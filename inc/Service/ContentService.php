@@ -61,6 +61,37 @@ final class ContentService
         return $deleted;
     }
 
+    public function setStatus(int $id, string $type, string $status): bool
+    {
+        $item = $this->find($id, $type);
+
+        if ($item === null || (string)($item['status'] ?? '') === $status) {
+            return false;
+        }
+
+        return $this->query->update('content', [
+            'status' => $status,
+            'updated' => date('Y-m-d H:i:s'),
+        ], ['id' => $id, 'type' => $type]) > 0;
+    }
+
+    public function setStatusMany(array $ids, string $type, string $status): int
+    {
+        $clean = $this->sanitizeIds($ids);
+
+        if ($clean === []) {
+            return 0;
+        }
+
+        $updated = 0;
+
+        foreach ($clean as $id) {
+            $updated += $this->setStatus($id, $type, $status) ? 1 : 0;
+        }
+
+        return $updated;
+    }
+
     public function save(array $input, int $authorId, string $type, ?int $id = null): array
     {
         $name = trim((string)($input['name'] ?? ''));

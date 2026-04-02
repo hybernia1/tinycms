@@ -14,6 +14,8 @@ foreach ($availableStatuses as $statusValue) {
 <div class="d-flex gap-2 align-center mb-3">
     <select name="action" id="bulk-action-select" disabled>
         <option value="">Hromadné akce</option>
+        <option value="publish">Publikovat</option>
+        <option value="draft">Přepnout do draftu</option>
         <option value="delete">Smazat</option>
     </select>
     <button class="btn btn-light" id="bulk-apply" type="button" disabled>Použít</button>
@@ -64,6 +66,17 @@ foreach ($availableStatuses as $statusValue) {
                     </td>
                     <td><span class="badge"><?= htmlspecialchars((string)($row['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td class="table-col-actions">
+                        <?php $isPublished = (string)($row['status'] ?? '') === 'published'; ?>
+                        <form method="post" action="<?= htmlspecialchars($url('admin/content/status-toggle'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                            <?= $csrfField() ?>
+                            <input type="hidden" name="type" value="<?= htmlspecialchars($type, ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="id" value="<?= $id ?>">
+                            <input type="hidden" name="mode" value="<?= $isPublished ? 'draft' : 'publish' ?>">
+                            <button class="btn btn-light btn-icon" type="submit" aria-label="<?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?>" title="<?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?>">
+                                <?= $icon($isPublished ? 'hide' : 'show') ?>
+                                <span class="sr-only"><?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?></span>
+                            </button>
+                        </form>
                         <form id="delete-content-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/content/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <?= $csrfField() ?>
                             <input type="hidden" name="type" value="<?= htmlspecialchars($type, ENT_QUOTES, 'UTF-8') ?>">

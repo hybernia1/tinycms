@@ -91,6 +91,18 @@ final class AdminContentController
             $redirect('admin/content?type=' . urlencode($type['type']));
         }
 
+        if ($action === 'publish') {
+            $affected = $this->content->setStatusMany($ids, $type['type'], 'published');
+            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Publikováno $affected záznamů." : 'Vybrané záznamy už byly publikované nebo nejsou dostupné.');
+            $redirect('admin/content?type=' . urlencode($type['type']));
+        }
+
+        if ($action === 'draft') {
+            $affected = $this->content->setStatusMany($ids, $type['type'], 'draft');
+            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Přepnuto do draftu $affected záznamů." : 'Vybrané záznamy už byly v draftu nebo nejsou dostupné.');
+            $redirect('admin/content?type=' . urlencode($type['type']));
+        }
+
         $this->flash->add('info', 'Nebyla vybrána žádná hromadná akce.');
         $redirect('admin/content?type=' . urlencode($type['type']));
     }
@@ -173,6 +185,32 @@ final class AdminContentController
         $this->flash->add('error', 'Nepodařilo se upravit obsah.');
         $this->storeFormState('edit', $id, $type['type'], array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect('admin/content/edit?id=' . $id . '&type=' . urlencode($type['type']));
+    }
+
+    public function statusToggleSubmit(callable $redirect): void
+    {
+        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+            return;
+        }
+
+        $type = $this->resolveType();
+        $id = (int)($_POST['id'] ?? 0);
+        $mode = (string)($_POST['mode'] ?? 'draft');
+
+        if ($id <= 0) {
+            $this->flash->add('error', 'Neplatné ID obsahu.');
+            $redirect('admin/content?type=' . urlencode($type['type']));
+        }
+
+        if ($mode === 'publish') {
+            $ok = $this->content->setStatus($id, $type['type'], 'published');
+            $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah publikován.' : 'Obsah už byl publikovaný nebo není dostupný.');
+            $redirect('admin/content?type=' . urlencode($type['type']));
+        }
+
+        $ok = $this->content->setStatus($id, $type['type'], 'draft');
+        $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah přepnut do draftu.' : 'Obsah už byl v draftu nebo není dostupný.');
+        $redirect('admin/content?type=' . urlencode($type['type']));
     }
 
     private function guard(callable $redirect): bool

@@ -119,6 +119,10 @@ $router->post('admin/content/bulk-action', static function () use ($adminContent
     $adminContent->bulkActionSubmit($redirect);
 });
 
+$router->post('admin/content/status-toggle', static function () use ($adminContent, $redirect): void {
+    $adminContent->statusToggleSubmit($redirect);
+});
+
 $router->get('admin/content/add', static function () use ($adminContent, $redirect): void {
     $adminContent->addForm($redirect);
 });
