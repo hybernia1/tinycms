@@ -20,6 +20,7 @@ final class PageView
             'siteName' => $siteName,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
+            'theme' => (string)($site['theme'] ?? 'light'),
             'pageTitle' => $siteName,
         ]);
     }

@@ -32,6 +32,7 @@ final class SettingsService
                     'timezone' => ['label' => 'Timezone', 'type' => 'text', 'default' => 'Europe/Prague'],
                     'dateformat' => ['label' => 'Date format', 'type' => 'text', 'default' => 'd.m.Y'],
                     'currency' => ['label' => 'Currency', 'type' => 'text', 'default' => 'CZK'],
+                    'theme' => ['label' => 'Default theme', 'type' => 'select', 'default' => 'light', 'options' => ['light' => 'Light', 'dark' => 'Dark']],
                 ],
             ],
             'seo' => [
@@ -95,6 +96,16 @@ final class SettingsService
                 }
 
                 $value = trim((string)$rawValue);
+                $field = $groups[$groupName]['fields'][$keyName];
+
+                if (($field['type'] ?? '') === 'select') {
+                    $options = array_map('strval', array_keys((array)($field['options'] ?? [])));
+
+                    if (!in_array($value, $options, true)) {
+                        $value = (string)($field['default'] ?? '');
+                    }
+                }
+
                 $stmt->execute([
                     'group_name' => $groupName,
                     'key_name' => $keyName,

@@ -21,6 +21,12 @@
                     <label><?= htmlspecialchars((string)($field['label'] ?? $fieldKey), ENT_QUOTES, 'UTF-8') ?></label>
                     <?php if ($fieldType === 'textarea'): ?>
                         <textarea name="settings[<?= htmlspecialchars((string)$activeGroup, ENT_QUOTES, 'UTF-8') ?>][<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" rows="4"><?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?></textarea>
+                    <?php elseif ($fieldType === 'select'): ?>
+                        <select name="settings[<?= htmlspecialchars((string)$activeGroup, ENT_QUOTES, 'UTF-8') ?>][<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]">
+                            <?php foreach (($field['options'] ?? []) as $optionValue => $optionLabel): ?>
+                                <option value="<?= htmlspecialchars((string)$optionValue, ENT_QUOTES, 'UTF-8') ?>" <?= $fieldValue === (string)$optionValue ? 'selected' : '' ?>><?= htmlspecialchars((string)$optionLabel, ENT_QUOTES, 'UTF-8') ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     <?php else: ?>
                         <input type="text" name="settings[<?= htmlspecialchars((string)$activeGroup, ENT_QUOTES, 'UTF-8') ?>][<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" value="<?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?>">
                     <?php endif; ?>
