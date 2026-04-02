@@ -4,10 +4,12 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/autoload.php';
 
 use App\Controller\AdminController;
+use App\Controller\AdminUserController;
 use App\Controller\FrontController;
 use App\Service\Auth\Auth;
 use App\Service\AuthService;
 use App\Service\Router\Router;
+use App\Service\UserService;
 use App\View\PageView;
 use App\View\View;
 
@@ -21,8 +23,10 @@ $auth = new Auth();
 
 $authService = new AuthService($auth);
 $pageView = new PageView($view);
+$userService = new UserService();
 $front = new FrontController($pageView, $authService);
 $admin = new AdminController($pageView, $authService);
+$adminUsers = new AdminUserController($pageView, $authService, $userService);
 
 $redirect = static function (string $path = '') use ($router): void {
     header('Location: ' . $router->url($path));
@@ -55,6 +59,26 @@ $router->get('admin', static function () use ($admin, $redirect): void {
 
 $router->get('admin/dashboard', static function () use ($admin, $redirect): void {
     $admin->dashboard($redirect);
+});
+
+$router->get('admin/users', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->list($redirect);
+});
+
+$router->get('admin/users/add', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->addForm($redirect);
+});
+
+$router->post('admin/users/add', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->addSubmit($redirect);
+});
+
+$router->get('admin/users/edit', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->editForm($redirect);
+});
+
+$router->post('admin/users/edit', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->editSubmit($redirect);
 });
 
 $router->get('admin/logout', static function () use ($admin, $redirect): void {

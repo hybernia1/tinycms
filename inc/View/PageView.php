@@ -30,4 +30,22 @@ final class PageView
             'user' => $user,
         ]);
     }
+
+    public function adminUsersList(array $users, string $status): void
+    {
+        $this->view->render('admin', 'admin/users/list', [
+            'users' => $users,
+            'status' => $status,
+        ]);
+    }
+
+    public function adminUsersForm(string $mode, array $user, array $errors, string $message): void
+    {
+        $this->view->render('admin', 'admin/users/form', [
+            'mode' => $mode,
+            'user' => $user,
+            'errors' => $errors,
+            'message' => $message,
+        ]);
+    }
 }
