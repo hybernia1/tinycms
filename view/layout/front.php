@@ -11,7 +11,7 @@ declare(strict_types=1);
     <script defer src="<?= htmlspecialchars($url('assets/js/flash.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/modal.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
-<body>
+<body data-theme="<?= htmlspecialchars((string)$theme, ENT_QUOTES, 'UTF-8') ?>">
 <div class="container mt-4">
     <?php foreach ($flashes as $flash): ?>
     <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">

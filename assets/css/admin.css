@@ -1,5 +1,5 @@
 body {
-    background: #f5f7fb;
+    background: var(--color-surface-muted);
 }
 
 .admin-shell {
@@ -12,8 +12,8 @@ body {
     left: 0;
     width: 240px;
     height: 100vh;
-    background: #0f172a;
-    color: #fff;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
     padding: 20px 14px;
 }
 
@@ -29,7 +29,7 @@ body {
 }
 
 .admin-nav-link {
-    color: #cbd5e1;
+    color: var(--sidebar-link);
     text-decoration: none;
     padding: 10px;
     display: block;
@@ -37,8 +37,8 @@ body {
 
 .admin-nav-link.active,
 .admin-nav-link:hover {
-    color: #fff;
-    background: #1e293b;
+    color: var(--sidebar-text);
+    background: var(--sidebar-link-active-bg);
 }
 
 .admin-main {
@@ -50,13 +50,13 @@ body {
 
 .admin-header,
 .admin-footer {
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border-soft);
     padding: 14px 20px;
 }
 
 .admin-footer {
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--color-border-soft);
     border-bottom: 0;
     margin-top: auto;
 }

@@ -35,6 +35,8 @@ final class View
         }
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
+        $theme = (string)($_GET['theme'] ?? 'light');
+        $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
 
