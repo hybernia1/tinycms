@@ -11,6 +11,7 @@ use App\View\PageView;
 final class AdminUserController
 {
     private const PER_PAGE_ALLOWED = [10, 20, 50];
+    private const FORM_STATE_KEY = 'admin_users_form_state';
 
     private PageView $pages;
     private AuthService $authService;
@@ -136,13 +137,15 @@ final class AdminUserController
             return;
         }
 
-        $this->pages->adminUsersForm('add', [
+        $fallback = [
             'ID' => null,
             'name' => '',
             'email' => '',
             'role' => 'user',
             'suspend' => 0,
-        ], []);
+        ];
+        $state = $this->consumeFormState('add');
+        $this->pages->adminUsersForm('add', $state['data'] ?? $fallback, $state['errors'] ?? []);
     }
 
     public function addSubmit(callable $redirect): void
@@ -159,7 +162,8 @@ final class AdminUserController
         }
 
         $this->flash->add('error', 'Nepodařilo se uložit uživatele.');
-        $this->pages->adminUsersForm('add', $_POST, $result['errors'] ?? []);
+        $this->storeFormState('add', null, $_POST, $result['errors'] ?? []);
+        $redirect('admin/users/add');
     }
 
     public function editForm(callable $redirect): void
@@ -176,7 +180,8 @@ final class AdminUserController
             $redirect('admin/users');
         }
 
-        $this->pages->adminUsersForm('edit', $user, []);
+        $state = $this->consumeFormState('edit', $id);
+        $this->pages->adminUsersForm('edit', $state['data'] ?? $user, $state['errors'] ?? []);
     }
 
     public function editSubmit(callable $redirect): void
@@ -201,7 +206,47 @@ final class AdminUserController
 
         $this->flash->add('error', 'Nepodařilo se upravit uživatele.');
         $data = array_merge($_POST, ['ID' => $id]);
-        $this->pages->adminUsersForm('edit', $data, $result['errors'] ?? []);
+        $this->storeFormState('edit', $id, $data, $result['errors'] ?? []);
+        $redirect('admin/users/edit?id=' . $id);
+    }
+
+    private function storeFormState(string $mode, ?int $id, array $data, array $errors): void
+    {
+        $this->ensureSession();
+        $_SESSION[self::FORM_STATE_KEY] = [
+            'mode' => $mode,
+            'id' => $id,
+            'data' => $data,
+            'errors' => $errors,
+        ];
+    }
+
+    private function consumeFormState(string $mode, ?int $id = null): ?array
+    {
+        $this->ensureSession();
+        $state = $_SESSION[self::FORM_STATE_KEY] ?? null;
+        unset($_SESSION[self::FORM_STATE_KEY]);
+
+        if (!is_array($state)) {
+            return null;
+        }
+
+        if (($state['mode'] ?? null) !== $mode) {
+            return null;
+        }
+
+        if (($state['id'] ?? null) !== $id) {
+            return null;
+        }
+
+        return $state;
+    }
+
+    private function ensureSession(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
     }
 
     private function guard(callable $redirect): bool
