@@ -64,7 +64,7 @@ $statusLinks = [
                         <a href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                         <div class="text-muted"><?= htmlspecialchars((string)($row['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                     </td>
-                    <td><?= htmlspecialchars((string)($row['role'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><span class="badge"><?= htmlspecialchars((string)($row['role'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td class="table-col-actions">
                         <?php if (!$isAdmin): ?>
                         <form method="post" action="<?= htmlspecialchars($url('admin/users/suspend-toggle'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
