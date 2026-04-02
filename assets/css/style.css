@@ -147,7 +147,6 @@ body {
     align-items: center;
     padding: 4px 8px;
     font-size: 12px;
-    border-radius: 999px;
     border: 1px solid var(--badge-border);
     background: var(--badge-bg);
     color: var(--badge-text);
