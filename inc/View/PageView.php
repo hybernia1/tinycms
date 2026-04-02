@@ -16,11 +16,13 @@ final class PageView
     {
         $this->view->render('front', 'front/index', [
             'user' => $user,
+            'pageTitle' => 'TinyCMS',
         ]);
     }
 
     public function loginForm(array $state): void
     {
+        $state['pageTitle'] = 'Login';
         $this->view->render('login', 'login/form', $state);
     }
 
@@ -28,6 +30,7 @@ final class PageView
     {
         $this->view->render('admin', 'admin/dashboard', [
             'user' => $user,
+            'pageTitle' => 'Dashboard',
         ]);
     }
 
@@ -36,6 +39,7 @@ final class PageView
         $this->view->render('admin', 'admin/users/list', [
             'users' => $users,
             'status' => $status,
+            'pageTitle' => 'Uživatelé',
         ]);
     }
 
@@ -46,6 +50,7 @@ final class PageView
             'user' => $user,
             'errors' => $errors,
             'message' => $message,
+            'pageTitle' => $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele',
         ]);
     }
 }

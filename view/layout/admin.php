@@ -1,15 +1,41 @@
 <?php
 declare(strict_types=1);
+$currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 ?>
 <!doctype html>
 <html lang="cs">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin | TinyCMS</title>
+    <title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?> | Admin</title>
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/style.css'), ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/admin.css'), ENT_QUOTES, 'UTF-8') ?>">
 </head>
 <body>
-<?= $content ?>
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <h2 class="admin-brand">TinyCMS Admin</h2>
+        <nav class="admin-nav">
+            <?php foreach ($adminMenu as $item):
+                $itemPath = trim(parse_url((string)$item['url'], PHP_URL_PATH) ?? '', '/');
+                $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
+            ?>
+            <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= htmlspecialchars((string)$item['url'], ENT_QUOTES, 'UTF-8') ?>">
+                <?= htmlspecialchars((string)$item['label'], ENT_QUOTES, 'UTF-8') ?>
+            </a>
+            <?php endforeach; ?>
+        </nav>
+    </aside>
+    <main class="admin-main">
+        <header class="admin-header d-flex justify-between align-center">
+            <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
+            <a class="btn btn-dark" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">Odhlásit</a>
+        </header>
+        <section class="admin-content">
+            <?= $content ?>
+        </section>
+        <footer class="admin-footer text-muted">TinyCMS Admin</footer>
+    </main>
+</div>
 </body>
 </html>

@@ -1,0 +1,78 @@
+body {
+    background: #f5f7fb;
+}
+
+.admin-shell {
+    min-height: 100vh;
+}
+
+.admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: #0f172a;
+    color: #fff;
+    padding: 20px 14px;
+}
+
+.admin-brand {
+    font-size: 18px;
+    margin: 0 0 18px;
+}
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-nav-link {
+    color: #cbd5e1;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+}
+
+.admin-nav-link.active,
+.admin-nav-link:hover {
+    color: #fff;
+    background: #1e293b;
+}
+
+.admin-main {
+    margin-left: 240px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-header,
+.admin-footer {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 14px 20px;
+}
+
+.admin-footer {
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 0;
+    margin-top: auto;
+}
+
+.admin-content {
+    padding: 20px;
+}
+
+@media (max-width: 900px) {
+    .admin-sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
+
+    .admin-main {
+        margin-left: 0;
+    }
+}

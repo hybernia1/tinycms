@@ -22,6 +22,16 @@ final class View
         $layoutFile = $this->resolve('view/layout/' . $layout . '.php', '/view/layout/');
 
         $url = fn(string $path = ''): string => $this->router->url($path);
+
+        if ($layout === 'admin' && !isset($data['adminMenu'])) {
+            $data['adminMenu'] = [
+                ['label' => 'Dashboard', 'url' => $url('admin/dashboard')],
+                ['label' => 'Uživatelé', 'url' => $url('admin/users')],
+                ['label' => 'Content', 'url' => '#'],
+            ];
+        }
+
+        $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
         extract($data, EXTR_SKIP);
 
         ob_start();
