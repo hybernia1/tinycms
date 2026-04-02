@@ -137,11 +137,8 @@ final class ContentService
     public function statusesForType(string $type): array
     {
         $rows = $this->query->select('content', ['status'], ['type' => $type]);
-        $statuses = array_values(array_unique(array_filter(array_map(static fn(array $row): string => (string)($row['status'] ?? ''), $rows))));
-
-        if ($statuses === []) {
-            return ['draft', 'published'];
-        }
+        $statuses = array_values(array_unique(array_filter(array_map(static fn(array $row): string => trim((string)($row['status'] ?? '')), $rows))));
+        $statuses = array_values(array_unique(array_merge(['draft', 'published'], $statuses)));
 
         sort($statuses);
         return $statuses;
