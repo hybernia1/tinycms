@@ -64,26 +64,28 @@ final class AdminUserController
         $redirect('admin/users');
     }
 
-
-    public function suspendSubmit(callable $redirect): void
+    public function suspendToggleSubmit(callable $redirect): void
     {
         if (!$this->guard($redirect)) {
             return;
         }
 
         $id = (int)($_POST['id'] ?? 0);
+        $mode = (string)($_POST['mode'] ?? 'suspend');
 
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID uživatele.');
             $redirect('admin/users');
         }
 
-        if ($this->users->suspend($id)) {
-            $this->flash->add('success', 'Uživatel suspendován.');
-        } else {
-            $this->flash->add('error', 'Uživatele se nepodařilo suspendovat.');
+        if ($mode === 'unsuspend') {
+            $ok = $this->users->unsuspend($id);
+            $this->flash->add($ok ? 'success' : 'error', $ok ? 'Uživatel odsuspendován.' : 'Uživatele se nepodařilo odsuspendovat.');
+            $redirect('admin/users');
         }
 
+        $ok = $this->users->suspend($id);
+        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Uživatel suspendován.' : 'Uživatele se nepodařilo suspendovat.');
         $redirect('admin/users');
     }
 
@@ -110,7 +112,13 @@ final class AdminUserController
 
         if ($action === 'suspend') {
             $affected = $this->users->suspendMany($ids);
-            $this->flash->add($affected > 0 ? 'success' : 'error', $affected > 0 ? "Suspendováno $affected uživatelů." : 'Vybrané uživatele se nepodařilo suspendovat.');
+            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Suspendováno $affected uživatelů." : 'Vybraní uživatelé už byli suspendovaní nebo nejsou dostupní.');
+            $redirect('admin/users');
+        }
+
+        if ($action === 'unsuspend') {
+            $affected = $this->users->unsuspendMany($ids);
+            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Odsuspendováno $affected uživatelů." : 'Vybraní uživatelé už byli aktivní nebo nejsou dostupní.');
             $redirect('admin/users');
         }
 

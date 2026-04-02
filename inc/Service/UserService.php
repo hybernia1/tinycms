@@ -61,17 +61,30 @@ final class UserService
         return $deleted;
     }
 
-
     public function suspend(int $id): bool
     {
         $user = $this->find($id);
 
-        if ($user === null || (string)($user['role'] ?? '') === 'admin') {
+        if ($user === null || (string)($user['role'] ?? '') === 'admin' || (int)($user['suspend'] ?? 0) === 1) {
             return false;
         }
 
         return $this->query->update('users', [
             'suspend' => 1,
+            'updated' => date('Y-m-d H:i:s'),
+        ], ['ID' => $id]) > 0;
+    }
+
+    public function unsuspend(int $id): bool
+    {
+        $user = $this->find($id);
+
+        if ($user === null || (string)($user['role'] ?? '') === 'admin' || (int)($user['suspend'] ?? 0) === 0) {
+            return false;
+        }
+
+        return $this->query->update('users', [
+            'suspend' => 0,
             'updated' => date('Y-m-d H:i:s'),
         ], ['ID' => $id]) > 0;
     }
@@ -87,13 +100,24 @@ final class UserService
         $updated = 0;
 
         foreach ($clean as $id) {
-            $user = $this->find($id);
-
-            if ($user === null || (string)($user['role'] ?? '') === 'admin') {
-                continue;
-            }
-
             $updated += $this->suspend($id) ? 1 : 0;
+        }
+
+        return $updated;
+    }
+
+    public function unsuspendMany(array $ids): int
+    {
+        $clean = $this->sanitizeIds($ids);
+
+        if ($clean === []) {
+            return 0;
+        }
+
+        $updated = 0;
+
+        foreach ($clean as $id) {
+            $updated += $this->unsuspend($id) ? 1 : 0;
         }
 
         return $updated;

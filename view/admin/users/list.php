@@ -14,6 +14,7 @@ $total = (int)($pagination['total'] ?? 0);
     <select name="action" id="bulk-action-select" disabled>
         <option value="">Hromadné akce</option>
         <option value="suspend">Suspendovat</option>
+        <option value="unsuspend">Odsuspendovat</option>
         <option value="delete">Smazat</option>
     </select>
     <button class="btn btn-light" id="bulk-apply" type="button" disabled>Použít</button>
@@ -36,6 +37,7 @@ $total = (int)($pagination['total'] ?? 0);
             <?php foreach ($users as $row):
                 $id = (int)($row['ID'] ?? 0);
                 $isAdmin = (string)($row['role'] ?? '') === 'admin';
+                $isSuspended = (int)($row['suspend'] ?? 0) === 1;
             ?>
                 <tr>
                     <td><?php if (!$isAdmin): ?><input type="checkbox" value="<?= $id ?>" data-bulk-item><?php endif; ?></td>
@@ -47,9 +49,10 @@ $total = (int)($pagination['total'] ?? 0);
                     <td>
                         <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
                         <?php if (!$isAdmin): ?>
-                        <form method="post" action="<?= htmlspecialchars($url('admin/users/suspend'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                        <form method="post" action="<?= htmlspecialchars($url('admin/users/suspend-toggle'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <input type="hidden" name="id" value="<?= $id ?>">
-                            <button class="btn btn-light" type="submit">Suspend</button>
+                            <input type="hidden" name="mode" value="<?= $isSuspended ? 'unsuspend' : 'suspend' ?>">
+                            <button class="btn btn-light" type="submit"><?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?></button>
                         </form>
                         <form id="delete-user-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/users/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <input type="hidden" name="id" value="<?= $id ?>">
