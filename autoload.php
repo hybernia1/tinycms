@@ -1,28 +1,19 @@
 <?php
 declare(strict_types=1);
 
-require_once "config.php";
+require_once __DIR__ . '/config.php';
 
-spl_autoload_register(function ($class) {
-
-    // prefix namespace
+spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
 
-    // base directory
-    $base_dir = CLASS_DIR . '/';
-
-    // kontrola prefixu
     if (strncmp($prefix, $class, strlen($prefix)) !== 0) {
         return;
     }
 
-    // odstranění prefixu
-    $relative_class = substr($class, strlen($prefix));
+    $relativeClass = substr($class, strlen($prefix));
+    $file = __DIR__ . '/' . CLASS_DIR . '/' . str_replace('\\', '/', $relativeClass) . '.php';
 
-    // namespace -> cesta
-    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
-
-    if (file_exists($file)) {
-        require $file;
+    if (is_file($file)) {
+        require_once $file;
     }
 });
