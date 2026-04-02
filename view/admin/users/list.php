@@ -23,8 +23,9 @@ $total = (int)($pagination['total'] ?? 0);
 <form id="bulk-action-form" method="post" action="<?= htmlspecialchars($url('admin/users/bulk-action'), ENT_QUOTES, 'UTF-8') ?>">
     <input type="hidden" name="ids" value="">
     <input type="hidden" name="action" id="bulk-action-value" value="">
+</form>
 
-    <div class="card p-4">
+<div class="card p-4">
         <div class="text-muted mb-3">Celkem: <?= $total ?></div>
         <table class="w-100">
             <thead>
@@ -86,8 +87,7 @@ $total = (int)($pagination['total'] ?? 0);
                 <button class="btn btn-light" type="submit">Použít</button>
             </form>
         </div>
-    </div>
-</form>
+</div>
 
 <div class="modal-overlay" data-modal>
     <div class="modal">
