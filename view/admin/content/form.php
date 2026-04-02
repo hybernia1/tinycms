@@ -1,5 +1,11 @@
 <?php
 $type = (string)($contentType['type'] ?? 'post');
+$createdAtRaw = (string)($item['created'] ?? '');
+$createdAtStamp = $createdAtRaw !== '' ? strtotime($createdAtRaw) : false;
+$createdAt = $createdAtStamp !== false ? date('Y-m-d\\TH:i', $createdAtStamp) : '';
+$updatedAtRaw = (string)($item['updated'] ?? '');
+$updatedAtStamp = $updatedAtRaw !== '' ? strtotime($updatedAtRaw) : false;
+$updatedAt = $updatedAtStamp !== false ? date('d.m.Y H:i', $updatedAtStamp) : '—';
 ?>
 <div class="card p-5">
     <h1 class="m-0 mb-4"><?= $mode === 'add' ? 'Přidat ' . htmlspecialchars((string)($contentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') : 'Upravit ' . htmlspecialchars((string)($contentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') ?></h1>
@@ -32,6 +38,15 @@ $type = (string)($contentType['type'] ?? 'post');
                 <?php endforeach; ?>
             </select>
             <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+        </div>
+        <div class="mb-3">
+            <label>Publish date</label>
+            <input type="datetime-local" name="created" value="<?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>">
+            <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['created'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+        </div>
+        <div class="mb-3">
+            <label>Updated</label>
+            <input type="text" value="<?= htmlspecialchars($updatedAt, ENT_QUOTES, 'UTF-8') ?>" readonly>
         </div>
         <div class="mb-3">
             <label>Excerpt</label>

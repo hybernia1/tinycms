@@ -116,7 +116,7 @@ final class AdminContentController
         }
 
         $type = $this->resolveType();
-        $fallback = ['id' => null, 'type' => $type['type'], 'name' => '', 'status' => 'draft', 'excerpt' => '', 'body' => ''];
+        $fallback = ['id' => null, 'type' => $type['type'], 'name' => '', 'status' => 'draft', 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $fallback['author'] = (int)($this->authService->auth()->id() ?? 0);
         $state = $this->consumeFormState('add', null, $type['type']);
         $statuses = $this->content->statusesForType($type['type']);

@@ -108,6 +108,7 @@ final class ContentService
         $excerpt = trim((string)($input['excerpt'] ?? ''));
         $body = trim((string)($input['body'] ?? ''));
         $author = $this->resolveAuthorId($input, $defaultAuthorId);
+        $created = $this->resolveDateTime((string)($input['created'] ?? ''));
         $errors = [];
 
         if ($name === '') {
@@ -120,6 +121,10 @@ final class ContentService
 
         if (($input['author'] ?? '') !== '' && $author === null) {
             $errors['author'] = 'Autor není validní.';
+        }
+
+        if (($input['created'] ?? '') !== '' && $created === null) {
+            $errors['created'] = 'Datum publikace není validní.';
         }
 
         if ($errors !== []) {
@@ -138,9 +143,13 @@ final class ContentService
         ];
 
         if ($id === null) {
-            $payload['created'] = $now;
+            $payload['created'] = $created ?? $now;
             $newId = $this->query->insert('content', $payload);
             return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
+        }
+
+        if ($created !== null) {
+            $payload['created'] = $created;
         }
 
         $updated = $this->query->update('content', $payload, ['id' => $id, 'type' => $type]);
@@ -178,5 +187,22 @@ final class ContentService
 
         $rows = $this->query->select('users', ['ID'], ['ID' => $authorId]);
         return $rows === [] ? null : $authorId;
+    }
+
+    private function resolveDateTime(string $value): ?string
+    {
+        $clean = trim($value);
+
+        if ($clean === '') {
+            return null;
+        }
+
+        $timestamp = strtotime($clean);
+
+        if ($timestamp === false) {
+            return null;
+        }
+
+        return date('Y-m-d H:i:s', $timestamp);
     }
 }
