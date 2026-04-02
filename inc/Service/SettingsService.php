@@ -72,6 +72,12 @@ final class SettingsService
         return $result;
     }
 
+
+    public function resolved(): array
+    {
+        return array_replace_recursive($this->defaults(), $this->values());
+    }
+
     public function save(array $input): void
     {
         $groups = $this->groups();

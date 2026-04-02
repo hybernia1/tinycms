@@ -12,11 +12,15 @@ final class PageView
         $this->view = $view;
     }
 
-    public function home(?array $user): void
+    public function home(?array $user, array $site): void
     {
+        $siteName = (string)($site['name'] ?? 'TinyCMS');
         $this->view->render('front', 'front/index', [
             'user' => $user,
-            'pageTitle' => 'TinyCMS',
+            'siteName' => $siteName,
+            'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
+            'siteAuthor' => (string)($site['author'] ?? 'Admin'),
+            'pageTitle' => $siteName,
         ]);
     }
 

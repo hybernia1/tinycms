@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Service\AuthService;
 use App\Service\CsrfService;
+use App\Service\SettingsService;
 use App\View\PageView;
 
 final class FrontController
@@ -12,17 +13,26 @@ final class FrontController
     private PageView $pages;
     private AuthService $authService;
     private CsrfService $csrf;
+    private SettingsService $settings;
 
-    public function __construct(PageView $pages, AuthService $authService, CsrfService $csrf)
+    public function __construct(PageView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings)
     {
         $this->pages = $pages;
         $this->authService = $authService;
         $this->csrf = $csrf;
+        $this->settings = $settings;
     }
 
     public function home(): void
     {
-        $this->pages->home($this->authService->auth()->user());
+        $settings = $this->settings->resolved();
+        $site = [
+            'name' => (string)($settings['main']['sitename'] ?? 'TinyCMS'),
+            'footer' => (string)($settings['main']['sitefooter'] ?? '© TinyCMS'),
+            'author' => (string)($settings['main']['siteauthor'] ?? 'Admin'),
+        ];
+
+        $this->pages->home($this->authService->auth()->user(), $site);
     }
 
     public function loginForm(callable $redirect): void
