@@ -30,7 +30,6 @@ final class FrontController
             'name' => (string)($settings['main']['sitename'] ?? 'TinyCMS'),
             'footer' => (string)($settings['main']['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['main']['siteauthor'] ?? 'Admin'),
-            'theme' => (string)($settings['custom']['theme'] ?? 'light'),
         ];
 
         $this->pages->home($this->authService->auth()->user(), $site);

@@ -28,9 +28,9 @@ $csrf = new CsrfService();
 $view = new View(dirname(__DIR__), $router, $flash, $csrf);
 
 $authService = new AuthService($auth);
-$pageView = new PageView($view);
 $userService = new UserService();
 $settingsService = new SettingsService();
+$pageView = new PageView($view, $settingsService);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
