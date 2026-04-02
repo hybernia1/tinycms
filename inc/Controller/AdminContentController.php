@@ -132,7 +132,8 @@ final class AdminContentController
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', 'Obsah vytvořen.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
+            $newId = (int)($result['id'] ?? 0);
+            $redirect($newId > 0 ? $this->editPath($type['type'], $newId) : 'admin/content?type=' . urlencode($type['type']));
         }
 
         $this->flash->add('error', 'Nepodařilo se uložit obsah.');
@@ -179,7 +180,7 @@ final class AdminContentController
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', 'Obsah upraven.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
+            $redirect($this->editPath($type['type'], $id));
         }
 
         $this->flash->add('error', 'Nepodařilo se upravit obsah.');
@@ -278,5 +279,10 @@ final class AdminContentController
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
+    }
+
+    private function editPath(string $type, int $id): string
+    {
+        return 'admin/content/edit?id=' . $id . '&type=' . urlencode($type);
     }
 }
