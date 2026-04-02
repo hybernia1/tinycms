@@ -39,7 +39,7 @@ $statusLinks = [
     </form>
 </div>
 
-<form id="bulk-action-form" method="post" action="<?= htmlspecialchars($url('admin/users/bulk-action'), ENT_QUOTES, 'UTF-8') ?>">
+<form id="bulk-action-form" method="post" action="<?= htmlspecialchars($url('admin/users/bulk-action'), ENT_QUOTES, 'UTF-8') ?>" data-bulk-type="uživatelů">
     <?= $csrfField() ?>
     <input type="hidden" name="ids" value="">
     <input type="hidden" name="action" id="bulk-action-value" value="">

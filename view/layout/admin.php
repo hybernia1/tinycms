@@ -3,6 +3,8 @@ declare(strict_types=1);
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
+$isContentList = str_ends_with($currentPath, 'admin/content');
+$currentContentType = $currentContentType ?? null;
 ?>
 <!doctype html>
 <html lang="cs">
@@ -49,6 +51,11 @@ $isUsersList = str_ends_with($currentPath, 'admin/users');
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span>Přidat uživatele</span>
+            </a>
+            <?php elseif ($isContentList && is_array($currentContentType)): ?>
+            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/content/add?type=' . urlencode((string)($currentContentType['type'] ?? 'post'))), ENT_QUOTES, 'UTF-8') ?>">
+                <?= $icon('add') ?>
+                <span>Přidat <?= htmlspecialchars((string)($currentContentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
             <?php endif; ?>
         </div>

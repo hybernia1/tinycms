@@ -4,11 +4,14 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/autoload.php';
 
 use App\Controller\AdminController;
+use App\Controller\AdminContentController;
 use App\Controller\AdminSettingsController;
 use App\Controller\AdminUserController;
 use App\Controller\FrontController;
 use App\Service\Auth\Auth;
 use App\Service\AuthService;
+use App\Service\ContentService;
+use App\Service\ContentTypeService;
 use App\Service\CsrfService;
 use App\Service\FlashService;
 use App\Service\Router\Router;
@@ -29,11 +32,14 @@ $view = new View(dirname(__DIR__), $router, $flash, $csrf);
 
 $authService = new AuthService($auth);
 $userService = new UserService();
+$contentService = new ContentService();
+$contentTypes = new ContentTypeService();
 $settingsService = new SettingsService();
-$pageView = new PageView($view, $settingsService);
+$pageView = new PageView($view, $settingsService, $contentTypes);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
+$adminContent = new AdminContentController($pageView, $authService, $contentService, $contentTypes, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 
 $redirect = static function (string $path = '') use ($router): void {
@@ -99,6 +105,34 @@ $router->get('admin/users/edit', static function () use ($adminUsers, $redirect)
 
 $router->post('admin/users/edit', static function () use ($adminUsers, $redirect): void {
     $adminUsers->editSubmit($redirect);
+});
+
+$router->get('admin/content', static function () use ($adminContent, $redirect): void {
+    $adminContent->list($redirect);
+});
+
+$router->post('admin/content/delete', static function () use ($adminContent, $redirect): void {
+    $adminContent->deleteSubmit($redirect);
+});
+
+$router->post('admin/content/bulk-action', static function () use ($adminContent, $redirect): void {
+    $adminContent->bulkActionSubmit($redirect);
+});
+
+$router->get('admin/content/add', static function () use ($adminContent, $redirect): void {
+    $adminContent->addForm($redirect);
+});
+
+$router->post('admin/content/add', static function () use ($adminContent, $redirect): void {
+    $adminContent->addSubmit($redirect);
+});
+
+$router->get('admin/content/edit', static function () use ($adminContent, $redirect): void {
+    $adminContent->editForm($redirect);
+});
+
+$router->post('admin/content/edit', static function () use ($adminContent, $redirect): void {
+    $adminContent->editSubmit($redirect);
 });
 
 
