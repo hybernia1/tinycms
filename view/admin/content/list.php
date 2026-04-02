@@ -57,12 +57,20 @@ foreach ($availableStatuses as $statusValue) {
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($items as $row): $id = (int)($row['id'] ?? 0); ?>
+            <?php foreach ($items as $row):
+                $id = (int)($row['id'] ?? 0);
+                $createdAt = (string)($row['created'] ?? '');
+                $createdStamp = $createdAt !== '' ? strtotime($createdAt) : false;
+                $isPlanned = $createdStamp !== false && $createdStamp > time();
+            ?>
                 <tr>
                     <td class="table-col-select"><input type="checkbox" value="<?= $id ?>" data-bulk-item></td>
                     <td>
                         <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id . '&type=' . urlencode($type)), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-                        <div class="text-muted"><?= htmlspecialchars((string)($row['updated'] ?? $row['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="text-muted">
+                            <?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>
+                            <?php if ($isPlanned): ?><span class="badge badge-planned ml-2">Plánováno</span><?php endif; ?>
+                        </div>
                     </td>
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td><span class="badge"><?= htmlspecialchars((string)($row['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></td>

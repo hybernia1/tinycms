@@ -132,6 +132,7 @@ body {
 .mb-4 { margin-bottom: 16px; }
 .mb-5 { margin-bottom: 24px; }
 .mt-4 { margin-top: 16px; }
+.ml-2 { margin-left: 8px; }
 
 .text-primary { color: var(--primary); }
 .text-muted { color: var(--color-muted); }
@@ -286,6 +287,22 @@ textarea {
 
 input[type='datetime-local'] {
     min-height: 40px;
+    border-radius: 4px;
+}
+
+input[type='datetime-local']::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: var(--datetime-picker-filter, none);
+}
+
+body[data-theme='dark'] input[type='datetime-local'] {
+    --datetime-picker-filter: invert(0.9);
+}
+
+.badge-planned {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fcd34d;
 }
 
 .search-input {
