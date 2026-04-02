@@ -3,7 +3,8 @@ body {
 }
 
 .admin-shell {
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .admin-sidebar {
@@ -46,15 +47,18 @@ body {
 
 .admin-main {
     margin-left: 240px;
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .admin-header-spacer {
     background: #fff;
     border-bottom: 1px solid var(--color-border-soft);
     min-height: 56px;
+    padding: 10px 20px;
+    flex: 0 0 auto;
 }
 
 .admin-footer {
@@ -67,6 +71,8 @@ body {
 
 .admin-content {
     padding: 20px;
+    overflow-y: auto;
+    flex: 1 1 auto;
 }
 
 .admin-sidebar-bottom {
@@ -92,5 +98,6 @@ body {
 
     .admin-main {
         margin-left: 0;
+        height: auto;
     }
 }

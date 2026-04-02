@@ -2,6 +2,7 @@
 declare(strict_types=1);
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 $authUser = $_SESSION['auth'] ?? null;
+$isUsersList = str_ends_with($currentPath, 'admin/users');
 ?>
 <!doctype html>
 <html lang="cs">
@@ -42,7 +43,15 @@ $authUser = $_SESSION['auth'] ?? null;
         </div>
     </aside>
     <main class="admin-main">
-        <div class="admin-header-spacer"></div>
+        <div class="admin-header-spacer d-flex justify-between align-center">
+            <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
+            <?php if ($isUsersList): ?>
+            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
+                <?= $icon('add') ?>
+                <span>Přidat uživatele</span>
+            </a>
+            <?php endif; ?>
+        </div>
         <section class="admin-content">
             <?php foreach ($flashes as $flash): ?>
             <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">

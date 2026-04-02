@@ -11,14 +11,6 @@ $statusLinks = [
     'suspended' => 'Suspendovaní',
 ];
 ?>
-<div class="d-flex justify-between align-center mb-4">
-    <h1 class="m-0">Uživatelé</h1>
-    <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
-        <?= $icon('add') ?>
-        <span>Přidat uživatele</span>
-    </a>
-</div>
-
 <div class="d-flex gap-2 align-center mb-3">
     <select name="action" id="bulk-action-select" disabled>
         <option value="">Hromadné akce</option>
