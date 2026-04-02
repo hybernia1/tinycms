@@ -102,7 +102,7 @@ final class PageView
         ]);
     }
 
-    public function adminContentForm(string $mode, array $item, array $errors, array $contentType, array $availableStatuses): void
+    public function adminContentForm(string $mode, array $item, array $errors, array $contentType, array $availableStatuses, array $authors): void
     {
         $this->view->render('admin', 'admin/content/form', [
             'mode' => $mode,
@@ -110,6 +110,7 @@ final class PageView
             'errors' => $errors,
             'contentType' => $contentType,
             'availableStatuses' => $availableStatuses,
+            'authors' => $authors,
             'currentContentType' => $contentType,
             'adminMenu' => $this->adminMenu(),
             'theme' => $this->theme(),

@@ -53,7 +53,7 @@ foreach ($availableStatuses as $statusValue) {
             <thead>
             <tr>
                 <th class="table-col-select"><input type="checkbox" data-bulk-toggle></th>
-                <th>Název</th><th>Status</th><th class="table-col-actions">Akce</th>
+                <th>Název</th><th>Autor</th><th>Status</th><th class="table-col-actions">Akce</th>
             </tr>
             </thead>
             <tbody>
@@ -64,6 +64,7 @@ foreach ($availableStatuses as $statusValue) {
                         <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id . '&type=' . urlencode($type)), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                         <div class="text-muted"><?= htmlspecialchars((string)($row['updated'] ?? $row['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                     </td>
+                    <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td><span class="badge"><?= htmlspecialchars((string)($row['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td class="table-col-actions">
                         <?php $isPublished = (string)($row['status'] ?? '') === 'published'; ?>

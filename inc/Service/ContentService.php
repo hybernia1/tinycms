@@ -23,7 +23,16 @@ final class ContentService
             $where['status'] = $status;
         }
 
-        return $this->query->paginate('content', ['id', 'type', 'name', 'status', 'author', 'created', 'updated'], $where, [
+        return $this->query->paginate('content', [
+            'id',
+            'type',
+            'name',
+            'status',
+            'author',
+            '(SELECT name FROM users WHERE users.ID = content.author LIMIT 1) AS author_name',
+            'created',
+            'updated',
+        ], $where, [
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'id',
@@ -92,12 +101,13 @@ final class ContentService
         return $updated;
     }
 
-    public function save(array $input, int $authorId, string $type, ?int $id = null): array
+    public function save(array $input, int $defaultAuthorId, string $type, ?int $id = null): array
     {
         $name = trim((string)($input['name'] ?? ''));
         $status = trim((string)($input['status'] ?? 'draft'));
         $excerpt = trim((string)($input['excerpt'] ?? ''));
         $body = trim((string)($input['body'] ?? ''));
+        $author = $this->resolveAuthorId($input, $defaultAuthorId);
         $errors = [];
 
         if ($name === '') {
@@ -106,6 +116,10 @@ final class ContentService
 
         if ($status === '') {
             $errors['status'] = 'Status je povinný.';
+        }
+
+        if (($input['author'] ?? '') !== '' && $author === null) {
+            $errors['author'] = 'Autor není validní.';
         }
 
         if ($errors !== []) {
@@ -119,7 +133,7 @@ final class ContentService
             'status' => $status,
             'excerpt' => $excerpt === '' ? null : mb_substr($excerpt, 0, 500),
             'body' => $body,
-            'author' => $authorId > 0 ? $authorId : null,
+            'author' => $author,
             'updated' => $now,
         ];
 
@@ -147,5 +161,18 @@ final class ContentService
     private function sanitizeIds(array $ids): array
     {
         return array_values(array_unique(array_filter(array_map('intval', $ids), static fn(int $v): bool => $v > 0)));
+    }
+
+    private function resolveAuthorId(array $input, int $defaultAuthorId): ?int
+    {
+        $raw = $input['author'] ?? null;
+        $authorId = $raw === null || $raw === '' ? $defaultAuthorId : (int)$raw;
+
+        if ($authorId <= 0) {
+            return null;
+        }
+
+        $rows = $this->query->select('users', ['ID'], ['ID' => $authorId]);
+        return $rows === [] ? null : $authorId;
     }
 }

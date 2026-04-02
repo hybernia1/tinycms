@@ -190,6 +190,13 @@ final class UserService
         return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
     }
 
+    public function authorOptions(): array
+    {
+        $rows = $this->query->select('users', ['ID', 'name', 'email']);
+        usort($rows, static fn(array $a, array $b): int => strcmp((string)($a['name'] ?? ''), (string)($b['name'] ?? '')));
+        return $rows;
+    }
+
     private function sanitizeIds(array $ids): array
     {
         return array_values(array_unique(array_filter(array_map('intval', $ids), fn(int $v): bool => $v > 0)));

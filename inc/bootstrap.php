@@ -39,7 +39,7 @@ $pageView = new PageView($view, $settingsService, $contentTypes);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
-$adminContent = new AdminContentController($pageView, $authService, $contentService, $contentTypes, $flash, $csrf);
+$adminContent = new AdminContentController($pageView, $authService, $contentService, $contentTypes, $userService, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 
 $redirect = static function (string $path = '') use ($router): void {

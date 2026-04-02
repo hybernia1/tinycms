@@ -8,6 +8,7 @@ use App\Service\ContentService;
 use App\Service\ContentTypeService;
 use App\Service\CsrfService;
 use App\Service\FlashService;
+use App\Service\UserService;
 use App\View\PageView;
 
 final class AdminContentController
@@ -20,6 +21,7 @@ final class AdminContentController
         private AuthService $authService,
         private ContentService $content,
         private ContentTypeService $contentTypes,
+        private UserService $users,
         private FlashService $flash,
         private CsrfService $csrf
     ) {
@@ -115,9 +117,10 @@ final class AdminContentController
 
         $type = $this->resolveType();
         $fallback = ['id' => null, 'type' => $type['type'], 'name' => '', 'status' => 'draft', 'excerpt' => '', 'body' => ''];
+        $fallback['author'] = (int)($this->authService->auth()->id() ?? 0);
         $state = $this->consumeFormState('add', null, $type['type']);
         $statuses = $this->content->statusesForType($type['type']);
-        $this->pages->adminContentForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $type, $statuses);
+        $this->pages->adminContentForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $type, $statuses, $this->users->authorOptions());
     }
 
     public function addSubmit(callable $redirect): void
@@ -158,7 +161,7 @@ final class AdminContentController
 
         $state = $this->consumeFormState('edit', $id, $type['type']);
         $statuses = $this->content->statusesForType($type['type']);
-        $this->pages->adminContentForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $type, $statuses);
+        $this->pages->adminContentForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $type, $statuses, $this->users->authorOptions());
     }
 
     public function editSubmit(callable $redirect): void

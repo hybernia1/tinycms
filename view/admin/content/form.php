@@ -21,6 +21,19 @@ $type = (string)($contentType['type'] ?? 'post');
             <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <div class="mb-3">
+            <label>Autor</label>
+            <select name="author">
+                <option value="">Bez autora</option>
+                <?php foreach ($authors as $author): ?>
+                    <?php $authorId = (int)($author['ID'] ?? 0); ?>
+                    <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
+                        <?= htmlspecialchars((string)($author['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars((string)($author['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+        </div>
+        <div class="mb-3">
             <label>Excerpt</label>
             <textarea name="excerpt" rows="3"><?= htmlspecialchars((string)($item['excerpt'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
         </div>
