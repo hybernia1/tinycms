@@ -3,8 +3,13 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
+use App\Db\Connection;
+use App\Db\Query;
+
 class Auth
 {
+    private bool $synced = false;
+
     public function __construct()
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -14,6 +19,7 @@ class Auth
 
     public function check(): bool
     {
+        $this->sync();
         return isset($_SESSION['auth']['id']);
     }
 
@@ -66,6 +72,7 @@ class Auth
         }
 
         session_destroy();
+        $this->synced = false;
     }
 
     public function requireLogin(): void
@@ -89,5 +96,31 @@ class Auth
     public function requireAdmin(): void
     {
         $this->requireRole('admin');
+    }
+
+    private function sync(): void
+    {
+        if ($this->synced || !isset($_SESSION['auth']['id'])) {
+            return;
+        }
+
+        $userId = (int)$_SESSION['auth']['id'];
+        $rows = (new Query(Connection::get()))->select('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $userId]);
+
+        if (empty($rows) || (int)($rows[0]['suspend'] ?? 0) === 1) {
+            unset($_SESSION['auth']);
+            $this->synced = true;
+            return;
+        }
+
+        $user = $rows[0];
+        $_SESSION['auth'] = [
+            'id' => (int)$user['ID'],
+            'name' => (string)$user['name'],
+            'email' => (string)$user['email'],
+            'role' => (string)$user['role'],
+        ];
+
+        $this->synced = true;
     }
 }
