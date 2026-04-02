@@ -1,3 +1,4 @@
+<?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-5">
     <h1 class="m-0 mb-4"><?= $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele' ?></h1>
     <?php if ($message !== ''): ?><p class="text-danger mb-3"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -26,7 +27,11 @@
             <?php if (!empty($errors['role'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['role'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <div class="mb-4">
-            <label><input type="checkbox" name="suspend" value="1" <?= ((int)($user['suspend'] ?? 0) === 1) ? 'checked' : '' ?>> Suspend</label>
+            <?php if ($isAdmin): ?>
+                <p class="text-muted m-0">Admin účet nelze suspendovat.</p>
+            <?php else: ?>
+                <label><input type="checkbox" name="suspend" value="1" <?= ((int)($user['suspend'] ?? 0) === 1) ? 'checked' : '' ?>> Suspend</label>
+            <?php endif; ?>
         </div>
         <button class="btn btn-primary" type="submit">Uložit</button>
         <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/users'), ENT_QUOTES, 'UTF-8') ?>">Zpět</a>

@@ -38,9 +38,16 @@ $total = (int)($pagination['total'] ?? 0);
             </tr>
         </thead>
         <tbody>
-        <?php foreach ($users as $row): $id = (int)($row['ID'] ?? 0); ?>
+        <?php foreach ($users as $row):
+            $id = (int)($row['ID'] ?? 0);
+            $isAdmin = (string)($row['role'] ?? '') === 'admin';
+        ?>
             <tr>
-                <td><input type="checkbox" value="<?= $id ?>" data-bulk-item></td>
+                <td>
+                    <?php if (!$isAdmin): ?>
+                        <input type="checkbox" value="<?= $id ?>" data-bulk-item>
+                    <?php endif; ?>
+                </td>
                 <td><?= $id ?></td>
                 <td><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                 <td><?= htmlspecialchars((string)($row['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
@@ -48,10 +55,12 @@ $total = (int)($pagination['total'] ?? 0);
                 <td><?= (int)($row['suspend'] ?? 0) ?></td>
                 <td>
                     <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
+                    <?php if (!$isAdmin): ?>
                     <form id="delete-user-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/users/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                         <input type="hidden" name="id" value="<?= $id ?>">
                         <button class="btn btn-light" type="button" data-modal-open data-modal-mode="single" data-type="uživatele" data-form-id="delete-user-<?= $id ?>">Delete</button>
                     </form>
+                    <?php endif; ?>
                 </td>
             </tr>
         <?php endforeach; ?>

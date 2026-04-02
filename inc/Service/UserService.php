@@ -33,12 +33,32 @@ final class UserService
 
     public function delete(int $id): bool
     {
+        $user = $this->find($id);
+
+        if ($user === null || (string)($user['role'] ?? '') === 'admin') {
+            return false;
+        }
+
         return $this->query->delete('users', ['ID' => $id]) > 0;
     }
 
     public function deleteMany(array $ids): int
     {
-        return $this->query->deleteIn('users', 'ID', $ids);
+        $clean = array_values(array_unique(array_filter(array_map('intval', $ids), fn(int $v): bool => $v > 0)));
+
+        if ($clean === []) {
+            return 0;
+        }
+
+        $deleted = 0;
+
+        foreach ($clean as $id) {
+            if ($this->delete($id)) {
+                $deleted++;
+            }
+        }
+
+        return $deleted;
     }
 
     public function save(array $input, ?int $id = null): array
@@ -74,6 +94,10 @@ final class UserService
 
         if ($errors !== []) {
             return ['success' => false, 'errors' => $errors];
+        }
+
+        if ($role === 'admin') {
+            $suspend = 0;
         }
 
         $now = date('Y-m-d H:i:s');
