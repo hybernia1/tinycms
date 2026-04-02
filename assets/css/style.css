@@ -532,14 +532,49 @@ body[data-theme='dark'] input[type='week'] {
 }
 
 .custom-datetime {
+    position: relative;
+}
+
+.custom-datetime-trigger {
+    width: 100%;
+    padding: var(--control-padding-y) var(--control-padding-x);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    line-height: var(--lh-tight);
+    text-align: left;
+    min-height: var(--size-touch);
+    cursor: pointer;
+}
+
+.custom-datetime-panel {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    right: 0;
+    z-index: 30;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: var(--space-2);
+    display: none;
+}
+
+.custom-datetime.open .custom-datetime-panel {
+    display: block;
+}
+
+.custom-datetime-controls {
     display: grid;
     grid-template-columns: 1fr minmax(7rem, 9rem);
     gap: var(--space-2);
 }
 
-.custom-datetime-date,
-.custom-datetime-time {
-    width: 100%;
+.custom-datetime-actions {
+    margin-top: var(--space-2);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
 }
 
 .flash {
