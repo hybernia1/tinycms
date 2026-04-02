@@ -1,6 +1,5 @@
 <?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-5">
-    <h1 class="m-0 mb-4"><?= $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele' ?></h1>
     <form method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <div class="mb-3">

@@ -5,7 +5,6 @@ $createdStamp = $createdRaw !== '' ? strtotime($createdRaw) : false;
 $createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
 ?>
 <div class="card p-5">
-    <h1 class="m-0 mb-4"><?= $mode === 'add' ? 'Přidat ' . htmlspecialchars((string)($contentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') : 'Upravit ' . htmlspecialchars((string)($contentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') ?></h1>
     <form method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add?type=' . urlencode($type)) : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0) . '&type=' . urlencode($type)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <input type="hidden" name="type" value="<?= htmlspecialchars($type, ENT_QUOTES, 'UTF-8') ?>">

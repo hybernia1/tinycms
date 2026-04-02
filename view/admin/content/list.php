@@ -47,7 +47,7 @@ foreach ($availableStatuses as $statusValue) {
     <input type="hidden" name="action" id="bulk-action-value" value="">
 </form>
 
-<div class="card p-4">
+<div class="card">
     <div class="table-responsive">
         <table class="table">
             <thead>
