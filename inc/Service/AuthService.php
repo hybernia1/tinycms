@@ -30,6 +30,7 @@ final class AuthService
         return $layer->attempt([
             'email' => trim((string)($input['email'] ?? '')),
             'password' => (string)($input['password'] ?? ''),
+            'remember' => (int)((int)($input['remember'] ?? 0) === 1),
         ]);
     }
 
