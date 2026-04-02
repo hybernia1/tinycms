@@ -197,12 +197,17 @@ final class ContentService
             return null;
         }
 
-        $timestamp = strtotime($clean);
+        $formats = ['Y-m-d H:i:s', 'Y-m-d H:i', 'Y-m-d\\TH:i:s', 'Y-m-d\\TH:i'];
 
-        if ($timestamp === false) {
-            return null;
+        foreach ($formats as $format) {
+            $date = \DateTimeImmutable::createFromFormat($format, $clean);
+
+            if ($date instanceof \DateTimeImmutable) {
+                return $date->format('Y-m-d H:i:s');
+            }
         }
 
-        return date('Y-m-d H:i:s', $timestamp);
+        $timestamp = strtotime($clean);
+        return $timestamp === false ? null : date('Y-m-d H:i:s', $timestamp);
     }
 }

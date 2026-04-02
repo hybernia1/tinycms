@@ -1,11 +1,27 @@
 <?php
 $type = (string)($contentType['type'] ?? 'post');
-$createdAtRaw = (string)($item['created'] ?? '');
-$createdAtStamp = $createdAtRaw !== '' ? strtotime($createdAtRaw) : false;
-$createdAt = $createdAtStamp !== false ? date('Y-m-d\\TH:i', $createdAtStamp) : '';
-$updatedAtRaw = (string)($item['updated'] ?? '');
-$updatedAtStamp = $updatedAtRaw !== '' ? strtotime($updatedAtRaw) : false;
-$updatedAt = $updatedAtStamp !== false ? date('d.m.Y H:i', $updatedAtStamp) : '—';
+$parseDate = static function (string $value): ?\DateTimeImmutable {
+    $clean = trim($value);
+
+    if ($clean === '') {
+        return null;
+    }
+
+    foreach (['Y-m-d H:i:s', 'Y-m-d H:i', 'Y-m-d\\TH:i:s', 'Y-m-d\\TH:i'] as $format) {
+        $date = \DateTimeImmutable::createFromFormat($format, $clean);
+        if ($date instanceof \DateTimeImmutable) {
+            return $date;
+        }
+    }
+
+    $timestamp = strtotime($clean);
+    return $timestamp === false ? null : (new \DateTimeImmutable())->setTimestamp($timestamp);
+};
+
+$createdAtDate = $parseDate((string)($item['created'] ?? ''));
+$createdAt = $createdAtDate?->format('Y-m-d\\TH:i') ?? '';
+$updatedAtDate = $parseDate((string)($item['updated'] ?? ''));
+$updatedAt = $updatedAtDate?->format('d.m.Y H:i') ?? '—';
 ?>
 <div class="card p-5">
     <h1 class="m-0 mb-4"><?= $mode === 'add' ? 'Přidat ' . htmlspecialchars((string)($contentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') : 'Upravit ' . htmlspecialchars((string)($contentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') ?></h1>
