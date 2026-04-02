@@ -16,6 +16,11 @@
     --space-5: 1.5rem;
     --size-icon: 1rem;
     --size-touch: 2.5rem;
+    --control-border: 1px solid var(--color-border);
+    --control-padding-y: calc(var(--space-2) + var(--space-1) / 2);
+    --control-padding-x: var(--space-3);
+    --select-arrow-size: 0.6rem;
+    --select-arrow-offset: var(--space-3);
 }
 
 body[data-theme='light'] {
@@ -318,34 +323,74 @@ label {
 
 input {
     width: 100%;
-    padding: calc(var(--space-2) + var(--space-1) / 2);
-    border: 1px solid var(--color-border);
+    padding: var(--control-padding-y) var(--control-padding-x);
+    border: var(--control-border);
     color: var(--color-text);
     background: var(--color-surface);
+    font: inherit;
+    line-height: var(--lh-tight);
+    min-height: var(--size-touch);
 }
 
 textarea {
     width: 100%;
-    padding: calc(var(--space-2) + var(--space-1) / 2);
-    border: 1px solid var(--color-border);
+    padding: var(--control-padding-y) var(--control-padding-x);
+    border: var(--control-border);
     color: var(--color-text);
     background: var(--color-surface);
     resize: vertical;
     min-height: 92px;
-    font-family: inherit;
-    font-size: var(--fs-sm);
+    font: inherit;
+    line-height: var(--lh-base);
 }
 
-input[type='datetime-local'] {
+select {
+    width: 100%;
+    padding: var(--control-padding-y) calc(var(--control-padding-x) * 2.6) var(--control-padding-y) var(--control-padding-x);
+    border: var(--control-border);
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%236b7280' d='M0 0h10L5 6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--select-arrow-offset) center;
+    background-size: var(--select-arrow-size);
+    appearance: none;
+    -webkit-appearance: none;
+    font: inherit;
+    line-height: var(--lh-tight);
     min-height: var(--size-touch);
 }
 
-input[type='datetime-local']::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    filter: var(--datetime-picker-filter, none);
+select option {
+    color: var(--color-text);
+    background: var(--color-surface);
 }
 
-body[data-theme='dark'] input[type='datetime-local'] {
+input[type='date'],
+input[type='time'],
+input[type='datetime-local'],
+input[type='month'],
+input[type='week'] {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: calc(var(--control-padding-x) * 2.2);
+}
+
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='time']::-webkit-calendar-picker-indicator,
+input[type='datetime-local']::-webkit-calendar-picker-indicator,
+input[type='month']::-webkit-calendar-picker-indicator,
+input[type='week']::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: var(--datetime-picker-filter, none);
+    opacity: 0.75;
+}
+
+body[data-theme='dark'] input[type='date'],
+body[data-theme='dark'] input[type='time'],
+body[data-theme='dark'] input[type='datetime-local'],
+body[data-theme='dark'] input[type='month'],
+body[data-theme='dark'] input[type='week'] {
     --datetime-picker-filter: invert(0.9);
 }
 
@@ -388,13 +433,6 @@ body[data-theme='dark'] input[type='datetime-local'] {
     --flash-border: var(--tone-info-border);
     --flash-text: var(--tone-info-text);
     --flash-bg: var(--tone-info-bg);
-}
-
-select {
-    padding: calc(var(--space-2) + var(--space-1) / 2);
-    border: 1px solid var(--color-border);
-    color: var(--color-text);
-    background: var(--color-surface);
 }
 
 .pagination {
