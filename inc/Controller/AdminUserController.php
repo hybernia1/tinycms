@@ -42,6 +42,53 @@ final class AdminUserController
         $this->pages->adminUsersList($pagination, self::PER_PAGE_ALLOWED);
     }
 
+    public function deleteSubmit(callable $redirect): void
+    {
+        if (!$this->guard($redirect)) {
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+
+        if ($id <= 0) {
+            $this->flash->add('error', 'Neplatné ID uživatele.');
+            $redirect('admin/users');
+        }
+
+        if ($this->users->delete($id)) {
+            $this->flash->add('success', 'Uživatel smazán.');
+        } else {
+            $this->flash->add('error', 'Uživatele se nepodařilo smazat.');
+        }
+
+        $redirect('admin/users');
+    }
+
+    public function bulkDeleteSubmit(callable $redirect): void
+    {
+        if (!$this->guard($redirect)) {
+            return;
+        }
+
+        $rawIds = (string)($_POST['ids'] ?? '');
+        $ids = array_filter(array_map('intval', explode(',', $rawIds)), fn(int $v): bool => $v > 0);
+
+        if ($ids === []) {
+            $this->flash->add('info', 'Nebyly vybrány žádné záznamy.');
+            $redirect('admin/users');
+        }
+
+        $deleted = $this->users->deleteMany($ids);
+
+        if ($deleted > 0) {
+            $this->flash->add('success', "Smazáno $deleted uživatelů.");
+        } else {
+            $this->flash->add('error', 'Vybrané uživatele se nepodařilo smazat.');
+        }
+
+        $redirect('admin/users');
+    }
+
     public function addForm(callable $redirect): void
     {
         if (!$this->guard($redirect)) {

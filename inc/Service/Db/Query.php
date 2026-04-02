@@ -101,17 +101,28 @@ class Query
 
     public function delete(string $table, array $where): int
     {
-        $conditions = [];
-        $params = [];
-        foreach ($where as $col => $val) {
-            $conditions[] = "$col = :$col";
-            $params[$col] = $val;
-        }
-
-        $sql = "DELETE FROM $table WHERE " . implode(' AND ', $conditions);
+        [$whereSql, $params] = $this->buildWhere($where);
+        $sql = "DELETE FROM $table$whereSql";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
+
+        return $stmt->rowCount();
+    }
+
+    public function deleteIn(string $table, string $column, array $values): int
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $values), fn(int $v): bool => $v > 0)));
+
+        if ($ids === []) {
+            return 0;
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($ids), '?'));
+        $sql = "DELETE FROM $table WHERE $column IN ($placeholders)";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($ids);
 
         return $stmt->rowCount();
     }

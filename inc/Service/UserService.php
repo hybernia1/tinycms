@@ -31,6 +31,16 @@ final class UserService
         return $rows[0] ?? null;
     }
 
+    public function delete(int $id): bool
+    {
+        return $this->query->delete('users', ['ID' => $id]) > 0;
+    }
+
+    public function deleteMany(array $ids): int
+    {
+        return $this->query->deleteIn('users', 'ID', $ids);
+    }
+
     public function save(array $input, ?int $id = null): array
     {
         $name = trim((string)($input['name'] ?? ''));

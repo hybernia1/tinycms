@@ -67,6 +67,14 @@ $router->get('admin/users', static function () use ($adminUsers, $redirect): voi
     $adminUsers->list($redirect);
 });
 
+$router->post('admin/users/delete', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->deleteSubmit($redirect);
+});
+
+$router->post('admin/users/bulk-delete', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->bulkDeleteSubmit($redirect);
+});
+
 $router->get('admin/users/add', static function () use ($adminUsers, $redirect): void {
     $adminUsers->addForm($redirect);
 });

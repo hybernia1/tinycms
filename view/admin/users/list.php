@@ -7,8 +7,16 @@ $total = (int)($pagination['total'] ?? 0);
 ?>
 <div class="d-flex justify-between align-center mb-4">
     <h1 class="m-0">Uživatelé</h1>
-    <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">Přidat uživatele</a>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">Přidat uživatele</a>
+        <button class="btn btn-light" type="button" data-modal-open data-modal-mode="bulk" data-type="uživatelů" data-form-id="bulk-delete-form">Smazat vybrané</button>
+    </div>
 </div>
+
+<form id="bulk-delete-form" method="post" action="<?= htmlspecialchars($url('admin/users/bulk-delete'), ENT_QUOTES, 'UTF-8') ?>">
+    <input type="hidden" name="ids" value="">
+</form>
+
 <div class="card p-4">
     <form method="get" class="d-flex gap-2 align-center mb-3">
         <label class="m-0">Na stránku</label>
@@ -25,18 +33,26 @@ $total = (int)($pagination['total'] ?? 0);
     <table class="w-100">
         <thead>
             <tr>
+                <th><input type="checkbox" data-bulk-toggle></th>
                 <th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Suspend</th><th>Akce</th>
             </tr>
         </thead>
         <tbody>
-        <?php foreach ($users as $row): ?>
+        <?php foreach ($users as $row): $id = (int)($row['ID'] ?? 0); ?>
             <tr>
-                <td><?= (int)($row['ID'] ?? 0) ?></td>
+                <td><input type="checkbox" value="<?= $id ?>" data-bulk-item></td>
+                <td><?= $id ?></td>
                 <td><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                 <td><?= htmlspecialchars((string)($row['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                 <td><?= htmlspecialchars((string)($row['role'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                 <td><?= (int)($row['suspend'] ?? 0) ?></td>
-                <td><a class="btn btn-light" href="<?= htmlspecialchars($url('admin/users/edit?id=' . (int)($row['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">Edit</a></td>
+                <td>
+                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
+                    <form id="delete-user-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/users/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                        <input type="hidden" name="id" value="<?= $id ?>">
+                        <button class="btn btn-light" type="button" data-modal-open data-modal-mode="single" data-type="uživatele" data-form-id="delete-user-<?= $id ?>">Delete</button>
+                    </form>
+                </td>
             </tr>
         <?php endforeach; ?>
         </tbody>
@@ -49,4 +65,14 @@ $total = (int)($pagination['total'] ?? 0);
         <?php endfor; ?>
     </div>
     <?php endif; ?>
+</div>
+
+<div class="modal-overlay" data-modal>
+    <div class="modal">
+        <p data-modal-text>Skutečně smazat?</p>
+        <div class="modal-actions">
+            <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="">Potvrdit</button>
+        </div>
+    </div>
 </div>
