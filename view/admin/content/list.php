@@ -53,7 +53,7 @@ foreach ($availableStatuses as $statusValue) {
             <thead>
             <tr>
                 <th class="table-col-select"><input type="checkbox" data-bulk-toggle></th>
-                <th>Název</th><th>Autor</th><th>Status</th><th class="table-col-actions">Akce</th>
+                <th>Název</th><th>Autor</th><th class="table-col-actions">Akce</th>
             </tr>
             </thead>
             <tbody>
@@ -62,6 +62,8 @@ foreach ($availableStatuses as $statusValue) {
                 $createdAt = (string)($row['created'] ?? '');
                 $createdStamp = $createdAt !== '' ? strtotime($createdAt) : false;
                 $isPlanned = $createdStamp !== false && $createdStamp > time();
+                $statusValue = (string)($row['status'] ?? '');
+                $statusClass = $statusValue === 'published' ? 'text-bg-success' : ($statusValue === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
             ?>
                 <tr>
                     <td class="table-col-select"><input type="checkbox" value="<?= $id ?>" data-bulk-item></td>
@@ -70,10 +72,12 @@ foreach ($availableStatuses as $statusValue) {
                         <div class="text-muted">
                             <?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>
                         </div>
-                        <?php if ($isPlanned): ?><div class="mt-2"><span class="badge text-bg-warning">Plánováno</span></div><?php endif; ?>
+                        <div class="d-flex gap-2 mt-2">
+                            <span class="badge <?= htmlspecialchars($statusClass, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($statusValue, ENT_QUOTES, 'UTF-8') ?></span>
+                            <?php if ($isPlanned): ?><span class="badge text-bg-warning">Plánováno</span><?php endif; ?>
+                        </div>
                     </td>
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><span class="badge"><?= htmlspecialchars((string)($row['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td class="table-col-actions">
                         <?php $isPublished = (string)($row['status'] ?? '') === 'published'; ?>
                         <form method="post" action="<?= htmlspecialchars($url('admin/content/status-toggle'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
