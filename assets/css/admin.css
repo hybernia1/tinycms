@@ -10,6 +10,7 @@ body {
 
 .admin-shell {
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
 }
 
@@ -19,6 +20,7 @@ body {
     left: 0;
     width: 240px;
     height: 100vh;
+    height: 100dvh;
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
     padding: 20px 14px;
@@ -54,10 +56,12 @@ body {
 .admin-main {
     margin-left: 240px;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .admin-header-spacer {
@@ -108,6 +112,7 @@ body {
     .admin-main {
         margin-left: 0;
         height: 100vh;
+        height: 100dvh;
     }
 
     .admin-menu-toggle {
