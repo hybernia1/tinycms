@@ -28,6 +28,13 @@ body[data-theme='light'] {
     --flash-info-border: #93c5fd;
     --flash-info-text: #1e3a8a;
     --flash-info-bg: #eff6ff;
+    --btn-primary-bg: #1d4ed8;
+    --btn-primary-text: #ffffff;
+    --btn-dark-bg: #111827;
+    --btn-dark-text: #ffffff;
+    --btn-light-bg: #f3f4f6;
+    --btn-light-text: #111827;
+    --btn-light-border: #d1d5db;
 }
 
 body[data-theme='dark'] {
@@ -54,6 +61,13 @@ body[data-theme='dark'] {
     --flash-info-border: #1e3a8a;
     --flash-info-text: #93c5fd;
     --flash-info-bg: #172554;
+    --btn-primary-bg: #2563eb;
+    --btn-primary-text: #ffffff;
+    --btn-dark-bg: #e5e7eb;
+    --btn-dark-text: #0b1220;
+    --btn-light-bg: #1f2937;
+    --btn-light-text: #e5e7eb;
+    --btn-light-border: #374151;
 }
 
 * {
@@ -141,19 +155,19 @@ body {
 }
 
 .btn-primary {
-    background: var(--primary);
-    color: #fff;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
 }
 
 .btn-dark {
-    background: var(--color-text);
-    color: #fff;
+    background: var(--btn-dark-bg);
+    color: var(--btn-dark-text);
 }
 
 .btn-light {
-    background: var(--color-surface-muted);
-    color: var(--color-text);
-    border-color: var(--color-border);
+    background: var(--btn-light-bg);
+    color: var(--btn-light-text);
+    border-color: var(--btn-light-border);
 }
 
 .w-100 { width: 100%; }
