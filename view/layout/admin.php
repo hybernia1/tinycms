@@ -36,7 +36,7 @@ $isUsersList = str_ends_with($currentPath, 'admin/users');
                 <div class="text-muted"><?= htmlspecialchars((string)($authUser['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
             <?php endif; ?>
-            <a class="btn btn-dark w-100" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
+            <a class="btn btn-light w-100" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('logout') ?>
                 <span>Odhlásit</span>
             </a>

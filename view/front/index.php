@@ -8,7 +8,7 @@
                 <div class="d-flex gap-2">
                     <a class="btn btn-primary" href="<?= htmlspecialchars($url('login'), ENT_QUOTES, 'UTF-8') ?>">Login</a>
                     <?php if (!empty($user) && (($user['role'] ?? '') === 'admin')): ?>
-                    <a class="btn btn-dark" href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>">Dashboard</a>
+                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>">Dashboard</a>
                     <?php endif; ?>
                 </div>
             </div>
