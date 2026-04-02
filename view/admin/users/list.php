@@ -40,6 +40,7 @@ $statusLinks = [
 </div>
 
 <form id="bulk-action-form" method="post" action="<?= htmlspecialchars($url('admin/users/bulk-action'), ENT_QUOTES, 'UTF-8') ?>">
+    <?= $csrfField() ?>
     <input type="hidden" name="ids" value="">
     <input type="hidden" name="action" id="bulk-action-value" value="">
 </form>
@@ -69,6 +70,7 @@ $statusLinks = [
                     <td class="table-col-actions">
                         <?php if (!$isAdmin): ?>
                         <form method="post" action="<?= htmlspecialchars($url('admin/users/suspend-toggle'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                            <?= $csrfField() ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <input type="hidden" name="mode" value="<?= $isSuspended ? 'unsuspend' : 'suspend' ?>">
                             <button class="btn btn-light btn-icon" type="submit" aria-label="<?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?>" title="<?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?>">
@@ -77,6 +79,7 @@ $statusLinks = [
                             </button>
                         </form>
                         <form id="delete-user-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/users/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                            <?= $csrfField() ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <button class="btn btn-light btn-icon" type="button" data-modal-open data-modal-mode="single" data-type="uživatele" data-form-id="delete-user-<?= $id ?>" aria-label="Smazat uživatele" title="Smazat uživatele">
                                 <?= $icon('delete') ?>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\AuthService;
+use App\Service\CsrfService;
 use App\Service\FlashService;
 use App\Service\UserService;
 use App\View\PageView;
@@ -17,13 +18,15 @@ final class AdminUserController
     private AuthService $authService;
     private UserService $users;
     private FlashService $flash;
+    private CsrfService $csrf;
 
-    public function __construct(PageView $pages, AuthService $authService, UserService $users, FlashService $flash)
+    public function __construct(PageView $pages, AuthService $authService, UserService $users, FlashService $flash, CsrfService $csrf)
     {
         $this->pages = $pages;
         $this->authService = $authService;
         $this->users = $users;
         $this->flash = $flash;
+        $this->csrf = $csrf;
     }
 
     public function list(callable $redirect): void
@@ -52,6 +55,9 @@ final class AdminUserController
         if (!$this->guard($redirect)) {
             return;
         }
+        if (!$this->guardCsrf($redirect)) {
+            return;
+        }
 
         $id = (int)($_POST['id'] ?? 0);
 
@@ -72,6 +78,9 @@ final class AdminUserController
     public function suspendToggleSubmit(callable $redirect): void
     {
         if (!$this->guard($redirect)) {
+            return;
+        }
+        if (!$this->guardCsrf($redirect)) {
             return;
         }
 
@@ -97,6 +106,9 @@ final class AdminUserController
     public function bulkActionSubmit(callable $redirect): void
     {
         if (!$this->guard($redirect)) {
+            return;
+        }
+        if (!$this->guardCsrf($redirect)) {
             return;
         }
 
@@ -153,6 +165,9 @@ final class AdminUserController
         if (!$this->guard($redirect)) {
             return;
         }
+        if (!$this->guardCsrf($redirect)) {
+            return;
+        }
 
         $result = $this->users->save($_POST);
 
@@ -187,6 +202,9 @@ final class AdminUserController
     public function editSubmit(callable $redirect): void
     {
         if (!$this->guard($redirect)) {
+            return;
+        }
+        if (!$this->guardCsrf($redirect)) {
             return;
         }
 
@@ -247,6 +265,17 @@ final class AdminUserController
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
+    }
+
+    private function guardCsrf(callable $redirect): bool
+    {
+        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            return true;
+        }
+
+        $this->flash->add('error', 'Bezpečnostní token vypršel, odešlete formulář znovu.');
+        $redirect('admin/users');
+        return false;
     }
 
     private function guard(callable $redirect): bool

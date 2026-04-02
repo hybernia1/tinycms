@@ -32,6 +32,7 @@ class Login
     {
         $email = trim((string)($data['email'] ?? ''));
         $password = (string)($data['password'] ?? '');
+        $remember = (int)($data['remember'] ?? 0) === 1;
 
         $errors = [];
 
@@ -100,6 +101,19 @@ class Login
             'email' => (string)$user['email'],
             'role' => (string)$user['role'],
         ];
+
+        if ($remember) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                session_id(),
+                time() + (60 * 60 * 24 * 30),
+                $params['path'] ?: '/',
+                $params['domain'] ?: '',
+                (bool)$params['secure'],
+                (bool)$params['httponly']
+            );
+        }
 
         unset($user['password']);
 
