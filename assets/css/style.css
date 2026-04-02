@@ -181,7 +181,10 @@ body {
     background: var(--warning-bg);
     color: var(--warning-text);
 }
-.text-bg-dark { background: var(--color-text); }
+.text-bg-dark {
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+}
 
 .card {
     border: 1px solid var(--color-border-soft);
