@@ -44,7 +44,7 @@ final class ContentService
 
     public function find(int $id, string $type): ?array
     {
-        $rows = $this->query->select('content', ['id', 'type', 'name', 'status', 'excerpt', 'body', 'author'], ['id' => $id, 'type' => $type]);
+        $rows = $this->query->select('content', ['id', 'type', 'name', 'status', 'excerpt', 'body', 'author', 'created', 'updated'], ['id' => $id, 'type' => $type]);
         return $rows[0] ?? null;
     }
 
