@@ -215,3 +215,13 @@ select {
 .inline-form {
     display: inline-block;
 }
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+button:disabled,
+select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

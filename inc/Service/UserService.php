@@ -44,7 +44,7 @@ final class UserService
 
     public function deleteMany(array $ids): int
     {
-        $clean = array_values(array_unique(array_filter(array_map('intval', $ids), fn(int $v): bool => $v > 0)));
+        $clean = $this->sanitizeIds($ids);
 
         if ($clean === []) {
             return 0;
@@ -59,6 +59,32 @@ final class UserService
         }
 
         return $deleted;
+    }
+
+    public function suspendMany(array $ids): int
+    {
+        $clean = $this->sanitizeIds($ids);
+
+        if ($clean === []) {
+            return 0;
+        }
+
+        $updated = 0;
+
+        foreach ($clean as $id) {
+            $user = $this->find($id);
+
+            if ($user === null || (string)($user['role'] ?? '') === 'admin') {
+                continue;
+            }
+
+            $updated += $this->query->update('users', [
+                'suspend' => 1,
+                'updated' => date('Y-m-d H:i:s'),
+            ], ['ID' => $id]) > 0 ? 1 : 0;
+        }
+
+        return $updated;
     }
 
     public function save(array $input, ?int $id = null): array
@@ -122,5 +148,10 @@ final class UserService
         $updated = $this->query->update('users', $payload, ['ID' => $id]);
 
         return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+    }
+
+    private function sanitizeIds(array $ids): array
+    {
+        return array_values(array_unique(array_filter(array_map('intval', $ids), fn(int $v): bool => $v > 0)));
     }
 }

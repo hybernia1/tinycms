@@ -64,13 +64,14 @@ final class AdminUserController
         $redirect('admin/users');
     }
 
-    public function bulkDeleteSubmit(callable $redirect): void
+    public function bulkActionSubmit(callable $redirect): void
     {
         if (!$this->guard($redirect)) {
             return;
         }
 
         $rawIds = (string)($_POST['ids'] ?? '');
+        $action = (string)($_POST['action'] ?? '');
         $ids = array_filter(array_map('intval', explode(',', $rawIds)), fn(int $v): bool => $v > 0);
 
         if ($ids === []) {
@@ -78,14 +79,19 @@ final class AdminUserController
             $redirect('admin/users');
         }
 
-        $deleted = $this->users->deleteMany($ids);
-
-        if ($deleted > 0) {
-            $this->flash->add('success', "Smazáno $deleted uživatelů.");
-        } else {
-            $this->flash->add('error', 'Vybrané uživatele se nepodařilo smazat.');
+        if ($action === 'delete') {
+            $affected = $this->users->deleteMany($ids);
+            $this->flash->add($affected > 0 ? 'success' : 'error', $affected > 0 ? "Smazáno $affected uživatelů." : 'Vybrané uživatele se nepodařilo smazat.');
+            $redirect('admin/users');
         }
 
+        if ($action === 'suspend') {
+            $affected = $this->users->suspendMany($ids);
+            $this->flash->add($affected > 0 ? 'success' : 'error', $affected > 0 ? "Suspendováno $affected uživatelů." : 'Vybrané uživatele se nepodařilo suspendovat.');
+            $redirect('admin/users');
+        }
+
+        $this->flash->add('info', 'Nebyla vybrána žádná hromadná akce.');
         $redirect('admin/users');
     }
 
