@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Auth\Auth;
-use App\Auth\Login;
-use App\Auth\LoginLayer;
-use App\Db\Connection;
-use App\Db\Query;
+use App\Service\Auth\Auth;
+use App\Service\Auth\Login;
+use App\Service\Auth\LoginLayer;
+use App\Service\Db\Connection;
+use App\Service\Db\Query;
 
 final class AuthService
 {

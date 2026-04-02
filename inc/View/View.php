@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use App\Router\Router;
+use App\Service\Router\Router;
 
 final class View
 {

@@ -11,19 +11,9 @@ spl_autoload_register(function (string $class): void {
     }
 
     $relativeClass = str_replace('\\', '/', substr($class, strlen($prefix)));
+    $file = __DIR__ . '/' . INC_DIR . $relativeClass . '.php';
 
-    $paths = [
-        __DIR__ . '/' . INC_DIR . $relativeClass . '.php',
-    ];
-
-    if (str_starts_with($relativeClass, 'Auth/') || str_starts_with($relativeClass, 'Db/') || str_starts_with($relativeClass, 'Router/')) {
-        $paths[] = __DIR__ . '/' . INC_DIR . 'Service/' . $relativeClass . '.php';
-    }
-
-    foreach ($paths as $file) {
-        if (is_file($file)) {
-            require_once $file;
-            return;
-        }
+    if (is_file($file)) {
+        require_once $file;
     }
 });

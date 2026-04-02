@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/autoload.php';
 
-use App\Auth\Auth;
-use App\Router\Router;
+use App\Service\Auth\Auth;
+use App\Service\Router\Router;
 use App\View\View;
 
 $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));

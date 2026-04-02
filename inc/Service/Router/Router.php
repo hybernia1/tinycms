@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Router;
+namespace App\Service\Router;
 
 final class Router
 {

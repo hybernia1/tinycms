@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Auth;
+namespace App\Service\Auth;
 
-use App\Db\Connection;
-use App\Db\Query;
+use App\Service\Db\Connection;
+use App\Service\Db\Query;
 
 class Auth
 {

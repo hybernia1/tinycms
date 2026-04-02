@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Auth;
+namespace App\Service\Auth;
 
 final class LoginLayer
 {
