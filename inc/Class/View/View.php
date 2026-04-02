@@ -1,0 +1,46 @@
+<?php
+declare(strict_types=1);
+
+namespace App\View;
+
+use App\Router\Router;
+
+final class View
+{
+    private string $rootPath;
+    private Router $router;
+
+    public function __construct(string $rootPath, Router $router)
+    {
+        $this->rootPath = rtrim($rootPath, '/');
+        $this->router = $router;
+    }
+
+    public function render(string $layout, string $template, array $data = []): void
+    {
+        $templateFile = $this->resolve('view/' . $template . '.php', '/view/');
+        $layoutFile = $this->resolve('view/layout/' . $layout . '.php', '/view/layout/');
+
+        $url = fn(string $path = ''): string => $this->router->url($path);
+        extract($data, EXTR_SKIP);
+
+        ob_start();
+        require $templateFile;
+        $content = (string)ob_get_clean();
+
+        require $layoutFile;
+    }
+
+    private function resolve(string $relativePath, string $allowedPath): string
+    {
+        $fullPath = $this->rootPath . '/' . ltrim($relativePath, '/');
+        $realPath = realpath($fullPath);
+
+        if ($realPath === false || !str_starts_with($realPath, $this->rootPath . $allowedPath) || !is_file($realPath)) {
+            http_response_code(404);
+            exit('404');
+        }
+
+        return $realPath;
+    }
+}
