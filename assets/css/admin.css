@@ -51,10 +51,18 @@ body {
     flex-direction: column;
 }
 
+.admin-header-spacer {
+    background: #fff;
+    border-bottom: 1px solid var(--color-border-soft);
+    min-height: 56px;
+}
+
 .admin-footer {
     background: var(--color-surface);
     border-top: 1px solid var(--color-border-soft);
+    border-bottom: 0;
     padding: 14px 20px;
+    margin-top: auto;
 }
 
 .admin-content {

@@ -42,6 +42,7 @@ $authUser = $_SESSION['auth'] ?? null;
         </div>
     </aside>
     <main class="admin-main">
+        <div class="admin-header-spacer"></div>
         <section class="admin-content">
             <?php foreach ($flashes as $flash): ?>
             <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">
