@@ -25,6 +25,11 @@ final class View
         $layoutFile = $this->resolve('view/layout/' . $layout . '.php', '/view/layout/');
 
         $url = fn(string $path = ''): string => $this->router->url($path);
+        $icon = static function (string $name, string $classes = 'icon') use ($url): string {
+            $sprite = htmlspecialchars($url('assets/icons.svg#icon-' . $name), ENT_QUOTES, 'UTF-8');
+            $classAttr = htmlspecialchars($classes, ENT_QUOTES, 'UTF-8');
+            return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
+        };
 
         if ($layout === 'admin' && !isset($data['adminMenu'])) {
             $data['adminMenu'] = [
@@ -37,6 +42,7 @@ final class View
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
         $theme = (string)($_GET['theme'] ?? 'light');
         $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
+        $data['icon'] = $icon;
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
 

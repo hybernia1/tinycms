@@ -7,7 +7,10 @@ $total = (int)($pagination['total'] ?? 0);
 ?>
 <div class="d-flex justify-between align-center mb-4">
     <h1 class="m-0">Uživatelé</h1>
-    <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">Přidat uživatele</a>
+    <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
+        <?= $icon('add') ?>
+        <span>Přidat uživatele</span>
+    </a>
 </div>
 
 <div class="d-flex gap-2 align-center mb-3">
@@ -53,11 +56,17 @@ $total = (int)($pagination['total'] ?? 0);
                         <form method="post" action="<?= htmlspecialchars($url('admin/users/suspend-toggle'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <input type="hidden" name="mode" value="<?= $isSuspended ? 'unsuspend' : 'suspend' ?>">
-                            <button class="btn btn-light" type="submit"><?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?></button>
+                            <button class="btn btn-light btn-icon" type="submit" aria-label="<?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?>" title="<?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?>">
+                                <?= $icon($isSuspended ? 'show' : 'hide') ?>
+                                <span class="sr-only"><?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?></span>
+                            </button>
                         </form>
                         <form id="delete-user-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/users/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <input type="hidden" name="id" value="<?= $id ?>">
-                            <button class="btn btn-light" type="button" data-modal-open data-modal-mode="single" data-type="uživatele" data-form-id="delete-user-<?= $id ?>">Delete</button>
+                            <button class="btn btn-light btn-icon" type="button" data-modal-open data-modal-mode="single" data-type="uživatele" data-form-id="delete-user-<?= $id ?>" aria-label="Smazat uživatele" title="Smazat uživatele">
+                                <?= $icon('delete') ?>
+                                <span class="sr-only">Smazat uživatele</span>
+                            </button>
                         </form>
                         <?php endif; ?>
                     </td>

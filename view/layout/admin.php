@@ -31,7 +31,10 @@ $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '
     <main class="admin-main">
         <header class="admin-header d-flex justify-between align-center">
             <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
-            <a class="btn btn-dark" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">Odhlásit</a>
+            <a class="btn btn-dark" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
+                <?= $icon('logout') ?>
+                <span>Odhlásit</span>
+            </a>
         </header>
         <section class="admin-content">
             <?php foreach ($flashes as $flash): ?>

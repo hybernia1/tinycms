@@ -152,6 +152,10 @@ body {
     text-decoration: none;
     cursor: pointer;
     font-size: 14px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-primary {
@@ -171,6 +175,30 @@ body {
 }
 
 .w-100 { width: 100%; }
+
+.icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    flex: 0 0 auto;
+}
+
+.btn-icon {
+    padding: 8px;
+    min-width: 34px;
+    justify-content: center;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
 
 .table-responsive {
     width: 100%;
