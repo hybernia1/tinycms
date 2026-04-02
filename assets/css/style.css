@@ -348,6 +348,11 @@ select {
     border-color: var(--primary);
 }
 
+.pagination-link.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .filter-nav {
     display: flex;
     flex-wrap: wrap;

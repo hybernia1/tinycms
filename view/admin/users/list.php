@@ -106,9 +106,16 @@ $statusLinks = [
         <div class="d-flex justify-between align-center mt-4">
             <?php if ($totalPages > 1): ?>
             <div class="pagination">
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a class="pagination-link<?= $i === $page ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $i . '&per_page=' . $perPage . '&status=' . $status . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"><?= $i ?></a>
-                <?php endfor; ?>
+                <?php $prevPage = max(1, $page - 1); ?>
+                <?php $nextPage = min($totalPages, $page + 1); ?>
+                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $prevPage . '&per_page=' . $perPage . '&status=' . $status . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
+                    <?= $icon('prev') ?>
+                    <span>Předchozí</span>
+                </a>
+                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $nextPage . '&per_page=' . $perPage . '&status=' . $status . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
+                    <span>Další</span>
+                    <?= $icon('next') ?>
+                </a>
             </div>
             <?php else: ?>
             <div></div>
