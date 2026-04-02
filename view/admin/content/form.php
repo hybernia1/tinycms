@@ -1,27 +1,6 @@
 <?php
 $type = (string)($contentType['type'] ?? 'post');
-$parseDate = static function (string $value): ?\DateTimeImmutable {
-    $clean = trim($value);
-
-    if ($clean === '') {
-        return null;
-    }
-
-    foreach (['Y-m-d H:i:s', 'Y-m-d H:i', 'Y-m-d\\TH:i:s', 'Y-m-d\\TH:i'] as $format) {
-        $date = \DateTimeImmutable::createFromFormat($format, $clean);
-        if ($date instanceof \DateTimeImmutable) {
-            return $date;
-        }
-    }
-
-    $timestamp = strtotime($clean);
-    return $timestamp === false ? null : (new \DateTimeImmutable())->setTimestamp($timestamp);
-};
-
-$createdAtDate = $parseDate((string)($item['created'] ?? ''));
-$createdAt = $createdAtDate?->format('Y-m-d\\TH:i') ?? '';
-$updatedAtDate = $parseDate((string)($item['updated'] ?? ''));
-$updatedAt = $updatedAtDate?->format('d.m.Y H:i') ?? '—';
+$createdAt = trim((string)($item['created'] ?? ''));
 ?>
 <div class="card p-5">
     <h1 class="m-0 mb-4"><?= $mode === 'add' ? 'Přidat ' . htmlspecialchars((string)($contentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') : 'Upravit ' . htmlspecialchars((string)($contentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') ?></h1>
@@ -57,12 +36,8 @@ $updatedAt = $updatedAtDate?->format('d.m.Y H:i') ?? '—';
         </div>
         <div class="mb-3">
             <label>Publish date</label>
-            <input type="datetime-local" name="created" value="<?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="text" name="created" value="<?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>" placeholder="YYYY-MM-DD HH:MM:SS">
             <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['created'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
-        </div>
-        <div class="mb-3">
-            <label>Updated</label>
-            <input type="text" value="<?= htmlspecialchars($updatedAt, ENT_QUOTES, 'UTF-8') ?>" readonly>
         </div>
         <div class="mb-3">
             <label>Excerpt</label>
