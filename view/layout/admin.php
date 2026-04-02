@@ -49,7 +49,10 @@ $currentContentType = $currentContentType ?? null;
     <main class="admin-main">
         <div class="admin-header-spacer d-flex justify-between align-center">
             <div class="d-flex align-center gap-2">
-                <button class="btn btn-light btn-icon admin-menu-toggle" type="button" data-admin-menu-toggle aria-label="Otevřít menu" title="Otevřít menu">☰</button>
+                <button class="btn btn-light btn-icon admin-menu-toggle" type="button" data-admin-menu-toggle aria-label="Otevřít menu" title="Otevřít menu">
+                    <?= $icon('menu') ?>
+                    <span class="sr-only">Otevřít menu</span>
+                </button>
                 <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <?php if ($isUsersList): ?>
