@@ -15,9 +15,14 @@ final class UserService
         $this->query = new Query(Connection::get());
     }
 
-    public function all(): array
+    public function paginate(int $page = 1, int $perPage = 10): array
     {
-        return $this->query->select('users', ['ID', 'name', 'email', 'role', 'suspend', 'created']);
+        return $this->query->paginate('users', ['ID', 'name', 'email', 'role', 'suspend', 'created'], [], [
+            'page' => $page,
+            'perPage' => $perPage,
+            'orderBy' => 'ID',
+            'orderDir' => 'DESC',
+        ]);
     }
 
     public function find(int $id): ?array

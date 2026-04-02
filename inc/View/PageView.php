@@ -34,10 +34,11 @@ final class PageView
         ]);
     }
 
-    public function adminUsersList(array $users): void
+    public function adminUsersList(array $pagination, array $allowedPerPage): void
     {
         $this->view->render('admin', 'admin/users/list', [
-            'users' => $users,
+            'pagination' => $pagination,
+            'allowedPerPage' => $allowedPerPage,
             'pageTitle' => 'Uživatelé',
         ]);
     }

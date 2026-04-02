@@ -10,6 +10,8 @@ use App\View\PageView;
 
 final class AdminUserController
 {
+    private const PER_PAGE_ALLOWED = [10, 20, 50];
+
     private PageView $pages;
     private AuthService $authService;
     private UserService $users;
@@ -29,7 +31,15 @@ final class AdminUserController
             return;
         }
 
-        $this->pages->adminUsersList($this->users->all());
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = (int)($_GET['per_page'] ?? 10);
+
+        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
+            $perPage = 10;
+        }
+
+        $pagination = $this->users->paginate($page, $perPage);
+        $this->pages->adminUsersList($pagination, self::PER_PAGE_ALLOWED);
     }
 
     public function addForm(callable $redirect): void

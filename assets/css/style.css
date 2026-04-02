@@ -155,3 +155,29 @@ input {
     color: #1e3a8a;
     background: #eff6ff;
 }
+
+select {
+    padding: 10px;
+    border: 1px solid #d1d5db;
+}
+
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pagination-link {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    text-decoration: none;
+    color: var(--dark);
+    background: #fff;
+}
+
+.pagination-link.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
