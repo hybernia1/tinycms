@@ -12,20 +12,32 @@
     root.classList.add('has-custom-datetime');
     let opened = null;
 
-    const splitValue = (value) => {
+    const weekdayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
+
+    const parseValue = (value) => {
         if (!value || !value.includes('T')) {
-            return { date: '', time: '' };
+            return null;
         }
-        const [date, time] = value.split('T');
-        return { date: date || '', time: (time || '').slice(0, 5) };
+        const [datePart, timePart] = value.split('T');
+        const [year, month, day] = datePart.split('-').map(Number);
+        const [hour, minute] = (timePart || '00:00').split(':').map(Number);
+        if (!year || !month || !day) {
+            return null;
+        }
+        return new Date(year, month - 1, day, hour || 0, minute || 0, 0, 0);
     };
 
-    const formatLabel = (value) => {
-        if (!value) {
-            return 'Vybrat datum a čas';
-        }
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) {
+    const toValue = (date) => {
+        const year = String(date.getFullYear());
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hour = String(date.getHours()).padStart(2, '0');
+        const minute = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hour}:${minute}`;
+    };
+
+    const formatLabel = (date) => {
+        if (!date) {
             return 'Vybrat datum a čas';
         }
         return new Intl.DateTimeFormat('cs-CZ', {
@@ -37,16 +49,6 @@
         }).format(date);
     };
 
-    const syncHidden = (hidden, dateInput, timeInput, trigger) => {
-        if (!dateInput.value) {
-            hidden.value = '';
-            trigger.textContent = formatLabel('');
-            return;
-        }
-        hidden.value = `${dateInput.value}T${timeInput.value || '00:00'}`;
-        trigger.textContent = formatLabel(hidden.value);
-    };
-
     const closeOpened = () => {
         if (!opened) {
             return;
@@ -56,20 +58,22 @@
         opened = null;
     };
 
-    const setNow = (dateInput, timeInput) => {
-        const now = new Date();
-        const year = String(now.getFullYear());
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        dateInput.value = `${year}-${month}-${day}`;
-        timeInput.value = `${hours}:${minutes}`;
+    const sameDay = (a, b) => a && b
+        && a.getFullYear() === b.getFullYear()
+        && a.getMonth() === b.getMonth()
+        && a.getDate() === b.getDate();
+
+    const buildOption = (value, text) => {
+        const option = document.createElement('option');
+        option.value = String(value);
+        option.textContent = text;
+        return option;
     };
 
     inputs.forEach((hiddenInput) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-datetime';
+
         const trigger = document.createElement('button');
         trigger.type = 'button';
         trigger.className = 'custom-datetime-trigger';
@@ -80,83 +84,204 @@
         const panel = document.createElement('div');
         panel.className = 'custom-datetime-panel';
 
-        const controls = document.createElement('div');
-        controls.className = 'custom-datetime-controls';
+        const header = document.createElement('div');
+        header.className = 'custom-datetime-header';
+        const prev = document.createElement('button');
+        prev.type = 'button';
+        prev.className = 'btn btn-light btn-icon';
+        prev.textContent = '‹';
+        const title = document.createElement('strong');
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'btn btn-light btn-icon';
+        next.textContent = '›';
+        header.appendChild(prev);
+        header.appendChild(title);
+        header.appendChild(next);
+        panel.appendChild(header);
 
-        const dateInput = document.createElement('input');
-        dateInput.type = 'date';
-        dateInput.className = 'custom-datetime-date';
-        dateInput.required = hiddenInput.required;
-        dateInput.disabled = hiddenInput.disabled;
+        const weekdays = document.createElement('div');
+        weekdays.className = 'custom-datetime-weekdays';
+        weekdayLabels.forEach((label) => {
+            const el = document.createElement('span');
+            el.textContent = label;
+            weekdays.appendChild(el);
+        });
+        panel.appendChild(weekdays);
 
-        const timeInput = document.createElement('input');
-        timeInput.type = 'time';
-        timeInput.className = 'custom-datetime-time';
-        timeInput.step = 60;
-        timeInput.disabled = hiddenInput.disabled;
+        const grid = document.createElement('div');
+        grid.className = 'custom-datetime-grid';
+        panel.appendChild(grid);
 
-        const { date, time } = splitValue(hiddenInput.value);
-        dateInput.value = date;
-        timeInput.value = time;
-        trigger.textContent = formatLabel(hiddenInput.value);
-
-        controls.appendChild(dateInput);
-        controls.appendChild(timeInput);
-        panel.appendChild(controls);
+        const timeRow = document.createElement('div');
+        timeRow.className = 'custom-datetime-time-row';
+        const hourSelect = document.createElement('select');
+        hourSelect.className = 'custom-datetime-hour';
+        for (let h = 0; h < 24; h += 1) {
+            hourSelect.appendChild(buildOption(h, String(h).padStart(2, '0')));
+        }
+        const minuteSelect = document.createElement('select');
+        minuteSelect.className = 'custom-datetime-minute';
+        for (let m = 0; m < 60; m += 1) {
+            minuteSelect.appendChild(buildOption(m, String(m).padStart(2, '0')));
+        }
+        const colon = document.createElement('span');
+        colon.className = 'custom-datetime-colon';
+        colon.textContent = ':';
+        timeRow.appendChild(hourSelect);
+        timeRow.appendChild(colon);
+        timeRow.appendChild(minuteSelect);
+        panel.appendChild(timeRow);
 
         const actions = document.createElement('div');
         actions.className = 'custom-datetime-actions';
-        const nowButton = document.createElement('button');
-        nowButton.type = 'button';
-        nowButton.className = 'btn btn-light';
-        nowButton.textContent = 'Teď';
-        nowButton.disabled = hiddenInput.disabled;
+        const todayButton = document.createElement('button');
+        todayButton.type = 'button';
+        todayButton.className = 'btn btn-light';
+        todayButton.textContent = 'Dnes';
         const clearButton = document.createElement('button');
         clearButton.type = 'button';
         clearButton.className = 'btn btn-light';
         clearButton.textContent = 'Vymazat';
-        clearButton.disabled = hiddenInput.disabled;
-        const applyButton = document.createElement('button');
-        applyButton.type = 'button';
-        applyButton.className = 'btn btn-primary';
-        applyButton.textContent = 'Použít';
-        applyButton.disabled = hiddenInput.disabled;
-        actions.appendChild(nowButton);
+        const cancelButton = document.createElement('button');
+        cancelButton.type = 'button';
+        cancelButton.className = 'btn btn-light';
+        cancelButton.textContent = 'Zrušit';
+        const okButton = document.createElement('button');
+        okButton.type = 'button';
+        okButton.className = 'btn btn-primary';
+        okButton.textContent = 'OK';
+        actions.appendChild(todayButton);
         actions.appendChild(clearButton);
-        actions.appendChild(applyButton);
+        actions.appendChild(cancelButton);
+        actions.appendChild(okButton);
         panel.appendChild(actions);
 
-        nowButton.addEventListener('click', () => {
-            setNow(dateInput, timeInput);
+        let selectedDate = parseValue(hiddenInput.value);
+        let viewMonth = selectedDate ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        let draftDate = selectedDate ? new Date(selectedDate) : null;
+
+        const syncTrigger = () => {
+            trigger.textContent = formatLabel(selectedDate);
+        };
+
+        const syncTimeSelects = () => {
+            hourSelect.value = String(draftDate ? draftDate.getHours() : 0);
+            minuteSelect.value = String(draftDate ? draftDate.getMinutes() : 0);
+        };
+
+        const render = () => {
+            title.textContent = new Intl.DateTimeFormat('cs-CZ', { month: 'long', year: 'numeric' }).format(viewMonth);
+            grid.innerHTML = '';
+            const start = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
+            const offset = (start.getDay() + 6) % 7;
+            const firstVisible = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1 - offset);
+            const today = new Date();
+
+            for (let i = 0; i < 42; i += 1) {
+                const day = new Date(firstVisible.getFullYear(), firstVisible.getMonth(), firstVisible.getDate() + i);
+                const cell = document.createElement('button');
+                cell.type = 'button';
+                cell.className = 'custom-datetime-day';
+                cell.textContent = String(day.getDate());
+                if (day.getMonth() !== viewMonth.getMonth()) {
+                    cell.classList.add('muted');
+                }
+                if (sameDay(day, today)) {
+                    cell.classList.add('today');
+                }
+                if (sameDay(day, draftDate)) {
+                    cell.classList.add('selected');
+                }
+                cell.addEventListener('click', () => {
+                    const base = draftDate || new Date();
+                    draftDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), base.getHours(), base.getMinutes(), 0, 0);
+                    viewMonth = new Date(day.getFullYear(), day.getMonth(), 1);
+                    syncTimeSelects();
+                    render();
+                });
+                grid.appendChild(cell);
+            }
+        };
+
+        const open = () => {
+            if (trigger.disabled) {
+                return;
+            }
+            const parsed = parseValue(hiddenInput.value);
+            selectedDate = parsed;
+            draftDate = parsed ? new Date(parsed) : null;
+            viewMonth = draftDate ? new Date(draftDate.getFullYear(), draftDate.getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            syncTimeSelects();
+            render();
+            closeOpened();
+            wrapper.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+            opened = { wrapper, trigger };
+        };
+
+        prev.addEventListener('click', () => {
+            viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1);
+            render();
+        });
+
+        next.addEventListener('click', () => {
+            viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1);
+            render();
+        });
+
+        hourSelect.addEventListener('change', () => {
+            if (!draftDate) {
+                draftDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1, 0, 0, 0, 0);
+            }
+            draftDate.setHours(Number(hourSelect.value), draftDate.getMinutes(), 0, 0);
+        });
+
+        minuteSelect.addEventListener('change', () => {
+            if (!draftDate) {
+                draftDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1, 0, 0, 0, 0);
+            }
+            draftDate.setMinutes(Number(minuteSelect.value), 0, 0);
+        });
+
+        todayButton.addEventListener('click', () => {
+            const now = new Date();
+            draftDate = new Date(now);
+            viewMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            syncTimeSelects();
+            render();
         });
 
         clearButton.addEventListener('click', () => {
-            dateInput.value = '';
-            timeInput.value = '';
-            syncHidden(hiddenInput, dateInput, timeInput, trigger);
+            draftDate = null;
+            selectedDate = null;
+            hiddenInput.value = '';
+            syncTrigger();
             hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
             closeOpened();
         });
 
-        applyButton.addEventListener('click', () => {
-            syncHidden(hiddenInput, dateInput, timeInput, trigger);
+        cancelButton.addEventListener('click', () => {
+            closeOpened();
+        });
+
+        okButton.addEventListener('click', () => {
+            selectedDate = draftDate ? new Date(draftDate) : null;
+            hiddenInput.value = selectedDate ? toValue(selectedDate) : '';
+            syncTrigger();
             hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
             closeOpened();
         });
 
         trigger.addEventListener('click', () => {
-            if (trigger.disabled) {
+            if (wrapper.classList.contains('open')) {
+                closeOpened();
                 return;
             }
-            const isOpen = wrapper.classList.contains('open');
-            closeOpened();
-            if (!isOpen) {
-                wrapper.classList.add('open');
-                trigger.setAttribute('aria-expanded', 'true');
-                opened = { wrapper, trigger };
-            }
+            open();
         });
 
+        syncTrigger();
         wrapper.appendChild(trigger);
         wrapper.appendChild(panel);
         hiddenInput.insertAdjacentElement('afterend', wrapper);

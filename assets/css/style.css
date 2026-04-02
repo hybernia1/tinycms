@@ -564,16 +564,71 @@ body[data-theme='dark'] input[type='week'] {
     display: block;
 }
 
-.custom-datetime-controls {
-    display: grid;
-    grid-template-columns: 1fr minmax(7rem, 9rem);
+.custom-datetime-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.custom-datetime-weekdays,
+.custom-datetime-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--space-1);
+}
+
+.custom-datetime-weekdays {
+    margin-bottom: var(--space-1);
+    color: var(--color-muted);
+    font-size: var(--fs-sm);
+}
+
+.custom-datetime-day {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text);
+    min-height: 2rem;
+    cursor: pointer;
+}
+
+.custom-datetime-day.muted {
+    color: var(--color-muted);
+    opacity: 0.55;
+}
+
+.custom-datetime-day.today {
+    border-color: var(--color-border);
+}
+
+.custom-datetime-day.selected {
+    background: var(--primary);
+    color: #fff;
+}
+
+.custom-datetime-time-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.custom-datetime-hour,
+.custom-datetime-minute {
+    width: 5rem;
+}
+
+.custom-datetime-colon {
+    color: var(--color-muted);
 }
 
 .custom-datetime-actions {
     margin-top: var(--space-2);
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
     gap: var(--space-2);
 }
 
