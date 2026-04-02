@@ -1,7 +1,6 @@
 <?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-5">
     <h1 class="m-0 mb-4"><?= $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele' ?></h1>
-    <?php if ($message !== ''): ?><p class="text-danger mb-3"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
     <form method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <div class="mb-3">
             <label>Jméno</label>

@@ -43,13 +43,12 @@ final class PageView
         ]);
     }
 
-    public function adminUsersForm(string $mode, array $user, array $errors, string $message): void
+    public function adminUsersForm(string $mode, array $user, array $errors): void
     {
         $this->view->render('admin', 'admin/users/form', [
             'mode' => $mode,
             'user' => $user,
             'errors' => $errors,
-            'message' => $message,
             'pageTitle' => $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele',
         ]);
     }

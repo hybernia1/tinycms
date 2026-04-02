@@ -138,7 +138,7 @@ final class AdminUserController
             'email' => '',
             'role' => 'user',
             'suspend' => 0,
-        ], [], '');
+        ], []);
     }
 
     public function addSubmit(callable $redirect): void
@@ -155,7 +155,7 @@ final class AdminUserController
         }
 
         $this->flash->add('error', 'Nepodařilo se uložit uživatele.');
-        $this->pages->adminUsersForm('add', $_POST, $result['errors'] ?? [], 'Nepodařilo se uložit uživatele.');
+        $this->pages->adminUsersForm('add', $_POST, $result['errors'] ?? []);
     }
 
     public function editForm(callable $redirect): void
@@ -172,7 +172,7 @@ final class AdminUserController
             $redirect('admin/users');
         }
 
-        $this->pages->adminUsersForm('edit', $user, [], '');
+        $this->pages->adminUsersForm('edit', $user, []);
     }
 
     public function editSubmit(callable $redirect): void
@@ -197,7 +197,7 @@ final class AdminUserController
 
         $this->flash->add('error', 'Nepodařilo se upravit uživatele.');
         $data = array_merge($_POST, ['ID' => $id]);
-        $this->pages->adminUsersForm('edit', $data, $result['errors'] ?? [], 'Nepodařilo se upravit uživatele.');
+        $this->pages->adminUsersForm('edit', $data, $result['errors'] ?? []);
     }
 
     private function guard(callable $redirect): bool
