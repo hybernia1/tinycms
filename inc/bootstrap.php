@@ -8,6 +8,7 @@ use App\Controller\AdminUserController;
 use App\Controller\FrontController;
 use App\Service\Auth\Auth;
 use App\Service\AuthService;
+use App\Service\FlashService;
 use App\Service\Router\Router;
 use App\Service\UserService;
 use App\View\PageView;
@@ -18,15 +19,16 @@ $baseDir = trim(dirname($scriptName), '/.');
 $basePath = $baseDir === '' ? '' : '/' . $baseDir;
 
 $router = new Router($basePath);
-$view = new View(dirname(__DIR__), $router);
 $auth = new Auth();
+$flash = new FlashService();
+$view = new View(dirname(__DIR__), $router, $flash);
 
 $authService = new AuthService($auth);
 $pageView = new PageView($view);
 $userService = new UserService();
 $front = new FrontController($pageView, $authService);
 $admin = new AdminController($pageView, $authService);
-$adminUsers = new AdminUserController($pageView, $authService, $userService);
+$adminUsers = new AdminUserController($pageView, $authService, $userService, $flash);
 
 $redirect = static function (string $path = '') use ($router): void {
     header('Location: ' . $router->url($path));

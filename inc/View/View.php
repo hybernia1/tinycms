@@ -3,17 +3,20 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\FlashService;
 use App\Service\Router\Router;
 
 final class View
 {
     private string $rootPath;
     private Router $router;
+    private FlashService $flash;
 
-    public function __construct(string $rootPath, Router $router)
+    public function __construct(string $rootPath, Router $router, FlashService $flash)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
+        $this->flash = $flash;
     }
 
     public function render(string $layout, string $template, array $data = []): void
@@ -32,6 +35,7 @@ final class View
         }
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
+        $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
 
         ob_start();

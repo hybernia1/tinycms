@@ -2,8 +2,6 @@
     <h1 class="m-0">Uživatelé</h1>
     <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">Přidat uživatele</a>
 </div>
-<?php if ($status === 'created'): ?><p class="text-success">Uživatel vytvořen.</p><?php endif; ?>
-<?php if ($status === 'updated'): ?><p class="text-success">Uživatel upraven.</p><?php endif; ?>
 <div class="card p-4">
     <table class="w-100">
         <thead>

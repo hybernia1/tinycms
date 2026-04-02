@@ -34,11 +34,10 @@ final class PageView
         ]);
     }
 
-    public function adminUsersList(array $users, string $status): void
+    public function adminUsersList(array $users): void
     {
         $this->view->render('admin', 'admin/users/list', [
             'users' => $users,
-            'status' => $status,
             'pageTitle' => 'Uživatelé',
         ]);
     }
