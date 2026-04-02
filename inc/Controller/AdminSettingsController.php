@@ -32,8 +32,15 @@ final class AdminSettingsController
             return;
         }
 
+        $groups = $this->settings->groups();
+        $activeGroup = (string)($_GET['group'] ?? array_key_first($groups));
+
+        if (!isset($groups[$activeGroup])) {
+            $activeGroup = (string)array_key_first($groups);
+        }
+
         $values = array_replace_recursive($this->settings->defaults(), $this->settings->values());
-        $this->pages->adminSettingsForm($this->settings->groups(), $values);
+        $this->pages->adminSettingsForm($groups, $values, $activeGroup);
     }
 
     public function submit(callable $redirect): void
@@ -42,14 +49,16 @@ final class AdminSettingsController
             return;
         }
 
+        $group = trim((string)($_POST['group'] ?? ''));
+
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
             $this->flash->add('error', 'Bezpečnostní token vypršel, odešlete formulář znovu.');
-            $redirect('admin/settings');
+            $redirect('admin/settings?group=' . urlencode($group));
         }
 
         $this->settings->save((array)($_POST['settings'] ?? []));
         $this->flash->add('success', 'Nastavení uloženo.');
-        $redirect('admin/settings');
+        $redirect('admin/settings?group=' . urlencode($group));
     }
 
     private function guard(callable $redirect): bool

@@ -46,11 +46,12 @@ final class PageView
     }
 
 
-    public function adminSettingsForm(array $groups, array $values): void
+    public function adminSettingsForm(array $groups, array $values, string $activeGroup): void
     {
         $this->view->render('admin', 'admin/settings/form', [
             'groups' => $groups,
             'values' => $values,
+            'activeGroup' => $activeGroup,
             'pageTitle' => 'Nastavení',
         ]);
     }

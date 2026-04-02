@@ -78,9 +78,17 @@ final class SettingsService
         $pdo = Connection::get();
         $stmt = $pdo->prepare('INSERT INTO settings (group_name, key_name, value, value_type, is_public) VALUES (:group_name, :key_name, :value, :value_type, :is_public) ON DUPLICATE KEY UPDATE value = VALUES(value), value_type = VALUES(value_type), is_public = VALUES(is_public)');
 
-        foreach ($groups as $groupName => $group) {
-            foreach ($group['fields'] as $keyName => $field) {
-                $value = trim((string)($input[$groupName][$keyName] ?? ''));
+        foreach ($input as $groupName => $groupInput) {
+            if (!isset($groups[$groupName]) || !is_array($groupInput)) {
+                continue;
+            }
+
+            foreach ($groupInput as $keyName => $rawValue) {
+                if (!isset($groups[$groupName]['fields'][$keyName])) {
+                    continue;
+                }
+
+                $value = trim((string)$rawValue);
                 $stmt->execute([
                     'group_name' => $groupName,
                     'key_name' => $keyName,
