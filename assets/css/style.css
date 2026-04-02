@@ -552,7 +552,7 @@ body[data-theme='dark'] input[type='week'] {
     position: absolute;
     top: calc(100% + var(--space-1));
     left: 0;
-    right: 0;
+    width: min(26rem, calc(100vw - 2rem));
     z-index: 30;
     border: 1px solid var(--color-border);
     background: var(--color-surface);
