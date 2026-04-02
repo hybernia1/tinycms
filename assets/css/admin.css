@@ -1,0 +1,103 @@
+body {
+    background: var(--color-surface-muted);
+}
+
+.admin-shell {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-brand {
+    font-size: 18px;
+    margin: 0 0 18px;
+}
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.admin-nav-link {
+    color: var(--sidebar-link);
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+}
+
+.admin-nav-link.active,
+.admin-nav-link:hover {
+    color: var(--sidebar-text);
+    background: var(--sidebar-link-active-bg);
+}
+
+.admin-main {
+    margin-left: 240px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.admin-header-spacer {
+    background: #fff;
+    border-bottom: 1px solid var(--color-border-soft);
+    min-height: 56px;
+    padding: 10px 20px;
+    flex: 0 0 auto;
+}
+
+.admin-footer {
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border-soft);
+    border-bottom: 0;
+    padding: 14px 20px;
+    margin-top: auto;
+}
+
+.admin-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+.admin-sidebar-bottom {
+    margin-top: auto;
+    border-top: 1px solid var(--color-border-soft);
+    padding-top: 12px;
+}
+
+.admin-user-meta {
+    margin-bottom: 10px;
+}
+
+.admin-user-name {
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .admin-sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
+
+    .admin-main {
+        margin-left: 0;
+        height: auto;
+    }
+}
