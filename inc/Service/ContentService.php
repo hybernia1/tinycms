@@ -165,8 +165,12 @@ final class ContentService
 
     private function resolveAuthorId(array $input, int $defaultAuthorId): ?int
     {
+        if (array_key_exists('author', $input) && trim((string)$input['author']) === '') {
+            return null;
+        }
+
         $raw = $input['author'] ?? null;
-        $authorId = $raw === null || $raw === '' ? $defaultAuthorId : (int)$raw;
+        $authorId = $raw === null ? $defaultAuthorId : (int)$raw;
 
         if ($authorId <= 0) {
             return null;
