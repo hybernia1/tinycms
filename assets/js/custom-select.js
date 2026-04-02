@@ -54,6 +54,9 @@
         const list = document.createElement('ul');
         list.className = 'custom-select-list';
         list.setAttribute('role', 'listbox');
+        if (select.options.length > 5) {
+            wrapper.classList.add('is-scrollable');
+        }
 
         Array.from(select.options).forEach((option) => {
             const item = document.createElement('li');

@@ -436,6 +436,10 @@ select option {
     display: block;
 }
 
+.custom-select.is-scrollable .custom-select-dropdown {
+    max-height: calc(var(--size-touch) * 5);
+}
+
 .custom-select.disabled .custom-select-button {
     opacity: 0.5;
     cursor: not-allowed;
@@ -470,6 +474,10 @@ input[type='week'] {
     appearance: none;
     -webkit-appearance: none;
     padding-right: calc(var(--control-padding-x) * 2.2);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%236b7280' d='M0 0h10L5 6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--select-arrow-offset) center;
+    background-size: var(--select-arrow-size);
 }
 
 input[type='date']::-webkit-calendar-picker-indicator,
@@ -479,7 +487,8 @@ input[type='month']::-webkit-calendar-picker-indicator,
 input[type='week']::-webkit-calendar-picker-indicator {
     cursor: pointer;
     filter: var(--datetime-picker-filter, none);
-    opacity: 0.75;
+    opacity: 0;
+    width: calc(var(--control-padding-x) * 2.2);
 }
 
 body[data-theme='dark'] input[type='date'],
@@ -491,7 +500,27 @@ body[data-theme='dark'] input[type='week'] {
 }
 
 .search-input {
-    width: 260px;
+    width: 100%;
+    padding-right: calc(var(--control-padding-x) * 2.6);
+}
+
+.search-form {
+    min-width: 260px;
+}
+
+.search-field {
+    position: relative;
+}
+
+.search-field-icon {
+    position: absolute;
+    top: 50%;
+    right: var(--select-arrow-offset);
+    width: var(--size-icon);
+    height: var(--size-icon);
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.75;
 }
 
 .flash {

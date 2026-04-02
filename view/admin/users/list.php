@@ -27,15 +27,14 @@ $statusLinks = [
             <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?status=' . $key . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
         <?php endforeach; ?>
     </nav>
-    <form method="get" class="d-flex gap-2 align-center">
+    <form method="get" class="search-form">
         <input type="hidden" name="status" value="<?= htmlspecialchars($status, ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="per_page" value="<?= $perPage ?>">
         <input type="hidden" name="page" value="1">
-        <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat jméno nebo email">
-        <button class="btn btn-light btn-icon" type="submit" aria-label="Hledat" title="Hledat">
-            <?= $icon('search') ?>
-            <span class="sr-only">Hledat</span>
-        </button>
+        <div class="search-field">
+            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat jméno nebo email">
+            <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
+        </div>
     </form>
 </div>
 
