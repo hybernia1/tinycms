@@ -4,6 +4,12 @@ $page = (int)($pagination['page'] ?? 1);
 $perPage = (int)($pagination['per_page'] ?? 10);
 $totalPages = (int)($pagination['total_pages'] ?? 1);
 $total = (int)($pagination['total'] ?? 0);
+$status = (string)($status ?? 'all');
+$statusLinks = [
+    'all' => 'Všichni',
+    'active' => 'Aktivní',
+    'suspended' => 'Suspendovaní',
+];
 ?>
 <div class="d-flex justify-between align-center mb-4">
     <h1 class="m-0">Uživatelé</h1>
@@ -23,13 +29,21 @@ $total = (int)($pagination['total'] ?? 0);
     <button class="btn btn-light" id="bulk-apply" type="button" disabled>Použít</button>
 </div>
 
+<div class="d-flex justify-between align-center mb-3">
+    <nav class="filter-nav">
+        <?php foreach ($statusLinks as $key => $label): ?>
+            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?status=' . $key . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
+        <?php endforeach; ?>
+    </nav>
+    <div class="text-muted">Celkem: <?= $total ?></div>
+</div>
+
 <form id="bulk-action-form" method="post" action="<?= htmlspecialchars($url('admin/users/bulk-action'), ENT_QUOTES, 'UTF-8') ?>">
     <input type="hidden" name="ids" value="">
     <input type="hidden" name="action" id="bulk-action-value" value="">
 </form>
 
 <div class="card p-4">
-        <div class="text-muted mb-3">Celkem: <?= $total ?></div>
         <div class="table-responsive">
         <table class="table">
             <thead>
@@ -80,7 +94,7 @@ $total = (int)($pagination['total'] ?? 0);
             <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a class="pagination-link<?= $i === $page ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $i . '&per_page=' . $perPage), ENT_QUOTES, 'UTF-8') ?>"><?= $i ?></a>
+                    <a class="pagination-link<?= $i === $page ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $i . '&per_page=' . $perPage . '&status=' . $status), ENT_QUOTES, 'UTF-8') ?>"><?= $i ?></a>
                 <?php endfor; ?>
             </div>
             <?php else: ?>
@@ -93,6 +107,7 @@ $total = (int)($pagination['total'] ?? 0);
                         <option value="<?= (int)$option ?>" <?= $perPage === (int)$option ? 'selected' : '' ?>><?= (int)$option ?></option>
                     <?php endforeach; ?>
                 </select>
+                <input type="hidden" name="status" value="<?= htmlspecialchars($status, ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="page" value="1">
                 <button class="btn btn-light" type="submit">Použít</button>
             </form>

@@ -33,13 +33,16 @@ final class AdminUserController
 
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = (int)($_GET['per_page'] ?? 10);
+        $status = (string)($_GET['status'] ?? 'all');
+        $status = in_array($status, ['all', 'active', 'suspended'], true) ? $status : 'all';
+        $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
 
         if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
             $perPage = 10;
         }
 
-        $pagination = $this->users->paginate($page, $perPage);
-        $this->pages->adminUsersList($pagination, self::PER_PAGE_ALLOWED);
+        $pagination = $this->users->paginate($page, $perPage, $suspend);
+        $this->pages->adminUsersList($pagination, self::PER_PAGE_ALLOWED, $status);
     }
 
     public function deleteSubmit(callable $redirect): void

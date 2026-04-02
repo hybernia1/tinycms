@@ -309,6 +309,27 @@ select {
     border-color: var(--primary);
 }
 
+.filter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.filter-link {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    color: var(--color-text);
+    background: var(--color-surface);
+}
+
+.filter-link.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
 
 .modal-overlay {
     position: fixed;

@@ -15,9 +15,11 @@ final class UserService
         $this->query = new Query(Connection::get());
     }
 
-    public function paginate(int $page = 1, int $perPage = 10): array
+    public function paginate(int $page = 1, int $perPage = 10, ?int $suspend = null): array
     {
-        return $this->query->paginate('users', ['ID', 'name', 'email', 'role', 'suspend', 'created'], [], [
+        $where = $suspend === null ? [] : ['suspend' => $suspend];
+
+        return $this->query->paginate('users', ['ID', 'name', 'email', 'role', 'suspend', 'created'], $where, [
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'ID',
