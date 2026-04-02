@@ -385,6 +385,11 @@ input[type='radio'] {
     accent-color: var(--primary);
 }
 
+input[type='checkbox'] {
+    width: 1.05rem;
+    height: 1.05rem;
+}
+
 select option {
     color: var(--color-text);
     background: var(--color-surface);
@@ -514,6 +519,46 @@ body[data-theme='dark'] input[type='week'] {
 .search-input {
     width: 100%;
     padding-right: calc(var(--control-padding-x) * 2.6);
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon-field {
+    padding-left: calc(var(--control-padding-x) * 2.4) !important;
+}
+
+.input-with-icon-toggle {
+    padding-right: calc(var(--control-padding-x) * 2.4) !important;
+}
+
+.input-with-icon-symbol {
+    position: absolute;
+    top: 50%;
+    left: var(--select-arrow-offset);
+    width: var(--size-icon);
+    height: var(--size-icon);
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--color-muted);
+}
+
+.input-with-icon-action {
+    position: absolute;
+    top: 50%;
+    right: var(--select-arrow-offset);
+    transform: translateY(-50%);
+    width: var(--size-icon);
+    height: var(--size-icon);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-form {
