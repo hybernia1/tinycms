@@ -15,7 +15,7 @@ final class UserService
         $this->query = new Query(Connection::get());
     }
 
-    public function paginate(int $page = 1, int $perPage = 10, ?int $suspend = null): array
+    public function paginate(int $page = 1, int $perPage = 10, ?int $suspend = null, string $search = ''): array
     {
         $where = $suspend === null ? [] : ['suspend' => $suspend];
 
@@ -24,6 +24,8 @@ final class UserService
             'perPage' => $perPage,
             'orderBy' => 'ID',
             'orderDir' => 'DESC',
+            'search' => $search,
+            'searchColumns' => ['name', 'email'],
         ]);
     }
 

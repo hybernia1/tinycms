@@ -32,10 +32,19 @@ class Query
         $perPage = max(1, (int)($options['perPage'] ?? 10));
         $orderBy = (string)($options['orderBy'] ?? 'ID');
         $orderDir = strtoupper((string)($options['orderDir'] ?? 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
+        $search = trim((string)($options['search'] ?? ''));
+        $searchColumns = (array)($options['searchColumns'] ?? []);
 
         [$whereSql, $params] = $this->buildWhere($where);
+        [$searchSql, $searchParams] = $this->buildSearch($search, $searchColumns);
+        $params = array_merge($params, $searchParams);
+        $conditionsSql = $whereSql;
 
-        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM $table$whereSql");
+        if ($searchSql !== '') {
+            $conditionsSql .= ($whereSql === '' ? ' WHERE ' : ' AND ') . $searchSql;
+        }
+
+        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM $table$conditionsSql");
         $countStmt->execute($params);
         $total = (int)$countStmt->fetchColumn();
 
@@ -44,7 +53,7 @@ class Query
         $offset = ($page - 1) * $perPage;
 
         $cols = implode(', ', $columns);
-        $sql = "SELECT $cols FROM $table$whereSql ORDER BY $orderBy $orderDir LIMIT :limit OFFSET :offset";
+        $sql = "SELECT $cols FROM $table$conditionsSql ORDER BY $orderBy $orderDir LIMIT :limit OFFSET :offset";
 
         $stmt = $this->pdo->prepare($sql);
 
@@ -142,5 +151,23 @@ class Query
         }
 
         return [' WHERE ' . implode(' AND ', $conditions), $params];
+    }
+
+    private function buildSearch(string $search, array $columns): array
+    {
+        if ($search === '' || $columns === []) {
+            return ['', []];
+        }
+
+        $conditions = [];
+        $params = [];
+
+        foreach ($columns as $index => $column) {
+            $key = 'search_' . $index;
+            $conditions[] = "$column LIKE :$key";
+            $params[$key] = '%' . $search . '%';
+        }
+
+        return ['(' . implode(' OR ', $conditions) . ')', $params];
     }
 }

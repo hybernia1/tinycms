@@ -5,6 +5,7 @@ $perPage = (int)($pagination['per_page'] ?? 10);
 $totalPages = (int)($pagination['total_pages'] ?? 1);
 $total = (int)($pagination['total'] ?? 0);
 $status = (string)($status ?? 'all');
+$query = (string)($query ?? '');
 $statusLinks = [
     'all' => 'Všichni',
     'active' => 'Aktivní',
@@ -32,10 +33,22 @@ $statusLinks = [
 <div class="d-flex justify-between align-center mb-3">
     <nav class="filter-nav">
         <?php foreach ($statusLinks as $key => $label): ?>
-            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?status=' . $key . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
+            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?status=' . $key . '&per_page=' . $perPage . '&page=1&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
         <?php endforeach; ?>
     </nav>
-    <div class="text-muted">Celkem: <?= $total ?></div>
+    <div class="d-flex gap-2 align-center">
+        <form method="get" class="d-flex gap-2 align-center">
+            <input type="hidden" name="status" value="<?= htmlspecialchars($status, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="per_page" value="<?= $perPage ?>">
+            <input type="hidden" name="page" value="1">
+            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat jméno nebo email">
+            <button class="btn btn-light btn-icon" type="submit" aria-label="Hledat" title="Hledat">
+                <?= $icon('search') ?>
+                <span class="sr-only">Hledat</span>
+            </button>
+        </form>
+        <div class="text-muted">Celkem: <?= $total ?></div>
+    </div>
 </div>
 
 <form id="bulk-action-form" method="post" action="<?= htmlspecialchars($url('admin/users/bulk-action'), ENT_QUOTES, 'UTF-8') ?>">
@@ -94,7 +107,7 @@ $statusLinks = [
             <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a class="pagination-link<?= $i === $page ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $i . '&per_page=' . $perPage . '&status=' . $status), ENT_QUOTES, 'UTF-8') ?>"><?= $i ?></a>
+                    <a class="pagination-link<?= $i === $page ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $i . '&per_page=' . $perPage . '&status=' . $status . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"><?= $i ?></a>
                 <?php endfor; ?>
             </div>
             <?php else: ?>
@@ -108,6 +121,7 @@ $statusLinks = [
                     <?php endforeach; ?>
                 </select>
                 <input type="hidden" name="status" value="<?= htmlspecialchars($status, ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="page" value="1">
                 <button class="btn btn-light" type="submit">Použít</button>
             </form>

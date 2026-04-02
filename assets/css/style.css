@@ -280,6 +280,10 @@ input {
     background: var(--color-surface);
 }
 
+.search-input {
+    width: 260px;
+}
+
 .flash {
     display: flex;
     justify-content: space-between;
