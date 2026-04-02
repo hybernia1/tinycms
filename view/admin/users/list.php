@@ -10,25 +10,13 @@ $total = (int)($pagination['total'] ?? 0);
     <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">Přidat uživatele</a>
 </div>
 
-<div class="d-flex justify-between align-center mb-3">
-    <div class="d-flex gap-2 align-center">
-        <select name="action" id="bulk-action-select" disabled>
-            <option value="">Hromadné akce</option>
-            <option value="suspend">Suspendovat</option>
-            <option value="delete">Smazat</option>
-        </select>
-        <button class="btn btn-light" id="bulk-apply" type="button" disabled>Použít</button>
-    </div>
-
-    <form method="get" class="d-flex gap-2 align-center">
-        <select name="per_page">
-            <?php foreach ($allowedPerPage as $option): ?>
-                <option value="<?= (int)$option ?>" <?= $perPage === (int)$option ? 'selected' : '' ?>><?= (int)$option ?></option>
-            <?php endforeach; ?>
-        </select>
-        <input type="hidden" name="page" value="1">
-        <button class="btn btn-light" type="submit">Použít</button>
-    </form>
+<div class="d-flex gap-2 align-center mb-3">
+    <select name="action" id="bulk-action-select" disabled>
+        <option value="">Hromadné akce</option>
+        <option value="suspend">Suspendovat</option>
+        <option value="delete">Smazat</option>
+    </select>
+    <button class="btn btn-light" id="bulk-apply" type="button" disabled>Použít</button>
 </div>
 
 <form id="bulk-action-form" method="post" action="<?= htmlspecialchars($url('admin/users/bulk-action'), ENT_QUOTES, 'UTF-8') ?>">
@@ -59,6 +47,10 @@ $total = (int)($pagination['total'] ?? 0);
                     <td>
                         <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
                         <?php if (!$isAdmin): ?>
+                        <form method="post" action="<?= htmlspecialchars($url('admin/users/suspend'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                            <input type="hidden" name="id" value="<?= $id ?>">
+                            <button class="btn btn-light" type="submit">Suspend</button>
+                        </form>
                         <form id="delete-user-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/users/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <button class="btn btn-light" type="button" data-modal-open data-modal-mode="single" data-type="uživatele" data-form-id="delete-user-<?= $id ?>">Delete</button>
@@ -70,13 +62,27 @@ $total = (int)($pagination['total'] ?? 0);
             </tbody>
         </table>
 
-        <?php if ($totalPages > 1): ?>
-        <div class="pagination mt-4 justify-end">
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a class="pagination-link<?= $i === $page ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $i . '&per_page=' . $perPage), ENT_QUOTES, 'UTF-8') ?>"><?= $i ?></a>
-            <?php endfor; ?>
+        <div class="d-flex justify-between align-center mt-4">
+            <?php if ($totalPages > 1): ?>
+            <div class="pagination">
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a class="pagination-link<?= $i === $page ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $i . '&per_page=' . $perPage), ENT_QUOTES, 'UTF-8') ?>"><?= $i ?></a>
+                <?php endfor; ?>
+            </div>
+            <?php else: ?>
+            <div></div>
+            <?php endif; ?>
+
+            <form method="get" class="d-flex gap-2 align-center">
+                <select name="per_page">
+                    <?php foreach ($allowedPerPage as $option): ?>
+                        <option value="<?= (int)$option ?>" <?= $perPage === (int)$option ? 'selected' : '' ?>><?= (int)$option ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="hidden" name="page" value="1">
+                <button class="btn btn-light" type="submit">Použít</button>
+            </form>
         </div>
-        <?php endif; ?>
     </div>
 </form>
 

@@ -61,6 +61,21 @@ final class UserService
         return $deleted;
     }
 
+
+    public function suspend(int $id): bool
+    {
+        $user = $this->find($id);
+
+        if ($user === null || (string)($user['role'] ?? '') === 'admin') {
+            return false;
+        }
+
+        return $this->query->update('users', [
+            'suspend' => 1,
+            'updated' => date('Y-m-d H:i:s'),
+        ], ['ID' => $id]) > 0;
+    }
+
     public function suspendMany(array $ids): int
     {
         $clean = $this->sanitizeIds($ids);
@@ -78,10 +93,7 @@ final class UserService
                 continue;
             }
 
-            $updated += $this->query->update('users', [
-                'suspend' => 1,
-                'updated' => date('Y-m-d H:i:s'),
-            ], ['ID' => $id]) > 0 ? 1 : 0;
+            $updated += $this->suspend($id) ? 1 : 0;
         }
 
         return $updated;

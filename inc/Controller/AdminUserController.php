@@ -64,6 +64,29 @@ final class AdminUserController
         $redirect('admin/users');
     }
 
+
+    public function suspendSubmit(callable $redirect): void
+    {
+        if (!$this->guard($redirect)) {
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+
+        if ($id <= 0) {
+            $this->flash->add('error', 'Neplatné ID uživatele.');
+            $redirect('admin/users');
+        }
+
+        if ($this->users->suspend($id)) {
+            $this->flash->add('success', 'Uživatel suspendován.');
+        } else {
+            $this->flash->add('error', 'Uživatele se nepodařilo suspendovat.');
+        }
+
+        $redirect('admin/users');
+    }
+
     public function bulkActionSubmit(callable $redirect): void
     {
         if (!$this->guard($redirect)) {

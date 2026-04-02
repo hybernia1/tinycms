@@ -71,6 +71,10 @@ $router->post('admin/users/delete', static function () use ($adminUsers, $redire
     $adminUsers->deleteSubmit($redirect);
 });
 
+$router->post('admin/users/suspend', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->suspendSubmit($redirect);
+});
+
 $router->post('admin/users/bulk-action', static function () use ($adminUsers, $redirect): void {
     $adminUsers->bulkActionSubmit($redirect);
 });
