@@ -1,0 +1,121 @@
+:root {
+    --primary: #1d4ed8;
+    --dark: #111827;
+    --light: #f3f4f6;
+    --muted: #6b7280;
+    --danger: #b91c1c;
+    --success: #047857;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--dark);
+    background: #fff;
+}
+
+.container {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -8px;
+}
+
+[class^='col-'] {
+    padding: 0 8px;
+    width: 100%;
+}
+
+.col-4 { width: 33.3333%; }
+.col-6 { width: 50%; }
+.col-8 { width: 66.6666%; }
+.col-12 { width: 100%; }
+
+@media (max-width: 768px) {
+    .col-4,
+    .col-6,
+    .col-8 {
+        width: 100%;
+    }
+}
+
+.d-flex { display: flex; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+
+.p-2 { padding: 8px; }
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.p-5 { padding: 24px; }
+.py-5 { padding-top: 24px; padding-bottom: 24px; }
+
+.m-0 { margin: 0; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-5 { margin-bottom: 24px; }
+.mt-4 { margin-top: 16px; }
+
+.text-primary { color: var(--primary); }
+.text-muted { color: var(--muted); }
+.text-danger { color: var(--danger); }
+.text-success { color: var(--success); }
+
+.bg-light { background: var(--light); }
+.bg-primary { background: var(--primary); color: #fff; }
+.bg-dark { background: var(--dark); color: #fff; }
+
+.card {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-dark {
+    background: var(--dark);
+    color: #fff;
+}
+
+.btn-light {
+    background: var(--light);
+    color: var(--dark);
+    border-color: #d1d5db;
+}
+
+.w-100 { width: 100%; }
+
+label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+}
