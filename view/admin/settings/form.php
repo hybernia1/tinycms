@@ -1,6 +1,4 @@
 <div class="card p-5">
-    <h1 class="m-0 mb-4">Nastavení webu</h1>
-
     <nav class="filter-nav mb-4">
         <?php foreach ($groups as $groupKey => $group): ?>
             <a class="filter-link<?= $activeGroup === $groupKey ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/settings?group=' . urlencode((string)$groupKey)), ENT_QUOTES, 'UTF-8') ?>">
