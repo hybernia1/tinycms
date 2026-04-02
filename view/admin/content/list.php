@@ -69,8 +69,8 @@ foreach ($availableStatuses as $statusValue) {
                         <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id . '&type=' . urlencode($type)), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                         <div class="text-muted">
                             <?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>
-                            <?php if ($isPlanned): ?><span class="badge badge-planned ml-2">Plánováno</span><?php endif; ?>
                         </div>
+                        <?php if ($isPlanned): ?><div class="mt-2"><span class="badge text-bg-warning">Plánováno</span></div><?php endif; ?>
                     </td>
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td><span class="badge"><?= htmlspecialchars((string)($row['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></td>
