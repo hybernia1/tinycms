@@ -5,7 +5,7 @@ declare(strict_types=1);
 <?php if ($message !== ''): ?>
 <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
 <?php endif; ?>
-<form method="post" action="/admin/login">
+<form method="post" action="<?= htmlspecialchars($url('admin/login'), ENT_QUOTES, 'UTF-8') ?>">
     <label>
         Email
         <input type="email" name="email" value="<?= htmlspecialchars((string)($old['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
