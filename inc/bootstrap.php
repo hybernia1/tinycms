@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/autoload.php';
 
 use App\Controller\AdminController;
+use App\Controller\AdminSettingsController;
 use App\Controller\AdminUserController;
 use App\Controller\FrontController;
 use App\Service\Auth\Auth;
@@ -11,6 +12,7 @@ use App\Service\AuthService;
 use App\Service\CsrfService;
 use App\Service\FlashService;
 use App\Service\Router\Router;
+use App\Service\SettingsService;
 use App\Service\UserService;
 use App\View\PageView;
 use App\View\View;
@@ -28,9 +30,11 @@ $view = new View(dirname(__DIR__), $router, $flash, $csrf);
 $authService = new AuthService($auth);
 $pageView = new PageView($view);
 $userService = new UserService();
+$settingsService = new SettingsService();
 $front = new FrontController($pageView, $authService, $csrf);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
+$adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 
 $redirect = static function (string $path = '') use ($router): void {
     header('Location: ' . $router->url($path));
@@ -95,6 +99,15 @@ $router->get('admin/users/edit', static function () use ($adminUsers, $redirect)
 
 $router->post('admin/users/edit', static function () use ($adminUsers, $redirect): void {
     $adminUsers->editSubmit($redirect);
+});
+
+
+$router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
+    $adminSettings->form($redirect);
+});
+
+$router->post('admin/settings', static function () use ($adminSettings, $redirect): void {
+    $adminSettings->submit($redirect);
 });
 
 $router->get('admin/logout', static function () use ($admin, $redirect): void {

@@ -39,6 +39,7 @@ final class View
             $data['adminMenu'] = [
                 ['label' => 'Dashboard', 'url' => $url('admin/dashboard')],
                 ['label' => 'Uživatelé', 'url' => $url('admin/users')],
+                ['label' => 'Nastavení', 'url' => $url('admin/settings')],
                 ['label' => 'Content', 'url' => '#'],
             ];
         }
