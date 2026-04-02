@@ -39,13 +39,20 @@ final class View
             $data['adminMenu'] = [
                 ['label' => 'Dashboard', 'url' => $url('admin/dashboard')],
                 ['label' => 'Uživatelé', 'url' => $url('admin/users')],
+                ['label' => 'Nastavení', 'url' => $url('admin/settings')],
                 ['label' => 'Content', 'url' => '#'],
             ];
         }
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
-        $theme = (string)($_GET['theme'] ?? 'light');
-        $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
+        $defaultTheme = (string)($data['theme'] ?? 'light');
+
+        if (!in_array($defaultTheme, ['light', 'dark'], true)) {
+            $defaultTheme = 'light';
+        }
+
+        $theme = (string)($_GET['theme'] ?? $defaultTheme);
+        $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : $defaultTheme;
         $data['icon'] = $icon;
         $data['csrfField'] = $csrfField;
         $data['flashes'] = $this->flash->consume();
