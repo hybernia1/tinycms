@@ -232,6 +232,24 @@ body {
     background: var(--table-row-hover-bg);
 }
 
+.table-col-select {
+    width: 1%;
+    white-space: nowrap;
+    padding-left: 6px;
+    padding-right: 6px;
+    text-align: left;
+}
+
+.table-col-actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.table-col-actions .inline-form + .inline-form {
+    margin-left: 6px;
+}
+
 label {
     display: block;
     margin-bottom: 6px;
