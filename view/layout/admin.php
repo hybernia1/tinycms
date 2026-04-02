@@ -70,7 +70,6 @@ $currentContentType = $currentContentType ?? null;
             <?php endforeach; ?>
             <?= $content ?>
         </section>
-        <footer class="admin-footer text-muted">TinyCMS Admin</footer>
     </main>
 </div>
 </body>
