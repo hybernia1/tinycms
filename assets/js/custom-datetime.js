@@ -11,6 +11,9 @@
 
     root.classList.add('has-custom-datetime');
     let opened = null;
+    const sampleIconUse = document.querySelector('svg.icon use');
+    const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '';
+    const calendarIconHref = `${iconBase}#icon-calendar`;
 
     const weekdayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
 
@@ -80,6 +83,13 @@
         trigger.setAttribute('aria-haspopup', 'dialog');
         trigger.setAttribute('aria-expanded', 'false');
         trigger.disabled = hiddenInput.disabled;
+        const triggerLabel = document.createElement('span');
+        triggerLabel.className = 'custom-datetime-trigger-label';
+        const triggerIcon = document.createElement('span');
+        triggerIcon.className = 'custom-datetime-trigger-icon';
+        triggerIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${calendarIconHref}"></use></svg>`;
+        trigger.appendChild(triggerLabel);
+        trigger.appendChild(triggerIcon);
 
         const panel = document.createElement('div');
         panel.className = 'custom-datetime-panel';
@@ -162,7 +172,7 @@
         let draftDate = selectedDate ? new Date(selectedDate) : null;
 
         const syncTrigger = () => {
-            trigger.textContent = formatLabel(selectedDate);
+            triggerLabel.textContent = formatLabel(selectedDate);
         };
 
         const syncTimeSelects = () => {

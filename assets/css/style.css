@@ -546,6 +546,15 @@ body[data-theme='dark'] input[type='week'] {
     text-align: left;
     min-height: var(--size-touch);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.custom-datetime-trigger-icon {
+    color: var(--color-muted);
+    flex: 0 0 auto;
 }
 
 .custom-datetime-panel {
