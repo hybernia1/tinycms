@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
+$authUser = $_SESSION['auth'] ?? null;
 ?>
 <!doctype html>
 <html lang="cs">
@@ -27,15 +28,20 @@ $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '
             </a>
             <?php endforeach; ?>
         </nav>
-    </aside>
-    <main class="admin-main">
-        <header class="admin-header d-flex justify-between align-center">
-            <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
-            <a class="btn btn-dark" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
+        <div class="admin-sidebar-bottom">
+            <?php if (is_array($authUser)): ?>
+            <div class="admin-user-meta">
+                <div class="admin-user-name"><?= htmlspecialchars((string)($authUser['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="text-muted"><?= htmlspecialchars((string)($authUser['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+            </div>
+            <?php endif; ?>
+            <a class="btn btn-dark w-100" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('logout') ?>
                 <span>Odhlásit</span>
             </a>
-        </header>
+        </div>
+    </aside>
+    <main class="admin-main">
         <section class="admin-content">
             <?php foreach ($flashes as $flash): ?>
             <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">

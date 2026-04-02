@@ -15,6 +15,8 @@ body {
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
     padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
 }
 
 .admin-brand {
@@ -26,6 +28,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    flex: 1;
 }
 
 .admin-nav-link {
@@ -48,21 +51,28 @@ body {
     flex-direction: column;
 }
 
-.admin-header,
 .admin-footer {
     background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border-soft);
-    padding: 14px 20px;
-}
-
-.admin-footer {
     border-top: 1px solid var(--color-border-soft);
-    border-bottom: 0;
-    margin-top: auto;
+    padding: 14px 20px;
 }
 
 .admin-content {
     padding: 20px;
+}
+
+.admin-sidebar-bottom {
+    margin-top: auto;
+    border-top: 1px solid var(--color-border-soft);
+    padding-top: 12px;
+}
+
+.admin-user-meta {
+    margin-bottom: 10px;
+}
+
+.admin-user-name {
+    font-weight: 600;
 }
 
 @media (max-width: 900px) {
