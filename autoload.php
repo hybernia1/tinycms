@@ -11,9 +11,15 @@ spl_autoload_register(function (string $class): void {
     }
 
     $relativeClass = substr($class, strlen($prefix));
-    $file = __DIR__ . '/' . CLASS_DIR . '/' . str_replace('\\', '/', $relativeClass) . '.php';
+    $paths = [
+        __DIR__ . '/' . INC_DIR . str_replace('\\', '/', $relativeClass) . '.php',
+        __DIR__ . '/' . CLASS_DIR . '/' . str_replace('\\', '/', $relativeClass) . '.php',
+    ];
 
-    if (is_file($file)) {
-        require_once $file;
+    foreach ($paths as $file) {
+        if (is_file($file)) {
+            require_once $file;
+            return;
+        }
     }
 });
