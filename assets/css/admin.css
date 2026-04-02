@@ -1,5 +1,11 @@
+html,
+body {
+    height: 100%;
+}
+
 body {
     background: var(--color-surface-muted);
+    overflow: hidden;
 }
 
 .admin-shell {
