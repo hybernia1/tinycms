@@ -71,6 +71,14 @@ body {
     z-index: 3;
 }
 
+.admin-menu-toggle {
+    display: none;
+}
+
+.admin-menu-overlay {
+    display: none;
+}
+
 .admin-content {
     padding: 20px;
     flex: 1 1 auto;
@@ -92,13 +100,32 @@ body {
 
 @media (max-width: 900px) {
     .admin-sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease-in-out;
+        z-index: 20;
     }
 
     .admin-main {
         margin-left: 0;
-        height: auto;
+        height: 100vh;
+    }
+
+    .admin-menu-toggle {
+        display: inline-flex;
+    }
+
+    .admin-menu-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 15;
+    }
+
+    body.admin-menu-open .admin-sidebar {
+        transform: translateX(0);
+    }
+
+    body.admin-menu-open .admin-menu-overlay {
+        display: block;
     }
 }

@@ -16,6 +16,7 @@ $currentContentType = $currentContentType ?? null;
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/admin.css'), ENT_QUOTES, 'UTF-8') ?>">
     <script defer src="<?= htmlspecialchars($url('assets/js/flash.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/modal.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/admin-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body data-theme="<?= htmlspecialchars((string)$theme, ENT_QUOTES, 'UTF-8') ?>">
 <div class="admin-shell">
@@ -44,9 +45,13 @@ $currentContentType = $currentContentType ?? null;
             </a>
         </div>
     </aside>
+    <div class="admin-menu-overlay" data-admin-menu-close></div>
     <main class="admin-main">
         <div class="admin-header-spacer d-flex justify-between align-center">
-            <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
+            <div class="d-flex align-center gap-2">
+                <button class="btn btn-light btn-icon admin-menu-toggle" type="button" data-admin-menu-toggle aria-label="Otevřít menu" title="Otevřít menu">☰</button>
+                <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
+            </div>
             <?php if ($isUsersList): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
