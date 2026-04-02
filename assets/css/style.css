@@ -2,6 +2,7 @@
     --primary: #1d4ed8;
     --danger: #b91c1c;
     --success: #047857;
+    --warning: #92400e;
 }
 
 body[data-theme='light'] {
@@ -19,23 +20,26 @@ body[data-theme='light'] {
     --sidebar-text: #ffffff;
     --sidebar-link: #cbd5e1;
     --sidebar-link-active-bg: #1e293b;
-    --flash-success-border: #86efac;
-    --flash-success-text: #166534;
-    --flash-success-bg: #f0fdf4;
-    --flash-error-border: #fca5a5;
-    --flash-error-text: #991b1b;
-    --flash-error-bg: #fef2f2;
-    --flash-info-border: #93c5fd;
-    --flash-info-text: #1e3a8a;
-    --flash-info-bg: #eff6ff;
-    --btn-primary-bg: #1d4ed8;
-    --btn-primary-text: #ffffff;
-    --btn-light-bg: #f3f4f6;
-    --btn-light-text: #111827;
-    --btn-light-border: #d1d5db;
+    --tone-primary-bg: #1d4ed8;
+    --tone-primary-text: #ffffff;
+    --tone-primary-border: #1d4ed8;
+    --tone-neutral-bg: #f3f4f6;
+    --tone-neutral-text: #111827;
+    --tone-neutral-border: #d1d5db;
+    --tone-success-bg: #f0fdf4;
+    --tone-success-text: #166534;
+    --tone-success-border: #86efac;
+    --tone-danger-bg: #fef2f2;
+    --tone-danger-text: #991b1b;
+    --tone-danger-border: #fca5a5;
+    --tone-info-bg: #eff6ff;
+    --tone-info-text: #1e3a8a;
+    --tone-info-border: #93c5fd;
     --badge-bg: #eff6ff;
     --badge-text: #1e3a8a;
     --badge-border: #bfdbfe;
+    --warning-bg: #fef3c7;
+    --warning-text: #92400e;
 }
 
 body[data-theme='dark'] {
@@ -53,23 +57,26 @@ body[data-theme='dark'] {
     --sidebar-text: #f8fafc;
     --sidebar-link: #94a3b8;
     --sidebar-link-active-bg: #1e293b;
-    --flash-success-border: #14532d;
-    --flash-success-text: #86efac;
-    --flash-success-bg: #052e16;
-    --flash-error-border: #7f1d1d;
-    --flash-error-text: #fca5a5;
-    --flash-error-bg: #450a0a;
-    --flash-info-border: #1e3a8a;
-    --flash-info-text: #93c5fd;
-    --flash-info-bg: #172554;
-    --btn-primary-bg: #2563eb;
-    --btn-primary-text: #ffffff;
-    --btn-light-bg: #1f2937;
-    --btn-light-text: #e5e7eb;
-    --btn-light-border: #374151;
+    --tone-primary-bg: #2563eb;
+    --tone-primary-text: #ffffff;
+    --tone-primary-border: #2563eb;
+    --tone-neutral-bg: #1f2937;
+    --tone-neutral-text: #e5e7eb;
+    --tone-neutral-border: #374151;
+    --tone-success-bg: #052e16;
+    --tone-success-text: #86efac;
+    --tone-success-border: #14532d;
+    --tone-danger-bg: #450a0a;
+    --tone-danger-text: #fca5a5;
+    --tone-danger-border: #7f1d1d;
+    --tone-info-bg: #172554;
+    --tone-info-text: #93c5fd;
+    --tone-info-border: #1e3a8a;
     --badge-bg: #172554;
     --badge-text: #bfdbfe;
     --badge-border: #1e3a8a;
+    --warning-bg: #78350f;
+    --warning-text: #fde68a;
 }
 
 * {
@@ -132,6 +139,8 @@ body {
 .mb-4 { margin-bottom: 16px; }
 .mb-5 { margin-bottom: 24px; }
 .mt-4 { margin-top: 16px; }
+.mt-2 { margin-top: 8px; }
+.ml-2 { margin-left: 8px; }
 
 .text-primary { color: var(--primary); }
 .text-muted { color: var(--color-muted); }
@@ -151,7 +160,31 @@ body {
 
 .bg-light { background: var(--color-surface-muted); }
 .bg-primary { background: var(--primary); color: #fff; }
+.bg-success { background: var(--success); color: #fff; }
+.bg-danger { background: var(--danger); color: #fff; }
+.bg-warning { background: var(--warning); color: #fff; }
 .bg-dark { background: var(--color-text); color: #fff; }
+
+.text-bg-primary,
+.text-bg-success,
+.text-bg-danger,
+.text-bg-warning,
+.text-bg-dark {
+    color: #fff;
+    border-color: transparent;
+}
+
+.text-bg-primary { background: var(--primary); }
+.text-bg-success { background: var(--success); }
+.text-bg-danger { background: var(--danger); }
+.text-bg-warning {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+.text-bg-dark {
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+}
 
 .card {
     border: 1px solid var(--color-border-soft);
@@ -169,18 +202,22 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    background: var(--btn-bg, var(--tone-neutral-bg));
+    color: var(--btn-text, var(--tone-neutral-text));
+    border-color: var(--btn-border, var(--tone-neutral-border));
 }
 
 .btn-primary {
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
+    --btn-bg: var(--tone-primary-bg);
+    --btn-text: var(--tone-primary-text);
+    --btn-border: var(--tone-primary-border);
 }
 
 
 .btn-light {
-    background: var(--btn-light-bg);
-    color: var(--btn-light-text);
-    border-color: var(--btn-light-border);
+    --btn-bg: var(--tone-neutral-bg);
+    --btn-text: var(--tone-neutral-text);
+    --btn-border: var(--tone-neutral-border);
 }
 
 .w-100 { width: 100%; }
@@ -272,6 +309,32 @@ input {
     background: var(--color-surface);
 }
 
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    background: var(--color-surface);
+    resize: vertical;
+    min-height: 92px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+input[type='datetime-local'] {
+    min-height: 40px;
+    border-radius: 4px;
+}
+
+input[type='datetime-local']::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: var(--datetime-picker-filter, none);
+}
+
+body[data-theme='dark'] input[type='datetime-local'] {
+    --datetime-picker-filter: invert(0.9);
+}
+
 .search-input {
     width: 260px;
 }
@@ -283,8 +346,9 @@ input {
     gap: 10px;
     padding: 10px 12px;
     margin-bottom: 10px;
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
+    border: 1px solid var(--flash-border, var(--tone-info-border));
+    background: var(--flash-bg, var(--tone-info-bg));
+    color: var(--flash-text, var(--tone-info-text));
 }
 
 .flash button {
@@ -295,21 +359,21 @@ input {
 }
 
 .flash-success {
-    border-color: var(--flash-success-border);
-    color: var(--flash-success-text);
-    background: var(--flash-success-bg);
+    --flash-border: var(--tone-success-border);
+    --flash-text: var(--tone-success-text);
+    --flash-bg: var(--tone-success-bg);
 }
 
 .flash-error {
-    border-color: var(--flash-error-border);
-    color: var(--flash-error-text);
-    background: var(--flash-error-bg);
+    --flash-border: var(--tone-danger-border);
+    --flash-text: var(--tone-danger-text);
+    --flash-bg: var(--tone-danger-bg);
 }
 
 .flash-info {
-    border-color: var(--flash-info-border);
-    color: var(--flash-info-text);
-    background: var(--flash-info-bg);
+    --flash-border: var(--tone-info-border);
+    --flash-text: var(--tone-info-text);
+    --flash-bg: var(--tone-info-bg);
 }
 
 select {

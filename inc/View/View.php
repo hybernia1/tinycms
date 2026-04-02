@@ -40,8 +40,15 @@ final class View
                 ['label' => 'Dashboard', 'url' => $url('admin/dashboard')],
                 ['label' => 'Uživatelé', 'url' => $url('admin/users')],
                 ['label' => 'Nastavení', 'url' => $url('admin/settings')],
-                ['label' => 'Content', 'url' => '#'],
             ];
+        } elseif ($layout === 'admin' && isset($data['adminMenu']) && is_array($data['adminMenu'])) {
+            $data['adminMenu'] = array_map(static function (array $item) use ($url): array {
+                $path = (string)($item['url'] ?? '');
+                return [
+                    'label' => (string)($item['label'] ?? ''),
+                    'url' => str_starts_with($path, 'http') ? $path : $url($path),
+                ];
+            }, $data['adminMenu']);
         }
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';

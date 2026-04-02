@@ -79,10 +79,11 @@ document.addEventListener('click', function (event) {
         }
 
         if (actionSelect.value === 'delete') {
+            const bulkType = form.getAttribute('data-bulk-type') || 'záznamů';
             const fakeTrigger = document.createElement('button');
             fakeTrigger.setAttribute('data-modal-open', '1');
             fakeTrigger.setAttribute('data-modal-mode', 'bulk');
-            fakeTrigger.setAttribute('data-type', 'uživatelů');
+            fakeTrigger.setAttribute('data-type', bulkType);
             fakeTrigger.setAttribute('data-form-id', 'bulk-action-form');
             fakeTrigger.setAttribute('data-count', String(checked.length));
             fakeTrigger.style.display = 'none';

@@ -1,5 +1,11 @@
+html,
+body {
+    height: 100%;
+}
+
 body {
     background: var(--color-surface-muted);
+    overflow: hidden;
 }
 
 .admin-shell {
@@ -50,7 +56,8 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .admin-header-spacer {
@@ -59,19 +66,21 @@ body {
     min-height: 56px;
     padding: 10px 20px;
     flex: 0 0 auto;
+    position: sticky;
+    top: 0;
+    z-index: 3;
 }
 
-.admin-footer {
-    background: var(--color-surface);
-    border-top: 1px solid var(--color-border-soft);
-    border-bottom: 0;
-    padding: 14px 20px;
-    margin-top: auto;
+.admin-menu-toggle {
+    display: none;
+}
+
+.admin-menu-overlay {
+    display: none;
 }
 
 .admin-content {
     padding: 20px;
-    overflow-y: auto;
     flex: 1 1 auto;
 }
 
@@ -91,13 +100,32 @@ body {
 
 @media (max-width: 900px) {
     .admin-sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease-in-out;
+        z-index: 20;
     }
 
     .admin-main {
         margin-left: 0;
-        height: auto;
+        height: 100vh;
+    }
+
+    .admin-menu-toggle {
+        display: inline-flex;
+    }
+
+    .admin-menu-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 15;
+    }
+
+    body.admin-menu-open .admin-sidebar {
+        transform: translateX(0);
+    }
+
+    body.admin-menu-open .admin-menu-overlay {
+        display: block;
     }
 }
