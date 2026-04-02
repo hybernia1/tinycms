@@ -45,14 +45,8 @@ final class View
         }
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
-        $defaultTheme = (string)($data['theme'] ?? 'light');
-
-        if (!in_array($defaultTheme, ['light', 'dark'], true)) {
-            $defaultTheme = 'light';
-        }
-
-        $theme = (string)($_GET['theme'] ?? $defaultTheme);
-        $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : $defaultTheme;
+        $theme = (string)($data['theme'] ?? 'light');
+        $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
         $data['icon'] = $icon;
         $data['csrfField'] = $csrfField;
         $data['flashes'] = $this->flash->consume();

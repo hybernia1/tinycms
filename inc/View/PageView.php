@@ -3,13 +3,17 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\SettingsService;
+
 final class PageView
 {
     private View $view;
+    private SettingsService $settings;
 
-    public function __construct(View $view)
+    public function __construct(View $view, SettingsService $settings)
     {
         $this->view = $view;
+        $this->settings = $settings;
     }
 
     public function home(?array $user, array $site): void
@@ -20,7 +24,7 @@ final class PageView
             'siteName' => $siteName,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
-            'theme' => (string)($site['theme'] ?? 'light'),
+            'theme' => $this->theme(),
             'pageTitle' => $siteName,
         ]);
     }
@@ -28,6 +32,7 @@ final class PageView
     public function loginForm(array $state): void
     {
         $state['pageTitle'] = 'Login';
+        $state['theme'] = $this->theme();
         $this->view->render('login', 'login/form', $state);
     }
 
@@ -35,6 +40,7 @@ final class PageView
     {
         $this->view->render('admin', 'admin/dashboard', [
             'user' => $user,
+            'theme' => $this->theme(),
             'pageTitle' => 'Dashboard',
         ]);
     }
@@ -46,10 +52,10 @@ final class PageView
             'allowedPerPage' => $allowedPerPage,
             'status' => $status,
             'query' => $query,
+            'theme' => $this->theme(),
             'pageTitle' => 'Uživatelé',
         ]);
     }
-
 
     public function adminSettingsForm(array $groups, array $values, string $activeGroup): void
     {
@@ -57,16 +63,27 @@ final class PageView
             'groups' => $groups,
             'values' => $values,
             'activeGroup' => $activeGroup,
+            'theme' => $this->theme(),
             'pageTitle' => 'Nastavení',
         ]);
     }
+
     public function adminUsersForm(string $mode, array $user, array $errors): void
     {
         $this->view->render('admin', 'admin/users/form', [
             'mode' => $mode,
             'user' => $user,
             'errors' => $errors,
+            'theme' => $this->theme(),
             'pageTitle' => $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele',
         ]);
+    }
+
+    private function theme(): string
+    {
+        $settings = $this->settings->resolved();
+        $theme = (string)($settings['custom']['theme'] ?? 'light');
+
+        return in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
     }
 }
