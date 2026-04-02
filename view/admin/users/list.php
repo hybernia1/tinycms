@@ -31,7 +31,7 @@ $total = (int)($pagination['total'] ?? 0);
             <thead>
                 <tr>
                     <th><input type="checkbox" data-bulk-toggle></th>
-                    <th>ID</th><th>Jméno</th><th>Email</th><th>Role</th><th>Suspend</th><th>Akce</th>
+                    <th>Uživatel</th><th>Role</th><th>Akce</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,13 +42,12 @@ $total = (int)($pagination['total'] ?? 0);
             ?>
                 <tr>
                     <td><?php if (!$isAdmin): ?><input type="checkbox" value="<?= $id ?>" data-bulk-item><?php endif; ?></td>
-                    <td><?= $id ?></td>
-                    <td><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars((string)($row['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars((string)($row['role'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= (int)($row['suspend'] ?? 0) ?></td>
                     <td>
-                        <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>">Edit</a>
+                        <a href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                        <div class="text-muted"><?= htmlspecialchars((string)($row['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                    </td>
+                    <td><?= htmlspecialchars((string)($row['role'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                    <td>
                         <?php if (!$isAdmin): ?>
                         <form method="post" action="<?= htmlspecialchars($url('admin/users/suspend-toggle'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <input type="hidden" name="id" value="<?= $id ?>">
