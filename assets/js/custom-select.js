@@ -30,6 +30,14 @@
         button.textContent = selectedOption ? selectedOption.textContent || '' : '';
     };
 
+    const syncDisabled = (select, button, wrapper) => {
+        button.disabled = select.disabled;
+        wrapper.classList.toggle('disabled', select.disabled);
+        if (select.disabled && opened === wrapper) {
+            closeOpened();
+        }
+    };
+
     selects.forEach((select) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-select';
@@ -39,7 +47,6 @@
         button.setAttribute('data-custom-select-button', '');
         button.setAttribute('aria-haspopup', 'listbox');
         button.setAttribute('aria-expanded', 'false');
-        button.disabled = select.disabled;
         sync(select, button);
 
         const dropdown = document.createElement('div');
@@ -84,6 +91,7 @@
         wrapper.appendChild(dropdown);
         select.insertAdjacentElement('afterend', wrapper);
         select.classList.add('custom-select-native');
+        syncDisabled(select, button, wrapper);
 
         button.addEventListener('click', () => {
             if (button.disabled) {
@@ -105,7 +113,13 @@
                 el.classList.toggle('selected', el === selected);
                 el.setAttribute('aria-selected', el === selected ? 'true' : 'false');
             });
+            syncDisabled(select, button, wrapper);
         });
+
+        const observer = new MutationObserver(() => {
+            syncDisabled(select, button, wrapper);
+        });
+        observer.observe(select, { attributes: true, attributeFilter: ['disabled'] });
     });
 
     document.addEventListener('click', (event) => {
