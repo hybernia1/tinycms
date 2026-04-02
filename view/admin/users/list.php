@@ -27,7 +27,8 @@ $total = (int)($pagination['total'] ?? 0);
 
 <div class="card p-4">
         <div class="text-muted mb-3">Celkem: <?= $total ?></div>
-        <table class="w-100">
+        <div class="table-responsive">
+        <table class="table">
             <thead>
                 <tr>
                     <th><input type="checkbox" data-bulk-toggle></th>
@@ -64,6 +65,7 @@ $total = (int)($pagination['total'] ?? 0);
             <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
 
         <div class="d-flex justify-between align-center mt-4">
             <?php if ($totalPages > 1): ?>

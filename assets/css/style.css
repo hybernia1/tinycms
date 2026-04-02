@@ -109,6 +109,38 @@ body {
 
 .w-100 { width: 100%; }
 
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+}
+
+.table th,
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: top;
+}
+
+.table thead th {
+    background: #f9fafb;
+    font-weight: 600;
+}
+
+.table tbody tr:nth-child(even) {
+    background: #fcfcfd;
+}
+
+.table tbody tr:hover {
+    background: #f8fafc;
+}
+
 label {
     display: block;
     margin-bottom: 6px;
