@@ -68,6 +68,14 @@
         selection.addRange(range);
     }
 
+    function isSelectionInside(editor) {
+        var selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+            return false;
+        }
+        return editor.contains(selection.anchorNode);
+    }
+
     function createIconButton(icon, command, title) {
         var button = document.createElement('button');
         button.type = 'button';
@@ -172,6 +180,16 @@
             wrapper.classList.remove('is-link-open');
         }
 
+        function updateFormatState() {
+            if (htmlMode || !isSelectionInside(editor)) {
+                bold.classList.remove('is-active');
+                italic.classList.remove('is-active');
+                return;
+            }
+            bold.classList.toggle('is-active', document.queryCommandState('bold'));
+            italic.classList.toggle('is-active', document.queryCommandState('italic'));
+        }
+
         function runCommand(command) {
             if (htmlMode) {
                 return;
@@ -182,6 +200,7 @@
             normalizeBlocks(editor);
             sync(textarea, editor);
             closeMenus();
+            updateFormatState();
         }
 
         function setHtmlMode(enabled) {
@@ -198,6 +217,12 @@
             textarea.style.display = 'none';
             sync(textarea, editor);
         }
+
+        toolbar.addEventListener('mousedown', function (event) {
+            if (event.target.closest('[data-command]')) {
+                event.preventDefault();
+            }
+        });
 
         toolbar.addEventListener('click', function (event) {
             var button = event.target.closest('[data-command]');
@@ -224,7 +249,9 @@
                 if (htmlMode) {
                     return;
                 }
-                linkRange = rememberSelection();
+                if (isSelectionInside(editor)) {
+                    linkRange = rememberSelection();
+                }
                 wrapper.classList.toggle('is-link-open');
                 wrapper.classList.remove('is-list-open');
                 if (wrapper.classList.contains('is-link-open')) {
@@ -251,6 +278,7 @@
                     document.execCommand('createLink', false, url);
                     normalizeBlocks(editor);
                     sync(textarea, editor);
+                    updateFormatState();
                     if (linkInput) {
                         linkInput.value = '';
                     }
@@ -277,19 +305,36 @@
         document.addEventListener('click', function (event) {
             if (!wrapper.contains(event.target)) {
                 closeMenus();
+                updateFormatState();
+            }
+        });
+
+        document.addEventListener('selectionchange', function () {
+            if (isSelectionInside(editor)) {
+                updateFormatState();
             }
         });
 
         editor.addEventListener('keydown', function (event) {
             if (event.key === 'Enter' && !event.shiftKey) {
+                var wasBold = document.queryCommandState('bold');
+                var wasItalic = document.queryCommandState('italic');
                 document.execCommand('defaultParagraphSeparator', false, 'p');
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
+                if (wasBold) {
+                    document.execCommand('bold', false, null);
+                }
+                if (wasItalic) {
+                    document.execCommand('italic', false, null);
+                }
+                updateFormatState();
             }
         });
 
         editor.addEventListener('input', function () {
             sync(textarea, editor);
+            updateFormatState();
         });
 
         editor.addEventListener('blur', function () {
@@ -298,6 +343,7 @@
             }
             normalizeBlocks(editor);
             sync(textarea, editor);
+            updateFormatState();
         });
 
         textarea.style.display = 'none';
@@ -320,6 +366,7 @@
         document.execCommand('defaultParagraphSeparator', false, 'p');
         normalizeBlocks(editor);
         sync(textarea, editor);
+        updateFormatState();
     }
 
     document.addEventListener('DOMContentLoaded', function () {
