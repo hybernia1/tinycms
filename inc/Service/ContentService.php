@@ -52,23 +52,6 @@ final class ContentService
         return $this->query->delete('content', ['id' => $id]) > 0;
     }
 
-    public function deleteMany(array $ids): int
-    {
-        $clean = $this->sanitizeIds($ids);
-
-        if ($clean === []) {
-            return 0;
-        }
-
-        $deleted = 0;
-
-        foreach ($clean as $id) {
-            $deleted += $this->delete($id) ? 1 : 0;
-        }
-
-        return $deleted;
-    }
-
     public function setStatus(int $id, string $status): bool
     {
         $item = $this->find($id);
@@ -81,23 +64,6 @@ final class ContentService
             'status' => $status,
             'updated' => date('Y-m-d H:i:s'),
         ], ['id' => $id]) > 0;
-    }
-
-    public function setStatusMany(array $ids, string $status): int
-    {
-        $clean = $this->sanitizeIds($ids);
-
-        if ($clean === []) {
-            return 0;
-        }
-
-        $updated = 0;
-
-        foreach ($clean as $id) {
-            $updated += $this->setStatus($id, $status) ? 1 : 0;
-        }
-
-        return $updated;
     }
 
     public function save(array $input, int $defaultAuthorId, ?int $id = null): array
@@ -203,11 +169,6 @@ final class ContentService
         }
 
         return $created <= ($now ?? time());
-    }
-
-    private function sanitizeIds(array $ids): array
-    {
-        return array_values(array_unique(array_filter(array_map('intval', $ids), static fn(int $v): bool => $v > 0)));
     }
 
     private function resolveAuthorId(array $input, int $defaultAuthorId): ?int

@@ -87,10 +87,6 @@ $router->post('admin/users/suspend-toggle', static function () use ($adminUsers,
     $adminUsers->suspendToggleSubmit($redirect);
 });
 
-$router->post('admin/users/bulk-action', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->bulkActionSubmit($redirect);
-});
-
 $router->get('admin/users/add', static function () use ($adminUsers, $redirect): void {
     $adminUsers->addForm($redirect);
 });
@@ -113,10 +109,6 @@ $router->get('admin/content', static function () use ($adminContent, $redirect):
 
 $router->post('admin/content/delete', static function () use ($adminContent, $redirect): void {
     $adminContent->deleteSubmit($redirect);
-});
-
-$router->post('admin/content/bulk-action', static function () use ($adminContent, $redirect): void {
-    $adminContent->bulkActionSubmit($redirect);
 });
 
 $router->post('admin/content/status-toggle', static function () use ($adminContent, $redirect): void {

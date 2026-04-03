@@ -67,43 +67,6 @@ final class AdminContentController
         $redirect('admin/content');
     }
 
-    public function bulkActionSubmit(callable $redirect): void
-    {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
-            return;
-        }
-
-        $rawIds = (string)($_POST['ids'] ?? '');
-        $action = (string)($_POST['action'] ?? '');
-        $ids = array_filter(array_map('intval', explode(',', $rawIds)), static fn(int $v): bool => $v > 0);
-
-        if ($ids === []) {
-            $this->flash->add('info', 'Nebyly vybrány žádné záznamy.');
-            $redirect('admin/content');
-        }
-
-        if ($action === 'delete') {
-            $affected = $this->content->deleteMany($ids);
-            $this->flash->add($affected > 0 ? 'success' : 'error', $affected > 0 ? "Smazáno $affected záznamů." : 'Vybrané záznamy se nepodařilo smazat.');
-            $redirect('admin/content');
-        }
-
-        if ($action === 'publish') {
-            $affected = $this->content->setStatusMany($ids, 'published');
-            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Publikováno $affected záznamů." : 'Vybrané záznamy už byly publikované nebo nejsou dostupné.');
-            $redirect('admin/content');
-        }
-
-        if ($action === 'draft') {
-            $affected = $this->content->setStatusMany($ids, 'draft');
-            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Přepnuto do draftu $affected záznamů." : 'Vybrané záznamy už byly v draftu nebo nejsou dostupné.');
-            $redirect('admin/content');
-        }
-
-        $this->flash->add('info', 'Nebyla vybrána žádná hromadná akce.');
-        $redirect('admin/content');
-    }
-
     public function addForm(callable $redirect): void
     {
         if (!$this->guard($redirect)) {

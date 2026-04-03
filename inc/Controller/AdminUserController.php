@@ -52,10 +52,7 @@ final class AdminUserController
 
     public function deleteSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
-            return;
-        }
-        if (!$this->guardCsrf($redirect)) {
+        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
             return;
         }
 
@@ -77,10 +74,7 @@ final class AdminUserController
 
     public function suspendToggleSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
-            return;
-        }
-        if (!$this->guardCsrf($redirect)) {
+        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
             return;
         }
 
@@ -103,46 +97,6 @@ final class AdminUserController
         $redirect('admin/users');
     }
 
-    public function bulkActionSubmit(callable $redirect): void
-    {
-        if (!$this->guard($redirect)) {
-            return;
-        }
-        if (!$this->guardCsrf($redirect)) {
-            return;
-        }
-
-        $rawIds = (string)($_POST['ids'] ?? '');
-        $action = (string)($_POST['action'] ?? '');
-        $ids = array_filter(array_map('intval', explode(',', $rawIds)), fn(int $v): bool => $v > 0);
-
-        if ($ids === []) {
-            $this->flash->add('info', 'Nebyly vybrány žádné záznamy.');
-            $redirect('admin/users');
-        }
-
-        if ($action === 'delete') {
-            $affected = $this->users->deleteMany($ids);
-            $this->flash->add($affected > 0 ? 'success' : 'error', $affected > 0 ? "Smazáno $affected uživatelů." : 'Vybrané uživatele se nepodařilo smazat.');
-            $redirect('admin/users');
-        }
-
-        if ($action === 'suspend') {
-            $affected = $this->users->suspendMany($ids);
-            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Suspendováno $affected uživatelů." : 'Vybraní uživatelé už byli suspendovaní nebo nejsou dostupní.');
-            $redirect('admin/users');
-        }
-
-        if ($action === 'unsuspend') {
-            $affected = $this->users->unsuspendMany($ids);
-            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Odsuspendováno $affected uživatelů." : 'Vybraní uživatelé už byli aktivní nebo nejsou dostupní.');
-            $redirect('admin/users');
-        }
-
-        $this->flash->add('info', 'Nebyla vybrána žádná hromadná akce.');
-        $redirect('admin/users');
-    }
-
     public function addForm(callable $redirect): void
     {
         if (!$this->guard($redirect)) {
@@ -162,10 +116,7 @@ final class AdminUserController
 
     public function addSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
-            return;
-        }
-        if (!$this->guardCsrf($redirect)) {
+        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
             return;
         }
 
@@ -201,10 +152,7 @@ final class AdminUserController
 
     public function editSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
-            return;
-        }
-        if (!$this->guardCsrf($redirect)) {
+        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
             return;
         }
 
@@ -249,11 +197,7 @@ final class AdminUserController
             return null;
         }
 
-        if (($state['mode'] ?? null) !== $mode) {
-            return null;
-        }
-
-        if (($state['id'] ?? null) !== $id) {
+        if (($state['mode'] ?? null) !== $mode || ($state['id'] ?? null) !== $id) {
             return null;
         }
 

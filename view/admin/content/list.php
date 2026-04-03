@@ -10,16 +10,6 @@ foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = ucfirst($statusValue);
 }
 ?>
-<div class="d-flex gap-2 align-center mb-3">
-    <select name="action" id="bulk-action-select" disabled>
-        <option value="">Hromadné akce</option>
-        <option value="publish">Publikovat</option>
-        <option value="draft">Přepnout do draftu</option>
-        <option value="delete">Smazat</option>
-    </select>
-    <button class="btn btn-light" id="bulk-apply" type="button" disabled>Použít</button>
-</div>
-
 <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <nav class="filter-nav">
         <?php foreach ($statusLinks as $key => $label): ?>
@@ -37,18 +27,11 @@ foreach ($availableStatuses as $statusValue) {
     </form>
 </div>
 
-<form id="bulk-action-form" method="post" action="<?= htmlspecialchars($url('admin/content/bulk-action'), ENT_QUOTES, 'UTF-8') ?>" data-bulk-type="záznamů">
-    <?= $csrfField() ?>
-    <input type="hidden" name="ids" value="">
-    <input type="hidden" name="action" id="bulk-action-value" value="">
-</form>
-
 <div class="card p-2">
     <div class="table-responsive">
         <table class="table">
             <thead>
             <tr>
-                <th class="table-col-select"><input type="checkbox" data-bulk-toggle></th>
                 <th>Název</th><th>Autor</th><th class="table-col-actions">Akce</th>
             </tr>
             </thead>
@@ -62,7 +45,6 @@ foreach ($availableStatuses as $statusValue) {
                 $statusClass = $statusValue === 'published' ? 'text-bg-success' : ($statusValue === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
             ?>
                 <tr>
-                    <td class="table-col-select"><input type="checkbox" value="<?= $id ?>" data-bulk-item></td>
                     <td>
                         <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                         <div class="text-muted">
@@ -88,7 +70,7 @@ foreach ($availableStatuses as $statusValue) {
                         <form id="delete-content-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/content/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <?= $csrfField() ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
-                            <button class="btn btn-light btn-icon" type="button" data-modal-open data-modal-mode="single" data-type="obsah" data-form-id="delete-content-<?= $id ?>" aria-label="Smazat" title="Smazat">
+                            <button class="btn btn-light btn-icon" type="button" data-modal-open data-type="obsah" data-form-id="delete-content-<?= $id ?>" aria-label="Smazat" title="Smazat">
                                 <?= $icon('delete') ?>
                                 <span class="sr-only">Smazat</span>
                             </button>
