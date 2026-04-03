@@ -138,6 +138,10 @@ body {
     border: 1px solid var(--color-border-soft);
 }
 
+.table .content-thumbnail-preview {
+    max-width: 140px;
+}
+
 
 .admin-list-toolbar {
     flex-wrap: wrap;

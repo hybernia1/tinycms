@@ -5,6 +5,7 @@ require_once dirname(__DIR__) . '/autoload.php';
 
 use App\Controller\AdminController;
 use App\Controller\AdminContentController;
+use App\Controller\AdminMediaController;
 use App\Controller\AdminSettingsController;
 use App\Controller\AdminUserController;
 use App\Controller\FrontController;
@@ -44,6 +45,7 @@ $front = new FrontController($pageView, $authService, $csrf, $settingsService, $
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
 $adminContent = new AdminContentController($pageView, $authService, $contentService, $mediaService, $uploadService, $userService, $flash, $csrf);
+$adminMedia = new AdminMediaController($pageView, $authService, $mediaService, $uploadService, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {

@@ -107,12 +107,36 @@ final class PageView
         ]);
     }
 
+    public function adminMediaList(array $pagination, array $allowedPerPage, string $query): void
+    {
+        $this->view->render('admin/layout', 'admin/media/list', [
+            'pagination' => $pagination,
+            'allowedPerPage' => $allowedPerPage,
+            'query' => $query,
+            'adminMenu' => $this->adminMenu(),
+            'pageTitle' => 'Média',
+        ]);
+    }
+
+    public function adminMediaForm(string $mode, array $item, array $errors, array $authors): void
+    {
+        $this->view->render('admin/layout', 'admin/media/form', [
+            'mode' => $mode,
+            'item' => $item,
+            'errors' => $errors,
+            'authors' => $authors,
+            'adminMenu' => $this->adminMenu(),
+            'pageTitle' => $mode === 'add' ? 'Přidat médium' : 'Upravit médium',
+        ]);
+    }
+
     private function adminMenu(): array
     {
         return [
             ['label' => 'Dashboard', 'url' => 'admin/dashboard'],
             ['label' => 'Uživatelé', 'url' => 'admin/users'],
             ['label' => 'Obsah', 'url' => 'admin/content'],
+            ['label' => 'Média', 'url' => 'admin/media'],
             ['label' => 'Nastavení', 'url' => 'admin/settings'],
         ];
     }

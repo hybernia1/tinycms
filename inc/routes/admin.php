@@ -81,6 +81,30 @@ $router->post('admin/content/thumbnail/delete', static function () use ($adminCo
     $adminContent->thumbnailDeleteSubmit($redirect);
 });
 
+$router->get('admin/media', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->list($redirect);
+});
+
+$router->post('admin/media/delete', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->deleteSubmit($redirect);
+});
+
+$router->get('admin/media/add', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->addForm($redirect);
+});
+
+$router->post('admin/media/add', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->addSubmit($redirect);
+});
+
+$router->get('admin/media/edit', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->editForm($redirect);
+});
+
+$router->post('admin/media/edit', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->editSubmit($redirect);
+});
+
 $router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
     $adminSettings->form($redirect);
 });
