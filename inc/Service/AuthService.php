@@ -5,17 +5,18 @@ namespace App\Service;
 
 use App\Service\Auth\Auth;
 use App\Service\Auth\Login;
-use App\Service\Auth\LoginLayer;
 use App\Service\Db\Connection;
 use App\Service\Db\Query;
 
 final class AuthService
 {
     private Auth $auth;
+    private Login $login;
 
     public function __construct(Auth $auth)
     {
         $this->auth = $auth;
+        $this->login = new Login(new Query(Connection::get()));
     }
 
     public function auth(): Auth
@@ -25,13 +26,26 @@ final class AuthService
 
     public function login(array $input): array
     {
-        $layer = new LoginLayer(new Login(new Query(Connection::get())), $this->auth);
-
-        return $layer->attempt([
+        $result = $this->login->attempt([
             'email' => trim((string)($input['email'] ?? '')),
             'password' => (string)($input['password'] ?? ''),
             'remember' => (int)((int)($input['remember'] ?? 0) === 1),
         ]);
+
+        if (($result['success'] ?? false) !== true) {
+            return [
+                'success' => false,
+                'errors' => $result['errors'] ?? [],
+                'message' => (string)($result['message'] ?? 'Přihlášení selhalo.'),
+            ];
+        }
+
+        return [
+            'success' => true,
+            'redirect' => $this->redirectAfterLogin(),
+            'errors' => [],
+            'message' => '',
+        ];
     }
 
     public function redirectAfterLogin(): string

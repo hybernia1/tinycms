@@ -75,29 +75,6 @@ class Auth
         $this->synced = false;
     }
 
-    public function requireLogin(): void
-    {
-        if (!$this->check()) {
-            http_response_code(403);
-            exit('Přístup odepřen. Nejste přihlášena.');
-        }
-    }
-
-    public function requireRole(string $role): void
-    {
-        $this->requireLogin();
-
-        if (!$this->hasRole($role)) {
-            http_response_code(403);
-            exit('Přístup odepřen. Nemáte dostatečná oprávnění.');
-        }
-    }
-
-    public function requireAdmin(): void
-    {
-        $this->requireRole('admin');
-    }
-
     private function sync(): void
     {
         if ($this->synced || !isset($_SESSION['auth']['id'])) {
