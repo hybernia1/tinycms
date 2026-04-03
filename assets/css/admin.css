@@ -6,6 +6,7 @@ body {
 body {
     background: var(--color-surface-muted);
     overflow: hidden;
+    overflow-x: hidden;
 }
 
 .admin-shell {
@@ -145,7 +146,8 @@ body {
         height: auto;
         min-height: 100vh;
         min-height: 100dvh;
-        overflow: visible;
+        overflow-x: hidden;
+        overflow-y: visible;
     }
 
     .admin-sidebar {
@@ -159,7 +161,8 @@ body {
         height: auto;
         min-height: 100vh;
         min-height: 100dvh;
-        overflow: visible;
+        overflow-x: hidden;
+        overflow-y: visible;
         -webkit-overflow-scrolling: auto;
     }
 

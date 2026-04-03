@@ -327,6 +327,20 @@ a:focus-visible {
     margin-left: 6px;
 }
 
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: hidden;
+    }
+
+    .table {
+        min-width: 0;
+    }
+
+    .table-col-actions {
+        white-space: normal;
+    }
+}
+
 label {
     display: block;
     margin-bottom: 6px;
