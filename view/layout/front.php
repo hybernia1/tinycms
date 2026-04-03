@@ -6,17 +6,22 @@ declare(strict_types=1);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= htmlspecialchars((string)($pageTitle ?? 'TinyCMS'), ENT_QUOTES, 'UTF-8') ?></title>
-    <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
-    <script defer src="<?= htmlspecialchars($url('assets/vendor/jquery-4.0.0.min.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/flash.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/modal.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <?php
+    $siteTitleValue = $site_title();
+    $pageTitleValue = (string)($pageTitle ?? $siteTitleValue);
+    $documentTitle = $pageTitleValue === $siteTitleValue ? $siteTitleValue : $pageTitleValue . ' | ' . $siteTitleValue;
+    ?>
+    <title><?= $escape($documentTitle) ?></title>
+    <link rel="stylesheet" href="<?= $escape($url('assets/css/style.css')) ?>">
+    <script defer src="<?= $escape($url('assets/vendor/jquery-4.0.0.min.js')) ?>"></script>
+    <script defer src="<?= $escape($url('assets/js/flash.js')) ?>"></script>
+    <script defer src="<?= $escape($url('assets/js/modal.js')) ?>"></script>
 </head>
-<body data-theme="<?= htmlspecialchars((string)$theme, ENT_QUOTES, 'UTF-8') ?>">
+<body data-theme="<?= $escape((string)$theme) ?>">
 <div class="container mt-4">
     <?php foreach ($flashes as $flash): ?>
-    <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">
-        <span><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+    <div class="flash flash-<?= $escape((string)($flash['type'] ?? 'info')) ?>">
+        <span><?= $escape((string)($flash['message'] ?? '')) ?></span>
         <button type="button" data-flash-close aria-label="Zavřít notifikaci" title="Zavřít notifikaci">
             <?= $icon('cancel') ?>
         </button>
@@ -25,7 +30,7 @@ declare(strict_types=1);
 </div>
 <?= $content ?>
 <footer class="container py-4 text-muted">
-    <?= htmlspecialchars((string)($siteFooter ?? '© TinyCMS'), ENT_QUOTES, 'UTF-8') ?>
+    <?= $escape((string)($siteFooter ?? '© TinyCMS')) ?>
 </footer>
 </body>
 </html>
