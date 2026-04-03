@@ -1,11 +1,22 @@
 (function () {
-    function createButton(icon, command, title) {
+    var linkState = {
+        editor: null,
+        textarea: null,
+        toolbar: null,
+        range: null
+    };
+
+    function createButton(icon, command, title, isModalTrigger) {
         var button = document.createElement('button');
         button.type = 'button';
         button.className = 'wysiwyg-btn';
         button.setAttribute('data-command', command);
         button.setAttribute('aria-label', title);
         button.title = title;
+        if (isModalTrigger) {
+            button.setAttribute('data-modal-open', '');
+            button.setAttribute('data-modal-target', '#wysiwyg-link-modal');
+        }
         button.innerHTML = '<svg aria-hidden="true"><use href="#' + icon + '"></use></svg>';
         return button;
     }
@@ -30,6 +41,27 @@
         });
     }
 
+    function rememberSelection() {
+        var selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+            return null;
+        }
+        return selection.getRangeAt(0).cloneRange();
+    }
+
+    function restoreSelection(range, editor) {
+        if (!range) {
+            return;
+        }
+        editor.focus();
+        var selection = window.getSelection();
+        if (!selection) {
+            return;
+        }
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
     function init(textarea) {
         var wrapper = document.createElement('div');
         wrapper.className = 'wysiwyg';
@@ -38,16 +70,16 @@
         toolbar.className = 'wysiwyg-toolbar';
 
         var actions = [
-            ['w-bold', 'bold', 'Tučně'],
-            ['w-italic', 'italic', 'Kurzíva'],
-            ['w-link', 'createLink', 'Odkaz'],
-            ['w-ul', 'insertUnorderedList', 'Odrážky'],
-            ['w-ol', 'insertOrderedList', 'Číslování'],
-            ['w-clear', 'removeFormat', 'Vyčistit']
+            ['w-bold', 'bold', 'Tučně', false],
+            ['w-italic', 'italic', 'Kurzíva', false],
+            ['w-link', 'createLink', 'Odkaz', true],
+            ['w-ul', 'insertUnorderedList', 'Odrážky', false],
+            ['w-ol', 'insertOrderedList', 'Číslování', false],
+            ['w-clear', 'removeFormat', 'Vyčistit', false]
         ];
 
         actions.forEach(function (item) {
-            toolbar.appendChild(createButton(item[0], item[1], item[2]));
+            toolbar.appendChild(createButton(item[0], item[1], item[2], item[3]));
         });
 
         var editor = document.createElement('div');
@@ -64,14 +96,21 @@
             var command = button.getAttribute('data-command');
             editor.focus();
             if (command === 'createLink') {
-                var value = window.prompt('URL odkazu', 'https://');
-                if (!value) {
-                    return;
-                }
-                document.execCommand(command, false, value);
-            } else {
-                document.execCommand(command, false, null);
+                linkState.editor = editor;
+                linkState.textarea = textarea;
+                linkState.toolbar = toolbar;
+                linkState.range = rememberSelection();
+                window.setTimeout(function () {
+                    var linkInput = document.querySelector('[data-wysiwyg-link-input]');
+                    if (linkInput) {
+                        linkInput.focus();
+                        linkInput.select();
+                    }
+                }, 0);
+                return;
             }
+
+            document.execCommand(command, false, null);
             sync(textarea, editor);
             toggleStates(toolbar);
         });
@@ -91,6 +130,43 @@
         wrapper.appendChild(editor);
         sync(textarea, editor);
     }
+
+    document.addEventListener('click', function (event) {
+        var confirm = event.target.closest('[data-wysiwyg-link-confirm]');
+        if (!confirm || !linkState.editor || !linkState.textarea || !linkState.toolbar) {
+            return;
+        }
+
+        var modal = confirm.closest('[data-modal]');
+        var input = modal ? modal.querySelector('[data-wysiwyg-link-input]') : null;
+        var url = input ? input.value.trim() : '';
+        if (!url) {
+            return;
+        }
+
+        restoreSelection(linkState.range, linkState.editor);
+        document.execCommand('createLink', false, url);
+        sync(linkState.textarea, linkState.editor);
+        toggleStates(linkState.toolbar);
+
+        if (modal) {
+            modal.classList.remove('open');
+        }
+        if (input) {
+            input.value = '';
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Enter' || !event.target.matches('[data-wysiwyg-link-input]')) {
+            return;
+        }
+        event.preventDefault();
+        var confirm = document.querySelector('[data-wysiwyg-link-confirm]');
+        if (confirm) {
+            confirm.click();
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         var textareas = document.querySelectorAll('textarea[data-wysiwyg]');
