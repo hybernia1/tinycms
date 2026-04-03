@@ -90,10 +90,6 @@ $contentId = (int)($item['id'] ?? 0);
                                 <span>Zvolit obrázek</span>
                             <?php endif; ?>
                         </button>
-                        <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
-                        <div class="mt-2 d-flex gap-2">
-                            <button class="btn btn-primary" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/upload?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Nahrát</button>
-                        </div>
                         <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
                             <div class="mt-2 d-flex gap-2">
                                 <input type="hidden" name="id" value="<?= (int)($item['id'] ?? 0) ?>">
@@ -117,20 +113,47 @@ $contentId = (int)($item['id'] ?? 0);
                 <?= $icon('cancel') ?>
             </button>
         </div>
-        <form class="media-library-search" data-media-library-search>
-            <input type="search" name="q" placeholder="Hledat obrázek">
-            <button class="btn btn-light" type="submit">Hledat</button>
-        </form>
-        <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/thumbnail/upload?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
-            <?= $csrfField() ?>
-            <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
-            <button class="btn btn-primary" type="submit">Nahrát nový</button>
-        </form>
-        <div class="media-library-grid" data-media-library-grid></div>
-        <div class="media-library-pagination">
-            <button class="btn btn-light" type="button" data-media-library-prev>Předchozí</button>
-            <span data-media-library-page>1 / 1</span>
-            <button class="btn btn-light" type="button" data-media-library-next>Další</button>
+        <div class="media-library-modal-layout">
+            <div class="media-library-detail">
+                <div class="media-library-detail-preview" data-media-library-detail-preview></div>
+                <div class="media-library-detail-meta">
+                    <div><strong>Název:</strong> <span data-media-library-detail-name>—</span></div>
+                    <div><strong>Cesta:</strong> <span data-media-library-detail-path>—</span></div>
+                    <div><strong>Vytvořeno:</strong> <span data-media-library-detail-created>—</span></div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="button" data-media-library-choose disabled>Zvolit</button>
+                    <button
+                        class="btn btn-danger"
+                        type="button"
+                        data-media-library-delete-open
+                        data-modal-open
+                        data-modal-target="#media-library-delete-modal"
+                        data-type="obrázek"
+                        data-form-id="media-library-delete-form"
+                        disabled
+                    >
+                        Smazat
+                    </button>
+                </div>
+            </div>
+            <div class="media-library-list">
+                <form class="media-library-search" data-media-library-search>
+                    <input type="search" name="q" placeholder="Hledat obrázek">
+                    <button class="btn btn-light" type="submit">Hledat</button>
+                </form>
+                <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/thumbnail/upload?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $csrfField() ?>
+                    <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                    <button class="btn btn-primary" type="submit">Nahrát nový</button>
+                </form>
+                <div class="media-library-grid" data-media-library-grid></div>
+                <div class="media-library-pagination">
+                    <button class="btn btn-light" type="button" data-media-library-prev>Předchozí</button>
+                    <span data-media-library-page>1 / 1</span>
+                    <button class="btn btn-light" type="button" data-media-library-next>Další</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -139,4 +162,18 @@ $contentId = (int)($item['id'] ?? 0);
     <input type="hidden" name="id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-media-id>
 </form>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/media-library/delete'), ENT_QUOTES, 'UTF-8') ?>" id="media-library-delete-form">
+    <?= $csrfField() ?>
+    <input type="hidden" name="content_id" value="<?= $contentId ?>">
+    <input type="hidden" name="media_id" value="" data-media-library-delete-media-id>
+</form>
+<div class="modal-overlay" data-modal id="media-library-delete-modal">
+    <div class="modal">
+        <p data-modal-text>Skutečně smazat tento obrázek?</p>
+        <div class="modal-actions">
+            <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="media-library-delete-form">Potvrdit</button>
+        </div>
+    </div>
+</div>
 <?php endif; ?>

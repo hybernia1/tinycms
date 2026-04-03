@@ -10,12 +10,20 @@ if (modal && openTrigger) {
     const searchForm = modal.querySelector('[data-media-library-search]');
     const selectForm = document.querySelector('[data-media-library-select-form]');
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
+    const deleteMediaIdField = document.querySelector('[data-media-library-delete-media-id]');
+    const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
+    const detailName = modal.querySelector('[data-media-library-detail-name]');
+    const detailPath = modal.querySelector('[data-media-library-detail-path]');
+    const detailCreated = modal.querySelector('[data-media-library-detail-created]');
+    const chooseButton = modal.querySelector('[data-media-library-choose]');
+    const deleteButton = modal.querySelector('[data-media-library-delete-open]');
 
     const endpoint = openTrigger.getAttribute('data-media-library-endpoint') || '';
     const baseUrl = openTrigger.getAttribute('data-media-base-url') || '';
     let page = 1;
     let totalPages = 1;
     let query = '';
+    let selectedMedia = null;
 
     const absoluteUrl = (path) => {
         if (!path) {
@@ -69,8 +77,54 @@ if (modal && openTrigger) {
 
             button.appendChild(imageWrap);
             button.appendChild(label);
+            button.dataset.mediaName = name;
+            button.dataset.mediaPath = String(item.path || '');
+            button.dataset.mediaCreated = String(item.created || '');
+            button.dataset.mediaPreviewPath = previewPath;
             grid.appendChild(button);
         });
+    };
+
+    const renderSelected = () => {
+        if (detailPreview) {
+            detailPreview.innerHTML = '';
+            if (selectedMedia && selectedMedia.previewPath !== '') {
+                const image = document.createElement('img');
+                image.src = absoluteUrl(selectedMedia.previewPath);
+                image.alt = selectedMedia.name;
+                detailPreview.appendChild(image);
+            } else {
+                detailPreview.textContent = 'Bez náhledu';
+            }
+        }
+
+        if (detailName) {
+            detailName.textContent = selectedMedia ? selectedMedia.name : '—';
+        }
+
+        if (detailPath) {
+            detailPath.textContent = selectedMedia ? selectedMedia.path : '—';
+        }
+
+        if (detailCreated) {
+            detailCreated.textContent = selectedMedia ? selectedMedia.created : '—';
+        }
+
+        if (chooseButton) {
+            chooseButton.disabled = !selectedMedia;
+        }
+
+        if (deleteButton) {
+            deleteButton.disabled = !selectedMedia;
+        }
+
+        if (mediaIdField) {
+            mediaIdField.value = selectedMedia ? String(selectedMedia.id) : '';
+        }
+
+        if (deleteMediaIdField) {
+            deleteMediaIdField.value = selectedMedia ? String(selectedMedia.id) : '';
+        }
     };
 
     const updatePager = () => {
@@ -118,6 +172,8 @@ if (modal && openTrigger) {
     const open = () => {
         modal.classList.add('open');
         page = 1;
+        selectedMedia = null;
+        renderSelected();
         load().catch(() => {
             if (grid) {
                 grid.innerHTML = '<p class="text-danger m-0">Nepodařilo se načíst knihovnu.</p>';
@@ -167,7 +223,7 @@ if (modal && openTrigger) {
         });
     }
 
-    if (grid && selectForm && mediaIdField) {
+    if (grid) {
         grid.addEventListener('click', (event) => {
             const target = event.target.closest('[data-media-library-select]');
             if (!target) {
@@ -179,7 +235,27 @@ if (modal && openTrigger) {
                 return;
             }
 
-            mediaIdField.value = String(mediaId);
+            selectedMedia = {
+                id: mediaId,
+                name: target.dataset.mediaName || 'Bez názvu',
+                path: target.dataset.mediaPath || '',
+                created: target.dataset.mediaCreated || '',
+                previewPath: target.dataset.mediaPreviewPath || '',
+            };
+
+            grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
+            target.classList.add('selected');
+            renderSelected();
+        });
+    }
+
+    if (chooseButton && selectForm && mediaIdField) {
+        chooseButton.addEventListener('click', () => {
+            if (!selectedMedia) {
+                return;
+            }
+
+            mediaIdField.value = String(selectedMedia.id);
             selectForm.submit();
         });
     }

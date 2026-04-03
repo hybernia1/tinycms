@@ -347,6 +347,8 @@ final class AdminContentController extends BaseAdminController
                 'id' => (int)($item['id'] ?? 0),
                 'name' => (string)($item['name'] ?? ''),
                 'preview_path' => $previewPath,
+                'path' => (string)($item['path'] ?? ''),
+                'created' => (string)($item['created'] ?? ''),
             ];
         }, (array)($pagination['data'] ?? []));
 
@@ -358,6 +360,47 @@ final class AdminContentController extends BaseAdminController
             'total_pages' => (int)($pagination['total_pages'] ?? 1),
             'query' => $query,
         ], JSON_UNESCAPED_UNICODE);
+    }
+
+    public function mediaLibraryDeleteSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $contentId = (int)($_POST['content_id'] ?? 0);
+        $mediaId = (int)($_POST['media_id'] ?? 0);
+        $item = $this->content->find($contentId);
+
+        if ($item === null) {
+            $this->flash->add('error', 'Obsah nenalezen.');
+            $redirect('admin/content');
+            return;
+        }
+
+        if ($mediaId <= 0) {
+            $this->flash->add('error', 'Médium nenalezeno.');
+            $redirect($this->editPath($contentId));
+            return;
+        }
+
+        $media = $this->media->find($mediaId);
+        if ($media === null || !$this->media->delete($mediaId)) {
+            $this->flash->add('error', 'Médium se nepodařilo smazat.');
+            $redirect($this->editPath($contentId));
+            return;
+        }
+
+        if ((int)($item['thumbnail'] ?? 0) === $mediaId) {
+            $this->content->setThumbnail($contentId, null);
+        }
+
+        $this->upload->deleteMediaFiles($media);
+        $this->flash->add('success', 'Médium bylo smazáno.');
+        $redirect($this->editPath($contentId));
     }
 
     private function editPath(int $id): string

@@ -89,6 +89,10 @@ $router->get('admin/content/media-library', static function () use ($adminConten
     $adminContent->mediaLibrary($redirect);
 });
 
+$router->post('admin/content/media-library/delete', static function () use ($adminContent, $redirect): void {
+    $adminContent->mediaLibraryDeleteSubmit($redirect);
+});
+
 $router->get('admin/media', static function () use ($adminMedia, $redirect): void {
     $adminMedia->list($redirect);
 });
