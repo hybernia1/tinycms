@@ -3,20 +3,17 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use App\Service\ContentTypeService;
 use App\Service\SettingsService;
 
 final class PageView
 {
     private View $view;
     private SettingsService $settings;
-    private ContentTypeService $contentTypes;
 
-    public function __construct(View $view, SettingsService $settings, ContentTypeService $contentTypes)
+    public function __construct(View $view, SettingsService $settings)
     {
         $this->view = $view;
         $this->settings = $settings;
-        $this->contentTypes = $contentTypes;
     }
 
     public function home(?array $user, array $site, array $posts = []): void
@@ -96,37 +93,31 @@ final class PageView
         ]);
     }
 
-    public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $contentType, array $availableStatuses): void
+    public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $availableStatuses): void
     {
         $this->view->render('admin', 'admin/content/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
             'status' => $status,
             'query' => $query,
-            'contentType' => $contentType,
             'availableStatuses' => $availableStatuses,
-            'currentContentType' => $contentType,
             'adminMenu' => $this->adminMenu(),
             'theme' => $this->theme(),
-            'pageTitle' => (string)($contentType['label_plural'] ?? 'Content'),
+            'pageTitle' => 'Obsah',
         ]);
     }
 
-    public function adminContentForm(string $mode, array $item, array $errors, array $contentType, array $availableStatuses, array $authors): void
+    public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $authors): void
     {
         $this->view->render('admin', 'admin/content/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
-            'contentType' => $contentType,
             'availableStatuses' => $availableStatuses,
             'authors' => $authors,
-            'currentContentType' => $contentType,
             'adminMenu' => $this->adminMenu(),
             'theme' => $this->theme(),
-            'pageTitle' => $mode === 'add'
-                ? 'Přidat ' . (string)($contentType['label_singular'] ?? 'obsah')
-                : 'Upravit ' . (string)($contentType['label_singular'] ?? 'obsah'),
+            'pageTitle' => $mode === 'add' ? 'Přidat obsah' : 'Upravit obsah',
         ]);
     }
 
@@ -140,20 +131,11 @@ final class PageView
 
     private function adminMenu(): array
     {
-        $items = [
+        return [
             ['label' => 'Dashboard', 'url' => 'admin/dashboard'],
             ['label' => 'Uživatelé', 'url' => 'admin/users'],
+            ['label' => 'Obsah', 'url' => 'admin/content'],
+            ['label' => 'Nastavení', 'url' => 'admin/settings'],
         ];
-
-        foreach ($this->contentTypes->all() as $type) {
-            $items[] = [
-                'label' => (string)($type['label_plural'] ?? 'Content'),
-                'url' => 'admin/content?type=' . urlencode((string)($type['type'] ?? 'post')),
-            ];
-        }
-
-        $items[] = ['label' => 'Nastavení', 'url' => 'admin/settings'];
-
-        return $items;
     }
 }

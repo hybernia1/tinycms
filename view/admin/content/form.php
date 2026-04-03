@@ -1,12 +1,10 @@
 <?php
-$type = (string)($contentType['type'] ?? 'post');
 $createdRaw = trim((string)($item['created'] ?? ''));
 $createdStamp = $createdRaw !== '' ? strtotime($createdRaw) : false;
 $createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
 ?>
-<form class="content-editor-form" method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add?type=' . urlencode($type)) : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0) . '&type=' . urlencode($type)), ENT_QUOTES, 'UTF-8') ?>">
+<form class="content-editor-form" method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
-    <input type="hidden" name="type" value="<?= htmlspecialchars($type, ENT_QUOTES, 'UTF-8') ?>">
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">
@@ -44,7 +42,7 @@ $createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
                 </div>
                 <div class="content-box-footer d-flex gap-2">
                     <button class="btn btn-primary" type="submit">Uložit</button>
-                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content?type=' . urlencode($type)), ENT_QUOTES, 'UTF-8') ?>">Zpět</a>
+                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>">Zpět</a>
                 </div>
             </div>
             <div class="card">

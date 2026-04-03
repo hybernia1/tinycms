@@ -32,7 +32,7 @@
                         </h3>
                         <p class="m-0 mb-1 text-muted"><?= htmlspecialchars((string)($post['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
                         <p class="m-0 mb-1"><small>Slug URL: /<?= htmlspecialchars((string)($post['url'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
-                        <p class="m-0"><small>Short URL: /<?= htmlspecialchars((string)($post['type_slug'] ?? ''), ENT_QUOTES, 'UTF-8') ?>/<?= htmlspecialchars((string)($post['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
+                        <p class="m-0"><small>Short URL: /<?= htmlspecialchars((string)($post['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
                     </li>
                     <?php endforeach; ?>
                 </ul>

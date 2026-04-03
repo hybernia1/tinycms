@@ -11,7 +11,6 @@ use App\Controller\FrontController;
 use App\Service\Auth\Auth;
 use App\Service\AuthService;
 use App\Service\ContentService;
-use App\Service\ContentTypeService;
 use App\Service\CsrfService;
 use App\Service\FlashService;
 use App\Service\Router\Router;
@@ -35,13 +34,12 @@ $authService = new AuthService($auth);
 $userService = new UserService();
 $contentService = new ContentService();
 $slugger = new SluggerService();
-$contentTypes = new ContentTypeService();
 $settingsService = new SettingsService();
-$pageView = new PageView($view, $settingsService, $contentTypes);
-$front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $contentTypes, $slugger);
+$pageView = new PageView($view, $settingsService);
+$front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $slugger);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
-$adminContent = new AdminContentController($pageView, $authService, $contentService, $contentTypes, $userService, $flash, $csrf);
+$adminContent = new AdminContentController($pageView, $authService, $contentService, $userService, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
@@ -51,10 +49,6 @@ $redirect = static function (string $path = '', bool $permanent = false) use ($r
 
 $router->get('', static function () use ($front): void {
     $front->home();
-});
-
-$router->get('{typeSlug}/{slug}', static function (array $params) use ($front, $redirect): void {
-    $front->contentDetail($params, $redirect);
 });
 
 $router->get('front/login', static function () use ($redirect): void {
@@ -145,7 +139,6 @@ $router->post('admin/content/edit', static function () use ($adminContent, $redi
     $adminContent->editSubmit($redirect);
 });
 
-
 $router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
     $adminSettings->form($redirect);
 });
@@ -156,6 +149,10 @@ $router->post('admin/settings', static function () use ($adminSettings, $redirec
 
 $router->get('admin/logout', static function () use ($admin, $redirect): void {
     $admin->logout($redirect);
+});
+
+$router->get('{slug}', static function (array $params) use ($front, $redirect): void {
+    $front->contentDetail($params, $redirect);
 });
 
 return [

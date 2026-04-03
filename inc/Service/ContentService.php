@@ -15,9 +15,9 @@ final class ContentService
         $this->query = new Query(Connection::get());
     }
 
-    public function paginate(string $type, int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
+    public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
     {
-        $where = ['type' => $type];
+        $where = [];
 
         if ($status !== 'all') {
             $where['status'] = $status;
@@ -25,7 +25,6 @@ final class ContentService
 
         return $this->query->paginate('content', [
             'id',
-            'type',
             'name',
             'status',
             'author',
@@ -42,18 +41,18 @@ final class ContentService
         ]);
     }
 
-    public function find(int $id, string $type): ?array
+    public function find(int $id): ?array
     {
-        $rows = $this->query->select('content', ['id', 'type', 'name', 'status', 'excerpt', 'body', 'author', 'created', 'updated'], ['id' => $id, 'type' => $type]);
+        $rows = $this->query->select('content', ['id', 'name', 'status', 'excerpt', 'body', 'author', 'created', 'updated'], ['id' => $id]);
         return $rows[0] ?? null;
     }
 
-    public function delete(int $id, string $type): bool
+    public function delete(int $id): bool
     {
-        return $this->query->delete('content', ['id' => $id, 'type' => $type]) > 0;
+        return $this->query->delete('content', ['id' => $id]) > 0;
     }
 
-    public function deleteMany(array $ids, string $type): int
+    public function deleteMany(array $ids): int
     {
         $clean = $this->sanitizeIds($ids);
 
@@ -64,15 +63,15 @@ final class ContentService
         $deleted = 0;
 
         foreach ($clean as $id) {
-            $deleted += $this->delete($id, $type) ? 1 : 0;
+            $deleted += $this->delete($id) ? 1 : 0;
         }
 
         return $deleted;
     }
 
-    public function setStatus(int $id, string $type, string $status): bool
+    public function setStatus(int $id, string $status): bool
     {
-        $item = $this->find($id, $type);
+        $item = $this->find($id);
 
         if ($item === null || (string)($item['status'] ?? '') === $status) {
             return false;
@@ -81,10 +80,10 @@ final class ContentService
         return $this->query->update('content', [
             'status' => $status,
             'updated' => date('Y-m-d H:i:s'),
-        ], ['id' => $id, 'type' => $type]) > 0;
+        ], ['id' => $id]) > 0;
     }
 
-    public function setStatusMany(array $ids, string $type, string $status): int
+    public function setStatusMany(array $ids, string $status): int
     {
         $clean = $this->sanitizeIds($ids);
 
@@ -95,13 +94,13 @@ final class ContentService
         $updated = 0;
 
         foreach ($clean as $id) {
-            $updated += $this->setStatus($id, $type, $status) ? 1 : 0;
+            $updated += $this->setStatus($id, $status) ? 1 : 0;
         }
 
         return $updated;
     }
 
-    public function save(array $input, int $defaultAuthorId, string $type, ?int $id = null): array
+    public function save(array $input, int $defaultAuthorId, ?int $id = null): array
     {
         $name = trim((string)($input['name'] ?? ''));
         $status = trim((string)($input['status'] ?? 'draft'));
@@ -133,7 +132,6 @@ final class ContentService
 
         $now = date('Y-m-d H:i:s');
         $payload = [
-            'type' => $type,
             'name' => $name,
             'status' => $status,
             'excerpt' => $excerpt === '' ? null : mb_substr($excerpt, 0, 500),
@@ -152,14 +150,14 @@ final class ContentService
             $payload['created'] = $created;
         }
 
-        $updated = $this->query->update('content', $payload, ['id' => $id, 'type' => $type]);
+        $updated = $this->query->update('content', $payload, ['id' => $id]);
 
         return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
     }
 
-    public function statusesForType(string $type): array
+    public function statuses(): array
     {
-        $rows = $this->query->select('content', ['status'], ['type' => $type]);
+        $rows = $this->query->select('content', ['status']);
         $statuses = array_values(array_unique(array_filter(array_map(static fn(array $row): string => trim((string)($row['status'] ?? '')), $rows))));
         $statuses = array_values(array_unique(array_merge(['draft', 'published'], $statuses)));
 
@@ -167,18 +165,11 @@ final class ContentService
         return $statuses;
     }
 
-    public function listPublished(string $type = '', int $limit = 20): array
+    public function listPublished(int $limit = 20): array
     {
-        $rows = $this->query->select('content', ['id', 'type', 'name', 'excerpt', 'created'], ['status' => 'published']);
+        $rows = $this->query->select('content', ['id', 'name', 'excerpt', 'created'], ['status' => 'published']);
         $now = time();
-        $typeKey = trim(mb_strtolower($type));
-        $items = array_values(array_filter($rows, static function (array $row) use ($now, $typeKey): bool {
-            if ($typeKey !== '' && trim(mb_strtolower((string)($row['type'] ?? ''))) !== $typeKey) {
-                return false;
-            }
-
-            return self::isPublishedVisible($row, $now);
-        }));
+        $items = array_values(array_filter($rows, static fn(array $row): bool => self::isPublishedVisible($row, $now)));
 
         usort($items, static fn(array $a, array $b): int => strcmp((string)($b['created'] ?? ''), (string)($a['created'] ?? '')));
 
@@ -189,9 +180,9 @@ final class ContentService
         return $items;
     }
 
-    public function findPublished(int $id, string $type): ?array
+    public function findPublished(int $id): ?array
     {
-        $item = $this->find($id, $type);
+        $item = $this->find($id);
 
         if ($item === null || !self::isPublishedVisible($item)) {
             return null;
