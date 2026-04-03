@@ -1,15 +1,15 @@
 <div class="card p-5">
     <nav class="filter-nav mb-4">
         <?php foreach ($groups as $groupKey => $group): ?>
-            <a class="filter-link<?= $activeGroup === $groupKey ? ' active' : '' ?>" href="<?= $e($url('admin/settings?group=' . urlencode((string)$groupKey))) ?>">
-                <?= $e((string)($group['label'] ?? $groupKey)) ?>
+            <a class="filter-link<?= $activeGroup === $groupKey ? ' active' : '' ?>" href="<?= $escape($url('admin/settings?group=' . urlencode((string)$groupKey))) ?>">
+                <?= $escape((string)($group['label'] ?? $groupKey)) ?>
             </a>
         <?php endforeach; ?>
     </nav>
 
-    <form method="post" action="<?= $e($url('admin/settings')) ?>">
+    <form method="post" action="<?= $escape($url('admin/settings')) ?>">
         <?= $csrfField() ?>
-        <input type="hidden" name="group" value="<?= $e((string)$activeGroup) ?>">
+        <input type="hidden" name="group" value="<?= $escape((string)$activeGroup) ?>">
 
         <?php $active = $groups[$activeGroup] ?? null; ?>
         <?php if (is_array($active)): ?>
@@ -31,19 +31,19 @@
                         <?php elseif ($fieldKey === 'timeformat_custom'): ?>
                             Vlastní formát času
                         <?php else: ?>
-                            <?= $e((string)($field['label'] ?? $fieldKey)) ?>
+                            <?= $escape((string)($field['label'] ?? $fieldKey)) ?>
                         <?php endif; ?>
                     </label>
                     <?php if ($fieldType === 'textarea'): ?>
-                        <textarea name="settings[<?= $e((string)$activeGroup) ?>][<?= $e((string)$fieldKey) ?>]" rows="4"><?= $e($fieldValue) ?></textarea>
+                        <textarea name="settings[<?= $escape((string)$activeGroup) ?>][<?= $escape((string)$fieldKey) ?>]" rows="4"><?= $escape($fieldValue) ?></textarea>
                     <?php elseif ($fieldType === 'select'): ?>
-                        <select name="settings[<?= $e((string)$activeGroup) ?>][<?= $e((string)$fieldKey) ?>]">
+                        <select name="settings[<?= $escape((string)$activeGroup) ?>][<?= $escape((string)$fieldKey) ?>]">
                             <?php foreach (($field['options'] ?? []) as $optionValue => $optionLabel): ?>
-                                <option value="<?= $e((string)$optionValue) ?>" <?= $fieldValue === (string)$optionValue ? 'selected' : '' ?>><?= $e((string)$optionLabel) ?></option>
+                                <option value="<?= $escape((string)$optionValue) ?>" <?= $fieldValue === (string)$optionValue ? 'selected' : '' ?>><?= $escape((string)$optionLabel) ?></option>
                             <?php endforeach; ?>
                         </select>
                     <?php else: ?>
-                        <input type="text" name="settings[<?= $e((string)$activeGroup) ?>][<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>">
+                        <input type="text" name="settings[<?= $escape((string)$activeGroup) ?>][<?= $escape((string)$fieldKey) ?>]" value="<?= $escape($fieldValue) ?>">
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>

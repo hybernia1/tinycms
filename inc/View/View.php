@@ -35,14 +35,16 @@ final class View
             return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
         };
         $csrfField = fn(string $name = '_csrf'): string => $this->csrf->field($name);
-        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $escape = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
         $dateTime = $data['dateTime'] ?? null;
-        $d = static fn(mixed $value): string => (string)$value;
-        $t = static fn(mixed $value): string => (string)$value;
+        $date = static fn(mixed $value): string => (string)$value;
+        $time = static fn(mixed $value): string => (string)$value;
+        $title = (string)($data['siteTitle'] ?? $data['siteName'] ?? 'TinyCMS');
+        $siteTitle = static fn(): string => $title;
 
         if ($dateTime instanceof DateTimeService) {
-            $d = static fn(mixed $value): string => $dateTime->formatDate((string)$value);
-            $t = static fn(mixed $value): string => $dateTime->formatTime((string)$value);
+            $date = static fn(mixed $value): string => $dateTime->formatDate((string)$value);
+            $time = static fn(mixed $value): string => $dateTime->formatTime((string)$value);
         }
 
         if ($layout === 'admin' && !isset($data['adminMenu'])) {
@@ -66,9 +68,10 @@ final class View
         $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
         $data['icon'] = $icon;
         $data['csrfField'] = $csrfField;
-        $data['e'] = $e;
-        $data['d'] = $d;
-        $data['t'] = $t;
+        $data['escape'] = $escape;
+        $data['date'] = $date;
+        $data['time'] = $time;
+        $data['site_title'] = $siteTitle;
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
 

@@ -34,6 +34,7 @@ final class PageView
             'theme' => $this->theme(),
             'pageTitle' => $siteName,
             'dateTime' => $this->dateTime,
+            'siteTitle' => $this->siteTitle(),
         ]);
     }
 
@@ -41,6 +42,7 @@ final class PageView
     {
         $state['pageTitle'] = 'Login';
         $state['theme'] = $this->theme();
+        $state['siteTitle'] = $this->siteTitle();
         $this->view->render('login', 'login/form', $state);
     }
 
@@ -51,6 +53,7 @@ final class PageView
             'theme' => $this->theme(),
             'pageTitle' => (string)($item['name'] ?? 'Obsah'),
             'dateTime' => $this->dateTime,
+            'siteTitle' => $this->siteTitle(),
         ]);
     }
 
@@ -62,6 +65,7 @@ final class PageView
             'theme' => $this->theme(),
             'pageTitle' => 'Dashboard',
             'dateTime' => $this->dateTime,
+            'siteTitle' => $this->siteTitle(),
         ]);
     }
 
@@ -76,6 +80,7 @@ final class PageView
             'theme' => $this->theme(),
             'pageTitle' => 'Uživatelé',
             'dateTime' => $this->dateTime,
+            'siteTitle' => $this->siteTitle(),
         ]);
     }
 
@@ -89,6 +94,7 @@ final class PageView
             'theme' => $this->theme(),
             'pageTitle' => 'Nastavení',
             'dateTime' => $this->dateTime,
+            'siteTitle' => $this->siteTitle(),
         ]);
     }
 
@@ -102,6 +108,7 @@ final class PageView
             'theme' => $this->theme(),
             'pageTitle' => $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele',
             'dateTime' => $this->dateTime,
+            'siteTitle' => $this->siteTitle(),
         ]);
     }
 
@@ -119,6 +126,7 @@ final class PageView
             'theme' => $this->theme(),
             'pageTitle' => (string)($contentType['label_plural'] ?? 'Content'),
             'dateTime' => $this->dateTime,
+            'siteTitle' => $this->siteTitle(),
         ]);
     }
 
@@ -138,6 +146,7 @@ final class PageView
                 ? 'Přidat ' . (string)($contentType['label_singular'] ?? 'obsah')
                 : 'Upravit ' . (string)($contentType['label_singular'] ?? 'obsah'),
             'dateTime' => $this->dateTime,
+            'siteTitle' => $this->siteTitle(),
         ]);
     }
 
@@ -147,6 +156,12 @@ final class PageView
         $theme = (string)($settings['custom']['theme'] ?? 'light');
 
         return in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
+    }
+
+    private function siteTitle(): string
+    {
+        $settings = $this->settings->resolved();
+        return (string)($settings['main']['sitename'] ?? 'TinyCMS');
     }
 
     private function adminMenu(): array

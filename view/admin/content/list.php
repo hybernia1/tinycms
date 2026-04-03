@@ -24,24 +24,24 @@ foreach ($availableStatuses as $statusValue) {
 <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <nav class="filter-nav">
         <?php foreach ($statusLinks as $key => $label): ?>
-            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= $e($url('admin/content?type=' . urlencode($type) . '&status=' . urlencode($key) . '&per_page=' . $perPage . '&page=1')) ?>"><?= $e($label) ?></a>
+            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= $escape($url('admin/content?type=' . urlencode($type) . '&status=' . urlencode($key) . '&per_page=' . $perPage . '&page=1')) ?>"><?= $escape($label) ?></a>
         <?php endforeach; ?>
     </nav>
     <form method="get" class="search-form">
-        <input type="hidden" name="type" value="<?= $e($type) ?>">
-        <input type="hidden" name="status" value="<?= $e($status) ?>">
+        <input type="hidden" name="type" value="<?= $escape($type) ?>">
+        <input type="hidden" name="status" value="<?= $escape($status) ?>">
         <input type="hidden" name="per_page" value="<?= $perPage ?>">
         <input type="hidden" name="page" value="1">
         <div class="search-field">
-            <input class="search-input" type="search" name="q" value="<?= $e($query) ?>" placeholder="Hledat název nebo obsah">
+            <input class="search-input" type="search" name="q" value="<?= $escape($query) ?>" placeholder="Hledat název nebo obsah">
             <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
         </div>
     </form>
 </div>
 
-<form id="bulk-action-form" method="post" action="<?= $e($url('admin/content/bulk-action')) ?>" data-bulk-type="záznamů">
+<form id="bulk-action-form" method="post" action="<?= $escape($url('admin/content/bulk-action')) ?>" data-bulk-type="záznamů">
     <?= $csrfField() ?>
-    <input type="hidden" name="type" value="<?= $e($type) ?>">
+    <input type="hidden" name="type" value="<?= $escape($type) ?>">
     <input type="hidden" name="ids" value="">
     <input type="hidden" name="action" id="bulk-action-value" value="">
 </form>
@@ -59,7 +59,7 @@ foreach ($availableStatuses as $statusValue) {
             <?php foreach ($items as $row):
                 $id = (int)($row['id'] ?? 0);
                 $createdAt = (string)($row['created'] ?? '');
-                $createdLabel = $d($createdAt) . ' ' . $t($createdAt);
+                $createdLabel = $date($createdAt) . ' ' . $time($createdAt);
                 $createdStamp = $createdAt !== '' ? strtotime($createdAt) : false;
                 $isPlanned = $createdStamp !== false && $createdStamp > time();
                 $statusValue = (string)($row['status'] ?? '');
@@ -68,21 +68,21 @@ foreach ($availableStatuses as $statusValue) {
                 <tr>
                     <td class="table-col-select"><input type="checkbox" value="<?= $id ?>" data-bulk-item></td>
                     <td>
-                        <a href="<?= $e($url('admin/content/edit?id=' . $id . '&type=' . urlencode($type))) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+                        <a href="<?= $escape($url('admin/content/edit?id=' . $id . '&type=' . urlencode($type))) ?>"><?= $escape((string)($row['name'] ?? '')) ?></a>
                         <div class="text-muted">
-                            <?= $e($createdLabel) ?>
+                            <?= $escape($createdLabel) ?>
                         </div>
                         <div class="d-flex gap-2 mt-2">
-                            <span class="badge <?= $e($statusClass) ?>"><?= $e($statusValue) ?></span>
+                            <span class="badge <?= $escape($statusClass) ?>"><?= $escape($statusValue) ?></span>
                             <?php if ($isPlanned): ?><span class="badge text-bg-warning">Plánováno</span><?php endif; ?>
                         </div>
                     </td>
-                    <td><?= $e((string)($row['author_name'] ?? '—')) ?></td>
+                    <td><?= $escape((string)($row['author_name'] ?? '—')) ?></td>
                     <td class="table-col-actions">
                         <?php $isPublished = (string)($row['status'] ?? '') === 'published'; ?>
-                        <form method="post" action="<?= $e($url('admin/content/status-toggle')) ?>" class="inline-form">
+                        <form method="post" action="<?= $escape($url('admin/content/status-toggle')) ?>" class="inline-form">
                             <?= $csrfField() ?>
-                            <input type="hidden" name="type" value="<?= $e($type) ?>">
+                            <input type="hidden" name="type" value="<?= $escape($type) ?>">
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <input type="hidden" name="mode" value="<?= $isPublished ? 'draft' : 'publish' ?>">
                             <button class="btn btn-light btn-icon" type="submit" aria-label="<?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?>" title="<?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?>">
@@ -90,9 +90,9 @@ foreach ($availableStatuses as $statusValue) {
                                 <span class="sr-only"><?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?></span>
                             </button>
                         </form>
-                        <form id="delete-content-<?= $id ?>" method="post" action="<?= $e($url('admin/content/delete')) ?>" class="inline-form">
+                        <form id="delete-content-<?= $id ?>" method="post" action="<?= $escape($url('admin/content/delete')) ?>" class="inline-form">
                             <?= $csrfField() ?>
-                            <input type="hidden" name="type" value="<?= $e($type) ?>">
+                            <input type="hidden" name="type" value="<?= $escape($type) ?>">
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <button class="btn btn-light btn-icon" type="button" data-modal-open data-modal-mode="single" data-type="obsah" data-form-id="delete-content-<?= $id ?>" aria-label="Smazat" title="Smazat">
                                 <?= $icon('delete') ?>
@@ -110,8 +110,8 @@ foreach ($availableStatuses as $statusValue) {
         <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php $prevPage = max(1, $page - 1); $nextPage = min($totalPages, $page + 1); ?>
-                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= $e($url('admin/content?page=' . $prevPage . '&per_page=' . $perPage . '&type=' . urlencode($type) . '&status=' . urlencode($status) . '&q=' . urlencode($query))) ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span>Předchozí</span></a>
-                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= $e($url('admin/content?page=' . $nextPage . '&per_page=' . $perPage . '&type=' . urlencode($type) . '&status=' . urlencode($status) . '&q=' . urlencode($query))) ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span>Další</span><?= $icon('next') ?></a>
+                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= $escape($url('admin/content?page=' . $prevPage . '&per_page=' . $perPage . '&type=' . urlencode($type) . '&status=' . urlencode($status) . '&q=' . urlencode($query))) ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span>Předchozí</span></a>
+                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= $escape($url('admin/content?page=' . $nextPage . '&per_page=' . $perPage . '&type=' . urlencode($type) . '&status=' . urlencode($status) . '&q=' . urlencode($query))) ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span>Další</span><?= $icon('next') ?></a>
             </div>
         <?php else: ?>
             <div></div>
@@ -123,9 +123,9 @@ foreach ($availableStatuses as $statusValue) {
                     <option value="<?= (int)$option ?>" <?= $perPage === (int)$option ? 'selected' : '' ?>><?= (int)$option ?></option>
                 <?php endforeach; ?>
             </select>
-            <input type="hidden" name="type" value="<?= $e($type) ?>">
-            <input type="hidden" name="status" value="<?= $e($status) ?>">
-            <input type="hidden" name="q" value="<?= $e($query) ?>">
+            <input type="hidden" name="type" value="<?= $escape($type) ?>">
+            <input type="hidden" name="status" value="<?= $escape($status) ?>">
+            <input type="hidden" name="q" value="<?= $escape($query) ?>">
             <input type="hidden" name="page" value="1">
             <button class="btn btn-light" type="submit">Použít</button>
         </form>
