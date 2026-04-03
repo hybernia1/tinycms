@@ -149,85 +149,24 @@ a:focus-visible {
     flex: 1 0 0%;
 }
 
-.col-auto {
-    flex: 0 0 auto;
-    width: auto;
-}
-
 [class^='col-'],
 [class*=' col-'] {
     flex: 0 0 auto;
     width: 100%;
 }
 
-.col-1 { width: 8.3333%; }
-.col-2 { width: 16.6667%; }
-.col-3 { width: 25%; }
-.col-4 { width: 33.3333%; }
-.col-5 { width: 41.6667%; }
-.col-6 { width: 50%; }
-.col-7 { width: 58.3333%; }
-.col-8 { width: 66.6666%; }
-.col-9 { width: 75%; }
-.col-10 { width: 83.3333%; }
-.col-11 { width: 91.6667%; }
 .col-12 { width: 100%; }
 
-.g-0 { --grid-gutter-x: 0; --grid-gutter-y: 0; }
-.g-1 { --grid-gutter-x: var(--space-1); --grid-gutter-y: var(--space-1); }
-.g-2 { --grid-gutter-x: var(--space-2); --grid-gutter-y: var(--space-2); }
-.g-3 { --grid-gutter-x: var(--space-3); --grid-gutter-y: var(--space-3); }
-.g-4 { --grid-gutter-x: var(--space-4); --grid-gutter-y: var(--space-4); }
-
-.gx-0 { --grid-gutter-x: 0; }
-.gx-1 { --grid-gutter-x: var(--space-1); }
-.gx-2 { --grid-gutter-x: var(--space-2); }
-.gx-3 { --grid-gutter-x: var(--space-3); }
-.gx-4 { --grid-gutter-x: var(--space-4); }
-
-.gy-0 { --grid-gutter-y: 0; }
-.gy-1 { --grid-gutter-y: var(--space-1); }
-.gy-2 { --grid-gutter-y: var(--space-2); }
-.gy-3 { --grid-gutter-y: var(--space-3); }
-.gy-4 { --grid-gutter-y: var(--space-4); }
-
 @media (min-width: 768px) {
-    .col-md { flex: 1 0 0%; }
-    .col-md-auto { flex: 0 0 auto; width: auto; }
-    .col-md-1 { width: 8.3333%; }
-    .col-md-2 { width: 16.6667%; }
-    .col-md-3 { width: 25%; }
-    .col-md-4 { width: 33.3333%; }
-    .col-md-5 { width: 41.6667%; }
     .col-md-6 { width: 50%; }
-    .col-md-7 { width: 58.3333%; }
-    .col-md-8 { width: 66.6666%; }
-    .col-md-9 { width: 75%; }
-    .col-md-10 { width: 83.3333%; }
-    .col-md-11 { width: 91.6667%; }
-    .col-md-12 { width: 100%; }
 }
 
 @media (min-width: 992px) {
-    .col-lg { flex: 1 0 0%; }
-    .col-lg-auto { flex: 0 0 auto; width: auto; }
-    .col-lg-1 { width: 8.3333%; }
-    .col-lg-2 { width: 16.6667%; }
-    .col-lg-3 { width: 25%; }
-    .col-lg-4 { width: 33.3333%; }
-    .col-lg-5 { width: 41.6667%; }
-    .col-lg-6 { width: 50%; }
-    .col-lg-7 { width: 58.3333%; }
     .col-lg-8 { width: 66.6666%; }
-    .col-lg-9 { width: 75%; }
-    .col-lg-10 { width: 83.3333%; }
-    .col-lg-11 { width: 91.6667%; }
-    .col-lg-12 { width: 100%; }
 }
 
 .d-flex { display: flex; }
 .gap-2 { gap: var(--space-2); }
-.gap-3 { gap: var(--space-3); }
 .align-center { align-items: center; }
 .justify-between { justify-content: space-between; }
 
@@ -241,15 +180,11 @@ a:focus-visible {
 .mb-2 { margin-bottom: var(--space-2); }
 .mb-3 { margin-bottom: var(--space-3); }
 .mb-4 { margin-bottom: var(--space-4); }
-.mb-5 { margin-bottom: var(--space-5); }
 .mt-4 { margin-top: var(--space-4); }
 .mt-2 { margin-top: var(--space-2); }
-.ml-2 { margin-left: var(--space-2); }
 
-.text-primary { color: var(--primary); }
 .text-muted { color: var(--color-muted); }
 .text-danger { color: var(--danger); }
-.text-success { color: var(--success); }
 
 .badge {
     display: inline-flex;
@@ -265,13 +200,11 @@ a:focus-visible {
 .bg-light { background: var(--color-surface-muted); }
 .bg-primary { background: var(--primary); color: var(--color-inverse); }
 .bg-success { background: var(--success); color: var(--color-inverse); }
-.bg-danger { background: var(--danger); color: var(--color-inverse); }
 .bg-warning { background: var(--warning); color: var(--color-inverse); }
 .bg-dark { background: var(--color-emphasis); color: var(--color-inverse); }
 
 .text-bg-primary,
 .text-bg-success,
-.text-bg-danger,
 .text-bg-warning,
 .text-bg-dark {
     color: var(--color-inverse);
@@ -280,7 +213,6 @@ a:focus-visible {
 
 .text-bg-primary { background: var(--primary); }
 .text-bg-success { background: var(--success); }
-.text-bg-danger { background: var(--danger); }
 .text-bg-warning {
     background: var(--warning-bg);
     color: var(--warning-text);
@@ -378,14 +310,6 @@ a:focus-visible {
 
 .table tbody tr:hover {
     background: var(--table-row-hover-bg);
-}
-
-.table-col-select {
-    width: 1%;
-    white-space: nowrap;
-    padding-left: var(--space-1-5);
-    padding-right: var(--space-1-5);
-    text-align: left;
 }
 
 .table-col-actions {
@@ -838,10 +762,6 @@ input[type='week']::-webkit-calendar-picker-indicator {
 
 .inline-form {
     display: inline-block;
-}
-
-.justify-end {
-    justify-content: flex-end;
 }
 
 button:disabled,
