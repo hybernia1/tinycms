@@ -35,6 +35,7 @@ final class ContentService
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'id',
+            'orderByAllowed' => ['id', 'name', 'status', 'author', 'created', 'updated'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name', 'excerpt', 'body'],

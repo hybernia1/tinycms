@@ -23,6 +23,7 @@ final class UserService
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'ID',
+            'orderByAllowed' => ['ID', 'name', 'email', 'role', 'suspend', 'created'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name', 'email'],

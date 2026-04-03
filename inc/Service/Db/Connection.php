@@ -5,6 +5,7 @@ namespace App\Service\Db;
 
 use PDO;
 use PDOException;
+use RuntimeException;
 
 class Connection
 {
@@ -18,7 +19,7 @@ class Connection
                 self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
                 self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (PDOException $e) {
-                die('Database connection failed: ' . $e->getMessage());
+                throw new RuntimeException('Database connection failed.', 0, $e);
             }
         }
 

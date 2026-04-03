@@ -10,24 +10,25 @@ use App\Service\FlashService;
 use App\Service\UserService;
 use App\View\PageView;
 
-final class AdminContentController
+final class AdminContentController extends BaseAdminController
 {
     private const PER_PAGE_ALLOWED = [10, 20, 50];
     private const FORM_STATE_KEY = 'admin_content_form_state';
 
     public function __construct(
         private PageView $pages,
-        private AuthService $authService,
+        AuthService $authService,
         private ContentService $content,
         private UserService $users,
-        private FlashService $flash,
-        private CsrfService $csrf
+        FlashService $flash,
+        CsrfService $csrf
     ) {
+        parent::__construct($authService, $flash, $csrf);
     }
 
     public function list(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
+        if (!$this->guardAdmin($redirect, false)) {
             return;
         }
 
@@ -51,7 +52,10 @@ final class AdminContentController
 
     public function deleteSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
             return;
         }
 
@@ -60,6 +64,7 @@ final class AdminContentController
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID obsahu.');
             $redirect('admin/content');
+            return;
         }
 
         $ok = $this->content->delete($id);
@@ -69,20 +74,23 @@ final class AdminContentController
 
     public function addForm(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
+        if (!$this->guardAdmin($redirect, false)) {
             return;
         }
 
         $fallback = ['id' => null, 'name' => '', 'status' => 'draft', 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $fallback['author'] = (int)($this->authService->auth()->id() ?? 0);
-        $state = $this->consumeFormState('add', null);
+        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
         $statuses = $this->content->statuses();
         $this->pages->adminContentForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $statuses, $this->users->authorOptions());
     }
 
     public function addSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
             return;
         }
 
@@ -96,13 +104,13 @@ final class AdminContentController
         }
 
         $this->flash->add('error', 'Nepodařilo se uložit obsah.');
-        $this->storeFormState('add', null, $_POST, $result['errors'] ?? []);
+        $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/content/add');
     }
 
     public function editForm(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
+        if (!$this->guardAdmin($redirect, false)) {
             return;
         }
 
@@ -112,16 +120,20 @@ final class AdminContentController
         if ($item === null) {
             $this->flash->add('info', 'Obsah nenalezen.');
             $redirect('admin/content');
+            return;
         }
 
-        $state = $this->consumeFormState('edit', $id);
+        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $statuses = $this->content->statuses();
         $this->pages->adminContentForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $statuses, $this->users->authorOptions());
     }
 
     public function editSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
             return;
         }
 
@@ -130,6 +142,7 @@ final class AdminContentController
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID obsahu.');
             $redirect('admin/content');
+            return;
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
@@ -141,13 +154,16 @@ final class AdminContentController
         }
 
         $this->flash->add('error', 'Nepodařilo se upravit obsah.');
-        $this->storeFormState('edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
+        $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect('admin/content/edit?id=' . $id);
     }
 
     public function statusToggleSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
             return;
         }
 
@@ -157,6 +173,7 @@ final class AdminContentController
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID obsahu.');
             $redirect('admin/content');
+            return;
         }
 
         if ($mode === 'publish') {
@@ -168,67 +185,6 @@ final class AdminContentController
         $ok = $this->content->setStatus($id, 'draft');
         $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah přepnut do draftu.' : 'Obsah už byl v draftu nebo není dostupný.');
         $redirect('admin/content');
-    }
-
-    private function guard(callable $redirect): bool
-    {
-        if (!$this->authService->auth()->check()) {
-            $redirect('login');
-        }
-
-        if (!$this->authService->canAccessAdmin()) {
-            $redirect('');
-        }
-
-        return true;
-    }
-
-    private function guardCsrf(callable $redirect): bool
-    {
-        $token = (string)($_POST['_csrf'] ?? '');
-
-        if ($token === '' || !$this->csrf->verify($token)) {
-            $this->flash->add('error', 'Neplatný CSRF token.');
-            $redirect('admin/content');
-        }
-
-        return true;
-    }
-
-    private function storeFormState(string $mode, ?int $id, array $data, array $errors): void
-    {
-        $this->ensureSession();
-        $_SESSION[self::FORM_STATE_KEY] = [
-            'mode' => $mode,
-            'id' => $id,
-            'data' => $data,
-            'errors' => $errors,
-        ];
-    }
-
-    private function consumeFormState(string $mode, ?int $id): ?array
-    {
-        $this->ensureSession();
-        $state = $_SESSION[self::FORM_STATE_KEY] ?? null;
-
-        if (!is_array($state)) {
-            return null;
-        }
-
-        unset($_SESSION[self::FORM_STATE_KEY]);
-
-        if (($state['mode'] ?? null) !== $mode || ($state['id'] ?? null) !== $id) {
-            return null;
-        }
-
-        return $state;
-    }
-
-    private function ensureSession(): void
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
     }
 
     private function editPath(int $id): string

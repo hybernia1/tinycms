@@ -64,6 +64,16 @@ final class SettingsService
     public function save(array $input): void
     {
         $fields = $this->fields();
+        $existingRows = $this->query->select('settings', ['key_name']);
+        $existingKeys = [];
+
+        foreach ($existingRows as $row) {
+            $key = (string)($row['key_name'] ?? '');
+
+            if ($key !== '') {
+                $existingKeys[$key] = true;
+            }
+        }
 
         foreach ($input as $key => $rawValue) {
             if (!isset($fields[$key])) {
@@ -72,14 +82,14 @@ final class SettingsService
 
             $value = trim((string)$rawValue);
             $payload = ['value' => json_encode($value, JSON_UNESCAPED_UNICODE)];
-            $exists = $this->query->select('settings', ['key_name'], ['key_name' => $key]) !== [];
 
-            if ($exists) {
+            if (isset($existingKeys[$key])) {
                 $this->query->update('settings', $payload, ['key_name' => $key]);
                 continue;
             }
 
             $this->query->insert('settings', ['key_name' => $key, 'value' => $payload['value']]);
+            $existingKeys[$key] = true;
         }
     }
 }
