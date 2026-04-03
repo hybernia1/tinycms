@@ -33,9 +33,9 @@ final class FrontController
     {
         $settings = $this->settings->resolved();
         $site = [
-            'name' => (string)($settings['main']['sitename'] ?? 'TinyCMS'),
-            'footer' => (string)($settings['main']['sitefooter'] ?? '© TinyCMS'),
-            'author' => (string)($settings['main']['siteauthor'] ?? 'Admin'),
+            'name' => (string)($settings['sitename'] ?? 'TinyCMS'),
+            'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
+            'author' => (string)($settings['siteauthor'] ?? 'Admin'),
         ];
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(30));
 

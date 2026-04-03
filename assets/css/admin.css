@@ -1,14 +1,7 @@
-body[data-theme='light'] {
+:root {
     --sidebar-bg: #0f172a;
     --sidebar-text: #ffffff;
     --sidebar-link: #cbd5e1;
-    --sidebar-link-active-bg: #1e293b;
-}
-
-body[data-theme='dark'] {
-    --sidebar-bg: #020617;
-    --sidebar-text: #f8fafc;
-    --sidebar-link: #94a3b8;
     --sidebar-link-active-bg: #1e293b;
 }
 

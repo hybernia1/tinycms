@@ -21,7 +21,7 @@ $isContentList = str_ends_with($currentPath, 'admin/content');
     <script defer src="<?= htmlspecialchars($url('assets/js/custom-datetime.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/password-toggle.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
-<body data-theme="<?= htmlspecialchars((string)$theme, ENT_QUOTES, 'UTF-8') ?>">
+<body>
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <h2 class="admin-brand">TinyCMS Admin</h2>

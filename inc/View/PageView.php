@@ -3,17 +3,13 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use App\Service\SettingsService;
-
 final class PageView
 {
     private View $view;
-    private SettingsService $settings;
 
-    public function __construct(View $view, SettingsService $settings)
+    public function __construct(View $view)
     {
         $this->view = $view;
-        $this->settings = $settings;
     }
 
     public function home(?array $user, array $site, array $posts = []): void
@@ -25,7 +21,6 @@ final class PageView
             'siteName' => $siteName,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
-            'theme' => $this->theme(),
             'pageTitle' => $siteName,
         ]);
     }
@@ -33,7 +28,6 @@ final class PageView
     public function loginForm(array $state): void
     {
         $state['pageTitle'] = 'Login';
-        $state['theme'] = $this->theme();
         $this->view->render('login', 'login/form', $state);
     }
 
@@ -41,7 +35,6 @@ final class PageView
     {
         $this->view->render('front', 'front/content', [
             'item' => $item,
-            'theme' => $this->theme(),
             'pageTitle' => (string)($item['name'] ?? 'Obsah'),
         ]);
     }
@@ -51,7 +44,6 @@ final class PageView
         $this->view->render('admin', 'admin/dashboard', [
             'user' => $user,
             'adminMenu' => $this->adminMenu(),
-            'theme' => $this->theme(),
             'pageTitle' => 'Dashboard',
         ]);
     }
@@ -64,19 +56,16 @@ final class PageView
             'status' => $status,
             'query' => $query,
             'adminMenu' => $this->adminMenu(),
-            'theme' => $this->theme(),
             'pageTitle' => 'Uživatelé',
         ]);
     }
 
-    public function adminSettingsForm(array $groups, array $values, string $activeGroup): void
+    public function adminSettingsForm(array $fields, array $values): void
     {
         $this->view->render('admin', 'admin/settings/form', [
-            'groups' => $groups,
+            'fields' => $fields,
             'values' => $values,
-            'activeGroup' => $activeGroup,
             'adminMenu' => $this->adminMenu(),
-            'theme' => $this->theme(),
             'pageTitle' => 'Nastavení',
         ]);
     }
@@ -88,7 +77,6 @@ final class PageView
             'user' => $user,
             'errors' => $errors,
             'adminMenu' => $this->adminMenu(),
-            'theme' => $this->theme(),
             'pageTitle' => $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele',
         ]);
     }
@@ -102,7 +90,6 @@ final class PageView
             'query' => $query,
             'availableStatuses' => $availableStatuses,
             'adminMenu' => $this->adminMenu(),
-            'theme' => $this->theme(),
             'pageTitle' => 'Obsah',
         ]);
     }
@@ -116,17 +103,8 @@ final class PageView
             'availableStatuses' => $availableStatuses,
             'authors' => $authors,
             'adminMenu' => $this->adminMenu(),
-            'theme' => $this->theme(),
             'pageTitle' => $mode === 'add' ? 'Přidat obsah' : 'Upravit obsah',
         ]);
-    }
-
-    private function theme(): string
-    {
-        $settings = $this->settings->resolved();
-        $theme = (string)($settings['custom']['theme'] ?? 'light');
-
-        return in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
     }
 
     private function adminMenu(): array

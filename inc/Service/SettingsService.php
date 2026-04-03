@@ -15,46 +15,31 @@ final class SettingsService
         $this->query = new Query(Connection::get());
     }
 
-    public function groups(): array
+    public function fields(): array
     {
         return [
-            'main' => [
-                'label' => 'Main settings',
-                'fields' => [
-                    'sitename' => ['label' => 'Site name', 'type' => 'text', 'default' => 'TinyCMS'],
-                    'sitefooter' => ['label' => 'Site footer', 'type' => 'text', 'default' => '© TinyCMS'],
-                    'siteauthor' => ['label' => 'Site author', 'type' => 'text', 'default' => 'Admin'],
-                ],
-            ],
-            'custom' => [
-                'label' => 'Custom settings',
-                'fields' => [
-                    'timezone' => ['label' => 'Timezone', 'type' => 'text', 'default' => 'Europe/Prague'],
-                    'dateformat' => ['label' => 'Date format', 'type' => 'text', 'default' => 'd.m.Y'],
-                    'currency' => ['label' => 'Currency', 'type' => 'text', 'default' => 'CZK'],
-                    'theme' => ['label' => 'Default theme', 'type' => 'select', 'default' => 'light', 'options' => ['light' => 'Light', 'dark' => 'Dark']],
-                ],
-            ],
-            'seo' => [
-                'label' => 'SEO settings',
-                'fields' => [
-                    'meta_title' => ['label' => 'Meta title', 'type' => 'text', 'default' => 'TinyCMS'],
-                    'meta_description' => ['label' => 'Meta description', 'type' => 'textarea', 'default' => ''],
-                ],
-            ],
+            'sitename' => ['label' => 'Site name', 'type' => 'text', 'default' => 'TinyCMS'],
+            'sitefooter' => ['label' => 'Site footer', 'type' => 'text', 'default' => '© TinyCMS'],
+            'siteauthor' => ['label' => 'Site author', 'type' => 'text', 'default' => 'Admin'],
+            'meta_title' => ['label' => 'Meta title', 'type' => 'text', 'default' => 'TinyCMS'],
+            'meta_description' => ['label' => 'Meta description', 'type' => 'textarea', 'default' => ''],
         ];
     }
 
     public function values(): array
     {
-        $rows = $this->query->select('settings', ['group_name', 'key_name', 'value']);
+        $rows = $this->query->select('settings', ['key_name', 'value']);
         $values = [];
 
         foreach ($rows as $row) {
-            $group = (string)($row['group_name'] ?? '');
             $key = (string)($row['key_name'] ?? '');
+
+            if ($key === '') {
+                continue;
+            }
+
             $decoded = json_decode((string)($row['value'] ?? 'null'), true);
-            $values[$group][$key] = is_scalar($decoded) || $decoded === null ? (string)($decoded ?? '') : '';
+            $values[$key] = is_scalar($decoded) || $decoded === null ? (string)($decoded ?? '') : '';
         }
 
         return $values;
@@ -64,56 +49,37 @@ final class SettingsService
     {
         $result = [];
 
-        foreach ($this->groups() as $groupKey => $group) {
-            foreach ($group['fields'] as $key => $field) {
-                $result[$groupKey][$key] = (string)($field['default'] ?? '');
-            }
+        foreach ($this->fields() as $key => $field) {
+            $result[$key] = (string)($field['default'] ?? '');
         }
 
         return $result;
     }
 
-
     public function resolved(): array
     {
-        return array_replace_recursive($this->defaults(), $this->values());
+        return array_replace($this->defaults(), $this->values());
     }
 
     public function save(array $input): void
     {
-        $groups = $this->groups();
-        $pdo = Connection::get();
-        $stmt = $pdo->prepare('INSERT INTO settings (group_name, key_name, value, value_type, is_public) VALUES (:group_name, :key_name, :value, :value_type, :is_public) ON DUPLICATE KEY UPDATE value = VALUES(value), value_type = VALUES(value_type), is_public = VALUES(is_public)');
+        $fields = $this->fields();
 
-        foreach ($input as $groupName => $groupInput) {
-            if (!isset($groups[$groupName]) || !is_array($groupInput)) {
+        foreach ($input as $key => $rawValue) {
+            if (!isset($fields[$key])) {
                 continue;
             }
 
-            foreach ($groupInput as $keyName => $rawValue) {
-                if (!isset($groups[$groupName]['fields'][$keyName])) {
-                    continue;
-                }
+            $value = trim((string)$rawValue);
+            $payload = ['value' => json_encode($value, JSON_UNESCAPED_UNICODE)];
+            $exists = $this->query->select('settings', ['key_name'], ['key_name' => $key]) !== [];
 
-                $value = trim((string)$rawValue);
-                $field = $groups[$groupName]['fields'][$keyName];
-
-                if (($field['type'] ?? '') === 'select') {
-                    $options = array_map('strval', array_keys((array)($field['options'] ?? [])));
-
-                    if (!in_array($value, $options, true)) {
-                        $value = (string)($field['default'] ?? '');
-                    }
-                }
-
-                $stmt->execute([
-                    'group_name' => $groupName,
-                    'key_name' => $keyName,
-                    'value' => json_encode($value, JSON_UNESCAPED_UNICODE),
-                    'value_type' => 'string',
-                    'is_public' => 1,
-                ]);
+            if ($exists) {
+                $this->query->update('settings', $payload, ['key_name' => $key]);
+                continue;
             }
+
+            $this->query->insert('settings', ['key_name' => $key, 'value' => $payload['value']]);
         }
     }
 }
