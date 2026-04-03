@@ -1,17 +1,17 @@
-(($) => {
-    const $body = $(document.body);
+const body = document.body;
 
-    $(document).on('click', '[data-admin-menu-toggle]', () => {
-        $body.toggleClass('admin-menu-open');
-    });
+document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-admin-menu-toggle]')) {
+        body.classList.toggle('admin-menu-open');
+        return;
+    }
 
-    $(document).on('click', '[data-admin-menu-close]', () => {
-        $body.removeClass('admin-menu-open');
-    });
+    if (event.target.closest('[data-admin-menu-close]')) {
+        body.classList.remove('admin-menu-open');
+        return;
+    }
 
-    $(document).on('click', '.admin-nav-link', () => {
-        if (window.matchMedia('(max-width: 900px)').matches) {
-            $body.removeClass('admin-menu-open');
-        }
-    });
-})(jQuery);
+    if (event.target.closest('.admin-nav-link') && window.matchMedia('(max-width: 900px)').matches) {
+        body.classList.remove('admin-menu-open');
+    }
+});

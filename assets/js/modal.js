@@ -1,37 +1,55 @@
-(($) => {
-    const $doc = $(document);
+const openModal = (trigger) => {
+    const modal = document.querySelector('[data-modal]');
+    if (!modal) {
+        return;
+    }
 
-    const openModal = ($trigger) => {
-        const $modal = $('[data-modal]').first();
-        if (!$modal.length) {
-            return;
-        }
+    const type = trigger.getAttribute('data-type') || 'záznam';
+    const formId = trigger.getAttribute('data-form-id') || '';
+    const text = modal.querySelector('[data-modal-text]');
+    const confirm = modal.querySelector('[data-modal-confirm]');
 
-        const type = $trigger.data('type') || 'záznam';
-        const formId = $trigger.data('form-id') || '';
+    if (text) {
+        text.textContent = `Skutečně smazat tento ${type}?`;
+    }
 
-        $modal.find('[data-modal-text]').text(`Skutečně smazat tento ${type}?`);
-        $modal.find('[data-modal-confirm]').attr('data-form-id', formId);
-        $modal.addClass('open');
-    };
+    if (confirm) {
+        confirm.setAttribute('data-form-id', formId);
+    }
 
-    $doc.on('click', '[data-modal-open]', function (event) {
+    modal.classList.add('open');
+};
+
+document.addEventListener('click', (event) => {
+    const openTrigger = event.target.closest('[data-modal-open]');
+    if (openTrigger) {
         event.preventDefault();
-        openModal($(this));
-    });
+        openModal(openTrigger);
+        return;
+    }
 
-    $doc.on('click', '[data-modal-close]', () => {
-        $('[data-modal]').removeClass('open');
-    });
-
-    $doc.on('click', '[data-modal-confirm]', function () {
-        const formId = String($(this).attr('data-form-id') || '');
-        const form = formId ? document.getElementById(formId) : null;
-
-        if (form) {
-            form.submit();
+    if (event.target.closest('[data-modal-close]')) {
+        const modal = document.querySelector('[data-modal]');
+        if (modal) {
+            modal.classList.remove('open');
         }
+        return;
+    }
 
-        $('[data-modal]').removeClass('open');
-    });
-})(jQuery);
+    const confirmTrigger = event.target.closest('[data-modal-confirm]');
+    if (!confirmTrigger) {
+        return;
+    }
+
+    const formId = confirmTrigger.getAttribute('data-form-id') || '';
+    const form = formId ? document.getElementById(formId) : null;
+
+    if (form) {
+        form.submit();
+    }
+
+    const modal = document.querySelector('[data-modal]');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+});
