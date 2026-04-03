@@ -10,23 +10,25 @@
     }
 
     root.classList.add('has-custom-datetime');
+
     let opened = null;
     const sampleIconUse = document.querySelector('svg.icon use');
     const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '';
-    const calendarIconHref = `${iconBase}#icon-calendar`;
-
+    const iconHref = (name) => `${iconBase}#icon-${name}`;
     const weekdayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
 
     const parseValue = (value) => {
         if (!value || !value.includes('T')) {
             return null;
         }
+
         const [datePart, timePart] = value.split('T');
         const [year, month, day] = datePart.split('-').map(Number);
         const [hour, minute] = (timePart || '00:00').split(':').map(Number);
         if (!year || !month || !day) {
             return null;
         }
+
         return new Date(year, month - 1, day, hour || 0, minute || 0, 0, 0);
     };
 
@@ -43,6 +45,7 @@
         if (!date) {
             return 'Vybrat datum a čas';
         }
+
         return new Intl.DateTimeFormat('cs-CZ', {
             day: '2-digit',
             month: '2-digit',
@@ -56,6 +59,7 @@
         if (!opened) {
             return;
         }
+
         opened.wrapper.classList.remove('open');
         opened.trigger.setAttribute('aria-expanded', 'false');
         opened = null;
@@ -73,6 +77,18 @@
         return option;
     };
 
+    const createIconButton = (icon, label) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-light btn-icon';
+        button.setAttribute('aria-label', label);
+        button.setAttribute('title', label);
+        button.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${iconHref(icon)}"></use></svg>`;
+        return button;
+    };
+
+    const monthStart = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
+
     inputs.forEach((hiddenInput) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-datetime';
@@ -83,11 +99,14 @@
         trigger.setAttribute('aria-haspopup', 'dialog');
         trigger.setAttribute('aria-expanded', 'false');
         trigger.disabled = hiddenInput.disabled;
+
         const triggerLabel = document.createElement('span');
         triggerLabel.className = 'custom-datetime-trigger-label';
+
         const triggerIcon = document.createElement('span');
         triggerIcon.className = 'custom-datetime-trigger-icon';
-        triggerIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${calendarIconHref}"></use></svg>`;
+        triggerIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${iconHref('calendar')}"></use></svg>`;
+
         trigger.appendChild(triggerLabel);
         trigger.appendChild(triggerIcon);
 
@@ -96,15 +115,11 @@
 
         const header = document.createElement('div');
         header.className = 'custom-datetime-header';
-        const prev = document.createElement('button');
-        prev.type = 'button';
-        prev.className = 'btn btn-light btn-icon';
-        prev.textContent = '‹';
+
+        const prev = createIconButton('prev', 'Předchozí měsíc');
         const title = document.createElement('strong');
-        const next = document.createElement('button');
-        next.type = 'button';
-        next.className = 'btn btn-light btn-icon';
-        next.textContent = '›';
+        const next = createIconButton('next', 'Další měsíc');
+
         header.appendChild(prev);
         header.appendChild(title);
         header.appendChild(next);
@@ -125,19 +140,23 @@
 
         const timeRow = document.createElement('div');
         timeRow.className = 'custom-datetime-time-row';
+
         const hourSelect = document.createElement('select');
         hourSelect.className = 'custom-datetime-hour';
         for (let h = 0; h < 24; h += 1) {
             hourSelect.appendChild(buildOption(h, String(h).padStart(2, '0')));
         }
+
         const minuteSelect = document.createElement('select');
         minuteSelect.className = 'custom-datetime-minute';
         for (let m = 0; m < 60; m += 1) {
             minuteSelect.appendChild(buildOption(m, String(m).padStart(2, '0')));
         }
+
         const colon = document.createElement('span');
         colon.className = 'custom-datetime-colon';
         colon.textContent = ':';
+
         timeRow.appendChild(hourSelect);
         timeRow.appendChild(colon);
         timeRow.appendChild(minuteSelect);
@@ -145,30 +164,30 @@
 
         const actions = document.createElement('div');
         actions.className = 'custom-datetime-actions';
+
         const todayButton = document.createElement('button');
         todayButton.type = 'button';
         todayButton.className = 'btn btn-light';
         todayButton.textContent = 'Dnes';
+
         const clearButton = document.createElement('button');
         clearButton.type = 'button';
         clearButton.className = 'btn btn-light';
         clearButton.textContent = 'Vymazat';
-        const cancelButton = document.createElement('button');
-        cancelButton.type = 'button';
-        cancelButton.className = 'btn btn-light';
-        cancelButton.textContent = 'Zrušit';
+
         const okButton = document.createElement('button');
         okButton.type = 'button';
         okButton.className = 'btn btn-primary';
         okButton.textContent = 'OK';
+
         actions.appendChild(todayButton);
         actions.appendChild(clearButton);
-        actions.appendChild(cancelButton);
         actions.appendChild(okButton);
         panel.appendChild(actions);
 
         let selectedDate = parseValue(hiddenInput.value);
-        let viewMonth = selectedDate ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        const now = new Date();
+        let viewMonth = monthStart(selectedDate || now);
         let draftDate = selectedDate ? new Date(selectedDate) : null;
 
         const syncTrigger = () => {
@@ -183,6 +202,7 @@
         const render = () => {
             title.textContent = new Intl.DateTimeFormat('cs-CZ', { month: 'long', year: 'numeric' }).format(viewMonth);
             grid.innerHTML = '';
+
             const start = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
             const offset = (start.getDay() + 6) % 7;
             const firstVisible = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1 - offset);
@@ -194,6 +214,7 @@
                 cell.type = 'button';
                 cell.className = 'custom-datetime-day';
                 cell.textContent = String(day.getDate());
+
                 if (day.getMonth() !== viewMonth.getMonth()) {
                     cell.classList.add('muted');
                 }
@@ -203,17 +224,19 @@
                 if (sameDay(day, draftDate)) {
                     cell.classList.add('selected');
                 }
+
                 cell.addEventListener('click', () => {
                     const base = draftDate || new Date();
                     draftDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), base.getHours(), base.getMinutes(), 0, 0);
                     selectedDate = new Date(draftDate);
                     hiddenInput.value = toValue(selectedDate);
                     hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-                    viewMonth = new Date(day.getFullYear(), day.getMonth(), 1);
+                    viewMonth = monthStart(day);
                     syncTrigger();
                     syncTimeSelects();
                     render();
                 });
+
                 grid.appendChild(cell);
             }
         };
@@ -222,10 +245,12 @@
             if (trigger.disabled) {
                 return;
             }
+
             const parsed = parseValue(hiddenInput.value);
             selectedDate = parsed;
             draftDate = parsed ? new Date(parsed) : null;
-            viewMonth = draftDate ? new Date(draftDate.getFullYear(), draftDate.getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            viewMonth = monthStart(draftDate || new Date());
+
             syncTimeSelects();
             render();
             closeOpened();
@@ -259,9 +284,9 @@
         });
 
         todayButton.addEventListener('click', () => {
-            const now = new Date();
-            draftDate = new Date(now);
-            viewMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const today = new Date();
+            draftDate = new Date(today);
+            viewMonth = monthStart(today);
             syncTimeSelects();
             render();
         });
@@ -272,10 +297,6 @@
             hiddenInput.value = '';
             syncTrigger();
             hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-            closeOpened();
-        });
-
-        cancelButton.addEventListener('click', () => {
             closeOpened();
         });
 
