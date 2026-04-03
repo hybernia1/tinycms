@@ -5,7 +5,6 @@ namespace App\Controller;
 
 use App\Service\AuthService;
 use App\Service\ContentService;
-use App\Service\ContentTypeService;
 use App\Service\CsrfService;
 use App\Service\FlashService;
 use App\Service\UserService;
@@ -20,7 +19,6 @@ final class AdminContentController
         private PageView $pages,
         private AuthService $authService,
         private ContentService $content,
-        private ContentTypeService $contentTypes,
         private UserService $users,
         private FlashService $flash,
         private CsrfService $csrf
@@ -33,7 +31,6 @@ final class AdminContentController
             return;
         }
 
-        $type = $this->resolveType();
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = (int)($_GET['per_page'] ?? 10);
         $status = trim((string)($_GET['status'] ?? 'all'));
@@ -43,13 +40,13 @@ final class AdminContentController
             $perPage = 10;
         }
 
-        $availableStatuses = $this->content->statusesForType($type['type']);
+        $availableStatuses = $this->content->statuses();
         if ($status !== 'all' && !in_array($status, $availableStatuses, true)) {
             $status = 'all';
         }
 
-        $pagination = $this->content->paginate($type['type'], $page, $perPage, $status, $query);
-        $this->pages->adminContentList($pagination, self::PER_PAGE_ALLOWED, $status, $query, $type, $availableStatuses);
+        $pagination = $this->content->paginate($page, $perPage, $status, $query);
+        $this->pages->adminContentList($pagination, self::PER_PAGE_ALLOWED, $status, $query, $availableStatuses);
     }
 
     public function deleteSubmit(callable $redirect): void
@@ -58,55 +55,16 @@ final class AdminContentController
             return;
         }
 
-        $type = $this->resolveType();
         $id = (int)($_POST['id'] ?? 0);
 
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID obsahu.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
+            $redirect('admin/content');
         }
 
-        $ok = $this->content->delete($id, $type['type']);
+        $ok = $this->content->delete($id);
         $this->flash->add($ok ? 'success' : 'error', $ok ? 'Obsah smazán.' : 'Obsah se nepodařilo smazat.');
-        $redirect('admin/content?type=' . urlencode($type['type']));
-    }
-
-    public function bulkActionSubmit(callable $redirect): void
-    {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
-            return;
-        }
-
-        $type = $this->resolveType();
-        $rawIds = (string)($_POST['ids'] ?? '');
-        $action = (string)($_POST['action'] ?? '');
-        $ids = array_filter(array_map('intval', explode(',', $rawIds)), static fn(int $v): bool => $v > 0);
-
-        if ($ids === []) {
-            $this->flash->add('info', 'Nebyly vybrány žádné záznamy.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
-        }
-
-        if ($action === 'delete') {
-            $affected = $this->content->deleteMany($ids, $type['type']);
-            $this->flash->add($affected > 0 ? 'success' : 'error', $affected > 0 ? "Smazáno $affected záznamů." : 'Vybrané záznamy se nepodařilo smazat.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
-        }
-
-        if ($action === 'publish') {
-            $affected = $this->content->setStatusMany($ids, $type['type'], 'published');
-            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Publikováno $affected záznamů." : 'Vybrané záznamy už byly publikované nebo nejsou dostupné.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
-        }
-
-        if ($action === 'draft') {
-            $affected = $this->content->setStatusMany($ids, $type['type'], 'draft');
-            $this->flash->add($affected > 0 ? 'success' : 'info', $affected > 0 ? "Přepnuto do draftu $affected záznamů." : 'Vybrané záznamy už byly v draftu nebo nejsou dostupné.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
-        }
-
-        $this->flash->add('info', 'Nebyla vybrána žádná hromadná akce.');
-        $redirect('admin/content?type=' . urlencode($type['type']));
+        $redirect('admin/content');
     }
 
     public function addForm(callable $redirect): void
@@ -115,12 +73,11 @@ final class AdminContentController
             return;
         }
 
-        $type = $this->resolveType();
-        $fallback = ['id' => null, 'type' => $type['type'], 'name' => '', 'status' => 'draft', 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
+        $fallback = ['id' => null, 'name' => '', 'status' => 'draft', 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $fallback['author'] = (int)($this->authService->auth()->id() ?? 0);
-        $state = $this->consumeFormState('add', null, $type['type']);
-        $statuses = $this->content->statusesForType($type['type']);
-        $this->pages->adminContentForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $type, $statuses, $this->users->authorOptions());
+        $state = $this->consumeFormState('add', null);
+        $statuses = $this->content->statuses();
+        $this->pages->adminContentForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $statuses, $this->users->authorOptions());
     }
 
     public function addSubmit(callable $redirect): void
@@ -129,19 +86,18 @@ final class AdminContentController
             return;
         }
 
-        $type = $this->resolveType();
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($_POST, $authorId, $type['type']);
+        $result = $this->content->save($_POST, $authorId);
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', 'Obsah vytvořen.');
             $newId = (int)($result['id'] ?? 0);
-            $redirect($newId > 0 ? $this->editPath($type['type'], $newId) : 'admin/content?type=' . urlencode($type['type']));
+            $redirect($newId > 0 ? $this->editPath($newId) : 'admin/content');
         }
 
         $this->flash->add('error', 'Nepodařilo se uložit obsah.');
-        $this->storeFormState('add', null, $type['type'], $_POST, $result['errors'] ?? []);
-        $redirect('admin/content/add?type=' . urlencode($type['type']));
+        $this->storeFormState('add', null, $_POST, $result['errors'] ?? []);
+        $redirect('admin/content/add');
     }
 
     public function editForm(callable $redirect): void
@@ -150,18 +106,17 @@ final class AdminContentController
             return;
         }
 
-        $type = $this->resolveType();
         $id = (int)($_GET['id'] ?? 0);
-        $item = $this->content->find($id, $type['type']);
+        $item = $this->content->find($id);
 
         if ($item === null) {
             $this->flash->add('info', 'Obsah nenalezen.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
+            $redirect('admin/content');
         }
 
-        $state = $this->consumeFormState('edit', $id, $type['type']);
-        $statuses = $this->content->statusesForType($type['type']);
-        $this->pages->adminContentForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $type, $statuses, $this->users->authorOptions());
+        $state = $this->consumeFormState('edit', $id);
+        $statuses = $this->content->statuses();
+        $this->pages->adminContentForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $statuses, $this->users->authorOptions());
     }
 
     public function editSubmit(callable $redirect): void
@@ -170,25 +125,24 @@ final class AdminContentController
             return;
         }
 
-        $type = $this->resolveType();
         $id = (int)($_GET['id'] ?? 0);
 
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID obsahu.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
+            $redirect('admin/content');
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($_POST, $authorId, $type['type'], $id);
+        $result = $this->content->save($_POST, $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', 'Obsah upraven.');
-            $redirect($this->editPath($type['type'], $id));
+            $redirect($this->editPath($id));
         }
 
         $this->flash->add('error', 'Nepodařilo se upravit obsah.');
-        $this->storeFormState('edit', $id, $type['type'], array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect('admin/content/edit?id=' . $id . '&type=' . urlencode($type['type']));
+        $this->storeFormState('edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
+        $redirect('admin/content/edit?id=' . $id);
     }
 
     public function statusToggleSubmit(callable $redirect): void
@@ -197,24 +151,23 @@ final class AdminContentController
             return;
         }
 
-        $type = $this->resolveType();
         $id = (int)($_POST['id'] ?? 0);
         $mode = (string)($_POST['mode'] ?? 'draft');
 
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID obsahu.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
+            $redirect('admin/content');
         }
 
         if ($mode === 'publish') {
-            $ok = $this->content->setStatus($id, $type['type'], 'published');
+            $ok = $this->content->setStatus($id, 'published');
             $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah publikován.' : 'Obsah už byl publikovaný nebo není dostupný.');
-            $redirect('admin/content?type=' . urlencode($type['type']));
+            $redirect('admin/content');
         }
 
-        $ok = $this->content->setStatus($id, $type['type'], 'draft');
+        $ok = $this->content->setStatus($id, 'draft');
         $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah přepnut do draftu.' : 'Obsah už byl v draftu nebo není dostupný.');
-        $redirect('admin/content?type=' . urlencode($type['type']));
+        $redirect('admin/content');
     }
 
     private function guard(callable $redirect): bool
@@ -236,30 +189,24 @@ final class AdminContentController
 
         if ($token === '' || !$this->csrf->verify($token)) {
             $this->flash->add('error', 'Neplatný CSRF token.');
-            $redirect('admin/content?type=' . urlencode($this->resolveType()['type']));
+            $redirect('admin/content');
         }
 
         return true;
     }
 
-    private function resolveType(): array
-    {
-        return $this->contentTypes->resolve((string)($_GET['type'] ?? $_POST['type'] ?? ''));
-    }
-
-    private function storeFormState(string $mode, ?int $id, string $type, array $data, array $errors): void
+    private function storeFormState(string $mode, ?int $id, array $data, array $errors): void
     {
         $this->ensureSession();
         $_SESSION[self::FORM_STATE_KEY] = [
             'mode' => $mode,
             'id' => $id,
-            'type' => $type,
             'data' => $data,
             'errors' => $errors,
         ];
     }
 
-    private function consumeFormState(string $mode, ?int $id, string $type): ?array
+    private function consumeFormState(string $mode, ?int $id): ?array
     {
         $this->ensureSession();
         $state = $_SESSION[self::FORM_STATE_KEY] ?? null;
@@ -270,7 +217,7 @@ final class AdminContentController
 
         unset($_SESSION[self::FORM_STATE_KEY]);
 
-        if (($state['mode'] ?? null) !== $mode || ($state['id'] ?? null) !== $id || ($state['type'] ?? null) !== $type) {
+        if (($state['mode'] ?? null) !== $mode || ($state['id'] ?? null) !== $id) {
             return null;
         }
 
@@ -284,8 +231,8 @@ final class AdminContentController
         }
     }
 
-    private function editPath(string $type, int $id): string
+    private function editPath(int $id): string
     {
-        return 'admin/content/edit?id=' . $id . '&type=' . urlencode($type);
+        return 'admin/content/edit?id=' . $id;
     }
 }

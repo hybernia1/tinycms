@@ -4,7 +4,6 @@ $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '
 $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
-$currentContentType = $currentContentType ?? null;
 ?>
 <!doctype html>
 <html lang="cs">
@@ -22,7 +21,7 @@ $currentContentType = $currentContentType ?? null;
     <script defer src="<?= htmlspecialchars($url('assets/js/custom-datetime.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/password-toggle.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
-<body data-theme="<?= htmlspecialchars((string)$theme, ENT_QUOTES, 'UTF-8') ?>">
+<body>
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <h2 class="admin-brand">TinyCMS Admin</h2>
@@ -64,10 +63,10 @@ $currentContentType = $currentContentType ?? null;
                 <?= $icon('add') ?>
                 <span>Přidat uživatele</span>
             </a>
-            <?php elseif ($isContentList && is_array($currentContentType)): ?>
-            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/content/add?type=' . urlencode((string)($currentContentType['type'] ?? 'post'))), ENT_QUOTES, 'UTF-8') ?>">
+            <?php elseif ($isContentList): ?>
+            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/content/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
-                <span>Přidat <?= htmlspecialchars((string)($currentContentType['label_singular'] ?? 'obsah'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span>Přidat obsah</span>
             </a>
             <?php endif; ?>
         </div>

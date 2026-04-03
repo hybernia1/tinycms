@@ -29,9 +29,6 @@
     --danger: var(--color-brand-danger);
     --success: var(--color-brand-success);
     --warning: var(--color-brand-warning);
-}
-
-body[data-theme='light'] {
     --color-body-bg: #ffffff;
     --color-body-text: #111827;
     --color-body-muted: #6b7280;
@@ -66,51 +63,6 @@ body[data-theme='light'] {
     --badge-border: #bfdbfe;
     --warning-bg: #fef3c7;
     --warning-text: #92400e;
-    --color-bg: var(--color-body-bg);
-    --color-text: var(--color-body-text);
-    --color-muted: var(--color-body-muted);
-    --color-surface: var(--color-surface-1);
-    --color-surface-muted: var(--color-surface-2);
-    --color-border: var(--color-border-strong);
-    --link-text: var(--color-link);
-    --link-hover-text: var(--color-link-hover);
-}
-
-body[data-theme='dark'] {
-    --color-body-bg: #0b1220;
-    --color-body-text: #e5e7eb;
-    --color-body-muted: #94a3b8;
-    --color-surface-1: #111827;
-    --color-surface-2: #1f2937;
-    --color-border-strong: #374151;
-    --color-border-soft: #334155;
-    --color-link: #93c5fd;
-    --color-link-hover: #bfdbfe;
-    --color-emphasis: #020617;
-    --color-inverse: #ffffff;
-    --table-head-bg: #1f2937;
-    --table-row-alt-bg: #111827;
-    --table-row-hover-bg: #172033;
-    --tone-primary-bg: #2563eb;
-    --tone-primary-text: #ffffff;
-    --tone-primary-border: #2563eb;
-    --tone-neutral-bg: #1f2937;
-    --tone-neutral-text: #e5e7eb;
-    --tone-neutral-border: #374151;
-    --tone-success-bg: #052e16;
-    --tone-success-text: #86efac;
-    --tone-success-border: #14532d;
-    --tone-danger-bg: #450a0a;
-    --tone-danger-text: #fca5a5;
-    --tone-danger-border: #7f1d1d;
-    --tone-info-bg: #172554;
-    --tone-info-text: #93c5fd;
-    --tone-info-border: #1e3a8a;
-    --badge-bg: #172554;
-    --badge-text: #bfdbfe;
-    --badge-border: #1e3a8a;
-    --warning-bg: #78350f;
-    --warning-text: #fde68a;
     --color-bg: var(--color-body-bg);
     --color-text: var(--color-body-text);
     --color-muted: var(--color-body-muted);
@@ -613,13 +565,6 @@ input[type='week']::-webkit-calendar-picker-indicator {
     width: calc(var(--control-padding-x) * 2.2);
 }
 
-body[data-theme='dark'] input[type='date'],
-body[data-theme='dark'] input[type='time'],
-body[data-theme='dark'] input[type='datetime-local'],
-body[data-theme='dark'] input[type='month'],
-body[data-theme='dark'] input[type='week'] {
-    --datetime-picker-filter: invert(0.9);
-}
 
 .search-input {
     width: 100%;

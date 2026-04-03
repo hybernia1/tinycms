@@ -46,25 +46,6 @@ final class UserService
         return $this->query->delete('users', ['ID' => $id]) > 0;
     }
 
-    public function deleteMany(array $ids): int
-    {
-        $clean = $this->sanitizeIds($ids);
-
-        if ($clean === []) {
-            return 0;
-        }
-
-        $deleted = 0;
-
-        foreach ($clean as $id) {
-            if ($this->delete($id)) {
-                $deleted++;
-            }
-        }
-
-        return $deleted;
-    }
-
     public function suspend(int $id): bool
     {
         $user = $this->find($id);
@@ -91,40 +72,6 @@ final class UserService
             'suspend' => 0,
             'updated' => date('Y-m-d H:i:s'),
         ], ['ID' => $id]) > 0;
-    }
-
-    public function suspendMany(array $ids): int
-    {
-        $clean = $this->sanitizeIds($ids);
-
-        if ($clean === []) {
-            return 0;
-        }
-
-        $updated = 0;
-
-        foreach ($clean as $id) {
-            $updated += $this->suspend($id) ? 1 : 0;
-        }
-
-        return $updated;
-    }
-
-    public function unsuspendMany(array $ids): int
-    {
-        $clean = $this->sanitizeIds($ids);
-
-        if ($clean === []) {
-            return 0;
-        }
-
-        $updated = 0;
-
-        foreach ($clean as $id) {
-            $updated += $this->unsuspend($id) ? 1 : 0;
-        }
-
-        return $updated;
     }
 
     public function save(array $input, ?int $id = null): array
@@ -197,8 +144,4 @@ final class UserService
         return $rows;
     }
 
-    private function sanitizeIds(array $ids): array
-    {
-        return array_values(array_unique(array_filter(array_map('intval', $ids), fn(int $v): bool => $v > 0)));
-    }
 }

@@ -52,8 +52,6 @@ final class View
         }
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
-        $theme = (string)($data['theme'] ?? 'light');
-        $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
         $data['icon'] = $icon;
         $data['csrfField'] = $csrfField;
         $data['flashes'] = $this->flash->consume();
