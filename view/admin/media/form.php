@@ -32,6 +32,14 @@
                     <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             <?php endif; ?>
+            <div class="mb-3">
+                <label>Vytvořeno</label>
+                <div class="text-muted"><?= htmlspecialchars((string)($item['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+            </div>
+            <div class="mb-3">
+                <label>Aktualizováno</label>
+                <div class="text-muted"><?= htmlspecialchars((string)($item['updated'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></div>
+            </div>
         <?php endif; ?>
         <div class="mb-4">
             <label>Autor</label>
@@ -49,4 +57,36 @@
         <button class="btn btn-primary" type="submit">Uložit</button>
         <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>">Zpět</a>
     </form>
+
+    <?php if ($mode === 'edit'): ?>
+        <hr>
+        <h3 class="mb-3">Použito jako thumbnail</h3>
+        <?php if (($usages ?? []) === []): ?>
+            <p class="text-muted m-0">Médium není použité jako thumbnail u žádného článku.</p>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Článek</th><th>Status</th><th>Vytvořeno</th><th>Aktualizováno</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($usages as $usage): ?>
+                        <tr>
+                            <td>
+                                <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . (int)($usage['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+                                    <?= htmlspecialchars((string)($usage['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                                </a>
+                            </td>
+                            <td><?= htmlspecialchars((string)($usage['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars((string)($usage['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars((string)($usage['updated'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
 </div>

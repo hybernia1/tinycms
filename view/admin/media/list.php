@@ -47,6 +47,8 @@ $query = (string)($query ?? '');
                             <div>
                                 <a href="<?= htmlspecialchars($url('admin/media/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                                 <div class="text-muted"><?= htmlspecialchars((string)($row['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="text-muted">Vytvořeno: <?= htmlspecialchars((string)($row['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="text-muted">Aktualizováno: <?= htmlspecialchars((string)($row['updated'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></div>
                             </div>
                         </div>
                     </td>

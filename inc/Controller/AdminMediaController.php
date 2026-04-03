@@ -52,7 +52,7 @@ final class AdminMediaController extends BaseAdminController
 
         $fallback = ['id' => null, 'name' => '', 'path' => '', 'path_webp' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
-        $this->pages->adminMediaForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->media->authorOptions());
+        $this->pages->adminMediaForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->media->authorOptions(), []);
     }
 
     public function addSubmit(callable $redirect): void
@@ -117,7 +117,7 @@ final class AdminMediaController extends BaseAdminController
         }
 
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
-        $this->pages->adminMediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions());
+        $this->pages->adminMediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions(), $this->media->thumbnailUsages($id));
     }
 
     public function editSubmit(callable $redirect): void

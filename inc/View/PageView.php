@@ -118,13 +118,14 @@ final class PageView
         ]);
     }
 
-    public function adminMediaForm(string $mode, array $item, array $errors, array $authors): void
+    public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = []): void
     {
         $this->view->render('admin/layout', 'admin/media/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
             'authors' => $authors,
+            'usages' => $usages,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? 'Přidat médium' : 'Upravit médium',
         ]);

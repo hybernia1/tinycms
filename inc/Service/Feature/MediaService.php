@@ -33,12 +33,14 @@ final class MediaService
             'path',
             'path_webp',
             'author',
+            'created',
+            'updated',
             '(SELECT name FROM users WHERE users.ID = media.author LIMIT 1) AS author_name',
         ], [], [
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'path', 'path_webp', 'author'],
+            'orderByAllowed' => ['id', 'name', 'path', 'path_webp', 'author', 'created', 'updated'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name', 'path', 'path_webp'],
@@ -47,7 +49,7 @@ final class MediaService
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('media', ['id', 'author', 'name', 'path', 'path_webp'], ['id' => $id]);
+        $rows = $this->query->select('media', ['id', 'author', 'name', 'path', 'path_webp', 'created', 'updated'], ['id' => $id]);
         return $rows[0] ?? null;
     }
 
@@ -88,12 +90,25 @@ final class MediaService
         ];
 
         if ($id === null) {
+            $payload['created'] = date('Y-m-d H:i:s');
             $newId = $this->query->insert('media', $payload);
             return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
         }
 
+        $payload['updated'] = date('Y-m-d H:i:s');
         $updated = $this->query->update('media', $payload, ['id' => $id]);
         return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+    }
+
+    public function thumbnailUsages(int $mediaId): array
+    {
+        if ($mediaId <= 0) {
+            return [];
+        }
+
+        $rows = $this->query->select('content', ['id', 'name', 'status', 'created', 'updated'], ['thumbnail' => $mediaId]);
+        usort($rows, static fn(array $a, array $b): int => strcmp((string)($b['updated'] ?? $b['created'] ?? ''), (string)($a['updated'] ?? $a['created'] ?? '')));
+        return $rows;
     }
 
     public function authorOptions(): array
