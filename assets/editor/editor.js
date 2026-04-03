@@ -21,7 +21,25 @@
                 return;
             }
 
+            if (node.tagName === 'UL' || node.tagName === 'OL') {
+                var listWrapper = document.createElement('div');
+                listWrapper.className = 'block block-list';
+                editor.replaceChild(listWrapper, node);
+                listWrapper.appendChild(node);
+                return;
+            }
+
             if (node.tagName === 'DIV') {
+                var childList = node.firstElementChild;
+                if (node.classList.contains('block') && node.classList.contains('block-list') && childList && (childList.tagName === 'UL' || childList.tagName === 'OL')) {
+                    return;
+                }
+
+                if (childList && (childList.tagName === 'UL' || childList.tagName === 'OL')) {
+                    node.className = 'block block-list';
+                    return;
+                }
+
                 var p = document.createElement('p');
                 p.innerHTML = node.innerHTML;
                 editor.replaceChild(p, node);

@@ -116,6 +116,16 @@
     margin: 0 0 var(--space-2);
 }
 
+
+.wysiwyg-editor .block {
+    margin: 0 0 var(--space-2);
+}
+
+.wysiwyg-editor .block.block-list ul,
+.wysiwyg-editor .block.block-list ol {
+    margin: 0;
+}
+
 .wysiwyg-editor ul,
 .wysiwyg-editor ol {
     padding-left: 1.25rem;
