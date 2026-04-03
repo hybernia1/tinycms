@@ -29,8 +29,18 @@ final class SettingsService
             'custom' => [
                 'label' => 'Custom settings',
                 'fields' => [
-                    'timezone' => ['label' => 'Timezone', 'type' => 'text', 'default' => 'Europe/Prague'],
-                    'dateformat' => ['label' => 'Date format', 'type' => 'text', 'default' => 'd.m.Y'],
+                    'timezone' => ['label' => 'Timezone', 'type' => 'select', 'default' => 'UTC', 'options' => $this->utcTimezoneOptions()],
+                    'dateformat_mode' => ['label' => 'Date format', 'type' => 'select', 'default' => 'cs', 'options' => [
+                        'cs' => '3. 4. 2026 - j. n. Y',
+                        'db' => 'Výchozí z databáze',
+                        'custom' => 'Vlastní',
+                    ]],
+                    'dateformat_custom' => ['label' => 'Date format custom', 'type' => 'text', 'default' => 'j. n. Y'],
+                    'timeformat_mode' => ['label' => 'Time format', 'type' => 'select', 'default' => 'short', 'options' => [
+                        'short' => '10:50',
+                        'custom' => 'Vlastní',
+                    ]],
+                    'timeformat_custom' => ['label' => 'Time format custom', 'type' => 'text', 'default' => 'H:i'],
                     'currency' => ['label' => 'Currency', 'type' => 'text', 'default' => 'CZK'],
                     'theme' => ['label' => 'Default theme', 'type' => 'select', 'default' => 'light', 'options' => ['light' => 'Light', 'dark' => 'Dark']],
                 ],
@@ -115,5 +125,21 @@ final class SettingsService
                 ]);
             }
         }
+    }
+
+    private function utcTimezoneOptions(): array
+    {
+        $options = [];
+
+        for ($offset = -12 * 60; $offset <= 14 * 60; $offset += 30) {
+            $sign = $offset < 0 ? '-' : '+';
+            $abs = abs($offset);
+            $hours = str_pad((string)intdiv($abs, 60), 2, '0', STR_PAD_LEFT);
+            $minutes = str_pad((string)($abs % 60), 2, '0', STR_PAD_LEFT);
+            $value = $offset === 0 ? 'UTC' : 'UTC' . $sign . $hours . ':' . $minutes;
+            $options[$value] = $value;
+        }
+
+        return $options;
     }
 }

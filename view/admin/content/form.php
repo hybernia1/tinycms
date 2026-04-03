@@ -1,8 +1,7 @@
 <?php
 $type = (string)($contentType['type'] ?? 'post');
 $createdRaw = trim((string)($item['created'] ?? ''));
-$createdStamp = $createdRaw !== '' ? strtotime($createdRaw) : false;
-$createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
+$createdAt = $dateTime->toInputValue($createdRaw);
 ?>
 <form class="content-editor-form" method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add?type=' . urlencode($type)) : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0) . '&type=' . urlencode($type)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>

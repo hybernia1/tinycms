@@ -59,6 +59,7 @@ foreach ($availableStatuses as $statusValue) {
             <?php foreach ($items as $row):
                 $id = (int)($row['id'] ?? 0);
                 $createdAt = (string)($row['created'] ?? '');
+                $createdLabel = $dateTime->formatDateTime($createdAt);
                 $createdStamp = $createdAt !== '' ? strtotime($createdAt) : false;
                 $isPlanned = $createdStamp !== false && $createdStamp > time();
                 $statusValue = (string)($row['status'] ?? '');
@@ -69,7 +70,7 @@ foreach ($availableStatuses as $statusValue) {
                     <td>
                         <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id . '&type=' . urlencode($type)), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                         <div class="text-muted">
-                            <?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>
+                            <?= htmlspecialchars($createdLabel, ENT_QUOTES, 'UTF-8') ?>
                         </div>
                         <div class="d-flex gap-2 mt-2">
                             <span class="badge <?= htmlspecialchars($statusClass, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($statusValue, ENT_QUOTES, 'UTF-8') ?></span>

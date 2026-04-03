@@ -11,7 +11,6 @@ final class ContentTypeService
     public function __construct()
     {
         $this->register('post', 'Příspěvky', 'Příspěvek');
-        $this->register('page', 'Stránky', 'Stránka');
     }
 
     public function register(string $type, string $pluralLabel, string $singularLabel, string $slug = ''): void

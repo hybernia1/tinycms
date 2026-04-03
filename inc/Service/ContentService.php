@@ -9,10 +9,12 @@ use App\Service\Db\Query;
 final class ContentService
 {
     private Query $query;
+    private DateTimeService $dateTime;
 
-    public function __construct()
+    public function __construct(DateTimeService $dateTime)
     {
         $this->query = new Query(Connection::get());
+        $this->dateTime = $dateTime;
     }
 
     public function paginate(string $type, int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
@@ -108,7 +110,7 @@ final class ContentService
         $excerpt = trim((string)($input['excerpt'] ?? ''));
         $body = trim((string)($input['body'] ?? ''));
         $author = $this->resolveAuthorId($input, $defaultAuthorId);
-        $created = $this->resolveDateTime((string)($input['created'] ?? ''));
+        $created = $this->dateTime->toStorage((string)($input['created'] ?? ''));
         $errors = [];
 
         if ($name === '') {
@@ -234,27 +236,5 @@ final class ContentService
 
         $rows = $this->query->select('users', ['ID'], ['ID' => $authorId]);
         return $rows === [] ? null : $authorId;
-    }
-
-    private function resolveDateTime(string $value): ?string
-    {
-        $clean = trim($value);
-
-        if ($clean === '') {
-            return null;
-        }
-
-        $formats = ['Y-m-d H:i:s', 'Y-m-d H:i', 'Y-m-d\\TH:i:s', 'Y-m-d\\TH:i'];
-
-        foreach ($formats as $format) {
-            $date = \DateTimeImmutable::createFromFormat($format, $clean);
-
-            if ($date instanceof \DateTimeImmutable) {
-                return $date->format('Y-m-d H:i:s');
-            }
-        }
-
-        $timestamp = strtotime($clean);
-        return $timestamp === false ? null : date('Y-m-d H:i:s', $timestamp);
     }
 }

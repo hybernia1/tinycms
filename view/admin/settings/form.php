@@ -16,9 +16,24 @@
             <?php foreach (($active['fields'] ?? []) as $fieldKey => $field):
                 $fieldType = (string)($field['type'] ?? 'text');
                 $fieldValue = (string)($values[$activeGroup][$fieldKey] ?? '');
+                $isDateCustomField = $fieldKey === 'dateformat_custom';
+                $isTimeCustomField = $fieldKey === 'timeformat_custom';
+                $dateMode = (string)($values[$activeGroup]['dateformat_mode'] ?? '');
+                $timeMode = (string)($values[$activeGroup]['timeformat_mode'] ?? '');
+                if (($isDateCustomField && $dateMode !== 'custom') || ($isTimeCustomField && $timeMode !== 'custom')) {
+                    continue;
+                }
             ?>
                 <div class="mb-3">
-                    <label><?= htmlspecialchars((string)($field['label'] ?? $fieldKey), ENT_QUOTES, 'UTF-8') ?></label>
+                    <label>
+                        <?php if ($fieldKey === 'dateformat_custom'): ?>
+                            Vlastní formát data
+                        <?php elseif ($fieldKey === 'timeformat_custom'): ?>
+                            Vlastní formát času
+                        <?php else: ?>
+                            <?= htmlspecialchars((string)($field['label'] ?? $fieldKey), ENT_QUOTES, 'UTF-8') ?>
+                        <?php endif; ?>
+                    </label>
                     <?php if ($fieldType === 'textarea'): ?>
                         <textarea name="settings[<?= htmlspecialchars((string)$activeGroup, ENT_QUOTES, 'UTF-8') ?>][<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" rows="4"><?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?></textarea>
                     <?php elseif ($fieldType === 'select'): ?>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Service\ContentTypeService;
+use App\Service\DateTimeService;
 use App\Service\SettingsService;
 
 final class PageView
@@ -11,12 +12,14 @@ final class PageView
     private View $view;
     private SettingsService $settings;
     private ContentTypeService $contentTypes;
+    private DateTimeService $dateTime;
 
-    public function __construct(View $view, SettingsService $settings, ContentTypeService $contentTypes)
+    public function __construct(View $view, SettingsService $settings, ContentTypeService $contentTypes, DateTimeService $dateTime)
     {
         $this->view = $view;
         $this->settings = $settings;
         $this->contentTypes = $contentTypes;
+        $this->dateTime = $dateTime;
     }
 
     public function home(?array $user, array $site, array $posts = []): void
@@ -30,6 +33,7 @@ final class PageView
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
             'theme' => $this->theme(),
             'pageTitle' => $siteName,
+            'dateTime' => $this->dateTime,
         ]);
     }
 
@@ -46,6 +50,7 @@ final class PageView
             'item' => $item,
             'theme' => $this->theme(),
             'pageTitle' => (string)($item['name'] ?? 'Obsah'),
+            'dateTime' => $this->dateTime,
         ]);
     }
 
@@ -56,6 +61,7 @@ final class PageView
             'adminMenu' => $this->adminMenu(),
             'theme' => $this->theme(),
             'pageTitle' => 'Dashboard',
+            'dateTime' => $this->dateTime,
         ]);
     }
 
@@ -69,6 +75,7 @@ final class PageView
             'adminMenu' => $this->adminMenu(),
             'theme' => $this->theme(),
             'pageTitle' => 'Uživatelé',
+            'dateTime' => $this->dateTime,
         ]);
     }
 
@@ -81,6 +88,7 @@ final class PageView
             'adminMenu' => $this->adminMenu(),
             'theme' => $this->theme(),
             'pageTitle' => 'Nastavení',
+            'dateTime' => $this->dateTime,
         ]);
     }
 
@@ -93,6 +101,7 @@ final class PageView
             'adminMenu' => $this->adminMenu(),
             'theme' => $this->theme(),
             'pageTitle' => $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele',
+            'dateTime' => $this->dateTime,
         ]);
     }
 
@@ -109,6 +118,7 @@ final class PageView
             'adminMenu' => $this->adminMenu(),
             'theme' => $this->theme(),
             'pageTitle' => (string)($contentType['label_plural'] ?? 'Content'),
+            'dateTime' => $this->dateTime,
         ]);
     }
 
@@ -127,6 +137,7 @@ final class PageView
             'pageTitle' => $mode === 'add'
                 ? 'Přidat ' . (string)($contentType['label_singular'] ?? 'obsah')
                 : 'Upravit ' . (string)($contentType['label_singular'] ?? 'obsah'),
+            'dateTime' => $this->dateTime,
         ]);
     }
 
