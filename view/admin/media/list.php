@@ -29,7 +29,9 @@ $query = (string)($query ?? '');
             <?php foreach ($items as $row):
                 $id = (int)($row['id'] ?? 0);
                 $previewPath = trim((string)($row['path_webp'] ?? ''));
-                if ($previewPath === '') {
+                if ($previewPath !== '') {
+                    $previewPath = (string)(preg_replace('/\.webp$/i', '_100x100.webp', $previewPath) ?? $previewPath);
+                } else {
                     $previewPath = trim((string)($row['path'] ?? ''));
                 }
                 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
@@ -47,8 +49,7 @@ $query = (string)($query ?? '');
                             <div>
                                 <a href="<?= htmlspecialchars($url('admin/media/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                                 <div class="text-muted"><?= htmlspecialchars((string)($row['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                                <div class="text-muted">Vytvořeno: <?= htmlspecialchars((string)($row['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                                <div class="text-muted">Aktualizováno: <?= htmlspecialchars((string)($row['updated'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="text-muted"><?= htmlspecialchars((string)($row['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                             </div>
                         </div>
                     </td>

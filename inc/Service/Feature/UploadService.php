@@ -8,6 +8,8 @@ use App\Service\Support\SluggerService;
 final class UploadService
 {
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    private const MAX_WEBP_WIDTH = 1024;
+    private const LIST_THUMB_SIZE = 100;
     private const MIME_TO_EXTENSION = [
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
@@ -68,9 +70,22 @@ final class UploadService
         $webpRel = $extension === 'webp' ? $fileRel : $subdir . '/' . $slug . '.webp';
         $webpAbs = $this->rootPath . '/' . $webpRel;
 
-        if ($extension !== 'webp' && !$this->createWebp($fileAbs, $webpAbs, $mime)) {
-            @unlink($fileAbs);
+        if (!$this->createWebp($fileAbs, $webpAbs, $mime, self::MAX_WEBP_WIDTH)) {
+            if ($fileAbs !== $webpAbs) {
+                @unlink($fileAbs);
+            }
             return ['success' => false, 'error' => 'Nepodařilo se vytvořit WEBP variantu.'];
+        }
+
+        $thumbRel = $this->thumbnailPath($webpRel);
+        $thumbAbs = $this->rootPath . '/' . $thumbRel;
+
+        if (!$this->createThumbnailWebp($webpAbs, $thumbAbs, self::LIST_THUMB_SIZE)) {
+            if ($fileAbs !== $webpAbs) {
+                @unlink($fileAbs);
+            }
+            @unlink($webpAbs);
+            return ['success' => false, 'error' => 'Nepodařilo se vytvořit thumbnail variantu.'];
         }
 
         return [
@@ -85,10 +100,17 @@ final class UploadService
 
     public function deleteMediaFiles(array $media): void
     {
-        $paths = array_unique(array_filter([
+        $paths = array_filter([
             trim((string)($media['path'] ?? '')),
             trim((string)($media['path_webp'] ?? '')),
-        ]));
+        ]);
+
+        $webpPath = trim((string)($media['path_webp'] ?? ''));
+        if ($webpPath !== '') {
+            $paths[] = $this->thumbnailPath($webpPath);
+        }
+
+        $paths = array_unique($paths);
 
         foreach ($paths as $path) {
             $absolute = $this->rootPath . '/' . ltrim($path, '/');
@@ -110,7 +132,7 @@ final class UploadService
         return $mime;
     }
 
-    private function createWebp(string $sourcePath, string $destinationPath, string $mime): bool
+    private function createWebp(string $sourcePath, string $destinationPath, string $mime, int $maxWidth): bool
     {
         if (!function_exists('imagewebp')) {
             return false;
@@ -128,9 +150,94 @@ final class UploadService
             return false;
         }
 
-        $result = @imagewebp($image, $destinationPath, 85);
+        $prepared = $this->resizeToMaxWidth($image, $maxWidth);
+        if ($prepared === false) {
+            imagedestroy($image);
+            return false;
+        }
+
+        $result = @imagewebp($prepared, $destinationPath, 85);
+        if ($prepared !== $image) {
+            imagedestroy($prepared);
+        }
         imagedestroy($image);
 
         return $result;
+    }
+
+    private function createThumbnailWebp(string $sourceWebp, string $destinationPath, int $size): bool
+    {
+        if (!function_exists('imagecreatefromwebp') || !function_exists('imagewebp')) {
+            return false;
+        }
+
+        $image = @imagecreatefromwebp($sourceWebp);
+        if ($image === false) {
+            return false;
+        }
+
+        $width = (int)imagesx($image);
+        $height = (int)imagesy($image);
+        if ($width <= 0 || $height <= 0) {
+            imagedestroy($image);
+            return false;
+        }
+
+        $srcSize = min($width, $height);
+        $srcX = (int)floor(($width - $srcSize) / 2);
+        $srcY = (int)floor(($height - $srcSize) / 2);
+
+        $thumb = imagecreatetruecolor($size, $size);
+        if ($thumb === false) {
+            imagedestroy($image);
+            return false;
+        }
+
+        imagealphablending($thumb, true);
+        imagesavealpha($thumb, true);
+
+        $ok = imagecopyresampled($thumb, $image, 0, 0, $srcX, $srcY, $size, $size, $srcSize, $srcSize);
+        $saved = $ok ? @imagewebp($thumb, $destinationPath, 82) : false;
+
+        imagedestroy($thumb);
+        imagedestroy($image);
+
+        return $saved;
+    }
+
+    private function resizeToMaxWidth(\GdImage $image, int $maxWidth): \GdImage|false
+    {
+        $width = (int)imagesx($image);
+        $height = (int)imagesy($image);
+
+        if ($width <= 0 || $height <= 0) {
+            return false;
+        }
+
+        if ($width <= $maxWidth) {
+            return $image;
+        }
+
+        $newWidth = $maxWidth;
+        $newHeight = (int)max(1, round(($height / $width) * $newWidth));
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        if ($resized === false) {
+            return false;
+        }
+
+        imagealphablending($resized, true);
+        imagesavealpha($resized, true);
+
+        if (!imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height)) {
+            imagedestroy($resized);
+            return false;
+        }
+
+        return $resized;
+    }
+
+    private function thumbnailPath(string $webpPath): string
+    {
+        return (string)(preg_replace('/\.webp$/i', '_' . self::LIST_THUMB_SIZE . 'x' . self::LIST_THUMB_SIZE . '.webp', $webpPath) ?? $webpPath);
     }
 }
