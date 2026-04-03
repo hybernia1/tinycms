@@ -7,6 +7,28 @@
         textarea.value = normalizeHtml(editor.innerHTML.trim());
     }
 
+    function normalizeBlocks(editor) {
+        var nodes = Array.prototype.slice.call(editor.childNodes);
+        nodes.forEach(function (node) {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent && node.textContent.trim() !== '') {
+                var paragraph = document.createElement('p');
+                paragraph.textContent = node.textContent;
+                editor.replaceChild(paragraph, node);
+                return;
+            }
+
+            if (node.nodeType !== Node.ELEMENT_NODE) {
+                return;
+            }
+
+            if (node.tagName === 'DIV') {
+                var p = document.createElement('p');
+                p.innerHTML = node.innerHTML;
+                editor.replaceChild(p, node);
+            }
+        });
+    }
+
     function rememberSelection() {
         var selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) {
@@ -137,7 +159,9 @@
                 return;
             }
             editor.focus();
+            document.execCommand('defaultParagraphSeparator', false, 'p');
             document.execCommand(command, false, null);
+            normalizeBlocks(editor);
             sync(textarea, editor);
             closeMenus();
         }
@@ -205,7 +229,9 @@
                 var url = linkInput ? linkInput.value.trim() : '';
                 if (url) {
                     restoreSelection(linkRange, editor);
+                    document.execCommand('defaultParagraphSeparator', false, 'p');
                     document.execCommand('createLink', false, url);
+                    normalizeBlocks(editor);
                     sync(textarea, editor);
                     if (linkInput) {
                         linkInput.value = '';
@@ -236,7 +262,16 @@
             }
         });
 
+        editor.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                document.execCommand('defaultParagraphSeparator', false, 'p');
+                event.preventDefault();
+                document.execCommand('insertParagraph', false, null);
+            }
+        });
+
         editor.addEventListener('input', function () {
+            normalizeBlocks(editor);
             sync(textarea, editor);
         });
 
@@ -246,6 +281,8 @@
         wrapper.appendChild(linkPanel);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);
+        document.execCommand('defaultParagraphSeparator', false, 'p');
+        normalizeBlocks(editor);
         sync(textarea, editor);
     }
 
