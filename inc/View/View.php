@@ -25,7 +25,7 @@ final class View
     public function render(string $layout, string $template, array $data = []): void
     {
         $templateFile = $this->resolve('view/' . $template . '.php', '/view/');
-        $layoutFile = $this->resolve('view/layout/' . $layout . '.php', '/view/layout/');
+        $layoutFile = $this->resolve('view/' . $layout . '.php', '/view/');
 
         $url = fn(string $path = ''): string => $this->router->url($path);
         $icon = static function (string $name, string $classes = 'icon') use ($url): string {
@@ -35,13 +35,15 @@ final class View
         };
         $csrfField = fn(string $name = '_csrf'): string => $this->csrf->field($name);
 
-        if ($layout === 'admin' && !isset($data['adminMenu'])) {
+        $isAdminLayout = str_starts_with($layout, 'admin/');
+
+        if ($isAdminLayout && !isset($data['adminMenu'])) {
             $data['adminMenu'] = [
                 ['label' => 'Dashboard', 'url' => $url('admin/dashboard')],
                 ['label' => 'Uživatelé', 'url' => $url('admin/users')],
                 ['label' => 'Nastavení', 'url' => $url('admin/settings')],
             ];
-        } elseif ($layout === 'admin' && isset($data['adminMenu']) && is_array($data['adminMenu'])) {
+        } elseif ($isAdminLayout && isset($data['adminMenu']) && is_array($data['adminMenu'])) {
             $data['adminMenu'] = array_map(static function (array $item) use ($url): array {
                 $path = (string)($item['url'] ?? '');
                 return [

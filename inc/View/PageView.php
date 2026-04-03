@@ -15,7 +15,7 @@ final class PageView
     public function home(?array $user, array $site, array $posts = []): void
     {
         $siteName = (string)($site['name'] ?? 'TinyCMS');
-        $this->view->render('front', 'front/index', [
+        $this->view->render('front/layout', 'front/index', [
             'user' => $user,
             'posts' => $posts,
             'siteName' => $siteName,
@@ -28,12 +28,12 @@ final class PageView
     public function loginForm(array $state): void
     {
         $state['pageTitle'] = 'Login';
-        $this->view->render('login', 'login/form', $state);
+        $this->view->render('front/layout', 'front/auth/login', $state);
     }
 
     public function contentDetail(array $item): void
     {
-        $this->view->render('front', 'front/content', [
+        $this->view->render('front/layout', 'front/content', [
             'item' => $item,
             'pageTitle' => (string)($item['name'] ?? 'Obsah'),
         ]);
@@ -41,7 +41,7 @@ final class PageView
 
     public function adminDashboard(?array $user): void
     {
-        $this->view->render('admin', 'admin/dashboard', [
+        $this->view->render('admin/layout', 'admin/dashboard', [
             'user' => $user,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => 'Dashboard',
@@ -50,7 +50,7 @@ final class PageView
 
     public function adminUsersList(array $pagination, array $allowedPerPage, string $status, string $query): void
     {
-        $this->view->render('admin', 'admin/users/list', [
+        $this->view->render('admin/layout', 'admin/users/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
             'status' => $status,
@@ -62,7 +62,7 @@ final class PageView
 
     public function adminSettingsForm(array $fields, array $values): void
     {
-        $this->view->render('admin', 'admin/settings/form', [
+        $this->view->render('admin/layout', 'admin/settings/form', [
             'fields' => $fields,
             'values' => $values,
             'adminMenu' => $this->adminMenu(),
@@ -72,7 +72,7 @@ final class PageView
 
     public function adminUsersForm(string $mode, array $user, array $errors): void
     {
-        $this->view->render('admin', 'admin/users/form', [
+        $this->view->render('admin/layout', 'admin/users/form', [
             'mode' => $mode,
             'user' => $user,
             'errors' => $errors,
@@ -83,7 +83,7 @@ final class PageView
 
     public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $availableStatuses): void
     {
-        $this->view->render('admin', 'admin/content/list', [
+        $this->view->render('admin/layout', 'admin/content/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
             'status' => $status,
@@ -96,7 +96,7 @@ final class PageView
 
     public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $authors): void
     {
-        $this->view->render('admin', 'admin/content/form', [
+        $this->view->render('admin/layout', 'admin/content/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
