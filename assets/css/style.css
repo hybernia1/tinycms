@@ -400,9 +400,9 @@ select option {
     padding: var(--control-padding-y) calc(var(--control-padding-x) * 2.6) var(--control-padding-y) var(--control-padding-x);
     text-align: left;
     cursor: pointer;
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: var(--space-2);
 }
 
@@ -411,8 +411,12 @@ select option {
 }
 
 .custom-select-button-icon {
+    position: absolute;
+    top: 50%;
+    right: var(--select-arrow-offset);
+    transform: translateY(-50%);
+    pointer-events: none;
     color: var(--color-muted);
-    flex: 0 0 auto;
 }
 
 .custom-select-dropdown {
@@ -565,18 +569,22 @@ input[type='week']::-webkit-calendar-picker-indicator {
 
 .custom-datetime-trigger {
     width: 100%;
-    padding: var(--control-padding-y) var(--control-padding-x);
+    padding: var(--control-padding-y) calc(var(--control-padding-x) * 2.6) var(--control-padding-y) var(--control-padding-x);
     text-align: left;
     cursor: pointer;
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: var(--space-2);
 }
 
 .custom-datetime-trigger-icon {
+    position: absolute;
+    top: 50%;
+    right: var(--select-arrow-offset);
+    transform: translateY(-50%);
+    pointer-events: none;
     color: var(--color-muted);
-    flex: 0 0 auto;
 }
 
 .custom-datetime-panel {
