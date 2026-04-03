@@ -1,21 +1,17 @@
-document.addEventListener('click', function (event) {
-    const toggle = event.target.closest('[data-admin-menu-toggle]');
+(($) => {
+    const $body = $(document.body);
 
-    if (toggle) {
-        document.body.classList.toggle('admin-menu-open');
-        return;
-    }
+    $(document).on('click', '[data-admin-menu-toggle]', () => {
+        $body.toggleClass('admin-menu-open');
+    });
 
-    const close = event.target.closest('[data-admin-menu-close]');
+    $(document).on('click', '[data-admin-menu-close]', () => {
+        $body.removeClass('admin-menu-open');
+    });
 
-    if (close) {
-        document.body.classList.remove('admin-menu-open');
-        return;
-    }
-
-    const navLink = event.target.closest('.admin-nav-link');
-
-    if (navLink && window.matchMedia('(max-width: 900px)').matches) {
-        document.body.classList.remove('admin-menu-open');
-    }
-});
+    $(document).on('click', '.admin-nav-link', () => {
+        if (window.matchMedia('(max-width: 900px)').matches) {
+            $body.removeClass('admin-menu-open');
+        }
+    });
+})(jQuery);

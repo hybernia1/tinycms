@@ -1,69 +1,69 @@
-document.addEventListener('click', function (event) {
-    const trigger = event.target.closest('[data-modal-open]');
-    const modal = document.querySelector('[data-modal]');
+(($) => {
+    const $doc = $(document);
 
-    if (trigger && modal) {
-        event.preventDefault();
+    const checkedItems = () => $('[data-bulk-item]:checked');
 
-        const mode = trigger.getAttribute('data-modal-mode') || 'single';
-        const type = trigger.getAttribute('data-type') || 'záznam';
-        const formId = trigger.getAttribute('data-form-id') || '';
-        let count = parseInt(trigger.getAttribute('data-count') || '1', 10);
+    const syncBulkUi = () => {
+        const hasChecked = checkedItems().length > 0;
+        $('#bulk-action-select').prop('disabled', !hasChecked);
+        $('#bulk-apply').prop('disabled', !hasChecked);
+    };
+
+    const openModal = ($trigger) => {
+        const $modal = $('[data-modal]').first();
+        if (!$modal.length) {
+            return;
+        }
+
+        const mode = $trigger.data('modal-mode') || 'single';
+        const type = $trigger.data('type') || 'záznam';
+        const formId = $trigger.data('form-id') || '';
+        let count = Number.parseInt(String($trigger.data('count') || '1'), 10);
 
         if (mode === 'bulk') {
-            const checked = Array.from(document.querySelectorAll('[data-bulk-item]:checked'));
-            count = checked.length;
-
-            if (count === 0) {
+            count = checkedItems().length;
+            if (!count) {
                 return;
             }
         }
 
-        const text = modal.querySelector('[data-modal-text]');
-        const confirm = modal.querySelector('[data-modal-confirm]');
+        const text = mode === 'bulk'
+            ? `Skutečně smazat ${count} ${type}?`
+            : `Skutečně smazat tento ${type}?`;
 
-        if (text) {
-            text.textContent = mode === 'bulk' ? `Skutečně smazat ${count} ${type}?` : `Skutečně smazat tento ${type}?`;
-        }
+        $modal.find('[data-modal-text]').text(text);
+        $modal.find('[data-modal-confirm]').attr('data-form-id', formId);
+        $modal.addClass('open');
+    };
 
-        if (confirm) {
-            confirm.setAttribute('data-form-id', formId);
-        }
+    $doc.on('click', '[data-modal-open]', function (event) {
+        event.preventDefault();
+        openModal($(this));
+    });
 
-        modal.classList.add('open');
-        return;
-    }
+    $doc.on('click', '[data-modal-close]', () => {
+        $('[data-modal]').removeClass('open');
+    });
 
-    const close = event.target.closest('[data-modal-close]');
-    if (close && modal) {
-        modal.classList.remove('open');
-        return;
-    }
-
-    const confirm = event.target.closest('[data-modal-confirm]');
-    if (confirm && modal) {
-        const form = document.getElementById(confirm.getAttribute('data-form-id') || '');
-
+    $doc.on('click', '[data-modal-confirm]', function () {
+        const formId = String($(this).attr('data-form-id') || '');
+        const form = formId ? document.getElementById(formId) : null;
         if (form) {
             form.submit();
         }
+        $('[data-modal]').removeClass('open');
+    });
 
-        modal.classList.remove('open');
-        return;
-    }
-
-    const bulkApply = event.target.closest('#bulk-apply');
-    if (bulkApply) {
+    $doc.on('click', '#bulk-apply', () => {
         const form = document.getElementById('bulk-action-form');
         const actionSelect = document.getElementById('bulk-action-select');
 
-        if (!form || !actionSelect || actionSelect.value === '') {
+        if (!form || !actionSelect || !actionSelect.value) {
             return;
         }
 
-        const checked = Array.from(document.querySelectorAll('[data-bulk-item]:checked'));
-
-        if (checked.length === 0) {
+        const $checked = checkedItems();
+        if (!$checked.length) {
             return;
         }
 
@@ -71,7 +71,7 @@ document.addEventListener('click', function (event) {
         const actionField = document.getElementById('bulk-action-value');
 
         if (idsField) {
-            idsField.value = checked.map((el) => el.value).join(',');
+            idsField.value = $checked.map((_, el) => el.value).get().join(',');
         }
 
         if (actionField) {
@@ -79,42 +79,29 @@ document.addEventListener('click', function (event) {
         }
 
         if (actionSelect.value === 'delete') {
-            const bulkType = form.getAttribute('data-bulk-type') || 'záznamů';
-            const fakeTrigger = document.createElement('button');
-            fakeTrigger.setAttribute('data-modal-open', '1');
-            fakeTrigger.setAttribute('data-modal-mode', 'bulk');
-            fakeTrigger.setAttribute('data-type', bulkType);
-            fakeTrigger.setAttribute('data-form-id', 'bulk-action-form');
-            fakeTrigger.setAttribute('data-count', String(checked.length));
-            fakeTrigger.style.display = 'none';
-            document.body.appendChild(fakeTrigger);
-            fakeTrigger.click();
-            fakeTrigger.remove();
+            const $trigger = $('<button>', {
+                type: 'button',
+                'data-modal-open': '1',
+                'data-modal-mode': 'bulk',
+                'data-type': form.getAttribute('data-bulk-type') || 'záznamů',
+                'data-form-id': 'bulk-action-form',
+                'data-count': String($checked.length),
+            }).hide();
+
+            $(document.body).append($trigger);
+            $trigger.trigger('click').remove();
             return;
         }
 
         form.submit();
-    }
-});
+    });
 
-document.addEventListener('change', function (event) {
-    const toggle = event.target.closest('[data-bulk-toggle]');
+    $doc.on('change', '[data-bulk-toggle]', function () {
+        $('[data-bulk-item]').prop('checked', this.checked);
+        syncBulkUi();
+    });
 
-    if (toggle) {
-        document.querySelectorAll('[data-bulk-item]').forEach(function (item) {
-            item.checked = toggle.checked;
-        });
-    }
+    $doc.on('change', '[data-bulk-item]', syncBulkUi);
 
-    const checkedCount = document.querySelectorAll('[data-bulk-item]:checked').length;
-    const actionSelect = document.getElementById('bulk-action-select');
-    const applyButton = document.getElementById('bulk-apply');
-
-    if (actionSelect) {
-        actionSelect.disabled = checkedCount === 0;
-    }
-
-    if (applyButton) {
-        applyButton.disabled = checkedCount === 0;
-    }
-});
+    syncBulkUi();
+})(jQuery);
