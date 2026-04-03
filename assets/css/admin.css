@@ -87,6 +87,18 @@ body {
 
 .admin-content {
     flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+.admin-content > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-content .card,
+.admin-content form {
+    max-width: 100%;
 }
 
 .admin-sidebar-bottom {
