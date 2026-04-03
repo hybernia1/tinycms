@@ -22,7 +22,7 @@ $query = (string)($query ?? '');
         <table class="table">
             <thead>
             <tr>
-                <th>Název</th><th>Autor</th><th class="table-col-actions">Akce</th>
+                <th>Médium</th><th>Autor</th><th class="table-col-actions">Akce</th>
             </tr>
             </thead>
             <tbody>
@@ -36,13 +36,19 @@ $query = (string)($query ?? '');
             ?>
                 <tr>
                     <td>
-                        <a href="<?= htmlspecialchars($url('admin/media/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-                        <div class="text-muted"><?= htmlspecialchars((string)($row['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                        <?php if ($previewUrl !== ''): ?>
-                            <div class="content-thumbnail-preview mt-2">
-                                <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                        <div class="d-flex align-center gap-2">
+                            <?php if ($previewUrl !== ''): ?>
+                                <div class="media-list-thumb">
+                                    <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                                </div>
+                            <?php else: ?>
+                                <div class="media-list-thumb media-list-thumb-empty"></div>
+                            <?php endif; ?>
+                            <div>
+                                <a href="<?= htmlspecialchars($url('admin/media/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                                <div class="text-muted"><?= htmlspecialchars((string)($row['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                             </div>
-                        <?php endif; ?>
+                        </div>
                     </td>
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="table-col-actions">

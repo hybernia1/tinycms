@@ -50,7 +50,7 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        $fallback = ['id' => null, 'name' => '', 'path' => '', 'path_webp' => '', 'author' => null];
+        $fallback = ['id' => null, 'name' => '', 'path' => '', 'path_webp' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
         $this->pages->adminMediaForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->media->authorOptions());
     }
@@ -80,10 +80,12 @@ final class AdminMediaController extends BaseAdminController
         }
 
         $uploadData = (array)($upload['data'] ?? []);
+        $authorId = (int)($this->authService->auth()->id() ?? 0);
         $input = array_merge($_POST, [
             'name' => trim((string)($_POST['name'] ?? '')) !== '' ? (string)$_POST['name'] : (string)($uploadData['name'] ?? ''),
             'path' => (string)($uploadData['path'] ?? ''),
             'path_webp' => (string)($uploadData['path_webp'] ?? ''),
+            'author' => trim((string)($_POST['author'] ?? '')) !== '' ? (string)$_POST['author'] : ($authorId > 0 ? (string)$authorId : ''),
         ]);
         $result = $this->media->save($input);
 
