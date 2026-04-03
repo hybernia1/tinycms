@@ -21,7 +21,7 @@ foreach ($availableStatuses as $statusValue) {
     <button class="btn btn-light" id="bulk-apply" type="button" disabled>Použít</button>
 </div>
 
-<div class="d-flex justify-between align-center mb-3">
+<div class="list-toolbar mb-3">
     <nav class="filter-nav">
         <?php foreach ($statusLinks as $key => $label): ?>
             <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/content?type=' . urlencode($type) . '&status=' . urlencode($key) . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>

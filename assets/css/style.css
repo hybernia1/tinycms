@@ -562,7 +562,8 @@ body[data-theme='dark'] input[type='week'] {
 }
 
 .search-form {
-    min-width: 260px;
+    min-width: 0;
+    width: min(100%, 22rem);
 }
 
 .search-field {
@@ -780,6 +781,30 @@ body[data-theme='dark'] input[type='week'] {
     background: var(--primary);
     color: #fff;
     border-color: var(--primary);
+}
+
+.list-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.list-toolbar .search-form {
+    flex: 1 1 16rem;
+    max-width: 22rem;
+}
+
+@media (max-width: 768px) {
+    .list-toolbar {
+        align-items: stretch;
+    }
+
+    .list-toolbar .search-form {
+        flex-basis: 100%;
+        max-width: none;
+    }
 }
 
 .modal-overlay {
