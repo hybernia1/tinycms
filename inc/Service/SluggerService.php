@@ -39,6 +39,30 @@ final class SluggerService
             return '';
         }
 
+        $clean = strtr($clean, [
+            'á' => 'a',
+            'ä' => 'a',
+            'č' => 'c',
+            'ď' => 'd',
+            'é' => 'e',
+            'ě' => 'e',
+            'í' => 'i',
+            'ľ' => 'l',
+            'ĺ' => 'l',
+            'ň' => 'n',
+            'ó' => 'o',
+            'ô' => 'o',
+            'ö' => 'o',
+            'ř' => 'r',
+            'š' => 's',
+            'ť' => 't',
+            'ú' => 'u',
+            'ů' => 'u',
+            'ü' => 'u',
+            'ý' => 'y',
+            'ž' => 'z',
+        ]);
+
         $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $clean);
         $ascii = $ascii === false ? $clean : $ascii;
         $ascii = preg_replace('/[^a-z0-9]+/i', '-', $ascii) ?? '';
