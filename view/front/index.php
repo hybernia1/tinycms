@@ -2,21 +2,21 @@
     <div class="row">
         <div class="col-12 col-lg-8">
             <div class="card p-5 bg-light mb-4">
-                <h1 class="m-0 mb-3"><?= htmlspecialchars((string)($siteName ?? 'TinyCMS'), ENT_QUOTES, 'UTF-8') ?></h1>
+                <h1 class="m-0 mb-3"><?= $e((string)($siteName ?? 'TinyCMS')) ?></h1>
                 <p class="m-0 mb-2 text-muted">Minimalistické CMS bez balastu.</p>
-                <p class="m-0 mb-4 text-muted">Autor: <?= htmlspecialchars((string)($siteAuthor ?? 'Admin'), ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="m-0 mb-4 text-muted">Autor: <?= $e((string)($siteAuthor ?? 'Admin')) ?></p>
                 <div class="d-flex gap-2">
-                    <a class="btn btn-primary" href="<?= htmlspecialchars($url('login'), ENT_QUOTES, 'UTF-8') ?>">Login</a>
+                    <a class="btn btn-primary" href="<?= $e($url('login')) ?>">Login</a>
                     <?php if (!empty($user) && (($user['role'] ?? '') === 'admin')): ?>
-                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>">Dashboard</a>
+                    <a class="btn btn-light" href="<?= $e($url('admin/dashboard')) ?>">Dashboard</a>
                     <?php endif; ?>
                 </div>
             </div>
             <?php if (!empty($user)): ?>
             <div class="card p-4">
-                <p class="m-0 mb-2"><strong>Uživatel:</strong> <?= htmlspecialchars((string)($user['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
-                <p class="m-0 mb-2"><strong>Email:</strong> <?= htmlspecialchars((string)($user['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
-                <p class="m-0"><strong>Role:</strong> <?= htmlspecialchars((string)($user['role'] ?? 'guest'), ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="m-0 mb-2"><strong>Uživatel:</strong> <?= $e((string)($user['name'] ?? '')) ?></p>
+                <p class="m-0 mb-2"><strong>Email:</strong> <?= $e((string)($user['email'] ?? '')) ?></p>
+                <p class="m-0"><strong>Role:</strong> <?= $e((string)($user['role'] ?? 'guest')) ?></p>
             </div>
             <?php endif; ?>
             <div class="card p-4 mt-4">
@@ -28,11 +28,11 @@
                     <?php foreach ($posts as $post): ?>
                     <li class="list-group-item px-0">
                         <h3 class="h6 m-0 mb-1">
-                            <a href="<?= htmlspecialchars($url((string)($post['url'] ?? '')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($post['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                            <a href="<?= $e($url((string)($post['url'] ?? ''))) ?>"><?= $e((string)($post['name'] ?? '')) ?></a>
                         </h3>
-                        <p class="m-0 mb-1 text-muted"><?= htmlspecialchars($dateTime->formatDateTime((string)($post['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></p>
-                        <p class="m-0 mb-1"><small>Slug URL: /<?= htmlspecialchars((string)($post['url'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
-                        <p class="m-0"><small>Short URL: /<?= htmlspecialchars((string)($post['type_slug'] ?? ''), ENT_QUOTES, 'UTF-8') ?>/<?= htmlspecialchars((string)($post['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
+                        <p class="m-0 mb-1 text-muted"><?= $e($d((string)($post['created'] ?? '')) . ' ' . $t((string)($post['created'] ?? ''))) ?></p>
+                        <p class="m-0 mb-1"><small>Slug URL: /<?= $e((string)($post['url'] ?? '')) ?></small></p>
+                        <p class="m-0"><small>Short URL: /<?= $e((string)($post['type_slug'] ?? '')) ?>/<?= $e((string)($post['id'] ?? '')) ?></small></p>
                     </li>
                     <?php endforeach; ?>
                 </ul>

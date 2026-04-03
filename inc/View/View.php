@@ -6,6 +6,7 @@ namespace App\View;
 use App\Service\FlashService;
 use App\Service\Router\Router;
 use App\Service\CsrfService;
+use App\Service\DateTimeService;
 
 final class View
 {
@@ -34,6 +35,15 @@ final class View
             return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
         };
         $csrfField = fn(string $name = '_csrf'): string => $this->csrf->field($name);
+        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $dateTime = $data['dateTime'] ?? null;
+        $d = static fn(mixed $value): string => (string)$value;
+        $t = static fn(mixed $value): string => (string)$value;
+
+        if ($dateTime instanceof DateTimeService) {
+            $d = static fn(mixed $value): string => $dateTime->formatDate((string)$value);
+            $t = static fn(mixed $value): string => $dateTime->formatTime((string)$value);
+        }
 
         if ($layout === 'admin' && !isset($data['adminMenu'])) {
             $data['adminMenu'] = [
@@ -56,6 +66,9 @@ final class View
         $data['theme'] = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
         $data['icon'] = $icon;
         $data['csrfField'] = $csrfField;
+        $data['e'] = $e;
+        $data['d'] = $d;
+        $data['t'] = $t;
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
 

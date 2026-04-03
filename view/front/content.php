@@ -2,12 +2,12 @@
     <div class="row">
         <div class="col-12 col-lg-8">
             <article class="card p-4">
-                <h1 class="h2 mb-3"><?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></h1>
-                <p class="text-muted mb-3"><?= htmlspecialchars($dateTime->formatDateTime((string)($item['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></p>
+                <h1 class="h2 mb-3"><?= $e((string)($item['name'] ?? '')) ?></h1>
+                <p class="text-muted mb-3"><?= $e($d((string)($item['created'] ?? '')) . ' ' . $t((string)($item['created'] ?? ''))) ?></p>
                 <?php if ((string)($item['excerpt'] ?? '') !== ''): ?>
-                <p class="mb-4"><?= nl2br(htmlspecialchars((string)($item['excerpt'] ?? ''), ENT_QUOTES, 'UTF-8')) ?></p>
+                <p class="mb-4"><?= nl2br($e((string)($item['excerpt'] ?? ''))) ?></p>
                 <?php endif; ?>
-                <div><?= nl2br(htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8')) ?></div>
+                <div><?= nl2br($e((string)($item['body'] ?? ''))) ?></div>
             </article>
         </div>
     </div>
