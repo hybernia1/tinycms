@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Service\AuthService;
 use App\Service\ContentService;
+use App\Service\ContentTypeService;
 use App\Service\CsrfService;
 use App\Service\SettingsService;
 use App\Service\SluggerService;
@@ -17,15 +18,17 @@ final class FrontController
     private CsrfService $csrf;
     private SettingsService $settings;
     private ContentService $contentService;
+    private ContentTypeService $contentTypes;
     private SluggerService $slugger;
 
-    public function __construct(PageView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings, ContentService $contentService, SluggerService $slugger)
+    public function __construct(PageView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings, ContentService $contentService, ContentTypeService $contentTypes, SluggerService $slugger)
     {
         $this->pages = $pages;
         $this->authService = $authService;
         $this->csrf = $csrf;
         $this->settings = $settings;
         $this->contentService = $contentService;
+        $this->contentTypes = $contentTypes;
         $this->slugger = $slugger;
     }
 
@@ -37,6 +40,7 @@ final class FrontController
             'footer' => (string)($settings['main']['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['main']['siteauthor'] ?? 'Admin'),
         ];
+        $postType = $this->contentTypes->resolve('post');
         $posts = array_map(function (array $item): array {
             $id = (int)($item['id'] ?? 0);
             return [
@@ -47,8 +51,44 @@ final class FrontController
                 'slug' => $this->slugger->slug((string)($item['name'] ?? ''), $id),
             ];
         }, $this->contentService->listPublished('post', 30));
+        $posts = array_map(static function (array $item) use ($postType): array {
+            $item['type_slug'] = (string)($postType['slug'] ?? 'clanky');
+            $item['url'] = $item['type_slug'] . '/' . (string)($item['slug'] ?? '');
+            return $item;
+        }, $posts);
 
         $this->pages->home($this->authService->auth()->user(), $site, $posts);
+    }
+
+    public function contentDetail(array $params): void
+    {
+        $type = $this->contentTypes->resolveBySlug((string)($params['typeSlug'] ?? ''));
+
+        if ($type === null) {
+            http_response_code(404);
+            echo '404';
+            return;
+        }
+
+        $id = $this->slugger->extractId((string)($params['slug'] ?? ''));
+        $item = $id > 0 ? $this->contentService->findPublished($id, (string)$type['type']) : null;
+
+        if ($item === null) {
+            http_response_code(404);
+            echo '404';
+            return;
+        }
+
+        $slug = $this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0));
+        $this->pages->contentDetail([
+            'type_slug' => (string)($type['slug'] ?? ''),
+            'slug' => $slug,
+            'id' => (int)($item['id'] ?? 0),
+            'name' => (string)($item['name'] ?? ''),
+            'excerpt' => (string)($item['excerpt'] ?? ''),
+            'body' => (string)($item['body'] ?? ''),
+            'created' => (string)($item['created'] ?? ''),
+        ]);
     }
 
     public function loginForm(callable $redirect): void

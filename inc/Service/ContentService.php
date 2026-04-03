@@ -185,6 +185,22 @@ final class ContentService
         return $items;
     }
 
+    public function findPublished(int $id, string $type): ?array
+    {
+        $item = $this->find($id, $type);
+
+        if ($item === null || (string)($item['status'] ?? '') !== 'published') {
+            return null;
+        }
+
+        $created = strtotime((string)($item['created'] ?? ''));
+        if ($created === false || $created > time()) {
+            return null;
+        }
+
+        return $item;
+    }
+
     private function sanitizeIds(array $ids): array
     {
         return array_values(array_unique(array_filter(array_map('intval', $ids), static fn(int $v): bool => $v > 0)));

@@ -38,7 +38,7 @@ $slugger = new SluggerService();
 $contentTypes = new ContentTypeService();
 $settingsService = new SettingsService();
 $pageView = new PageView($view, $settingsService, $contentTypes);
-$front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $slugger);
+$front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $contentTypes, $slugger);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
 $adminContent = new AdminContentController($pageView, $authService, $contentService, $contentTypes, $userService, $flash, $csrf);
@@ -51,6 +51,10 @@ $redirect = static function (string $path = '') use ($router): void {
 
 $router->get('', static function () use ($front): void {
     $front->home();
+});
+
+$router->get('{typeSlug}/{slug}', static function (array $params) use ($front): void {
+    $front->contentDetail($params);
 });
 
 $router->get('front/login', static function () use ($redirect): void {

@@ -16,6 +16,21 @@ final class SluggerService
         return $base . '-' . $id;
     }
 
+    public function extractId(string $slug): int
+    {
+        $clean = trim($slug);
+
+        if ($clean !== '' && ctype_digit($clean)) {
+            return (int)$clean;
+        }
+
+        if (preg_match('/-(\d+)$/', $clean, $matches) === 1) {
+            return (int)$matches[1];
+        }
+
+        return 0;
+    }
+
     private function normalize(string $value): string
     {
         $clean = trim(mb_strtolower($value));

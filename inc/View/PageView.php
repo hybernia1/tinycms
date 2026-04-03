@@ -40,6 +40,15 @@ final class PageView
         $this->view->render('login', 'login/form', $state);
     }
 
+    public function contentDetail(array $item): void
+    {
+        $this->view->render('front', 'front/content', [
+            'item' => $item,
+            'theme' => $this->theme(),
+            'pageTitle' => (string)($item['name'] ?? 'Obsah'),
+        ]);
+    }
+
     public function adminDashboard(?array $user): void
     {
         $this->view->render('admin', 'admin/dashboard', [

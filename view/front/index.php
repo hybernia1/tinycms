@@ -27,10 +27,12 @@
                 <ul class="list-group list-group-flush">
                     <?php foreach ($posts as $post): ?>
                     <li class="list-group-item px-0">
-                        <h3 class="h6 m-0 mb-1"><?= htmlspecialchars((string)($post['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></h3>
+                        <h3 class="h6 m-0 mb-1">
+                            <a href="<?= htmlspecialchars($url((string)($post['url'] ?? '')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($post['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                        </h3>
                         <p class="m-0 mb-1 text-muted"><?= htmlspecialchars((string)($post['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
-                        <p class="m-0 mb-1"><small>Slug URL: /post/<?= htmlspecialchars((string)($post['slug'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
-                        <p class="m-0"><small>Short URL: /post/<?= htmlspecialchars((string)($post['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
+                        <p class="m-0 mb-1"><small>Slug URL: /<?= htmlspecialchars((string)($post['url'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
+                        <p class="m-0"><small>Short URL: /<?= htmlspecialchars((string)($post['type_slug'] ?? ''), ENT_QUOTES, 'UTF-8') ?>/<?= htmlspecialchars((string)($post['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
                     </li>
                     <?php endforeach; ?>
                 </ul>
