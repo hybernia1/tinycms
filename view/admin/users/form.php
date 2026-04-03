@@ -9,12 +9,20 @@
         </div>
         <div class="mb-3">
             <label>Email</label>
-            <input type="email" name="email" value="<?= htmlspecialchars((string)($user['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+            <div class="input-with-icon">
+                <span class="input-with-icon-symbol" aria-hidden="true"><?= $icon('email') ?></span>
+                <input class="input-with-icon-field" type="email" name="email" value="<?= htmlspecialchars((string)($user['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+            </div>
             <?php if (!empty($errors['email'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['email'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <div class="mb-3">
             <label>Heslo <?= $mode === 'edit' ? '(volitelné)' : '' ?></label>
-            <input type="password" name="password" <?= $mode === 'add' ? 'required' : '' ?>>
+            <div class="input-with-icon">
+                <input class="input-with-icon-toggle" type="password" name="password" data-password-input <?= $mode === 'add' ? 'required' : '' ?>>
+                <button class="input-with-icon-action" type="button" data-password-toggle aria-label="Zobrazit heslo" title="Zobrazit heslo">
+                    <?= $icon('show') ?>
+                </button>
+            </div>
             <?php if (!empty($errors['password'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['password'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <div class="mb-3">
