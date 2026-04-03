@@ -39,31 +39,26 @@
         return button;
     }
 
+    function createMenuItem(icon, command, label) {
+        var item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'wysiwyg-menu-item';
+        item.setAttribute('data-command', command);
+        item.innerHTML = '<svg aria-hidden="true"><use href="#' + icon + '"></use></svg><span>' + label + '</span>';
+        return item;
+    }
+
     function createListGroup() {
         var group = document.createElement('div');
         group.className = 'wysiwyg-group';
 
         var toggle = createIconButton('w-ul', 'toggleListMenu', 'Seznamy');
-        toggle.setAttribute('data-role', 'list-toggle');
 
         var menu = document.createElement('div');
         menu.className = 'wysiwyg-menu';
-        menu.setAttribute('data-role', 'list-menu');
 
-        var bullets = document.createElement('button');
-        bullets.type = 'button';
-        bullets.className = 'wysiwyg-menu-item';
-        bullets.setAttribute('data-command', 'insertUnorderedList');
-        bullets.textContent = 'Odrážky';
-
-        var numbers = document.createElement('button');
-        numbers.type = 'button';
-        numbers.className = 'wysiwyg-menu-item';
-        numbers.setAttribute('data-command', 'insertOrderedList');
-        numbers.textContent = 'Číslování';
-
-        menu.appendChild(bullets);
-        menu.appendChild(numbers);
+        menu.appendChild(createMenuItem('w-ul', 'insertUnorderedList', 'Odrážky'));
+        menu.appendChild(createMenuItem('w-ol', 'insertOrderedList', 'Číslování'));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -113,6 +108,7 @@
         var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
         var clear = createIconButton('w-clear', 'removeFormat', 'Vyčistit');
         var listGroup = createListGroup();
+        var html = createIconButton('w-html', 'toggleHtml', 'HTML');
         var linkPanel = createLinkPanel();
 
         toolbar.appendChild(bold);
@@ -120,6 +116,7 @@
         toolbar.appendChild(link);
         toolbar.appendChild(listGroup);
         toolbar.appendChild(clear);
+        toolbar.appendChild(html);
 
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
@@ -128,6 +125,7 @@
         editor.innerHTML = textarea.value.trim();
 
         var linkRange = null;
+        var htmlMode = false;
 
         function closeMenus() {
             wrapper.classList.remove('is-list-open');
@@ -135,10 +133,28 @@
         }
 
         function runCommand(command) {
+            if (htmlMode) {
+                return;
+            }
             editor.focus();
             document.execCommand(command, false, null);
             sync(textarea, editor);
             closeMenus();
+        }
+
+        function setHtmlMode(enabled) {
+            htmlMode = enabled;
+            wrapper.classList.toggle('is-html-mode', enabled);
+            html.classList.toggle('is-active', enabled);
+            closeMenus();
+            if (enabled) {
+                sync(textarea, editor);
+                textarea.style.display = 'block';
+                return;
+            }
+            editor.innerHTML = textarea.value.trim();
+            textarea.style.display = 'none';
+            sync(textarea, editor);
         }
 
         toolbar.addEventListener('click', function (event) {
@@ -148,13 +164,24 @@
             }
 
             var command = button.getAttribute('data-command');
+            if (command === 'toggleHtml') {
+                setHtmlMode(!htmlMode);
+                return;
+            }
+
             if (command === 'toggleListMenu') {
+                if (htmlMode) {
+                    return;
+                }
                 wrapper.classList.toggle('is-list-open');
                 wrapper.classList.remove('is-link-open');
                 return;
             }
 
             if (command === 'toggleLinkPanel') {
+                if (htmlMode) {
+                    return;
+                }
                 linkRange = rememberSelection();
                 wrapper.classList.toggle('is-link-open');
                 wrapper.classList.remove('is-list-open');
@@ -218,6 +245,7 @@
         wrapper.appendChild(toolbar);
         wrapper.appendChild(linkPanel);
         wrapper.appendChild(editor);
+        wrapper.appendChild(textarea);
         sync(textarea, editor);
     }
 

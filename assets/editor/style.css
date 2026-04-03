@@ -26,7 +26,8 @@
     cursor: pointer;
 }
 
-.wysiwyg-btn:hover {
+.wysiwyg-btn:hover,
+.wysiwyg-btn.is-active {
     border-color: var(--color-border-soft);
     background: var(--color-surface);
 }
@@ -62,6 +63,14 @@
     text-align: left;
     padding: var(--space-2) var(--space-3);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.wysiwyg-menu-item svg {
+    width: 1rem;
+    height: 1rem;
 }
 
 .wysiwyg-menu-item:hover {
@@ -114,4 +123,16 @@
 
 .wysiwyg-editor a {
     color: var(--color-primary);
+}
+
+.wysiwyg textarea[data-wysiwyg] {
+    width: 100%;
+    min-height: 18rem;
+    border: 0;
+    padding: var(--space-3);
+    resize: vertical;
+}
+
+.wysiwyg.is-html-mode .wysiwyg-editor {
+    display: none;
 }
