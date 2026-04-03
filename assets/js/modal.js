@@ -1,5 +1,19 @@
+const getModal = (trigger) => {
+    const target = trigger?.getAttribute('data-modal-target') || '';
+    if (target) {
+        return document.querySelector(target);
+    }
+    return document.querySelector('[data-modal]');
+};
+
+const closeModal = (modal) => {
+    if (modal) {
+        modal.classList.remove('open');
+    }
+};
+
 const openModal = (trigger) => {
-    const modal = document.querySelector('[data-modal]');
+    const modal = getModal(trigger);
     if (!modal) {
         return;
     }
@@ -9,11 +23,11 @@ const openModal = (trigger) => {
     const text = modal.querySelector('[data-modal-text]');
     const confirm = modal.querySelector('[data-modal-confirm]');
 
-    if (text) {
+    if (text && trigger.hasAttribute('data-type')) {
         text.textContent = `Skutečně smazat tento ${type}?`;
     }
 
-    if (confirm) {
+    if (confirm && formId) {
         confirm.setAttribute('data-form-id', formId);
     }
 
@@ -28,11 +42,9 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    if (event.target.closest('[data-modal-close]')) {
-        const modal = document.querySelector('[data-modal]');
-        if (modal) {
-            modal.classList.remove('open');
-        }
+    const closeTrigger = event.target.closest('[data-modal-close]');
+    if (closeTrigger) {
+        closeModal(closeTrigger.closest('[data-modal]'));
         return;
     }
 
@@ -48,8 +60,5 @@ document.addEventListener('click', (event) => {
         form.submit();
     }
 
-    const modal = document.querySelector('[data-modal]');
-    if (modal) {
-        modal.classList.remove('open');
-    }
+    closeModal(confirmTrigger.closest('[data-modal]'));
 });

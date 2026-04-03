@@ -18,7 +18,7 @@ $createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
             </div>
             <div class="m-0">
                 <label>Obsah</label>
-                <textarea name="body" rows="14"><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                <textarea name="body" rows="14" data-wysiwyg><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
         </div>
         <aside class="content-editor-sidebar">
