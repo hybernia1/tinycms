@@ -4,8 +4,10 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\AuthService;
+use App\Service\ContentService;
 use App\Service\CsrfService;
 use App\Service\SettingsService;
+use App\Service\SluggerService;
 use App\View\PageView;
 
 final class FrontController
@@ -14,13 +16,17 @@ final class FrontController
     private AuthService $authService;
     private CsrfService $csrf;
     private SettingsService $settings;
+    private ContentService $contentService;
+    private SluggerService $slugger;
 
-    public function __construct(PageView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings)
+    public function __construct(PageView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings, ContentService $contentService, SluggerService $slugger)
     {
         $this->pages = $pages;
         $this->authService = $authService;
         $this->csrf = $csrf;
         $this->settings = $settings;
+        $this->contentService = $contentService;
+        $this->slugger = $slugger;
     }
 
     public function home(): void
@@ -31,8 +37,18 @@ final class FrontController
             'footer' => (string)($settings['main']['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['main']['siteauthor'] ?? 'Admin'),
         ];
+        $posts = array_map(function (array $item): array {
+            $id = (int)($item['id'] ?? 0);
+            return [
+                'id' => $id,
+                'name' => (string)($item['name'] ?? ''),
+                'excerpt' => (string)($item['excerpt'] ?? ''),
+                'created' => (string)($item['created'] ?? ''),
+                'slug' => $this->slugger->slug((string)($item['name'] ?? ''), $id),
+            ];
+        }, $this->contentService->listPublished('post', 30));
 
-        $this->pages->home($this->authService->auth()->user(), $site);
+        $this->pages->home($this->authService->auth()->user(), $site, $posts);
     }
 
     public function loginForm(callable $redirect): void

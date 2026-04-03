@@ -167,6 +167,24 @@ final class ContentService
         return $statuses;
     }
 
+    public function listPublished(string $type = 'post', int $limit = 20): array
+    {
+        $rows = $this->query->select('content', ['id', 'name', 'excerpt', 'created'], ['type' => $type, 'status' => 'published']);
+        $now = time();
+        $items = array_values(array_filter($rows, static function (array $row) use ($now): bool {
+            $created = strtotime((string)($row['created'] ?? ''));
+            return $created !== false && $created <= $now;
+        }));
+
+        usort($items, static fn(array $a, array $b): int => strcmp((string)($b['created'] ?? ''), (string)($a['created'] ?? '')));
+
+        if ($limit > 0) {
+            return array_slice($items, 0, $limit);
+        }
+
+        return $items;
+    }
+
     private function sanitizeIds(array $ids): array
     {
         return array_values(array_unique(array_filter(array_map('intval', $ids), static fn(int $v): bool => $v > 0)));

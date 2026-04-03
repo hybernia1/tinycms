@@ -19,6 +19,23 @@
                 <p class="m-0"><strong>Role:</strong> <?= htmlspecialchars((string)($user['role'] ?? 'guest'), ENT_QUOTES, 'UTF-8') ?></p>
             </div>
             <?php endif; ?>
+            <div class="card p-4 mt-4">
+                <h2 class="h4 mb-3">Publikované články</h2>
+                <?php if (empty($posts)): ?>
+                <p class="m-0 text-muted">Zatím nejsou žádné publikované články.</p>
+                <?php else: ?>
+                <ul class="list-group list-group-flush">
+                    <?php foreach ($posts as $post): ?>
+                    <li class="list-group-item px-0">
+                        <h3 class="h6 m-0 mb-1"><?= htmlspecialchars((string)($post['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p class="m-0 mb-1 text-muted"><?= htmlspecialchars((string)($post['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
+                        <p class="m-0 mb-1"><small>Slug URL: /post/<?= htmlspecialchars((string)($post['slug'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
+                        <p class="m-0"><small>Short URL: /post/<?= htmlspecialchars((string)($post['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></p>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
