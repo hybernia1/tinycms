@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Service\AuthService;
+use App\Service\Feature\AuthService;
 use App\View\PageView;
 
 final class AdminController
@@ -21,6 +21,7 @@ final class AdminController
     {
         if (!$this->authService->auth()->check()) {
             $redirect('login');
+            return;
         }
 
         $redirect($this->authService->canAccessAdmin() ? 'admin/dashboard' : '');
@@ -30,10 +31,12 @@ final class AdminController
     {
         if (!$this->authService->auth()->check()) {
             $redirect('login');
+            return;
         }
 
         if (!$this->authService->canAccessAdmin()) {
             $redirect('');
+            return;
         }
 
         $this->pages->adminDashboard($this->authService->auth()->user());

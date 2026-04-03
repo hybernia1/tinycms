@@ -9,14 +9,14 @@ use App\Controller\AdminSettingsController;
 use App\Controller\AdminUserController;
 use App\Controller\FrontController;
 use App\Service\Auth\Auth;
-use App\Service\AuthService;
-use App\Service\ContentService;
-use App\Service\CsrfService;
-use App\Service\FlashService;
-use App\Service\Router\Router;
-use App\Service\SettingsService;
-use App\Service\SluggerService;
-use App\Service\UserService;
+use App\Service\Feature\AuthService;
+use App\Service\Feature\ContentService;
+use App\Service\Support\CsrfService;
+use App\Service\Support\FlashService;
+use App\Service\Infra\Router\Router;
+use App\Service\Feature\SettingsService;
+use App\Service\Support\SluggerService;
+use App\Service\Feature\UserService;
 use App\View\PageView;
 use App\View\View;
 
@@ -47,105 +47,8 @@ $redirect = static function (string $path = '', bool $permanent = false) use ($r
     exit;
 };
 
-$router->get('', static function () use ($front): void {
-    $front->home();
-});
-
-$router->get('front/login', static function () use ($redirect): void {
-    $redirect('login');
-});
-
-$router->get('login', static function () use ($front, $redirect): void {
-    $front->loginForm($redirect);
-});
-
-$router->post('login', static function () use ($front, $redirect): void {
-    $front->loginSubmit($redirect);
-});
-
-$router->get('admin/login', static function () use ($redirect): void {
-    $redirect('login');
-});
-
-$router->get('admin', static function () use ($admin, $redirect): void {
-    $admin->index($redirect);
-});
-
-$router->get('admin/dashboard', static function () use ($admin, $redirect): void {
-    $admin->dashboard($redirect);
-});
-
-$router->get('admin/users', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->list($redirect);
-});
-
-$router->post('admin/users/delete', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->deleteSubmit($redirect);
-});
-
-$router->post('admin/users/suspend-toggle', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->suspendToggleSubmit($redirect);
-});
-
-$router->get('admin/users/add', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->addForm($redirect);
-});
-
-$router->post('admin/users/add', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->addSubmit($redirect);
-});
-
-$router->get('admin/users/edit', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->editForm($redirect);
-});
-
-$router->post('admin/users/edit', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->editSubmit($redirect);
-});
-
-$router->get('admin/content', static function () use ($adminContent, $redirect): void {
-    $adminContent->list($redirect);
-});
-
-$router->post('admin/content/delete', static function () use ($adminContent, $redirect): void {
-    $adminContent->deleteSubmit($redirect);
-});
-
-$router->post('admin/content/status-toggle', static function () use ($adminContent, $redirect): void {
-    $adminContent->statusToggleSubmit($redirect);
-});
-
-$router->get('admin/content/add', static function () use ($adminContent, $redirect): void {
-    $adminContent->addForm($redirect);
-});
-
-$router->post('admin/content/add', static function () use ($adminContent, $redirect): void {
-    $adminContent->addSubmit($redirect);
-});
-
-$router->get('admin/content/edit', static function () use ($adminContent, $redirect): void {
-    $adminContent->editForm($redirect);
-});
-
-$router->post('admin/content/edit', static function () use ($adminContent, $redirect): void {
-    $adminContent->editSubmit($redirect);
-});
-
-$router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
-    $adminSettings->form($redirect);
-});
-
-$router->post('admin/settings', static function () use ($adminSettings, $redirect): void {
-    $adminSettings->submit($redirect);
-});
-
-$router->get('admin/logout', static function () use ($admin, $redirect): void {
-    $admin->logout($redirect);
-});
-
-$router->get('{slug}', static function (array $params) use ($front, $redirect): void {
-    $front->contentDetail($params, $redirect);
-});
+require __DIR__ . '/routes/front.php';
+require __DIR__ . '/routes/admin.php';
 
 return [
     'router' => $router,

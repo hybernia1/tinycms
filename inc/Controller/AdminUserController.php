@@ -3,35 +3,30 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Service\AuthService;
-use App\Service\CsrfService;
-use App\Service\FlashService;
-use App\Service\UserService;
+use App\Service\Feature\AuthService;
+use App\Service\Support\CsrfService;
+use App\Service\Support\FlashService;
+use App\Service\Feature\UserService;
 use App\View\PageView;
 
-final class AdminUserController
+final class AdminUserController extends BaseAdminController
 {
     private const PER_PAGE_ALLOWED = [10, 20, 50];
     private const FORM_STATE_KEY = 'admin_users_form_state';
 
     private PageView $pages;
-    private AuthService $authService;
     private UserService $users;
-    private FlashService $flash;
-    private CsrfService $csrf;
 
     public function __construct(PageView $pages, AuthService $authService, UserService $users, FlashService $flash, CsrfService $csrf)
     {
+        parent::__construct($authService, $flash, $csrf);
         $this->pages = $pages;
-        $this->authService = $authService;
         $this->users = $users;
-        $this->flash = $flash;
-        $this->csrf = $csrf;
     }
 
     public function list(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
@@ -52,7 +47,10 @@ final class AdminUserController
 
     public function deleteSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+        if (
+            !$this->guardAdmin($redirect)
+            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+        ) {
             return;
         }
 
@@ -61,6 +59,7 @@ final class AdminUserController
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID uživatele.');
             $redirect('admin/users');
+            return;
         }
 
         if ($this->users->delete($id)) {
@@ -74,7 +73,10 @@ final class AdminUserController
 
     public function suspendToggleSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+        if (
+            !$this->guardAdmin($redirect)
+            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+        ) {
             return;
         }
 
@@ -84,6 +86,7 @@ final class AdminUserController
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID uživatele.');
             $redirect('admin/users');
+            return;
         }
 
         if ($mode === 'unsuspend') {
@@ -99,7 +102,7 @@ final class AdminUserController
 
     public function addForm(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
@@ -110,13 +113,16 @@ final class AdminUserController
             'role' => 'user',
             'suspend' => 0,
         ];
-        $state = $this->consumeFormState('add');
+        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add');
         $this->pages->adminUsersForm('add', $state['data'] ?? $fallback, $state['errors'] ?? []);
     }
 
     public function addSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+        if (
+            !$this->guardAdmin($redirect)
+            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+        ) {
             return;
         }
 
@@ -128,13 +134,13 @@ final class AdminUserController
         }
 
         $this->flash->add('error', 'Nepodařilo se uložit uživatele.');
-        $this->storeFormState('add', null, $_POST, $result['errors'] ?? []);
+        $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/users/add');
     }
 
     public function editForm(callable $redirect): void
     {
-        if (!$this->guard($redirect)) {
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
@@ -144,15 +150,19 @@ final class AdminUserController
         if ($user === null) {
             $this->flash->add('info', 'Uživatel nenalezen.');
             $redirect('admin/users');
+            return;
         }
 
-        $state = $this->consumeFormState('edit', $id);
+        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $this->pages->adminUsersForm('edit', $state['data'] ?? $user, $state['errors'] ?? []);
     }
 
     public function editSubmit(callable $redirect): void
     {
-        if (!$this->guard($redirect) || !$this->guardCsrf($redirect)) {
+        if (
+            !$this->guardAdmin($redirect)
+            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+        ) {
             return;
         }
 
@@ -161,6 +171,7 @@ final class AdminUserController
         if ($id <= 0) {
             $this->flash->add('error', 'Neplatné ID uživatele.');
             $redirect('admin/users');
+            return;
         }
 
         $result = $this->users->save($_POST, $id);
@@ -172,69 +183,7 @@ final class AdminUserController
 
         $this->flash->add('error', 'Nepodařilo se upravit uživatele.');
         $data = array_merge($_POST, ['ID' => $id]);
-        $this->storeFormState('edit', $id, $data, $result['errors'] ?? []);
+        $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, $data, $result['errors'] ?? []);
         $redirect('admin/users/edit?id=' . $id);
-    }
-
-    private function storeFormState(string $mode, ?int $id, array $data, array $errors): void
-    {
-        $this->ensureSession();
-        $_SESSION[self::FORM_STATE_KEY] = [
-            'mode' => $mode,
-            'id' => $id,
-            'data' => $data,
-            'errors' => $errors,
-        ];
-    }
-
-    private function consumeFormState(string $mode, ?int $id = null): ?array
-    {
-        $this->ensureSession();
-        $state = $_SESSION[self::FORM_STATE_KEY] ?? null;
-        unset($_SESSION[self::FORM_STATE_KEY]);
-
-        if (!is_array($state)) {
-            return null;
-        }
-
-        if (($state['mode'] ?? null) !== $mode || ($state['id'] ?? null) !== $id) {
-            return null;
-        }
-
-        return $state;
-    }
-
-    private function ensureSession(): void
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-    }
-
-    private function guardCsrf(callable $redirect): bool
-    {
-        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            return true;
-        }
-
-        $this->flash->add('error', 'Bezpečnostní token vypršel, odešlete formulář znovu.');
-        $redirect('admin/users');
-        return false;
-    }
-
-    private function guard(callable $redirect): bool
-    {
-        if (!$this->authService->auth()->check()) {
-            $redirect('login');
-            return false;
-        }
-
-        if (!$this->authService->canAccessAdmin()) {
-            $this->flash->add('info', 'Nemáte přístup do administrace.');
-            $redirect('');
-            return false;
-        }
-
-        return true;
     }
 }

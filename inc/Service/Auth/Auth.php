@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Service\Auth;
 
-use App\Service\Db\Connection;
-use App\Service\Db\Query;
+use App\Service\Infra\Db\Connection;
+use App\Service\Infra\Db\Query;
 
 class Auth
 {
@@ -73,29 +73,6 @@ class Auth
 
         session_destroy();
         $this->synced = false;
-    }
-
-    public function requireLogin(): void
-    {
-        if (!$this->check()) {
-            http_response_code(403);
-            exit('Přístup odepřen. Nejste přihlášena.');
-        }
-    }
-
-    public function requireRole(string $role): void
-    {
-        $this->requireLogin();
-
-        if (!$this->hasRole($role)) {
-            http_response_code(403);
-            exit('Přístup odepřen. Nemáte dostatečná oprávnění.');
-        }
-    }
-
-    public function requireAdmin(): void
-    {
-        $this->requireRole('admin');
     }
 
     private function sync(): void

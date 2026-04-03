@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service\Db;
+namespace App\Service\Infra\Db;
 
+use InvalidArgumentException;
 use PDO;
 
 class Query
@@ -16,6 +17,7 @@ class Query
 
     public function select(string $table, array $columns = ['*'], array $where = []): array
     {
+        $this->assertIdentifier($table, 'table');
         [$whereSql, $params] = $this->buildWhere($where);
         $cols = implode(', ', $columns);
         $sql = "SELECT $cols FROM $table$whereSql";
@@ -28,12 +30,20 @@ class Query
 
     public function paginate(string $table, array $columns = ['*'], array $where = [], array $options = []): array
     {
+        $this->assertIdentifier($table, 'table');
         $page = max(1, (int)($options['page'] ?? 1));
         $perPage = max(1, (int)($options['perPage'] ?? 10));
         $orderBy = (string)($options['orderBy'] ?? 'ID');
+        $orderByAllowed = (array)($options['orderByAllowed'] ?? []);
         $orderDir = strtoupper((string)($options['orderDir'] ?? 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
         $search = trim((string)($options['search'] ?? ''));
         $searchColumns = (array)($options['searchColumns'] ?? []);
+
+        if ($orderByAllowed !== []) {
+            $orderBy = in_array($orderBy, $orderByAllowed, true) ? $orderBy : (string)($orderByAllowed[0] ?? 'ID');
+        } elseif (!$this->isIdentifier($orderBy)) {
+            $orderBy = 'ID';
+        }
 
         [$whereSql, $params] = $this->buildWhere($where);
         [$searchSql, $searchParams] = $this->buildSearch($search, $searchColumns);
@@ -76,6 +86,7 @@ class Query
 
     public function insert(string $table, array $data): int
     {
+        $this->assertIdentifier($table, 'table');
         $columns = implode(', ', array_keys($data));
         $placeholders = ':' . implode(', :', array_keys($data));
 
@@ -89,13 +100,16 @@ class Query
 
     public function update(string $table, array $data, array $where): int
     {
+        $this->assertIdentifier($table, 'table');
         $set = [];
         foreach ($data as $col => $val) {
+            $this->assertIdentifier((string)$col, 'column');
             $set[] = "$col = :$col";
         }
 
         $conditions = [];
         foreach ($where as $col => $val) {
+            $this->assertIdentifier((string)$col, 'column');
             $conditions[] = "$col = :where_$col";
             $data["where_$col"] = $val;
         }
@@ -110,6 +124,7 @@ class Query
 
     public function delete(string $table, array $where): int
     {
+        $this->assertIdentifier($table, 'table');
         [$whereSql, $params] = $this->buildWhere($where);
         $sql = "DELETE FROM $table$whereSql";
 
@@ -121,6 +136,8 @@ class Query
 
     public function deleteIn(string $table, string $column, array $values): int
     {
+        $this->assertIdentifier($table, 'table');
+        $this->assertIdentifier($column, 'column');
         $ids = array_values(array_unique(array_filter(array_map('intval', $values), fn(int $v): bool => $v > 0)));
 
         if ($ids === []) {
@@ -146,6 +163,7 @@ class Query
         $params = [];
 
         foreach ($where as $column => $value) {
+            $this->assertIdentifier((string)$column, 'column');
             $conditions[] = "$column = :$column";
             $params[$column] = $value;
         }
@@ -163,11 +181,26 @@ class Query
         $params = [];
 
         foreach ($columns as $index => $column) {
+            $this->assertIdentifier((string)$column, 'column');
             $key = 'search_' . $index;
             $conditions[] = "$column LIKE :$key";
             $params[$key] = '%' . $search . '%';
         }
 
         return ['(' . implode(' OR ', $conditions) . ')', $params];
+    }
+
+    private function assertIdentifier(string $value, string $context): void
+    {
+        if ($this->isIdentifier($value)) {
+            return;
+        }
+
+        throw new InvalidArgumentException('Invalid ' . $context . ' identifier: ' . $value);
+    }
+
+    private function isIdentifier(string $value): bool
+    {
+        return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $value) === 1;
     }
 }

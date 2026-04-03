@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service;
+namespace App\Service\Feature;
 
-use App\Service\Db\Connection;
-use App\Service\Db\Query;
+use App\Service\Infra\Db\Connection;
+use App\Service\Infra\Db\Query;
 
 final class UserService
 {
@@ -23,6 +23,7 @@ final class UserService
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'ID',
+            'orderByAllowed' => ['ID', 'name', 'email', 'role', 'suspend', 'created'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name', 'email'],
