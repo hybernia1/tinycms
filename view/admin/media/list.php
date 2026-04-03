@@ -4,6 +4,13 @@ $page = (int)($pagination['page'] ?? 1);
 $perPage = (int)($pagination['per_page'] ?? 10);
 $totalPages = (int)($pagination['total_pages'] ?? 1);
 $query = (string)($query ?? '');
+$thumbSuffix = '_100x100.webp';
+if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
+    $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
+    if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
+        $thumbSuffix = (string)$firstVariant['suffix'];
+    }
+}
 ?>
 <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <div></div>
@@ -30,7 +37,7 @@ $query = (string)($query ?? '');
                 $id = (int)($row['id'] ?? 0);
                 $previewPath = trim((string)($row['path_webp'] ?? ''));
                 if ($previewPath !== '') {
-                    $previewPath = (string)(preg_replace('/\.webp$/i', '_100x100.webp', $previewPath) ?? $previewPath);
+                    $previewPath = (string)(preg_replace('/\.webp$/i', $thumbSuffix, $previewPath) ?? $previewPath);
                 } else {
                     $previewPath = trim((string)($row['path'] ?? ''));
                 }

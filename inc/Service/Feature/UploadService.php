@@ -9,7 +9,10 @@ final class UploadService
 {
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     private const MAX_WEBP_WIDTH = 1024;
-    private const LIST_THUMB_SIZE = 100;
+    private const DEFAULT_THUMB_VARIANTS = [
+        ['suffix' => '_100x100.webp', 'mode' => 'crop', 'width' => 100, 'height' => 100],
+        ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],
+    ];
     private const MIME_TO_EXTENSION = [
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
@@ -77,10 +80,18 @@ final class UploadService
             return ['success' => false, 'error' => 'Nepodařilo se vytvořit WEBP variantu.'];
         }
 
-        $thumbRel = $this->thumbnailPath($webpRel);
-        $thumbAbs = $this->rootPath . '/' . $thumbRel;
+        $createdThumbs = [];
+        foreach ($this->thumbVariants() as $variant) {
+            $thumbRel = $this->thumbnailPath($webpRel, (string)$variant['suffix']);
+            $thumbAbs = $this->rootPath . '/' . $thumbRel;
+            if ($this->createThumbnailWebp($webpAbs, $thumbAbs, $variant)) {
+                $createdThumbs[] = $thumbAbs;
+                continue;
+            }
 
-        if (!$this->createThumbnailWebp($webpAbs, $thumbAbs, self::LIST_THUMB_SIZE)) {
+            foreach ($createdThumbs as $createdThumb) {
+                @unlink($createdThumb);
+            }
             if ($fileAbs !== $webpAbs) {
                 @unlink($fileAbs);
             }
@@ -107,7 +118,9 @@ final class UploadService
 
         $webpPath = trim((string)($media['path_webp'] ?? ''));
         if ($webpPath !== '') {
-            $paths[] = $this->thumbnailPath($webpPath);
+            foreach ($this->thumbVariants() as $variant) {
+                $paths[] = $this->thumbnailPath($webpPath, (string)$variant['suffix']);
+            }
         }
 
         $paths = array_unique($paths);
@@ -165,7 +178,7 @@ final class UploadService
         return $result;
     }
 
-    private function createThumbnailWebp(string $sourceWebp, string $destinationPath, int $size): bool
+    private function createThumbnailWebp(string $sourceWebp, string $destinationPath, array $variant): bool
     {
         if (!function_exists('imagecreatefromwebp') || !function_exists('imagewebp')) {
             return false;
@@ -183,11 +196,26 @@ final class UploadService
             return false;
         }
 
-        $srcSize = min($width, $height);
-        $srcX = (int)floor(($width - $srcSize) / 2);
-        $srcY = (int)floor(($height - $srcSize) / 2);
+        $mode = (string)($variant['mode'] ?? 'crop');
+        $targetWidth = max(1, (int)($variant['width'] ?? 100));
+        $targetHeight = max(1, (int)($variant['height'] ?? $targetWidth));
 
-        $thumb = imagecreatetruecolor($size, $size);
+        if ($mode === 'fit') {
+            $targetWidth = min($targetWidth, $width);
+            $targetHeight = (int)max(1, round(($height / $width) * $targetWidth));
+            $srcX = 0;
+            $srcY = 0;
+            $srcWidth = $width;
+            $srcHeight = $height;
+        } else {
+            $srcSize = min($width, $height);
+            $srcX = (int)floor(($width - $srcSize) / 2);
+            $srcY = (int)floor(($height - $srcSize) / 2);
+            $srcWidth = $srcSize;
+            $srcHeight = $srcSize;
+        }
+
+        $thumb = imagecreatetruecolor($targetWidth, $targetHeight);
         if ($thumb === false) {
             imagedestroy($image);
             return false;
@@ -196,7 +224,7 @@ final class UploadService
         imagealphablending($thumb, true);
         imagesavealpha($thumb, true);
 
-        $ok = imagecopyresampled($thumb, $image, 0, 0, $srcX, $srcY, $size, $size, $srcSize, $srcSize);
+        $ok = imagecopyresampled($thumb, $image, 0, 0, $srcX, $srcY, $targetWidth, $targetHeight, $srcWidth, $srcHeight);
         $saved = $ok ? @imagewebp($thumb, $destinationPath, 82) : false;
 
         imagedestroy($thumb);
@@ -236,8 +264,38 @@ final class UploadService
         return $resized;
     }
 
-    private function thumbnailPath(string $webpPath): string
+    private function thumbnailPath(string $webpPath, string $suffix): string
     {
-        return (string)(preg_replace('/\.webp$/i', '_' . self::LIST_THUMB_SIZE . 'x' . self::LIST_THUMB_SIZE . '.webp', $webpPath) ?? $webpPath);
+        return (string)(preg_replace('/\.webp$/i', $suffix, $webpPath) ?? $webpPath);
+    }
+
+    private function thumbVariants(): array
+    {
+        $raw = defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS) ? MEDIA_THUMB_VARIANTS : self::DEFAULT_THUMB_VARIANTS;
+        $variants = [];
+
+        foreach ($raw as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $suffix = trim((string)($item['suffix'] ?? ''));
+            $mode = trim((string)($item['mode'] ?? 'crop'));
+            $width = (int)($item['width'] ?? 0);
+            $height = (int)($item['height'] ?? 0);
+
+            if ($suffix === '' || !str_ends_with(strtolower($suffix), '.webp') || $width <= 0) {
+                continue;
+            }
+
+            if ($mode === 'fit') {
+                $variants[] = ['suffix' => $suffix, 'mode' => 'fit', 'width' => $width, 'height' => 0];
+                continue;
+            }
+
+            $variants[] = ['suffix' => $suffix, 'mode' => 'crop', 'width' => $width, 'height' => $height > 0 ? $height : $width];
+        }
+
+        return $variants === [] ? self::DEFAULT_THUMB_VARIANTS : $variants;
     }
 }
