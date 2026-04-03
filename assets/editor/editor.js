@@ -104,21 +104,6 @@
         return group;
     }
 
-    function resolveBlock(node, editor) {
-        var source = node;
-        if (source && source.nodeType === Node.TEXT_NODE) {
-            source = source.parentElement;
-        }
-        if (!source || !editor.contains(source)) {
-            return null;
-        }
-        var block = source.closest('.block, p');
-        if (!block || !editor.contains(block)) {
-            return null;
-        }
-        return block;
-    }
-
     function createLinkPanel() {
         var panel = document.createElement('div');
         panel.className = 'wysiwyg-link-panel';
@@ -181,39 +166,10 @@
 
         var linkRange = null;
         var htmlMode = false;
-        var activeBlock = null;
-        var hoverBlock = null;
 
         function closeMenus() {
             wrapper.classList.remove('is-list-open');
             wrapper.classList.remove('is-link-open');
-        }
-
-        function setBlockClass(current, next, className) {
-            if (current && current !== next) {
-                current.classList.remove(className);
-            }
-            if (next) {
-                next.classList.add(className);
-            }
-            return next;
-        }
-
-        function updateActiveBlock() {
-            var selection = window.getSelection();
-            if (!selection || selection.rangeCount === 0 || htmlMode) {
-                activeBlock = setBlockClass(activeBlock, null, 'is-active-block');
-                return;
-            }
-            activeBlock = setBlockClass(activeBlock, resolveBlock(selection.anchorNode, editor), 'is-active-block');
-        }
-
-        function updateHoverBlock(target) {
-            if (htmlMode) {
-                hoverBlock = setBlockClass(hoverBlock, null, 'is-hover-block');
-                return;
-            }
-            hoverBlock = setBlockClass(hoverBlock, resolveBlock(target, editor), 'is-hover-block');
         }
 
         function runCommand(command) {
@@ -233,8 +189,6 @@
             wrapper.classList.toggle('is-html-mode', enabled);
             html.classList.toggle('is-active', enabled);
             closeMenus();
-            activeBlock = setBlockClass(activeBlock, null, 'is-active-block');
-            hoverBlock = setBlockClass(hoverBlock, null, 'is-hover-block');
             if (enabled) {
                 sync(textarea, editor);
                 textarea.style.display = 'block';
@@ -243,7 +197,6 @@
             editor.innerHTML = textarea.value.trim();
             textarea.style.display = 'none';
             sync(textarea, editor);
-            updateActiveBlock();
         }
 
         toolbar.addEventListener('click', function (event) {
@@ -327,36 +280,6 @@
             }
         });
 
-        editor.addEventListener('mousemove', function (event) {
-            updateHoverBlock(event.target);
-        });
-
-        editor.addEventListener('mouseleave', function () {
-            updateHoverBlock(null);
-        });
-
-        editor.addEventListener('focus', function () {
-            updateActiveBlock();
-        });
-
-        editor.addEventListener('mouseup', function () {
-            updateActiveBlock();
-        });
-
-        editor.addEventListener('keyup', function () {
-            updateActiveBlock();
-        });
-
-        document.addEventListener('selectionchange', function () {
-            var selection = window.getSelection();
-            if (!selection || selection.rangeCount === 0) {
-                return;
-            }
-            if (editor.contains(selection.anchorNode)) {
-                updateActiveBlock();
-            }
-        });
-
         editor.addEventListener('keydown', function (event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 document.execCommand('defaultParagraphSeparator', false, 'p');
@@ -367,7 +290,6 @@
 
         editor.addEventListener('input', function () {
             sync(textarea, editor);
-            updateActiveBlock();
         });
 
         editor.addEventListener('blur', function () {
@@ -398,7 +320,6 @@
         document.execCommand('defaultParagraphSeparator', false, 'p');
         normalizeBlocks(editor);
         sync(textarea, editor);
-        updateActiveBlock();
     }
 
     document.addEventListener('DOMContentLoaded', function () {

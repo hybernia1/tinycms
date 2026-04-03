@@ -116,23 +116,8 @@
     margin: 0 0 var(--space-2);
 }
 
-.wysiwyg-editor p,
-.wysiwyg-editor .block {
-    border-radius: 4px;
-    transition: background-color 0.15s ease, box-shadow 0.15s ease;
-}
-
 .wysiwyg-editor .block {
     margin: 0 0 var(--space-2);
-}
-
-.wysiwyg-editor .is-hover-block {
-    background: #f8fafc;
-}
-
-.wysiwyg-editor .is-active-block {
-    background: #f8fafc;
-    box-shadow: inset 0 0 0 1px var(--color-border-soft);
 }
 
 .wysiwyg-editor .block.block-list ul,
