@@ -124,12 +124,22 @@ body {
 .content-editor-layout {
     display: grid;
     gap: var(--space-3);
+    min-width: 0;
+    max-width: 100%;
 }
 
 .content-editor-sidebar {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.content-editor-form,
+.content-editor-layout > * {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .content-box-header {
