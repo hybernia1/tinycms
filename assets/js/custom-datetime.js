@@ -206,7 +206,11 @@
                 cell.addEventListener('click', () => {
                     const base = draftDate || new Date();
                     draftDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), base.getHours(), base.getMinutes(), 0, 0);
+                    selectedDate = new Date(draftDate);
+                    hiddenInput.value = toValue(selectedDate);
+                    hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
                     viewMonth = new Date(day.getFullYear(), day.getMonth(), 1);
+                    syncTrigger();
                     syncTimeSelects();
                     render();
                 });
