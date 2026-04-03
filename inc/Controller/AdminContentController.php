@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Service\AuthService;
-use App\Service\ContentService;
-use App\Service\CsrfService;
-use App\Service\FlashService;
-use App\Service\UserService;
+use App\Service\Feature\AuthService;
+use App\Service\Feature\ContentService;
+use App\Service\Support\CsrfService;
+use App\Service\Support\FlashService;
+use App\Service\Feature\UserService;
 use App\View\PageView;
 
 final class AdminContentController extends BaseAdminController

@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use App\Service\FlashService;
-use App\Service\Router\Router;
-use App\Service\CsrfService;
+use App\Service\Support\FlashService;
+use App\Service\Infra\Router\Router;
+use App\Service\Support\CsrfService;
 
 final class View
 {

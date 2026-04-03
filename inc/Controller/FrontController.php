@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Service\AuthService;
-use App\Service\ContentService;
-use App\Service\CsrfService;
-use App\Service\SettingsService;
-use App\Service\SluggerService;
+use App\Service\Feature\AuthService;
+use App\Service\Feature\ContentService;
+use App\Service\Support\CsrfService;
+use App\Service\Feature\SettingsService;
+use App\Service\Support\SluggerService;
 use App\View\PageView;
 
 final class FrontController

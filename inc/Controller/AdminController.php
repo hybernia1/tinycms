@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Service\AuthService;
+use App\Service\Feature\AuthService;
 use App\View\PageView;
 
 final class AdminController

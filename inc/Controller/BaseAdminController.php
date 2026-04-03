@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Service\AuthService;
-use App\Service\CsrfService;
-use App\Service\FlashService;
+use App\Service\Feature\AuthService;
+use App\Service\Support\CsrfService;
+use App\Service\Support\FlashService;
 
 abstract class BaseAdminController
 {
