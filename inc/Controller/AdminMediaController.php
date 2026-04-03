@@ -64,7 +64,28 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        $result = $this->media->save($_POST);
+        if (!$this->hasUpload('file')) {
+            $this->flash->add('error', 'Nahrajte soubor média.');
+            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => 'Soubor je povinný.']);
+            $redirect('admin/media/add');
+            return;
+        }
+
+        $upload = $this->upload->uploadImage($_FILES['file'] ?? []);
+        if (($upload['success'] ?? false) !== true) {
+            $this->flash->add('error', (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.'));
+            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.')]);
+            $redirect('admin/media/add');
+            return;
+        }
+
+        $uploadData = (array)($upload['data'] ?? []);
+        $input = array_merge($_POST, [
+            'name' => trim((string)($_POST['name'] ?? '')) !== '' ? (string)$_POST['name'] : (string)($uploadData['name'] ?? ''),
+            'path' => (string)($uploadData['path'] ?? ''),
+            'path_webp' => (string)($uploadData['path_webp'] ?? ''),
+        ]);
+        $result = $this->media->save($input);
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', 'Médium vytvořeno.');
@@ -72,6 +93,7 @@ final class AdminMediaController extends BaseAdminController
             $redirect($newId > 0 ? $this->editPath($newId) : 'admin/media');
         }
 
+        $this->upload->deleteMediaFiles($uploadData);
         $this->flash->add('error', 'Nepodařilo se uložit médium.');
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/media/add');
@@ -112,13 +134,49 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        $result = $this->media->save($_POST, $id);
+        $item = $this->media->find($id);
+        if ($item === null) {
+            $this->flash->add('error', 'Médium nenalezeno.');
+            $redirect('admin/media');
+            return;
+        }
+
+        $input = array_merge($_POST, [
+            'path' => (string)($item['path'] ?? ''),
+            'path_webp' => (string)($item['path_webp'] ?? ''),
+        ]);
+        $newUploadData = null;
+
+        if ($this->hasUpload('file')) {
+            $upload = $this->upload->uploadImage($_FILES['file'] ?? []);
+            if (($upload['success'] ?? false) !== true) {
+                $this->flash->add('error', (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.'));
+                $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), ['file' => (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.')]);
+                $redirect($this->editPath($id));
+                return;
+            }
+
+            $newUploadData = (array)($upload['data'] ?? []);
+            $input['path'] = (string)($newUploadData['path'] ?? '');
+            $input['path_webp'] = (string)($newUploadData['path_webp'] ?? '');
+            if (trim((string)($input['name'] ?? '')) === '') {
+                $input['name'] = (string)($newUploadData['name'] ?? '');
+            }
+        }
+
+        $result = $this->media->save($input, $id);
 
         if (($result['success'] ?? false) === true) {
+            if (is_array($newUploadData)) {
+                $this->upload->deleteMediaFiles($item);
+            }
             $this->flash->add('success', 'Médium upraveno.');
             $redirect($this->editPath($id));
         }
 
+        if (is_array($newUploadData)) {
+            $this->upload->deleteMediaFiles($newUploadData);
+        }
         $this->flash->add('error', 'Nepodařilo se upravit médium.');
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect($this->editPath($id));
@@ -161,5 +219,10 @@ final class AdminMediaController extends BaseAdminController
     private function editPath(int $id): string
     {
         return 'admin/media/edit?id=' . $id;
+    }
+
+    private function hasUpload(string $field): bool
+    {
+        return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
     }
 }
