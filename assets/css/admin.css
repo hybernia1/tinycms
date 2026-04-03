@@ -1,8 +1,8 @@
 :root {
     --sidebar-bg: var(--color-emphasis);
     --sidebar-text: var(--color-inverse);
-    --sidebar-link: color-mix(in srgb, var(--sidebar-text) 78%, var(--sidebar-bg));
-    --sidebar-link-active-bg: color-mix(in srgb, var(--sidebar-bg) 84%, white);
+    --sidebar-link: #cbd5e1;
+    --sidebar-link-active-bg: #1e293b;
 }
 
 html,
