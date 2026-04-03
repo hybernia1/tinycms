@@ -260,6 +260,36 @@ final class AdminContentController extends BaseAdminController
         $redirect($this->editPath($id));
     }
 
+    public function thumbnailSelectSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $mediaId = (int)($_POST['media_id'] ?? 0);
+        $item = $this->content->find($id);
+
+        if ($item === null) {
+            $this->flash->add('error', 'Obsah nenalezen.');
+            $redirect('admin/content');
+            return;
+        }
+
+        if ($mediaId <= 0 || $this->media->find($mediaId) === null) {
+            $this->flash->add('error', 'Médium nenalezeno.');
+            $redirect($this->editPath($id));
+            return;
+        }
+
+        $ok = $this->content->setThumbnail($id, $mediaId);
+        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Náhled byl přiřazen.' : 'Náhled se nepodařilo přiřadit.');
+        $redirect($this->editPath($id));
+    }
+
     public function thumbnailDeleteSubmit(callable $redirect): void
     {
         if (
@@ -297,8 +327,62 @@ final class AdminContentController extends BaseAdminController
         $redirect($this->editPath($id));
     }
 
+    public function mediaLibrary(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = (int)($_GET['per_page'] ?? 10);
+        $query = trim((string)($_GET['q'] ?? ''));
+        if ($perPage <= 0 || $perPage > 20) {
+            $perPage = 10;
+        }
+
+        $pagination = $this->media->paginate($page, $perPage, $query);
+        $items = array_map(function (array $item): array {
+            $previewPath = $this->resolvePreviewPath($item);
+            return [
+                'id' => (int)($item['id'] ?? 0),
+                'name' => (string)($item['name'] ?? ''),
+                'preview_path' => $previewPath,
+            ];
+        }, (array)($pagination['data'] ?? []));
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'items' => $items,
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'query' => $query,
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
     private function editPath(int $id): string
     {
         return 'admin/content/edit?id=' . $id;
+    }
+
+    private function resolvePreviewPath(array $item): string
+    {
+        $previewPath = trim((string)($item['path_webp'] ?? ''));
+        if ($previewPath !== '') {
+            return (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $previewPath) ?? $previewPath);
+        }
+        return trim((string)($item['path'] ?? ''));
+    }
+
+    private function thumbnailSuffix(): string
+    {
+        $suffix = '_100x100.webp';
+        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
+            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
+            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
+                $suffix = (string)$firstVariant['suffix'];
+            }
+        }
+        return $suffix;
     }
 }

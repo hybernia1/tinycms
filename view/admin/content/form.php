@@ -9,6 +9,7 @@ if ($thumbnailPath === '') {
     $thumbnailPath = trim((string)($item['thumbnail_path'] ?? ''));
 }
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
+$contentId = (int)($item['id'] ?? 0);
 ?>
 <form class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
@@ -74,11 +75,21 @@ $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
                     <?php if ($mode === 'add'): ?>
                         <small class="text-muted">Nejdřív uložte obsah, poté přidejte thumbnail.</small>
                     <?php else: ?>
-                        <?php if ($thumbnailUrl !== ''): ?>
-                            <div class="content-thumbnail-preview mb-3">
-                                <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
-                            </div>
-                        <?php endif; ?>
+                        <button
+                            class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
+                            type="button"
+                            data-media-library-open
+                            data-media-library-endpoint="<?= htmlspecialchars($url('admin/content/media-library'), ENT_QUOTES, 'UTF-8') ?>"
+                            data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
+                        >
+                            <?php if ($thumbnailUrl !== ''): ?>
+                                <div class="content-thumbnail-preview">
+                                    <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                                </div>
+                            <?php else: ?>
+                                <span>Zvolit obrázek</span>
+                            <?php endif; ?>
+                        </button>
                         <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
                         <div class="mt-2 d-flex gap-2">
                             <button class="btn btn-primary" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/upload?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Nahrát</button>
@@ -96,3 +107,36 @@ $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
         </aside>
     </div>
 </form>
+
+<?php if ($mode !== 'add'): ?>
+<div class="media-library-modal" data-media-library-modal>
+    <div class="media-library-modal-dialog">
+        <div class="media-library-modal-header">
+            <strong>Media library</strong>
+            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="Zavřít">
+                <?= $icon('cancel') ?>
+            </button>
+        </div>
+        <form class="media-library-search" data-media-library-search>
+            <input type="search" name="q" placeholder="Hledat obrázek">
+            <button class="btn btn-light" type="submit">Hledat</button>
+        </form>
+        <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/thumbnail/upload?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
+            <?= $csrfField() ?>
+            <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+            <button class="btn btn-primary" type="submit">Nahrát nový</button>
+        </form>
+        <div class="media-library-grid" data-media-library-grid></div>
+        <div class="media-library-pagination">
+            <button class="btn btn-light" type="button" data-media-library-prev>Předchozí</button>
+            <span data-media-library-page>1 / 1</span>
+            <button class="btn btn-light" type="button" data-media-library-next>Další</button>
+        </div>
+    </div>
+</div>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/thumbnail/select'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-select-form>
+    <?= $csrfField() ?>
+    <input type="hidden" name="id" value="<?= $contentId ?>">
+    <input type="hidden" name="media_id" value="" data-media-library-media-id>
+</form>
+<?php endif; ?>

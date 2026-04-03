@@ -73,12 +73,20 @@ $router->post('admin/content/thumbnail/upload', static function () use ($adminCo
     $adminContent->thumbnailUploadSubmit($redirect);
 });
 
+$router->post('admin/content/thumbnail/select', static function () use ($adminContent, $redirect): void {
+    $adminContent->thumbnailSelectSubmit($redirect);
+});
+
 $router->post('admin/content/thumbnail/detach', static function () use ($adminContent, $redirect): void {
     $adminContent->thumbnailDetachSubmit($redirect);
 });
 
 $router->post('admin/content/thumbnail/delete', static function () use ($adminContent, $redirect): void {
     $adminContent->thumbnailDeleteSubmit($redirect);
+});
+
+$router->get('admin/content/media-library', static function () use ($adminContent, $redirect): void {
+    $adminContent->mediaLibrary($redirect);
 });
 
 $router->get('admin/media', static function () use ($adminMedia, $redirect): void {
