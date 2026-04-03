@@ -19,11 +19,12 @@ final class PageView
         $this->contentTypes = $contentTypes;
     }
 
-    public function home(?array $user, array $site): void
+    public function home(?array $user, array $site, array $posts = []): void
     {
         $siteName = (string)($site['name'] ?? 'TinyCMS');
         $this->view->render('front', 'front/index', [
             'user' => $user,
+            'posts' => $posts,
             'siteName' => $siteName,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
@@ -37,6 +38,15 @@ final class PageView
         $state['pageTitle'] = 'Login';
         $state['theme'] = $this->theme();
         $this->view->render('login', 'login/form', $state);
+    }
+
+    public function contentDetail(array $item): void
+    {
+        $this->view->render('front', 'front/content', [
+            'item' => $item,
+            'theme' => $this->theme(),
+            'pageTitle' => (string)($item['name'] ?? 'Obsah'),
+        ]);
     }
 
     public function adminDashboard(?array $user): void

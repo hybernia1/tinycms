@@ -7,6 +7,7 @@ final class Router
 {
     private string $basePath;
     private array $routes = [];
+    private array $dynamicRoutes = [];
 
     public function __construct(string $basePath = '')
     {
@@ -26,7 +27,16 @@ final class Router
 
     public function add(string $method, string $path, callable $handler): void
     {
-        $this->routes[strtoupper($method)][$this->normalizePath($path)] = $handler;
+        $normalizedPath = $this->normalizePath($path);
+        $methodKey = strtoupper($method);
+
+        if (str_contains($normalizedPath, '{')) {
+            [$regex, $params] = $this->compilePattern($normalizedPath);
+            $this->dynamicRoutes[$methodKey][] = ['regex' => $regex, 'params' => $params, 'handler' => $handler];
+            return;
+        }
+
+        $this->routes[$methodKey][$normalizedPath] = $handler;
     }
 
     public function dispatch(string $uri, string $method): bool
@@ -35,6 +45,20 @@ final class Router
         $handler = $this->routes[strtoupper($method)][$routePath] ?? null;
 
         if ($handler === null) {
+            foreach ($this->dynamicRoutes[strtoupper($method)] ?? [] as $route) {
+                if (preg_match($route['regex'], $routePath, $matches) !== 1) {
+                    continue;
+                }
+
+                $params = [];
+                foreach ($route['params'] as $name) {
+                    $params[$name] = (string)($matches[$name] ?? '');
+                }
+
+                $route['handler']($params);
+                return true;
+            }
+
             return false;
         }
 
@@ -68,5 +92,29 @@ final class Router
     private function normalizePath(string $path): string
     {
         return trim($path, '/');
+    }
+
+    private function compilePattern(string $path): array
+    {
+        if ($path === '') {
+            return ['#^$#', []];
+        }
+
+        $params = [];
+        $segments = explode('/', $path);
+        $parts = [];
+
+        foreach ($segments as $segment) {
+            if (preg_match('/^\{([a-zA-Z_][a-zA-Z0-9_]*)\}$/', $segment, $matches) === 1) {
+                $name = $matches[1];
+                $params[] = $name;
+                $parts[] = '(?<' . $name . '>[^/]+)';
+                continue;
+            }
+
+            $parts[] = preg_quote($segment, '#');
+        }
+
+        return ['#^' . implode('/', $parts) . '$#', $params];
     }
 }

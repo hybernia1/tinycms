@@ -167,6 +167,53 @@ final class ContentService
         return $statuses;
     }
 
+    public function listPublished(string $type = '', int $limit = 20): array
+    {
+        $rows = $this->query->select('content', ['id', 'type', 'name', 'excerpt', 'created'], ['status' => 'published']);
+        $now = time();
+        $typeKey = trim(mb_strtolower($type));
+        $items = array_values(array_filter($rows, static function (array $row) use ($now, $typeKey): bool {
+            if ($typeKey !== '' && trim(mb_strtolower((string)($row['type'] ?? ''))) !== $typeKey) {
+                return false;
+            }
+
+            return self::isPublishedVisible($row, $now);
+        }));
+
+        usort($items, static fn(array $a, array $b): int => strcmp((string)($b['created'] ?? ''), (string)($a['created'] ?? '')));
+
+        if ($limit > 0) {
+            return array_slice($items, 0, $limit);
+        }
+
+        return $items;
+    }
+
+    public function findPublished(int $id, string $type): ?array
+    {
+        $item = $this->find($id, $type);
+
+        if ($item === null || !self::isPublishedVisible($item)) {
+            return null;
+        }
+
+        return $item;
+    }
+
+    private static function isPublishedVisible(array $item, ?int $now = null): bool
+    {
+        if (trim((string)($item['status'] ?? 'published')) !== 'published') {
+            return false;
+        }
+
+        $created = strtotime((string)($item['created'] ?? ''));
+        if ($created === false) {
+            return false;
+        }
+
+        return $created <= ($now ?? time());
+    }
+
     private function sanitizeIds(array $ids): array
     {
         return array_values(array_unique(array_filter(array_map('intval', $ids), static fn(int $v): bool => $v > 0)));
