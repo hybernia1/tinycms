@@ -366,9 +366,16 @@
         });
 
         editor.addEventListener('input', function () {
-            normalizeBlocks(editor);
             sync(textarea, editor);
             updateActiveBlock();
+        });
+
+        editor.addEventListener('blur', function () {
+            if (htmlMode) {
+                return;
+            }
+            normalizeBlocks(editor);
+            sync(textarea, editor);
         });
 
         textarea.style.display = 'none';
@@ -377,6 +384,17 @@
         wrapper.appendChild(linkPanel);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);
+        var form = textarea.closest('form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                if (htmlMode) {
+                    return;
+                }
+                normalizeBlocks(editor);
+                sync(textarea, editor);
+            });
+        }
+
         document.execCommand('defaultParagraphSeparator', false, 'p');
         normalizeBlocks(editor);
         sync(textarea, editor);
