@@ -10,14 +10,14 @@ final class ContentTypeService
 
     public function __construct()
     {
-        $this->register('post', 'Příspěvky', 'Příspěvek', 'clanky');
-        $this->register('page', 'Stránky', 'Stránka', 'stranky');
+        $this->register('post', 'Příspěvky', 'Příspěvek');
+        $this->register('page', 'Stránky', 'Stránka');
     }
 
-    public function register(string $type, string $pluralLabel, string $singularLabel, string $slug): void
+    public function register(string $type, string $pluralLabel, string $singularLabel, string $slug = ''): void
     {
         $key = $this->sanitizeType($type);
-        $slugKey = $this->sanitizeSlug($slug);
+        $slugKey = $this->sanitizeSlug($slug === '' ? $key : $slug);
 
         if ($key === '' || $slugKey === '') {
             return;
@@ -54,7 +54,7 @@ final class ContentTypeService
         $first = reset($this->types);
         return is_array($first) ? $first : [
             'type' => 'post',
-            'slug' => 'clanky',
+            'slug' => 'post',
             'label_plural' => 'Příspěvky',
             'label_singular' => 'Příspěvek',
         ];
@@ -66,7 +66,16 @@ final class ContentTypeService
         $type = $this->slugMap[$slugKey] ?? null;
 
         if ($type === null) {
-            return null;
+            if ($slugKey === '') {
+                return null;
+            }
+
+            return [
+                'type' => $slugKey,
+                'slug' => $slugKey,
+                'label_plural' => ucfirst($slugKey),
+                'label_singular' => ucfirst($slugKey),
+            ];
         }
 
         return $this->types[$type] ?? null;

@@ -40,19 +40,21 @@ final class FrontController
             'footer' => (string)($settings['main']['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['main']['siteauthor'] ?? 'Admin'),
         ];
-        $postType = $this->contentTypes->resolve('post');
         $posts = array_map(function (array $item): array {
             $id = (int)($item['id'] ?? 0);
+            $type = $this->contentTypes->resolveBySlug((string)($item['type'] ?? ''));
+            $typeSlug = (string)($type['slug'] ?? (string)($item['type'] ?? 'post'));
             return [
                 'id' => $id,
+                'type' => (string)($item['type'] ?? 'post'),
+                'type_slug' => $typeSlug,
                 'name' => (string)($item['name'] ?? ''),
                 'excerpt' => (string)($item['excerpt'] ?? ''),
                 'created' => (string)($item['created'] ?? ''),
                 'slug' => $this->slugger->slug((string)($item['name'] ?? ''), $id),
             ];
-        }, $this->contentService->listPublished('post', 30));
-        $posts = array_map(static function (array $item) use ($postType): array {
-            $item['type_slug'] = (string)($postType['slug'] ?? 'clanky');
+        }, $this->contentService->listPublished('', 30));
+        $posts = array_map(static function (array $item): array {
             $item['url'] = $item['type_slug'] . '/' . (string)($item['slug'] ?? '');
             return $item;
         }, $posts);

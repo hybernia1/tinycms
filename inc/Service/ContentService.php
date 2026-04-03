@@ -167,11 +167,16 @@ final class ContentService
         return $statuses;
     }
 
-    public function listPublished(string $type = 'post', int $limit = 20): array
+    public function listPublished(string $type = '', int $limit = 20): array
     {
-        $rows = $this->query->select('content', ['id', 'name', 'excerpt', 'created'], ['type' => $type, 'status' => 'published']);
+        $rows = $this->query->select('content', ['id', 'type', 'name', 'excerpt', 'created'], ['status' => 'published']);
         $now = time();
-        $items = array_values(array_filter($rows, static function (array $row) use ($now): bool {
+        $typeKey = trim(mb_strtolower($type));
+        $items = array_values(array_filter($rows, static function (array $row) use ($now, $typeKey): bool {
+            if ($typeKey !== '' && trim(mb_strtolower((string)($row['type'] ?? ''))) !== $typeKey) {
+                return false;
+            }
+
             $created = strtotime((string)($row['created'] ?? ''));
             return $created !== false && $created <= $now;
         }));
