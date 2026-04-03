@@ -177,8 +177,7 @@ final class ContentService
                 return false;
             }
 
-            $created = strtotime((string)($row['created'] ?? ''));
-            return $created !== false && $created <= $now;
+            return self::isPublishedVisible($row, $now);
         }));
 
         usort($items, static fn(array $a, array $b): int => strcmp((string)($b['created'] ?? ''), (string)($a['created'] ?? '')));
@@ -194,16 +193,25 @@ final class ContentService
     {
         $item = $this->find($id, $type);
 
-        if ($item === null || (string)($item['status'] ?? '') !== 'published') {
-            return null;
-        }
-
-        $created = strtotime((string)($item['created'] ?? ''));
-        if ($created === false || $created > time()) {
+        if ($item === null || !self::isPublishedVisible($item)) {
             return null;
         }
 
         return $item;
+    }
+
+    private static function isPublishedVisible(array $item, ?int $now = null): bool
+    {
+        if (trim((string)($item['status'] ?? 'published')) !== 'published') {
+            return false;
+        }
+
+        $created = strtotime((string)($item['created'] ?? ''));
+        if ($created === false) {
+            return false;
+        }
+
+        return $created <= ($now ?? time());
     }
 
     private function sanitizeIds(array $ids): array

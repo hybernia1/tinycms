@@ -40,24 +40,7 @@ final class FrontController
             'footer' => (string)($settings['main']['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['main']['siteauthor'] ?? 'Admin'),
         ];
-        $posts = array_map(function (array $item): array {
-            $id = (int)($item['id'] ?? 0);
-            $type = $this->contentTypes->resolveBySlug((string)($item['type'] ?? ''));
-            $typeSlug = (string)($type['slug'] ?? (string)($item['type'] ?? 'post'));
-            return [
-                'id' => $id,
-                'type' => (string)($item['type'] ?? 'post'),
-                'type_slug' => $typeSlug,
-                'name' => (string)($item['name'] ?? ''),
-                'excerpt' => (string)($item['excerpt'] ?? ''),
-                'created' => (string)($item['created'] ?? ''),
-                'slug' => $this->slugger->slug((string)($item['name'] ?? ''), $id),
-            ];
-        }, $this->contentService->listPublished('', 30));
-        $posts = array_map(static function (array $item): array {
-            $item['url'] = $item['type_slug'] . '/' . (string)($item['slug'] ?? '');
-            return $item;
-        }, $posts);
+        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished('', 30));
 
         $this->pages->home($this->authService->auth()->user(), $site, $posts);
     }
@@ -67,18 +50,14 @@ final class FrontController
         $type = $this->contentTypes->resolveBySlug((string)($params['typeSlug'] ?? ''));
 
         if ($type === null) {
-            http_response_code(404);
-            echo '404';
-            return;
+            $this->notFound();
         }
 
         $id = $this->slugger->extractId((string)($params['slug'] ?? ''));
         $item = $id > 0 ? $this->contentService->findPublished($id, (string)$type['type']) : null;
 
         if ($item === null) {
-            http_response_code(404);
-            echo '404';
-            return;
+            $this->notFound();
         }
 
         $slug = $this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0));
@@ -88,15 +67,7 @@ final class FrontController
             $redirect((string)($type['slug'] ?? '') . '/' . $slug, true);
         }
 
-        $this->pages->contentDetail([
-            'type_slug' => (string)($type['slug'] ?? ''),
-            'slug' => $slug,
-            'id' => (int)($item['id'] ?? 0),
-            'name' => (string)($item['name'] ?? ''),
-            'excerpt' => (string)($item['excerpt'] ?? ''),
-            'body' => (string)($item['body'] ?? ''),
-            'created' => (string)($item['created'] ?? ''),
-        ]);
+        $this->pages->contentDetail($this->toDetailItem($item, (string)($type['slug'] ?? ''), $slug));
     }
 
     public function loginForm(callable $redirect): void
@@ -138,5 +109,44 @@ final class FrontController
             'message' => (string)($result['message'] ?? 'Přihlášení selhalo.'),
             'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'remember' => (int)((int)($_POST['remember'] ?? 0) === 1)],
         ]);
+    }
+
+    private function notFound(): void
+    {
+        http_response_code(404);
+        echo '404';
+        exit;
+    }
+
+    private function toPublicListItem(array $item): array
+    {
+        $id = (int)($item['id'] ?? 0);
+        $type = $this->contentTypes->resolveForType((string)($item['type'] ?? ''));
+        $typeSlug = (string)($type['slug'] ?? 'post');
+        $slug = $this->slugger->slug((string)($item['name'] ?? ''), $id);
+
+        return [
+            'id' => $id,
+            'type' => (string)($item['type'] ?? 'post'),
+            'type_slug' => $typeSlug,
+            'name' => (string)($item['name'] ?? ''),
+            'excerpt' => (string)($item['excerpt'] ?? ''),
+            'created' => (string)($item['created'] ?? ''),
+            'slug' => $slug,
+            'url' => $typeSlug . '/' . $slug,
+        ];
+    }
+
+    private function toDetailItem(array $item, string $typeSlug, string $slug): array
+    {
+        return [
+            'type_slug' => $typeSlug,
+            'slug' => $slug,
+            'id' => (int)($item['id'] ?? 0),
+            'name' => (string)($item['name'] ?? ''),
+            'excerpt' => (string)($item['excerpt'] ?? ''),
+            'body' => (string)($item['body'] ?? ''),
+            'created' => (string)($item['created'] ?? ''),
+        ];
     }
 }

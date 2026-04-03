@@ -66,19 +66,26 @@ final class ContentTypeService
         $type = $this->slugMap[$slugKey] ?? null;
 
         if ($type === null) {
-            if ($slugKey === '') {
-                return null;
-            }
-
-            return [
-                'type' => $slugKey,
-                'slug' => $slugKey,
-                'label_plural' => ucfirst($slugKey),
-                'label_singular' => ucfirst($slugKey),
-            ];
+            return $this->resolveForType($slugKey);
         }
 
-        return $this->types[$type] ?? null;
+        return $this->resolveForType($type);
+    }
+
+    public function resolveForType(string $type): ?array
+    {
+        $key = $this->sanitizeType($type);
+
+        if ($key === '') {
+            return null;
+        }
+
+        return $this->types[$key] ?? [
+            'type' => $key,
+            'slug' => $this->sanitizeSlug($key),
+            'label_plural' => ucfirst($key),
+            'label_singular' => ucfirst($key),
+        ];
     }
 
     private function sanitizeType(string $type): string
