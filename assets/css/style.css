@@ -696,20 +696,29 @@ body[data-theme='dark'] input[type='week'] {
     position: relative;
 }
 
-.custom-datetime-trigger {
-    width: 100%;
-    padding: var(--control-padding-y) var(--control-padding-x);
-    text-align: left;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.custom-datetime-control {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--space-2);
+}
+
+.custom-datetime-manual {
+    min-width: 0;
+}
+
+.custom-datetime-trigger {
+    width: calc(var(--control-height) + var(--space-2));
+    height: var(--control-height);
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .custom-datetime-trigger-icon {
     color: var(--color-muted);
-    flex: 0 0 auto;
+    display: inline-flex;
 }
 
 .custom-datetime-panel {

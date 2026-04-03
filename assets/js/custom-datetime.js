@@ -17,11 +17,14 @@
 
     const weekdayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
 
+    const normalizeValue = (value) => (value || '').trim().replace(' ', 'T');
+
     const parseValue = (value) => {
-        if (!value || !value.includes('T')) {
+        const normalized = normalizeValue(value);
+        if (!normalized || !normalized.includes('T')) {
             return null;
         }
-        const [datePart, timePart] = value.split('T');
+        const [datePart, timePart] = normalized.split('T');
         const [year, month, day] = datePart.split('-').map(Number);
         const [hour, minute] = (timePart || '00:00').split(':').map(Number);
         if (!year || !month || !day) {
@@ -77,19 +80,27 @@
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-datetime';
 
+        const control = document.createElement('div');
+        control.className = 'custom-datetime-control';
+
+        const manualInput = document.createElement('input');
+        manualInput.type = 'text';
+        manualInput.className = 'custom-datetime-manual';
+        manualInput.placeholder = 'RRRR-MM-DDTHH:MM';
+        manualInput.disabled = hiddenInput.disabled;
+
         const trigger = document.createElement('button');
         trigger.type = 'button';
         trigger.className = 'custom-datetime-trigger';
         trigger.setAttribute('aria-haspopup', 'dialog');
         trigger.setAttribute('aria-expanded', 'false');
         trigger.disabled = hiddenInput.disabled;
-        const triggerLabel = document.createElement('span');
-        triggerLabel.className = 'custom-datetime-trigger-label';
         const triggerIcon = document.createElement('span');
         triggerIcon.className = 'custom-datetime-trigger-icon';
         triggerIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${calendarIconHref}"></use></svg>`;
-        trigger.appendChild(triggerLabel);
         trigger.appendChild(triggerIcon);
+        control.appendChild(manualInput);
+        control.appendChild(trigger);
 
         const panel = document.createElement('div');
         panel.className = 'custom-datetime-panel';
@@ -172,7 +183,8 @@
         let draftDate = selectedDate ? new Date(selectedDate) : null;
 
         const syncTrigger = () => {
-            triggerLabel.textContent = formatLabel(selectedDate);
+            manualInput.value = selectedDate ? toValue(selectedDate) : '';
+            manualInput.title = formatLabel(selectedDate);
         };
 
         const syncTimeSelects = () => {
@@ -206,6 +218,10 @@
                 cell.addEventListener('click', () => {
                     const base = draftDate || new Date();
                     draftDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), base.getHours(), base.getMinutes(), 0, 0);
+                    selectedDate = new Date(draftDate);
+                    hiddenInput.value = toValue(selectedDate);
+                    hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    syncTrigger();
                     viewMonth = new Date(day.getFullYear(), day.getMonth(), 1);
                     syncTimeSelects();
                     render();
@@ -245,6 +261,10 @@
                 draftDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1, 0, 0, 0, 0);
             }
             draftDate.setHours(Number(hourSelect.value), draftDate.getMinutes(), 0, 0);
+            selectedDate = new Date(draftDate);
+            hiddenInput.value = toValue(selectedDate);
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            syncTrigger();
         });
 
         minuteSelect.addEventListener('change', () => {
@@ -252,11 +272,19 @@
                 draftDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1, 0, 0, 0, 0);
             }
             draftDate.setMinutes(Number(minuteSelect.value), 0, 0);
+            selectedDate = new Date(draftDate);
+            hiddenInput.value = toValue(selectedDate);
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            syncTrigger();
         });
 
         todayButton.addEventListener('click', () => {
             const now = new Date();
             draftDate = new Date(now);
+            selectedDate = new Date(now);
+            hiddenInput.value = toValue(selectedDate);
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            syncTrigger();
             viewMonth = new Date(now.getFullYear(), now.getMonth(), 1);
             syncTimeSelects();
             render();
@@ -283,6 +311,30 @@
             closeOpened();
         });
 
+        manualInput.addEventListener('change', () => {
+            const parsed = parseValue(manualInput.value);
+            if (!manualInput.value.trim()) {
+                selectedDate = null;
+                draftDate = null;
+                hiddenInput.value = '';
+                syncTrigger();
+                hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                return;
+            }
+            if (!parsed) {
+                syncTrigger();
+                return;
+            }
+            selectedDate = new Date(parsed);
+            draftDate = new Date(parsed);
+            viewMonth = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+            hiddenInput.value = toValue(selectedDate);
+            syncTrigger();
+            syncTimeSelects();
+            render();
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
         trigger.addEventListener('click', () => {
             if (wrapper.classList.contains('open')) {
                 closeOpened();
@@ -292,7 +344,7 @@
         });
 
         syncTrigger();
-        wrapper.appendChild(trigger);
+        wrapper.appendChild(control);
         wrapper.appendChild(panel);
         hiddenInput.insertAdjacentElement('afterend', wrapper);
         hiddenInput.classList.add('custom-datetime-native');
