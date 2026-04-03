@@ -76,6 +76,18 @@
         return editor.contains(selection.anchorNode);
     }
 
+    function getCurrentLink(editor) {
+        var selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
+            return null;
+        }
+        var source = selection.anchorNode;
+        if (source.nodeType === Node.TEXT_NODE) {
+            source = source.parentElement;
+        }
+        return source ? source.closest('a') : null;
+    }
+
     function createIconButton(icon, command, title) {
         var button = document.createElement('button');
         button.type = 'button';
@@ -131,6 +143,12 @@
         cancel.setAttribute('data-role', 'link-cancel');
         cancel.textContent = 'Zrušit';
 
+        var remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'btn btn-light';
+        remove.setAttribute('data-role', 'link-remove');
+        remove.textContent = 'Odebrat odkaz';
+
         var confirm = document.createElement('button');
         confirm.type = 'button';
         confirm.className = 'btn btn-primary';
@@ -138,6 +156,7 @@
         confirm.textContent = 'Vložit';
 
         actions.appendChild(cancel);
+        actions.appendChild(remove);
         actions.appendChild(confirm);
         panel.appendChild(input);
         panel.appendChild(actions);
@@ -173,11 +192,13 @@
         editor.innerHTML = textarea.value.trim();
 
         var linkRange = null;
+        var activeLink = null;
         var htmlMode = false;
 
         function closeMenus() {
             wrapper.classList.remove('is-list-open');
             wrapper.classList.remove('is-link-open');
+            activeLink = null;
         }
 
         function updateFormatState() {
@@ -251,12 +272,14 @@
                 }
                 if (isSelectionInside(editor)) {
                     linkRange = rememberSelection();
+                    activeLink = getCurrentLink(editor);
                 }
                 wrapper.classList.toggle('is-link-open');
                 wrapper.classList.remove('is-list-open');
                 if (wrapper.classList.contains('is-link-open')) {
                     var linkInput = linkPanel.querySelector('[data-role="link-input"]');
                     if (linkInput) {
+                        linkInput.value = activeLink ? (activeLink.getAttribute('href') || '') : '';
                         linkInput.focus();
                         linkInput.select();
                     }
@@ -268,26 +291,58 @@
         });
 
         linkPanel.addEventListener('click', function (event) {
+            var linkInput = linkPanel.querySelector('[data-role="link-input"]');
+
+            if (event.target.closest('[data-role="link-remove"]')) {
+                if (activeLink && editor.contains(activeLink)) {
+                    var parent = activeLink.parentNode;
+                    while (activeLink.firstChild) {
+                        parent.insertBefore(activeLink.firstChild, activeLink);
+                    }
+                    parent.removeChild(activeLink);
+                } else if (linkRange) {
+                    restoreSelection(linkRange, editor);
+                    document.execCommand('unlink', false, null);
+                }
+                normalizeBlocks(editor);
+                sync(textarea, editor);
+                updateFormatState();
+                if (linkInput) {
+                    linkInput.value = '';
+                }
+                activeLink = null;
+                closeMenus();
+                return;
+            }
+
             var apply = event.target.closest('[data-role="link-apply"]');
             if (apply) {
-                var linkInput = linkPanel.querySelector('[data-role="link-input"]');
                 var url = linkInput ? linkInput.value.trim() : '';
                 if (url) {
-                    restoreSelection(linkRange, editor);
-                    document.execCommand('defaultParagraphSeparator', false, 'p');
-                    document.execCommand('createLink', false, url);
+                    if (activeLink && editor.contains(activeLink) && (!linkRange || linkRange.collapsed)) {
+                        activeLink.setAttribute('href', url);
+                    } else {
+                        restoreSelection(linkRange, editor);
+                        document.execCommand('defaultParagraphSeparator', false, 'p');
+                        document.execCommand('createLink', false, url);
+                    }
                     normalizeBlocks(editor);
                     sync(textarea, editor);
                     updateFormatState();
                     if (linkInput) {
                         linkInput.value = '';
                     }
+                    activeLink = null;
                 }
                 closeMenus();
                 return;
             }
 
             if (event.target.closest('[data-role="link-cancel"]')) {
+                if (linkInput) {
+                    linkInput.value = '';
+                }
+                activeLink = null;
                 closeMenus();
             }
         });
