@@ -20,14 +20,14 @@
             </div>
             <?php endif; ?>
             <div class="card p-4 mt-4">
-                <h2 class="h4 mb-3">Publikované články</h2>
+                <h2 class="mb-3">Publikované články</h2>
                 <?php if (empty($posts)): ?>
                 <p class="m-0 text-muted">Zatím nejsou žádné publikované články.</p>
                 <?php else: ?>
-                <ul class="list-group list-group-flush">
+                <ul class="m-0">
                     <?php foreach ($posts as $post): ?>
-                    <li class="list-group-item px-0">
-                        <h3 class="h6 m-0 mb-1">
+                    <li>
+                        <h3 class="m-0 mb-1">
                             <a href="<?= htmlspecialchars($url((string)($post['url'] ?? '')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($post['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                         </h3>
                         <p class="m-0 mb-1 text-muted"><?= htmlspecialchars((string)($post['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>

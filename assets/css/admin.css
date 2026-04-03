@@ -1,6 +1,6 @@
 :root {
-    --sidebar-bg: #0f172a;
-    --sidebar-text: #ffffff;
+    --sidebar-bg: var(--color-emphasis);
+    --sidebar-text: var(--color-inverse);
     --sidebar-link: #cbd5e1;
     --sidebar-link-active-bg: #1e293b;
 }
