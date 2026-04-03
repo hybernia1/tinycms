@@ -69,6 +69,42 @@ $router->post('admin/content/edit', static function () use ($adminContent, $redi
     $adminContent->editSubmit($redirect);
 });
 
+$router->post('admin/content/thumbnail/upload', static function () use ($adminContent, $redirect): void {
+    $adminContent->thumbnailUploadSubmit($redirect);
+});
+
+$router->post('admin/content/thumbnail/detach', static function () use ($adminContent, $redirect): void {
+    $adminContent->thumbnailDetachSubmit($redirect);
+});
+
+$router->post('admin/content/thumbnail/delete', static function () use ($adminContent, $redirect): void {
+    $adminContent->thumbnailDeleteSubmit($redirect);
+});
+
+$router->get('admin/media', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->list($redirect);
+});
+
+$router->post('admin/media/delete', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->deleteSubmit($redirect);
+});
+
+$router->get('admin/media/add', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->addForm($redirect);
+});
+
+$router->post('admin/media/add', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->addSubmit($redirect);
+});
+
+$router->get('admin/media/edit', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->editForm($redirect);
+});
+
+$router->post('admin/media/edit', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->editSubmit($redirect);
+});
+
 $router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
     $adminSettings->form($redirect);
 });

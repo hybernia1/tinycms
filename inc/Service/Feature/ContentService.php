@@ -44,7 +44,20 @@ final class ContentService
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('content', ['id', 'name', 'status', 'excerpt', 'body', 'author', 'created', 'updated'], ['id' => $id]);
+        $rows = $this->query->select('content', [
+            'id',
+            'name',
+            'status',
+            'excerpt',
+            'body',
+            'author',
+            'thumbnail',
+            '(SELECT name FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_name',
+            '(SELECT path FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path',
+            '(SELECT path_webp FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path_webp',
+            'created',
+            'updated',
+        ], ['id' => $id]);
         return $rows[0] ?? null;
     }
 
@@ -65,6 +78,24 @@ final class ContentService
             'status' => $status,
             'updated' => date('Y-m-d H:i:s'),
         ], ['id' => $id]) > 0;
+    }
+
+    public function setThumbnail(int $id, ?int $thumbnailId): bool
+    {
+        $item = $this->find($id);
+
+        if ($item === null) {
+            return false;
+        }
+
+        if ((int)($item['thumbnail'] ?? 0) === (int)($thumbnailId ?? 0)) {
+            return true;
+        }
+
+        return $this->query->update('content', [
+            'thumbnail' => $thumbnailId,
+            'updated' => date('Y-m-d H:i:s'),
+        ], ['id' => $id]) >= 0;
     }
 
     public function save(array $input, int $defaultAuthorId, ?int $id = null): array

@@ -3,7 +3,14 @@ $createdRaw = trim((string)($item['created'] ?? ''));
 $createdStamp = $createdRaw !== '' ? strtotime($createdRaw) : false;
 $createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
 ?>
-<form class="content-editor-form" method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+<?php
+$thumbnailPath = trim((string)($item['thumbnail_path_webp'] ?? ''));
+if ($thumbnailPath === '') {
+    $thumbnailPath = trim((string)($item['thumbnail_path'] ?? ''));
+}
+$thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
+?>
+<form class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <div class="content-editor-layout">
         <div class="card p-4">
@@ -59,6 +66,31 @@ $createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
                         <?php endforeach; ?>
                     </select>
                     <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                </div>
+            </div>
+            <div class="card">
+                <div class="content-box-header">Thumbnail</div>
+                <div class="p-3">
+                    <?php if ($mode === 'add'): ?>
+                        <small class="text-muted">Nejdřív uložte obsah, poté přidejte thumbnail.</small>
+                    <?php else: ?>
+                        <?php if ($thumbnailUrl !== ''): ?>
+                            <div class="content-thumbnail-preview mb-3">
+                                <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                            </div>
+                        <?php endif; ?>
+                        <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
+                        <div class="mt-2 d-flex gap-2">
+                            <button class="btn btn-primary" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/upload?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Nahrát</button>
+                        </div>
+                        <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
+                            <div class="mt-2 d-flex gap-2">
+                                <input type="hidden" name="id" value="<?= (int)($item['id'] ?? 0) ?>">
+                                <button class="btn btn-light" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/detach'), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Odpojit</button>
+                                <button class="btn btn-danger" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/delete'), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Smazat</button>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </aside>

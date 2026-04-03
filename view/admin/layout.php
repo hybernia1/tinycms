@@ -4,6 +4,7 @@ $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '
 $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
+$isMediaList = str_ends_with($currentPath, 'admin/media');
 $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: '';
 ?>
 <!doctype html>
@@ -70,6 +71,11 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/content/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span>Přidat obsah</span>
+            </a>
+            <?php elseif ($isMediaList): ?>
+            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>">
+                <?= $icon('add') ?>
+                <span>Přidat médium</span>
             </a>
             <?php endif; ?>
         </div>

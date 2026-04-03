@@ -5,12 +5,15 @@ require_once dirname(__DIR__) . '/autoload.php';
 
 use App\Controller\AdminController;
 use App\Controller\AdminContentController;
+use App\Controller\AdminMediaController;
 use App\Controller\AdminSettingsController;
 use App\Controller\AdminUserController;
 use App\Controller\FrontController;
 use App\Service\Auth\Auth;
 use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;
+use App\Service\Feature\MediaService;
+use App\Service\Feature\UploadService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Infra\Router\Router;
@@ -33,13 +36,16 @@ $view = new View(dirname(__DIR__), $router, $flash, $csrf);
 $authService = new AuthService($auth);
 $userService = new UserService();
 $contentService = new ContentService();
+$mediaService = new MediaService();
 $slugger = new SluggerService();
+$uploadService = new UploadService(dirname(__DIR__), $slugger);
 $settingsService = new SettingsService();
 $pageView = new PageView($view);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $slugger);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
-$adminContent = new AdminContentController($pageView, $authService, $contentService, $userService, $flash, $csrf);
+$adminContent = new AdminContentController($pageView, $authService, $contentService, $mediaService, $uploadService, $userService, $flash, $csrf);
+$adminMedia = new AdminMediaController($pageView, $authService, $mediaService, $uploadService, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
