@@ -5,6 +5,8 @@ namespace App\Controller;
 
 use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;
+use App\Service\Feature\MediaService;
+use App\Service\Feature\UploadService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Feature\UserService;
@@ -19,6 +21,8 @@ final class AdminContentController extends BaseAdminController
         private PageView $pages,
         AuthService $authService,
         private ContentService $content,
+        private MediaService $media,
+        private UploadService $upload,
         private UserService $users,
         FlashService $flash,
         CsrfService $csrf
@@ -185,6 +189,112 @@ final class AdminContentController extends BaseAdminController
         $ok = $this->content->setStatus($id, 'draft');
         $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah přepnut do draftu.' : 'Obsah už byl v draftu nebo není dostupný.');
         $redirect('admin/content');
+    }
+
+    public function thumbnailUploadSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $id = (int)($_GET['id'] ?? 0);
+        $item = $this->content->find($id);
+
+        if ($item === null) {
+            $this->flash->add('error', 'Obsah nenalezen.');
+            $redirect('admin/content');
+            return;
+        }
+
+        $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
+        if (($upload['success'] ?? false) !== true) {
+            $this->flash->add('error', (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.'));
+            $redirect($this->editPath($id));
+            return;
+        }
+
+        $author = (int)($this->authService->auth()->id() ?? 0);
+        $data = (array)($upload['data'] ?? []);
+        $mediaId = $this->media->create(
+            $author > 0 ? $author : null,
+            (string)($data['name'] ?? ''),
+            (string)($data['path'] ?? ''),
+            (string)($data['path_webp'] ?? '')
+        );
+
+        if ($mediaId <= 0 || !$this->content->setThumbnail($id, $mediaId)) {
+            if ($mediaId > 0) {
+                $this->media->delete($mediaId);
+            }
+            $this->upload->deleteMediaFiles($data);
+            $this->flash->add('error', 'Náhled se nepodařilo uložit.');
+            $redirect($this->editPath($id));
+            return;
+        }
+
+        $this->flash->add('success', 'Náhled byl nahrán.');
+        $redirect($this->editPath($id));
+    }
+
+    public function thumbnailDetachSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0 || $this->content->find($id) === null) {
+            $this->flash->add('error', 'Obsah nenalezen.');
+            $redirect('admin/content');
+            return;
+        }
+
+        $ok = $this->content->setThumbnail($id, null);
+        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Náhled byl odpojen.' : 'Náhled se nepodařilo odpojit.');
+        $redirect($this->editPath($id));
+    }
+
+    public function thumbnailDeleteSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $item = $this->content->find($id);
+
+        if ($item === null) {
+            $this->flash->add('error', 'Obsah nenalezen.');
+            $redirect('admin/content');
+            return;
+        }
+
+        $thumbnailId = (int)($item['thumbnail'] ?? 0);
+        if ($thumbnailId <= 0) {
+            $this->flash->add('info', 'Obsah nemá přiřazený náhled.');
+            $redirect($this->editPath($id));
+            return;
+        }
+
+        $media = $this->media->find($thumbnailId);
+        if ($media === null || !$this->media->delete($thumbnailId)) {
+            $this->flash->add('error', 'Náhled se nepodařilo smazat.');
+            $redirect($this->editPath($id));
+            return;
+        }
+
+        $this->upload->deleteMediaFiles($media);
+        $this->flash->add('success', 'Náhled byl odstraněn z databáze i disku.');
+        $redirect($this->editPath($id));
     }
 
     private function editPath(int $id): string

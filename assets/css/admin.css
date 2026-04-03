@@ -131,6 +131,13 @@ body {
     border-top: 1px solid var(--color-border-soft);
 }
 
+.content-thumbnail-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--color-border-soft);
+}
+
 
 .admin-list-toolbar {
     flex-wrap: wrap;

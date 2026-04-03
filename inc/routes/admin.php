@@ -69,6 +69,18 @@ $router->post('admin/content/edit', static function () use ($adminContent, $redi
     $adminContent->editSubmit($redirect);
 });
 
+$router->post('admin/content/thumbnail/upload', static function () use ($adminContent, $redirect): void {
+    $adminContent->thumbnailUploadSubmit($redirect);
+});
+
+$router->post('admin/content/thumbnail/detach', static function () use ($adminContent, $redirect): void {
+    $adminContent->thumbnailDetachSubmit($redirect);
+});
+
+$router->post('admin/content/thumbnail/delete', static function () use ($adminContent, $redirect): void {
+    $adminContent->thumbnailDeleteSubmit($redirect);
+});
+
 $router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
     $adminSettings->form($redirect);
 });
