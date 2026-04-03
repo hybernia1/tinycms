@@ -1,44 +1,10 @@
 (function () {
-    var linkState = {
-        editor: null,
-        textarea: null,
-        toolbar: null,
-        range: null
-    };
-
-    function createButton(icon, command, title, isModalTrigger) {
-        var button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'wysiwyg-btn';
-        button.setAttribute('data-command', command);
-        button.setAttribute('aria-label', title);
-        button.title = title;
-        if (isModalTrigger) {
-            button.setAttribute('data-modal-open', '');
-            button.setAttribute('data-modal-target', '#wysiwyg-link-modal');
-        }
-        button.innerHTML = '<svg aria-hidden="true"><use href="#' + icon + '"></use></svg>';
-        return button;
-    }
-
     function normalizeHtml(html) {
         return html === '<br>' ? '' : html;
     }
 
     function sync(textarea, editor) {
         textarea.value = normalizeHtml(editor.innerHTML.trim());
-    }
-
-    function toggleStates(toolbar) {
-        var buttons = toolbar.querySelectorAll('[data-command]');
-        buttons.forEach(function (button) {
-            var command = button.getAttribute('data-command');
-            if (!command || command === 'createLink' || command === 'removeFormat' || command === 'insertUnorderedList' || command === 'insertOrderedList') {
-                button.classList.remove('is-active');
-                return;
-            }
-            button.classList.toggle('is-active', document.queryCommandState(command));
-        });
     }
 
     function rememberSelection() {
@@ -62,6 +28,79 @@
         selection.addRange(range);
     }
 
+    function createIconButton(icon, command, title) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'wysiwyg-btn';
+        button.setAttribute('data-command', command);
+        button.setAttribute('aria-label', title);
+        button.title = title;
+        button.innerHTML = '<svg aria-hidden="true"><use href="#' + icon + '"></use></svg>';
+        return button;
+    }
+
+    function createListGroup() {
+        var group = document.createElement('div');
+        group.className = 'wysiwyg-group';
+
+        var toggle = createIconButton('w-ul', 'toggleListMenu', 'Seznamy');
+        toggle.setAttribute('data-role', 'list-toggle');
+
+        var menu = document.createElement('div');
+        menu.className = 'wysiwyg-menu';
+        menu.setAttribute('data-role', 'list-menu');
+
+        var bullets = document.createElement('button');
+        bullets.type = 'button';
+        bullets.className = 'wysiwyg-menu-item';
+        bullets.setAttribute('data-command', 'insertUnorderedList');
+        bullets.textContent = 'Odrážky';
+
+        var numbers = document.createElement('button');
+        numbers.type = 'button';
+        numbers.className = 'wysiwyg-menu-item';
+        numbers.setAttribute('data-command', 'insertOrderedList');
+        numbers.textContent = 'Číslování';
+
+        menu.appendChild(bullets);
+        menu.appendChild(numbers);
+        group.appendChild(toggle);
+        group.appendChild(menu);
+        return group;
+    }
+
+    function createLinkPanel() {
+        var panel = document.createElement('div');
+        panel.className = 'wysiwyg-link-panel';
+
+        var input = document.createElement('input');
+        input.type = 'url';
+        input.placeholder = 'https://';
+        input.className = 'wysiwyg-link-input';
+        input.setAttribute('data-role', 'link-input');
+
+        var actions = document.createElement('div');
+        actions.className = 'wysiwyg-link-actions';
+
+        var cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'btn btn-light';
+        cancel.setAttribute('data-role', 'link-cancel');
+        cancel.textContent = 'Zrušit';
+
+        var confirm = document.createElement('button');
+        confirm.type = 'button';
+        confirm.className = 'btn btn-primary';
+        confirm.setAttribute('data-role', 'link-apply');
+        confirm.textContent = 'Vložit';
+
+        actions.appendChild(cancel);
+        actions.appendChild(confirm);
+        panel.appendChild(input);
+        panel.appendChild(actions);
+        return panel;
+    }
+
     function init(textarea) {
         var wrapper = document.createElement('div');
         wrapper.className = 'wysiwyg';
@@ -69,18 +108,18 @@
         var toolbar = document.createElement('div');
         toolbar.className = 'wysiwyg-toolbar';
 
-        var actions = [
-            ['w-bold', 'bold', 'Tučně', false],
-            ['w-italic', 'italic', 'Kurzíva', false],
-            ['w-link', 'createLink', 'Odkaz', true],
-            ['w-ul', 'insertUnorderedList', 'Odrážky', false],
-            ['w-ol', 'insertOrderedList', 'Číslování', false],
-            ['w-clear', 'removeFormat', 'Vyčistit', false]
-        ];
+        var bold = createIconButton('w-bold', 'bold', 'Tučně');
+        var italic = createIconButton('w-italic', 'italic', 'Kurzíva');
+        var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
+        var clear = createIconButton('w-clear', 'removeFormat', 'Vyčistit');
+        var listGroup = createListGroup();
+        var linkPanel = createLinkPanel();
 
-        actions.forEach(function (item) {
-            toolbar.appendChild(createButton(item[0], item[1], item[2], item[3]));
-        });
+        toolbar.appendChild(bold);
+        toolbar.appendChild(italic);
+        toolbar.appendChild(link);
+        toolbar.appendChild(listGroup);
+        toolbar.appendChild(clear);
 
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
@@ -88,85 +127,99 @@
         editor.dataset.placeholder = 'Začněte psát obsah…';
         editor.innerHTML = textarea.value.trim();
 
+        var linkRange = null;
+
+        function closeMenus() {
+            wrapper.classList.remove('is-list-open');
+            wrapper.classList.remove('is-link-open');
+        }
+
+        function runCommand(command) {
+            editor.focus();
+            document.execCommand(command, false, null);
+            sync(textarea, editor);
+            closeMenus();
+        }
+
         toolbar.addEventListener('click', function (event) {
             var button = event.target.closest('[data-command]');
             if (!button) {
                 return;
             }
+
             var command = button.getAttribute('data-command');
-            editor.focus();
-            if (command === 'createLink') {
-                linkState.editor = editor;
-                linkState.textarea = textarea;
-                linkState.toolbar = toolbar;
-                linkState.range = rememberSelection();
-                window.setTimeout(function () {
-                    var linkInput = document.querySelector('[data-wysiwyg-link-input]');
+            if (command === 'toggleListMenu') {
+                wrapper.classList.toggle('is-list-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleLinkPanel') {
+                linkRange = rememberSelection();
+                wrapper.classList.toggle('is-link-open');
+                wrapper.classList.remove('is-list-open');
+                if (wrapper.classList.contains('is-link-open')) {
+                    var linkInput = linkPanel.querySelector('[data-role="link-input"]');
                     if (linkInput) {
                         linkInput.focus();
                         linkInput.select();
                     }
-                }, 0);
+                }
                 return;
             }
 
-            document.execCommand(command, false, null);
-            sync(textarea, editor);
-            toggleStates(toolbar);
+            runCommand(command);
+        });
+
+        linkPanel.addEventListener('click', function (event) {
+            var apply = event.target.closest('[data-role="link-apply"]');
+            if (apply) {
+                var linkInput = linkPanel.querySelector('[data-role="link-input"]');
+                var url = linkInput ? linkInput.value.trim() : '';
+                if (url) {
+                    restoreSelection(linkRange, editor);
+                    document.execCommand('createLink', false, url);
+                    sync(textarea, editor);
+                    if (linkInput) {
+                        linkInput.value = '';
+                    }
+                }
+                closeMenus();
+                return;
+            }
+
+            if (event.target.closest('[data-role="link-cancel"]')) {
+                closeMenus();
+            }
+        });
+
+        linkPanel.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                var apply = linkPanel.querySelector('[data-role="link-apply"]');
+                if (apply) {
+                    apply.click();
+                }
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!wrapper.contains(event.target)) {
+                closeMenus();
+            }
         });
 
         editor.addEventListener('input', function () {
             sync(textarea, editor);
-            toggleStates(toolbar);
-        });
-
-        editor.addEventListener('keyup', function () {
-            toggleStates(toolbar);
         });
 
         textarea.style.display = 'none';
         textarea.parentNode.insertBefore(wrapper, textarea);
         wrapper.appendChild(toolbar);
+        wrapper.appendChild(linkPanel);
         wrapper.appendChild(editor);
         sync(textarea, editor);
     }
-
-    document.addEventListener('click', function (event) {
-        var confirm = event.target.closest('[data-wysiwyg-link-confirm]');
-        if (!confirm || !linkState.editor || !linkState.textarea || !linkState.toolbar) {
-            return;
-        }
-
-        var modal = confirm.closest('[data-modal]');
-        var input = modal ? modal.querySelector('[data-wysiwyg-link-input]') : null;
-        var url = input ? input.value.trim() : '';
-        if (!url) {
-            return;
-        }
-
-        restoreSelection(linkState.range, linkState.editor);
-        document.execCommand('createLink', false, url);
-        sync(linkState.textarea, linkState.editor);
-        toggleStates(linkState.toolbar);
-
-        if (modal) {
-            modal.classList.remove('open');
-        }
-        if (input) {
-            input.value = '';
-        }
-    });
-
-    document.addEventListener('keydown', function (event) {
-        if (event.key !== 'Enter' || !event.target.matches('[data-wysiwyg-link-input]')) {
-            return;
-        }
-        event.preventDefault();
-        var confirm = document.querySelector('[data-wysiwyg-link-confirm]');
-        if (confirm) {
-            confirm.click();
-        }
-    });
 
     document.addEventListener('DOMContentLoaded', function () {
         var textareas = document.querySelectorAll('textarea[data-wysiwyg]');

@@ -64,14 +64,3 @@ $createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
         </aside>
     </div>
 </form>
-
-<div class="modal-overlay" id="wysiwyg-link-modal" data-modal>
-    <div class="modal">
-        <label for="wysiwyg-link-input">URL odkazu</label>
-        <input id="wysiwyg-link-input" type="url" placeholder="https://" data-wysiwyg-link-input>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
-            <button class="btn btn-primary" type="button" data-wysiwyg-link-confirm>Vložit odkaz</button>
-        </div>
-    </div>
-</div>
