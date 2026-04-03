@@ -2,12 +2,14 @@ html,
 body {
     height: 100%;
     overflow-x: hidden;
+    overscroll-behavior-x: none;
 }
 
 body {
     background: var(--color-surface-muted);
     overflow: hidden;
     overflow-x: hidden;
+    touch-action: pan-y;
 }
 
 .admin-shell {
@@ -167,7 +169,8 @@ body {
 
 @media (max-width: 900px) {
     body {
-        overflow: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .admin-shell {
@@ -192,6 +195,7 @@ body {
         overflow-x: hidden;
         overflow-y: visible;
         -webkit-overflow-scrolling: auto;
+        overscroll-behavior-x: none;
     }
 
     .admin-menu-toggle {
