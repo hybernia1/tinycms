@@ -137,6 +137,17 @@ body {
 }
 
 @media (max-width: 900px) {
+    body {
+        overflow: auto;
+    }
+
+    .admin-shell {
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
     .admin-sidebar {
         transform: translateX(-100%);
         transition: transform 0.2s ease-in-out;
@@ -145,8 +156,11 @@ body {
 
     .admin-main {
         margin-left: 0;
-        height: 100vh;
-        height: 100dvh;
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: visible;
+        -webkit-overflow-scrolling: auto;
     }
 
     .admin-menu-toggle {
