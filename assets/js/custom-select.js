@@ -12,6 +12,9 @@
     root.classList.add('has-custom-select');
 
     let opened = null;
+    const sampleIconUse = document.querySelector('svg.icon use');
+    const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '';
+    const arrowIconHref = `${iconBase}#icon-chevron-down`;
 
     const closeOpened = () => {
         if (!opened) {
@@ -25,9 +28,9 @@
         opened = null;
     };
 
-    const sync = (select, button) => {
+    const sync = (select, buttonLabel) => {
         const selectedOption = select.options[select.selectedIndex];
-        button.textContent = selectedOption ? selectedOption.textContent || '' : '';
+        buttonLabel.textContent = selectedOption ? selectedOption.textContent || '' : '';
     };
 
     const syncDisabled = (select, button, wrapper) => {
@@ -41,13 +44,24 @@
     selects.forEach((select) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-select';
+
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'custom-select-button';
         button.setAttribute('data-custom-select-button', '');
         button.setAttribute('aria-haspopup', 'listbox');
         button.setAttribute('aria-expanded', 'false');
-        sync(select, button);
+
+        const buttonLabel = document.createElement('span');
+        buttonLabel.className = 'custom-select-button-label';
+
+        const buttonIcon = document.createElement('span');
+        buttonIcon.className = 'custom-select-button-icon';
+        buttonIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${arrowIconHref}"></use></svg>`;
+
+        button.appendChild(buttonLabel);
+        button.appendChild(buttonIcon);
+        sync(select, buttonLabel);
 
         const dropdown = document.createElement('div');
         dropdown.className = 'custom-select-dropdown';
@@ -82,7 +96,7 @@
                     el.classList.toggle('selected', el === item);
                     el.setAttribute('aria-selected', el === item ? 'true' : 'false');
                 });
-                sync(select, button);
+                sync(select, buttonLabel);
                 closeOpened();
             });
 
@@ -110,7 +124,7 @@
         });
 
         select.addEventListener('change', () => {
-            sync(select, button);
+            sync(select, buttonLabel);
             const selected = Array.from(list.querySelectorAll('.custom-select-option')).find((el) => el.dataset.value === select.value) || null;
             list.querySelectorAll('.custom-select-option').forEach((el) => {
                 el.classList.toggle('selected', el === selected);
