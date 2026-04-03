@@ -1,6 +1,7 @@
 html,
 body {
     height: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -87,17 +88,22 @@ body {
 
 .admin-content {
     flex: 1 1 auto;
-    min-width: 0;
     overflow-x: hidden;
 }
 
-.admin-content > * {
+.admin-page {
+    padding: var(--space-2);
     min-width: 0;
     max-width: 100%;
 }
 
-.admin-content .card,
-.admin-content form {
+.admin-page > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-page .card,
+.admin-page form {
     max-width: 100%;
 }
 
@@ -145,7 +151,7 @@ body {
 
     .content-editor-sidebar {
         position: sticky;
-        top: calc(var(--space-2) * 8);
+        top: var(--space-2);
     }
 }
 

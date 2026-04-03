@@ -70,16 +70,18 @@ $currentContentType = $currentContentType ?? null;
             </a>
             <?php endif; ?>
         </div>
-        <section class="admin-content p-2">
-            <?php foreach ($flashes as $flash): ?>
-            <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">
-                <span><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
-                <button type="button" data-flash-close aria-label="Zavřít notifikaci" title="Zavřít notifikaci">
-                    <?= $icon('cancel') ?>
-                </button>
+        <section class="admin-content">
+            <div class="admin-page">
+                <?php foreach ($flashes as $flash): ?>
+                <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">
+                    <span><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                    <button type="button" data-flash-close aria-label="Zavřít notifikaci" title="Zavřít notifikaci">
+                        <?= $icon('cancel') ?>
+                    </button>
+                </div>
+                <?php endforeach; ?>
+                <?= $content ?>
             </div>
-            <?php endforeach; ?>
-            <?= $content ?>
         </section>
     </main>
 </div>
