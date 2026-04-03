@@ -60,7 +60,7 @@ final class FrontController
         $this->pages->home($this->authService->auth()->user(), $site, $posts);
     }
 
-    public function contentDetail(array $params): void
+    public function contentDetail(array $params, callable $redirect): void
     {
         $type = $this->contentTypes->resolveBySlug((string)($params['typeSlug'] ?? ''));
 
@@ -80,6 +80,12 @@ final class FrontController
         }
 
         $slug = $this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0));
+        $requestedSlug = trim((string)($params['slug'] ?? ''));
+
+        if ($requestedSlug !== $slug) {
+            $redirect((string)($type['slug'] ?? '') . '/' . $slug, true);
+        }
+
         $this->pages->contentDetail([
             'type_slug' => (string)($type['slug'] ?? ''),
             'slug' => $slug,

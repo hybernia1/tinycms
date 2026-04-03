@@ -44,8 +44,8 @@ $adminUsers = new AdminUserController($pageView, $authService, $userService, $fl
 $adminContent = new AdminContentController($pageView, $authService, $contentService, $contentTypes, $userService, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 
-$redirect = static function (string $path = '') use ($router): void {
-    header('Location: ' . $router->url($path));
+$redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
+    header('Location: ' . $router->url($path), true, $permanent ? 301 : 302);
     exit;
 };
 
@@ -53,8 +53,8 @@ $router->get('', static function () use ($front): void {
     $front->home();
 });
 
-$router->get('{typeSlug}/{slug}', static function (array $params) use ($front): void {
-    $front->contentDetail($params);
+$router->get('{typeSlug}/{slug}', static function (array $params) use ($front, $redirect): void {
+    $front->contentDetail($params, $redirect);
 });
 
 $router->get('front/login', static function () use ($redirect): void {
