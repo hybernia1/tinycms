@@ -11,7 +11,6 @@ if (modal && openTrigger) {
     const uploadForm = modal.querySelector('[data-media-library-upload-form]');
     const uploadButton = modal.querySelector('[data-media-library-upload-button]');
     const uploadLabel = modal.querySelector('[data-media-library-upload-label]');
-    const uploadLoader = modal.querySelector('[data-media-library-upload-loader]');
     const selectForm = document.querySelector('[data-media-library-select-form]');
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
     const deleteMediaIdField = document.querySelector('[data-media-library-delete-media-id]');
@@ -325,13 +324,12 @@ if (modal && openTrigger) {
         });
     }
 
-    if (uploadForm && uploadButton && uploadLabel && uploadLoader) {
+    if (uploadForm && uploadButton && uploadLabel) {
         uploadForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             setStatus('');
 
             uploadButton.disabled = true;
-            uploadLoader.classList.remove('d-none');
             uploadLabel.textContent = 'Nahrávám...';
 
             const response = await fetch(uploadForm.action, {
@@ -342,7 +340,6 @@ if (modal && openTrigger) {
             const data = await response.json().catch(() => ({}));
 
             uploadButton.disabled = false;
-            uploadLoader.classList.add('d-none');
             uploadLabel.textContent = 'Nahrát nový';
 
             if (!response.ok || !data.success) {
