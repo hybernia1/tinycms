@@ -10,9 +10,11 @@ use App\Controller\AdminSettingsController;
 use App\Controller\AdminTermController;
 use App\Controller\AdminUserController;
 use App\Controller\FrontController;
+use App\Controller\InstallController;
 use App\Service\Auth\Auth;
 use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;
+use App\Service\Feature\InstallService;
 use App\Service\Feature\MediaService;
 use App\Service\Feature\UploadService;
 use App\Service\Feature\TermService;
@@ -30,11 +32,48 @@ $baseDir = trim(dirname($scriptName), '/.');
 $basePath = $baseDir === '' ? '' : '/' . $baseDir;
 
 $router = new Router($basePath);
-$auth = new Auth();
 $flash = new FlashService();
 $csrf = new CsrfService();
 $view = new View(dirname(__DIR__), $router, $flash, $csrf);
 
+$redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
+    header('Location: ' . $router->url($path), true, $permanent ? 301 : 302);
+    exit;
+};
+
+$requestPath = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? '/');
+$requestPath = '/' . ltrim($requestPath, '/');
+if ($basePath !== '' && ($requestPath === $basePath || str_starts_with($requestPath, $basePath . '/'))) {
+    $requestPath = (string)substr($requestPath, strlen($basePath));
+}
+$requestPath = trim($requestPath, '/');
+
+$isInstalled = is_file(dirname(__DIR__) . '/config.php');
+
+if (!$isInstalled) {
+    $install = new InstallController($view, $csrf, new InstallService());
+
+    $allowedWhenMissingConfig = $requestPath === 'install'
+        || $requestPath === 'install/admin'
+        || $requestPath === 'install/done'
+        || str_starts_with($requestPath, 'assets/');
+
+    if (!$allowedWhenMissingConfig) {
+        $redirect('install');
+    }
+
+    require __DIR__ . '/routes/install.php';
+
+    return [
+        'router' => $router,
+    ];
+}
+
+if (str_starts_with($requestPath, 'install')) {
+    $redirect('admin/dashboard');
+}
+
+$auth = new Auth();
 $authService = new AuthService($auth);
 $userService = new UserService();
 $contentService = new ContentService();
@@ -51,11 +90,6 @@ $adminContent = new AdminContentController($pageView, $authService, $contentServ
 $adminMedia = new AdminMediaController($pageView, $authService, $mediaService, $uploadService, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 $adminTerms = new AdminTermController($pageView, $authService, $termService, $flash, $csrf);
-
-$redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
-    header('Location: ' . $router->url($path), true, $permanent ? 301 : 302);
-    exit;
-};
 
 require __DIR__ . '/routes/front.php';
 require __DIR__ . '/routes/admin.php';
