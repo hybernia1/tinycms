@@ -345,7 +345,7 @@ final class AdminContentController extends BaseAdminController
         $items = array_map(fn(array $item): array => $this->mapLibraryItem($item), (array)($pagination['data'] ?? []));
         if ($currentMediaId > 0) {
             $currentItem = $this->media->find($currentMediaId);
-            if ($currentItem !== null) {
+            if ($currentItem !== null && $this->matchesLibraryQuery($currentItem, $query)) {
                 $items = array_values(array_filter($items, static fn(array $row): bool => (int)($row['id'] ?? 0) !== $currentMediaId));
                 array_unshift($items, $this->mapLibraryItem($currentItem));
             }
@@ -528,6 +528,28 @@ final class AdminContentController extends BaseAdminController
             'path' => (string)($item['path'] ?? ''),
             'created' => (string)($item['created'] ?? ''),
         ];
+    }
+
+    private function matchesLibraryQuery(array $item, string $query): bool
+    {
+        $needle = mb_strtolower(trim($query));
+        if ($needle === '') {
+            return true;
+        }
+
+        $haystacks = [
+            mb_strtolower((string)($item['name'] ?? '')),
+            mb_strtolower((string)($item['path'] ?? '')),
+            mb_strtolower((string)($item['path_webp'] ?? '')),
+        ];
+
+        foreach ($haystacks as $haystack) {
+            if ($haystack !== '' && mb_strpos($haystack, $needle) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function jsonError(string $message): void
