@@ -294,7 +294,7 @@ if (modal && openTrigger) {
                     query = searchField.value.trim();
                     page = 1;
                     load().catch(() => null);
-                }, 2000);
+                }, 1000);
             });
         }
     }
