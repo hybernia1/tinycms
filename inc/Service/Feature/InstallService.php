@@ -89,16 +89,10 @@ final class InstallService
     {
         try {
             $pdo = $this->connect($db);
-            $pdo->beginTransaction();
             $this->createSchema($pdo);
-            $pdo->commit();
             $this->writeConfig($db);
             return ['success' => true, 'message' => 'Instalace proběhla úspěšně.'];
         } catch (\Throwable $e) {
-            if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-
             return ['success' => false, 'message' => 'Instalace selhala. Zkontrolujte údaje a oprávnění.'];
         }
     }
@@ -123,7 +117,11 @@ final class InstallService
             . "    ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],\n"
             . "];\n";
 
-        file_put_contents(dirname(__DIR__, 3) . '/config.php', $content, LOCK_EX);
+        $written = file_put_contents(dirname(__DIR__, 3) . '/config.php', $content, LOCK_EX);
+
+        if ($written === false) {
+            throw new \RuntimeException('Config write failed.');
+        }
     }
 
     private function createSchema(PDO $pdo): void
