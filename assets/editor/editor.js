@@ -43,6 +43,12 @@
         if (!block.querySelector('.image-resize-handle')) {
             block.appendChild(createImageResizeHandle());
         }
+
+        var image = block.querySelector('img[data-media-id]');
+        if (image && block.style.width === '' && image.style.width !== '') {
+            block.style.width = image.style.width;
+            image.style.width = '100%';
+        }
     }
 
     function enhanceImageBlocks(editor) {
@@ -495,7 +501,9 @@
             }
             event.preventDefault();
             resizingState = {
+                block: block,
                 image: image,
+                editorWidth: Math.max(1, editor.clientWidth),
                 startX: event.clientX,
                 startWidth: image.getBoundingClientRect().width,
             };
@@ -507,7 +515,9 @@
                 return;
             }
             var width = Math.max(120, resizingState.startWidth + (event.clientX - resizingState.startX));
-            resizingState.image.style.width = Math.round(width) + 'px';
+            var percent = Math.min(100, Math.max(15, (width / resizingState.editorWidth) * 100));
+            resizingState.block.style.width = percent.toFixed(2).replace(/\.00$/, '') + '%';
+            resizingState.image.style.width = '100%';
             sync(textarea, editor);
         });
 

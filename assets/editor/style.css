@@ -154,8 +154,9 @@
 .wysiwyg-editor .block.block-image {
     position: relative;
     margin: 0 0 var(--space-2);
-    display: inline-block;
+    display: block;
     max-width: 100%;
+    clear: both;
 }
 
 .wysiwyg-editor .block.block-image img {
@@ -164,16 +165,21 @@
 }
 
 .wysiwyg-editor .block.block-image.align-left {
-    margin-right: auto;
+    float: left;
+    clear: none;
+    margin: 0 var(--space-3) var(--space-2) 0;
 }
 
 .wysiwyg-editor .block.block-image.align-center {
+    float: none;
     margin-left: auto;
     margin-right: auto;
 }
 
 .wysiwyg-editor .block.block-image.align-right {
-    margin-left: auto;
+    float: right;
+    clear: none;
+    margin: 0 0 var(--space-2) var(--space-3);
 }
 
 .image-controls {
