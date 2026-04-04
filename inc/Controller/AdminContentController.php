@@ -564,6 +564,34 @@ final class AdminContentController extends BaseAdminController
         $this->jsonSuccess(['id' => $mediaId, 'name' => $name]);
     }
 
+    public function attachmentAttachSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $contentId = (int)($_POST['content_id'] ?? 0);
+        $mediaId = (int)($_POST['media_id'] ?? 0);
+
+        if ($contentId <= 0 || $mediaId <= 0) {
+            $this->jsonError('Neplatná data.');
+            return;
+        }
+
+        if (!$this->content->attachMedia($contentId, $mediaId)) {
+            $this->jsonError('Přílohu se nepodařilo uložit.');
+            return;
+        }
+
+        $this->jsonSuccess([
+            'content_id' => $contentId,
+            'media_id' => $mediaId,
+        ]);
+    }
+
     private function editPath(int $id): string
     {
         return 'admin/content/edit?id=' . $id;

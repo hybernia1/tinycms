@@ -1,4 +1,6 @@
 (function () {
+    var editorCounter = 0;
+
     function normalizeHtml(html) {
         return html === '<br>' ? '' : html;
     }
@@ -164,6 +166,8 @@
     }
 
     function init(textarea) {
+        editorCounter += 1;
+        var editorId = 'wysiwyg-' + editorCounter;
         var wrapper = document.createElement('div');
         wrapper.className = 'wysiwyg';
 
@@ -176,6 +180,7 @@
         var clear = createIconButton('w-clear', 'removeFormat', 'Vyčistit');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
+        var media = createIconButton('w-image', 'openMediaLibrary', 'Vložit obrázek');
         var linkPanel = createLinkPanel();
 
         toolbar.appendChild(bold);
@@ -183,6 +188,9 @@
         toolbar.appendChild(link);
         toolbar.appendChild(listGroup);
         toolbar.appendChild(clear);
+        if ((textarea.dataset.mediaLibraryEndpoint || '').trim() !== '') {
+            toolbar.appendChild(media);
+        }
         toolbar.appendChild(html);
 
         var editor = document.createElement('div');
@@ -194,6 +202,7 @@
         var linkRange = null;
         var activeLink = null;
         var htmlMode = false;
+        var mediaRange = null;
 
         function closeMenus() {
             wrapper.classList.remove('is-list-open');
@@ -254,6 +263,23 @@
             var command = button.getAttribute('data-command');
             if (command === 'toggleHtml') {
                 setHtmlMode(!htmlMode);
+                return;
+            }
+
+            if (command === 'openMediaLibrary') {
+                if (htmlMode) {
+                    return;
+                }
+                mediaRange = isSelectionInside(editor) ? rememberSelection() : null;
+                document.dispatchEvent(new CustomEvent('tinycms:media-library-open', {
+                    detail: {
+                        mode: 'editor',
+                        editorId: editorId,
+                        contentId: Number(textarea.dataset.contentId || '0'),
+                        endpoint: textarea.dataset.mediaLibraryEndpoint || '',
+                        baseUrl: textarea.dataset.mediaBaseUrl || '',
+                    },
+                }));
                 return;
             }
 
@@ -368,6 +394,18 @@
             if (isSelectionInside(editor)) {
                 updateFormatState();
             }
+        });
+
+        document.addEventListener('tinycms:media-library-selected', function (event) {
+            var detail = event.detail || {};
+            if (detail.editorId !== editorId || !detail.url) {
+                return;
+            }
+            restoreSelection(mediaRange, editor);
+            document.execCommand('insertHTML', false, '<img src="' + String(detail.url).replace(/"/g, '&quot;') + '" alt="' + String(detail.name || '').replace(/"/g, '&quot;') + '">');
+            normalizeBlocks(editor);
+            sync(textarea, editor);
+            updateFormatState();
         });
 
         editor.addEventListener('keydown', function (event) {

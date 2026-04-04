@@ -9,10 +9,12 @@ use App\Service\Infra\Db\Query;
 final class ContentService
 {
     private Query $query;
+    private \PDO $pdo;
 
     public function __construct()
     {
-        $this->query = new Query(Connection::get());
+        $this->pdo = Connection::get();
+        $this->query = new Query($this->pdo);
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
@@ -161,6 +163,24 @@ final class ContentService
 
         sort($statuses);
         return $statuses;
+    }
+
+    public function attachMedia(int $contentId, int $mediaId): bool
+    {
+        if ($contentId <= 0 || $mediaId <= 0 || $this->find($contentId) === null) {
+            return false;
+        }
+
+        $mediaExists = $this->query->select('media', ['id'], ['id' => $mediaId]) !== [];
+        if (!$mediaExists) {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare('INSERT IGNORE INTO attachments (content, media) VALUES (:content, :media)');
+        return $stmt->execute([
+            'content' => $contentId,
+            'media' => $mediaId,
+        ]);
     }
 
     public function listPublished(int $limit = 20): array
