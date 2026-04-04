@@ -39,19 +39,35 @@ final class AdminTermController extends BaseAdminController
         }
 
         $pagination = $this->terms->paginate($page, $perPage, $query);
-        if ($this->wantsJson()) {
-            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
-            $this->jsonSuccess([
-                'items' => $items,
+        $this->pages->adminTermList($pagination, self::PER_PAGE_ALLOWED, $query);
+    }
+
+    public function listApiV1(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = (int)($_GET['per_page'] ?? 10);
+        $query = trim((string)($_GET['q'] ?? ''));
+        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
+            $perPage = 10;
+        }
+
+        $pagination = $this->terms->paginate($page, $perPage, $query);
+        $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => $items,
+            'meta' => [
                 'page' => (int)($pagination['page'] ?? 1),
                 'per_page' => (int)($pagination['per_page'] ?? $perPage),
                 'total_pages' => (int)($pagination['total_pages'] ?? 1),
                 'query' => $query,
-            ]);
-            return;
-        }
-
-        $this->pages->adminTermList($pagination, self::PER_PAGE_ALLOWED, $query);
+            ],
+        ]);
     }
 
     public function suggest(callable $redirect): void
@@ -61,8 +77,12 @@ final class AdminTermController extends BaseAdminController
         }
 
         $query = trim((string)($_GET['q'] ?? ''));
-        $this->jsonSuccess([
-            'items' => $this->terms->search($query, 15),
+        $this->respondJson([
+            'ok' => true,
+            'data' => $this->terms->search($query, 15),
+            'meta' => [
+                'query' => $query,
+            ],
         ]);
     }
 
@@ -146,7 +166,7 @@ final class AdminTermController extends BaseAdminController
         $redirect($this->editPath($id));
     }
 
-    public function deleteSubmit(callable $redirect): void
+    public function deleteApiV1(callable $redirect, int $id): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -155,29 +175,17 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
-        $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Neplatné ID štítku.');
-                return;
-            }
-            $this->flash->add('error', 'Neplatné ID štítku.');
-            $redirect('admin/terms');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID štítku.']], 422);
             return;
         }
 
-        $ok = $this->terms->delete($id);
-        if ($this->wantsJson()) {
-            if ($ok) {
-                $this->jsonSuccess(['id' => $id]);
-                return;
-            }
-            $this->jsonError('Štítek se nepodařilo smazat.');
+        if (!$this->terms->delete($id)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Štítek se nepodařilo smazat.']], 422);
             return;
         }
 
-        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Štítek smazán.' : 'Štítek se nepodařilo smazat.');
-        $redirect('admin/terms');
+        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
     }
 
     private function editPath(int $id): string

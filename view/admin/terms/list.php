@@ -6,7 +6,7 @@ $totalPages = (int)($pagination['total_pages'] ?? 1);
 $query = (string)($query ?? '');
 $csrfMarkup = $csrfField();
 ?>
-<div data-terms-list data-endpoint="<?= htmlspecialchars($url('admin/terms'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/terms/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
+<div data-terms-list data-endpoint="<?= htmlspecialchars($url('admin/api/v1/terms'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/terms/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
     <div data-terms-csrf class="d-none"><?= $csrfMarkup ?></div>
     <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
         <div></div>

@@ -32,27 +32,31 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
-        $query = trim((string)($_GET['q'] ?? ''));
+        [$page, $perPage, $query] = $this->resolveListQuery();
+        $pagination = $this->media->paginate($page, $perPage, $query);
+        $this->pages->adminMediaList($pagination, self::PER_PAGE_ALLOWED, $query);
+    }
 
-        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
-            $perPage = 10;
+    public function listApiV1(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
         }
 
+        [$page, $perPage, $query] = $this->resolveListQuery();
         $pagination = $this->media->paginate($page, $perPage, $query);
-        if ($this->wantsJson()) {
-            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
-            $this->jsonSuccess([
-                'items' => $items,
+        $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => $items,
+            'meta' => [
                 'page' => (int)($pagination['page'] ?? 1),
                 'per_page' => (int)($pagination['per_page'] ?? $perPage),
                 'total_pages' => (int)($pagination['total_pages'] ?? 1),
                 'query' => $query,
-            ]);
-            return;
-        }
-        $this->pages->adminMediaList($pagination, self::PER_PAGE_ALLOWED, $query);
+            ],
+        ]);
     }
 
     public function addForm(callable $redirect): void
@@ -195,7 +199,7 @@ final class AdminMediaController extends BaseAdminController
         $redirect($this->editPath($id));
     }
 
-    public function deleteSubmit(callable $redirect): void
+    public function deleteApiV1(callable $redirect, int $id): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -204,50 +208,54 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Neplatné ID média.');
-                return;
-            }
-            $this->flash->add('error', 'Neplatné ID média.');
-            $redirect('admin/media');
+            $this->respondJson([
+                'ok' => false,
+                'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID média.'],
+            ], 422);
             return;
         }
 
         $item = $this->media->find($id);
         if ($item === null) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Médium nenalezeno.');
-                return;
-            }
-            $this->flash->add('info', 'Médium nenalezeno.');
-            $redirect('admin/media');
+            $this->respondJson([
+                'ok' => false,
+                'error' => ['code' => 'NOT_FOUND', 'message' => 'Médium nenalezeno.'],
+            ], 404);
             return;
         }
 
         if (!$this->media->delete($id)) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Médium se nepodařilo smazat.');
-                return;
-            }
-            $this->flash->add('error', 'Médium se nepodařilo smazat.');
-            $redirect('admin/media');
+            $this->respondJson([
+                'ok' => false,
+                'error' => ['code' => 'DELETE_FAILED', 'message' => 'Médium se nepodařilo smazat.'],
+            ], 422);
             return;
         }
 
         $this->upload->deleteMediaFiles($item);
-        if ($this->wantsJson()) {
-            $this->jsonSuccess(['id' => $id]);
-            return;
-        }
-        $this->flash->add('success', 'Médium smazáno.');
-        $redirect('admin/media');
+        $this->respondJson([
+            'ok' => true,
+            'data' => ['id' => $id],
+        ]);
     }
 
     private function editPath(int $id): string
     {
         return 'admin/media/edit?id=' . $id;
+    }
+
+    private function resolveListQuery(): array
+    {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = (int)($_GET['per_page'] ?? 10);
+        $query = trim((string)($_GET['q'] ?? ''));
+
+        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
+            $perPage = 10;
+        }
+
+        return [$page, $perPage, $query];
     }
 
     private function hasUpload(string $field): bool

@@ -38,37 +38,36 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
-        $status = trim((string)($_GET['status'] ?? 'all'));
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
-            $perPage = 10;
-        }
-
-        $availableStatuses = $this->content->statuses();
-        if ($status !== 'all' && !in_array($status, $availableStatuses, true)) {
-            $status = 'all';
-        }
+        [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveListQuery();
 
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
-        if ($this->wantsJson()) {
-            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
-            $this->jsonSuccess([
-                'items' => $items,
+        $this->pages->adminContentList($pagination, self::PER_PAGE_ALLOWED, $status, $query, $availableStatuses);
+    }
+
+    public function listApiV1(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        $pagination = $this->content->paginate($page, $perPage, $status, $query);
+        $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => $items,
+            'meta' => [
                 'page' => (int)($pagination['page'] ?? 1),
                 'per_page' => (int)($pagination['per_page'] ?? $perPage),
                 'total_pages' => (int)($pagination['total_pages'] ?? 1),
                 'status' => $status,
                 'query' => $query,
-            ]);
-            return;
-        }
-        $this->pages->adminContentList($pagination, self::PER_PAGE_ALLOWED, $status, $query, $availableStatuses);
+            ],
+        ]);
     }
 
-    public function deleteSubmit(callable $redirect): void
+    public function deleteApiV1(callable $redirect, int $id): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -77,29 +76,17 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $id = (int)($_POST['id'] ?? 0);
-
         if ($id <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Neplatné ID obsahu.');
-                return;
-            }
-            $this->flash->add('error', 'Neplatné ID obsahu.');
-            $redirect('admin/content');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID obsahu.']], 422);
             return;
         }
 
-        $ok = $this->content->delete($id);
-        if ($this->wantsJson()) {
-            if ($ok) {
-                $this->jsonSuccess(['id' => $id]);
-                return;
-            }
-            $this->jsonError('Obsah se nepodařilo smazat.');
+        if (!$this->content->delete($id)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Obsah se nepodařilo smazat.']], 422);
             return;
         }
-        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Obsah smazán.' : 'Obsah se nepodařilo smazat.');
-        $redirect('admin/content');
+
+        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
     }
 
     public function addForm(callable $redirect): void
@@ -196,7 +183,7 @@ final class AdminContentController extends BaseAdminController
         $redirect('admin/content/edit?id=' . $id);
     }
 
-    public function statusToggleSubmit(callable $redirect): void
+    public function statusApiV1(callable $redirect, int $id): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -205,44 +192,28 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $id = (int)($_POST['id'] ?? 0);
         $mode = (string)($_POST['mode'] ?? 'draft');
-
         if ($id <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Neplatné ID obsahu.');
-                return;
-            }
-            $this->flash->add('error', 'Neplatné ID obsahu.');
-            $redirect('admin/content');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID obsahu.']], 422);
             return;
         }
 
         if ($mode === 'publish') {
-            $ok = $this->content->setStatus($id, 'published');
-            if ($this->wantsJson()) {
-                if ($ok) {
-                    $this->jsonSuccess(['id' => $id, 'status' => 'published']);
-                    return;
-                }
-                $this->jsonError('Obsah už byl publikovaný nebo není dostupný.');
+            if (!$this->content->setStatus($id, 'published')) {
+                $this->respondJson(['ok' => false, 'error' => ['code' => 'PUBLISH_FAILED', 'message' => 'Obsah už byl publikovaný nebo není dostupný.']], 422);
                 return;
             }
-            $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah publikován.' : 'Obsah už byl publikovaný nebo není dostupný.');
-            $redirect('admin/content');
-        }
 
-        $ok = $this->content->setStatus($id, 'draft');
-        if ($this->wantsJson()) {
-            if ($ok) {
-                $this->jsonSuccess(['id' => $id, 'status' => 'draft']);
-                return;
-            }
-            $this->jsonError('Obsah už byl v draftu nebo není dostupný.');
+            $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'status' => 'published']]);
             return;
         }
-        $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah přepnut do draftu.' : 'Obsah už byl v draftu nebo není dostupný.');
-        $redirect('admin/content');
+
+        if (!$this->content->setStatus($id, 'draft')) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DRAFT_FAILED', 'message' => 'Obsah už byl v draftu nebo není dostupný.']], 422);
+            return;
+        }
+
+        $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'status' => 'draft']]);
     }
 
     public function thumbnailUploadSubmit(callable $redirect): void
@@ -293,7 +264,7 @@ final class AdminContentController extends BaseAdminController
         $redirect($this->editPath($id));
     }
 
-    public function thumbnailDetachSubmit(callable $redirect): void
+    public function thumbnailDetachApiV1(callable $redirect, int $id): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -302,28 +273,17 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0 || $this->content->find($id) === null) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Obsah nenalezen.');
-                return;
-            }
-            $this->flash->add('error', 'Obsah nenalezen.');
-            $redirect('admin/content');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
             return;
         }
 
-        $ok = $this->content->setThumbnail($id, null);
-        if ($this->wantsJson()) {
-            if ($ok) {
-                $this->jsonSuccess(['id' => $id]);
-                return;
-            }
-            $this->jsonError('Náhled se nepodařilo odpojit.');
+        if (!$this->content->setThumbnail($id, null)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DETACH_FAILED', 'message' => 'Náhled se nepodařilo odpojit.']], 422);
             return;
         }
-        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Náhled byl odpojen.' : 'Náhled se nepodařilo odpojit.');
-        $redirect($this->editPath($id));
+
+        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
     }
 
     public function thumbnailSelectSubmit(callable $redirect): void
@@ -393,9 +353,14 @@ final class AdminContentController extends BaseAdminController
         $redirect($this->editPath($id));
     }
 
-    public function mediaLibrary(callable $redirect): void
+    public function mediaLibraryApiV1(callable $redirect, int $contentId): void
     {
         if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
             return;
         }
 
@@ -418,15 +383,18 @@ final class AdminContentController extends BaseAdminController
         }
 
         $this->respondJson([
-            'items' => $items,
-            'page' => (int)($pagination['page'] ?? 1),
-            'per_page' => (int)($pagination['per_page'] ?? $perPage),
-            'total_pages' => (int)($pagination['total_pages'] ?? 1),
-            'query' => $query,
+            'ok' => true,
+            'data' => $items,
+            'meta' => [
+                'page' => (int)($pagination['page'] ?? 1),
+                'per_page' => (int)($pagination['per_page'] ?? $perPage),
+                'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'query' => $query,
+            ],
         ]);
     }
 
-    public function mediaLibraryDeleteSubmit(callable $redirect): void
+    public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -435,38 +403,20 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $contentId = (int)($_POST['content_id'] ?? 0);
-        $mediaId = (int)($_POST['media_id'] ?? 0);
         $item = $this->content->find($contentId);
-
         if ($item === null) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Obsah nenalezen.');
-                return;
-            }
-            $this->flash->add('error', 'Obsah nenalezen.');
-            $redirect('admin/content');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
             return;
         }
 
         if ($mediaId <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Médium nenalezeno.');
-                return;
-            }
-            $this->flash->add('error', 'Médium nenalezeno.');
-            $redirect($this->editPath($contentId));
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_MEDIA_ID', 'message' => 'Médium nenalezeno.']], 422);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($media === null || !$this->media->delete($mediaId)) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Médium se nepodařilo smazat.');
-                return;
-            }
-            $this->flash->add('error', 'Médium se nepodařilo smazat.');
-            $redirect($this->editPath($contentId));
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Médium se nepodařilo smazat.']], 422);
             return;
         }
 
@@ -475,15 +425,10 @@ final class AdminContentController extends BaseAdminController
         }
 
         $this->upload->deleteMediaFiles($media);
-        if ($this->wantsJson()) {
-            $this->jsonSuccess(['id' => $mediaId, 'content_id' => $contentId]);
-            return;
-        }
-        $this->flash->add('success', 'Médium bylo smazáno.');
-        $redirect($this->editPath($contentId));
+        $this->respondJson(['ok' => true, 'data' => ['id' => $mediaId, 'content_id' => $contentId]]);
     }
 
-    public function mediaLibraryUploadSubmit(callable $redirect): void
+    public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -492,15 +437,14 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $contentId = (int)($_POST['content_id'] ?? 0);
         if ($contentId <= 0 || $this->content->find($contentId) === null) {
-            $this->jsonError('Obsah nenalezen.');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
             return;
         }
 
         $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
         if (($upload['success'] ?? false) !== true) {
-            $this->jsonError((string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.'));
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'UPLOAD_FAILED', 'message' => (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.')]], 422);
             return;
         }
 
@@ -515,23 +459,26 @@ final class AdminContentController extends BaseAdminController
 
         if ($mediaId <= 0) {
             $this->upload->deleteMediaFiles($data);
-            $this->jsonError('Médium se nepodařilo uložit.');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SAVE_FAILED', 'message' => 'Médium se nepodařilo uložit.']], 422);
             return;
         }
 
         $media = $this->media->find($mediaId);
         $previewPath = $media !== null ? $this->resolvePreviewPath($media) : (string)($data['path'] ?? '');
-        $this->jsonSuccess([
-            'id' => $mediaId,
-            'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
-            'preview_path' => $previewPath,
-            'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
-            'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
-            'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
+        $this->respondJson([
+            'ok' => true,
+            'data' => [
+                'id' => $mediaId,
+                'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
+                'preview_path' => $previewPath,
+                'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
+                'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
+                'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
+            ],
         ]);
     }
 
-    public function mediaLibraryRenameSubmit(callable $redirect): void
+    public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -540,23 +487,20 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $contentId = (int)($_POST['content_id'] ?? 0);
-        $mediaId = (int)($_POST['media_id'] ?? 0);
         $name = trim((string)($_POST['name'] ?? ''));
-
         if ($contentId <= 0 || $this->content->find($contentId) === null) {
-            $this->jsonError('Obsah nenalezen.');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
             return;
         }
 
         if ($mediaId <= 0 || $name === '') {
-            $this->jsonError('Neplatná data.');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => 'Neplatná data.']], 422);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($media === null) {
-            $this->jsonError('Médium nenalezeno.');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => 'Médium nenalezeno.']], 404);
             return;
         }
 
@@ -568,14 +512,14 @@ final class AdminContentController extends BaseAdminController
         ], $mediaId);
 
         if (($result['success'] ?? false) !== true) {
-            $this->jsonError((string)($result['errors']['name'] ?? 'Název se nepodařilo uložit.'));
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'RENAME_FAILED', 'message' => (string)($result['errors']['name'] ?? 'Název se nepodařilo uložit.')]], 422);
             return;
         }
 
-        $this->jsonSuccess(['id' => $mediaId, 'name' => $name]);
+        $this->respondJson(['ok' => true, 'data' => ['id' => $mediaId, 'name' => $name]]);
     }
 
-    public function attachmentAttachSubmit(callable $redirect): void
+    public function attachmentAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -584,28 +528,41 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $contentId = (int)($_POST['content_id'] ?? 0);
-        $mediaId = (int)($_POST['media_id'] ?? 0);
-
         if ($contentId <= 0 || $mediaId <= 0) {
-            $this->jsonError('Neplatná data.');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => 'Neplatná data.']], 422);
             return;
         }
 
         if (!$this->content->attachMedia($contentId, $mediaId)) {
-            $this->jsonError('Přílohu se nepodařilo uložit.');
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'ATTACH_FAILED', 'message' => 'Přílohu se nepodařilo uložit.']], 422);
             return;
         }
 
-        $this->jsonSuccess([
-            'content_id' => $contentId,
-            'media_id' => $mediaId,
-        ]);
+        $this->respondJson(['ok' => true, 'data' => ['content_id' => $contentId, 'media_id' => $mediaId]]);
     }
 
     private function editPath(int $id): string
     {
         return 'admin/content/edit?id=' . $id;
+    }
+
+    private function resolveListQuery(): array
+    {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = (int)($_GET['per_page'] ?? 10);
+        $status = trim((string)($_GET['status'] ?? 'all'));
+        $query = trim((string)($_GET['q'] ?? ''));
+
+        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
+            $perPage = 10;
+        }
+
+        $availableStatuses = $this->content->statuses();
+        if ($status !== 'all' && !in_array($status, $availableStatuses, true)) {
+            $status = 'all';
+        }
+
+        return [$page, $perPage, $status, $query, $availableStatuses];
     }
 
     private function resolvePreviewPath(array $item): string
