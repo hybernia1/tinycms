@@ -34,17 +34,6 @@ final class AdminMediaController extends BaseAdminController
 
         [$page, $perPage, $query] = $this->resolveListQuery();
         $pagination = $this->media->paginate($page, $perPage, $query);
-        if ($this->wantsJson()) {
-            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
-            $this->jsonSuccess([
-                'items' => $items,
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'query' => $query,
-            ]);
-            return;
-        }
         $this->pages->adminMediaList($pagination, self::PER_PAGE_ALLOWED, $query);
     }
 
@@ -208,56 +197,6 @@ final class AdminMediaController extends BaseAdminController
         $this->flash->add('error', 'Nepodařilo se upravit médium.');
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect($this->editPath($id));
-    }
-
-    public function deleteSubmit(callable $redirect): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', 'Neplatný CSRF token.')
-        ) {
-            return;
-        }
-
-        $id = (int)($_POST['id'] ?? 0);
-        if ($id <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Neplatné ID média.');
-                return;
-            }
-            $this->flash->add('error', 'Neplatné ID média.');
-            $redirect('admin/media');
-            return;
-        }
-
-        $item = $this->media->find($id);
-        if ($item === null) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Médium nenalezeno.');
-                return;
-            }
-            $this->flash->add('info', 'Médium nenalezeno.');
-            $redirect('admin/media');
-            return;
-        }
-
-        if (!$this->media->delete($id)) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Médium se nepodařilo smazat.');
-                return;
-            }
-            $this->flash->add('error', 'Médium se nepodařilo smazat.');
-            $redirect('admin/media');
-            return;
-        }
-
-        $this->upload->deleteMediaFiles($item);
-        if ($this->wantsJson()) {
-            $this->jsonSuccess(['id' => $id]);
-            return;
-        }
-        $this->flash->add('success', 'Médium smazáno.');
-        $redirect('admin/media');
     }
 
     public function deleteApiV1(callable $redirect, int $id): void

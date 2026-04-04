@@ -33,18 +33,6 @@ final class AdminUserController extends BaseAdminController
         [$page, $perPage, $status, $suspend, $query] = $this->resolveListQuery();
 
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
-        if ($this->wantsJson()) {
-            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
-            $this->jsonSuccess([
-                'items' => $items,
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-            ]);
-            return;
-        }
         $this->pages->adminUsersList($pagination, self::PER_PAGE_ALLOWED, $status, $query);
     }
 
@@ -71,46 +59,6 @@ final class AdminUserController extends BaseAdminController
         ]);
     }
 
-    public function deleteSubmit(callable $redirect): void
-    {
-        if (
-            !$this->guardAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
-        ) {
-            return;
-        }
-
-        $id = (int)($_POST['id'] ?? 0);
-
-        if ($id <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Neplatné ID uživatele.');
-                return;
-            }
-            $this->flash->add('error', 'Neplatné ID uživatele.');
-            $redirect('admin/users');
-            return;
-        }
-
-        $ok = $this->users->delete($id);
-        if ($this->wantsJson()) {
-            if ($ok) {
-                $this->jsonSuccess(['id' => $id]);
-                return;
-            }
-            $this->jsonError('Uživatele se nepodařilo smazat.');
-            return;
-        }
-
-        if ($ok) {
-            $this->flash->add('success', 'Uživatel smazán.');
-        } else {
-            $this->flash->add('error', 'Uživatele se nepodařilo smazat.');
-        }
-
-        $redirect('admin/users');
-    }
-
     public function deleteApiV1(callable $redirect, int $id): void
     {
         if (
@@ -131,55 +79,6 @@ final class AdminUserController extends BaseAdminController
         }
 
         $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
-    }
-
-    public function suspendToggleSubmit(callable $redirect): void
-    {
-        if (
-            !$this->guardAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
-        ) {
-            return;
-        }
-
-        $id = (int)($_POST['id'] ?? 0);
-        $mode = (string)($_POST['mode'] ?? 'suspend');
-
-        if ($id <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Neplatné ID uživatele.');
-                return;
-            }
-            $this->flash->add('error', 'Neplatné ID uživatele.');
-            $redirect('admin/users');
-            return;
-        }
-
-        if ($mode === 'unsuspend') {
-            $ok = $this->users->unsuspend($id);
-            if ($this->wantsJson()) {
-                if ($ok) {
-                    $this->jsonSuccess(['id' => $id, 'suspend' => 0]);
-                    return;
-                }
-                $this->jsonError('Uživatele se nepodařilo odsuspendovat.');
-                return;
-            }
-            $this->flash->add($ok ? 'success' : 'error', $ok ? 'Uživatel odsuspendován.' : 'Uživatele se nepodařilo odsuspendovat.');
-            $redirect('admin/users');
-        }
-
-        $ok = $this->users->suspend($id);
-        if ($this->wantsJson()) {
-            if ($ok) {
-                $this->jsonSuccess(['id' => $id, 'suspend' => 1]);
-                return;
-            }
-            $this->jsonError('Uživatele se nepodařilo suspendovat.');
-            return;
-        }
-        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Uživatel suspendován.' : 'Uživatele se nepodařilo suspendovat.');
-        $redirect('admin/users');
     }
 
     public function suspendApiV1(callable $redirect, int $id): void

@@ -39,18 +39,6 @@ final class AdminTermController extends BaseAdminController
         }
 
         $pagination = $this->terms->paginate($page, $perPage, $query);
-        if ($this->wantsJson()) {
-            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
-            $this->jsonSuccess([
-                'items' => $items,
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'query' => $query,
-            ]);
-            return;
-        }
-
         $this->pages->adminTermList($pagination, self::PER_PAGE_ALLOWED, $query);
     }
 
@@ -172,40 +160,6 @@ final class AdminTermController extends BaseAdminController
         $this->flash->add('error', 'Nepodařilo se upravit štítek.');
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect($this->editPath($id));
-    }
-
-    public function deleteSubmit(callable $redirect): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', 'Neplatný CSRF token.')
-        ) {
-            return;
-        }
-
-        $id = (int)($_POST['id'] ?? 0);
-        if ($id <= 0) {
-            if ($this->wantsJson()) {
-                $this->jsonError('Neplatné ID štítku.');
-                return;
-            }
-            $this->flash->add('error', 'Neplatné ID štítku.');
-            $redirect('admin/terms');
-            return;
-        }
-
-        $ok = $this->terms->delete($id);
-        if ($this->wantsJson()) {
-            if ($ok) {
-                $this->jsonSuccess(['id' => $id]);
-                return;
-            }
-            $this->jsonError('Štítek se nepodařilo smazat.');
-            return;
-        }
-
-        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Štítek smazán.' : 'Štítek se nepodařilo smazat.');
-        $redirect('admin/terms');
     }
 
     public function deleteApiV1(callable $redirect, int $id): void

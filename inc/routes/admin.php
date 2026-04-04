@@ -85,10 +85,6 @@ $router->post('admin/content/thumbnail/select', static function () use ($adminCo
     $adminContent->thumbnailSelectSubmit($redirect);
 });
 
-$router->post('admin/content/thumbnail/detach', static function () use ($adminContent, $redirect): void {
-    $adminContent->thumbnailDetachSubmit($redirect);
-});
-
 $router->post('admin/content/thumbnail/delete', static function () use ($adminContent, $redirect): void {
     $adminContent->thumbnailDeleteSubmit($redirect);
 });
