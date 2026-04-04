@@ -137,6 +137,14 @@ $router->get('admin/media', static function () use ($adminMedia, $redirect): voi
     $adminMedia->list($redirect);
 });
 
+$router->get('admin/api/v1/media', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->listApiV1($redirect);
+});
+
+$router->post('admin/api/v1/media/{id}/delete', static function (array $params) use ($adminMedia, $redirect): void {
+    $adminMedia->deleteApiV1($redirect, (int)($params['id'] ?? 0));
+});
+
 $router->post('admin/media/delete', static function () use ($adminMedia, $redirect): void {
     $adminMedia->deleteSubmit($redirect);
 });

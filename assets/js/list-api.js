@@ -14,6 +14,73 @@ const icon = (name) => iconSprite !== ''
     ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${esc(iconSprite)}#icon-${esc(name)}"></use></svg>`
     : '';
 
+const apiMigrationMap = {
+    '/admin/media': '/admin/api/v1/media',
+};
+
+const normalizePath = (value) => {
+    const raw = String(value || '').trim();
+    if (raw === '') {
+        return '';
+    }
+    const url = new URL(raw, window.location.origin);
+    return url.pathname.replace(/\/$/, '');
+};
+
+const resolveEndpoint = (value) => {
+    const raw = String(value || '').trim();
+    const normalized = normalizePath(raw);
+    if (normalized === '' || raw === '') {
+        return '';
+    }
+
+    const entry = Object.entries(apiMigrationMap).find(([from]) => normalized.endsWith(from));
+    if (!entry) {
+        return raw;
+    }
+
+    const [from, to] = entry;
+    const nextPath = normalized.replace(new RegExp(`${from}$`), to);
+    const url = new URL(raw, window.location.origin);
+    url.pathname = nextPath;
+    return url.pathname + url.search;
+};
+
+const normalizeListResponse = (payload) => {
+    if (payload && payload.ok === true) {
+        const meta = payload.meta && typeof payload.meta === 'object' ? payload.meta : {};
+        return {
+            items: Array.isArray(payload.data) ? payload.data : [],
+            page: Number(meta.page || 1),
+            totalPages: Number(meta.total_pages || 1),
+        };
+    }
+
+    return {
+        items: Array.isArray(payload?.items) ? payload.items : [],
+        page: Number(payload?.page || 1),
+        totalPages: Number(payload?.total_pages || 1),
+    };
+};
+
+const normalizeActionResponse = (response, payload) => {
+    if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
+        return {
+            success: payload.ok === true,
+            message: String(payload.error?.message || payload.message || ''),
+            data: payload.data && typeof payload.data === 'object' ? payload.data : {},
+            statusOk: response.ok,
+        };
+    }
+
+    return {
+        success: payload?.success === true,
+        message: String(payload?.message || ''),
+        data: payload && typeof payload === 'object' ? payload : {},
+        statusOk: response.ok,
+    };
+};
+
 const pushFlash = (type, message) => {
     const text = String(message || '').trim();
     if (text === '') {
@@ -43,7 +110,7 @@ const initListApi = (config) => {
         return;
     }
 
-    const endpoint = root.getAttribute('data-endpoint') || '';
+    const endpoint = resolveEndpoint(root.getAttribute('data-endpoint') || '');
     const endpointBase = endpoint.replace(/\/$/, '');
     const editBase = root.getAttribute('data-edit-base') || '';
     const csrfInput = root.querySelector(`[data-${config.name}-csrf] input[name="_csrf"]`);
@@ -140,9 +207,9 @@ const initListApi = (config) => {
         }
 
         const data = await response.json();
-        const items = Array.isArray(data.items) ? data.items : [];
-        body.innerHTML = items.map((item) => config.rowHtml(item, { editBase, context })).join('');
-        setPagination(Number(data.page || 1), Number(data.total_pages || 1));
+        const normalized = normalizeListResponse(data);
+        body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
+        setPagination(normalized.page, normalized.totalPages);
         syncFilters();
     };
 
@@ -162,7 +229,8 @@ const initListApi = (config) => {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            const message = String(errorData.message || '');
+            const normalizedError = normalizeActionResponse(response, errorData);
+            const message = normalizedError.message;
             if (message !== '') {
                 pushFlash('error', message);
             }
@@ -170,11 +238,16 @@ const initListApi = (config) => {
         }
 
         const data = await response.json().catch(() => ({}));
-        if (data.success !== true && data.message) {
-            pushFlash('error', String(data.message));
+        const normalized = normalizeActionResponse(response, data);
+        if (!normalized.success && normalized.message !== '') {
+            pushFlash('error', normalized.message);
         }
 
-        return data;
+        return {
+            success: normalized.success,
+            message: normalized.message,
+            ...normalized.data,
+        };
     };
 
     root.addEventListener('click', async (event) => {
@@ -252,7 +325,10 @@ const initListApi = (config) => {
             }
 
             deleteConfirm.disabled = true;
-            const result = await postAction(`${endpointBase}/delete`, { id: pendingDeleteId });
+            const deletePath = typeof config.deletePath === 'function'
+                ? config.deletePath(endpointBase, pendingDeleteId)
+                : `${endpointBase}/delete`;
+            const result = await postAction(deletePath, { id: pendingDeleteId });
             deleteConfirm.disabled = false;
             if (result.success === true) {
                 pendingDeleteId = 0;
@@ -361,6 +437,7 @@ initListApi({
     name: 'media',
     rootSelector: '[data-media-list]',
     withStatus: false,
+    deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: { deleteSuccess: 'Médium smazáno.' },
     getContext: (root) => ({ thumbSuffix: root.getAttribute('data-thumb-suffix') || '_100x100.webp' }),
     rowHtml: (item, { editBase, context }) => {
