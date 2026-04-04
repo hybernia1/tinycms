@@ -37,7 +37,7 @@ $contentId = (int)($item['id'] ?? 0);
                     data-wysiwyg
                     <?php if ($mode !== 'add'): ?>
                         data-content-id="<?= $contentId ?>"
-                        data-media-library-endpoint="<?= htmlspecialchars($url('admin/content/media-library'), ENT_QUOTES, 'UTF-8') ?>"
+                        data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media'), ENT_QUOTES, 'UTF-8') ?>"
                         data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
                     <?php endif; ?>
                 ><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
@@ -115,7 +115,7 @@ $contentId = (int)($item['id'] ?? 0);
                             class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
                             type="button"
                             data-media-library-open
-                            data-media-library-endpoint="<?= htmlspecialchars($url('admin/content/media-library'), ENT_QUOTES, 'UTF-8') ?>"
+                            data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media'), ENT_QUOTES, 'UTF-8') ?>"
                             data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
                             data-current-media-id="<?= (int)($item['thumbnail'] ?? 0) ?>"
                         >
@@ -186,7 +186,7 @@ $contentId = (int)($item['id'] ?? 0);
                         <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
                     </div>
                 </form>
-                <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/media-library/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
+                <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
                     <?= $csrfField() ?>
                     <input type="hidden" name="content_id" value="<?= $contentId ?>">
                     <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
@@ -209,7 +209,7 @@ $contentId = (int)($item['id'] ?? 0);
     <input type="hidden" name="id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-media-id>
 </form>
-<form method="post" action="<?= htmlspecialchars($url('admin/content/media-library/delete'), ENT_QUOTES, 'UTF-8') ?>" id="media-library-delete-form">
+<form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/0/delete'), ENT_QUOTES, 'UTF-8') ?>" id="media-library-delete-form" data-action-template="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/delete'), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-delete-media-id>
@@ -218,13 +218,13 @@ $contentId = (int)($item['id'] ?? 0);
     <?= $csrfField() ?>
     <input type="hidden" name="id" value="<?= $contentId ?>">
 </form>
-<form method="post" action="<?= htmlspecialchars($url('admin/content/media-library/rename'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-rename-form>
+<form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/0/rename'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-rename-form data-action-template="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/rename'), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-rename-media-id>
     <input type="hidden" name="name" value="" data-media-library-rename-name>
 </form>
-<form method="post" action="<?= htmlspecialchars($url('admin/content/attachments/attach'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-attach-form>
+<form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/0/attach'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-attach-form data-action-template="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/attach'), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>

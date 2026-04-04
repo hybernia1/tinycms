@@ -113,6 +113,26 @@ $router->get('admin/content/media-library', static function () use ($adminConten
     $adminContent->mediaLibrary($redirect);
 });
 
+$router->get('admin/api/v1/content/{id}/media', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->mediaLibraryApiV1($redirect, (int)($params['id'] ?? 0));
+});
+
+$router->post('admin/api/v1/content/{id}/media/upload', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->mediaLibraryUploadApiV1($redirect, (int)($params['id'] ?? 0));
+});
+
+$router->post('admin/api/v1/content/{id}/media/{mediaId}/delete', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->mediaLibraryDeleteApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
+});
+
+$router->post('admin/api/v1/content/{id}/media/{mediaId}/rename', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->mediaLibraryRenameApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
+});
+
+$router->post('admin/api/v1/content/{id}/media/{mediaId}/attach', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->attachmentAttachApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
+});
+
 $router->post('admin/content/media-library/delete', static function () use ($adminContent, $redirect): void {
     $adminContent->mediaLibraryDeleteSubmit($redirect);
 });

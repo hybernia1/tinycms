@@ -492,6 +492,47 @@ final class AdminContentController extends BaseAdminController
         ]);
     }
 
+    public function mediaLibraryApiV1(callable $redirect, int $contentId): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            return;
+        }
+
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = (int)($_GET['per_page'] ?? 10);
+        $query = trim((string)($_GET['q'] ?? ''));
+        $currentMediaId = (int)($_GET['current_media_id'] ?? 0);
+        if ($perPage <= 0 || $perPage > 20) {
+            $perPage = 10;
+        }
+
+        $pagination = $this->media->paginate($page, $perPage, $query);
+        $items = array_map(fn(array $item): array => $this->mapLibraryItem($item), (array)($pagination['data'] ?? []));
+        if ($currentMediaId > 0) {
+            $currentItem = $this->media->find($currentMediaId);
+            if ($currentItem !== null && $this->matchesLibraryQuery($currentItem, $query)) {
+                $items = array_values(array_filter($items, static fn(array $row): bool => (int)($row['id'] ?? 0) !== $currentMediaId));
+                array_unshift($items, $this->mapLibraryItem($currentItem));
+            }
+        }
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => $items,
+            'meta' => [
+                'page' => (int)($pagination['page'] ?? 1),
+                'per_page' => (int)($pagination['per_page'] ?? $perPage),
+                'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'query' => $query,
+            ],
+        ]);
+    }
+
     public function mediaLibraryDeleteSubmit(callable $redirect): void
     {
         if (
@@ -549,6 +590,40 @@ final class AdminContentController extends BaseAdminController
         $redirect($this->editPath($contentId));
     }
 
+    public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $item = $this->content->find($contentId);
+        if ($item === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            return;
+        }
+
+        if ($mediaId <= 0) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_MEDIA_ID', 'message' => 'Médium nenalezeno.']], 422);
+            return;
+        }
+
+        $media = $this->media->find($mediaId);
+        if ($media === null || !$this->media->delete($mediaId)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Médium se nepodařilo smazat.']], 422);
+            return;
+        }
+
+        if ((int)($item['thumbnail'] ?? 0) === $mediaId) {
+            $this->content->setThumbnail($contentId, null);
+        }
+
+        $this->upload->deleteMediaFiles($media);
+        $this->respondJson(['ok' => true, 'data' => ['id' => $mediaId, 'content_id' => $contentId]]);
+    }
+
     public function mediaLibraryUploadSubmit(callable $redirect): void
     {
         if (
@@ -597,6 +672,56 @@ final class AdminContentController extends BaseAdminController
         ]);
     }
 
+    public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            return;
+        }
+
+        $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
+        if (($upload['success'] ?? false) !== true) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'UPLOAD_FAILED', 'message' => (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.')]], 422);
+            return;
+        }
+
+        $author = (int)($this->authService->auth()->id() ?? 0);
+        $data = (array)($upload['data'] ?? []);
+        $mediaId = $this->media->create(
+            $author > 0 ? $author : null,
+            (string)($data['name'] ?? ''),
+            (string)($data['path'] ?? ''),
+            (string)($data['path_webp'] ?? '')
+        );
+
+        if ($mediaId <= 0) {
+            $this->upload->deleteMediaFiles($data);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SAVE_FAILED', 'message' => 'Médium se nepodařilo uložit.']], 422);
+            return;
+        }
+
+        $media = $this->media->find($mediaId);
+        $previewPath = $media !== null ? $this->resolvePreviewPath($media) : (string)($data['path'] ?? '');
+        $this->respondJson([
+            'ok' => true,
+            'data' => [
+                'id' => $mediaId,
+                'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
+                'preview_path' => $previewPath,
+                'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
+                'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
+                'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
+            ],
+        ]);
+    }
+
     public function mediaLibraryRenameSubmit(callable $redirect): void
     {
         if (
@@ -641,6 +766,47 @@ final class AdminContentController extends BaseAdminController
         $this->jsonSuccess(['id' => $mediaId, 'name' => $name]);
     }
 
+    public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $name = trim((string)($_POST['name'] ?? ''));
+        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            return;
+        }
+
+        if ($mediaId <= 0 || $name === '') {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => 'Neplatná data.']], 422);
+            return;
+        }
+
+        $media = $this->media->find($mediaId);
+        if ($media === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => 'Médium nenalezeno.']], 404);
+            return;
+        }
+
+        $result = $this->media->save([
+            'name' => $name,
+            'path' => (string)($media['path'] ?? ''),
+            'path_webp' => (string)($media['path_webp'] ?? ''),
+            'author' => (string)($media['author'] ?? ''),
+        ], $mediaId);
+
+        if (($result['success'] ?? false) !== true) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'RENAME_FAILED', 'message' => (string)($result['errors']['name'] ?? 'Název se nepodařilo uložit.')]], 422);
+            return;
+        }
+
+        $this->respondJson(['ok' => true, 'data' => ['id' => $mediaId, 'name' => $name]]);
+    }
+
     public function attachmentAttachSubmit(callable $redirect): void
     {
         if (
@@ -667,6 +833,28 @@ final class AdminContentController extends BaseAdminController
             'content_id' => $contentId,
             'media_id' => $mediaId,
         ]);
+    }
+
+    public function attachmentAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        if ($contentId <= 0 || $mediaId <= 0) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => 'Neplatná data.']], 422);
+            return;
+        }
+
+        if (!$this->content->attachMedia($contentId, $mediaId)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'ATTACH_FAILED', 'message' => 'Přílohu se nepodařilo uložit.']], 422);
+            return;
+        }
+
+        $this->respondJson(['ok' => true, 'data' => ['content_id' => $contentId, 'media_id' => $mediaId]]);
     }
 
     private function editPath(int $id): string

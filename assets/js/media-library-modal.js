@@ -47,6 +47,32 @@ if (modal && openTrigger) {
     let selectedMedia = null;
     let searchTimer = null;
 
+    const normalizePayload = (payload) => {
+        if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
+            return {
+                success: payload.ok === true,
+                message: String(payload.error?.message || ''),
+                data: payload.data,
+                meta: payload.meta || {},
+            };
+        }
+
+        return {
+            success: payload?.success === true || !Object.prototype.hasOwnProperty.call(payload || {}, 'success'),
+            message: String(payload?.message || ''),
+            data: payload,
+            meta: payload || {},
+        };
+    };
+
+    const resolveAction = (form, mediaId) => {
+        const template = form?.getAttribute('data-action-template') || '';
+        if (template !== '' && Number(mediaId) > 0) {
+            return template.replace('{mediaId}', String(Number(mediaId)));
+        }
+        return form?.action || '';
+    };
+
     const setStatus = (message) => {
         if (status) {
             status.textContent = message;
@@ -236,10 +262,14 @@ if (modal && openTrigger) {
             throw new Error('load_failed');
         }
 
-        const data = await response.json();
-        totalPages = Math.max(1, Number(data.total_pages || 1));
-        page = Math.min(Math.max(1, Number(data.page || 1)), totalPages);
-        renderItems(data.items || []);
+        const raw = await response.json();
+        const normalized = normalizePayload(raw);
+        const items = Array.isArray(normalized.data) ? normalized.data : (Array.isArray(raw.items) ? raw.items : []);
+        const total = Number(normalized.meta.total_pages || raw.total_pages || 1);
+        const current = Number(normalized.meta.page || raw.page || 1);
+        totalPages = Math.max(1, total);
+        page = Math.min(Math.max(1, current), totalPages);
+        renderItems(items);
         if (!selectedMedia && currentMediaId > 0 && grid) {
             const currentCard = grid.querySelector(`[data-media-library-select="${currentMediaId}"]`);
             if (currentCard) {
@@ -376,7 +406,8 @@ if (modal && openTrigger) {
                     const body = new FormData(attachForm);
                     body.set('content_id', String(contentId));
                     body.set('media_id', String(selectedMedia.id));
-                    await fetch(attachForm.action, {
+                    const attachAction = resolveAction(attachForm, selectedMedia.id);
+                    await fetch(attachAction, {
                         method: 'POST',
                         body,
                         headers: { Accept: 'application/json' },
@@ -413,12 +444,13 @@ if (modal && openTrigger) {
             }
 
             renameName.value = value;
-            const response = await fetch(renameForm.action, {
+            const renameAction = resolveAction(renameForm, selectedMedia.id);
+            const response = await fetch(renameAction, {
                 method: 'POST',
                 body: new FormData(renameForm),
                 headers: { Accept: 'application/json' },
             });
-            const data = await response.json();
+            const data = normalizePayload(await response.json());
 
             if (!response.ok || !data.success) {
                 setStatus(data.message || 'Název se nepodařilo uložit.');
@@ -452,7 +484,7 @@ if (modal && openTrigger) {
                 body: new FormData(uploadForm),
                 headers: { Accept: 'application/json' },
             });
-            const data = await response.json().catch(() => ({}));
+            const data = normalizePayload(await response.json().catch(() => ({})));
 
             uploadButton.disabled = false;
             uploadLabel.textContent = 'Nahrát nový';
@@ -481,12 +513,13 @@ if (modal && openTrigger) {
 
             const formData = new FormData(deleteForm);
             formData.set('media_id', String(selectedMedia.id));
-            const response = await fetch(deleteForm.action, {
+            const deleteAction = resolveAction(deleteForm, selectedMedia.id);
+            const response = await fetch(deleteAction, {
                 method: 'POST',
                 body: formData,
                 headers: { Accept: 'application/json' },
             });
-            const data = await response.json().catch(() => ({}));
+            const data = normalizePayload(await response.json().catch(() => ({})));
 
             if (!response.ok || !data.success) {
                 setStatus(data.message || 'Mazání se nepodařilo.');
