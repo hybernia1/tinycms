@@ -10,11 +10,14 @@ $statusLinks = [
     'active' => 'Aktivní',
     'suspended' => 'Suspendovaní',
 ];
+$csrfMarkup = $csrfField();
 ?>
+<div data-users-list data-endpoint="<?= htmlspecialchars($url('admin/users'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/users/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
+    <div data-users-csrf class="d-none"><?= $csrfMarkup ?></div>
 <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <nav class="filter-nav">
         <?php foreach ($statusLinks as $key => $label): ?>
-            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/users?status=' . $key . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
+            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" data-users-status="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>" href="<?= htmlspecialchars($url('admin/users?status=' . $key . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
         <?php endforeach; ?>
     </nav>
     <form method="get" class="search-form">
@@ -22,7 +25,7 @@ $statusLinks = [
         <input type="hidden" name="per_page" value="<?= $perPage ?>">
         <input type="hidden" name="page" value="1">
         <div class="search-field">
-            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat jméno nebo email">
+            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat jméno nebo email" data-users-search>
             <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
         </div>
     </form>
@@ -36,7 +39,7 @@ $statusLinks = [
                     <th>Uživatel</th><th class="table-col-actions">Akce</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody data-users-list-body>
             <?php foreach ($users as $row):
                 $id = (int)($row['ID'] ?? 0);
                 $isAdmin = (string)($row['role'] ?? '') === 'admin';
@@ -57,19 +60,15 @@ $statusLinks = [
                             <?= $csrfField() ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <input type="hidden" name="mode" value="<?= $isSuspended ? 'unsuspend' : 'suspend' ?>">
-                            <button class="btn btn-light btn-icon" type="submit" aria-label="<?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?>" title="<?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?>">
+                            <button class="btn btn-light btn-icon" type="button" data-users-toggle="<?= $id ?>" data-users-mode="<?= $isSuspended ? 'unsuspend' : 'suspend' ?>" aria-label="<?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?>" title="<?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?>">
                                 <?= $icon($isSuspended ? 'show' : 'hide') ?>
                                 <span class="sr-only"><?= $isSuspended ? 'Odsuspendovat' : 'Suspendovat' ?></span>
                             </button>
                         </form>
-                        <form id="delete-user-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/users/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
-                            <?= $csrfField() ?>
-                            <input type="hidden" name="id" value="<?= $id ?>">
-                            <button class="btn btn-light btn-icon" type="button" data-modal-open data-type="uživatele" data-form-id="delete-user-<?= $id ?>" aria-label="Smazat uživatele" title="Smazat uživatele">
+                            <button class="btn btn-light btn-icon" type="button" data-users-delete-open="<?= $id ?>" aria-label="Smazat uživatele" title="Smazat uživatele">
                                 <?= $icon('delete') ?>
                                 <span class="sr-only">Smazat uživatele</span>
                             </button>
-                        </form>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -83,11 +82,11 @@ $statusLinks = [
         <div class="pagination">
             <?php $prevPage = max(1, $page - 1); ?>
             <?php $nextPage = min($totalPages, $page + 1); ?>
-            <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $prevPage . '&per_page=' . $perPage . '&status=' . $status . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
+            <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" data-users-prev href="<?= htmlspecialchars($url('admin/users?page=' . $prevPage . '&per_page=' . $perPage . '&status=' . $status . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
                 <?= $icon('prev') ?>
                 <span>Předchozí</span>
             </a>
-            <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/users?page=' . $nextPage . '&per_page=' . $perPage . '&status=' . $status . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
+            <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" data-users-next href="<?= htmlspecialchars($url('admin/users?page=' . $nextPage . '&per_page=' . $perPage . '&status=' . $status . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
                 <span>Další</span>
                 <?= $icon('next') ?>
             </a>
@@ -97,7 +96,7 @@ $statusLinks = [
         <?php endif; ?>
 
         <form method="get" class="d-flex gap-2 align-center">
-            <select name="per_page">
+            <select name="per_page" data-users-per-page>
                 <?php foreach ($allowedPerPage as $option): ?>
                     <option value="<?= (int)$option ?>" <?= $perPage === (int)$option ? 'selected' : '' ?>><?= (int)$option ?></option>
                 <?php endforeach; ?>
@@ -110,12 +109,13 @@ $statusLinks = [
     </div>
 </div>
 
-<div class="modal-overlay" data-modal>
+<div class="modal-overlay" data-users-delete-modal>
     <div class="modal">
-        <p data-modal-text>Skutečně smazat?</p>
+        <p>Skutečně smazat tohoto uživatele?</p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="">Potvrdit</button>
+            <button class="btn btn-light" type="button" data-users-delete-cancel>Zrušit</button>
+            <button class="btn btn-primary" type="button" data-users-delete-confirm>Potvrdit</button>
         </div>
     </div>
+</div>
 </div>
