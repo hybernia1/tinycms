@@ -93,7 +93,7 @@ $contentId = (int)($item['id'] ?? 0);
                     <div
                         class="tag-picker"
                         data-tag-picker
-                        data-suggest-endpoint="<?= htmlspecialchars($url('admin/terms/suggest'), ENT_QUOTES, 'UTF-8') ?>"
+                        data-suggest-endpoint="<?= htmlspecialchars($url('admin/api/v1/terms/suggest'), ENT_QUOTES, 'UTF-8') ?>"
                         data-initial="<?= $termsJson ?>"
                     >
                         <div class="tag-picker-field">

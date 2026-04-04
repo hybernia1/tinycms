@@ -125,7 +125,7 @@ $router->post('admin/api/v1/terms/{id}/delete', static function (array $params) 
     $adminTerms->deleteApiV1($redirect, (int)($params['id'] ?? 0));
 });
 
-$router->get('admin/terms/suggest', static function () use ($adminTerms, $redirect): void {
+$router->get('admin/api/v1/terms/suggest', static function () use ($adminTerms, $redirect): void {
     $adminTerms->suggest($redirect);
 });
 

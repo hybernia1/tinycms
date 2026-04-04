@@ -77,8 +77,12 @@ final class AdminTermController extends BaseAdminController
         }
 
         $query = trim((string)($_GET['q'] ?? ''));
-        $this->jsonSuccess([
-            'items' => $this->terms->search($query, 15),
+        $this->respondJson([
+            'ok' => true,
+            'data' => $this->terms->search($query, 15),
+            'meta' => [
+                'query' => $query,
+            ],
         ]);
     }
 

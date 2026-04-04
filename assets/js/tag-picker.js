@@ -94,7 +94,7 @@ if (tagPickers.length) {
             }
 
             const data = await response.json().catch(() => ({}));
-            const items = Array.isArray(data.items) ? data.items : [];
+            const items = Array.isArray(data.data) ? data.data : [];
             const names = items
                 .map((item) => String(item.name || '').trim())
                 .filter((name) => name !== '' && !tags.some((tag) => normalize(tag) === normalize(name)));
