@@ -51,6 +51,18 @@ final class AdminContentController extends BaseAdminController
         }
 
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
+        if ($this->wantsJson()) {
+            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+            $this->jsonSuccess([
+                'items' => $items,
+                'page' => (int)($pagination['page'] ?? 1),
+                'per_page' => (int)($pagination['per_page'] ?? $perPage),
+                'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'status' => $status,
+                'query' => $query,
+            ]);
+            return;
+        }
         $this->pages->adminContentList($pagination, self::PER_PAGE_ALLOWED, $status, $query, $availableStatuses);
     }
 
@@ -66,12 +78,24 @@ final class AdminContentController extends BaseAdminController
         $id = (int)($_POST['id'] ?? 0);
 
         if ($id <= 0) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Neplatné ID obsahu.');
+                return;
+            }
             $this->flash->add('error', 'Neplatné ID obsahu.');
             $redirect('admin/content');
             return;
         }
 
         $ok = $this->content->delete($id);
+        if ($this->wantsJson()) {
+            if ($ok) {
+                $this->jsonSuccess(['id' => $id]);
+                return;
+            }
+            $this->jsonError('Obsah se nepodařilo smazat.');
+            return;
+        }
         $this->flash->add($ok ? 'success' : 'error', $ok ? 'Obsah smazán.' : 'Obsah se nepodařilo smazat.');
         $redirect('admin/content');
     }
@@ -175,6 +199,10 @@ final class AdminContentController extends BaseAdminController
         $mode = (string)($_POST['mode'] ?? 'draft');
 
         if ($id <= 0) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Neplatné ID obsahu.');
+                return;
+            }
             $this->flash->add('error', 'Neplatné ID obsahu.');
             $redirect('admin/content');
             return;
@@ -182,11 +210,27 @@ final class AdminContentController extends BaseAdminController
 
         if ($mode === 'publish') {
             $ok = $this->content->setStatus($id, 'published');
+            if ($this->wantsJson()) {
+                if ($ok) {
+                    $this->jsonSuccess(['id' => $id, 'status' => 'published']);
+                    return;
+                }
+                $this->jsonError('Obsah už byl publikovaný nebo není dostupný.');
+                return;
+            }
             $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah publikován.' : 'Obsah už byl publikovaný nebo není dostupný.');
             $redirect('admin/content');
         }
 
         $ok = $this->content->setStatus($id, 'draft');
+        if ($this->wantsJson()) {
+            if ($ok) {
+                $this->jsonSuccess(['id' => $id, 'status' => 'draft']);
+                return;
+            }
+            $this->jsonError('Obsah už byl v draftu nebo není dostupný.');
+            return;
+        }
         $this->flash->add($ok ? 'success' : 'info', $ok ? 'Obsah přepnut do draftu.' : 'Obsah už byl v draftu nebo není dostupný.');
         $redirect('admin/content');
     }
@@ -555,6 +599,20 @@ final class AdminContentController extends BaseAdminController
             'preview_path' => $this->resolvePreviewPath($item),
             'path' => (string)($item['path'] ?? ''),
             'created' => (string)($item['created'] ?? ''),
+        ];
+    }
+
+    private function mapListItem(array $row): array
+    {
+        $createdAt = (string)($row['created'] ?? '');
+        $createdStamp = $createdAt !== '' ? strtotime($createdAt) : false;
+        return [
+            'id' => (int)($row['id'] ?? 0),
+            'name' => (string)($row['name'] ?? ''),
+            'author_name' => (string)($row['author_name'] ?? '—'),
+            'status' => (string)($row['status'] ?? 'draft'),
+            'created' => $createdAt,
+            'is_planned' => $createdStamp !== false && $createdStamp > time(),
         ];
     }
 
