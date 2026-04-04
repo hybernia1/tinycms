@@ -5,6 +5,7 @@ namespace App\Service\Infra\Db;
 
 use InvalidArgumentException;
 use PDO;
+use PDOException;
 
 class Query
 {
@@ -92,8 +93,13 @@ class Query
 
         $sql = "INSERT INTO $table ($columns) VALUES ($placeholders)";
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($data);
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($data);
+        } catch (PDOException $e) {
+            $this->throwIfDataTooLong($e);
+            throw $e;
+        }
 
         return (int)$this->pdo->lastInsertId();
     }
@@ -116,10 +122,14 @@ class Query
 
         $sql = "UPDATE $table SET " . implode(', ', $set) . " WHERE " . implode(' AND ', $conditions);
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($data);
-
-        return $stmt->rowCount();
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($data);
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            $this->throwIfDataTooLong($e);
+            throw $e;
+        }
     }
 
     public function delete(string $table, array $where): int
@@ -202,5 +212,15 @@ class Query
     private function isIdentifier(string $value): bool
     {
         return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $value) === 1;
+    }
+
+    private function throwIfDataTooLong(PDOException $e): void
+    {
+        $sqlState = (string)($e->errorInfo[0] ?? '');
+        $driverCode = (int)($e->errorInfo[1] ?? 0);
+
+        if ($sqlState === '22001' || $driverCode === 1406) {
+            throw new InvalidArgumentException('Jedna nebo více hodnot je příliš dlouhá pro databázový sloupec.', 0, $e);
+        }
     }
 }
