@@ -33,6 +33,7 @@ if (modal && openTrigger) {
     let totalPages = 1;
     let query = '';
     let selectedMedia = null;
+    let searchTimer = null;
 
     const setStatus = (message) => {
         if (status) {
@@ -228,6 +229,10 @@ if (modal && openTrigger) {
 
     const open = () => {
         modal.classList.add('open');
+        if (searchTimer) {
+            clearTimeout(searchTimer);
+            searchTimer = null;
+        }
         page = 1;
         selectedMedia = null;
         setStatus('');
@@ -272,13 +277,26 @@ if (modal && openTrigger) {
     }
 
     if (searchForm) {
+        const searchField = searchForm.querySelector('input[name="q"]');
         searchForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            const field = searchForm.querySelector('input[name="q"]');
-            query = field ? field.value.trim() : '';
+            query = searchField ? searchField.value.trim() : '';
             page = 1;
             load().catch(() => null);
         });
+
+        if (searchField) {
+            searchField.addEventListener('input', () => {
+                if (searchTimer) {
+                    clearTimeout(searchTimer);
+                }
+                searchTimer = window.setTimeout(() => {
+                    query = searchField.value.trim();
+                    page = 1;
+                    load().catch(() => null);
+                }, 2000);
+            });
+        }
     }
 
     if (grid) {

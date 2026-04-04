@@ -146,8 +146,10 @@ $contentId = (int)($item['id'] ?? 0);
             </div>
             <div class="media-library-list">
                 <form class="media-library-search" data-media-library-search>
-                    <input type="search" name="q" placeholder="Hledat obrázek">
-                    <button class="btn btn-light" type="submit">Hledat</button>
+                    <div class="search-field">
+                        <input class="search-input" type="search" name="q" placeholder="Hledat obrázek">
+                        <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
+                    </div>
                 </form>
                 <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/media-library/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
                     <?= $csrfField() ?>
