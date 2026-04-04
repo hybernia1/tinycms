@@ -61,7 +61,7 @@ $csrfMarkup = $csrfField();
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="table-col-actions">
                         <?php $isPublished = (string)($row['status'] ?? '') === 'published'; ?>
-                        <form method="post" action="<?= htmlspecialchars($url('admin/content/status-toggle'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                        <form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $id . '/status'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <?= $csrfField() ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <input type="hidden" name="mode" value="<?= $isPublished ? 'draft' : 'publish' ?>">

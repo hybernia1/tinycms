@@ -29,14 +29,6 @@ $router->post('admin/api/v1/users/{id}/suspend', static function (array $params)
     $adminUsers->suspendApiV1($redirect, (int)($params['id'] ?? 0));
 });
 
-$router->post('admin/users/delete', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->deleteSubmit($redirect);
-});
-
-$router->post('admin/users/suspend-toggle', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->suspendToggleSubmit($redirect);
-});
-
 $router->get('admin/users/add', static function () use ($adminUsers, $redirect): void {
     $adminUsers->addForm($redirect);
 });
@@ -67,14 +59,6 @@ $router->post('admin/api/v1/content/{id}/delete', static function (array $params
 
 $router->post('admin/api/v1/content/{id}/status', static function (array $params) use ($adminContent, $redirect): void {
     $adminContent->statusApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->post('admin/content/delete', static function () use ($adminContent, $redirect): void {
-    $adminContent->deleteSubmit($redirect);
-});
-
-$router->post('admin/content/status-toggle', static function () use ($adminContent, $redirect): void {
-    $adminContent->statusToggleSubmit($redirect);
 });
 
 $router->get('admin/content/add', static function () use ($adminContent, $redirect): void {
@@ -109,10 +93,6 @@ $router->post('admin/content/thumbnail/delete', static function () use ($adminCo
     $adminContent->thumbnailDeleteSubmit($redirect);
 });
 
-$router->get('admin/content/media-library', static function () use ($adminContent, $redirect): void {
-    $adminContent->mediaLibrary($redirect);
-});
-
 $router->get('admin/api/v1/content/{id}/media', static function (array $params) use ($adminContent, $redirect): void {
     $adminContent->mediaLibraryApiV1($redirect, (int)($params['id'] ?? 0));
 });
@@ -137,23 +117,6 @@ $router->post('admin/api/v1/content/{id}/thumbnail/detach', static function (arr
     $adminContent->thumbnailDetachApiV1($redirect, (int)($params['id'] ?? 0));
 });
 
-$router->post('admin/content/media-library/delete', static function () use ($adminContent, $redirect): void {
-    $adminContent->mediaLibraryDeleteSubmit($redirect);
-});
-
-$router->post('admin/content/media-library/upload', static function () use ($adminContent, $redirect): void {
-    $adminContent->mediaLibraryUploadSubmit($redirect);
-});
-
-$router->post('admin/content/media-library/rename', static function () use ($adminContent, $redirect): void {
-    $adminContent->mediaLibraryRenameSubmit($redirect);
-});
-
-$router->post('admin/content/attachments/attach', static function () use ($adminContent, $redirect): void {
-    $adminContent->attachmentAttachSubmit($redirect);
-});
-
-
 $router->get('admin/terms', static function () use ($adminTerms, $redirect): void {
     $adminTerms->list($redirect);
 });
@@ -168,10 +131,6 @@ $router->post('admin/api/v1/terms/{id}/delete', static function (array $params) 
 
 $router->get('admin/terms/suggest', static function () use ($adminTerms, $redirect): void {
     $adminTerms->suggest($redirect);
-});
-
-$router->post('admin/terms/delete', static function () use ($adminTerms, $redirect): void {
-    $adminTerms->deleteSubmit($redirect);
 });
 
 $router->get('admin/terms/add', static function () use ($adminTerms, $redirect): void {
@@ -199,10 +158,6 @@ $router->get('admin/api/v1/media', static function () use ($adminMedia, $redirec
 
 $router->post('admin/api/v1/media/{id}/delete', static function (array $params) use ($adminMedia, $redirect): void {
     $adminMedia->deleteApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->post('admin/media/delete', static function () use ($adminMedia, $redirect): void {
-    $adminMedia->deleteSubmit($redirect);
 });
 
 $router->get('admin/media/add', static function () use ($adminMedia, $redirect): void {
