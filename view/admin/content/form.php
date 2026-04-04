@@ -81,6 +81,7 @@ $contentId = (int)($item['id'] ?? 0);
                             data-media-library-open
                             data-media-library-endpoint="<?= htmlspecialchars($url('admin/content/media-library'), ENT_QUOTES, 'UTF-8') ?>"
                             data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
+                            data-current-media-id="<?= (int)($item['thumbnail'] ?? 0) ?>"
                         >
                             <?php if ($thumbnailUrl !== ''): ?>
                                 <div class="content-thumbnail-preview">
@@ -90,6 +91,12 @@ $contentId = (int)($item['id'] ?? 0);
                                 <span>Zvolit obrázek</span>
                             <?php endif; ?>
                         </button>
+                        <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
+                            <div class="mt-2 d-flex gap-2">
+                                <input type="hidden" name="id" value="<?= (int)($item['id'] ?? 0) ?>">
+                                <button class="btn btn-light" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/detach'), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Odpojit</button>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>

@@ -28,6 +28,7 @@ if (modal && openTrigger) {
 
     const endpoint = openTrigger.getAttribute('data-media-library-endpoint') || '';
     const baseUrl = openTrigger.getAttribute('data-media-base-url') || '';
+    const currentMediaId = Number(openTrigger.getAttribute('data-current-media-id') || '0');
     let page = 1;
     let totalPages = 1;
     let query = '';
@@ -97,6 +98,30 @@ if (modal && openTrigger) {
             button.dataset.mediaPreviewPath = previewPath;
             grid.appendChild(button);
         });
+    };
+
+    const selectCard = (target) => {
+        if (!target || !grid) {
+            return;
+        }
+
+        const mediaId = Number(target.getAttribute('data-media-library-select') || '0');
+        if (mediaId <= 0) {
+            return;
+        }
+
+        selectedMedia = {
+            id: mediaId,
+            name: target.dataset.mediaName || 'Bez názvu',
+            path: target.dataset.mediaPath || '',
+            created: target.dataset.mediaCreated || '',
+            previewPath: target.dataset.mediaPreviewPath || '',
+        };
+
+        grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
+        target.classList.add('selected');
+        setStatus('');
+        renderSelected();
     };
 
     const renderSelected = () => {
@@ -179,6 +204,9 @@ if (modal && openTrigger) {
         if (query !== '') {
             url.searchParams.set('q', query);
         }
+        if (currentMediaId > 0) {
+            url.searchParams.set('current_media_id', String(currentMediaId));
+        }
 
         const response = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
         if (!response.ok) {
@@ -189,6 +217,12 @@ if (modal && openTrigger) {
         totalPages = Math.max(1, Number(data.total_pages || 1));
         page = Math.min(Math.max(1, Number(data.page || 1)), totalPages);
         renderItems(data.items || []);
+        if (!selectedMedia && currentMediaId > 0 && grid) {
+            const currentCard = grid.querySelector(`[data-media-library-select="${currentMediaId}"]`);
+            if (currentCard) {
+                selectCard(currentCard);
+            }
+        }
         updatePager();
     };
 
@@ -254,23 +288,7 @@ if (modal && openTrigger) {
                 return;
             }
 
-            const mediaId = Number(target.getAttribute('data-media-library-select') || '0');
-            if (mediaId <= 0) {
-                return;
-            }
-
-            selectedMedia = {
-                id: mediaId,
-                name: target.dataset.mediaName || 'Bez názvu',
-                path: target.dataset.mediaPath || '',
-                created: target.dataset.mediaCreated || '',
-                previewPath: target.dataset.mediaPreviewPath || '',
-            };
-
-            grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
-            target.classList.add('selected');
-            setStatus('');
-            renderSelected();
+            selectCard(target);
         });
     }
 

@@ -336,21 +336,20 @@ final class AdminContentController extends BaseAdminController
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = (int)($_GET['per_page'] ?? 10);
         $query = trim((string)($_GET['q'] ?? ''));
+        $currentMediaId = (int)($_GET['current_media_id'] ?? 0);
         if ($perPage <= 0 || $perPage > 20) {
             $perPage = 10;
         }
 
         $pagination = $this->media->paginate($page, $perPage, $query);
-        $items = array_map(function (array $item): array {
-            $previewPath = $this->resolvePreviewPath($item);
-            return [
-                'id' => (int)($item['id'] ?? 0),
-                'name' => (string)($item['name'] ?? ''),
-                'preview_path' => $previewPath,
-                'path' => (string)($item['path'] ?? ''),
-                'created' => (string)($item['created'] ?? ''),
-            ];
-        }, (array)($pagination['data'] ?? []));
+        $items = array_map(fn(array $item): array => $this->mapLibraryItem($item), (array)($pagination['data'] ?? []));
+        if ($currentMediaId > 0) {
+            $currentItem = $this->media->find($currentMediaId);
+            if ($currentItem !== null) {
+                $items = array_values(array_filter($items, static fn(array $row): bool => (int)($row['id'] ?? 0) !== $currentMediaId));
+                array_unshift($items, $this->mapLibraryItem($currentItem));
+            }
+        }
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
@@ -518,6 +517,17 @@ final class AdminContentController extends BaseAdminController
             }
         }
         return $suffix;
+    }
+
+    private function mapLibraryItem(array $item): array
+    {
+        return [
+            'id' => (int)($item['id'] ?? 0),
+            'name' => (string)($item['name'] ?? ''),
+            'preview_path' => $this->resolvePreviewPath($item),
+            'path' => (string)($item['path'] ?? ''),
+            'created' => (string)($item['created'] ?? ''),
+        ];
     }
 
     private function jsonError(string $message): void
