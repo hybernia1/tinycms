@@ -196,12 +196,6 @@ a:focus-visible {
     line-height: var(--lh-tight);
 }
 
-.bg-light { background: var(--color-surface-muted); }
-.bg-primary { background: var(--primary); color: var(--color-inverse); }
-.bg-success { background: var(--success); color: var(--color-inverse); }
-.bg-warning { background: var(--warning); color: var(--color-inverse); }
-.bg-dark { background: var(--color-emphasis); color: var(--color-inverse); }
-
 .text-bg-primary,
 .text-bg-success,
 .text-bg-warning,
