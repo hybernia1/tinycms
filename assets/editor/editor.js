@@ -177,6 +177,19 @@
         selection.addRange(range);
     }
 
+    function focusEditorEnd(editor) {
+        editor.focus();
+        var selection = window.getSelection();
+        if (!selection) {
+            return;
+        }
+        var range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
     function isSelectionInside(editor) {
         var selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) {
@@ -578,7 +591,11 @@
             if (mediaId <= 0) {
                 return;
             }
-            restoreSelection(mediaRange, editor);
+            if (mediaRange) {
+                restoreSelection(mediaRange, editor);
+            } else {
+                focusEditorEnd(editor);
+            }
             document.execCommand('insertHTML', false, '<div class="block block-image align-center"><img src="' + String(detail.url).replace(/"/g, '&quot;') + '" alt="' + String(detail.name || '').replace(/"/g, '&quot;') + '" data-media-id="' + mediaId + '"></div><p><br></p>');
             normalizeBlocks(editor);
             enhanceImageBlocks(editor);
