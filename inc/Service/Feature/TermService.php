@@ -5,16 +5,20 @@ namespace App\Service\Feature;
 
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
+use App\Service\Infra\Db\SchemaConstraintValidator;
+use InvalidArgumentException;
 
 final class TermService
 {
     private Query $query;
     private \PDO $pdo;
+    private SchemaConstraintValidator $schemaConstraintValidator;
 
     public function __construct()
     {
         $this->pdo = Connection::get();
         $this->query = new Query($this->pdo);
+        $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $search = ''): array
@@ -56,6 +60,18 @@ final class TermService
             $errors['name'] = 'Štítek s tímto názvem už existuje.';
         }
 
+        $lengthErrors = $this->schemaConstraintValidator->validate('terms', [
+            'name' => $name,
+        ], [
+            'name' => 'name',
+        ]);
+
+        foreach ($lengthErrors as $field => $message) {
+            if (!isset($errors[$field])) {
+                $errors[$field] = $message;
+            }
+        }
+
         if ($errors !== []) {
             return ['success' => false, 'errors' => $errors];
         }
@@ -66,14 +82,18 @@ final class TermService
             'updated' => date('Y-m-d H:i:s'),
         ];
 
-        if ($id === null) {
-            $payload['created'] = date('Y-m-d H:i:s');
-            $newId = $this->query->insert('terms', $payload);
-            return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
-        }
+        try {
+            if ($id === null) {
+                $payload['created'] = date('Y-m-d H:i:s');
+                $newId = $this->query->insert('terms', $payload);
+                return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
+            }
 
-        $updated = $this->query->update('terms', $payload, ['id' => $id]);
-        return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+            $updated = $this->query->update('terms', $payload, ['id' => $id]);
+            return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+        } catch (InvalidArgumentException $e) {
+            return ['success' => false, 'errors' => ['_global' => $e->getMessage()]];
+        }
     }
 
     public function delete(int $id): bool

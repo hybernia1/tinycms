@@ -5,16 +5,20 @@ namespace App\Service\Feature;
 
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
+use App\Service\Infra\Db\SchemaConstraintValidator;
+use InvalidArgumentException;
 
 final class ContentService
 {
     private Query $query;
     private \PDO $pdo;
+    private SchemaConstraintValidator $schemaConstraintValidator;
 
     public function __construct()
     {
         $this->pdo = Connection::get();
         $this->query = new Query($this->pdo);
+        $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
@@ -126,6 +130,22 @@ final class ContentService
             $errors['created'] = 'Datum publikace není validní.';
         }
 
+        $lengthErrors = $this->schemaConstraintValidator->validate('content', [
+            'name' => $name,
+            'status' => $status,
+            'excerpt' => $excerpt,
+        ], [
+            'name' => 'name',
+            'status' => 'status',
+            'excerpt' => 'excerpt',
+        ]);
+
+        foreach ($lengthErrors as $field => $message) {
+            if (!isset($errors[$field])) {
+                $errors[$field] = $message;
+            }
+        }
+
         if ($errors !== []) {
             return ['success' => false, 'errors' => $errors];
         }
@@ -140,25 +160,29 @@ final class ContentService
             'updated' => $now,
         ];
 
-        if ($id === null) {
-            $payload['created'] = $created ?? $now;
-            $newId = $this->query->insert('content', $payload);
-            if ($newId > 0) {
-                $this->syncAttachments($newId, $body);
+        try {
+            if ($id === null) {
+                $payload['created'] = $created ?? $now;
+                $newId = $this->query->insert('content', $payload);
+                if ($newId > 0) {
+                    $this->syncAttachments($newId, $body);
+                }
+                return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }
-            return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
-        }
 
-        if ($created !== null) {
-            $payload['created'] = $created;
-        }
+            if ($created !== null) {
+                $payload['created'] = $created;
+            }
 
-        $updated = $this->query->update('content', $payload, ['id' => $id]);
-        if ($updated >= 0) {
-            $this->syncAttachments($id, $body);
-        }
+            $updated = $this->query->update('content', $payload, ['id' => $id]);
+            if ($updated >= 0) {
+                $this->syncAttachments($id, $body);
+            }
 
-        return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+            return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+        } catch (InvalidArgumentException $e) {
+            return ['success' => false, 'errors' => ['_global' => $e->getMessage()]];
+        }
     }
 
     public function statuses(): array
