@@ -105,6 +105,34 @@ $router->post('admin/content/attachments/attach', static function () use ($admin
     $adminContent->attachmentAttachSubmit($redirect);
 });
 
+
+$router->get('admin/terms', static function () use ($adminTerms, $redirect): void {
+    $adminTerms->list($redirect);
+});
+
+$router->get('admin/terms/suggest', static function () use ($adminTerms, $redirect): void {
+    $adminTerms->suggest($redirect);
+});
+
+$router->post('admin/terms/delete', static function () use ($adminTerms, $redirect): void {
+    $adminTerms->deleteSubmit($redirect);
+});
+
+$router->get('admin/terms/add', static function () use ($adminTerms, $redirect): void {
+    $adminTerms->addForm($redirect);
+});
+
+$router->post('admin/terms/add', static function () use ($adminTerms, $redirect): void {
+    $adminTerms->addSubmit($redirect);
+});
+
+$router->get('admin/terms/edit', static function () use ($adminTerms, $redirect): void {
+    $adminTerms->editForm($redirect);
+});
+
+$router->post('admin/terms/edit', static function () use ($adminTerms, $redirect): void {
+    $adminTerms->editSubmit($redirect);
+});
 $router->get('admin/media', static function () use ($adminMedia, $redirect): void {
     $adminMedia->list($redirect);
 });

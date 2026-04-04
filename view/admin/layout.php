@@ -5,6 +5,7 @@ $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
+$isTermsList = str_ends_with($currentPath, 'admin/terms');
 $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: '';
 ?>
 <!doctype html>
@@ -26,6 +27,8 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
     <script defer src="<?= htmlspecialchars($url('assets/js/content-list-api.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/users-list-api.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/media-list-api.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/terms-list-api.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/tag-picker.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body>
@@ -80,6 +83,11 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span>Přidat médium</span>
+            </a>
+            <?php elseif ($isTermsList): ?>
+            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>">
+                <?= $icon('add') ?>
+                <span>Přidat štítek</span>
             </a>
             <?php endif; ?>
         </div>

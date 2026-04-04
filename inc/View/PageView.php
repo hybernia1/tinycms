@@ -94,7 +94,7 @@ final class PageView
         ]);
     }
 
-    public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $authors): void
+    public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $authors, array $selectedTerms = []): void
     {
         $this->view->render('admin/layout', 'admin/content/form', [
             'mode' => $mode,
@@ -102,8 +102,31 @@ final class PageView
             'errors' => $errors,
             'availableStatuses' => $availableStatuses,
             'authors' => $authors,
+            'selectedTerms' => $selectedTerms,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? 'Přidat obsah' : 'Upravit obsah',
+        ]);
+    }
+
+    public function adminTermList(array $pagination, array $allowedPerPage, string $query): void
+    {
+        $this->view->render('admin/layout', 'admin/terms/list', [
+            'pagination' => $pagination,
+            'allowedPerPage' => $allowedPerPage,
+            'query' => $query,
+            'adminMenu' => $this->adminMenu(),
+            'pageTitle' => 'Štítky',
+        ]);
+    }
+
+    public function adminTermForm(string $mode, array $item, array $errors): void
+    {
+        $this->view->render('admin/layout', 'admin/terms/form', [
+            'mode' => $mode,
+            'item' => $item,
+            'errors' => $errors,
+            'adminMenu' => $this->adminMenu(),
+            'pageTitle' => $mode === 'add' ? 'Přidat štítek' : 'Upravit štítek',
         ]);
     }
 
@@ -138,6 +161,7 @@ final class PageView
             ['label' => 'Uživatelé', 'url' => 'admin/users'],
             ['label' => 'Obsah', 'url' => 'admin/content'],
             ['label' => 'Média', 'url' => 'admin/media'],
+            ['label' => 'Štítky', 'url' => 'admin/terms'],
             ['label' => 'Nastavení', 'url' => 'admin/settings'],
         ];
     }
