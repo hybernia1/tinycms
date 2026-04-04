@@ -12,7 +12,7 @@ $statusLinks = [
 ];
 $csrfMarkup = $csrfField();
 ?>
-<div data-users-list data-endpoint="<?= htmlspecialchars($url('admin/users'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/users/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
+<div data-users-list data-endpoint="<?= htmlspecialchars($url('admin/api/v1/users'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/users/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
     <div data-users-csrf class="d-none"><?= $csrfMarkup ?></div>
 <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <nav class="filter-nav">

@@ -11,7 +11,7 @@ foreach ($availableStatuses as $statusValue) {
 }
 $csrfMarkup = $csrfField();
 ?>
-<div data-content-list data-endpoint="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
+<div data-content-list data-endpoint="<?= htmlspecialchars($url('admin/api/v1/content'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
     <div data-content-csrf class="d-none"><?= $csrfMarkup ?></div>
 <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <nav class="filter-nav">

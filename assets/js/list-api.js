@@ -15,6 +15,8 @@ const icon = (name) => iconSprite !== ''
     : '';
 
 const apiMigrationMap = {
+    '/admin/users': '/admin/api/v1/users',
+    '/admin/content': '/admin/api/v1/content',
     '/admin/media': '/admin/api/v1/media',
 };
 
@@ -287,7 +289,10 @@ const initListApi = (config) => {
                 const id = Number(toggle.getAttribute(`data-${config.name}-toggle`) || '0');
                 const mode = toggle.getAttribute(`data-${config.name}-mode`) || config.toggle.defaultMode;
                 if (id > 0) {
-                    const result = await postAction(`${endpointBase}/${config.toggle.path}`, { id, mode });
+                    const togglePath = typeof config.togglePath === 'function'
+                        ? config.togglePath(endpointBase, id)
+                        : `${endpointBase}/${config.toggle.path}`;
+                    const result = await postAction(togglePath, { id, mode });
                     if (result.success === true) {
                         if (config.messages?.toggleSuccess) {
                             pushFlash('success', config.messages.toggleSuccess(mode));
@@ -371,6 +376,8 @@ initListApi({
     rootSelector: '[data-content-list]',
     withStatus: true,
     toggle: { path: 'status-toggle', defaultMode: 'draft' },
+    togglePath: (endpointBase, id) => `${endpointBase}/${id}/status`,
+    deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: {
         deleteSuccess: 'Obsah smazán.',
         toggleSuccess: (mode) => mode === 'publish' ? 'Obsah publikován.' : 'Obsah přepnut do draftu.',
@@ -478,6 +485,8 @@ initListApi({
     rootSelector: '[data-users-list]',
     withStatus: true,
     toggle: { path: 'suspend-toggle', defaultMode: 'suspend' },
+    togglePath: (endpointBase, id) => `${endpointBase}/${id}/suspend`,
+    deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: {
         deleteSuccess: 'Uživatel smazán.',
         toggleSuccess: (mode) => mode === 'unsuspend' ? 'Uživatel odsuspendován.' : 'Uživatel suspendován.',

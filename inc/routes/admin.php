@@ -17,6 +17,18 @@ $router->get('admin/users', static function () use ($adminUsers, $redirect): voi
     $adminUsers->list($redirect);
 });
 
+$router->get('admin/api/v1/users', static function () use ($adminUsers, $redirect): void {
+    $adminUsers->listApiV1($redirect);
+});
+
+$router->post('admin/api/v1/users/{id}/delete', static function (array $params) use ($adminUsers, $redirect): void {
+    $adminUsers->deleteApiV1($redirect, (int)($params['id'] ?? 0));
+});
+
+$router->post('admin/api/v1/users/{id}/suspend', static function (array $params) use ($adminUsers, $redirect): void {
+    $adminUsers->suspendApiV1($redirect, (int)($params['id'] ?? 0));
+});
+
 $router->post('admin/users/delete', static function () use ($adminUsers, $redirect): void {
     $adminUsers->deleteSubmit($redirect);
 });
@@ -43,6 +55,18 @@ $router->post('admin/users/edit', static function () use ($adminUsers, $redirect
 
 $router->get('admin/content', static function () use ($adminContent, $redirect): void {
     $adminContent->list($redirect);
+});
+
+$router->get('admin/api/v1/content', static function () use ($adminContent, $redirect): void {
+    $adminContent->listApiV1($redirect);
+});
+
+$router->post('admin/api/v1/content/{id}/delete', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->deleteApiV1($redirect, (int)($params['id'] ?? 0));
+});
+
+$router->post('admin/api/v1/content/{id}/status', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->statusApiV1($redirect, (int)($params['id'] ?? 0));
 });
 
 $router->post('admin/content/delete', static function () use ($adminContent, $redirect): void {

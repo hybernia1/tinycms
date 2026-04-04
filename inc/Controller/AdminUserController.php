@@ -30,16 +30,7 @@ final class AdminUserController extends BaseAdminController
             return;
         }
 
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
-        $status = (string)($_GET['status'] ?? 'all');
-        $status = in_array($status, ['all', 'active', 'suspended'], true) ? $status : 'all';
-        $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
-            $perPage = 10;
-        }
+        [$page, $perPage, $status, $suspend, $query] = $this->resolveListQuery();
 
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
         if ($this->wantsJson()) {
@@ -55,6 +46,29 @@ final class AdminUserController extends BaseAdminController
             return;
         }
         $this->pages->adminUsersList($pagination, self::PER_PAGE_ALLOWED, $status, $query);
+    }
+
+    public function listApiV1(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect)) {
+            return;
+        }
+
+        [$page, $perPage, $status, $suspend, $query] = $this->resolveListQuery();
+        $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
+        $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => $items,
+            'meta' => [
+                'page' => (int)($pagination['page'] ?? 1),
+                'per_page' => (int)($pagination['per_page'] ?? $perPage),
+                'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'status' => $status,
+                'query' => $query,
+            ],
+        ]);
     }
 
     public function deleteSubmit(callable $redirect): void
@@ -95,6 +109,28 @@ final class AdminUserController extends BaseAdminController
         }
 
         $redirect('admin/users');
+    }
+
+    public function deleteApiV1(callable $redirect, int $id): void
+    {
+        if (
+            !$this->guardAdmin($redirect)
+            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+        ) {
+            return;
+        }
+
+        if ($id <= 0) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID uživatele.']], 422);
+            return;
+        }
+
+        if (!$this->users->delete($id)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Uživatele se nepodařilo smazat.']], 422);
+            return;
+        }
+
+        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
     }
 
     public function suspendToggleSubmit(callable $redirect): void
@@ -144,6 +180,39 @@ final class AdminUserController extends BaseAdminController
         }
         $this->flash->add($ok ? 'success' : 'error', $ok ? 'Uživatel suspendován.' : 'Uživatele se nepodařilo suspendovat.');
         $redirect('admin/users');
+    }
+
+    public function suspendApiV1(callable $redirect, int $id): void
+    {
+        if (
+            !$this->guardAdmin($redirect)
+            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+        ) {
+            return;
+        }
+
+        $mode = (string)($_POST['mode'] ?? 'suspend');
+        if ($id <= 0) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID uživatele.']], 422);
+            return;
+        }
+
+        if ($mode === 'unsuspend') {
+            if (!$this->users->unsuspend($id)) {
+                $this->respondJson(['ok' => false, 'error' => ['code' => 'UNSUSPEND_FAILED', 'message' => 'Uživatele se nepodařilo odsuspendovat.']], 422);
+                return;
+            }
+
+            $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'suspend' => 0]]);
+            return;
+        }
+
+        if (!$this->users->suspend($id)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SUSPEND_FAILED', 'message' => 'Uživatele se nepodařilo suspendovat.']], 422);
+            return;
+        }
+
+        $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'suspend' => 1]]);
     }
 
     public function addForm(callable $redirect): void
@@ -244,6 +313,22 @@ final class AdminUserController extends BaseAdminController
             'is_admin' => (string)($row['role'] ?? '') === 'admin',
             'is_suspended' => $isSuspended,
         ];
+    }
+
+    private function resolveListQuery(): array
+    {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = (int)($_GET['per_page'] ?? 10);
+        $status = (string)($_GET['status'] ?? 'all');
+        $status = in_array($status, ['all', 'active', 'suspended'], true) ? $status : 'all';
+        $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
+        $query = trim((string)($_GET['q'] ?? ''));
+
+        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
+            $perPage = 10;
+        }
+
+        return [$page, $perPage, $status, $suspend, $query];
     }
 
 }
