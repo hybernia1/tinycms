@@ -5,18 +5,18 @@ namespace App\Service\Feature;
 
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
-use App\Service\Support\ColumnLimitValidator;
+use App\Service\Infra\Db\SchemaConstraintValidator;
 use InvalidArgumentException;
 
 final class UserService
 {
     private Query $query;
-    private ColumnLimitValidator $columnLimitValidator;
+    private SchemaConstraintValidator $columnLimitValidator;
 
     public function __construct()
     {
         $this->query = new Query(Connection::get());
-        $this->columnLimitValidator = new ColumnLimitValidator();
+        $this->columnLimitValidator = new SchemaConstraintValidator();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, ?int $suspend = null, string $search = ''): array

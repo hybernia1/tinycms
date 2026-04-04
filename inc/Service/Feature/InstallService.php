@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace App\Service\Feature;
 
-use App\Service\Support\ColumnLimitValidator;
+use App\Service\Infra\Db\SchemaConstraintValidator;
 use PDO;
 use PDOException;
 
 final class InstallService
 {
-    private ColumnLimitValidator $columnLimitValidator;
+    private SchemaConstraintValidator $columnLimitValidator;
 
-    public function __construct(?ColumnLimitValidator $columnLimitValidator = null)
+    public function __construct(?SchemaConstraintValidator $columnLimitValidator = null)
     {
-        $this->columnLimitValidator = $columnLimitValidator ?? new ColumnLimitValidator();
+        $this->columnLimitValidator = $columnLimitValidator ?? new SchemaConstraintValidator();
     }
 
     public function validateDatabaseInput(array $input): array

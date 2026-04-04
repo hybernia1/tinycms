@@ -97,7 +97,7 @@ class Query
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($data);
         } catch (PDOException $e) {
-            $this->throwIfDataTooLong($e);
+            $this->throwTranslatedDbError($e);
             throw $e;
         }
 
@@ -127,7 +127,7 @@ class Query
             $stmt->execute($data);
             return $stmt->rowCount();
         } catch (PDOException $e) {
-            $this->throwIfDataTooLong($e);
+            $this->throwTranslatedDbError($e);
             throw $e;
         }
     }
@@ -214,13 +214,25 @@ class Query
         return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $value) === 1;
     }
 
-    private function throwIfDataTooLong(PDOException $e): void
+    private function throwTranslatedDbError(PDOException $e): void
     {
-        $sqlState = (string)($e->errorInfo[0] ?? '');
+        $sqlState = (string)($e->errorInfo[0] ?? "");
         $driverCode = (int)($e->errorInfo[1] ?? 0);
 
-        if ($sqlState === '22001' || $driverCode === 1406) {
-            throw new InvalidArgumentException('Jedna nebo více hodnot je příliš dlouhá pro databázový sloupec.', 0, $e);
+        if ($sqlState === "22001" || $driverCode === 1406) {
+            throw new InvalidArgumentException("Jedna nebo více hodnot je příliš dlouhá pro databázový sloupec.", 0, $e);
+        }
+
+        if ($driverCode === 1048 || $driverCode === 1364) {
+            throw new InvalidArgumentException("Chybí povinná hodnota (NOT NULL).", 0, $e);
+        }
+
+        if ($driverCode === 1062) {
+            throw new InvalidArgumentException("Hodnota už existuje a musí být unikátní.", 0, $e);
+        }
+
+        if ($driverCode === 1452) {
+            throw new InvalidArgumentException("Neplatná vazba na související záznam (foreign key).", 0, $e);
         }
     }
 }

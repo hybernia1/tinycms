@@ -5,30 +5,30 @@ namespace App\Service\Feature;
 
 final class SchemaDefinition
 {
-    public static function stringLimits(): array
+    public static function columnRules(): array
     {
         return [
             'users' => [
-                'email' => 255,
-                'password' => 255,
-                'name' => 255,
-                'role' => 50,
+                'email' => ['max' => 255, 'nullable' => true],
+                'password' => ['max' => 255, 'nullable' => false],
+                'name' => ['max' => 255, 'nullable' => true],
+                'role' => ['max' => 50, 'nullable' => false, 'allowed' => ['admin', 'user']],
             ],
             'media' => [
-                'path' => 500,
-                'name' => 255,
-                'path_webp' => 500,
+                'path' => ['max' => 500, 'nullable' => true],
+                'name' => ['max' => 255, 'nullable' => true],
+                'path_webp' => ['max' => 500, 'nullable' => true],
             ],
             'content' => [
-                'status' => 50,
-                'excerpt' => 500,
-                'name' => 255,
+                'status' => ['max' => 50, 'nullable' => false],
+                'excerpt' => ['max' => 500, 'nullable' => true],
+                'name' => ['max' => 255, 'nullable' => true],
             ],
             'terms' => [
-                'name' => 255,
+                'name' => ['max' => 255, 'nullable' => false],
             ],
             'settings' => [
-                'key_name' => 100,
+                'key_name' => ['max' => 100, 'nullable' => false],
             ],
         ];
     }
