@@ -15,6 +15,17 @@
         return controls;
     }
 
+    function createImageSizeControls() {
+        var controls = document.createElement('div');
+        controls.className = 'image-size-controls';
+        controls.setAttribute('contenteditable', 'false');
+        controls.innerHTML = '<button type="button" class="btn btn-light btn-xs" data-image-size="100">100%</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-size="75">75%</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-size="50">50%</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-size="25">25%</button>';
+        return controls;
+    }
+
     function createImageResizeHandle() {
         var handle = document.createElement('span');
         handle.className = 'image-resize-handle';
@@ -42,6 +53,10 @@
 
         if (!block.querySelector('.image-resize-handle')) {
             block.appendChild(createImageResizeHandle());
+        }
+
+        if (!block.querySelector('.image-size-controls')) {
+            block.appendChild(createImageSizeControls());
         }
 
         var image = block.querySelector('img[data-media-id]');
@@ -76,7 +91,7 @@
 
     function serializeEditorHtml(editor) {
         var clone = editor.cloneNode(true);
-        clone.querySelectorAll('.image-controls, .image-resize-handle').forEach(function (node) {
+        clone.querySelectorAll('.image-controls, .image-size-controls, .image-resize-handle').forEach(function (node) {
             node.remove();
         });
         clone.querySelectorAll('.block.block-image').forEach(function (block) {
@@ -569,6 +584,24 @@
                     return;
                 }
                 applyImageAlignment(block, alignButton.getAttribute('data-image-align') || 'center');
+                sync(textarea, editor);
+                return;
+            }
+
+            var sizeButton = event.target.closest('[data-image-size]');
+            if (sizeButton) {
+                event.preventDefault();
+                var sizeBlock = sizeButton.closest('.block.block-image');
+                if (!sizeBlock) {
+                    return;
+                }
+                var size = Number(sizeButton.getAttribute('data-image-size') || '100');
+                var value = Math.max(25, Math.min(100, size));
+                sizeBlock.style.width = value + '%';
+                var sizeImage = sizeBlock.querySelector('img[data-media-id]');
+                if (sizeImage) {
+                    sizeImage.style.width = '100%';
+                }
                 sync(textarea, editor);
                 return;
             }
