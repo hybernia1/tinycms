@@ -41,6 +41,17 @@ final class AdminMediaController extends BaseAdminController
         }
 
         $pagination = $this->media->paginate($page, $perPage, $query);
+        if ($this->wantsJson()) {
+            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+            $this->jsonSuccess([
+                'items' => $items,
+                'page' => (int)($pagination['page'] ?? 1),
+                'per_page' => (int)($pagination['per_page'] ?? $perPage),
+                'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'query' => $query,
+            ]);
+            return;
+        }
         $this->pages->adminMediaList($pagination, self::PER_PAGE_ALLOWED, $query);
     }
 
@@ -195,6 +206,10 @@ final class AdminMediaController extends BaseAdminController
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Neplatné ID média.');
+                return;
+            }
             $this->flash->add('error', 'Neplatné ID média.');
             $redirect('admin/media');
             return;
@@ -202,18 +217,30 @@ final class AdminMediaController extends BaseAdminController
 
         $item = $this->media->find($id);
         if ($item === null) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Médium nenalezeno.');
+                return;
+            }
             $this->flash->add('info', 'Médium nenalezeno.');
             $redirect('admin/media');
             return;
         }
 
         if (!$this->media->delete($id)) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Médium se nepodařilo smazat.');
+                return;
+            }
             $this->flash->add('error', 'Médium se nepodařilo smazat.');
             $redirect('admin/media');
             return;
         }
 
         $this->upload->deleteMediaFiles($item);
+        if ($this->wantsJson()) {
+            $this->jsonSuccess(['id' => $id]);
+            return;
+        }
         $this->flash->add('success', 'Médium smazáno.');
         $redirect('admin/media');
     }
@@ -226,5 +253,36 @@ final class AdminMediaController extends BaseAdminController
     private function hasUpload(string $field): bool
     {
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    }
+
+    private function mapListItem(array $row): array
+    {
+        return [
+            'id' => (int)($row['id'] ?? 0),
+            'name' => (string)($row['name'] ?? ''),
+            'path' => (string)($row['path'] ?? ''),
+            'path_webp' => (string)($row['path_webp'] ?? ''),
+            'author_name' => (string)($row['author_name'] ?? '—'),
+            'created' => (string)($row['created'] ?? ''),
+        ];
+    }
+
+    private function wantsJson(): bool
+    {
+        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
+        return str_contains($accept, 'application/json');
+    }
+
+    private function jsonError(string $message): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(422);
+        echo json_encode(['success' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function jsonSuccess(array $payload): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(array_merge(['success' => true], $payload), JSON_UNESCAPED_UNICODE);
     }
 }
