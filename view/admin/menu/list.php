@@ -2,9 +2,9 @@
 $items = $items ?? [];
 $byParent = [];
 
-foreach ($items as $item) {
-    $parentId = (int)($item['parent_id'] ?? 0);
-    $byParent[$parentId][] = $item;
+foreach ($items as $treeItem) {
+    $parentId = (int)($treeItem['parent_id'] ?? 0);
+    $byParent[$parentId][] = $treeItem;
 }
 
 $renderTree = static function (int $parentId, callable $renderTree) use (&$byParent, $url, $icon, $csrfField): string {
@@ -21,7 +21,7 @@ $renderTree = static function (int $parentId, callable $renderTree) use (&$byPar
         $name = htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8');
         $urlText = htmlspecialchars((string)($row['url'] ?? '—'), ENT_QUOTES, 'UTF-8');
         $contentText = htmlspecialchars((string)($row['content_name'] ?? '—'), ENT_QUOTES, 'UTF-8');
-        $editUrl = htmlspecialchars($url('admin/menu/edit?id=' . $id), ENT_QUOTES, 'UTF-8');
+        $editUrl = htmlspecialchars($url('admin/menu?edit=' . $id), ENT_QUOTES, 'UTF-8');
         $deleteAction = htmlspecialchars($url('admin/menu/delete'), ENT_QUOTES, 'UTF-8');
 
         $html .= '<li class="menu-tree-item" data-menu-item data-menu-id="' . $id . '">';
@@ -50,8 +50,16 @@ $renderTree = static function (int $parentId, callable $renderTree) use (&$byPar
     $html .= '</ul>';
     return $html;
 };
+
+$mode = (string)($mode ?? 'add');
+$item = $item ?? ['id' => null, 'parent_id' => null, 'content_id' => null, 'name' => '', 'url' => '', 'position' => 0];
+$errors = $errors ?? [];
+$parentOptions = $parentOptions ?? [];
+$contentOptions = $contentOptions ?? [];
+$isEdit = $mode === 'edit' && (int)($item['id'] ?? 0) > 0;
+$formAction = $isEdit ? $url('admin/menu/edit?id=' . (int)$item['id']) : $url('admin/menu/add');
 ?>
-<div class="menu-tree-layout" data-menu-tree>
+<div class="menu-tree-layout menu-tree-grid" data-menu-tree>
     <div class="card p-3">
         <div class="d-flex justify-between align-center mb-3">
             <strong>Struktura navigace</strong>
@@ -65,10 +73,65 @@ $renderTree = static function (int $parentId, callable $renderTree) use (&$byPar
             </div>
             <div class="d-flex gap-2 mt-3">
                 <button class="btn btn-primary" type="submit">Uložit pořadí</button>
-                <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/menu/add'), ENT_QUOTES, 'UTF-8') ?>">Přidat položku</a>
             </div>
         </form>
     </div>
+
+    <form method="post" action="<?= htmlspecialchars($formAction, ENT_QUOTES, 'UTF-8') ?>" class="card p-3" id="menu-form">
+        <?= $csrfField() ?>
+        <div class="d-flex justify-between align-center mb-2">
+            <strong><?= $isEdit ? 'Upravit položku' : 'Nová položka' ?></strong>
+            <?php if ($isEdit): ?>
+                <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/menu'), ENT_QUOTES, 'UTF-8') ?>">Nová</a>
+            <?php endif; ?>
+        </div>
+
+        <div class="mb-3">
+            <label>Název</label>
+            <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+            <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+        </div>
+
+        <div class="mb-3">
+            <label>Nadřazená položka</label>
+            <select name="parent_id">
+                <option value="">— žádná —</option>
+                <?php foreach ($parentOptions as $parent): ?>
+                    <?php $parentId = (int)($parent['id'] ?? 0); ?>
+                    <option value="<?= $parentId ?>" <?= (int)($item['parent_id'] ?? 0) === $parentId ? 'selected' : '' ?>>
+                        <?= htmlspecialchars((string)($parent['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php if (!empty($errors['parent_id'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['parent_id'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+        </div>
+
+        <div class="mb-3">
+            <label>Navázaný obsah</label>
+            <select name="content_id">
+                <option value="">— žádný —</option>
+                <?php foreach ($contentOptions as $content): ?>
+                    <?php $contentId = (int)($content['id'] ?? 0); ?>
+                    <option value="<?= $contentId ?>" <?= (int)($item['content_id'] ?? 0) === $contentId ? 'selected' : '' ?>>
+                        <?= htmlspecialchars((string)($content['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php if (!empty($errors['content_id'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['content_id'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+        </div>
+
+        <div class="mb-3">
+            <label>URL</label>
+            <input type="text" name="url" value="<?= htmlspecialchars((string)($item['url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="/kontakt nebo https://...">
+        </div>
+
+        <div class="mb-3">
+            <label>Pozice</label>
+            <input type="number" name="position" value="<?= (int)($item['position'] ?? 0) ?>" step="1">
+        </div>
+
+        <button class="btn btn-primary" type="submit"><?= $isEdit ? 'Uložit změny' : 'Přidat položku' ?></button>
+    </form>
 </div>
 
 <div class="modal-overlay" data-modal id="menu-delete-modal">

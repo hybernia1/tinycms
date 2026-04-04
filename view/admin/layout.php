@@ -92,7 +92,7 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
                 <span>Přidat štítek</span>
             </a>
             <?php elseif ($isMenuList): ?>
-            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/menu/add'), ENT_QUOTES, 'UTF-8') ?>">
+            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/menu#menu-form'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span>Přidat položku</span>
             </a>

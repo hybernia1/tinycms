@@ -155,25 +155,17 @@ final class PageView
     }
 
 
-    public function adminMenuList(array $items): void
+    public function adminMenuList(array $items, string $mode, array $item, array $errors, array $parentOptions, array $contentOptions): void
     {
         $this->view->render('admin/layout', 'admin/menu/list', [
             'items' => $items,
-            'adminMenu' => $this->adminMenu(),
-            'pageTitle' => 'Navigace',
-        ]);
-    }
-
-    public function adminMenuForm(string $mode, array $item, array $errors, array $parentOptions, array $contentOptions): void
-    {
-        $this->view->render('admin/layout', 'admin/menu/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
             'parentOptions' => $parentOptions,
             'contentOptions' => $contentOptions,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? 'Přidat položku navigace' : 'Upravit položku navigace',
+            'pageTitle' => 'Navigace',
         ]);
     }
 

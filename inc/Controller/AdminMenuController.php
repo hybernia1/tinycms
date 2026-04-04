@@ -29,18 +29,33 @@ final class AdminMenuController extends BaseAdminController
             return;
         }
 
-        $this->pages->adminMenuList($this->menu->all());
+        $editId = (int)($_GET['edit'] ?? 0);
+        $mode = $editId > 0 ? 'edit' : 'add';
+        $fallback = ['id' => null, 'parent_id' => null, 'content_id' => null, 'name' => '', 'url' => '', 'position' => 0];
+        $baseItem = $mode === 'edit' ? ($this->menu->find($editId) ?? $fallback) : $fallback;
+        $state = $this->consumeFormState(self::FORM_STATE_KEY, $mode, $mode === 'edit' ? $editId : null);
+        $item = $state['data'] ?? $baseItem;
+
+        if ($mode === 'edit' && (int)($baseItem['id'] ?? 0) <= 0) {
+            $this->flash->add('info', 'Položka navigace nenalezena.');
+            $redirect('admin/menu');
+            return;
+        }
+
+        $currentId = $mode === 'edit' ? (int)($item['id'] ?? 0) : null;
+        $this->pages->adminMenuList(
+            $this->menu->all(),
+            $mode,
+            $item,
+            $state['errors'] ?? [],
+            $this->menu->options($currentId),
+            $this->menu->contentOptions(),
+        );
     }
 
     public function addForm(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
-            return;
-        }
-
-        $fallback = ['id' => null, 'parent_id' => null, 'content_id' => null, 'name' => '', 'url' => '', 'position' => 0];
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
-        $this->pages->adminMenuForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->menu->options(), $this->menu->contentOptions());
+        $redirect('admin/menu');
     }
 
     public function addSubmit(callable $redirect): void
@@ -54,34 +69,20 @@ final class AdminMenuController extends BaseAdminController
 
         $result = $this->menu->save($_POST);
         if (($result['success'] ?? false) === true) {
-            $newId = (int)($result['id'] ?? 0);
             $this->flash->add('success', 'Položka navigace vytvořena.');
-            $redirect($newId > 0 ? $this->editPath($newId) : 'admin/menu');
+            $redirect('admin/menu');
             return;
         }
 
         $this->flash->add('error', 'Nepodařilo se uložit položku navigace.');
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
-        $redirect('admin/menu/add');
+        $redirect('admin/menu');
     }
 
     public function editForm(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
-            return;
-        }
-
         $id = (int)($_GET['id'] ?? 0);
-        $item = $this->menu->find($id);
-
-        if ($item === null) {
-            $this->flash->add('info', 'Položka navigace nenalezena.');
-            $redirect('admin/menu');
-            return;
-        }
-
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
-        $this->pages->adminMenuForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->menu->options($id), $this->menu->contentOptions());
+        $redirect($id > 0 ? 'admin/menu?edit=' . $id : 'admin/menu');
     }
 
     public function editSubmit(callable $redirect): void
@@ -103,15 +104,14 @@ final class AdminMenuController extends BaseAdminController
         $result = $this->menu->save($_POST, $id);
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', 'Položka navigace upravena.');
-            $redirect($this->editPath($id));
+            $redirect('admin/menu?edit=' . $id);
             return;
         }
 
         $this->flash->add('error', 'Nepodařilo se upravit položku navigace.');
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect($this->editPath($id));
+        $redirect('admin/menu?edit=' . $id);
     }
-
 
     public function reorderSubmit(callable $redirect): void
     {
@@ -150,10 +150,5 @@ final class AdminMenuController extends BaseAdminController
         $ok = $this->menu->delete($id);
         $this->flash->add($ok ? 'success' : 'error', $ok ? 'Položka navigace smazána.' : 'Položku navigace se nepodařilo smazat.');
         $redirect('admin/menu');
-    }
-
-    private function editPath(int $id): string
-    {
-        return 'admin/menu/edit?id=' . $id;
     }
 }

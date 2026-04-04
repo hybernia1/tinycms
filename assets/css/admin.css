@@ -525,3 +525,16 @@ body {
 .menu-tree-item.dragging > .menu-tree-card {
     opacity: .45;
 }
+
+
+.menu-tree-grid {
+    display: grid;
+    gap: var(--space-3);
+}
+
+@media (min-width: 1100px) {
+    .menu-tree-grid {
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+        align-items: start;
+    }
+}
