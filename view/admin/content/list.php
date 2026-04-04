@@ -11,8 +11,9 @@ foreach ($availableStatuses as $statusValue) {
 }
 $csrfMarkup = $csrfField();
 ?>
-<div class="d-flex justify-between align-center mb-3 admin-list-toolbar" data-content-list data-endpoint="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
+<div data-content-list data-endpoint="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
     <div data-content-csrf class="d-none"><?= $csrfMarkup ?></div>
+<div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <nav class="filter-nav">
         <?php foreach ($statusLinks as $key => $label): ?>
             <a class="filter-link<?= $status === $key ? ' active' : '' ?>" data-content-status="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>" href="<?= htmlspecialchars($url('admin/content?status=' . urlencode($key) . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
@@ -113,4 +114,5 @@ $csrfMarkup = $csrfField();
             <button class="btn btn-primary" type="button" data-content-delete-confirm>Potvrdit</button>
         </div>
     </div>
+</div>
 </div>

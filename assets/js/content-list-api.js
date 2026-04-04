@@ -7,10 +7,10 @@ if (contentListRoot) {
     const filterLinks = Array.from(contentListRoot.querySelectorAll('[data-content-status]'));
     const searchField = contentListRoot.querySelector('[data-content-search]');
     const perPageField = contentListRoot.querySelector('[data-content-per-page]');
-    const body = document.querySelector('[data-content-list-body]');
-    const prevLink = document.querySelector('[data-content-prev]');
-    const nextLink = document.querySelector('[data-content-next]');
-    const deleteModal = document.querySelector('[data-content-delete-modal]');
+    const body = contentListRoot.querySelector('[data-content-list-body]');
+    const prevLink = contentListRoot.querySelector('[data-content-prev]');
+    const nextLink = contentListRoot.querySelector('[data-content-next]');
+    const deleteModal = contentListRoot.querySelector('[data-content-delete-modal]');
     const deleteCancel = deleteModal?.querySelector('[data-content-delete-cancel]');
     const deleteConfirm = deleteModal?.querySelector('[data-content-delete-confirm]');
 
