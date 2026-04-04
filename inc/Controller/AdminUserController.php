@@ -246,22 +246,4 @@ final class AdminUserController extends BaseAdminController
         ];
     }
 
-    private function wantsJson(): bool
-    {
-        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
-        return str_contains($accept, 'application/json');
-    }
-
-    private function jsonError(string $message): void
-    {
-        header('Content-Type: application/json; charset=utf-8');
-        http_response_code(422);
-        echo json_encode(['success' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
-    }
-
-    private function jsonSuccess(array $payload): void
-    {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(array_merge(['success' => true], $payload), JSON_UNESCAPED_UNICODE);
-    }
 }

@@ -407,14 +407,13 @@ final class AdminContentController extends BaseAdminController
             }
         }
 
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode([
+        $this->respondJson([
             'items' => $items,
             'page' => (int)($pagination['page'] ?? 1),
             'per_page' => (int)($pagination['per_page'] ?? $perPage),
             'total_pages' => (int)($pagination['total_pages'] ?? 1),
             'query' => $query,
-        ], JSON_UNESCAPED_UNICODE);
+        ]);
     }
 
     public function mediaLibraryDeleteSubmit(callable $redirect): void
@@ -638,22 +637,4 @@ final class AdminContentController extends BaseAdminController
         return false;
     }
 
-    private function jsonError(string $message): void
-    {
-        header('Content-Type: application/json; charset=utf-8');
-        http_response_code(422);
-        echo json_encode(['success' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
-    }
-
-    private function jsonSuccess(array $payload): void
-    {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(array_merge(['success' => true], $payload), JSON_UNESCAPED_UNICODE);
-    }
-
-    private function wantsJson(): bool
-    {
-        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
-        return str_contains($accept, 'application/json');
-    }
 }
