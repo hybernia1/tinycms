@@ -11,9 +11,15 @@ if (modal && openTrigger) {
     const uploadForm = modal.querySelector('[data-media-library-upload-form]');
     const uploadButton = modal.querySelector('[data-media-library-upload-button]');
     const uploadLabel = modal.querySelector('[data-media-library-upload-label]');
+    const detachButton = document.querySelector('[data-media-library-detach]');
+    const detachWrap = document.querySelector('[data-media-library-detach-wrap]');
+    const detachForm = document.querySelector('[data-media-library-detach-form]');
     const selectForm = document.querySelector('[data-media-library-select-form]');
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
     const deleteMediaIdField = document.querySelector('[data-media-library-delete-media-id]');
+    const deleteForm = document.getElementById('media-library-delete-form');
+    const deleteConfirmButton = document.querySelector('[data-media-library-delete-confirm]');
+    const deleteConfirmModal = document.getElementById('media-library-delete-modal');
     const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
     const detailNameInput = modal.querySelector('[data-media-library-detail-name-input]');
     const detailPath = modal.querySelector('[data-media-library-detail-path]');
@@ -28,7 +34,7 @@ if (modal && openTrigger) {
 
     const endpoint = openTrigger.getAttribute('data-media-library-endpoint') || '';
     const baseUrl = openTrigger.getAttribute('data-media-base-url') || '';
-    const currentMediaId = Number(openTrigger.getAttribute('data-current-media-id') || '0');
+    let currentMediaId = Number(openTrigger.getAttribute('data-current-media-id') || '0');
     let page = 1;
     let totalPages = 1;
     let query = '';
@@ -38,6 +44,14 @@ if (modal && openTrigger) {
     const setStatus = (message) => {
         if (status) {
             status.textContent = message;
+        }
+    };
+
+    const setTriggerEmpty = () => {
+        openTrigger.classList.add('empty');
+        openTrigger.innerHTML = '<span>Zvolit obrázek</span>';
+        if (detachWrap) {
+            detachWrap.remove();
         }
     };
 
@@ -391,6 +405,61 @@ if (modal && openTrigger) {
             page = 1;
             await load().catch(() => null);
             setStatus('Soubor nahrán.');
+        });
+    }
+
+    if (deleteConfirmButton && deleteForm && deleteMediaIdField) {
+        deleteConfirmButton.addEventListener('click', async () => {
+            if (!selectedMedia) {
+                return;
+            }
+
+            const formData = new FormData(deleteForm);
+            formData.set('media_id', String(selectedMedia.id));
+            const response = await fetch(deleteForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: { Accept: 'application/json' },
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || !data.success) {
+                setStatus(data.message || 'Mazání se nepodařilo.');
+                return;
+            }
+
+            if (currentMediaId === selectedMedia.id) {
+                currentMediaId = 0;
+                setTriggerEmpty();
+            }
+
+            selectedMedia = null;
+            renderSelected();
+            await load().catch(() => null);
+            if (deleteConfirmModal) {
+                deleteConfirmModal.classList.remove('open');
+            }
+            setStatus('Médium smazáno.');
+        });
+    }
+
+    if (detachButton && detachForm) {
+        detachButton.addEventListener('click', async () => {
+            const response = await fetch(detachForm.action, {
+                method: 'POST',
+                body: new FormData(detachForm),
+                headers: { Accept: 'application/json' },
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || !data.success) {
+                setStatus(data.message || 'Odpojení se nepodařilo.');
+                return;
+            }
+
+            currentMediaId = 0;
+            setTriggerEmpty();
+            setStatus('Náhled odpojen.');
         });
     }
 }

@@ -92,9 +92,8 @@ $contentId = (int)($item['id'] ?? 0);
                             <?php endif; ?>
                         </button>
                         <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
-                            <div class="mt-2 d-flex gap-2">
-                                <input type="hidden" name="id" value="<?= (int)($item['id'] ?? 0) ?>">
-                                <button class="btn btn-light" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/detach'), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Odpojit</button>
+                            <div class="mt-2 d-flex gap-2" data-media-library-detach-wrap>
+                                <button class="btn btn-light" type="button" data-media-library-detach>Odpojit</button>
                             </div>
                         <?php endif; ?>
                     <?php endif; ?>
@@ -179,6 +178,10 @@ $contentId = (int)($item['id'] ?? 0);
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-delete-media-id>
 </form>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/thumbnail/detach'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-detach-form>
+    <?= $csrfField() ?>
+    <input type="hidden" name="id" value="<?= $contentId ?>">
+</form>
 <form method="post" action="<?= htmlspecialchars($url('admin/content/media-library/rename'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-rename-form>
     <?= $csrfField() ?>
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
@@ -190,7 +193,7 @@ $contentId = (int)($item['id'] ?? 0);
         <p data-modal-text>Skutečně smazat tento obrázek?</p>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="media-library-delete-form">Potvrdit</button>
+            <button class="btn btn-primary" type="button" data-media-library-delete-confirm>Potvrdit</button>
         </div>
     </div>
 </div>

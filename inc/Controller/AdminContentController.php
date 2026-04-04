@@ -250,12 +250,24 @@ final class AdminContentController extends BaseAdminController
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0 || $this->content->find($id) === null) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Obsah nenalezen.');
+                return;
+            }
             $this->flash->add('error', 'Obsah nenalezen.');
             $redirect('admin/content');
             return;
         }
 
         $ok = $this->content->setThumbnail($id, null);
+        if ($this->wantsJson()) {
+            if ($ok) {
+                $this->jsonSuccess(['id' => $id]);
+                return;
+            }
+            $this->jsonError('Náhled se nepodařilo odpojit.');
+            return;
+        }
         $this->flash->add($ok ? 'success' : 'error', $ok ? 'Náhled byl odpojen.' : 'Náhled se nepodařilo odpojit.');
         $redirect($this->editPath($id));
     }
@@ -375,12 +387,20 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($contentId);
 
         if ($item === null) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Obsah nenalezen.');
+                return;
+            }
             $this->flash->add('error', 'Obsah nenalezen.');
             $redirect('admin/content');
             return;
         }
 
         if ($mediaId <= 0) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Médium nenalezeno.');
+                return;
+            }
             $this->flash->add('error', 'Médium nenalezeno.');
             $redirect($this->editPath($contentId));
             return;
@@ -388,6 +408,10 @@ final class AdminContentController extends BaseAdminController
 
         $media = $this->media->find($mediaId);
         if ($media === null || !$this->media->delete($mediaId)) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Médium se nepodařilo smazat.');
+                return;
+            }
             $this->flash->add('error', 'Médium se nepodařilo smazat.');
             $redirect($this->editPath($contentId));
             return;
@@ -398,6 +422,10 @@ final class AdminContentController extends BaseAdminController
         }
 
         $this->upload->deleteMediaFiles($media);
+        if ($this->wantsJson()) {
+            $this->jsonSuccess(['id' => $mediaId, 'content_id' => $contentId]);
+            return;
+        }
         $this->flash->add('success', 'Médium bylo smazáno.');
         $redirect($this->editPath($contentId));
     }
@@ -563,5 +591,11 @@ final class AdminContentController extends BaseAdminController
     {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(array_merge(['success' => true], $payload), JSON_UNESCAPED_UNICODE);
+    }
+
+    private function wantsJson(): bool
+    {
+        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
+        return str_contains($accept, 'application/json');
     }
 }
