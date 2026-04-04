@@ -434,12 +434,16 @@ body {
     cursor: pointer;
 }
 
-.tag-picker-input {
+.tag-picker .tag-picker-input {
     border: 0;
+    border-style: none;
+    background: transparent;
     outline: 0;
     padding: 4px 0;
     flex: 1 1 120px;
     min-width: 120px;
+    width: auto;
+    min-height: 0;
 }
 
 .tag-picker-suggestions {
