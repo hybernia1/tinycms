@@ -103,6 +103,8 @@
     min-height: 18rem;
     padding: var(--space-3);
     outline: none;
+    overflow: auto;
+    display: flow-root;
 }
 
 .wysiwyg-editor:empty::before {
