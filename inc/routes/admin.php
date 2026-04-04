@@ -61,6 +61,14 @@ $router->post('admin/api/v1/content/{id}/status', static function (array $params
     $adminContent->statusApiV1($redirect, (int)($params['id'] ?? 0));
 });
 
+$router->post('admin/api/v1/content/draft/init', static function () use ($adminContent, $redirect): void {
+    $adminContent->draftInitApiV1($redirect);
+});
+
+$router->post('admin/api/v1/content/autosave', static function () use ($adminContent, $redirect): void {
+    $adminContent->autosaveApiV1($redirect);
+});
+
 $router->get('admin/content/add', static function () use ($adminContent, $redirect): void {
     $adminContent->addForm($redirect);
 });
