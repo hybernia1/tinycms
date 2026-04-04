@@ -89,6 +89,28 @@
         textarea.value = serializeEditorHtml(editor);
     }
 
+    function createImageBreakParagraph() {
+        var paragraph = document.createElement('p');
+        paragraph.className = 'block-image-break';
+        paragraph.innerHTML = '<br>';
+        return paragraph;
+    }
+
+    function placeCaret(paragraph) {
+        if (!paragraph) {
+            return;
+        }
+        var selection = window.getSelection();
+        if (!selection) {
+            return;
+        }
+        var range = document.createRange();
+        range.selectNodeContents(paragraph);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
     function normalizeBlocks(editor) {
         var nodes = Array.prototype.slice.call(editor.childNodes);
         nodes.forEach(function (node) {
@@ -565,6 +587,21 @@
         });
 
         editor.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                var selectedImageBlock = editor.querySelector('.block.block-image.is-selected');
+                if (selectedImageBlock) {
+                    event.preventDefault();
+                    var next = selectedImageBlock.nextElementSibling;
+                    var target = next && next.classList.contains('block-image-break') ? next : createImageBreakParagraph();
+                    if (target !== next) {
+                        selectedImageBlock.parentNode.insertBefore(target, selectedImageBlock.nextSibling);
+                    }
+                    placeCaret(target);
+                    sync(textarea, editor);
+                    return;
+                }
+            }
+
             if (event.key === 'Enter' && !event.shiftKey) {
                 var wasBold = document.queryCommandState('bold');
                 var wasItalic = document.queryCommandState('italic');

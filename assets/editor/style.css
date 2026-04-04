@@ -127,6 +127,11 @@
     margin: 0;
 }
 
+.wysiwyg-editor p.block-image-break {
+    clear: both;
+    min-height: 1.25rem;
+}
+
 .wysiwyg-editor ul,
 .wysiwyg-editor ol {
     padding-left: 1.25rem;
