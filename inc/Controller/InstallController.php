@@ -6,8 +6,6 @@ namespace App\Controller;
 use App\Service\Feature\InstallService;
 use App\Service\Support\CsrfService;
 use App\View\View;
-use PDO;
-use PDOException;
 
 final class InstallController
 {
@@ -109,17 +107,10 @@ final class InstallController
 
         $_SESSION['install']['admin'] = $result['values'];
 
-        $install = $this->installService->install((array)$_SESSION['install']['db']);
+        $install = $this->installService->install((array)$_SESSION['install']['db'], (array)$_SESSION['install']['admin']);
 
         if (($install['success'] ?? false) !== true) {
             $_SESSION['install']['message'] = (string)($install['message'] ?? 'Instalace selhala.');
-            $redirect('install/admin');
-        }
-
-        $adminCreated = $this->createAdmin((array)$_SESSION['install']['db'], (array)$_SESSION['install']['admin']);
-
-        if ($adminCreated !== null) {
-            $_SESSION['install']['message'] = $adminCreated;
             $redirect('install/admin');
         }
 
@@ -138,38 +129,5 @@ final class InstallController
         $this->view->render('front/layout', 'front/install/done', [
             'pageTitle' => 'Instalace dokončena',
         ]);
-    }
-
-
-    private function createAdmin(array $db, array $admin): ?string
-    {
-        try {
-            $dsn = 'mysql:host=' . $db['db_host'] . ';dbname=' . $db['db_name'] . ';charset=utf8mb4';
-            $pdo = new PDO($dsn, (string)$db['db_user'], (string)$db['db_pass']);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-            $exists = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
-            $exists->execute(['email' => $admin['email']]);
-
-            if ($exists->fetchColumn() !== false) {
-                return 'Tento e-mail už existuje.';
-            }
-
-            $insert = $pdo->prepare('INSERT INTO users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)');
-            $now = date('Y-m-d H:i:s');
-            $insert->execute([
-                'name' => (string)$admin['name'],
-                'email' => (string)$admin['email'],
-                'password' => password_hash((string)$admin['password'], PASSWORD_DEFAULT),
-                'role' => 'admin',
-                'suspend' => 0,
-                'created' => $now,
-                'updated' => $now,
-            ]);
-
-            return null;
-        } catch (PDOException $e) {
-            return 'Nepodařilo se vytvořit admin účet.';
-        }
     }
 }

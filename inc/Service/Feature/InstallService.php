@@ -9,11 +9,11 @@ use PDOException;
 
 final class InstallService
 {
-    private SchemaConstraintValidator $columnLimitValidator;
+    private SchemaConstraintValidator $schemaValidator;
 
-    public function __construct(?SchemaConstraintValidator $columnLimitValidator = null)
+    public function __construct(?SchemaConstraintValidator $schemaValidator = null)
     {
-        $this->columnLimitValidator = $columnLimitValidator ?? new SchemaConstraintValidator();
+        $this->schemaValidator = $schemaValidator ?? new SchemaConstraintValidator();
     }
 
     public function validateDatabaseInput(array $input): array
@@ -79,7 +79,7 @@ final class InstallService
             $errors['password'] = 'Heslo musí mít alespoň 8 znaků.';
         }
 
-        $lengthErrors = $this->columnLimitValidator->validate('users', [
+        $lengthErrors = $this->schemaValidator->validate('users', [
             'name' => $name,
             'email' => $email,
             'password' => $password,
@@ -105,16 +105,32 @@ final class InstallService
         ];
     }
 
-    public function install(array $db): array
+    public function install(array $db, array $admin): array
     {
         try {
             $pdo = $this->connect($db);
-            $this->createSchema($pdo);
-            $this->writeConfig($db);
-            return ['success' => true, 'message' => 'Instalace proběhla úspěšně.'];
-        } catch (\Throwable $e) {
-            return ['success' => false, 'message' => 'Instalace selhala. Zkontrolujte údaje a oprávnění.'];
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => 'Nelze se připojit k databázi.'];
         }
+
+        try {
+            $this->createSchema($pdo);
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => 'Nepodařilo se vytvořit databázové tabulky.'];
+        }
+
+        $adminResult = $this->createAdmin($pdo, $admin);
+        if ($adminResult !== null) {
+            return ['success' => false, 'message' => $adminResult];
+        }
+
+        try {
+            $this->writeConfig($db);
+        } catch (\RuntimeException $e) {
+            return ['success' => false, 'message' => 'Nepodařilo se vytvořit config.php. Zkontrolujte oprávnění zápisu.'];
+        }
+
+        return ['success' => true, 'message' => 'Instalace proběhla úspěšně.'];
     }
 
     private function connect(array $db): PDO
@@ -123,6 +139,39 @@ final class InstallService
         $pdo = new PDO($dsn, (string)$db['db_user'], (string)$db['db_pass']);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
+    }
+
+    private function createAdmin(PDO $pdo, array $admin): ?string
+    {
+        try {
+            $exists = $pdo->prepare('SELECT id, role FROM users WHERE email = :email LIMIT 1');
+            $exists->execute(['email' => (string)$admin['email']]);
+            $row = $exists->fetch(PDO::FETCH_ASSOC);
+
+            if (is_array($row)) {
+                if ((string)($row['role'] ?? '') === 'admin') {
+                    return null;
+                }
+
+                return 'Tento e-mail už existuje pod jinou rolí.';
+            }
+
+            $insert = $pdo->prepare('INSERT INTO users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)');
+            $now = date('Y-m-d H:i:s');
+            $insert->execute([
+                'name' => (string)$admin['name'],
+                'email' => (string)$admin['email'],
+                'password' => password_hash((string)$admin['password'], PASSWORD_DEFAULT),
+                'role' => 'admin',
+                'suspend' => 0,
+                'created' => $now,
+                'updated' => $now,
+            ]);
+
+            return null;
+        } catch (PDOException $e) {
+            return 'Nepodařilo se vytvořit admin účet.';
+        }
     }
 
     private function writeConfig(array $db): void
