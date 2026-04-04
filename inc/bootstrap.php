@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/autoload.php';
 use App\Controller\AdminController;
 use App\Controller\AdminContentController;
 use App\Controller\AdminMediaController;
+use App\Controller\AdminMenuController;
 use App\Controller\AdminSettingsController;
 use App\Controller\AdminTermController;
 use App\Controller\AdminUserController;
@@ -14,6 +15,7 @@ use App\Service\Auth\Auth;
 use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;
 use App\Service\Feature\MediaService;
+use App\Service\Feature\MenuService;
 use App\Service\Feature\UploadService;
 use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
@@ -43,6 +45,7 @@ $slugger = new SluggerService();
 $uploadService = new UploadService(dirname(__DIR__), $slugger);
 $settingsService = new SettingsService();
 $termService = new TermService();
+$menuService = new MenuService();
 $pageView = new PageView($view);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $slugger);
 $admin = new AdminController($pageView, $authService);
@@ -51,6 +54,7 @@ $adminContent = new AdminContentController($pageView, $authService, $contentServ
 $adminMedia = new AdminMediaController($pageView, $authService, $mediaService, $uploadService, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
 $adminTerms = new AdminTermController($pageView, $authService, $termService, $flash, $csrf);
+$adminMenu = new AdminMenuController($pageView, $authService, $menuService, $flash, $csrf);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
     header('Location: ' . $router->url($path), true, $permanent ? 301 : 302);

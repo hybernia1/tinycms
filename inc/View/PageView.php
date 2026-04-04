@@ -154,6 +154,29 @@ final class PageView
         ]);
     }
 
+
+    public function adminMenuList(array $items): void
+    {
+        $this->view->render('admin/layout', 'admin/menu/list', [
+            'items' => $items,
+            'adminMenu' => $this->adminMenu(),
+            'pageTitle' => 'Navigace',
+        ]);
+    }
+
+    public function adminMenuForm(string $mode, array $item, array $errors, array $parentOptions, array $contentOptions): void
+    {
+        $this->view->render('admin/layout', 'admin/menu/form', [
+            'mode' => $mode,
+            'item' => $item,
+            'errors' => $errors,
+            'parentOptions' => $parentOptions,
+            'contentOptions' => $contentOptions,
+            'adminMenu' => $this->adminMenu(),
+            'pageTitle' => $mode === 'add' ? 'Přidat položku navigace' : 'Upravit položku navigace',
+        ]);
+    }
+
     private function adminMenu(): array
     {
         return [
@@ -162,6 +185,7 @@ final class PageView
             ['label' => 'Obsah', 'url' => 'admin/content'],
             ['label' => 'Média', 'url' => 'admin/media'],
             ['label' => 'Štítky', 'url' => 'admin/terms'],
+            ['label' => 'Navigace', 'url' => 'admin/menu'],
             ['label' => 'Nastavení', 'url' => 'admin/settings'],
         ];
     }

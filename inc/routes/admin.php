@@ -157,6 +157,31 @@ $router->post('admin/media/edit', static function () use ($adminMedia, $redirect
     $adminMedia->editSubmit($redirect);
 });
 
+
+$router->get('admin/menu', static function () use ($adminMenu, $redirect): void {
+    $adminMenu->list($redirect);
+});
+
+$router->post('admin/menu/delete', static function () use ($adminMenu, $redirect): void {
+    $adminMenu->deleteSubmit($redirect);
+});
+
+$router->get('admin/menu/add', static function () use ($adminMenu, $redirect): void {
+    $adminMenu->addForm($redirect);
+});
+
+$router->post('admin/menu/add', static function () use ($adminMenu, $redirect): void {
+    $adminMenu->addSubmit($redirect);
+});
+
+$router->get('admin/menu/edit', static function () use ($adminMenu, $redirect): void {
+    $adminMenu->editForm($redirect);
+});
+
+$router->post('admin/menu/edit', static function () use ($adminMenu, $redirect): void {
+    $adminMenu->editSubmit($redirect);
+});
+
 $router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
     $adminSettings->form($redirect);
 });

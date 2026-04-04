@@ -6,6 +6,7 @@ $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
 $isTermsList = str_ends_with($currentPath, 'admin/terms');
+$isMenuList = str_ends_with($currentPath, 'admin/menu');
 $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: '';
 ?>
 <!doctype html>
@@ -88,6 +89,11 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span>Přidat štítek</span>
+            </a>
+            <?php elseif ($isMenuList): ?>
+            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/menu/add'), ENT_QUOTES, 'UTF-8') ?>">
+                <?= $icon('add') ?>
+                <span>Přidat položku</span>
             </a>
             <?php endif; ?>
         </div>
