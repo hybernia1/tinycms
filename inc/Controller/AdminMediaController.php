@@ -272,9 +272,14 @@ final class AdminMediaController extends BaseAdminController
     {
         $pathWebp = trim((string)($row['path_webp'] ?? ''));
         if ($pathWebp !== '') {
-            return (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
+            $preview = (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
+            return str_starts_with($preview, '/') ? $preview : '/' . ltrim($preview, '/');
         }
-        return trim((string)($row['path'] ?? ''));
+        $path = trim((string)($row['path'] ?? ''));
+        if ($path === '') {
+            return '';
+        }
+        return str_starts_with($path, '/') ? $path : '/' . ltrim($path, '/');
     }
 
     private function thumbnailSuffix(): string
