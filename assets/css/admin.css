@@ -3,6 +3,7 @@
     --sidebar-text: var(--color-inverse);
     --sidebar-link: #cbd5e1;
     --sidebar-link-active-bg: #1e293b;
+    --app-height: 100dvh;
 }
 
 html,
@@ -17,8 +18,7 @@ body {
 
 .admin-shell {
     height: 100vh;
-    height: 100svh;
-    height: 100dvh;
+    height: var(--app-height);
     display: flex;
     overflow: hidden;
 }
@@ -203,7 +203,7 @@ body {
 .media-library-modal-dialog {
     max-width: 960px;
     max-height: calc(100vh - var(--space-5) * 2);
-    max-height: calc(100dvh - var(--space-5) * 2);
+    max-height: calc(var(--app-height) - var(--space-5) * 2);
     margin: 0 auto;
     background: var(--color-surface);
     border: 1px solid var(--color-border-soft);
@@ -376,11 +376,14 @@ body {
 @media (max-width: 900px) {
     .admin-sidebar {
         height: 100vh;
-        height: 100svh;
-        height: 100dvh;
+        height: var(--app-height);
         transform: translateX(-100%);
         transition: transform 0.2s ease-in-out;
         z-index: 20;
+    }
+
+    .admin-header-spacer {
+        position: relative;
     }
 
     .admin-main {
