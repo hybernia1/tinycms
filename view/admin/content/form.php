@@ -117,10 +117,17 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="media-library-detail">
                 <div class="media-library-detail-preview" data-media-library-detail-preview></div>
                 <div class="media-library-detail-meta">
-                    <div><strong>Název:</strong> <span data-media-library-detail-name>—</span></div>
+                    <div>
+                        <label>Název</label>
+                        <div class="d-flex gap-2">
+                            <input type="text" value="" data-media-library-detail-name-input>
+                            <button class="btn btn-light" type="button" data-media-library-rename disabled>Uložit</button>
+                        </div>
+                    </div>
                     <div><strong>Cesta:</strong> <span data-media-library-detail-path>—</span></div>
                     <div><strong>Vytvořeno:</strong> <span data-media-library-detail-created>—</span></div>
                 </div>
+                <small class="text-muted" data-media-library-status></small>
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary" type="button" data-media-library-choose disabled>Zvolit</button>
                     <button
@@ -142,10 +149,14 @@ $contentId = (int)($item['id'] ?? 0);
                     <input type="search" name="q" placeholder="Hledat obrázek">
                     <button class="btn btn-light" type="submit">Hledat</button>
                 </form>
-                <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/thumbnail/upload?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
+                <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/media-library/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
                     <?= $csrfField() ?>
+                    <input type="hidden" name="content_id" value="<?= $contentId ?>">
                     <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
-                    <button class="btn btn-primary" type="submit">Nahrát nový</button>
+                    <button class="btn btn-primary" type="submit" data-media-library-upload-button>
+                        <span data-media-library-upload-label>Nahrát nový</span>
+                        <span class="media-library-loader d-none" data-media-library-upload-loader><?= $icon('loader') ?></span>
+                    </button>
                 </form>
                 <div class="media-library-grid" data-media-library-grid></div>
                 <div class="media-library-pagination">
@@ -166,6 +177,12 @@ $contentId = (int)($item['id'] ?? 0);
     <?= $csrfField() ?>
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-delete-media-id>
+</form>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/media-library/rename'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-rename-form>
+    <?= $csrfField() ?>
+    <input type="hidden" name="content_id" value="<?= $contentId ?>">
+    <input type="hidden" name="media_id" value="" data-media-library-rename-media-id>
+    <input type="hidden" name="name" value="" data-media-library-rename-name>
 </form>
 <div class="modal-overlay" data-modal id="media-library-delete-modal">
     <div class="modal">

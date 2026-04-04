@@ -8,15 +8,24 @@ if (modal && openTrigger) {
     const nextButton = modal.querySelector('[data-media-library-next]');
     const closeButtons = modal.querySelectorAll('[data-media-library-close]');
     const searchForm = modal.querySelector('[data-media-library-search]');
+    const uploadForm = modal.querySelector('[data-media-library-upload-form]');
+    const uploadButton = modal.querySelector('[data-media-library-upload-button]');
+    const uploadLabel = modal.querySelector('[data-media-library-upload-label]');
+    const uploadLoader = modal.querySelector('[data-media-library-upload-loader]');
     const selectForm = document.querySelector('[data-media-library-select-form]');
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
     const deleteMediaIdField = document.querySelector('[data-media-library-delete-media-id]');
     const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
-    const detailName = modal.querySelector('[data-media-library-detail-name]');
+    const detailNameInput = modal.querySelector('[data-media-library-detail-name-input]');
     const detailPath = modal.querySelector('[data-media-library-detail-path]');
     const detailCreated = modal.querySelector('[data-media-library-detail-created]');
     const chooseButton = modal.querySelector('[data-media-library-choose]');
     const deleteButton = modal.querySelector('[data-media-library-delete-open]');
+    const renameButton = modal.querySelector('[data-media-library-rename]');
+    const status = modal.querySelector('[data-media-library-status]');
+    const renameForm = document.querySelector('[data-media-library-rename-form]');
+    const renameMediaId = document.querySelector('[data-media-library-rename-media-id]');
+    const renameName = document.querySelector('[data-media-library-rename-name]');
 
     const endpoint = openTrigger.getAttribute('data-media-library-endpoint') || '';
     const baseUrl = openTrigger.getAttribute('data-media-base-url') || '';
@@ -24,6 +33,12 @@ if (modal && openTrigger) {
     let totalPages = 1;
     let query = '';
     let selectedMedia = null;
+
+    const setStatus = (message) => {
+        if (status) {
+            status.textContent = message;
+        }
+    };
 
     const absoluteUrl = (path) => {
         if (!path) {
@@ -98,8 +113,9 @@ if (modal && openTrigger) {
             }
         }
 
-        if (detailName) {
-            detailName.textContent = selectedMedia ? selectedMedia.name : '—';
+        if (detailNameInput) {
+            detailNameInput.value = selectedMedia ? selectedMedia.name : '';
+            detailNameInput.disabled = !selectedMedia;
         }
 
         if (detailPath) {
@@ -118,12 +134,20 @@ if (modal && openTrigger) {
             deleteButton.disabled = !selectedMedia;
         }
 
+        if (renameButton) {
+            renameButton.disabled = !selectedMedia;
+        }
+
         if (mediaIdField) {
             mediaIdField.value = selectedMedia ? String(selectedMedia.id) : '';
         }
 
         if (deleteMediaIdField) {
             deleteMediaIdField.value = selectedMedia ? String(selectedMedia.id) : '';
+        }
+
+        if (renameMediaId) {
+            renameMediaId.value = selectedMedia ? String(selectedMedia.id) : '';
         }
     };
 
@@ -173,6 +197,7 @@ if (modal && openTrigger) {
         modal.classList.add('open');
         page = 1;
         selectedMedia = null;
+        setStatus('');
         renderSelected();
         load().catch(() => {
             if (grid) {
@@ -245,6 +270,7 @@ if (modal && openTrigger) {
 
             grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
             target.classList.add('selected');
+            setStatus('');
             renderSelected();
         });
     }
@@ -257,6 +283,81 @@ if (modal && openTrigger) {
 
             mediaIdField.value = String(selectedMedia.id);
             selectForm.submit();
+        });
+    }
+
+    if (renameButton && renameForm && detailNameInput && renameName) {
+        renameButton.addEventListener('click', async () => {
+            if (!selectedMedia) {
+                return;
+            }
+
+            const value = detailNameInput.value.trim();
+            if (value === '') {
+                setStatus('Název nesmí být prázdný.');
+                return;
+            }
+
+            renameName.value = value;
+            const response = await fetch(renameForm.action, {
+                method: 'POST',
+                body: new FormData(renameForm),
+                headers: { Accept: 'application/json' },
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                setStatus(data.message || 'Název se nepodařilo uložit.');
+                return;
+            }
+
+            selectedMedia.name = value;
+            const selectedCard = grid ? grid.querySelector('.media-library-card.selected') : null;
+            if (selectedCard) {
+                selectedCard.dataset.mediaName = value;
+                const label = selectedCard.querySelector('span');
+                if (label) {
+                    label.textContent = value;
+                }
+            }
+
+            setStatus('Název uložen.');
+        });
+    }
+
+    if (uploadForm && uploadButton && uploadLabel && uploadLoader) {
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            setStatus('');
+
+            uploadButton.disabled = true;
+            uploadLoader.classList.remove('d-none');
+            uploadLabel.textContent = 'Nahrávám...';
+
+            const response = await fetch(uploadForm.action, {
+                method: 'POST',
+                body: new FormData(uploadForm),
+                headers: { Accept: 'application/json' },
+            });
+            const data = await response.json().catch(() => ({}));
+
+            uploadButton.disabled = false;
+            uploadLoader.classList.add('d-none');
+            uploadLabel.textContent = 'Nahrát nový';
+
+            if (!response.ok || !data.success) {
+                setStatus(data.message || 'Upload se nepodařil.');
+                return;
+            }
+
+            const fileInput = uploadForm.querySelector('input[type="file"]');
+            if (fileInput) {
+                fileInput.value = '';
+            }
+
+            page = 1;
+            await load().catch(() => null);
+            setStatus('Soubor nahrán.');
         });
     }
 }

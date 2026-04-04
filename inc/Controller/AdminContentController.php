@@ -403,6 +403,97 @@ final class AdminContentController extends BaseAdminController
         $redirect($this->editPath($contentId));
     }
 
+    public function mediaLibraryUploadSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $contentId = (int)($_POST['content_id'] ?? 0);
+        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+            $this->jsonError('Obsah nenalezen.');
+            return;
+        }
+
+        $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
+        if (($upload['success'] ?? false) !== true) {
+            $this->jsonError((string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.'));
+            return;
+        }
+
+        $author = (int)($this->authService->auth()->id() ?? 0);
+        $data = (array)($upload['data'] ?? []);
+        $mediaId = $this->media->create(
+            $author > 0 ? $author : null,
+            (string)($data['name'] ?? ''),
+            (string)($data['path'] ?? ''),
+            (string)($data['path_webp'] ?? '')
+        );
+
+        if ($mediaId <= 0) {
+            $this->upload->deleteMediaFiles($data);
+            $this->jsonError('Médium se nepodařilo uložit.');
+            return;
+        }
+
+        $media = $this->media->find($mediaId);
+        $previewPath = $media !== null ? $this->resolvePreviewPath($media) : (string)($data['path'] ?? '');
+        $this->jsonSuccess([
+            'id' => $mediaId,
+            'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
+            'preview_path' => $previewPath,
+            'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
+            'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
+        ]);
+    }
+
+    public function mediaLibraryRenameSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $contentId = (int)($_POST['content_id'] ?? 0);
+        $mediaId = (int)($_POST['media_id'] ?? 0);
+        $name = trim((string)($_POST['name'] ?? ''));
+
+        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+            $this->jsonError('Obsah nenalezen.');
+            return;
+        }
+
+        if ($mediaId <= 0 || $name === '') {
+            $this->jsonError('Neplatná data.');
+            return;
+        }
+
+        $media = $this->media->find($mediaId);
+        if ($media === null) {
+            $this->jsonError('Médium nenalezeno.');
+            return;
+        }
+
+        $result = $this->media->save([
+            'name' => $name,
+            'path' => (string)($media['path'] ?? ''),
+            'path_webp' => (string)($media['path_webp'] ?? ''),
+            'author' => (string)($media['author'] ?? ''),
+        ], $mediaId);
+
+        if (($result['success'] ?? false) !== true) {
+            $this->jsonError((string)($result['errors']['name'] ?? 'Název se nepodařilo uložit.'));
+            return;
+        }
+
+        $this->jsonSuccess(['id' => $mediaId, 'name' => $name]);
+    }
+
     private function editPath(int $id): string
     {
         return 'admin/content/edit?id=' . $id;
@@ -427,5 +518,18 @@ final class AdminContentController extends BaseAdminController
             }
         }
         return $suffix;
+    }
+
+    private function jsonError(string $message): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(422);
+        echo json_encode(['success' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function jsonSuccess(array $payload): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(array_merge(['success' => true], $payload), JSON_UNESCAPED_UNICODE);
     }
 }

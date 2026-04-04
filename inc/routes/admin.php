@@ -93,6 +93,14 @@ $router->post('admin/content/media-library/delete', static function () use ($adm
     $adminContent->mediaLibraryDeleteSubmit($redirect);
 });
 
+$router->post('admin/content/media-library/upload', static function () use ($adminContent, $redirect): void {
+    $adminContent->mediaLibraryUploadSubmit($redirect);
+});
+
+$router->post('admin/content/media-library/rename', static function () use ($adminContent, $redirect): void {
+    $adminContent->mediaLibraryRenameSubmit($redirect);
+});
+
 $router->get('admin/media', static function () use ($adminMedia, $redirect): void {
     $adminMedia->list($redirect);
 });
