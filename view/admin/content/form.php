@@ -214,7 +214,7 @@ $contentId = (int)($item['id'] ?? 0);
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-delete-media-id>
 </form>
-<form method="post" action="<?= htmlspecialchars($url('admin/content/thumbnail/detach'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-detach-form>
+<form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/thumbnail/detach'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-detach-form>
     <?= $csrfField() ?>
     <input type="hidden" name="id" value="<?= $contentId ?>">
 </form>

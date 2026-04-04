@@ -548,7 +548,7 @@ if (modal && openTrigger) {
                 body: new FormData(detachForm),
                 headers: { Accept: 'application/json' },
             });
-            const data = await response.json().catch(() => ({}));
+            const data = normalizePayload(await response.json().catch(() => ({})));
 
             if (!response.ok || !data.success) {
                 setStatus(data.message || 'Odpojení se nepodařilo.');

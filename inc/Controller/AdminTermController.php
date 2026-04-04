@@ -54,6 +54,34 @@ final class AdminTermController extends BaseAdminController
         $this->pages->adminTermList($pagination, self::PER_PAGE_ALLOWED, $query);
     }
 
+    public function listApiV1(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = (int)($_GET['per_page'] ?? 10);
+        $query = trim((string)($_GET['q'] ?? ''));
+        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
+            $perPage = 10;
+        }
+
+        $pagination = $this->terms->paginate($page, $perPage, $query);
+        $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => $items,
+            'meta' => [
+                'page' => (int)($pagination['page'] ?? 1),
+                'per_page' => (int)($pagination['per_page'] ?? $perPage),
+                'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'query' => $query,
+            ],
+        ]);
+    }
+
     public function suggest(callable $redirect): void
     {
         if (!$this->guardAdmin($redirect, false)) {
@@ -178,6 +206,28 @@ final class AdminTermController extends BaseAdminController
 
         $this->flash->add($ok ? 'success' : 'error', $ok ? 'Štítek smazán.' : 'Štítek se nepodařilo smazat.');
         $redirect('admin/terms');
+    }
+
+    public function deleteApiV1(callable $redirect, int $id): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/terms', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        if ($id <= 0) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID štítku.']], 422);
+            return;
+        }
+
+        if (!$this->terms->delete($id)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Štítek se nepodařilo smazat.']], 422);
+            return;
+        }
+
+        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
     }
 
     private function editPath(int $id): string

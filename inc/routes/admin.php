@@ -133,6 +133,10 @@ $router->post('admin/api/v1/content/{id}/media/{mediaId}/attach', static functio
     $adminContent->attachmentAttachApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
 });
 
+$router->post('admin/api/v1/content/{id}/thumbnail/detach', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->thumbnailDetachApiV1($redirect, (int)($params['id'] ?? 0));
+});
+
 $router->post('admin/content/media-library/delete', static function () use ($adminContent, $redirect): void {
     $adminContent->mediaLibraryDeleteSubmit($redirect);
 });
@@ -152,6 +156,14 @@ $router->post('admin/content/attachments/attach', static function () use ($admin
 
 $router->get('admin/terms', static function () use ($adminTerms, $redirect): void {
     $adminTerms->list($redirect);
+});
+
+$router->get('admin/api/v1/terms', static function () use ($adminTerms, $redirect): void {
+    $adminTerms->listApiV1($redirect);
+});
+
+$router->post('admin/api/v1/terms/{id}/delete', static function (array $params) use ($adminTerms, $redirect): void {
+    $adminTerms->deleteApiV1($redirect, (int)($params['id'] ?? 0));
 });
 
 $router->get('admin/terms/suggest', static function () use ($adminTerms, $redirect): void {

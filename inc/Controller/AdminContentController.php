@@ -392,6 +392,28 @@ final class AdminContentController extends BaseAdminController
         $redirect($this->editPath($id));
     }
 
+    public function thumbnailDetachApiV1(callable $redirect, int $id): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        if ($id <= 0 || $this->content->find($id) === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            return;
+        }
+
+        if (!$this->content->setThumbnail($id, null)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DETACH_FAILED', 'message' => 'Náhled se nepodařilo odpojit.']], 422);
+            return;
+        }
+
+        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
+    }
+
     public function thumbnailSelectSubmit(callable $redirect): void
     {
         if (
