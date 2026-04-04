@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 define('INC_DIR', 'inc/');
 
+const APP_DEBUG = false;
+
 const DB_HOST = '127.0.0.1';
 const DB_NAME = 'tinycms';
 const DB_USER = 'root';

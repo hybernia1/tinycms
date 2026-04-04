@@ -15,6 +15,10 @@ if (!defined('MEDIA_THUMB_VARIANTS')) {
     define('MEDIA_THUMB_VARIANTS', []);
 }
 
+if (!defined('APP_DEBUG')) {
+    define('APP_DEBUG', false);
+}
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
 
