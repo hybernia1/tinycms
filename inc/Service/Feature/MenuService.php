@@ -84,6 +84,62 @@ final class MenuService
         return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
     }
 
+
+    public function reorder(array $items): bool
+    {
+        if ($items === []) {
+            return true;
+        }
+
+        $ids = array_values(array_unique(array_filter(array_map(static fn(array $item): int => (int)($item['id'] ?? 0), $items), static fn(int $id): bool => $id > 0)));
+        if ($ids === []) {
+            return false;
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($ids), '?'));
+        $stmt = $this->pdo->prepare('SELECT id FROM menu WHERE id IN (' . $placeholders . ')');
+        $stmt->execute($ids);
+        $existing = array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        if (count($existing) !== count($ids)) {
+            return false;
+        }
+
+        $allowed = array_fill_keys($ids, true);
+
+        $this->pdo->beginTransaction();
+        try {
+            $update = $this->pdo->prepare('UPDATE menu SET parent_id = :parent_id, position = :position WHERE id = :id');
+            foreach ($items as $item) {
+                $id = (int)($item['id'] ?? 0);
+                if ($id <= 0) {
+                    continue;
+                }
+
+                $parentId = isset($item['parent_id']) && (int)$item['parent_id'] > 0 ? (int)$item['parent_id'] : null;
+                if ($parentId !== null && !isset($allowed[$parentId])) {
+                    $parentId = null;
+                }
+
+                $position = max(0, (int)($item['position'] ?? 0));
+                $update->bindValue(':id', $id, \PDO::PARAM_INT);
+                if ($parentId === null) {
+                    $update->bindValue(':parent_id', null, \PDO::PARAM_NULL);
+                } else {
+                    $update->bindValue(':parent_id', $parentId, \PDO::PARAM_INT);
+                }
+                $update->bindValue(':position', $position, \PDO::PARAM_INT);
+                $update->execute();
+            }
+            $this->pdo->commit();
+            return true;
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            return false;
+        }
+    }
+
     public function delete(int $id): bool
     {
         return $this->query->delete('menu', ['id' => $id]) > 0;

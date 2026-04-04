@@ -162,6 +162,11 @@ $router->get('admin/menu', static function () use ($adminMenu, $redirect): void 
     $adminMenu->list($redirect);
 });
 
+
+$router->post('admin/menu/reorder', static function () use ($adminMenu, $redirect): void {
+    $adminMenu->reorderSubmit($redirect);
+});
+
 $router->post('admin/menu/delete', static function () use ($adminMenu, $redirect): void {
     $adminMenu->deleteSubmit($redirect);
 });

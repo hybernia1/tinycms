@@ -477,3 +477,51 @@ body {
 .tag-picker-suggestion:hover {
     background: #f6f7f8;
 }
+
+.menu-tree-layout {
+    max-width: 980px;
+}
+
+.menu-tree-root {
+    border: 1px dashed var(--color-border-soft);
+    padding: var(--space-2);
+    background: var(--color-surface-muted);
+}
+
+.menu-tree-level {
+    list-style: none;
+    margin: 0;
+    padding-left: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.menu-tree-level[data-menu-level="0"] {
+    padding-left: 0;
+}
+
+.menu-tree-card {
+    border: 1px solid var(--color-border-soft);
+    background: var(--color-surface);
+    padding: var(--space-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+
+.menu-tree-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.menu-tree-handle {
+    color: var(--color-text-muted);
+    cursor: move;
+}
+
+.menu-tree-item.dragging > .menu-tree-card {
+    opacity: .45;
+}

@@ -112,6 +112,25 @@ final class AdminMenuController extends BaseAdminController
         $redirect($this->editPath($id));
     }
 
+
+    public function reorderSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/menu', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $raw = trim((string)($_POST['tree'] ?? ''));
+        $decoded = $raw !== '' ? json_decode($raw, true) : null;
+        $items = is_array($decoded) ? $decoded : [];
+        $ok = $this->menu->reorder($items);
+
+        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Pořadí navigace uloženo.' : 'Pořadí navigace se nepodařilo uložit.');
+        $redirect('admin/menu');
+    }
+
     public function deleteSubmit(callable $redirect): void
     {
         if (
