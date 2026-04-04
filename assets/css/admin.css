@@ -367,7 +367,7 @@ body {
 
     .content-editor-sidebar {
         position: sticky;
-        top: calc(var(--space-2) * 8);
+        top: 0;
     }
 }
 
