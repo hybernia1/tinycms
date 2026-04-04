@@ -516,6 +516,7 @@ final class AdminContentController extends BaseAdminController
             'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
             'preview_path' => $previewPath,
             'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
+            'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
             'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
         ]);
     }
@@ -625,6 +626,7 @@ final class AdminContentController extends BaseAdminController
             'name' => (string)($item['name'] ?? ''),
             'preview_path' => $this->resolvePreviewPath($item),
             'path' => (string)($item['path'] ?? ''),
+            'webp_path' => (string)($item['path_webp'] ?? ''),
             'created' => (string)($item['created'] ?? ''),
         ];
     }

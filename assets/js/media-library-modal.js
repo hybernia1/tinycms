@@ -115,6 +115,7 @@ if (modal && openTrigger) {
             button.appendChild(label);
             button.dataset.mediaName = name;
             button.dataset.mediaPath = String(item.path || '');
+            button.dataset.mediaWebpPath = String(item.webp_path || '');
             button.dataset.mediaCreated = String(item.created || '');
             button.dataset.mediaPreviewPath = previewPath;
             grid.appendChild(button);
@@ -135,6 +136,7 @@ if (modal && openTrigger) {
             id: mediaId,
             name: target.dataset.mediaName || 'Bez názvu',
             path: target.dataset.mediaPath || '',
+            webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
             previewPath: target.dataset.mediaPreviewPath || '',
         };
@@ -362,7 +364,7 @@ if (modal && openTrigger) {
             }
 
             if (mode === 'editor') {
-                const imageUrl = absoluteUrl(selectedMedia.path || selectedMedia.previewPath || '');
+                const imageUrl = absoluteUrl(selectedMedia.webpPath || selectedMedia.path || selectedMedia.previewPath || '');
                 if (imageUrl === '') {
                     setStatus('Obrázek nemá platnou URL.');
                     return;
