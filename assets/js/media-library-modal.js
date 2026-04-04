@@ -1,5 +1,8 @@
 const modal = document.querySelector('[data-media-library-modal]');
-const openTrigger = document.querySelector('[data-media-library-open][data-media-library-mode!="editor"]') || document.querySelector('[data-media-library-open]');
+const openTrigger = Array.prototype.find.call(
+    document.querySelectorAll('[data-media-library-open]'),
+    (node) => node.getAttribute('data-media-library-mode') !== 'editor',
+) || null;
 
 if (modal && openTrigger) {
     const grid = modal.querySelector('[data-media-library-grid]');
