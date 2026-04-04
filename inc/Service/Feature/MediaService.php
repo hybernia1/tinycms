@@ -5,14 +5,18 @@ namespace App\Service\Feature;
 
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
+use App\Service\Infra\Db\SchemaConstraintValidator;
+use InvalidArgumentException;
 
 final class MediaService
 {
     private Query $query;
+    private SchemaConstraintValidator $schemaConstraintValidator;
 
     public function __construct()
     {
         $this->query = new Query(Connection::get());
+        $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
     public function create(?int $author, string $name, string $path, ?string $pathWebp): int
@@ -78,6 +82,22 @@ final class MediaService
             $errors['author'] = 'Autor není validní.';
         }
 
+        $lengthErrors = $this->schemaConstraintValidator->validate('media', [
+            'name' => $name,
+            'path' => $path,
+            'path_webp' => $pathWebp,
+        ], [
+            'name' => 'name',
+            'path' => 'path',
+            'path_webp' => 'path_webp',
+        ]);
+
+        foreach ($lengthErrors as $field => $message) {
+            if (!isset($errors[$field])) {
+                $errors[$field] = $message;
+            }
+        }
+
         if ($errors !== []) {
             return ['success' => false, 'errors' => $errors];
         }
@@ -89,15 +109,19 @@ final class MediaService
             'author' => $author,
         ];
 
-        if ($id === null) {
-            $payload['created'] = date('Y-m-d H:i:s');
-            $newId = $this->query->insert('media', $payload);
-            return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
-        }
+        try {
+            if ($id === null) {
+                $payload['created'] = date('Y-m-d H:i:s');
+                $newId = $this->query->insert('media', $payload);
+                return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
+            }
 
-        $payload['updated'] = date('Y-m-d H:i:s');
-        $updated = $this->query->update('media', $payload, ['id' => $id]);
-        return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+            $payload['updated'] = date('Y-m-d H:i:s');
+            $updated = $this->query->update('media', $payload, ['id' => $id]);
+            return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+        } catch (InvalidArgumentException $e) {
+            return ['success' => false, 'errors' => ['_global' => $e->getMessage()]];
+        }
     }
 
     public function thumbnailUsages(int $mediaId): array

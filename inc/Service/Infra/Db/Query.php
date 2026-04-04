@@ -5,6 +5,7 @@ namespace App\Service\Infra\Db;
 
 use InvalidArgumentException;
 use PDO;
+use PDOException;
 
 class Query
 {
@@ -92,8 +93,12 @@ class Query
 
         $sql = "INSERT INTO $table ($columns) VALUES ($placeholders)";
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($data);
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($data);
+        } catch (PDOException $e) {
+            throw $this->translatedDbError($e);
+        }
 
         return (int)$this->pdo->lastInsertId();
     }
@@ -116,10 +121,13 @@ class Query
 
         $sql = "UPDATE $table SET " . implode(', ', $set) . " WHERE " . implode(' AND ', $conditions);
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($data);
-
-        return $stmt->rowCount();
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($data);
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            throw $this->translatedDbError($e);
+        }
     }
 
     public function delete(string $table, array $where): int
@@ -202,5 +210,29 @@ class Query
     private function isIdentifier(string $value): bool
     {
         return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $value) === 1;
+    }
+
+    private function translatedDbError(PDOException $e): InvalidArgumentException
+    {
+        $sqlState = (string)($e->errorInfo[0] ?? "");
+        $driverCode = (int)($e->errorInfo[1] ?? 0);
+
+        if ($sqlState === "22001" || $driverCode === 1406) {
+            return new InvalidArgumentException("Jedna nebo více hodnot je příliš dlouhá pro databázový sloupec.", 0, $e);
+        }
+
+        if ($driverCode === 1048 || $driverCode === 1364) {
+            return new InvalidArgumentException("Chybí povinná hodnota (NOT NULL).", 0, $e);
+        }
+
+        if ($driverCode === 1062) {
+            return new InvalidArgumentException("Hodnota už existuje a musí být unikátní.", 0, $e);
+        }
+
+        if ($driverCode === 1452) {
+            return new InvalidArgumentException("Neplatná vazba na související záznam (foreign key).", 0, $e);
+        }
+
+        return new InvalidArgumentException("Databázová operace selhala.", 0, $e);
     }
 }

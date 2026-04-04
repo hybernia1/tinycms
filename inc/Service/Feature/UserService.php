@@ -5,14 +5,18 @@ namespace App\Service\Feature;
 
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
+use App\Service\Infra\Db\SchemaConstraintValidator;
+use InvalidArgumentException;
 
 final class UserService
 {
     private Query $query;
+    private SchemaConstraintValidator $columnLimitValidator;
 
     public function __construct()
     {
         $this->query = new Query(Connection::get());
+        $this->columnLimitValidator = new SchemaConstraintValidator();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, ?int $suspend = null, string $search = ''): array
@@ -100,6 +104,28 @@ final class UserService
             $errors['password'] = 'Heslo je povinné pro nového uživatele.';
         }
 
+        $lengthErrors = $this->columnLimitValidator->validate('users', [
+            'name' => $name,
+            'email' => $email,
+            'role' => $role,
+            'password' => $password,
+        ], [
+            'name' => 'name',
+            'email' => 'email',
+            'role' => 'role',
+            'password' => 'password',
+        ]);
+
+        if ($password === '') {
+            unset($lengthErrors['password']);
+        }
+
+        foreach ($lengthErrors as $field => $message) {
+            if (!isset($errors[$field])) {
+                $errors[$field] = $message;
+            }
+        }
+
         $existing = $this->query->select('users', ['ID'], ['email' => $email]);
 
         if (!empty($existing) && (int)$existing[0]['ID'] !== ($id ?? 0)) {
@@ -127,15 +153,19 @@ final class UserService
             $payload['password'] = password_hash($password, PASSWORD_DEFAULT);
         }
 
-        if ($id === null) {
-            $payload['created'] = $now;
-            $newId = $this->query->insert('users', $payload);
-            return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
+        try {
+            if ($id === null) {
+                $payload['created'] = $now;
+                $newId = $this->query->insert('users', $payload);
+                return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
+            }
+
+            $updated = $this->query->update('users', $payload, ['ID' => $id]);
+
+            return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
+        } catch (InvalidArgumentException $e) {
+            return ['success' => false, 'errors' => ['_global' => $e->getMessage()]];
         }
-
-        $updated = $this->query->update('users', $payload, ['ID' => $id]);
-
-        return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
     }
 
     public function authorOptions(): array

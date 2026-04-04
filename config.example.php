@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 define('INC_DIR', 'inc/');
 
-const DB_HOST = 'db.dw173.webglobe.com';
-const DB_NAME = 'iluze_net6';
-const DB_USER = 'iluze_net6';
-const DB_PASS = 'p27uuejD';
+const APP_DEBUG = false;
+
+const DB_HOST = '127.0.0.1';
+const DB_NAME = 'tinycms';
+const DB_USER = 'root';
+const DB_PASS = '';
 
 const MEDIA_THUMB_VARIANTS = [
     ['suffix' => '_100x100.webp', 'mode' => 'crop', 'width' => 100, 'height' => 100],
