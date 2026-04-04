@@ -262,9 +262,31 @@ final class AdminMediaController extends BaseAdminController
             'name' => (string)($row['name'] ?? ''),
             'path' => (string)($row['path'] ?? ''),
             'path_webp' => (string)($row['path_webp'] ?? ''),
+            'preview_path' => $this->resolvePreviewPath($row),
             'author_name' => (string)($row['author_name'] ?? '—'),
             'created' => (string)($row['created'] ?? ''),
         ];
+    }
+
+    private function resolvePreviewPath(array $row): string
+    {
+        $pathWebp = trim((string)($row['path_webp'] ?? ''));
+        if ($pathWebp !== '') {
+            return (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
+        }
+        return trim((string)($row['path'] ?? ''));
+    }
+
+    private function thumbnailSuffix(): string
+    {
+        $suffix = '_100x100.webp';
+        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
+            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
+            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
+                $suffix = (string)$firstVariant['suffix'];
+            }
+        }
+        return $suffix;
     }
 
     private function wantsJson(): bool

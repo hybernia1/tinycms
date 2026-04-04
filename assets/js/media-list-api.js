@@ -36,6 +36,10 @@ if (mediaListRoot) {
         : '';
 
     const previewUrl = (item) => {
+        const preview = String(item.preview_path || '');
+        if (preview !== '') {
+            return preview;
+        }
         const webp = String(item.path_webp || '');
         if (webp !== '') {
             return webp.replace(/\.webp$/i, thumbSuffix);
