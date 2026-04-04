@@ -15,7 +15,10 @@
         </div>
         <div class="mb-3">
             <label>Soubor <?= $mode === 'add' ? '' : '(volitelné, nahradí stávající)' ?></label>
-            <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" <?= $mode === 'add' ? 'required' : '' ?>>
+            <div class="file-input" data-file-input>
+                <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" <?= $mode === 'add' ? 'required' : '' ?>>
+                <small class="text-muted" data-file-input-label>Nevybrán žádný soubor</small>
+            </div>
             <?php if (!empty($errors['file'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['file'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <?php if ($mode === 'edit'): ?>

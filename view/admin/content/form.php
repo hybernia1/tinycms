@@ -162,7 +162,10 @@ $contentId = (int)($item['id'] ?? 0);
                 <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/media-library/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
                     <?= $csrfField() ?>
                     <input type="hidden" name="content_id" value="<?= $contentId ?>">
-                    <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                    <div class="file-input file-input-compact" data-file-input>
+                        <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                        <small class="text-muted" data-file-input-label>Nevybrán žádný soubor</small>
+                    </div>
                     <button class="btn btn-primary" type="submit" data-media-library-upload-button>
                         <span data-media-library-upload-label>Nahrát nový</span>
                     </button>
