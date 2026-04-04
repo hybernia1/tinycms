@@ -22,6 +22,8 @@ if (contentListRoot) {
     };
     let pendingDeleteId = 0;
     let searchTimer = null;
+    const iconUse = document.querySelector('svg use[href*="#icon-"]');
+    const iconSprite = iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
 
     const esc = (value) => String(value || '')
         .replace(/&/g, '&amp;')
@@ -34,6 +36,11 @@ if (contentListRoot) {
         const status = String(item.status || 'draft');
         const statusClass = status === 'published' ? 'text-bg-success' : (status === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
         const isPublished = status === 'published';
+        const toggleIcon = isPublished ? 'hide' : 'show';
+        const toggleLabel = isPublished ? 'Přepnout do draftu' : 'Publikovat';
+        const icon = (name) => iconSprite !== ''
+            ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${esc(iconSprite)}#icon-${esc(name)}"></use></svg>`
+            : '';
         return `
             <tr>
                 <td>
@@ -46,11 +53,13 @@ if (contentListRoot) {
                 </td>
                 <td>${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
-                    <button class="btn btn-light btn-icon" type="button" data-content-toggle="${Number(item.id || 0)}" data-content-mode="${isPublished ? 'draft' : 'publish'}">
-                        <span>${isPublished ? 'Draft' : 'Pub'}</span>
+                    <button class="btn btn-light btn-icon" type="button" data-content-toggle="${Number(item.id || 0)}" data-content-mode="${isPublished ? 'draft' : 'publish'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
+                        ${icon(toggleIcon)}
+                        <span class="sr-only">${esc(toggleLabel)}</span>
                     </button>
-                    <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}">
-                        <span>Del</span>
+                    <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}" aria-label="Smazat" title="Smazat">
+                        ${icon('delete')}
+                        <span class="sr-only">Smazat</span>
                     </button>
                 </td>
             </tr>
