@@ -1,10 +1,129 @@
 (function () {
+    var editorCounter = 0;
+
     function normalizeHtml(html) {
         return html === '<br>' ? '' : html;
     }
 
+    function createImageControls() {
+        var controls = document.createElement('div');
+        controls.className = 'image-controls';
+        controls.setAttribute('contenteditable', 'false');
+        controls.innerHTML = '<button type="button" class="btn btn-light btn-xs" data-image-align="left">Vlevo</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-align="center">Střed</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-align="right">Vpravo</button>';
+        return controls;
+    }
+
+    function createImageSizeControls() {
+        var controls = document.createElement('div');
+        controls.className = 'image-size-controls';
+        controls.setAttribute('contenteditable', 'false');
+        controls.innerHTML = '<button type="button" class="btn btn-light btn-xs" data-image-size="100">100%</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-size="75">75%</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-size="50">50%</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-size="25">25%</button>';
+        return controls;
+    }
+
+    function createImageResizeHandle() {
+        var handle = document.createElement('span');
+        handle.className = 'image-resize-handle';
+        handle.setAttribute('contenteditable', 'false');
+        return handle;
+    }
+
+    function applyImageAlignment(block, align) {
+        var value = ['left', 'center', 'right'].indexOf(align) >= 0 ? align : 'center';
+        block.classList.remove('align-left', 'align-center', 'align-right');
+        block.classList.add('align-' + value);
+    }
+
+    function ensureImageBlock(block) {
+        if (!block.classList.contains('block-image')) {
+            block.classList.add('block-image');
+        }
+        if (!block.classList.contains('align-left') && !block.classList.contains('align-center') && !block.classList.contains('align-right')) {
+            applyImageAlignment(block, 'center');
+        }
+
+        if (!block.querySelector('.image-controls')) {
+            block.appendChild(createImageControls());
+        }
+
+        if (!block.querySelector('.image-resize-handle')) {
+            block.appendChild(createImageResizeHandle());
+        }
+
+        if (!block.querySelector('.image-size-controls')) {
+            block.appendChild(createImageSizeControls());
+        }
+
+        var image = block.querySelector('img[data-media-id]');
+        if (image && block.style.width === '' && image.style.width !== '') {
+            block.style.width = image.style.width;
+            image.style.width = '100%';
+        }
+    }
+
+    function enhanceImageBlocks(editor) {
+        var images = Array.prototype.slice.call(editor.querySelectorAll('img[data-media-id]'));
+        images.forEach(function (image) {
+            var block = image.closest('.block.block-image');
+            if (!block) {
+                block = document.createElement('div');
+                block.className = 'block block-image align-center';
+                var parent = image.parentNode;
+                if (parent) {
+                    parent.insertBefore(block, image);
+                    block.appendChild(image);
+                    if ((parent.tagName === 'P' || parent.tagName === 'DIV') && parent.textContent.trim() === '' && parent.querySelectorAll('img').length === 0) {
+                        parent.remove();
+                    }
+                }
+            }
+
+            if (block) {
+                ensureImageBlock(block);
+            }
+        });
+    }
+
+    function serializeEditorHtml(editor) {
+        var clone = editor.cloneNode(true);
+        clone.querySelectorAll('.image-controls, .image-size-controls, .image-resize-handle').forEach(function (node) {
+            node.remove();
+        });
+        clone.querySelectorAll('.block.block-image').forEach(function (block) {
+            block.classList.remove('is-selected');
+        });
+        return normalizeHtml(clone.innerHTML.trim());
+    }
+
     function sync(textarea, editor) {
-        textarea.value = normalizeHtml(editor.innerHTML.trim());
+        textarea.value = serializeEditorHtml(editor);
+    }
+
+    function createImageBreakParagraph() {
+        var paragraph = document.createElement('p');
+        paragraph.className = 'block-image-break';
+        paragraph.innerHTML = '<br>';
+        return paragraph;
+    }
+
+    function placeCaret(paragraph) {
+        if (!paragraph) {
+            return;
+        }
+        var selection = window.getSelection();
+        if (!selection) {
+            return;
+        }
+        var range = document.createRange();
+        range.selectNodeContents(paragraph);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
     }
 
     function normalizeBlocks(editor) {
@@ -32,6 +151,11 @@
             if (node.tagName === 'DIV') {
                 var childList = node.firstElementChild;
                 if (node.classList.contains('block') && node.classList.contains('block-list') && childList && (childList.tagName === 'UL' || childList.tagName === 'OL')) {
+                    return;
+                }
+
+                if (node.classList.contains('block') && node.classList.contains('block-image')) {
+                    ensureImageBlock(node);
                     return;
                 }
 
@@ -64,6 +188,19 @@
         if (!selection) {
             return;
         }
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    function focusEditorEnd(editor) {
+        editor.focus();
+        var selection = window.getSelection();
+        if (!selection) {
+            return;
+        }
+        var range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
         selection.removeAllRanges();
         selection.addRange(range);
     }
@@ -164,6 +301,8 @@
     }
 
     function init(textarea) {
+        editorCounter += 1;
+        var editorId = 'wysiwyg-' + editorCounter;
         var wrapper = document.createElement('div');
         wrapper.className = 'wysiwyg';
 
@@ -176,6 +315,7 @@
         var clear = createIconButton('w-clear', 'removeFormat', 'Vyčistit');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
+        var media = createIconButton('w-image', 'openMediaLibrary', 'Vložit obrázek');
         var linkPanel = createLinkPanel();
 
         toolbar.appendChild(bold);
@@ -183,6 +323,9 @@
         toolbar.appendChild(link);
         toolbar.appendChild(listGroup);
         toolbar.appendChild(clear);
+        if ((textarea.dataset.mediaLibraryEndpoint || '').trim() !== '') {
+            toolbar.appendChild(media);
+        }
         toolbar.appendChild(html);
 
         var editor = document.createElement('div');
@@ -194,6 +337,7 @@
         var linkRange = null;
         var activeLink = null;
         var htmlMode = false;
+        var mediaRange = null;
 
         function closeMenus() {
             wrapper.classList.remove('is-list-open');
@@ -219,6 +363,7 @@
             document.execCommand('defaultParagraphSeparator', false, 'p');
             document.execCommand(command, false, null);
             normalizeBlocks(editor);
+            enhanceImageBlocks(editor);
             sync(textarea, editor);
             closeMenus();
             updateFormatState();
@@ -235,6 +380,7 @@
                 return;
             }
             editor.innerHTML = textarea.value.trim();
+            enhanceImageBlocks(editor);
             textarea.style.display = 'none';
             sync(textarea, editor);
         }
@@ -254,6 +400,23 @@
             var command = button.getAttribute('data-command');
             if (command === 'toggleHtml') {
                 setHtmlMode(!htmlMode);
+                return;
+            }
+
+            if (command === 'openMediaLibrary') {
+                if (htmlMode) {
+                    return;
+                }
+                mediaRange = isSelectionInside(editor) ? rememberSelection() : null;
+                document.dispatchEvent(new CustomEvent('tinycms:media-library-open', {
+                    detail: {
+                        mode: 'editor',
+                        editorId: editorId,
+                        contentId: Number(textarea.dataset.contentId || '0'),
+                        endpoint: textarea.dataset.mediaLibraryEndpoint || '',
+                        baseUrl: textarea.dataset.mediaBaseUrl || '',
+                    },
+                }));
                 return;
             }
 
@@ -370,7 +533,125 @@
             }
         });
 
+        var resizingState = null;
+        function stopResize() {
+            resizingState = null;
+            document.body.classList.remove('is-image-resizing');
+        }
+
+        editor.addEventListener('mousedown', function (event) {
+            var handle = event.target.closest('.image-resize-handle');
+            if (!handle) {
+                return;
+            }
+            var block = handle.closest('.block.block-image');
+            var image = block ? block.querySelector('img[data-media-id]') : null;
+            if (!block || !image) {
+                return;
+            }
+            event.preventDefault();
+            resizingState = {
+                block: block,
+                image: image,
+                editorWidth: Math.max(1, editor.clientWidth),
+                startX: event.clientX,
+                startWidth: image.getBoundingClientRect().width,
+            };
+            document.body.classList.add('is-image-resizing');
+        });
+
+        document.addEventListener('mousemove', function (event) {
+            if (!resizingState) {
+                return;
+            }
+            var width = Math.max(120, resizingState.startWidth + (event.clientX - resizingState.startX));
+            var percent = Math.min(100, Math.max(15, (width / resizingState.editorWidth) * 100));
+            resizingState.block.style.width = percent.toFixed(2).replace(/\.00$/, '') + '%';
+            resizingState.image.style.width = '100%';
+            sync(textarea, editor);
+        });
+
+        document.addEventListener('mouseup', function () {
+            stopResize();
+        });
+
+        editor.addEventListener('click', function (event) {
+            var alignButton = event.target.closest('[data-image-align]');
+            if (alignButton) {
+                event.preventDefault();
+                var block = alignButton.closest('.block.block-image');
+                if (!block) {
+                    return;
+                }
+                applyImageAlignment(block, alignButton.getAttribute('data-image-align') || 'center');
+                sync(textarea, editor);
+                return;
+            }
+
+            var sizeButton = event.target.closest('[data-image-size]');
+            if (sizeButton) {
+                event.preventDefault();
+                var sizeBlock = sizeButton.closest('.block.block-image');
+                if (!sizeBlock) {
+                    return;
+                }
+                var size = Number(sizeButton.getAttribute('data-image-size') || '100');
+                var value = Math.max(25, Math.min(100, size));
+                sizeBlock.style.width = value + '%';
+                var sizeImage = sizeBlock.querySelector('img[data-media-id]');
+                if (sizeImage) {
+                    sizeImage.style.width = '100%';
+                }
+                sync(textarea, editor);
+                return;
+            }
+
+            var blockImage = event.target.closest('.block.block-image');
+            editor.querySelectorAll('.block.block-image.is-selected').forEach(function (node) {
+                node.classList.remove('is-selected');
+            });
+            if (blockImage) {
+                blockImage.classList.add('is-selected');
+            }
+        });
+
+        document.addEventListener('tinycms:media-library-selected', function (event) {
+            var detail = event.detail || {};
+            if (detail.editorId !== editorId || !detail.url) {
+                return;
+            }
+            var mediaId = Number(detail.id || 0);
+            if (mediaId <= 0) {
+                return;
+            }
+            if (mediaRange) {
+                restoreSelection(mediaRange, editor);
+            } else {
+                focusEditorEnd(editor);
+            }
+            document.execCommand('insertHTML', false, '<div class="block block-image align-center"><img src="' + String(detail.url).replace(/"/g, '&quot;') + '" alt="' + String(detail.name || '').replace(/"/g, '&quot;') + '" data-media-id="' + mediaId + '"></div><p><br></p>');
+            normalizeBlocks(editor);
+            enhanceImageBlocks(editor);
+            sync(textarea, editor);
+            updateFormatState();
+        });
+
         editor.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                var selectedImageBlock = editor.querySelector('.block.block-image.is-selected');
+                if (selectedImageBlock) {
+                    event.preventDefault();
+                    var next = selectedImageBlock.nextElementSibling;
+                    var target = next && next.classList.contains('block-image-break') ? next : createImageBreakParagraph();
+                    if (target !== next) {
+                        selectedImageBlock.parentNode.insertBefore(target, selectedImageBlock.nextSibling);
+                    }
+                    placeCaret(target);
+                    sync(textarea, editor);
+                    return;
+                }
+            }
+
             if (event.key === 'Enter' && !event.shiftKey) {
                 var wasBold = document.queryCommandState('bold');
                 var wasItalic = document.queryCommandState('italic');
@@ -397,6 +678,7 @@
                 return;
             }
             normalizeBlocks(editor);
+            enhanceImageBlocks(editor);
             sync(textarea, editor);
             updateFormatState();
         });
@@ -414,12 +696,14 @@
                     return;
                 }
                 normalizeBlocks(editor);
+                enhanceImageBlocks(editor);
                 sync(textarea, editor);
             });
         }
 
         document.execCommand('defaultParagraphSeparator', false, 'p');
         normalizeBlocks(editor);
+        enhanceImageBlocks(editor);
         sync(textarea, editor);
         updateFormatState();
     }

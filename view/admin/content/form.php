@@ -26,7 +26,16 @@ $contentId = (int)($item['id'] ?? 0);
             </div>
             <div class="m-0">
                 <label>Obsah</label>
-                <textarea name="body" rows="14" data-wysiwyg><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                <textarea
+                    name="body"
+                    rows="14"
+                    data-wysiwyg
+                    <?php if ($mode !== 'add'): ?>
+                        data-content-id="<?= $contentId ?>"
+                        data-media-library-endpoint="<?= htmlspecialchars($url('admin/content/media-library'), ENT_QUOTES, 'UTF-8') ?>"
+                        data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
+                    <?php endif; ?>
+                ><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
         </div>
         <aside class="content-editor-sidebar">
@@ -187,6 +196,11 @@ $contentId = (int)($item['id'] ?? 0);
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-rename-media-id>
     <input type="hidden" name="name" value="" data-media-library-rename-name>
+</form>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/attachments/attach'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-attach-form>
+    <?= $csrfField() ?>
+    <input type="hidden" name="content_id" value="<?= $contentId ?>">
+    <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
 <div class="modal-overlay" data-modal id="media-library-delete-modal">
     <div class="modal">

@@ -9,10 +9,12 @@ use App\Service\Infra\Db\Query;
 final class ContentService
 {
     private Query $query;
+    private \PDO $pdo;
 
     public function __construct()
     {
-        $this->query = new Query(Connection::get());
+        $this->pdo = Connection::get();
+        $this->query = new Query($this->pdo);
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
@@ -141,6 +143,9 @@ final class ContentService
         if ($id === null) {
             $payload['created'] = $created ?? $now;
             $newId = $this->query->insert('content', $payload);
+            if ($newId > 0) {
+                $this->syncAttachments($newId, $body);
+            }
             return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
         }
 
@@ -149,6 +154,9 @@ final class ContentService
         }
 
         $updated = $this->query->update('content', $payload, ['id' => $id]);
+        if ($updated >= 0) {
+            $this->syncAttachments($id, $body);
+        }
 
         return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
     }
@@ -161,6 +169,84 @@ final class ContentService
 
         sort($statuses);
         return $statuses;
+    }
+
+    public function attachMedia(int $contentId, int $mediaId): bool
+    {
+        if ($contentId <= 0 || $mediaId <= 0 || $this->find($contentId) === null) {
+            return false;
+        }
+
+        $mediaExists = $this->query->select('media', ['id'], ['id' => $mediaId]) !== [];
+        if (!$mediaExists) {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare('INSERT IGNORE INTO attachments (content, media) VALUES (:content, :media)');
+        return $stmt->execute([
+            'content' => $contentId,
+            'media' => $mediaId,
+        ]);
+    }
+
+    private function syncAttachments(int $contentId, string $body): void
+    {
+        if ($contentId <= 0) {
+            return;
+        }
+
+        $mediaIds = $this->extractMediaIdsFromBody($body);
+        if ($mediaIds === []) {
+            $stmt = $this->pdo->prepare('DELETE FROM attachments WHERE content = :content');
+            $stmt->execute(['content' => $contentId]);
+            return;
+        }
+
+        $placeholders = [];
+        $params = ['content' => $contentId];
+        foreach ($mediaIds as $index => $mediaId) {
+            $key = 'media_' . $index;
+            $placeholders[] = ':' . $key;
+            $params[$key] = $mediaId;
+        }
+
+        $deleteSql = sprintf(
+            'DELETE FROM attachments WHERE content = :content AND media NOT IN (%s)',
+            implode(', ', $placeholders),
+        );
+        $deleteStmt = $this->pdo->prepare($deleteSql);
+        $deleteStmt->execute($params);
+
+        $insertStmt = $this->pdo->prepare('INSERT IGNORE INTO attachments (content, media) VALUES (:content, :media)');
+        foreach ($mediaIds as $mediaId) {
+            $insertStmt->execute([
+                'content' => $contentId,
+                'media' => $mediaId,
+            ]);
+        }
+    }
+
+    private function extractMediaIdsFromBody(string $body): array
+    {
+        if (trim($body) === '') {
+            return [];
+        }
+
+        preg_match_all('/data-media-id=["\'](\d+)["\']/i', $body, $matches);
+        $ids = array_map('intval', $matches[1] ?? []);
+        $ids = array_values(array_unique(array_filter($ids, static fn(int $id): bool => $id > 0)));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($ids), '?'));
+        $stmt = $this->pdo->prepare('SELECT id FROM media WHERE id IN (' . $placeholders . ')');
+        $stmt->execute($ids);
+        $existingIds = array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        $allowed = array_fill_keys($existingIds, true);
+
+        return array_values(array_filter($ids, static fn(int $id): bool => isset($allowed[$id])));
     }
 
     public function listPublished(int $limit = 20): array

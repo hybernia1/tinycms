@@ -101,6 +101,10 @@ $router->post('admin/content/media-library/rename', static function () use ($adm
     $adminContent->mediaLibraryRenameSubmit($redirect);
 });
 
+$router->post('admin/content/attachments/attach', static function () use ($adminContent, $redirect): void {
+    $adminContent->attachmentAttachSubmit($redirect);
+});
+
 $router->get('admin/media', static function () use ($adminMedia, $redirect): void {
     $adminMedia->list($redirect);
 });

@@ -1,5 +1,8 @@
 const modal = document.querySelector('[data-media-library-modal]');
-const openTrigger = document.querySelector('[data-media-library-open]');
+const openTrigger = Array.prototype.find.call(
+    document.querySelectorAll('[data-media-library-open]'),
+    (node) => node.getAttribute('data-media-library-mode') !== 'editor',
+) || null;
 
 if (modal && openTrigger) {
     const grid = modal.querySelector('[data-media-library-grid]');
@@ -32,9 +35,12 @@ if (modal && openTrigger) {
     const renameMediaId = document.querySelector('[data-media-library-rename-media-id]');
     const renameName = document.querySelector('[data-media-library-rename-name]');
 
-    const endpoint = openTrigger.getAttribute('data-media-library-endpoint') || '';
-    const baseUrl = openTrigger.getAttribute('data-media-base-url') || '';
-    let currentMediaId = Number(openTrigger.getAttribute('data-current-media-id') || '0');
+    let endpoint = '';
+    let baseUrl = '';
+    let currentMediaId = 0;
+    let mode = 'thumbnail';
+    let editorId = '';
+    let contentId = 0;
     let page = 1;
     let totalPages = 1;
     let query = '';
@@ -109,6 +115,7 @@ if (modal && openTrigger) {
             button.appendChild(label);
             button.dataset.mediaName = name;
             button.dataset.mediaPath = String(item.path || '');
+            button.dataset.mediaWebpPath = String(item.webp_path || '');
             button.dataset.mediaCreated = String(item.created || '');
             button.dataset.mediaPreviewPath = previewPath;
             grid.appendChild(button);
@@ -129,6 +136,7 @@ if (modal && openTrigger) {
             id: mediaId,
             name: target.dataset.mediaName || 'Bez názvu',
             path: target.dataset.mediaPath || '',
+            webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
             previewPath: target.dataset.mediaPreviewPath || '',
         };
@@ -241,7 +249,17 @@ if (modal && openTrigger) {
         updatePager();
     };
 
-    const open = () => {
+    const setContext = (detail) => {
+        endpoint = String(detail.endpoint || '');
+        baseUrl = String(detail.baseUrl || '');
+        mode = String(detail.mode || 'thumbnail');
+        editorId = String(detail.editorId || '');
+        contentId = Number(detail.contentId || 0);
+        currentMediaId = Number(detail.currentMediaId || 0);
+    };
+
+    const open = (detail) => {
+        setContext(detail || {});
         modal.classList.add('open');
         if (searchTimer) {
             clearTimeout(searchTimer);
@@ -262,7 +280,22 @@ if (modal && openTrigger) {
         modal.classList.remove('open');
     };
 
-    openTrigger.addEventListener('click', open);
+    if (openTrigger) {
+        openTrigger.addEventListener('click', () => {
+            const contentInput = document.querySelector('[data-media-library-attach-form] input[name="content_id"]');
+            open({
+                mode: 'thumbnail',
+                endpoint: openTrigger.getAttribute('data-media-library-endpoint') || '',
+                baseUrl: openTrigger.getAttribute('data-media-base-url') || '',
+                currentMediaId: Number(openTrigger.getAttribute('data-current-media-id') || '0'),
+                contentId: Number(contentInput ? contentInput.value : '0'),
+            });
+        });
+    }
+
+    document.addEventListener('tinycms:media-library-open', (event) => {
+        open(event.detail || {});
+    });
     closeButtons.forEach((button) => button.addEventListener('click', close));
     modal.addEventListener('click', (event) => {
         if (event.target === modal) {
@@ -325,8 +358,40 @@ if (modal && openTrigger) {
     }
 
     if (chooseButton && selectForm && mediaIdField) {
-        chooseButton.addEventListener('click', () => {
+        chooseButton.addEventListener('click', async () => {
             if (!selectedMedia) {
+                return;
+            }
+
+            if (mode === 'editor') {
+                const imageUrl = absoluteUrl(selectedMedia.webpPath || selectedMedia.path || selectedMedia.previewPath || '');
+                if (imageUrl === '') {
+                    setStatus('Obrázek nemá platnou URL.');
+                    return;
+                }
+                const attachForm = document.querySelector('[data-media-library-attach-form]');
+                const attachMediaId = document.querySelector('[data-media-library-attach-media-id]');
+                if (attachForm && attachMediaId && contentId > 0) {
+                    attachMediaId.value = String(selectedMedia.id);
+                    const body = new FormData(attachForm);
+                    body.set('content_id', String(contentId));
+                    body.set('media_id', String(selectedMedia.id));
+                    await fetch(attachForm.action, {
+                        method: 'POST',
+                        body,
+                        headers: { Accept: 'application/json' },
+                    }).catch(() => null);
+                }
+                document.dispatchEvent(new CustomEvent('tinycms:media-library-selected', {
+                    detail: {
+                        mode,
+                        editorId,
+                        id: selectedMedia.id,
+                        name: selectedMedia.name,
+                        url: imageUrl,
+                    },
+                }));
+                close();
                 return;
             }
 
