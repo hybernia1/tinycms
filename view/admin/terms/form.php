@@ -1,6 +1,6 @@
 <form method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/terms/add') : $url('admin/terms/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
-    <div class="card p-4" style="max-width:760px;">
+    <div class="card p-5">
         <div class="mb-3">
             <label>Název</label>
             <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
