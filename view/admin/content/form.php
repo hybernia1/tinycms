@@ -96,8 +96,10 @@ $contentId = (int)($item['id'] ?? 0);
                         data-suggest-endpoint="<?= htmlspecialchars($url('admin/terms/suggest'), ENT_QUOTES, 'UTF-8') ?>"
                         data-initial="<?= $termsJson ?>"
                     >
-                        <div class="tag-picker-chips" data-tag-picker-chips></div>
-                        <input class="tag-picker-input" type="text" data-tag-picker-input placeholder="Najít nebo přidat štítek">
+                        <div class="tag-picker-field">
+                            <div class="tag-picker-chips" data-tag-picker-chips></div>
+                            <input class="tag-picker-input" type="text" data-tag-picker-input placeholder="Najít nebo přidat štítek">
+                        </div>
                         <div class="tag-picker-suggestions" data-tag-picker-suggestions></div>
                         <input type="hidden" name="terms" value="<?= htmlspecialchars($termsValue, ENT_QUOTES, 'UTF-8') ?>" data-tag-picker-value>
                     </div>

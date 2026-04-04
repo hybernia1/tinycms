@@ -407,21 +407,27 @@ body {
 .tag-picker {
     position: relative;
     border: 1px solid #d8d8d8;
-    padding: 8px;
+    padding: 6px 8px;
     background: #fff;
+}
+
+.tag-picker-field {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
 }
 
 .tag-picker-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 8px;
 }
 
 .tag-picker-chip {
     border: 0;
-    background: #f1f2f3;
-    padding: 4px 10px;
+    background: #e6e7e8;
+    padding: 4px 8px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -429,10 +435,11 @@ body {
 }
 
 .tag-picker-input {
-    width: 100%;
     border: 0;
     outline: 0;
-    padding: 4px;
+    padding: 4px 0;
+    flex: 1 1 120px;
+    min-width: 120px;
 }
 
 .tag-picker-suggestions {
