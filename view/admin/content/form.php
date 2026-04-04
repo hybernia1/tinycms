@@ -9,6 +9,7 @@ if ($thumbnailPath === '') {
     $thumbnailPath = trim((string)($item['thumbnail_path'] ?? ''));
 }
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
+$contentId = (int)($item['id'] ?? 0);
 ?>
 <form class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
@@ -74,20 +75,25 @@ $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
                     <?php if ($mode === 'add'): ?>
                         <small class="text-muted">Nejdřív uložte obsah, poté přidejte thumbnail.</small>
                     <?php else: ?>
-                        <?php if ($thumbnailUrl !== ''): ?>
-                            <div class="content-thumbnail-preview mb-3">
-                                <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
-                            </div>
-                        <?php endif; ?>
-                        <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
-                        <div class="mt-2 d-flex gap-2">
-                            <button class="btn btn-primary" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/upload?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Nahrát</button>
-                        </div>
+                        <button
+                            class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
+                            type="button"
+                            data-media-library-open
+                            data-media-library-endpoint="<?= htmlspecialchars($url('admin/content/media-library'), ENT_QUOTES, 'UTF-8') ?>"
+                            data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
+                            data-current-media-id="<?= (int)($item['thumbnail'] ?? 0) ?>"
+                        >
+                            <?php if ($thumbnailUrl !== ''): ?>
+                                <div class="content-thumbnail-preview">
+                                    <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                                </div>
+                            <?php else: ?>
+                                <span>Zvolit obrázek</span>
+                            <?php endif; ?>
+                        </button>
                         <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
-                            <div class="mt-2 d-flex gap-2">
-                                <input type="hidden" name="id" value="<?= (int)($item['id'] ?? 0) ?>">
-                                <button class="btn btn-light" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/detach'), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Odpojit</button>
-                                <button class="btn btn-danger" type="submit" formaction="<?= htmlspecialchars($url('admin/content/thumbnail/delete'), ENT_QUOTES, 'UTF-8') ?>" formmethod="post" formnovalidate>Smazat</button>
+                            <div class="mt-2 d-flex gap-2" data-media-library-detach-wrap>
+                                <button class="btn btn-light" type="button" data-media-library-detach>Odpojit</button>
                             </div>
                         <?php endif; ?>
                     <?php endif; ?>
@@ -96,3 +102,99 @@ $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
         </aside>
     </div>
 </form>
+
+<?php if ($mode !== 'add'): ?>
+<div class="media-library-modal" data-media-library-modal>
+    <div class="media-library-modal-dialog">
+        <div class="media-library-modal-header">
+            <strong>Media library</strong>
+            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="Zavřít">
+                <?= $icon('cancel') ?>
+            </button>
+        </div>
+        <div class="media-library-modal-layout">
+            <div class="media-library-detail">
+                <div class="media-library-detail-preview" data-media-library-detail-preview></div>
+                <div class="media-library-detail-meta">
+                    <div>
+                        <label>Název</label>
+                        <div class="d-flex gap-2">
+                            <input type="text" value="" data-media-library-detail-name-input>
+                            <button class="btn btn-light" type="button" data-media-library-rename disabled>Uložit</button>
+                        </div>
+                    </div>
+                    <div><strong>Cesta:</strong> <span data-media-library-detail-path>—</span></div>
+                    <div><strong>Vytvořeno:</strong> <span data-media-library-detail-created>—</span></div>
+                </div>
+                <small class="text-muted" data-media-library-status></small>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="button" data-media-library-choose disabled>Zvolit</button>
+                    <button
+                        class="btn btn-danger"
+                        type="button"
+                        data-media-library-delete-open
+                        data-modal-open
+                        data-modal-target="#media-library-delete-modal"
+                        data-type="obrázek"
+                        data-form-id="media-library-delete-form"
+                        disabled
+                    >
+                        Smazat
+                    </button>
+                </div>
+            </div>
+            <div class="media-library-list">
+                <form class="media-library-search" data-media-library-search>
+                    <div class="search-field">
+                        <input class="search-input" type="search" name="q" placeholder="Hledat obrázek">
+                        <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
+                    </div>
+                </form>
+                <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/content/media-library/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
+                    <?= $csrfField() ?>
+                    <input type="hidden" name="content_id" value="<?= $contentId ?>">
+                    <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                    <button class="btn btn-primary" type="submit" data-media-library-upload-button>
+                        <span data-media-library-upload-label>Nahrát nový</span>
+                    </button>
+                </form>
+                <div class="media-library-grid" data-media-library-grid></div>
+                <div class="media-library-pagination">
+                    <button class="btn btn-light" type="button" data-media-library-prev>Předchozí</button>
+                    <span data-media-library-page>1 / 1</span>
+                    <button class="btn btn-light" type="button" data-media-library-next>Další</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/thumbnail/select'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-select-form>
+    <?= $csrfField() ?>
+    <input type="hidden" name="id" value="<?= $contentId ?>">
+    <input type="hidden" name="media_id" value="" data-media-library-media-id>
+</form>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/media-library/delete'), ENT_QUOTES, 'UTF-8') ?>" id="media-library-delete-form">
+    <?= $csrfField() ?>
+    <input type="hidden" name="content_id" value="<?= $contentId ?>">
+    <input type="hidden" name="media_id" value="" data-media-library-delete-media-id>
+</form>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/thumbnail/detach'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-detach-form>
+    <?= $csrfField() ?>
+    <input type="hidden" name="id" value="<?= $contentId ?>">
+</form>
+<form method="post" action="<?= htmlspecialchars($url('admin/content/media-library/rename'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-rename-form>
+    <?= $csrfField() ?>
+    <input type="hidden" name="content_id" value="<?= $contentId ?>">
+    <input type="hidden" name="media_id" value="" data-media-library-rename-media-id>
+    <input type="hidden" name="name" value="" data-media-library-rename-name>
+</form>
+<div class="modal-overlay" data-modal id="media-library-delete-modal">
+    <div class="modal">
+        <p data-modal-text>Skutečně smazat tento obrázek?</p>
+        <div class="modal-actions">
+            <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
+            <button class="btn btn-primary" type="button" data-media-library-delete-confirm>Potvrdit</button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

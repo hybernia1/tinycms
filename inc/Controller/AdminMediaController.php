@@ -41,6 +41,17 @@ final class AdminMediaController extends BaseAdminController
         }
 
         $pagination = $this->media->paginate($page, $perPage, $query);
+        if ($this->wantsJson()) {
+            $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+            $this->jsonSuccess([
+                'items' => $items,
+                'page' => (int)($pagination['page'] ?? 1),
+                'per_page' => (int)($pagination['per_page'] ?? $perPage),
+                'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'query' => $query,
+            ]);
+            return;
+        }
         $this->pages->adminMediaList($pagination, self::PER_PAGE_ALLOWED, $query);
     }
 
@@ -195,6 +206,10 @@ final class AdminMediaController extends BaseAdminController
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Neplatné ID média.');
+                return;
+            }
             $this->flash->add('error', 'Neplatné ID média.');
             $redirect('admin/media');
             return;
@@ -202,18 +217,30 @@ final class AdminMediaController extends BaseAdminController
 
         $item = $this->media->find($id);
         if ($item === null) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Médium nenalezeno.');
+                return;
+            }
             $this->flash->add('info', 'Médium nenalezeno.');
             $redirect('admin/media');
             return;
         }
 
         if (!$this->media->delete($id)) {
+            if ($this->wantsJson()) {
+                $this->jsonError('Médium se nepodařilo smazat.');
+                return;
+            }
             $this->flash->add('error', 'Médium se nepodařilo smazat.');
             $redirect('admin/media');
             return;
         }
 
         $this->upload->deleteMediaFiles($item);
+        if ($this->wantsJson()) {
+            $this->jsonSuccess(['id' => $id]);
+            return;
+        }
         $this->flash->add('success', 'Médium smazáno.');
         $redirect('admin/media');
     }
@@ -227,4 +254,44 @@ final class AdminMediaController extends BaseAdminController
     {
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
     }
+
+    private function mapListItem(array $row): array
+    {
+        return [
+            'id' => (int)($row['id'] ?? 0),
+            'name' => (string)($row['name'] ?? ''),
+            'path' => (string)($row['path'] ?? ''),
+            'path_webp' => (string)($row['path_webp'] ?? ''),
+            'preview_path' => $this->resolvePreviewPath($row),
+            'author_name' => (string)($row['author_name'] ?? '—'),
+            'created' => (string)($row['created'] ?? ''),
+        ];
+    }
+
+    private function resolvePreviewPath(array $row): string
+    {
+        $pathWebp = trim((string)($row['path_webp'] ?? ''));
+        if ($pathWebp !== '') {
+            $preview = (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
+            return str_starts_with($preview, '/') ? $preview : '/' . ltrim($preview, '/');
+        }
+        $path = trim((string)($row['path'] ?? ''));
+        if ($path === '') {
+            return '';
+        }
+        return str_starts_with($path, '/') ? $path : '/' . ltrim($path, '/');
+    }
+
+    private function thumbnailSuffix(): string
+    {
+        $suffix = '_100x100.webp';
+        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
+            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
+            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
+                $suffix = (string)$firstVariant['suffix'];
+            }
+        }
+        return $suffix;
+    }
+
 }

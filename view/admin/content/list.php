@@ -9,11 +9,14 @@ $statusLinks = ['all' => 'Vše'];
 foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = ucfirst($statusValue);
 }
+$csrfMarkup = $csrfField();
 ?>
+<div data-content-list data-endpoint="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
+    <div data-content-csrf class="d-none"><?= $csrfMarkup ?></div>
 <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <nav class="filter-nav">
         <?php foreach ($statusLinks as $key => $label): ?>
-            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" href="<?= htmlspecialchars($url('admin/content?status=' . urlencode($key) . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
+            <a class="filter-link<?= $status === $key ? ' active' : '' ?>" data-content-status="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>" href="<?= htmlspecialchars($url('admin/content?status=' . urlencode($key) . '&per_page=' . $perPage . '&page=1'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></a>
         <?php endforeach; ?>
     </nav>
     <form method="get" class="search-form">
@@ -21,7 +24,7 @@ foreach ($availableStatuses as $statusValue) {
         <input type="hidden" name="per_page" value="<?= $perPage ?>">
         <input type="hidden" name="page" value="1">
         <div class="search-field">
-            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat název nebo obsah">
+            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat název nebo obsah" data-content-search>
             <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
         </div>
     </form>
@@ -35,7 +38,7 @@ foreach ($availableStatuses as $statusValue) {
                 <th>Název</th><th>Autor</th><th class="table-col-actions">Akce</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody data-content-list-body>
             <?php foreach ($items as $row):
                 $id = (int)($row['id'] ?? 0);
                 $createdAt = (string)($row['created'] ?? '');
@@ -62,19 +65,15 @@ foreach ($availableStatuses as $statusValue) {
                             <?= $csrfField() ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
                             <input type="hidden" name="mode" value="<?= $isPublished ? 'draft' : 'publish' ?>">
-                            <button class="btn btn-light btn-icon" type="submit" aria-label="<?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?>" title="<?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?>">
+                            <button class="btn btn-light btn-icon" type="button" data-content-toggle="<?= $id ?>" data-content-mode="<?= $isPublished ? 'draft' : 'publish' ?>" aria-label="<?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?>" title="<?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?>">
                                 <?= $icon($isPublished ? 'hide' : 'show') ?>
                                 <span class="sr-only"><?= $isPublished ? 'Přepnout do draftu' : 'Publikovat' ?></span>
                             </button>
                         </form>
-                        <form id="delete-content-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/content/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
-                            <?= $csrfField() ?>
-                            <input type="hidden" name="id" value="<?= $id ?>">
-                            <button class="btn btn-light btn-icon" type="button" data-modal-open data-type="obsah" data-form-id="delete-content-<?= $id ?>" aria-label="Smazat" title="Smazat">
+                        <button class="btn btn-light btn-icon" type="button" data-content-delete-open="<?= $id ?>" aria-label="Smazat" title="Smazat">
                                 <?= $icon('delete') ?>
                                 <span class="sr-only">Smazat</span>
-                            </button>
-                        </form>
+                        </button>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -86,15 +85,15 @@ foreach ($availableStatuses as $statusValue) {
         <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php $prevPage = max(1, $page - 1); $nextPage = min($totalPages, $page + 1); ?>
-                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/content?page=' . $prevPage . '&per_page=' . $perPage . '&status=' . urlencode($status) . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span>Předchozí</span></a>
-                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/content?page=' . $nextPage . '&per_page=' . $perPage . '&status=' . urlencode($status) . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span>Další</span><?= $icon('next') ?></a>
+                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/content?page=' . $prevPage . '&per_page=' . $perPage . '&status=' . urlencode($status) . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>" data-content-prev<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span>Předchozí</span></a>
+                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/content?page=' . $nextPage . '&per_page=' . $perPage . '&status=' . urlencode($status) . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>" data-content-next<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span>Další</span><?= $icon('next') ?></a>
             </div>
         <?php else: ?>
             <div></div>
         <?php endif; ?>
 
         <form method="get" class="d-flex gap-2 align-center">
-            <select name="per_page">
+            <select name="per_page" data-content-per-page>
                 <?php foreach ($allowedPerPage as $option): ?>
                     <option value="<?= (int)$option ?>" <?= $perPage === (int)$option ? 'selected' : '' ?>><?= (int)$option ?></option>
                 <?php endforeach; ?>
@@ -107,12 +106,13 @@ foreach ($availableStatuses as $statusValue) {
     </div>
 </div>
 
-<div class="modal-overlay" data-modal>
+<div class="modal-overlay" data-content-delete-modal>
     <div class="modal">
-        <p data-modal-text>Skutečně smazat?</p>
+        <p>Skutečně smazat tento obsah?</p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="">Potvrdit</button>
+            <button class="btn btn-light" type="button" data-content-delete-cancel>Zrušit</button>
+            <button class="btn btn-primary" type="button" data-content-delete-confirm>Potvrdit</button>
         </div>
     </div>
+</div>
 </div>

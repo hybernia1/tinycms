@@ -11,14 +11,17 @@ if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
         $thumbSuffix = (string)$firstVariant['suffix'];
     }
 }
+$csrfMarkup = $csrfField();
 ?>
+<div data-media-list data-endpoint="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/media/edit?id='), ENT_QUOTES, 'UTF-8') ?>" data-thumb-suffix="<?= htmlspecialchars($thumbSuffix, ENT_QUOTES, 'UTF-8') ?>">
+<div data-media-csrf class="d-none"><?= $csrfMarkup ?></div>
 <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
     <div></div>
     <form method="get" class="search-form">
         <input type="hidden" name="per_page" value="<?= $perPage ?>">
         <input type="hidden" name="page" value="1">
         <div class="search-field">
-            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat název nebo cestu">
+            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat název nebo cestu" data-media-search>
             <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
         </div>
     </form>
@@ -32,7 +35,7 @@ if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
                 <th>Médium</th><th>Autor</th><th class="table-col-actions">Akce</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody data-media-list-body>
             <?php foreach ($items as $row):
                 $id = (int)($row['id'] ?? 0);
                 $previewPath = trim((string)($row['path_webp'] ?? ''));
@@ -62,14 +65,10 @@ if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
                     </td>
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="table-col-actions">
-                        <form id="delete-media-<?= $id ?>" method="post" action="<?= htmlspecialchars($url('admin/media/delete'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
-                            <?= $csrfField() ?>
-                            <input type="hidden" name="id" value="<?= $id ?>">
-                            <button class="btn btn-light btn-icon" type="button" data-modal-open data-type="médium" data-form-id="delete-media-<?= $id ?>" aria-label="Smazat médium" title="Smazat médium">
+                            <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="Smazat médium" title="Smazat médium">
                                 <?= $icon('delete') ?>
                                 <span class="sr-only">Smazat médium</span>
                             </button>
-                        </form>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -81,15 +80,15 @@ if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
         <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php $prevPage = max(1, $page - 1); $nextPage = min($totalPages, $page + 1); ?>
-                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/media?page=' . $prevPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span>Předchozí</span></a>
-                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/media?page=' . $nextPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span>Další</span><?= $icon('next') ?></a>
+                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" data-media-prev href="<?= htmlspecialchars($url('admin/media?page=' . $prevPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span>Předchozí</span></a>
+                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" data-media-next href="<?= htmlspecialchars($url('admin/media?page=' . $nextPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span>Další</span><?= $icon('next') ?></a>
             </div>
         <?php else: ?>
             <div></div>
         <?php endif; ?>
 
         <form method="get" class="d-flex gap-2 align-center">
-            <select name="per_page">
+            <select name="per_page" data-media-per-page>
                 <?php foreach ($allowedPerPage as $option): ?>
                     <option value="<?= (int)$option ?>" <?= $perPage === (int)$option ? 'selected' : '' ?>><?= (int)$option ?></option>
                 <?php endforeach; ?>
@@ -101,12 +100,13 @@ if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
     </div>
 </div>
 
-<div class="modal-overlay" data-modal>
+<div class="modal-overlay" data-media-delete-modal>
     <div class="modal">
-        <p data-modal-text>Skutečně smazat?</p>
+        <p>Skutečně smazat toto médium?</p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="">Potvrdit</button>
+            <button class="btn btn-light" type="button" data-media-delete-cancel>Zrušit</button>
+            <button class="btn btn-primary" type="button" data-media-delete-confirm>Potvrdit</button>
         </div>
     </div>
+</div>
 </div>

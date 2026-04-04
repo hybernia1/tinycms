@@ -74,6 +74,32 @@ abstract class BaseAdminController
         return $state;
     }
 
+    protected function wantsJson(): bool
+    {
+        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
+        return str_contains($accept, 'application/json');
+    }
+
+    protected function jsonError(string $message, int $statusCode = 422): void
+    {
+        $this->respondJson([
+            'success' => false,
+            'message' => $message,
+        ], $statusCode);
+    }
+
+    protected function jsonSuccess(array $payload = [], int $statusCode = 200): void
+    {
+        $this->respondJson(array_merge(['success' => true], $payload), $statusCode);
+    }
+
+    protected function respondJson(array $payload, int $statusCode = 200): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code($statusCode);
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
+
     private function ensureSession(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
