@@ -14,6 +14,29 @@ const icon = (name) => iconSprite !== ''
     ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${esc(iconSprite)}#icon-${esc(name)}"></use></svg>`
     : '';
 
+const pushFlash = (type, message) => {
+    const text = String(message || '').trim();
+    if (text === '') {
+        return;
+    }
+
+    const container = document.querySelector('.admin-content');
+    if (!container) {
+        return;
+    }
+
+    const flashType = ['success', 'error', 'info'].includes(type) ? type : 'info';
+    const flash = document.createElement('div');
+    flash.className = `flash flash-${flashType}`;
+    flash.innerHTML = `
+        <span>${esc(text)}</span>
+        <button type="button" data-flash-close aria-label="Zavřít notifikaci" title="Zavřít notifikaci">
+            ${icon('cancel')}
+        </button>
+    `;
+    container.prepend(flash);
+};
+
 const initListApi = (config) => {
     const root = document.querySelector(config.rootSelector);
     if (!root) {
@@ -21,6 +44,7 @@ const initListApi = (config) => {
     }
 
     const endpoint = root.getAttribute('data-endpoint') || '';
+    const endpointBase = endpoint.replace(/\/$/, '');
     const editBase = root.getAttribute('data-edit-base') || '';
     const csrfInput = root.querySelector(`[data-${config.name}-csrf] input[name="_csrf"]`);
     const searchField = root.querySelector(`[data-${config.name}-search]`);
@@ -51,6 +75,7 @@ const initListApi = (config) => {
 
     let pendingDeleteId = 0;
     let searchTimer = null;
+    let fetchController = null;
 
     const setPagination = (page, totalPages) => {
         if (!prevLink || !nextLink) {
@@ -81,6 +106,11 @@ const initListApi = (config) => {
             return;
         }
 
+        if (fetchController) {
+            fetchController.abort();
+        }
+        fetchController = new AbortController();
+
         const url = new URL(endpoint, window.location.origin);
         url.searchParams.set('page', String(state.page));
         url.searchParams.set('per_page', String(state.perPage));
@@ -93,7 +123,18 @@ const initListApi = (config) => {
             url.searchParams.set('q', state.query);
         }
 
-        const response = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
+        const response = await fetch(url.toString(), {
+            headers: { Accept: 'application/json' },
+            signal: fetchController.signal,
+        }).catch((error) => {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return null;
+            }
+            throw error;
+        });
+        if (!response) {
+            return;
+        }
         if (!response.ok) {
             return;
         }
@@ -120,11 +161,20 @@ const initListApi = (config) => {
         });
 
         if (!response.ok) {
-            return false;
+            const errorData = await response.json().catch(() => ({}));
+            const message = String(errorData.message || '');
+            if (message !== '') {
+                pushFlash('error', message);
+            }
+            return { success: false };
         }
 
         const data = await response.json().catch(() => ({}));
-        return data.success === true;
+        if (data.success !== true && data.message) {
+            pushFlash('error', String(data.message));
+        }
+
+        return data;
     };
 
     root.addEventListener('click', async (event) => {
@@ -164,8 +214,11 @@ const initListApi = (config) => {
                 const id = Number(toggle.getAttribute(`data-${config.name}-toggle`) || '0');
                 const mode = toggle.getAttribute(`data-${config.name}-mode`) || config.toggle.defaultMode;
                 if (id > 0) {
-                    const ok = await postAction(`${endpoint.replace(/\/$/, '')}/${config.toggle.path}`, { id, mode });
-                    if (ok) {
+                    const result = await postAction(`${endpointBase}/${config.toggle.path}`, { id, mode });
+                    if (result.success === true) {
+                        if (config.messages?.toggleSuccess) {
+                            pushFlash('success', config.messages.toggleSuccess(mode));
+                        }
                         await fetchList();
                     }
                 }
@@ -198,11 +251,16 @@ const initListApi = (config) => {
                 return;
             }
 
-            const ok = await postAction(`${endpoint.replace(/\/$/, '')}/delete`, { id: pendingDeleteId });
-            if (ok) {
+            deleteConfirm.disabled = true;
+            const result = await postAction(`${endpointBase}/delete`, { id: pendingDeleteId });
+            deleteConfirm.disabled = false;
+            if (result.success === true) {
                 pendingDeleteId = 0;
                 if (deleteModal) {
                     deleteModal.classList.remove('open');
+                }
+                if (config.messages?.deleteSuccess) {
+                    pushFlash('success', config.messages.deleteSuccess);
                 }
                 await fetchList();
             }
@@ -237,6 +295,10 @@ initListApi({
     rootSelector: '[data-content-list]',
     withStatus: true,
     toggle: { path: 'status-toggle', defaultMode: 'draft' },
+    messages: {
+        deleteSuccess: 'Obsah smazán.',
+        toggleSuccess: (mode) => mode === 'publish' ? 'Obsah publikován.' : 'Obsah přepnut do draftu.',
+    },
     rowHtml: (item, { editBase }) => {
         const status = String(item.status || 'draft');
         const statusClass = status === 'published' ? 'text-bg-success' : (status === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
@@ -273,6 +335,7 @@ initListApi({
     name: 'terms',
     rootSelector: '[data-terms-list]',
     withStatus: false,
+    messages: { deleteSuccess: 'Štítek smazán.' },
     rowHtml: (item, { editBase }) => {
         const id = Number(item.id || 0);
 
@@ -298,6 +361,7 @@ initListApi({
     name: 'media',
     rootSelector: '[data-media-list]',
     withStatus: false,
+    messages: { deleteSuccess: 'Médium smazáno.' },
     getContext: (root) => ({ thumbSuffix: root.getAttribute('data-thumb-suffix') || '_100x100.webp' }),
     rowHtml: (item, { editBase, context }) => {
         const thumbSuffix = context.thumbSuffix || '_100x100.webp';
@@ -337,6 +401,10 @@ initListApi({
     rootSelector: '[data-users-list]',
     withStatus: true,
     toggle: { path: 'suspend-toggle', defaultMode: 'suspend' },
+    messages: {
+        deleteSuccess: 'Uživatel smazán.',
+        toggleSuccess: (mode) => mode === 'unsuspend' ? 'Uživatel odsuspendován.' : 'Uživatel suspendován.',
+    },
     rowHtml: (item, { editBase }) => {
         const id = Number(item.id || 0);
         const isSuspended = item.is_suspended === true;
