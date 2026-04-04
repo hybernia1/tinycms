@@ -4,6 +4,11 @@ $createdStamp = $createdRaw !== '' ? strtotime($createdRaw) : false;
 $createdAt = $createdStamp !== false ? date('Y-m-d\\TH:i', $createdStamp) : '';
 ?>
 <?php
+$initialTerms = array_values(array_filter(array_map(static fn($term): string => trim((string)$term), (array)($selectedTerms ?? []))));
+$termsValue = implode(', ', $initialTerms);
+$termsJson = htmlspecialchars(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]', ENT_QUOTES, 'UTF-8');
+?>
+<?php
 $thumbnailPath = trim((string)($item['thumbnail_path_webp'] ?? ''));
 if ($thumbnailPath === '') {
     $thumbnailPath = trim((string)($item['thumbnail_path'] ?? ''));
@@ -76,6 +81,26 @@ $contentId = (int)($item['id'] ?? 0);
                         <?php endforeach; ?>
                     </select>
                     <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="content-box-header">Štítky</div>
+                <div class="p-3">
+                    <?php if ($mode === 'add'): ?>
+                        <small class="text-muted">Uložte obsah a štítky se přiřadí.</small>
+                    <?php endif; ?>
+                    <div
+                        class="tag-picker"
+                        data-tag-picker
+                        data-suggest-endpoint="<?= htmlspecialchars($url('admin/terms/suggest'), ENT_QUOTES, 'UTF-8') ?>"
+                        data-initial="<?= $termsJson ?>"
+                    >
+                        <div class="tag-picker-chips" data-tag-picker-chips></div>
+                        <input class="tag-picker-input" type="text" data-tag-picker-input placeholder="Najít nebo přidat štítek">
+                        <div class="tag-picker-suggestions" data-tag-picker-suggestions></div>
+                        <input type="hidden" name="terms" value="<?= htmlspecialchars($termsValue, ENT_QUOTES, 'UTF-8') ?>" data-tag-picker-value>
+                    </div>
                 </div>
             </div>
             <div class="card">

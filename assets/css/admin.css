@@ -403,3 +403,69 @@ body {
         display: block;
     }
 }
+
+.tag-picker {
+    position: relative;
+    border: 1px solid #d8d8d8;
+    border-radius: 10px;
+    padding: 8px;
+    background: #fff;
+}
+
+.tag-picker-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.tag-picker-chip {
+    border: 0;
+    background: #f1f2f3;
+    border-radius: 999px;
+    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.tag-picker-input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    padding: 4px;
+}
+
+.tag-picker-suggestions {
+    display: none;
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: calc(100% + 6px);
+    border: 1px solid #d8d8d8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+    z-index: 10;
+    max-height: 220px;
+    overflow: auto;
+}
+
+.tag-picker-suggestions.open {
+    display: block;
+}
+
+.tag-picker-suggestion {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: transparent;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.tag-picker-suggestion:hover {
+    background: #f6f7f8;
+}

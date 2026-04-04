@@ -7,6 +7,7 @@ use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;
 use App\Service\Feature\MediaService;
 use App\Service\Feature\UploadService;
+use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Feature\UserService;
@@ -24,6 +25,7 @@ final class AdminContentController extends BaseAdminController
         private MediaService $media,
         private UploadService $upload,
         private UserService $users,
+        private TermService $terms,
         FlashService $flash,
         CsrfService $csrf
     ) {
@@ -110,7 +112,9 @@ final class AdminContentController extends BaseAdminController
         $fallback['author'] = (int)($this->authService->auth()->id() ?? 0);
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
         $statuses = $this->content->statuses();
-        $this->pages->adminContentForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $statuses, $this->users->authorOptions());
+        $item = $state['data'] ?? $fallback;
+        $selectedTerms = $this->resolveSelectedTerms($item, null);
+        $this->pages->adminContentForm('add', $item, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
     }
 
     public function addSubmit(callable $redirect): void
@@ -126,8 +130,11 @@ final class AdminContentController extends BaseAdminController
         $result = $this->content->save($_POST, $authorId);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', 'Obsah vytvořen.');
             $newId = (int)($result['id'] ?? 0);
+            if ($newId > 0) {
+                $this->terms->syncContentTerms($newId, (string)($_POST['terms'] ?? ''));
+            }
+            $this->flash->add('success', 'Obsah vytvořen.');
             $redirect($newId > 0 ? $this->editPath($newId) : 'admin/content');
         }
 
@@ -153,7 +160,9 @@ final class AdminContentController extends BaseAdminController
 
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $statuses = $this->content->statuses();
-        $this->pages->adminContentForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $statuses, $this->users->authorOptions());
+        $formItem = $state['data'] ?? $item;
+        $selectedTerms = $this->resolveSelectedTerms($formItem, $id);
+        $this->pages->adminContentForm('edit', $formItem, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
     }
 
     public function editSubmit(callable $redirect): void
@@ -177,6 +186,7 @@ final class AdminContentController extends BaseAdminController
         $result = $this->content->save($_POST, $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
+            $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
             $this->flash->add('success', 'Obsah upraven.');
             $redirect($this->editPath($id));
         }
@@ -665,6 +675,36 @@ final class AdminContentController extends BaseAdminController
         }
 
         return false;
+    }
+
+    private function resolveSelectedTerms(array $item, ?int $contentId): array
+    {
+        if (array_key_exists('terms', $item)) {
+            return $this->normalizeTermNames((string)$item['terms']);
+        }
+
+        if ($contentId !== null && $contentId > 0) {
+            return $this->terms->namesByContent($contentId);
+        }
+
+        return [];
+    }
+
+    private function normalizeTermNames(string $rawTerms): array
+    {
+        $parts = preg_split('/[\n,]+/', $rawTerms) ?: [];
+        $terms = [];
+
+        foreach ($parts as $part) {
+            $value = trim((string)$part);
+            if ($value === '') {
+                continue;
+            }
+            $key = mb_strtolower($value);
+            $terms[$key] = mb_substr($value, 0, 255);
+        }
+
+        return array_values($terms);
     }
 
 }
