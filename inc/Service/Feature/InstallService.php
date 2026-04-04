@@ -85,13 +85,12 @@ final class InstallService
         ];
     }
 
-    public function install(array $db, array $admin): array
+    public function install(array $db): array
     {
         try {
             $pdo = $this->connect($db);
             $pdo->beginTransaction();
             $this->createSchema($pdo);
-            $this->createAdmin($pdo, $admin);
             $pdo->commit();
             $this->writeConfig($db);
             return ['success' => true, 'message' => 'Instalace proběhla úspěšně.'];
@@ -211,27 +210,5 @@ final class InstallService
         foreach ($sql as $query) {
             $pdo->exec($query);
         }
-    }
-
-    private function createAdmin(PDO $pdo, array $admin): void
-    {
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
-        $stmt->execute(['email' => $admin['email']]);
-
-        if ($stmt->fetchColumn() !== false) {
-            throw new \RuntimeException('Admin exists.');
-        }
-
-        $insert = $pdo->prepare('INSERT INTO users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)');
-        $now = date('Y-m-d H:i:s');
-        $insert->execute([
-            'name' => $admin['name'],
-            'email' => $admin['email'],
-            'password' => password_hash((string)$admin['password'], PASSWORD_DEFAULT),
-            'role' => 'admin',
-            'suspend' => 0,
-            'created' => $now,
-            'updated' => $now,
-        ]);
     }
 }
