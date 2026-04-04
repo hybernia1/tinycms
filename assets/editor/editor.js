@@ -401,8 +401,12 @@
             if (detail.editorId !== editorId || !detail.url) {
                 return;
             }
+            var mediaId = Number(detail.id || 0);
+            if (mediaId <= 0) {
+                return;
+            }
             restoreSelection(mediaRange, editor);
-            document.execCommand('insertHTML', false, '<img src="' + String(detail.url).replace(/"/g, '&quot;') + '" alt="' + String(detail.name || '').replace(/"/g, '&quot;') + '">');
+            document.execCommand('insertHTML', false, '<img src="' + String(detail.url).replace(/"/g, '&quot;') + '" alt="' + String(detail.name || '').replace(/"/g, '&quot;') + '" data-media-id="' + mediaId + '">');
             normalizeBlocks(editor);
             sync(textarea, editor);
             updateFormatState();
