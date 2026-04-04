@@ -104,9 +104,15 @@ body {
     font-weight: 600;
 }
 
+.content-editor-form {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
 .content-editor-layout {
     display: grid;
     gap: var(--space-3);
+    min-width: 0;
 }
 
 .content-editor-layout > * {
