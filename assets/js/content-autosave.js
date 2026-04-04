@@ -94,6 +94,12 @@
                 uploadForm.action = contentApi('/admin/api/v1/content/' + value + '/media/upload');
             }
 
+            var selectForm = document.querySelector('[data-media-library-select-form]');
+            if (selectForm) {
+                selectForm.action = contentApi('/admin/api/v1/content/' + value + '/thumbnail/0/select');
+                selectForm.setAttribute('data-action-template', contentApi('/admin/api/v1/content/' + value + '/thumbnail/{mediaId}/select'));
+            }
+
             if (editUrlBase !== '') {
                 form.action = editUrlBase + value;
                 if (window.location.search.indexOf('id=') === -1) {

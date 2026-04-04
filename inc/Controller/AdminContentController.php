@@ -376,7 +376,7 @@ final class AdminContentController extends BaseAdminController
         $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
     }
 
-    public function thumbnailSelectSubmit(callable $redirect): void
+    public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -385,25 +385,30 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $id = (int)($_POST['id'] ?? 0);
-        $mediaId = (int)($_POST['media_id'] ?? 0);
-        $item = $this->content->find($id);
-
-        if ($item === null) {
-            $this->flash->add('error', 'Obsah nenalezen.');
-            $redirect('admin/content');
+        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
             return;
         }
 
-        if ($mediaId <= 0 || $this->media->find($mediaId) === null) {
-            $this->flash->add('error', 'Médium nenalezeno.');
-            $redirect($this->editPath($id));
+        $media = $this->media->find($mediaId);
+        if ($mediaId <= 0 || $media === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => 'Médium nenalezeno.']], 404);
             return;
         }
 
-        $ok = $this->content->setThumbnail($id, $mediaId);
-        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Náhled byl přiřazen.' : 'Náhled se nepodařilo přiřadit.');
-        $redirect($this->editPath($id));
+        if (!$this->content->setThumbnail($contentId, $mediaId)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SELECT_FAILED', 'message' => 'Náhled se nepodařilo přiřadit.']], 422);
+            return;
+        }
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => [
+                'content_id' => $contentId,
+                'media_id' => $mediaId,
+                'media' => $this->mapLibraryItem($media),
+            ],
+        ]);
     }
 
     public function thumbnailDeleteSubmit(callable $redirect): void

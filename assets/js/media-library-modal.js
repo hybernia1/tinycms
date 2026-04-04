@@ -87,6 +87,22 @@ if (modal && openTrigger) {
         }
     };
 
+    const setTriggerThumbnail = (media) => {
+        if (!openTrigger || !media) {
+            return;
+        }
+
+        const imagePath = absoluteUrl(media.preview_path || media.webp_path || media.path || '');
+        if (imagePath === '') {
+            return;
+        }
+
+        openTrigger.classList.remove('empty');
+        openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
+        openTrigger.innerHTML = '<div class="content-thumbnail-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
+        currentMediaId = Number(media.id || 0);
+    };
+
     const absoluteUrl = (path) => {
         if (!path) {
             return '';
@@ -445,7 +461,21 @@ if (modal && openTrigger) {
             }
 
             mediaIdField.value = String(selectedMedia.id);
-            selectForm.submit();
+            const selectAction = resolveAction(selectForm, selectedMedia.id);
+            const response = await fetch(selectAction, {
+                method: 'POST',
+                body: new FormData(selectForm),
+                headers: { Accept: 'application/json' },
+            });
+            const data = normalizePayload(await response.json().catch(() => ({})));
+            if (!response.ok || !data.success) {
+                setStatus(data.message || 'Náhled se nepodařilo přiřadit.');
+                return;
+            }
+            if (data.data && data.data.media) {
+                setTriggerThumbnail(data.data.media);
+            }
+            close();
         });
     }
 

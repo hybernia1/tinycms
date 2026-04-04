@@ -208,7 +208,7 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
     </div>
 </div>
-<form method="post" action="<?= htmlspecialchars($url('admin/content/thumbnail/select'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-select-form>
+<form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/thumbnail/0/select'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-select-form data-action-template="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/thumbnail/{mediaId}/select'), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <input type="hidden" name="id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-media-id>
