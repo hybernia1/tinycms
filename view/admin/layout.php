@@ -32,7 +32,7 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
 </head>
 <body
     data-auth-check-endpoint="<?= htmlspecialchars($url('admin/api/v1/auth/check'), ENT_QUOTES, 'UTF-8') ?>"
-    data-home-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
+    data-auth-login-endpoint="<?= htmlspecialchars($url('admin/api/v1/auth/login'), ENT_QUOTES, 'UTF-8') ?>"
 >
 <?= $editorIcons ?>
 <div class="admin-shell">
@@ -109,7 +109,7 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
 <div class="modal-overlay" data-auth-check-modal>
     <div class="modal">
         <p data-auth-check-modal-text>Byli jste odhlášeni. Přihlaste se znovu.</p>
-        <form method="post" action="<?= htmlspecialchars($url('login'), ENT_QUOTES, 'UTF-8') ?>" data-auth-check-login hidden>
+        <form method="post" action="<?= htmlspecialchars($url('admin/api/v1/auth/login'), ENT_QUOTES, 'UTF-8') ?>" data-auth-check-login hidden>
             <?= $csrfField() ?>
             <div class="mb-3">
                 <label>Email</label>

@@ -17,6 +17,10 @@ $router->get('admin/api/v1/auth/check', static function () use ($admin): void {
     $admin->authCheckApiV1();
 });
 
+$router->post('admin/api/v1/auth/login', static function () use ($admin): void {
+    $admin->authLoginApiV1();
+});
+
 $router->get('admin/users', static function () use ($adminUsers, $redirect): void {
     $adminUsers->list($redirect);
 });

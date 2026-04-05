@@ -41,8 +41,9 @@
         }
 
         var endpoint = body.getAttribute('data-auth-check-endpoint') || '';
-        var homeUrl = body.getAttribute('data-home-url') || '/';
+        var loginEndpoint = body.getAttribute('data-auth-login-endpoint') || '';
         var pending = null;
+        var loginForm = document.querySelector('[data-auth-check-login]');
         var loginCsrfInput = document.querySelector('[data-auth-check-login] input[name="_csrf"]');
 
         function syncLoginCsrf(payload) {
@@ -54,6 +55,11 @@
             if (token !== '') {
                 loginCsrfInput.value = token;
             }
+        }
+
+        function syncLoginMessage(payload, fallback) {
+            var message = String(payload?.error?.message || '').trim();
+            openModal(message !== '' ? message : fallback, 'login');
         }
 
         async function ensureAccess(force) {
@@ -69,13 +75,16 @@
             pending = fetch(endpoint, { headers: { Accept: 'application/json' } })
                 .then(async function (response) {
                     if (response.status === 401) {
-                        syncLoginCsrf(await response.json().catch(function () { return {}; }));
-                        openModal('Byli jste odhlášeni. Přihlaste se znovu.', 'login');
+                        var payload401 = await response.json().catch(function () { return {}; });
+                        syncLoginCsrf(payload401);
+                        syncLoginMessage(payload401, 'Byli jste odhlášeni. Přihlaste se znovu.');
                         return false;
                     }
 
                     if (response.status === 403) {
-                        window.location.href = homeUrl;
+                        var payload403 = await response.json().catch(function () { return {}; });
+                        syncLoginCsrf(payload403);
+                        syncLoginMessage(payload403, 'Nemáte dostatečná oprávnění.');
                         return false;
                     }
 
@@ -112,6 +121,40 @@
                 closeModal();
             }
         });
+
+        if (loginForm && loginEndpoint !== '') {
+            loginForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                if (!navigator.onLine) {
+                    reportOffline();
+                    return;
+                }
+
+                var response = await fetch(loginEndpoint, {
+                    method: 'POST',
+                    body: new FormData(loginForm),
+                    headers: { Accept: 'application/json' },
+                }).catch(function () {
+                    reportOffline();
+                    return null;
+                });
+                if (!response) {
+                    return;
+                }
+
+                var payload = await response.json().catch(function () { return {}; });
+                syncLoginCsrf(payload);
+
+                if (response.ok && payload?.ok === true) {
+                    closeModal();
+                    ensureAccess(true).catch(function () { return null; });
+                    return;
+                }
+
+                syncLoginMessage(payload, 'Přihlášení selhalo.');
+            });
+        }
 
         ensureAccess(true).catch(function () { return null; });
         window.setInterval(function () {
