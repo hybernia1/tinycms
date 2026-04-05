@@ -165,6 +165,7 @@ if (modal && openTrigger) {
             button.dataset.mediaWebpPath = String(item.webp_path || '');
             button.dataset.mediaCreated = String(item.created || '');
             button.dataset.mediaPreviewPath = previewPath;
+            button.dataset.mediaCanDelete = item.can_delete === true ? '1' : '0';
             grid.appendChild(button);
         });
     };
@@ -186,6 +187,7 @@ if (modal && openTrigger) {
             webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
             previewPath: target.dataset.mediaPreviewPath || '',
+            canDelete: target.dataset.mediaCanDelete === '1',
         };
 
         grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
@@ -225,7 +227,9 @@ if (modal && openTrigger) {
         }
 
         if (deleteButton) {
-            deleteButton.disabled = !selectedMedia;
+            const canDelete = !!(selectedMedia && selectedMedia.canDelete);
+            deleteButton.disabled = !canDelete;
+            deleteButton.classList.toggle('d-none', !canDelete);
         }
 
         if (renameButton) {

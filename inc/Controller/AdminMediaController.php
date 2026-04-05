@@ -103,7 +103,7 @@ final class AdminMediaController extends BaseAdminController
             'path_webp' => (string)($uploadData['path_webp'] ?? ''),
             'author' => trim((string)($_POST['author'] ?? '')) !== '' ? (string)$_POST['author'] : ($authorId > 0 ? (string)$authorId : ''),
         ]);
-        $result = $this->media->save($input);
+        $result = $this->media->save($this->normalizeMediaInput($input, $authorId));
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.created', 'Media created.'));
@@ -194,7 +194,8 @@ final class AdminMediaController extends BaseAdminController
             }
         }
 
-        $result = $this->media->save($input, $id);
+        $authorId = (int)($this->authService->auth()->id() ?? 0);
+        $result = $this->media->save($this->normalizeMediaInput($input, $authorId), $id);
 
         if (($result['success'] ?? false) === true) {
             if (is_array($newUploadData)) {
@@ -282,6 +283,16 @@ final class AdminMediaController extends BaseAdminController
     private function hasUpload(string $field): bool
     {
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    }
+
+    private function normalizeMediaInput(array $input, int $authorId): array
+    {
+        if (!$this->isEditor()) {
+            return $input;
+        }
+
+        $input['author'] = $authorId > 0 ? (string)$authorId : '';
+        return $input;
     }
 
     private function canDeleteMedia(array $item): bool

@@ -126,7 +126,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($_POST, $authorId);
+        $result = $this->content->save($this->normalizeContentInput($_POST, $authorId), $authorId);
 
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
@@ -201,7 +201,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($_POST, $authorId, $id);
+        $result = $this->content->save($this->normalizeContentInput($_POST, $authorId), $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
@@ -706,14 +706,31 @@ final class AdminContentController extends BaseAdminController
             $name = I18n::t('content.untitled', '(untitled)');
         }
 
+        $author = trim((string)($input['author'] ?? ''));
+        if ($this->isEditor()) {
+            $author = $authorId > 0 ? (string)$authorId : '';
+        } elseif ($author === '' && $authorId > 0) {
+            $author = (string)$authorId;
+        }
+
         return [
             'name' => $name,
             'status' => trim((string)($input['status'] ?? 'draft')) ?: 'draft',
             'excerpt' => (string)($input['excerpt'] ?? ''),
             'body' => (string)($input['body'] ?? ''),
-            'author' => trim((string)($input['author'] ?? '')) !== '' ? (string)$input['author'] : ($authorId > 0 ? (string)$authorId : ''),
+            'author' => $author,
             'created' => (string)($input['created'] ?? ''),
         ];
+    }
+
+    private function normalizeContentInput(array $input, int $authorId): array
+    {
+        if (!$this->isEditor()) {
+            return $input;
+        }
+
+        $input['author'] = $authorId > 0 ? (string)$authorId : '';
+        return $input;
     }
 
     private function resolveListQuery(): array
@@ -784,6 +801,7 @@ final class AdminContentController extends BaseAdminController
         return [
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
+            'can_delete' => $this->canDeleteMedia($item),
             'preview_path' => $this->resolvePreviewPath($item),
             'path' => (string)($item['path'] ?? ''),
             'webp_path' => (string)($item['path_webp'] ?? ''),
