@@ -242,6 +242,20 @@
         return source ? source.closest('a') : null;
     }
 
+    function getSelectionContainer(editor) {
+        var selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
+            return null;
+        }
+        var node = selection.anchorNode;
+        return node && node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+    }
+
+    function isSelectionInsideTag(editor, tagName) {
+        var container = getSelectionContainer(editor);
+        return !!(container && container.closest(tagName));
+    }
+
     function createIconButton(icon, command, title) {
         var button = document.createElement('button');
         button.type = 'button';
@@ -471,10 +485,12 @@
             if (htmlMode || !isSelectionInside(editor)) {
                 bold.classList.remove('is-active');
                 italic.classList.remove('is-active');
+                quote.classList.remove('is-active');
                 return;
             }
             bold.classList.toggle('is-active', document.queryCommandState('bold'));
             italic.classList.toggle('is-active', document.queryCommandState('italic'));
+            quote.classList.toggle('is-active', isSelectionInsideTag(editor, 'blockquote'));
         }
 
         function runCommand(command, value) {
@@ -634,6 +650,12 @@
             }
 
             if (command.indexOf('formatBlock:') === 0) {
+                if (command === 'formatBlock:blockquote') {
+                    if (isSelectionInsideTag(editor, 'blockquote')) {
+                        runCommand('formatBlock', '<p>');
+                        return;
+                    }
+                }
                 runCommand('formatBlock', '<' + command.split(':')[1] + '>');
                 return;
             }
@@ -848,6 +870,21 @@
                     }
                     placeCaret(target);
                     sync(textarea, editor);
+                    return;
+                }
+            }
+
+            if (event.key === 'Enter' && !event.shiftKey) {
+                var quoteContainer = getSelectionContainer(editor);
+                var quoteBlock = quoteContainer ? quoteContainer.closest('blockquote') : null;
+                if (quoteBlock) {
+                    event.preventDefault();
+                    var paragraph = document.createElement('p');
+                    paragraph.innerHTML = '<br>';
+                    quoteBlock.parentNode.insertBefore(paragraph, quoteBlock.nextSibling);
+                    placeCaret(paragraph);
+                    sync(textarea, editor);
+                    updateFormatState();
                     return;
                 }
             }
