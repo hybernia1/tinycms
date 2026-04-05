@@ -17,6 +17,7 @@ return [
         'term' => [
             'title' => 'Štítek',
             'no_posts' => 'Pro tento štítek zatím nejsou žádné publikované články.',
+            'meta_description_prefix' => 'Články na téma',
         ],
         'search' => [
             'title' => 'Vyhledávání',
@@ -25,6 +26,7 @@ return [
             'results_for' => 'Výsledky hledání pro',
             'no_results' => 'Nenalezen žádný publikovaný obsah.',
             'meta_description' => 'Výsledky hledání na webu.',
+            'meta_description_prefix' => 'Výsledky vyhledávání pro',
         ],
     ],
 ];

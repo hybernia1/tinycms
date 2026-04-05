@@ -72,15 +72,16 @@ final class PageView
     {
         $resolvedTheme = $this->themes->resolveTheme($theme);
         $termSlug = (string)($term['slug'] ?? '');
+        $termName = (string)($term['name'] ?? '');
         $this->view->renderTheme($resolvedTheme, 'terms', [
             'term' => $term,
             'posts' => $posts,
             'pagination' => $pagination,
             'themeName' => $resolvedTheme,
-            'pageTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
-            'metaTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
-            'metaDescription' => trim(strip_tags((string)($term['body'] ?? ''))),
-            'metaKeywords' => [(string)($term['name'] ?? '')],
+            'pageTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
+            'metaTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
+            'metaDescription' => I18n::t('front.term.meta_description_prefix', 'Articles on topic') . ': ' . $termName,
+            'metaKeywords' => [$termName],
             'metaPath' => $termSlug !== '' ? 'term/' . $termSlug : '',
             'metaOgType' => 'website',
             'metaSearchUrlTemplate' => 'search?q={search_term_string}',
@@ -100,7 +101,9 @@ final class PageView
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'pageTitle' => $title,
             'metaTitle' => $title,
-            'metaDescription' => I18n::t('front.search.meta_description', 'Search results on the website.'),
+            'metaDescription' => $query === ''
+                ? I18n::t('front.search.meta_description', 'Search results on the website.')
+                : I18n::t('front.search.meta_description_prefix', 'Search results for') . ': ' . $query,
             'metaKeywords' => $query !== '' ? [$query] : [],
             'metaPath' => $query !== '' ? 'search?q=' . rawurlencode($query) : 'search',
             'metaRobots' => 'noindex,follow',

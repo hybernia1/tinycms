@@ -17,6 +17,7 @@ return [
         'term' => [
             'title' => 'Tag',
             'no_posts' => 'There are no published posts for this tag yet.',
+            'meta_description_prefix' => 'Articles on topic',
         ],
         'search' => [
             'title' => 'Search',
@@ -25,6 +26,7 @@ return [
             'results_for' => 'Search results for',
             'no_results' => 'No matching published content found.',
             'meta_description' => 'Search results on the website.',
+            'meta_description_prefix' => 'Search results for',
         ],
     ],
 ];
