@@ -52,7 +52,9 @@
     z-index: 4;
 }
 
-.wysiwyg.is-list-open .wysiwyg-menu {
+.wysiwyg.is-heading-open .wysiwyg-menu-heading,
+.wysiwyg.is-list-open .wysiwyg-menu-list,
+.wysiwyg.is-align-open .wysiwyg-menu-align {
     display: block;
 }
 
@@ -113,9 +115,22 @@
 }
 
 .wysiwyg-editor p,
+.wysiwyg-editor h1,
+.wysiwyg-editor h2,
+.wysiwyg-editor h3,
+.wysiwyg-editor h4,
+.wysiwyg-editor h5,
+.wysiwyg-editor h6,
+.wysiwyg-editor blockquote,
 .wysiwyg-editor ul,
 .wysiwyg-editor ol {
     margin: 0 0 var(--space-2);
+}
+
+.wysiwyg-editor blockquote {
+    border-left: 3px solid var(--color-border-soft);
+    padding-left: var(--space-3);
+    color: var(--color-text-muted);
 }
 
 .wysiwyg-editor .block {

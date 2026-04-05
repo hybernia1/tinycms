@@ -8,6 +8,9 @@
   <symbol id="w-link" viewBox="0 0 24 24">
     <path d="M10.5 13.5 13.5 10.5M8 16a4 4 0 0 1 0-5.7l2.3-2.3a4 4 0 0 1 5.7 0M16 8a4 4 0 0 1 0 5.7l-2.3 2.3a4 4 0 0 1-5.7 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
+  <symbol id="w-heading" viewBox="0 0 24 24">
+    <path d="M5 5v14M13 5v14M5 12h8M16 9l3-2v12M16 15h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
   <symbol id="w-ul" viewBox="0 0 24 24">
     <path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
@@ -22,5 +25,20 @@
   </symbol>
   <symbol id="w-image" viewBox="0 0 24 24">
     <path d="M4 5h16v14H4zM8 11l2.5 3L14 10l4 5M9 9h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="w-quote" viewBox="0 0 24 24">
+    <path d="M7 9h4v4H7v3h3a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3H7v3Zm8 0h4v4h-4v3h3a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-3v3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="w-align-left" viewBox="0 0 24 24">
+    <path d="M4 6h16M4 10h10M4 14h16M4 18h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="w-align-center" viewBox="0 0 24 24">
+    <path d="M4 6h16M7 10h10M4 14h16M7 18h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="w-align-right" viewBox="0 0 24 24">
+    <path d="M4 6h16M10 10h10M4 14h16M10 18h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="w-align-justify" viewBox="0 0 24 24">
+    <path d="M4 6h16M4 10h16M4 14h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
 </svg>

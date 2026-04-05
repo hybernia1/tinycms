@@ -245,17 +245,56 @@
         return item;
     }
 
+    function createHeadingGroup() {
+        var group = document.createElement('div');
+        group.className = 'wysiwyg-group wysiwyg-group-heading';
+
+        var toggle = createIconButton('w-heading', 'toggleHeadingMenu', 'Nadpisy');
+
+        var menu = document.createElement('div');
+        menu.className = 'wysiwyg-menu wysiwyg-menu-heading';
+
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:p', 'Odstavec'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h1', 'Nadpis 1'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h2', 'Nadpis 2'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h3', 'Nadpis 3'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h4', 'Nadpis 4'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h5', 'Nadpis 5'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h6', 'Nadpis 6'));
+        group.appendChild(toggle);
+        group.appendChild(menu);
+        return group;
+    }
+
     function createListGroup() {
         var group = document.createElement('div');
-        group.className = 'wysiwyg-group';
+        group.className = 'wysiwyg-group wysiwyg-group-list';
 
         var toggle = createIconButton('w-ul', 'toggleListMenu', 'Seznamy');
 
         var menu = document.createElement('div');
-        menu.className = 'wysiwyg-menu';
+        menu.className = 'wysiwyg-menu wysiwyg-menu-list';
 
         menu.appendChild(createMenuItem('w-ul', 'insertUnorderedList', 'Odrážky'));
         menu.appendChild(createMenuItem('w-ol', 'insertOrderedList', 'Číslování'));
+        group.appendChild(toggle);
+        group.appendChild(menu);
+        return group;
+    }
+
+    function createAlignGroup() {
+        var group = document.createElement('div');
+        group.className = 'wysiwyg-group wysiwyg-group-align';
+
+        var toggle = createIconButton('w-align-left', 'toggleAlignMenu', 'Zarovnání');
+
+        var menu = document.createElement('div');
+        menu.className = 'wysiwyg-menu wysiwyg-menu-align';
+
+        menu.appendChild(createMenuItem('w-align-left', 'justifyLeft', 'Vlevo'));
+        menu.appendChild(createMenuItem('w-align-center', 'justifyCenter', 'Na střed'));
+        menu.appendChild(createMenuItem('w-align-right', 'justifyRight', 'Vpravo'));
+        menu.appendChild(createMenuItem('w-align-justify', 'justifyFull', 'Do bloku'));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -309,17 +348,22 @@
         var toolbar = document.createElement('div');
         toolbar.className = 'wysiwyg-toolbar';
 
+        var headingGroup = createHeadingGroup();
         var bold = createIconButton('w-bold', 'bold', 'Tučně');
         var italic = createIconButton('w-italic', 'italic', 'Kurzíva');
+        var quote = createIconButton('w-quote', 'formatBlock:blockquote', 'Citace');
         var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
         var clear = createIconButton('w-clear', 'removeFormat', 'Vyčistit');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
         var media = createIconButton('w-image', 'openMediaLibrary', 'Vložit obrázek');
+        var alignGroup = createAlignGroup();
         var linkPanel = createLinkPanel();
 
+        toolbar.appendChild(headingGroup);
         toolbar.appendChild(bold);
         toolbar.appendChild(italic);
+        toolbar.appendChild(quote);
         toolbar.appendChild(link);
         toolbar.appendChild(listGroup);
         toolbar.appendChild(clear);
@@ -327,6 +371,7 @@
             toolbar.appendChild(media);
         }
         toolbar.appendChild(html);
+        toolbar.appendChild(alignGroup);
 
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
@@ -340,7 +385,9 @@
         var mediaRange = null;
 
         function closeMenus() {
+            wrapper.classList.remove('is-heading-open');
             wrapper.classList.remove('is-list-open');
+            wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-link-open');
             activeLink = null;
         }
@@ -355,13 +402,13 @@
             italic.classList.toggle('is-active', document.queryCommandState('italic'));
         }
 
-        function runCommand(command) {
+        function runCommand(command, value) {
             if (htmlMode) {
                 return;
             }
             editor.focus();
             document.execCommand('defaultParagraphSeparator', false, 'p');
-            document.execCommand(command, false, null);
+            document.execCommand(command, false, value || null);
             normalizeBlocks(editor);
             enhanceImageBlocks(editor);
             sync(textarea, editor);
@@ -424,7 +471,31 @@
                 if (htmlMode) {
                     return;
                 }
+                wrapper.classList.remove('is-heading-open');
+                wrapper.classList.remove('is-align-open');
                 wrapper.classList.toggle('is-list-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleHeadingMenu') {
+                if (htmlMode) {
+                    return;
+                }
+                wrapper.classList.toggle('is-heading-open');
+                wrapper.classList.remove('is-list-open');
+                wrapper.classList.remove('is-align-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleAlignMenu') {
+                if (htmlMode) {
+                    return;
+                }
+                wrapper.classList.remove('is-heading-open');
+                wrapper.classList.remove('is-list-open');
+                wrapper.classList.toggle('is-align-open');
                 wrapper.classList.remove('is-link-open');
                 return;
             }
@@ -447,6 +518,11 @@
                         linkInput.select();
                     }
                 }
+                return;
+            }
+
+            if (command.indexOf('formatBlock:') === 0) {
+                runCommand('formatBlock', '<' + command.split(':')[1] + '>');
                 return;
             }
 
