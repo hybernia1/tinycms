@@ -6,7 +6,6 @@ $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
 $isTermsList = str_ends_with($currentPath, 'admin/terms');
-$editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: '';
 ?>
 <!doctype html>
 <html lang="cs">
@@ -30,7 +29,6 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body>
-<?= $editorIcons ?>
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <h2 class="admin-brand">TinyCMS Admin</h2>

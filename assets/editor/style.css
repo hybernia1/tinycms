@@ -52,8 +52,15 @@
     z-index: 4;
 }
 
-.wysiwyg.is-list-open .wysiwyg-menu {
+.wysiwyg.is-heading-open .wysiwyg-menu-heading,
+.wysiwyg.is-list-open .wysiwyg-menu-list,
+.wysiwyg.is-align-open .wysiwyg-menu-align {
     display: block;
+}
+
+.wysiwyg.is-text-color-open .wysiwyg-menu-color[data-color-type='text'],
+.wysiwyg.is-bg-color-open .wysiwyg-menu-color[data-color-type='background'] {
+    display: grid;
 }
 
 .wysiwyg-menu-item {
@@ -75,6 +82,24 @@
 
 .wysiwyg-menu-item:hover {
     background: var(--color-surface-muted);
+}
+
+.wysiwyg-menu-color {
+    min-width: 9rem;
+    padding: var(--space-2);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-1);
+}
+
+.wysiwyg-color-swatch {
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 1px solid var(--color-border-soft);
+    cursor: pointer;
+}
+
+.wysiwyg-color-swatch:hover {
+    border-color: var(--color-text);
 }
 
 .wysiwyg-link-panel {
@@ -113,9 +138,22 @@
 }
 
 .wysiwyg-editor p,
+.wysiwyg-editor h1,
+.wysiwyg-editor h2,
+.wysiwyg-editor h3,
+.wysiwyg-editor h4,
+.wysiwyg-editor h5,
+.wysiwyg-editor h6,
+.wysiwyg-editor blockquote,
 .wysiwyg-editor ul,
 .wysiwyg-editor ol {
     margin: 0 0 var(--space-2);
+}
+
+.wysiwyg-editor blockquote {
+    border-left: 3px solid var(--color-border-soft);
+    padding-left: var(--space-3);
+    color: var(--color-text-muted);
 }
 
 .wysiwyg-editor .block {

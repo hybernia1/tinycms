@@ -232,7 +232,7 @@
         button.setAttribute('data-command', command);
         button.setAttribute('aria-label', title);
         button.title = title;
-        button.innerHTML = '<svg aria-hidden="true"><use href="#' + icon + '"></use></svg>';
+        button.innerHTML = '<svg aria-hidden="true"><use href="/assets/icons.svg#icon-' + icon + '"></use></svg>';
         return button;
     }
 
@@ -241,21 +241,98 @@
         item.type = 'button';
         item.className = 'wysiwyg-menu-item';
         item.setAttribute('data-command', command);
-        item.innerHTML = '<svg aria-hidden="true"><use href="#' + icon + '"></use></svg><span>' + label + '</span>';
+        item.innerHTML = '<svg aria-hidden="true"><use href="/assets/icons.svg#icon-' + icon + '"></use></svg><span>' + label + '</span>';
         return item;
+    }
+
+    function createColorSwatchButton(command, value) {
+        var item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'wysiwyg-color-swatch';
+        item.setAttribute('data-command', command);
+        item.setAttribute('data-value', value);
+        item.style.backgroundColor = value;
+        item.title = value;
+        item.setAttribute('aria-label', value);
+        return item;
+    }
+
+    function createColorGroup(icon, toggleCommand, swatchCommand, title, type) {
+        var group = document.createElement('div');
+        group.className = 'wysiwyg-group wysiwyg-group-color';
+
+        var toggle = createIconButton(icon, toggleCommand, title);
+
+        var menu = document.createElement('div');
+        menu.className = 'wysiwyg-menu wysiwyg-menu-color';
+        menu.setAttribute('data-color-type', type);
+
+        var colors = [
+            '#000000', '#434343', '#666666', '#999999',
+            '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef',
+            '#f3f3f3', '#ffffff', '#980000', '#ff0000',
+            '#ff9900', '#ffff00', '#00ff00', '#00ffff',
+        ];
+
+        colors.forEach(function (color) {
+            menu.appendChild(createColorSwatchButton(swatchCommand, color));
+        });
+
+        group.appendChild(toggle);
+        group.appendChild(menu);
+        return group;
+    }
+
+    function createHeadingGroup() {
+        var group = document.createElement('div');
+        group.className = 'wysiwyg-group wysiwyg-group-heading';
+
+        var toggle = createIconButton('w-heading', 'toggleHeadingMenu', 'Nadpisy');
+
+        var menu = document.createElement('div');
+        menu.className = 'wysiwyg-menu wysiwyg-menu-heading';
+
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:p', 'Odstavec'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h1', 'Nadpis 1'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h2', 'Nadpis 2'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h3', 'Nadpis 3'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h4', 'Nadpis 4'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h5', 'Nadpis 5'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h6', 'Nadpis 6'));
+        group.appendChild(toggle);
+        group.appendChild(menu);
+        return group;
     }
 
     function createListGroup() {
         var group = document.createElement('div');
-        group.className = 'wysiwyg-group';
+        group.className = 'wysiwyg-group wysiwyg-group-list';
 
         var toggle = createIconButton('w-ul', 'toggleListMenu', 'Seznamy');
 
         var menu = document.createElement('div');
-        menu.className = 'wysiwyg-menu';
+        menu.className = 'wysiwyg-menu wysiwyg-menu-list';
 
         menu.appendChild(createMenuItem('w-ul', 'insertUnorderedList', 'Odrážky'));
         menu.appendChild(createMenuItem('w-ol', 'insertOrderedList', 'Číslování'));
+        group.appendChild(toggle);
+        group.appendChild(menu);
+        return group;
+    }
+
+    function createAlignGroup() {
+        var group = document.createElement('div');
+        group.className = 'wysiwyg-group wysiwyg-group-align';
+
+        var toggle = createIconButton('w-align-left', 'toggleAlignMenu', 'Zarovnání');
+
+        var menu = document.createElement('div');
+        menu.className = 'wysiwyg-menu wysiwyg-menu-align';
+
+        menu.appendChild(createMenuItem('w-align-left', 'justifyLeft', 'Vlevo'));
+        menu.appendChild(createMenuItem('w-align-center', 'justifyCenter', 'Na střed'));
+        menu.appendChild(createMenuItem('w-align-right', 'justifyRight', 'Vpravo'));
+        menu.appendChild(createMenuItem('w-align-justify', 'justifyFull', 'Do bloku'));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -309,17 +386,24 @@
         var toolbar = document.createElement('div');
         toolbar.className = 'wysiwyg-toolbar';
 
+        var headingGroup = createHeadingGroup();
         var bold = createIconButton('w-bold', 'bold', 'Tučně');
         var italic = createIconButton('w-italic', 'italic', 'Kurzíva');
+        var quote = createIconButton('w-quote', 'formatBlock:blockquote', 'Citace');
         var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
         var clear = createIconButton('w-clear', 'removeFormat', 'Vyčistit');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
         var media = createIconButton('w-image', 'openMediaLibrary', 'Vložit obrázek');
+        var alignGroup = createAlignGroup();
+        var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', 'Barva textu', 'text');
+        var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', 'Barva pozadí', 'background');
         var linkPanel = createLinkPanel();
 
+        toolbar.appendChild(headingGroup);
         toolbar.appendChild(bold);
         toolbar.appendChild(italic);
+        toolbar.appendChild(quote);
         toolbar.appendChild(link);
         toolbar.appendChild(listGroup);
         toolbar.appendChild(clear);
@@ -327,6 +411,9 @@
             toolbar.appendChild(media);
         }
         toolbar.appendChild(html);
+        toolbar.appendChild(alignGroup);
+        toolbar.appendChild(textColorGroup);
+        toolbar.appendChild(backgroundColorGroup);
 
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
@@ -340,7 +427,11 @@
         var mediaRange = null;
 
         function closeMenus() {
+            wrapper.classList.remove('is-heading-open');
             wrapper.classList.remove('is-list-open');
+            wrapper.classList.remove('is-align-open');
+            wrapper.classList.remove('is-text-color-open');
+            wrapper.classList.remove('is-bg-color-open');
             wrapper.classList.remove('is-link-open');
             activeLink = null;
         }
@@ -355,13 +446,13 @@
             italic.classList.toggle('is-active', document.queryCommandState('italic'));
         }
 
-        function runCommand(command) {
+        function runCommand(command, value) {
             if (htmlMode) {
                 return;
             }
             editor.focus();
             document.execCommand('defaultParagraphSeparator', false, 'p');
-            document.execCommand(command, false, null);
+            document.execCommand(command, false, value || null);
             normalizeBlocks(editor);
             enhanceImageBlocks(editor);
             sync(textarea, editor);
@@ -424,7 +515,63 @@
                 if (htmlMode) {
                     return;
                 }
+                wrapper.classList.remove('is-heading-open');
+                wrapper.classList.remove('is-align-open');
+                wrapper.classList.remove('is-text-color-open');
+                wrapper.classList.remove('is-bg-color-open');
                 wrapper.classList.toggle('is-list-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleHeadingMenu') {
+                if (htmlMode) {
+                    return;
+                }
+                wrapper.classList.toggle('is-heading-open');
+                wrapper.classList.remove('is-list-open');
+                wrapper.classList.remove('is-align-open');
+                wrapper.classList.remove('is-text-color-open');
+                wrapper.classList.remove('is-bg-color-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleAlignMenu') {
+                if (htmlMode) {
+                    return;
+                }
+                wrapper.classList.remove('is-heading-open');
+                wrapper.classList.remove('is-list-open');
+                wrapper.classList.toggle('is-align-open');
+                wrapper.classList.remove('is-text-color-open');
+                wrapper.classList.remove('is-bg-color-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleTextColorMenu') {
+                if (htmlMode) {
+                    return;
+                }
+                wrapper.classList.remove('is-heading-open');
+                wrapper.classList.remove('is-list-open');
+                wrapper.classList.remove('is-align-open');
+                wrapper.classList.toggle('is-text-color-open');
+                wrapper.classList.remove('is-bg-color-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleBackgroundColorMenu') {
+                if (htmlMode) {
+                    return;
+                }
+                wrapper.classList.remove('is-heading-open');
+                wrapper.classList.remove('is-list-open');
+                wrapper.classList.remove('is-align-open');
+                wrapper.classList.remove('is-text-color-open');
+                wrapper.classList.toggle('is-bg-color-open');
                 wrapper.classList.remove('is-link-open');
                 return;
             }
@@ -447,6 +594,17 @@
                         linkInput.select();
                     }
                 }
+                return;
+            }
+
+            if (command.indexOf('formatBlock:') === 0) {
+                runCommand('formatBlock', '<' + command.split(':')[1] + '>');
+                return;
+            }
+
+            if (command === 'foreColor' || command === 'hiliteColor') {
+                document.execCommand('styleWithCSS', false, true);
+                runCommand(command, button.getAttribute('data-value') || '#000000');
                 return;
             }
 
