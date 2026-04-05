@@ -48,6 +48,11 @@ final class PageView
     {
         $resolvedTheme = $this->themes->resolveTheme($theme);
         $terms = array_map(static fn(array $term): string => trim((string)($term['name'] ?? '')), (array)($item['terms'] ?? []));
+        $thumb = (array)($item['thumbnail'] ?? []);
+        $ogImage = trim((string)($thumb['path'] ?? ''));
+        if ($ogImage === '') {
+            $ogImage = trim((string)($thumb['webp'] ?? ''));
+        }
         $this->view->renderTheme($resolvedTheme, 'content', [
             'item' => $item,
             'themeName' => $resolvedTheme,
@@ -58,6 +63,7 @@ final class PageView
             'metaPath' => (string)($item['slug'] ?? ''),
             'shortlinkPath' => (string)($item['id'] ?? ''),
             'metaOgType' => 'article',
+            'metaOgImage' => $ogImage,
             'metaPublishedTime' => (string)($item['created'] ?? ''),
         ]);
     }
