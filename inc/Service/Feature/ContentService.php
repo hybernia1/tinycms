@@ -307,7 +307,7 @@ final class ContentService
         $offset = ($safePage - 1) * $safePerPage;
 
         $countStmt = $this->pdo->prepare(
-            'SELECT COUNT(*) FROM content c INNER JOIN content_terms ct ON ct.content = c.id WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()'
+            'SELECT COUNT(DISTINCT c.id) FROM content c INNER JOIN content_terms ct ON ct.content = c.id WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()'
         );
         $countStmt->execute(['term' => $termId, 'status' => 'published']);
         $total = (int)$countStmt->fetchColumn();
@@ -316,7 +316,7 @@ final class ContentService
         $offset = ($currentPage - 1) * $safePerPage;
 
         $stmt = $this->pdo->prepare(
-            'SELECT c.id, c.name, c.excerpt, c.created,
+            'SELECT DISTINCT c.id, c.name, c.excerpt, c.created,
                     (SELECT path FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path,
                     (SELECT path_webp FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
              FROM content c
