@@ -324,7 +324,7 @@ if (modal && openTriggers.length > 0) {
     const open = (detail) => {
         setContext(detail || {});
         activeTrigger = detail.trigger || null;
-        modal.classList.add('open');
+        modal.classList.add('open', 'is-open');
         if (searchTimer) {
             clearTimeout(searchTimer);
             searchTimer = null;
@@ -360,7 +360,7 @@ if (modal && openTriggers.length > 0) {
     });
 
     const close = () => {
-        modal.classList.remove('open');
+        modal.classList.remove('open', 'is-open');
     };
 
     openTriggers.forEach((trigger) => {
