@@ -14,7 +14,7 @@ $csrfMarkup = $csrfField();
             <input type="hidden" name="per_page" value="<?= $perPage ?>">
             <input type="hidden" name="page" value="1">
             <div class="search-field">
-                <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat štítek" data-terms-search>
+                <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="<?= htmlspecialchars($t('terms.search_placeholder', 'Search tag'), ENT_QUOTES, 'UTF-8') ?>" data-terms-search>
                 <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
             </div>
         </form>
@@ -25,7 +25,7 @@ $csrfMarkup = $csrfField();
             <table class="table">
                 <thead>
                 <tr>
-                    <th>Název</th><th>Popis</th><th class="table-col-actions">Akce</th>
+                    <th><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('common.description', 'Description'), ENT_QUOTES, 'UTF-8') ?></th><th class="table-col-actions"><?= htmlspecialchars($t('common.actions', 'Actions'), ENT_QUOTES, 'UTF-8') ?></th>
                 </tr>
                 </thead>
                 <tbody data-terms-list-body>
@@ -38,9 +38,9 @@ $csrfMarkup = $csrfField();
                         </td>
                         <td><?= htmlspecialchars((string)($row['body'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                         <td class="table-col-actions">
-                            <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="<?= $id ?>" aria-label="Smazat štítek" title="Smazat štítek">
+                            <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('terms.delete', 'Delete tag'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('terms.delete', 'Delete tag'), ENT_QUOTES, 'UTF-8') ?>">
                                 <?= $icon('delete') ?>
-                                <span class="sr-only">Smazat štítek</span>
+                                <span class="sr-only"><?= htmlspecialchars($t('terms.delete', 'Delete tag'), ENT_QUOTES, 'UTF-8') ?></span>
                             </button>
                         </td>
                     </tr>
@@ -53,8 +53,8 @@ $csrfMarkup = $csrfField();
             <?php if ($totalPages > 1): ?>
                 <div class="pagination">
                     <?php $prevPage = max(1, $page - 1); $nextPage = min($totalPages, $page + 1); ?>
-                    <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/terms?page=' . $prevPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>" data-terms-prev<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span>Předchozí</span></a>
-                    <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/terms?page=' . $nextPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>" data-terms-next<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span>Další</span><?= $icon('next') ?></a>
+                    <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/terms?page=' . $prevPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>" data-terms-prev<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
+                    <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($url('admin/terms?page=' . $nextPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>" data-terms-next<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
                 </div>
             <?php else: ?>
                 <div></div>
@@ -68,17 +68,17 @@ $csrfMarkup = $csrfField();
                 </select>
                 <input type="hidden" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="page" value="1">
-                <button class="btn btn-light" type="submit">Použít</button>
+                <button class="btn btn-light" type="submit"><?= htmlspecialchars($t('common.apply', 'Apply'), ENT_QUOTES, 'UTF-8') ?></button>
             </form>
         </div>
     </div>
 
     <div class="modal-overlay" data-terms-delete-modal>
         <div class="modal">
-            <p>Skutečně smazat tento štítek?</p>
+            <p><?= htmlspecialchars($t('terms.delete_confirm', 'Do you really want to delete this tag?'), ENT_QUOTES, 'UTF-8') ?></p>
             <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-terms-delete-cancel>Zrušit</button>
-                <button class="btn btn-primary" type="button" data-terms-delete-confirm>Potvrdit</button>
+                <button class="btn btn-light" type="button" data-terms-delete-cancel><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button class="btn btn-primary" type="button" data-terms-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
             </div>
         </div>
     </div>

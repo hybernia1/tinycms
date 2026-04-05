@@ -16,6 +16,6 @@
             </div>
         <?php endforeach; ?>
 
-        <button class="btn btn-primary" type="submit">Uložit nastavení</button>
+        <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('settings.save', 'Save settings'), ENT_QUOTES, 'UTF-8') ?></button>
     </form>
 </div>

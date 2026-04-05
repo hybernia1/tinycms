@@ -26,7 +26,7 @@ $contentId = (int)($item['id'] ?? 0);
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">
-                <label>Název</label>
+                <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
                 <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
             </div>
@@ -35,7 +35,7 @@ $contentId = (int)($item['id'] ?? 0);
                 <textarea name="excerpt" rows="3"><?= htmlspecialchars((string)($item['excerpt'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
             <div class="m-0">
-                <label>Obsah</label>
+                <label><?= htmlspecialchars($t('content.body', 'Content'), ENT_QUOTES, 'UTF-8') ?></label>
                 <textarea
                     name="body"
                     rows="14"
@@ -48,10 +48,10 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
         <aside class="content-editor-sidebar">
             <div class="card">
-                <div class="content-box-header">Publikace</div>
+                <div class="content-box-header"><?= htmlspecialchars($t('content.publication', 'Publication'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
                     <div class="mb-3">
-                        <label>Status</label>
+                        <label><?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?></label>
                         <select name="status">
                             <?php foreach ($availableStatuses as $statusValue): ?>
                                 <option value="<?= htmlspecialchars((string)$statusValue, ENT_QUOTES, 'UTF-8') ?>" <?= (string)($item['status'] ?? 'draft') === (string)$statusValue ? 'selected' : '' ?>><?= htmlspecialchars((string)$statusValue, ENT_QUOTES, 'UTF-8') ?></option>
@@ -60,22 +60,22 @@ $contentId = (int)($item['id'] ?? 0);
                         <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
                     </div>
                     <div class="m-0">
-                        <label>Publish date</label>
+                        <label><?= htmlspecialchars($t('content.publish_date', 'Publish date'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="datetime-local" name="created" value="<?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['created'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
                     </div>
                 </div>
                 <div class="content-box-footer d-flex gap-2">
-                    <button class="btn btn-primary" type="submit">Uložit</button>
-                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>">Zpět</a>
+                    <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
                 </div>
             </div>
             <div class="card">
-                <div class="content-box-header">Autor</div>
+                <div class="content-box-header"><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
-                    <label>Autor</label>
+                    <label><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></label>
                     <select name="author">
-                        <option value="">Bez autora</option>
+                        <option value=""><?= htmlspecialchars($t('common.no_author', 'No author'), ENT_QUOTES, 'UTF-8') ?></option>
                         <?php foreach ($authors as $author): ?>
                             <?php $authorId = (int)($author['ID'] ?? 0); ?>
                             <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
@@ -88,10 +88,10 @@ $contentId = (int)($item['id'] ?? 0);
             </div>
 
             <div class="card">
-                <div class="content-box-header">Štítky</div>
+                <div class="content-box-header"><?= htmlspecialchars($t('admin.menu.terms', 'Tags'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
                     <?php if ($mode === 'add'): ?>
-                        <small class="text-muted">Uložte obsah a štítky se přiřadí.</small>
+                        <small class="text-muted"><?= htmlspecialchars($t('content.save_to_assign_tags', 'Save content first to assign tags.'), ENT_QUOTES, 'UTF-8') ?></small>
                     <?php endif; ?>
                     <div
                         class="tag-picker"
@@ -101,7 +101,7 @@ $contentId = (int)($item['id'] ?? 0);
                     >
                         <div class="tag-picker-field">
                             <div class="tag-picker-chips" data-tag-picker-chips></div>
-                            <input class="tag-picker-input" type="text" data-tag-picker-input placeholder="Najít nebo přidat štítek">
+                            <input class="tag-picker-input" type="text" data-tag-picker-input placeholder="<?= htmlspecialchars($t('content.find_or_add_tag', 'Find or add tag'), ENT_QUOTES, 'UTF-8') ?>">
                         </div>
                         <div class="tag-picker-suggestions" data-tag-picker-suggestions></div>
                         <input type="hidden" name="terms" value="<?= htmlspecialchars($termsValue, ENT_QUOTES, 'UTF-8') ?>" data-tag-picker-value>
@@ -109,10 +109,10 @@ $contentId = (int)($item['id'] ?? 0);
                 </div>
             </div>
             <div class="card">
-                <div class="content-box-header">Thumbnail</div>
+                <div class="content-box-header"><?= htmlspecialchars($t('content.thumbnail', 'Thumbnail'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
                     <?php if ($mode === 'add'): ?>
-                        <small class="text-muted">Thumbnail lze vybrat i před ručním uložením.</small>
+                        <small class="text-muted"><?= htmlspecialchars($t('content.thumbnail_hint', 'Thumbnail can be selected before manual save.'), ENT_QUOTES, 'UTF-8') ?></small>
                     <?php endif; ?>
                     <button
                         class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
@@ -127,12 +127,12 @@ $contentId = (int)($item['id'] ?? 0);
                                 <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                             </div>
                         <?php else: ?>
-                            <span>Zvolit obrázek</span>
+                            <span><?= htmlspecialchars($t('content.choose_image', 'Choose image'), ENT_QUOTES, 'UTF-8') ?></span>
                         <?php endif; ?>
                     </button>
                     <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
                         <div class="mt-2 d-flex gap-2" data-media-library-detach-wrap>
-                            <button class="btn btn-light" type="button" data-media-library-detach>Odpojit</button>
+                            <button class="btn btn-light" type="button" data-media-library-detach><?= htmlspecialchars($t('content.detach', 'Detach'), ENT_QUOTES, 'UTF-8') ?></button>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -144,7 +144,7 @@ $contentId = (int)($item['id'] ?? 0);
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
             <strong>Media library</strong>
-            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="Zavřít">
+            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="<?= htmlspecialchars($t('common.close', 'Close'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('cancel') ?>
             </button>
         </div>
@@ -153,36 +153,36 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="media-library-detail-preview" data-media-library-detail-preview></div>
                 <div class="media-library-detail-meta">
                     <div>
-                        <label>Název</label>
+                        <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
                         <div class="d-flex gap-2">
                             <input type="text" value="" data-media-library-detail-name-input>
-                            <button class="btn btn-light" type="button" data-media-library-rename disabled>Uložit</button>
+                            <button class="btn btn-light" type="button" data-media-library-rename disabled><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
                         </div>
                     </div>
-                    <div><strong>Cesta:</strong> <span data-media-library-detail-path>—</span></div>
-                    <div><strong>Vytvořeno:</strong> <span data-media-library-detail-created>—</span></div>
+                    <div><strong><?= htmlspecialchars($t('content.path', 'Path'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-path>—</span></div>
+                    <div><strong><?= htmlspecialchars($t('common.created', 'Created'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-created>—</span></div>
                 </div>
                 <small class="text-muted" data-media-library-status></small>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-primary" type="button" data-media-library-choose disabled>Zvolit</button>
+                    <button class="btn btn-primary" type="button" data-media-library-choose disabled><?= htmlspecialchars($t('content.choose', 'Choose'), ENT_QUOTES, 'UTF-8') ?></button>
                     <button
                         class="btn btn-danger"
                         type="button"
                         data-media-library-delete-open
                         data-modal-open
                         data-modal-target="#media-library-delete-modal"
-                        data-type="obrázek"
+                        data-type="<?= htmlspecialchars($t('content.image', 'image'), ENT_QUOTES, 'UTF-8') ?>"
                         data-form-id="media-library-delete-form"
                         disabled
                     >
-                        Smazat
+                        <?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?>
                     </button>
                 </div>
             </div>
             <div class="media-library-list">
                 <form class="media-library-search" data-media-library-search>
                     <div class="search-field">
-                        <input class="search-input" type="search" name="q" placeholder="Hledat obrázek">
+                        <input class="search-input" type="search" name="q" placeholder="<?= htmlspecialchars($t('content.search_image', 'Search image'), ENT_QUOTES, 'UTF-8') ?>">
                         <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
                     </div>
                 </form>
@@ -191,14 +191,14 @@ $contentId = (int)($item['id'] ?? 0);
                     <input type="hidden" name="content_id" value="<?= $contentId ?>">
                     <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
                     <button class="btn btn-primary" type="submit" data-media-library-upload-button>
-                        <span data-media-library-upload-label>Nahrát nový</span>
+                        <span data-media-library-upload-label><?= htmlspecialchars($t('content.upload_new', 'Upload new'), ENT_QUOTES, 'UTF-8') ?></span>
                     </button>
                 </form>
                 <div class="media-library-grid" data-media-library-grid></div>
                 <div class="media-library-pagination">
-                    <button class="btn btn-light" type="button" data-media-library-prev>Předchozí</button>
+                    <button class="btn btn-light" type="button" data-media-library-prev><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></button>
                     <span data-media-library-page>1 / 1</span>
-                    <button class="btn btn-light" type="button" data-media-library-next>Další</button>
+                    <button class="btn btn-light" type="button" data-media-library-next><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></button>
                 </div>
             </div>
         </div>
@@ -231,10 +231,10 @@ $contentId = (int)($item['id'] ?? 0);
 </form>
 <div class="modal-overlay" data-modal id="media-library-delete-modal">
     <div class="modal">
-        <p data-modal-text>Skutečně smazat tento obrázek?</p>
+        <p data-modal-text><?= htmlspecialchars($t('content.delete_image_confirm', 'Do you really want to delete this image?'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close>Zrušit</button>
-            <button class="btn btn-primary" type="button" data-media-library-delete-confirm>Potvrdit</button>
+            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>

@@ -7,7 +7,6 @@ final class I18n
 {
     private const DEFAULT_LOCALE = 'cs';
     private static ?string $locale = null;
-    /** @var array<string, array<string, mixed>> */
     private static array $catalogues = [];
 
     public static function setLocale(string $locale): void
@@ -51,9 +50,6 @@ final class I18n
         return $fallback ?? $key;
     }
 
-    /**
-     * @return array<int, string>
-     */
     public static function availableLocales(): array
     {
         $dir = dirname(__DIR__, 2) . '/lang';
@@ -79,9 +75,6 @@ final class I18n
         return $locales !== [] ? $locales : [self::DEFAULT_LOCALE];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private static function loadCatalogue(string $locale): array
     {
         if (isset(self::$catalogues[$locale])) {
@@ -99,9 +92,6 @@ final class I18n
         return self::$catalogues[$locale];
     }
 
-    /**
-     * @param array<string, mixed> $catalogue
-     */
     private static function getByPath(array $catalogue, string $key): mixed
     {
         $segments = explode('.', $key);

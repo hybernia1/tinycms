@@ -21,7 +21,7 @@ $csrfMarkup = $csrfField();
         <input type="hidden" name="per_page" value="<?= $perPage ?>">
         <input type="hidden" name="page" value="1">
         <div class="search-field">
-            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="Hledat název nebo cestu" data-media-search>
+            <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>" placeholder="<?= htmlspecialchars($t('media.search_placeholder', 'Search name or path'), ENT_QUOTES, 'UTF-8') ?>" data-media-search>
             <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
         </div>
     </form>
@@ -32,7 +32,7 @@ $csrfMarkup = $csrfField();
         <table class="table">
             <thead>
             <tr>
-                <th>Médium</th><th>Autor</th><th class="table-col-actions">Akce</th>
+                <th><?= htmlspecialchars($t('admin.menu.media', 'Media'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></th><th class="table-col-actions"><?= htmlspecialchars($t('common.actions', 'Actions'), ENT_QUOTES, 'UTF-8') ?></th>
             </tr>
             </thead>
             <tbody data-media-list-body>
@@ -65,9 +65,9 @@ $csrfMarkup = $csrfField();
                     </td>
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="table-col-actions">
-                            <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="Smazat médium" title="Smazat médium">
+                            <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('media.delete', 'Delete media'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete', 'Delete media'), ENT_QUOTES, 'UTF-8') ?>">
                                 <?= $icon('delete') ?>
-                                <span class="sr-only">Smazat médium</span>
+                                <span class="sr-only"><?= htmlspecialchars($t('media.delete', 'Delete media'), ENT_QUOTES, 'UTF-8') ?></span>
                             </button>
                     </td>
                 </tr>
@@ -80,8 +80,8 @@ $csrfMarkup = $csrfField();
         <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php $prevPage = max(1, $page - 1); $nextPage = min($totalPages, $page + 1); ?>
-                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" data-media-prev href="<?= htmlspecialchars($url('admin/media?page=' . $prevPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span>Předchozí</span></a>
-                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" data-media-next href="<?= htmlspecialchars($url('admin/media?page=' . $nextPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span>Další</span><?= $icon('next') ?></a>
+                <a class="pagination-link<?= $page <= 1 ? ' disabled' : '' ?>" data-media-prev href="<?= htmlspecialchars($url('admin/media?page=' . $prevPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
+                <a class="pagination-link<?= $page >= $totalPages ? ' disabled' : '' ?>" data-media-next href="<?= htmlspecialchars($url('admin/media?page=' . $nextPage . '&per_page=' . $perPage . '&q=' . urlencode($query)), ENT_QUOTES, 'UTF-8') ?>"<?= $page >= $totalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
             </div>
         <?php else: ?>
             <div></div>
@@ -95,17 +95,17 @@ $csrfMarkup = $csrfField();
             </select>
             <input type="hidden" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="page" value="1">
-            <button class="btn btn-light" type="submit">Použít</button>
+            <button class="btn btn-light" type="submit"><?= htmlspecialchars($t('common.apply', 'Apply'), ENT_QUOTES, 'UTF-8') ?></button>
         </form>
     </div>
 </div>
 
 <div class="modal-overlay" data-media-delete-modal>
     <div class="modal">
-        <p>Skutečně smazat toto médium?</p>
+        <p><?= htmlspecialchars($t('media.delete_confirm', 'Do you really want to delete this media?'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-media-delete-cancel>Zrušit</button>
-            <button class="btn btn-primary" type="button" data-media-delete-confirm>Potvrdit</button>
+            <button class="btn btn-light" type="button" data-media-delete-cancel><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-media-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>
