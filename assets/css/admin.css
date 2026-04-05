@@ -129,6 +129,36 @@ body {
     gap: var(--space-3);
 }
 
+body.admin-focus-mode .admin-sidebar,
+body.admin-focus-mode .admin-header-spacer,
+body.admin-focus-mode .content-editor-sidebar {
+    display: none;
+}
+
+body.admin-focus-mode .admin-main {
+    margin-left: 0;
+}
+
+body.admin-focus-mode .admin-content {
+    padding: 0;
+}
+
+body.admin-focus-mode .content-editor-form > .content-editor-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+}
+
+body.admin-focus-mode .content-editor-form > .content-editor-layout > .card {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+body.admin-focus-mode .content-editor-form .wysiwyg-editor {
+    min-height: calc(100svh - 9.5rem);
+    max-height: calc(100svh - 9.5rem);
+}
+
 .content-box-header {
     padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid var(--color-border-soft);

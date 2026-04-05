@@ -125,7 +125,8 @@
 }
 
 .wysiwyg-editor {
-    min-height: 18rem;
+    min-height: clamp(18rem, 52svh, 34rem);
+    max-height: 78svh;
     padding: var(--space-3);
     outline: none;
     overflow: auto;
