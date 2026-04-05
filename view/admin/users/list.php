@@ -50,7 +50,8 @@ $csrfMarkup = $csrfField();
                         <a href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                         <div class="text-muted"><?= htmlspecialchars((string)($row['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                         <div class="d-flex gap-2 mt-2">
-                            <span class="badge text-bg-primary"><?= htmlspecialchars((string)($row['role'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                            <?php $roleValue = (string)($row['role'] ?? ''); ?>
+                            <span class="badge text-bg-primary"><?= htmlspecialchars($t('users.roles.' . $roleValue, $roleValue), ENT_QUOTES, 'UTF-8') ?></span>
                             <?php if ($isSuspended): ?><span class="badge text-bg-warning"><?= htmlspecialchars($t('users.status.suspended_single', 'Suspended'), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
                         </div>
                     </td>

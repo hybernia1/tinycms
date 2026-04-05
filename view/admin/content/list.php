@@ -7,7 +7,7 @@ $status = (string)($status ?? 'all');
 $query = (string)($query ?? '');
 $statusLinks = ['all' => $t('common.all', 'All')];
 foreach ($availableStatuses as $statusValue) {
-    $statusLinks[$statusValue] = ucfirst($statusValue);
+    $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue));
 }
 $csrfMarkup = $csrfField();
 ?>
@@ -55,7 +55,7 @@ $csrfMarkup = $csrfField();
                             <?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>
                         </div>
                         <div class="d-flex gap-2 mt-2">
-                            <span class="badge <?= htmlspecialchars($statusClass, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($statusValue, ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="badge <?= htmlspecialchars($statusClass, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('content.statuses.' . $statusValue, $statusValue), ENT_QUOTES, 'UTF-8') ?></span>
                             <?php if ($isPlanned): ?><span class="badge text-bg-warning"><?= htmlspecialchars($t('content.planned', 'Planned'), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
                         </div>
                     </td>

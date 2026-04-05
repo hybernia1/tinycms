@@ -27,6 +27,10 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 'planned' => $t('content.planned'),
                 'switch_to_draft' => $t('content.switch_to_draft'),
                 'publish' => $t('content.publish'),
+                'statuses' => [
+                    'draft' => $t('content.statuses.draft', 'Draft'),
+                    'published' => $t('content.statuses.published', 'Published'),
+                ],
                 'choose_image' => $t('content.choose_image', 'Choose image'),
                 'deleted' => $t('content.deleted', 'Content deleted.'),
                 'published' => $t('content.published', 'Content published.'),
@@ -46,6 +50,10 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 'suspended' => $t('users.suspended', 'User suspended.'),
                 'unsuspended' => $t('users.unsuspended', 'User unsuspended.'),
                 'status_suspended_single' => $t('users.status.suspended_single'),
+                'roles' => [
+                    'user' => $t('users.roles.user', 'User'),
+                    'admin' => $t('users.roles.admin', 'Administrator'),
+                ],
                 'delete' => $t('users.delete'),
                 'suspend' => $t('users.suspend'),
                 'unsuspend' => $t('users.unsuspend'),

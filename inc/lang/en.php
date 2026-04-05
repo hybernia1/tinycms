@@ -143,6 +143,10 @@ return [
             'suspended' => 'Suspended',
             'suspended_single' => 'Suspended',
         ],
+        'roles' => [
+            'user' => 'User',
+            'admin' => 'Administrator',
+        ],
     ],
     'terms' => [
         'name_exists' => 'A tag with this name already exists.',
@@ -224,6 +228,10 @@ return [
         'search_image' => 'Search image',
         'upload_new' => 'Upload new',
         'delete_image_confirm' => 'Do you really want to delete this image?',
+        'statuses' => [
+            'draft' => 'Draft',
+            'published' => 'Published',
+        ],
     ],
     'settings' => [
         'save' => 'Save settings',

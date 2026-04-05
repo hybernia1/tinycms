@@ -143,6 +143,10 @@ return [
             'suspended' => 'Suspendovaní',
             'suspended_single' => 'Suspendován',
         ],
+        'roles' => [
+            'user' => 'Uživatel',
+            'admin' => 'Administrátor',
+        ],
     ],
     'terms' => [
         'name_exists' => 'Štítek s tímto názvem už existuje.',
@@ -224,6 +228,10 @@ return [
         'search_image' => 'Hledat obrázek',
         'upload_new' => 'Nahrát nový',
         'delete_image_confirm' => 'Skutečně smazat tento obrázek?',
+        'statuses' => [
+            'draft' => 'Draft',
+            'published' => 'Publikováno',
+        ],
     ],
     'settings' => [
         'save' => 'Uložit nastavení',
