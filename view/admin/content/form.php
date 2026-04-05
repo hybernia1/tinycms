@@ -39,12 +39,7 @@ $contentId = (int)($item['id'] ?? 0);
                 <textarea name="excerpt" rows="3"><?= htmlspecialchars((string)($item['excerpt'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
             <div class="m-0">
-                <div class="d-flex justify-between align-center mb-1">
-                    <label class="m-0">Obsah</label>
-                    <button class="btn btn-light" type="button" data-content-focus-toggle aria-pressed="false">
-                        <span data-content-focus-label>Nerušené psaní</span>
-                    </button>
-                </div>
+                <label>Obsah</label>
                 <textarea
                     name="body"
                     rows="14"

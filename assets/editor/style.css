@@ -37,6 +37,10 @@
     height: 1rem;
 }
 
+.wysiwyg-btn-focus {
+    margin-left: auto;
+}
+
 .wysiwyg-group {
     position: relative;
 }
