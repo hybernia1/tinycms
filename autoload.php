@@ -19,6 +19,14 @@ if (!defined('APP_DEBUG')) {
     define('APP_DEBUG', false);
 }
 
+if (!defined('APP_DATE_FORMAT')) {
+    define('APP_DATE_FORMAT', 'Y-m-d');
+}
+
+if (!defined('APP_DATETIME_FORMAT')) {
+    define('APP_DATETIME_FORMAT', 'Y-m-d H:i:s');
+}
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
 

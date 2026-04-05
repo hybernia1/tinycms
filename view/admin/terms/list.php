@@ -34,7 +34,7 @@ $csrfMarkup = $csrfField();
                     <tr>
                         <td>
                             <a href="<?= htmlspecialchars($url('admin/terms/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-                            <div class="text-muted"><?= htmlspecialchars((string)($row['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                            <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($row['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
                         </td>
                         <td><?= htmlspecialchars((string)($row['body'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                         <td class="table-col-actions">

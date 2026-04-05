@@ -19,6 +19,7 @@ use App\Service\Feature\MediaService;
 use App\Service\Feature\UploadService;
 use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
+use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\FlashService;
 use App\Service\Infra\Router\Router;
 use App\Service\Feature\SettingsService;
@@ -34,7 +35,8 @@ $basePath = $baseDir === '' ? '' : '/' . $baseDir;
 $router = new Router($basePath);
 $flash = new FlashService();
 $csrf = new CsrfService();
-$view = new View(dirname(__DIR__), $router, $flash, $csrf);
+$dateTimeFormatter = new DateTimeFormatter(APP_DATE_FORMAT, APP_DATETIME_FORMAT);
+$view = new View(dirname(__DIR__), $router, $flash, $csrf, $dateTimeFormatter);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
     header('Location: ' . $router->url($path), true, $permanent ? 301 : 302);

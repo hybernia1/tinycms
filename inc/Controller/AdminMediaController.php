@@ -273,7 +273,18 @@ final class AdminMediaController extends BaseAdminController
             'preview_path' => $this->resolvePreviewPath($row),
             'author_name' => (string)($row['author_name'] ?? '—'),
             'created' => (string)($row['created'] ?? ''),
+            'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
         ];
+    }
+
+    private function formatDateTime(string $value): string
+    {
+        $stamp = $value !== '' ? strtotime($value) : false;
+        if ($stamp === false) {
+            return '';
+        }
+
+        return date(APP_DATETIME_FORMAT, $stamp);
     }
 
     private function resolvePreviewPath(array $row): string

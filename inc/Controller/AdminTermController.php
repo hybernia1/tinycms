@@ -200,6 +200,17 @@ final class AdminTermController extends BaseAdminController
             'name' => (string)($row['name'] ?? ''),
             'body' => (string)($row['body'] ?? ''),
             'created' => (string)($row['created'] ?? ''),
+            'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
         ];
+    }
+
+    private function formatDateTime(string $value): string
+    {
+        $stamp = $value !== '' ? strtotime($value) : false;
+        if ($stamp === false) {
+            return '';
+        }
+
+        return date(APP_DATETIME_FORMAT, $stamp);
     }
 }

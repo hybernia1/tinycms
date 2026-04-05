@@ -41,8 +41,9 @@ $csrfMarkup = $csrfField();
             <tbody data-content-list-body>
             <?php foreach ($items as $row):
                 $id = (int)($row['id'] ?? 0);
-                $createdAt = (string)($row['created'] ?? '');
-                $createdStamp = $createdAt !== '' ? strtotime($createdAt) : false;
+                $createdAtRaw = (string)($row['created'] ?? '');
+                $createdAt = $formatDateTime($createdAtRaw);
+                $createdStamp = $createdAtRaw !== '' ? strtotime($createdAtRaw) : false;
                 $isPlanned = $createdStamp !== false && $createdStamp > time();
                 $statusValue = (string)($row['status'] ?? '');
                 $statusClass = $statusValue === 'published' ? 'text-bg-success' : ($statusValue === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
