@@ -17,6 +17,10 @@ $router->post('login', static function () use ($front, $redirect): void {
     $front->loginSubmit($redirect);
 });
 
+$router->get('term/{slug}', static function (array $params) use ($front, $redirect): void {
+    $front->termArchive($params, $redirect);
+});
+
 $router->get('{slug}', static function (array $params) use ($front, $redirect): void {
-    $front->contentDetail($params, $redirect);
+    $front->entry($params, $redirect);
 });

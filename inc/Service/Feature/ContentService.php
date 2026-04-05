@@ -288,6 +288,71 @@ final class ContentService
         return $items;
     }
 
+    public function paginatePublishedByTerm(int $termId, int $page = 1, int $perPage = 10): array
+    {
+        if ($termId <= 0) {
+            return ['data' => [], 'page' => 1, 'per_page' => $perPage, 'total' => 0, 'total_pages' => 1];
+        }
+
+        $safePerPage = $perPage > 0 ? $perPage : 10;
+        $safePage = $page > 0 ? $page : 1;
+        $offset = ($safePage - 1) * $safePerPage;
+
+        $countStmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM content c INNER JOIN content_terms ct ON ct.content = c.id WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()'
+        );
+        $countStmt->execute(['term' => $termId, 'status' => 'published']);
+        $total = (int)$countStmt->fetchColumn();
+        $totalPages = max(1, (int)ceil($total / $safePerPage));
+        $currentPage = min($safePage, $totalPages);
+        $offset = ($currentPage - 1) * $safePerPage;
+
+        $stmt = $this->pdo->prepare(
+            'SELECT c.id, c.name, c.excerpt, c.created
+             FROM content c
+             INNER JOIN content_terms ct ON ct.content = c.id
+             WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()
+             ORDER BY c.created DESC, c.id DESC
+             LIMIT :limit OFFSET :offset'
+        );
+        $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'page' => $currentPage,
+            'per_page' => $safePerPage,
+            'total' => $total,
+            'total_pages' => $totalPages,
+        ];
+    }
+
+    public function sitemapPublishedPage(int $page = 1, int $perPage = 2000): array
+    {
+        $safePerPage = $perPage > 0 ? $perPage : 2000;
+        $safePage = $page > 0 ? $page : 1;
+        $offset = ($safePage - 1) * $safePerPage;
+        $stmt = $this->pdo->prepare(
+            'SELECT id, name, updated, created FROM content WHERE status = :status AND created <= NOW() ORDER BY id ASC LIMIT :limit OFFSET :offset'
+        );
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function publishedVisibleCount(): int
+    {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM content WHERE status = :status AND created <= NOW()');
+        $stmt->execute(['status' => 'published']);
+        return (int)$stmt->fetchColumn();
+    }
+
     public function findPublished(int $id): ?array
     {
         $item = $this->find($id);
