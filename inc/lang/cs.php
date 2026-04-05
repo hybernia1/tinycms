@@ -366,4 +366,23 @@ return [
         'webp_create_failed' => 'Nepodařilo se vytvořit WEBP variantu.',
         'thumbnail_create_failed' => 'Nepodařilo se vytvořit thumbnail variantu.',
     ],
+    'errors' => [
+        'unexpected' => 'Došlo k neočekávané chybě. Zkuste to prosím později.',
+        'db' => [
+            'access_denied' => 'Nelze se připojit k databázi: neplatné přihlašovací údaje nebo oprávnění.',
+            'host_unresolved' => 'Nelze se připojit k databázi: nepodařilo se přeložit DB host.',
+            'server_unreachable' => 'Nelze se připojit k databázi: server není dostupný.',
+            'generic' => 'Nelze se připojit k databázi.',
+            'value_too_long' => 'Jedna nebo více hodnot je příliš dlouhá pro databázový sloupec.',
+            'required_value_missing' => 'Chybí povinná hodnota (NOT NULL).',
+            'unique_violation' => 'Hodnota už existuje a musí být unikátní.',
+            'invalid_foreign_key' => 'Neplatná vazba na související záznam (foreign key).',
+            'operation_failed' => 'Databázová operace selhala.',
+        ],
+        'validation' => [
+            'required' => 'Pole je povinné.',
+            'max_length' => 'Pole může mít maximálně %d znaků.',
+            'invalid_value' => 'Pole obsahuje nepovolenou hodnotu.',
+        ],
+    ],
 ];

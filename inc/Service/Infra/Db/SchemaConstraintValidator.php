@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service\Infra\Db;
 
 use App\Service\Feature\SchemaDefinition;
+use App\Service\Support\I18n;
 
 final class SchemaConstraintValidator
 {
@@ -39,19 +40,19 @@ final class SchemaConstraintValidator
             $nullable = (bool)($rule['nullable'] ?? true);
 
             if (!$nullable && trim($value) === '') {
-                $errors[$field] = 'Pole je povinné.';
+                $errors[$field] = I18n::t('errors.validation.required', 'This field is required.');
                 continue;
             }
 
             $max = $rule['max'] ?? null;
             if (is_int($max) && mb_strlen($value) > $max) {
-                $errors[$field] = 'Pole může mít maximálně ' . $max . ' znaků.';
+                $errors[$field] = sprintf(I18n::t('errors.validation.max_length', 'This field can contain at most %d characters.'), $max);
                 continue;
             }
 
             $allowed = $rule['allowed'] ?? null;
             if (is_array($allowed) && trim($value) !== '' && !in_array($value, $allowed, true)) {
-                $errors[$field] = 'Pole obsahuje nepovolenou hodnotu.';
+                $errors[$field] = I18n::t('errors.validation.invalid_value', 'This field contains a disallowed value.');
             }
         }
 

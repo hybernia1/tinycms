@@ -34,7 +34,7 @@ final class ErrorHandler
             return $dbMessage;
         }
 
-        return 'Došlo k neočekávané chybě. Zkuste to prosím později.';
+        return I18n::t('errors.unexpected', 'An unexpected error occurred. Please try again later.');
     }
 
     private function databaseMessage(Throwable $e): ?string
@@ -56,18 +56,18 @@ final class ErrorHandler
         $message = mb_strtolower($e->getMessage());
 
         if ($driverCode === 1044 || $driverCode === 1045 || str_contains($message, 'access denied')) {
-            return 'Nelze se připojit k databázi: neplatné přihlašovací údaje nebo oprávnění.';
+            return I18n::t('errors.db.access_denied', 'Cannot connect to database: invalid credentials or permissions.');
         }
 
         if (str_contains($message, 'php_network_getaddresses') || str_contains($message, 'getaddrinfo')) {
-            return 'Nelze se připojit k databázi: nepodařilo se přeložit DB host.';
+            return I18n::t('errors.db.host_unresolved', 'Cannot connect to database: failed to resolve DB host.');
         }
 
         if ($driverCode === 2002 || str_contains($message, 'connection refused') || str_contains($message, 'timed out')) {
-            return 'Nelze se připojit k databázi: server není dostupný.';
+            return I18n::t('errors.db.server_unreachable', 'Cannot connect to database: server is unreachable.');
         }
 
-        return 'Nelze se připojit k databázi.';
+        return I18n::t('errors.db.generic', 'Cannot connect to database.');
     }
 
     private function renderDebug(Throwable $e): void

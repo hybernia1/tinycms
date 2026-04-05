@@ -366,4 +366,23 @@ return [
         'webp_create_failed' => 'Failed to create WEBP variant.',
         'thumbnail_create_failed' => 'Failed to create thumbnail variant.',
     ],
+    'errors' => [
+        'unexpected' => 'An unexpected error occurred. Please try again later.',
+        'db' => [
+            'access_denied' => 'Cannot connect to database: invalid credentials or permissions.',
+            'host_unresolved' => 'Cannot connect to database: failed to resolve DB host.',
+            'server_unreachable' => 'Cannot connect to database: server is unreachable.',
+            'generic' => 'Cannot connect to database.',
+            'value_too_long' => 'One or more values are too long for the database column.',
+            'required_value_missing' => 'A required value (NOT NULL) is missing.',
+            'unique_violation' => 'The value already exists and must be unique.',
+            'invalid_foreign_key' => 'Invalid reference to related record (foreign key).',
+            'operation_failed' => 'Database operation failed.',
+        ],
+        'validation' => [
+            'required' => 'This field is required.',
+            'max_length' => 'This field can contain at most %d characters.',
+            'invalid_value' => 'This field contains a disallowed value.',
+        ],
+    ],
 ];
