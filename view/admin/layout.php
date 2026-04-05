@@ -19,6 +19,7 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/editor/style.css'), ENT_QUOTES, 'UTF-8') ?>">
     <script defer src="<?= htmlspecialchars($url('assets/js/flash.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/modal.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/admin-auth-check.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/admin-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/custom-select.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/custom-datetime.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
@@ -29,7 +30,11 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
     <script defer src="<?= htmlspecialchars($url('assets/js/content-autosave.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
-<body>
+<body
+    data-auth-check-endpoint="<?= htmlspecialchars($url('admin/api/v1/auth/check'), ENT_QUOTES, 'UTF-8') ?>"
+    data-login-url="<?= htmlspecialchars($url('login'), ENT_QUOTES, 'UTF-8') ?>"
+    data-home-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
+>
 <?= $editorIcons ?>
 <div class="admin-shell">
     <aside class="admin-sidebar">
@@ -101,6 +106,15 @@ $editorIcons = file_get_contents(__DIR__ . '/../../assets/editor/icons.svg') ?: 
             <?= $content ?>
         </section>
     </main>
+</div>
+<div class="modal-overlay" data-auth-check-modal>
+    <div class="modal">
+        <p data-auth-check-modal-text>Byli jste odhlášeni. Přihlaste se znovu.</p>
+        <div class="modal-actions">
+            <button class="btn btn-light" type="button" data-auth-check-modal-close>Zavřít</button>
+            <a class="btn btn-primary" href="#" data-auth-check-modal-action hidden>Přihlásit se</a>
+        </div>
+    </div>
 </div>
 </body>
 </html>

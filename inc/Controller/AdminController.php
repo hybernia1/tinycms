@@ -47,4 +47,38 @@ final class AdminController
         $this->authService->auth()->logout();
         $redirect('login');
     }
+
+    public function authCheckApiV1(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!$this->authService->auth()->check()) {
+            http_response_code(401);
+            echo json_encode([
+                'ok' => false,
+                'error' => [
+                    'code' => 'AUTH_REQUIRED',
+                    'message' => 'Byli jste odhlášeni. Přihlaste se znovu.',
+                ],
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        if (!$this->authService->canAccessAdmin()) {
+            http_response_code(403);
+            echo json_encode([
+                'ok' => false,
+                'error' => [
+                    'code' => 'FORBIDDEN',
+                    'message' => 'Nemáte dostatečná oprávnění.',
+                ],
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        echo json_encode([
+            'ok' => true,
+            'data' => ['status' => 'ok'],
+        ], JSON_UNESCAPED_UNICODE);
+    }
 }

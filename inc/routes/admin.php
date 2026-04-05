@@ -13,6 +13,10 @@ $router->get('admin/dashboard', static function () use ($admin, $redirect): void
     $admin->dashboard($redirect);
 });
 
+$router->get('admin/api/v1/auth/check', static function () use ($admin): void {
+    $admin->authCheckApiV1();
+});
+
 $router->get('admin/users', static function () use ($adminUsers, $redirect): void {
     $adminUsers->list($redirect);
 });

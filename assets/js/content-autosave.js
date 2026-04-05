@@ -29,6 +29,7 @@
         var saving = false;
         var pending = false;
         var lastSent = '';
+        var adminAuth = window.tinycmsAdminAuth || null;
         var appRoot = '';
         if (autosaveEndpoint.indexOf('/admin/api/v1/content/autosave') >= 0) {
             appRoot = autosaveEndpoint.replace(/\/admin\/api\/v1\/content\/autosave.*$/, '');
@@ -135,12 +136,23 @@
             if (!draftInitEndpoint) {
                 return 0;
             }
+            if (adminAuth && !(await adminAuth.ensureAccess())) {
+                return 0;
+            }
 
             var response = await fetch(draftInitEndpoint, {
                 method: 'POST',
                 body: new FormData(form),
                 headers: { Accept: 'application/json' },
+            }).catch(function () {
+                if (adminAuth && typeof adminAuth.reportOffline === 'function') {
+                    adminAuth.reportOffline();
+                }
+                return null;
             });
+            if (!response) {
+                return 0;
+            }
             var normalized = normalizePayload(await response.json().catch(function () { return {}; }));
             var id = Number(normalized.data?.id || 0);
             if (!response.ok || !normalized.success || id <= 0) {
@@ -165,12 +177,25 @@
                 saving = false;
                 return;
             }
+            if (adminAuth && !(await adminAuth.ensureAccess())) {
+                saving = false;
+                return;
+            }
 
             var response = await fetch(autosaveEndpoint, {
                 method: 'POST',
                 body: data,
                 headers: { Accept: 'application/json' },
+            }).catch(function () {
+                if (adminAuth && typeof adminAuth.reportOffline === 'function') {
+                    adminAuth.reportOffline();
+                }
+                return null;
             });
+            if (!response) {
+                saving = false;
+                return;
+            }
             var normalized = normalizePayload(await response.json().catch(function () { return {}; }));
             if (response.ok && normalized.success) {
                 lastSent = currentSignature;
