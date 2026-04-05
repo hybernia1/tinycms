@@ -221,7 +221,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     display: none;
-    z-index: 30;
+    z-index: 150;
     padding: var(--space-4);
 }
 
