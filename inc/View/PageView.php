@@ -31,6 +31,9 @@ final class PageView
             'pageTitle' => $siteName,
             'metaTitle' => (string)($site['meta_title'] ?? $siteName),
             'metaDescription' => (string)($site['meta_description'] ?? ''),
+            'metaKeywords' => [(string)($site['name'] ?? 'TinyCMS')],
+            'metaPath' => '',
+            'metaOgType' => 'website',
         ]);
     }
 
@@ -43,18 +46,24 @@ final class PageView
     public function contentDetail(array $item, string $theme): void
     {
         $resolvedTheme = $this->themes->resolveTheme($theme);
+        $terms = array_map(static fn(array $term): string => trim((string)($term['name'] ?? '')), (array)($item['terms'] ?? []));
         $this->view->renderTheme($resolvedTheme, 'content', [
             'item' => $item,
             'themeName' => $resolvedTheme,
             'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
             'metaTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
             'metaDescription' => (string)($item['excerpt'] ?? ''),
+            'metaKeywords' => array_values(array_filter($terms, static fn(string $term): bool => $term !== '')),
+            'metaPath' => (string)($item['slug'] ?? ''),
+            'shortlinkPath' => (string)($item['id'] ?? ''),
+            'metaOgType' => 'article',
         ]);
     }
 
     public function termArchive(array $term, array $posts, array $pagination, string $theme): void
     {
         $resolvedTheme = $this->themes->resolveTheme($theme);
+        $termSlug = (string)($term['slug'] ?? '');
         $this->view->renderTheme($resolvedTheme, 'terms', [
             'term' => $term,
             'posts' => $posts,
@@ -63,6 +72,9 @@ final class PageView
             'pageTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
             'metaTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
             'metaDescription' => trim(strip_tags((string)($term['body'] ?? ''))),
+            'metaKeywords' => [(string)($term['name'] ?? '')],
+            'metaPath' => $termSlug !== '' ? 'term/' . $termSlug : '',
+            'metaOgType' => 'website',
         ]);
     }
 

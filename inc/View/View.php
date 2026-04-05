@@ -16,6 +16,7 @@ final class View
     private FlashService $flash;
     private CsrfService $csrf;
     private DateTimeFormatter $dateTimeFormatter;
+    private MetaHead $metaHead;
 
     public function __construct(string $rootPath, Router $router, FlashService $flash, CsrfService $csrf, DateTimeFormatter $dateTimeFormatter)
     {
@@ -24,6 +25,7 @@ final class View
         $this->flash = $flash;
         $this->csrf = $csrf;
         $this->dateTimeFormatter = $dateTimeFormatter;
+        $this->metaHead = new MetaHead();
     }
 
     public function render(string $layout, string $template, array $data = []): void
@@ -60,24 +62,7 @@ final class View
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
-        $renderFrontHead = static function (array $options = []): string {
-            $title = trim((string)($options['title'] ?? 'TinyCMS'));
-            $description = trim((string)($options['description'] ?? ''));
-            $robots = trim((string)($options['robots'] ?? 'index,follow'));
-
-            $parts = [
-                '<meta charset="utf-8">',
-                '<meta name="viewport" content="width=device-width, initial-scale=1">',
-                '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>',
-                '<meta name="robots" content="' . htmlspecialchars($robots, ENT_QUOTES, 'UTF-8') . '">',
-            ];
-
-            if ($description !== '') {
-                $parts[] = '<meta name="description" content="' . htmlspecialchars($description, ENT_QUOTES, 'UTF-8') . '">';
-            }
-
-            return implode("\n", $parts);
-        };
+        $renderFrontHead = fn(array $options = []): string => $this->metaHead->render($options);
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
