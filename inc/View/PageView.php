@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\Support\I18n;
+
 final class PageView
 {
     private View $view;
@@ -35,7 +37,7 @@ final class PageView
     {
         $this->view->render('front/layout', 'front/content', [
             'item' => $item,
-            'pageTitle' => (string)($item['name'] ?? 'Obsah'),
+            'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
         ]);
     }
 
@@ -45,7 +47,7 @@ final class PageView
             'term' => $term,
             'posts' => $posts,
             'pagination' => $pagination,
-            'pageTitle' => (string)($term['name'] ?? 'Štítek'),
+            'pageTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
         ]);
     }
 
@@ -54,7 +56,7 @@ final class PageView
         $this->view->render('admin/layout', 'admin/dashboard', [
             'user' => $user,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => 'Dashboard',
+            'pageTitle' => I18n::t('admin.menu.dashboard', 'Dashboard'),
         ]);
     }
 
@@ -66,7 +68,7 @@ final class PageView
             'status' => $status,
             'query' => $query,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => 'Uživatelé',
+            'pageTitle' => I18n::t('admin.menu.users', 'Users'),
         ]);
     }
 
@@ -76,7 +78,7 @@ final class PageView
             'fields' => $fields,
             'values' => $values,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => 'Nastavení',
+            'pageTitle' => I18n::t('admin.menu.settings', 'Settings'),
         ]);
     }
 
@@ -87,7 +89,7 @@ final class PageView
             'user' => $user,
             'errors' => $errors,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? 'Přidat uživatele' : 'Upravit uživatele',
+            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_user', 'Add user') : I18n::t('admin.edit_user', 'Edit user'),
         ]);
     }
 
@@ -100,7 +102,7 @@ final class PageView
             'query' => $query,
             'availableStatuses' => $availableStatuses,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => 'Obsah',
+            'pageTitle' => I18n::t('admin.menu.content', 'Content'),
         ]);
     }
 
@@ -114,7 +116,7 @@ final class PageView
             'authors' => $authors,
             'selectedTerms' => $selectedTerms,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? 'Přidat obsah' : 'Upravit obsah',
+            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_content', 'Add content') : I18n::t('admin.edit_content', 'Edit content'),
         ]);
     }
 
@@ -125,7 +127,7 @@ final class PageView
             'allowedPerPage' => $allowedPerPage,
             'query' => $query,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => 'Štítky',
+            'pageTitle' => I18n::t('admin.menu.terms', 'Tags'),
         ]);
     }
 
@@ -136,7 +138,7 @@ final class PageView
             'item' => $item,
             'errors' => $errors,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? 'Přidat štítek' : 'Upravit štítek',
+            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_term', 'Add tag') : I18n::t('admin.edit_term', 'Edit tag'),
         ]);
     }
 
@@ -147,7 +149,7 @@ final class PageView
             'allowedPerPage' => $allowedPerPage,
             'query' => $query,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => 'Média',
+            'pageTitle' => I18n::t('admin.menu.media', 'Media'),
         ]);
     }
 
@@ -160,19 +162,19 @@ final class PageView
             'authors' => $authors,
             'usages' => $usages,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? 'Přidat médium' : 'Upravit médium',
+            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media', 'Add media') : I18n::t('admin.edit_media', 'Edit media'),
         ]);
     }
 
     private function adminMenu(): array
     {
         return [
-            ['label' => 'Dashboard', 'url' => 'admin/dashboard'],
-            ['label' => 'Uživatelé', 'url' => 'admin/users'],
-            ['label' => 'Obsah', 'url' => 'admin/content'],
-            ['label' => 'Média', 'url' => 'admin/media'],
-            ['label' => 'Štítky', 'url' => 'admin/terms'],
-            ['label' => 'Nastavení', 'url' => 'admin/settings'],
+            ['label' => I18n::t('admin.menu.dashboard', 'Dashboard'), 'url' => 'admin/dashboard'],
+            ['label' => I18n::t('admin.menu.users', 'Users'), 'url' => 'admin/users'],
+            ['label' => I18n::t('admin.menu.content', 'Content'), 'url' => 'admin/content'],
+            ['label' => I18n::t('admin.menu.media', 'Media'), 'url' => 'admin/media'],
+            ['label' => I18n::t('admin.menu.terms', 'Tags'), 'url' => 'admin/terms'],
+            ['label' => I18n::t('admin.menu.settings', 'Settings'), 'url' => 'admin/settings'],
         ];
     }
 }

@@ -2,17 +2,17 @@
     <?= $csrfField() ?>
     <div class="card p-5">
         <div class="mb-3">
-            <label>Název</label>
+            <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
             <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
             <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <div class="mb-3">
-            <label>Popis</label>
+            <label><?= htmlspecialchars($t('common.description', 'Description'), ENT_QUOTES, 'UTF-8') ?></label>
             <textarea name="body" rows="6"><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Uložit</button>
-            <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/terms'), ENT_QUOTES, 'UTF-8') ?>">Zpět</a>
+            <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
+            <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/terms'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
         </div>
     </div>
 </form>

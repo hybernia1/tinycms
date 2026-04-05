@@ -8,6 +8,7 @@ use App\Service\Feature\MediaService;
 use App\Service\Feature\UploadService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
+use App\Service\Support\I18n;
 use App\View\PageView;
 
 final class AdminMediaController extends BaseAdminController
@@ -74,22 +75,22 @@ final class AdminMediaController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         if (!$this->hasUpload('file')) {
-            $this->flash->add('error', 'Nahrajte soubor média.');
-            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => 'Soubor je povinný.']);
+            $this->flash->add('error', I18n::t('media.upload_file_required', 'Please upload a media file.'));
+            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => I18n::t('media.file_required', 'File is required.')]);
             $redirect('admin/media/add');
             return;
         }
 
         $upload = $this->upload->uploadImage($_FILES['file'] ?? []);
         if (($upload['success'] ?? false) !== true) {
-            $this->flash->add('error', (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.'));
-            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.')]);
+            $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
+            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed'))]);
             $redirect('admin/media/add');
             return;
         }
@@ -105,13 +106,13 @@ final class AdminMediaController extends BaseAdminController
         $result = $this->media->save($input);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', 'Médium vytvořeno.');
+            $this->flash->add('success', I18n::t('media.created', 'Media created.'));
             $newId = (int)($result['id'] ?? 0);
             $redirect($newId > 0 ? $this->editPath($newId) : 'admin/media');
         }
 
         $this->upload->deleteMediaFiles($uploadData);
-        $this->flash->add('error', 'Nepodařilo se uložit médium.');
+        $this->flash->add('error', I18n::t('media.save_failed', 'Could not save media.'));
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/media/add');
     }
@@ -126,7 +127,7 @@ final class AdminMediaController extends BaseAdminController
         $item = $this->media->find($id);
 
         if ($item === null) {
-            $this->flash->add('info', 'Médium nenalezeno.');
+            $this->flash->add('info', I18n::t('media.not_found', 'Media not found.'));
             $redirect('admin/media');
             return;
         }
@@ -139,21 +140,21 @@ final class AdminMediaController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->flash->add('error', 'Neplatné ID média.');
+            $this->flash->add('error', I18n::t('media.invalid_id', 'Invalid media ID.'));
             $redirect('admin/media');
             return;
         }
 
         $item = $this->media->find($id);
         if ($item === null) {
-            $this->flash->add('error', 'Médium nenalezeno.');
+            $this->flash->add('error', I18n::t('media.not_found', 'Media not found.'));
             $redirect('admin/media');
             return;
         }
@@ -167,8 +168,8 @@ final class AdminMediaController extends BaseAdminController
         if ($this->hasUpload('file')) {
             $upload = $this->upload->uploadImage($_FILES['file'] ?? []);
             if (($upload['success'] ?? false) !== true) {
-                $this->flash->add('error', (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.'));
-                $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), ['file' => (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.')]);
+                $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
+                $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), ['file' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed'))]);
                 $redirect($this->editPath($id));
                 return;
             }
@@ -187,14 +188,14 @@ final class AdminMediaController extends BaseAdminController
             if (is_array($newUploadData)) {
                 $this->upload->deleteMediaFiles($item);
             }
-            $this->flash->add('success', 'Médium upraveno.');
+            $this->flash->add('success', I18n::t('media.updated', 'Media updated.'));
             $redirect($this->editPath($id));
         }
 
         if (is_array($newUploadData)) {
             $this->upload->deleteMediaFiles($newUploadData);
         }
-        $this->flash->add('error', 'Nepodařilo se upravit médium.');
+        $this->flash->add('error', I18n::t('media.update_failed', 'Could not update media.'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect($this->editPath($id));
     }
@@ -203,7 +204,7 @@ final class AdminMediaController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
@@ -211,7 +212,7 @@ final class AdminMediaController extends BaseAdminController
         if ($id <= 0) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID média.'],
+                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('media.invalid_id', 'Invalid media ID.')],
             ], 422);
             return;
         }
@@ -220,7 +221,7 @@ final class AdminMediaController extends BaseAdminController
         if ($item === null) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'NOT_FOUND', 'message' => 'Médium nenalezeno.'],
+                'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('media.not_found', 'Media not found.')],
             ], 404);
             return;
         }
@@ -228,7 +229,7 @@ final class AdminMediaController extends BaseAdminController
         if (!$this->media->delete($id)) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'DELETE_FAILED', 'message' => 'Médium se nepodařilo smazat.'],
+                'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed', 'Could not delete media.')],
             ], 422);
             return;
         }

@@ -19,6 +19,10 @@ if (!defined('APP_DEBUG')) {
     define('APP_DEBUG', false);
 }
 
+if (!defined('APP_LANG')) {
+    define('APP_LANG', 'en');
+}
+
 if (!defined('APP_DATE_FORMAT')) {
     define('APP_DATE_FORMAT', 'Y-m-d');
 }

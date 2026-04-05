@@ -1,3 +1,10 @@
+(() => {
+const i18n = window.tinycmsI18n || {};
+const t = (path, fallback = '') => {
+    const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
+    return typeof value === 'string' && value !== '' ? value : fallback;
+};
+
 const esc = (value) => String(value || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -48,7 +55,7 @@ const pushFlash = (type, message) => {
     flash.className = `flash flash-${flashType}`;
     flash.innerHTML = `
         <span>${esc(text)}</span>
-        <button type="button" data-flash-close aria-label="Zavřít notifikaci" title="Zavřít notifikaci">
+        <button type="button" data-flash-close aria-label="${esc(t('common.close_notice', 'Close notification'))}" title="${esc(t('common.close_notice', 'Close notification'))}">
             ${icon('cancel')}
         </button>
     `;
@@ -328,14 +335,14 @@ initListApi({
     togglePath: (endpointBase, id) => `${endpointBase}/${id}/status`,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: {
-        deleteSuccess: 'Obsah smazán.',
-        toggleSuccess: (mode) => mode === 'publish' ? 'Obsah publikován.' : 'Obsah přepnut do draftu.',
+        deleteSuccess: t('content.deleted', 'Content deleted.'),
+        toggleSuccess: (mode) => mode === 'publish' ? t('content.published', 'Content published.') : t('content.switched_to_draft', 'Content switched to draft.'),
     },
     rowHtml: (item, { editBase }) => {
         const status = String(item.status || 'draft');
         const statusClass = status === 'published' ? 'text-bg-success' : (status === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
         const isPublished = status === 'published';
-        const toggleLabel = isPublished ? 'Přepnout do draftu' : 'Publikovat';
+        const toggleLabel = isPublished ? t('content.switch_to_draft', 'Switch to draft') : t('content.publish', 'Publish');
 
         return `
             <tr>
@@ -343,8 +350,8 @@ initListApi({
                     <a href="${esc(editBase)}${Number(item.id || 0)}">${esc(item.name)}</a>
                     <div class="text-muted">${esc(item.created_label || item.created)}</div>
                     <div class="d-flex gap-2 mt-2">
-                        <span class="badge ${esc(statusClass)}">${esc(status)}</span>
-                        ${item.is_planned ? '<span class="badge text-bg-warning">Plánováno</span>' : ''}
+                        <span class="badge ${esc(statusClass)}">${esc(t(`content.statuses.${status}`, status))}</span>
+                        ${item.is_planned ? `<span class="badge text-bg-warning">${esc(t('content.planned', 'Planned'))}</span>` : ''}
                     </div>
                 </td>
                 <td>${esc(item.author_name || '—')}</td>
@@ -353,9 +360,9 @@ initListApi({
                         ${icon(isPublished ? 'hide' : 'show')}
                         <span class="sr-only">${esc(toggleLabel)}</span>
                     </button>
-                    <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}" aria-label="Smazat" title="Smazat">
+                    <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}" aria-label="${esc(t('common.delete', 'Delete'))}" title="${esc(t('common.delete', 'Delete'))}">
                         ${icon('delete')}
-                        <span class="sr-only">Smazat</span>
+                        <span class="sr-only">${esc(t('common.delete', 'Delete'))}</span>
                     </button>
                 </td>
             </tr>
@@ -368,7 +375,7 @@ initListApi({
     rootSelector: '[data-terms-list]',
     withStatus: false,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
-    messages: { deleteSuccess: 'Štítek smazán.' },
+    messages: { deleteSuccess: t('terms.deleted', 'Tag deleted.') },
     rowHtml: (item, { editBase }) => {
         const id = Number(item.id || 0);
 
@@ -380,9 +387,9 @@ initListApi({
                 </td>
                 <td>${esc(item.body || '—')}</td>
                 <td class="table-col-actions">
-                    <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="${id}" aria-label="Smazat štítek" title="Smazat štítek">
+                    <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="${id}" aria-label="${esc(t('terms.delete', 'Delete tag'))}" title="${esc(t('terms.delete', 'Delete tag'))}">
                         ${icon('delete')}
-                        <span class="sr-only">Smazat štítek</span>
+                        <span class="sr-only">${esc(t('terms.delete', 'Delete tag'))}</span>
                     </button>
                 </td>
             </tr>
@@ -395,7 +402,7 @@ initListApi({
     rootSelector: '[data-media-list]',
     withStatus: false,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
-    messages: { deleteSuccess: 'Médium smazáno.' },
+    messages: { deleteSuccess: t('media.deleted', 'Media deleted.') },
     getContext: (root) => ({ thumbSuffix: root.getAttribute('data-thumb-suffix') || '_100x100.webp' }),
     rowHtml: (item, { editBase, context }) => {
         const thumbSuffix = context.thumbSuffix || '_100x100.webp';
@@ -420,9 +427,9 @@ initListApi({
                 </td>
                 <td>${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
-                    <button class="btn btn-light btn-icon" type="button" data-media-delete-open="${id}" aria-label="Smazat médium" title="Smazat médium">
+                    <button class="btn btn-light btn-icon" type="button" data-media-delete-open="${id}" aria-label="${esc(t('media.delete', 'Delete media'))}" title="${esc(t('media.delete', 'Delete media'))}">
                         ${icon('delete')}
-                        <span class="sr-only">Smazat médium</span>
+                        <span class="sr-only">${esc(t('media.delete', 'Delete media'))}</span>
                     </button>
                 </td>
             </tr>
@@ -438,14 +445,14 @@ initListApi({
     togglePath: (endpointBase, id) => `${endpointBase}/${id}/suspend`,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: {
-        deleteSuccess: 'Uživatel smazán.',
-        toggleSuccess: (mode) => mode === 'unsuspend' ? 'Uživatel odsuspendován.' : 'Uživatel suspendován.',
+        deleteSuccess: t('users.deleted', 'User deleted.'),
+        toggleSuccess: (mode) => mode === 'unsuspend' ? t('users.unsuspended', 'User unsuspended.') : t('users.suspended', 'User suspended.'),
     },
     rowHtml: (item, { editBase }) => {
         const id = Number(item.id || 0);
         const isSuspended = item.is_suspended === true;
         const isAdmin = item.is_admin === true;
-        const toggleLabel = isSuspended ? 'Odsuspendovat' : 'Suspendovat';
+        const toggleLabel = isSuspended ? t('users.unsuspend', 'Unsuspend') : t('users.suspend', 'Suspend');
 
         return `
             <tr>
@@ -453,8 +460,8 @@ initListApi({
                     <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
                     <div class="text-muted">${esc(item.email)}</div>
                     <div class="d-flex gap-2 mt-2">
-                        <span class="badge text-bg-primary">${esc(item.role)}</span>
-                        ${isSuspended ? '<span class="badge text-bg-warning">Suspendován</span>' : ''}
+                        <span class="badge text-bg-primary">${esc(t(`users.roles.${String(item.role || '')}`, String(item.role || '')))}</span>
+                        ${isSuspended ? `<span class="badge text-bg-warning">${esc(t('users.status_suspended_single', 'Suspended'))}</span>` : ''}
                     </div>
                 </td>
                 <td class="table-col-actions">
@@ -463,12 +470,13 @@ initListApi({
                         ${icon(isSuspended ? 'show' : 'hide')}
                         <span class="sr-only">${esc(toggleLabel)}</span>
                     </button>
-                    <button class="btn btn-light btn-icon" type="button" data-users-delete-open="${id}" aria-label="Smazat uživatele" title="Smazat uživatele">
+                    <button class="btn btn-light btn-icon" type="button" data-users-delete-open="${id}" aria-label="${esc(t('users.delete', 'Delete user'))}" title="${esc(t('users.delete', 'Delete user'))}">
                         ${icon('delete')}
-                        <span class="sr-only">Smazat uživatele</span>
+                        <span class="sr-only">${esc(t('users.delete', 'Delete user'))}</span>
                     </button>`}
                 </td>
             </tr>
         `;
     },
 });
+})();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service\Auth;
 
 use App\Service\Infra\Db\Query;
+use App\Service\Support\I18n;
 
 class Register
 {
@@ -37,50 +38,38 @@ class Register
 
         $errors = [];
 
-        // ----------------------------
-        // Validace jména
-        // ----------------------------
         if ($name === '') {
-            $errors['name'] = 'Jméno je povinné.';
+            $errors['name'] = I18n::t('auth.name_required', 'Name is required.');
         } elseif (mb_strlen($name) < 3) {
-            $errors['name'] = 'Jméno musí mít alespoň 3 znaky.';
+            $errors['name'] = I18n::t('auth.name_min_3', 'Name must be at least 3 characters.');
         } elseif (mb_strlen($name) > 100) {
-            $errors['name'] = 'Jméno je příliš dlouhé.';
+            $errors['name'] = I18n::t('auth.name_too_long', 'Name is too long.');
         }
 
-        // ----------------------------
-        // Validace emailu
-        // ----------------------------
         if ($email === '') {
-            $errors['email'] = 'E-mail je povinný.';
+            $errors['email'] = I18n::t('auth.email_required', 'Email is required.');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'E-mail není ve správném formátu.';
+            $errors['email'] = I18n::t('auth.email_invalid_format', 'Email format is invalid.');
         } else {
             $email = mb_strtolower($email);
         }
 
-        // ----------------------------
-        // Validace hesla
-        // ----------------------------
         if ($password === '') {
-            $errors['password'] = 'Heslo je povinné.';
+            $errors['password'] = I18n::t('auth.password_required', 'Password is required.');
         } elseif (mb_strlen($password) < 6) {
-            $errors['password'] = 'Heslo musí mít alespoň 6 znaků.';
+            $errors['password'] = I18n::t('auth.password_min_6', 'Password must be at least 6 characters.');
         } elseif (mb_strlen($password) > 255) {
-            $errors['password'] = 'Heslo je příliš dlouhé.';
+            $errors['password'] = I18n::t('auth.password_too_long', 'Password is too long.');
         }
 
         if (!empty($errors)) {
             return [
                 'success' => false,
-                'message' => 'Formulář obsahuje chyby.',
+                'message' => I18n::t('auth.form_has_errors', 'The form contains errors.'),
                 'errors'  => $errors,
             ];
         }
 
-        // ----------------------------
-        // Kontrola duplicity emailu
-        // ----------------------------
         $existingUser = $this->query->select('users', ['ID'], [
             'email' => $email,
         ]);
@@ -88,30 +77,24 @@ class Register
         if (!empty($existingUser)) {
             return [
                 'success' => false,
-                'message' => 'Tento e-mail je již registrován.',
+                'message' => I18n::t('auth.email_already_registered', 'This email is already registered.'),
                 'errors'  => [
-                    'email' => 'Tento e-mail je již používán.',
+                    'email' => I18n::t('auth.email_already_used', 'This email is already in use.'),
                 ],
             ];
         }
 
-        // ----------------------------
-        // Hash hesla
-        // ----------------------------
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
         if ($passwordHash === false) {
             return [
                 'success' => false,
-                'message' => 'Nepodařilo se vytvořit hash hesla.',
+                'message' => I18n::t('auth.password_hash_failed', 'Failed to create password hash.'),
             ];
         }
 
         $now = date('Y-m-d H:i:s');
 
-        // ----------------------------
-        // Uložení do DB
-        // ----------------------------
         $userId = $this->query->insert('users', [
             'name'     => $name,
             'email'    => $email,
@@ -125,13 +108,13 @@ class Register
         if ($userId <= 0) {
             return [
                 'success' => false,
-                'message' => 'Registraci se nepodařilo uložit.',
+                'message' => I18n::t('auth.registration_save_failed', 'Registration could not be saved.'),
             ];
         }
 
         return [
             'success' => true,
-            'message' => 'Registrace proběhla úspěšně.',
+            'message' => I18n::t('auth.registration_success', 'Registration successful.'),
             'user_id' => $userId,
         ];
     }

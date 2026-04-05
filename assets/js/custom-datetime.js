@@ -1,4 +1,14 @@
 (() => {
+    const i18n = window.tinycmsI18n || {};
+    const t = (path, fallback = '') => {
+        const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
+        return typeof value === 'string' && value !== '' ? value : fallback;
+    };
+    const ta = (path, fallback = []) => {
+        const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
+        return Array.isArray(value) && value.length ? value : fallback;
+    };
+
     const root = document.body;
     if (!root) {
         return;
@@ -15,7 +25,9 @@
     const sampleIconUse = document.querySelector('svg.icon use');
     const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '';
     const iconHref = (name) => `${iconBase}#icon-${name}`;
-    const weekdayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
+    const locale = String(document.documentElement?.lang || 'en');
+    const weekdayLabels = ta('datetime.weekdays_short', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+    const monthLabels = ta('datetime.months', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
 
     const parseValue = (value) => {
         if (!value || !value.includes('T')) {
@@ -43,10 +55,10 @@
 
     const formatLabel = (date) => {
         if (!date) {
-            return 'Vybrat datum a čas';
+            return t('datetime.pick_date_time', 'Pick date and time');
         }
 
-        return new Intl.DateTimeFormat('cs-CZ', {
+        return new Intl.DateTimeFormat(locale, {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -116,9 +128,9 @@
         const header = document.createElement('div');
         header.className = 'custom-datetime-header';
 
-        const prev = createIconButton('prev', 'Předchozí měsíc');
+        const prev = createIconButton('prev', t('datetime.prev_month', 'Previous month'));
         const title = document.createElement('strong');
-        const next = createIconButton('next', 'Další měsíc');
+        const next = createIconButton('next', t('datetime.next_month', 'Next month'));
 
         header.appendChild(prev);
         header.appendChild(title);
@@ -168,12 +180,12 @@
         const todayButton = document.createElement('button');
         todayButton.type = 'button';
         todayButton.className = 'btn btn-light';
-        todayButton.textContent = 'Dnes';
+        todayButton.textContent = t('datetime.today', 'Today');
 
         const clearButton = document.createElement('button');
         clearButton.type = 'button';
         clearButton.className = 'btn btn-light';
-        clearButton.textContent = 'Vymazat';
+        clearButton.textContent = t('datetime.clear', 'Clear');
 
         const okButton = document.createElement('button');
         okButton.type = 'button';
@@ -200,7 +212,7 @@
         };
 
         const render = () => {
-            title.textContent = new Intl.DateTimeFormat('cs-CZ', { month: 'long', year: 'numeric' }).format(viewMonth);
+            title.textContent = `${monthLabels[viewMonth.getMonth()] || ''} ${viewMonth.getFullYear()}`.trim();
             grid.innerHTML = '';
 
             const start = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);

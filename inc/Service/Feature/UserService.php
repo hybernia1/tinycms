@@ -6,6 +6,7 @@ namespace App\Service\Feature;
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
 use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Support\I18n;
 use InvalidArgumentException;
 
 final class UserService
@@ -89,19 +90,19 @@ final class UserService
         $errors = [];
 
         if ($name === '') {
-            $errors['name'] = 'Jméno je povinné.';
+            $errors['name'] = I18n::t('validation.name_required', 'Name is required.');
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'E-mail není validní.';
+            $errors['email'] = I18n::t('validation.email_invalid', 'Email is not valid.');
         }
 
         if (!in_array($role, ['admin', 'user'], true)) {
-            $errors['role'] = 'Role musí být admin nebo user.';
+            $errors['role'] = I18n::t('validation.role_invalid', 'Role must be admin or user.');
         }
 
         if ($id === null && $password === '') {
-            $errors['password'] = 'Heslo je povinné pro nového uživatele.';
+            $errors['password'] = I18n::t('validation.password_required_new_user', 'Password is required for a new user.');
         }
 
         $lengthErrors = $this->columnLimitValidator->validate('users', [
@@ -129,7 +130,7 @@ final class UserService
         $existing = $this->query->select('users', ['ID'], ['email' => $email]);
 
         if (!empty($existing) && (int)$existing[0]['ID'] !== ($id ?? 0)) {
-            $errors['email'] = 'E-mail je už použit.';
+            $errors['email'] = I18n::t('validation.email_already_used', 'Email is already used.');
         }
 
         if ($errors !== []) {

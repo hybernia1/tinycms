@@ -7,6 +7,7 @@ use App\Service\Support\FlashService;
 use App\Service\Infra\Router\Router;
 use App\Service\Support\CsrfService;
 use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\I18n;
 
 final class View
 {
@@ -40,14 +41,15 @@ final class View
         $formatDate = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDate($value, $fallback);
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
+        $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
         if ($isAdminLayout && !isset($data['adminMenu'])) {
             $data['adminMenu'] = [
-                ['label' => 'Dashboard', 'url' => $url('admin/dashboard')],
-                ['label' => 'Uživatelé', 'url' => $url('admin/users')],
-                ['label' => 'Nastavení', 'url' => $url('admin/settings')],
+                ['label' => I18n::t('admin.menu.dashboard', 'Dashboard'), 'url' => $url('admin/dashboard')],
+                ['label' => I18n::t('admin.menu.users', 'Users'), 'url' => $url('admin/users')],
+                ['label' => I18n::t('admin.menu.settings', 'Settings'), 'url' => $url('admin/settings')],
             ];
         } elseif ($isAdminLayout && isset($data['adminMenu']) && is_array($data['adminMenu'])) {
             $data['adminMenu'] = array_map(static function (array $item) use ($url): array {
@@ -65,6 +67,8 @@ final class View
         $data['formatDate'] = $formatDate;
         $data['formatDateTime'] = $formatDateTime;
         $data['formatInputDateTime'] = $formatInputDateTime;
+        $data['t'] = $t;
+        $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
 

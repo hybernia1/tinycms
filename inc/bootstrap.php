@@ -23,6 +23,7 @@ use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\FlashService;
 use App\Service\Infra\Router\Router;
 use App\Service\Feature\SettingsService;
+use App\Service\Support\I18n;
 use App\Service\Support\SluggerService;
 use App\Service\Feature\UserService;
 use App\View\PageView;
@@ -56,6 +57,7 @@ if (!$isInstalled) {
     $install = new InstallController($view, $csrf, new InstallService());
 
     $allowedWhenMissingConfig = $requestPath === 'install'
+        || $requestPath === 'install/db'
         || $requestPath === 'install/admin'
         || $requestPath === 'install/done'
         || str_starts_with($requestPath, 'assets/');
@@ -83,6 +85,8 @@ $mediaService = new MediaService();
 $slugger = new SluggerService();
 $uploadService = new UploadService(dirname(__DIR__), $slugger);
 $settingsService = new SettingsService();
+$resolvedSettings = $settingsService->resolved();
+I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
 $termService = new TermService();
 $pageView = new PageView($view);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $termService, $slugger);

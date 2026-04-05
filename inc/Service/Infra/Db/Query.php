@@ -6,6 +6,7 @@ namespace App\Service\Infra\Db;
 use InvalidArgumentException;
 use PDO;
 use PDOException;
+use App\Service\Support\I18n;
 
 class Query
 {
@@ -218,21 +219,21 @@ class Query
         $driverCode = (int)($e->errorInfo[1] ?? 0);
 
         if ($sqlState === "22001" || $driverCode === 1406) {
-            return new InvalidArgumentException("Jedna nebo více hodnot je příliš dlouhá pro databázový sloupec.", 0, $e);
+            return new InvalidArgumentException(I18n::t('errors.db.value_too_long', 'One or more values are too long for the database column.'), 0, $e);
         }
 
         if ($driverCode === 1048 || $driverCode === 1364) {
-            return new InvalidArgumentException("Chybí povinná hodnota (NOT NULL).", 0, $e);
+            return new InvalidArgumentException(I18n::t('errors.db.required_value_missing', 'A required value (NOT NULL) is missing.'), 0, $e);
         }
 
         if ($driverCode === 1062) {
-            return new InvalidArgumentException("Hodnota už existuje a musí být unikátní.", 0, $e);
+            return new InvalidArgumentException(I18n::t('errors.db.unique_violation', 'The value already exists and must be unique.'), 0, $e);
         }
 
         if ($driverCode === 1452) {
-            return new InvalidArgumentException("Neplatná vazba na související záznam (foreign key).", 0, $e);
+            return new InvalidArgumentException(I18n::t('errors.db.invalid_foreign_key', 'Invalid reference to related record (foreign key).'), 0, $e);
         }
 
-        return new InvalidArgumentException("Databázová operace selhala.", 0, $e);
+        return new InvalidArgumentException(I18n::t('errors.db.operation_failed', 'Database operation failed.'), 0, $e);
     }
 }

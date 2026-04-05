@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service\Feature;
 
 use App\Service\Support\SluggerService;
+use App\Service\Support\I18n;
 
 final class UploadService
 {
@@ -30,12 +31,12 @@ final class UploadService
     public function uploadImage(array $file): array
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            return ['success' => false, 'error' => 'Soubor se nepodařilo nahrát.'];
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
         }
 
         $tmpPath = (string)($file['tmp_name'] ?? '');
         if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
-            return ['success' => false, 'error' => 'Neplatný upload souboru.'];
+            return ['success' => false, 'error' => I18n::t('upload.invalid_upload', 'Invalid file upload.')];
         }
 
         $originalName = trim((string)($file['name'] ?? ''));
@@ -43,7 +44,7 @@ final class UploadService
         $mime = $this->detectMime($tmpPath);
 
         if (!isset(self::MIME_TO_EXTENSION[$mime])) {
-            return ['success' => false, 'error' => 'Nepodporovaný typ souboru.'];
+            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type', 'Unsupported file type.')];
         }
 
         if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
@@ -51,7 +52,7 @@ final class UploadService
         }
 
         if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
-            return ['success' => false, 'error' => 'Nepodporovaná přípona souboru.'];
+            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_extension', 'Unsupported file extension.')];
         }
 
         $baseName = pathinfo($originalName, PATHINFO_FILENAME);
@@ -60,14 +61,14 @@ final class UploadService
         $absDir = $this->rootPath . '/' . $subdir;
 
         if (!is_dir($absDir) && !mkdir($absDir, 0775, true) && !is_dir($absDir)) {
-            return ['success' => false, 'error' => 'Nelze vytvořit cílovou složku.'];
+            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed', 'Cannot create target directory.')];
         }
 
         $fileRel = $subdir . '/' . $slug . '.' . $extension;
         $fileAbs = $this->rootPath . '/' . $fileRel;
 
         if (!move_uploaded_file($tmpPath, $fileAbs)) {
-            return ['success' => false, 'error' => 'Soubor se nepodařilo uložit na disk.'];
+            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed', 'Failed to save file to disk.')];
         }
 
         $webpRel = $extension === 'webp' ? $fileRel : $subdir . '/' . $slug . '.webp';
@@ -77,7 +78,7 @@ final class UploadService
             if ($fileAbs !== $webpAbs) {
                 @unlink($fileAbs);
             }
-            return ['success' => false, 'error' => 'Nepodařilo se vytvořit WEBP variantu.'];
+            return ['success' => false, 'error' => I18n::t('upload.webp_create_failed', 'Failed to create WEBP variant.')];
         }
 
         $createdThumbs = [];
@@ -96,7 +97,7 @@ final class UploadService
                 @unlink($fileAbs);
             }
             @unlink($webpAbs);
-            return ['success' => false, 'error' => 'Nepodařilo se vytvořit thumbnail variantu.'];
+            return ['success' => false, 'error' => I18n::t('upload.thumbnail_create_failed', 'Failed to create thumbnail variant.')];
         }
 
         return [

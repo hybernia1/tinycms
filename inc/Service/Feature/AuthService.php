@@ -7,6 +7,7 @@ use App\Service\Auth\Auth;
 use App\Service\Auth\Login;
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
+use App\Service\Support\I18n;
 
 final class AuthService
 {
@@ -36,7 +37,7 @@ final class AuthService
             return [
                 'success' => false,
                 'errors' => $result['errors'] ?? [],
-                'message' => (string)($result['message'] ?? 'Přihlášení selhalo.'),
+                'message' => (string)($result['message'] ?? I18n::t('auth.login_failed', 'Login failed.')),
             ];
         }
 

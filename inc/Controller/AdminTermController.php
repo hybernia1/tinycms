@@ -7,6 +7,7 @@ use App\Service\Feature\AuthService;
 use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
+use App\Service\Support\I18n;
 use App\View\PageView;
 
 final class AdminTermController extends BaseAdminController
@@ -101,7 +102,7 @@ final class AdminTermController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
@@ -109,12 +110,12 @@ final class AdminTermController extends BaseAdminController
         $result = $this->terms->save($_POST);
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
-            $this->flash->add('success', 'Štítek vytvořen.');
+            $this->flash->add('success', I18n::t('terms.created', 'Tag created.'));
             $redirect($newId > 0 ? $this->editPath($newId) : 'admin/terms');
             return;
         }
 
-        $this->flash->add('error', 'Nepodařilo se uložit štítek.');
+        $this->flash->add('error', I18n::t('terms.save_failed', 'Could not save tag.'));
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/terms/add');
     }
@@ -129,7 +130,7 @@ final class AdminTermController extends BaseAdminController
         $item = $this->terms->find($id);
 
         if ($item === null) {
-            $this->flash->add('info', 'Štítek nenalezen.');
+            $this->flash->add('info', I18n::t('terms.not_found', 'Tag not found.'));
             $redirect('admin/terms');
             return;
         }
@@ -142,26 +143,26 @@ final class AdminTermController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->flash->add('error', 'Neplatné ID štítku.');
+            $this->flash->add('error', I18n::t('terms.invalid_id', 'Invalid tag ID.'));
             $redirect('admin/terms');
             return;
         }
 
         $result = $this->terms->save($_POST, $id);
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', 'Štítek upraven.');
+            $this->flash->add('success', I18n::t('terms.updated', 'Tag updated.'));
             $redirect($this->editPath($id));
             return;
         }
 
-        $this->flash->add('error', 'Nepodařilo se upravit štítek.');
+        $this->flash->add('error', I18n::t('terms.update_failed', 'Could not update tag.'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect($this->editPath($id));
     }
@@ -170,18 +171,18 @@ final class AdminTermController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID štítku.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('terms.invalid_id', 'Invalid tag ID.')]], 422);
             return;
         }
 
         if (!$this->terms->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Štítek se nepodařilo smazat.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('terms.delete_failed', 'Could not delete tag.')]], 422);
             return;
         }
 

@@ -11,6 +11,7 @@ use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Feature\UserService;
+use App\Service\Support\I18n;
 use App\View\PageView;
 
 final class AdminContentController extends BaseAdminController
@@ -71,18 +72,18 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID obsahu.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id', 'Invalid content ID.')]], 422);
             return;
         }
 
         if (!$this->content->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Obsah se nepodařilo smazat.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('content.delete_failed', 'Could not delete content.')]], 422);
             return;
         }
 
@@ -108,7 +109,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
@@ -121,11 +122,11 @@ final class AdminContentController extends BaseAdminController
             if ($newId > 0) {
                 $this->terms->syncContentTerms($newId, (string)($_POST['terms'] ?? ''));
             }
-            $this->flash->add('success', 'Obsah vytvořen.');
+            $this->flash->add('success', I18n::t('content.created', 'Content created.'));
             $redirect($newId > 0 ? $this->editPath($newId) : 'admin/content');
         }
 
-        $this->flash->add('error', 'Nepodařilo se uložit obsah.');
+        $this->flash->add('error', I18n::t('content.save_failed', 'Could not save content.'));
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/content/add');
     }
@@ -140,7 +141,7 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($id);
 
         if ($item === null) {
-            $this->flash->add('info', 'Obsah nenalezen.');
+            $this->flash->add('info', I18n::t('content.not_found', 'Content not found.'));
             $redirect('admin/content');
             return;
         }
@@ -156,7 +157,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
@@ -164,7 +165,7 @@ final class AdminContentController extends BaseAdminController
         $id = (int)($_GET['id'] ?? 0);
 
         if ($id <= 0) {
-            $this->flash->add('error', 'Neplatné ID obsahu.');
+            $this->flash->add('error', I18n::t('content.invalid_id', 'Invalid content ID.'));
             $redirect('admin/content');
             return;
         }
@@ -174,11 +175,11 @@ final class AdminContentController extends BaseAdminController
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
-            $this->flash->add('success', 'Obsah upraven.');
+            $this->flash->add('success', I18n::t('content.updated', 'Content updated.'));
             $redirect($this->editPath($id));
         }
 
-        $this->flash->add('error', 'Nepodařilo se upravit obsah.');
+        $this->flash->add('error', I18n::t('content.update_failed', 'Could not update content.'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect('admin/content/edit?id=' . $id);
     }
@@ -187,14 +188,14 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         $mode = (string)($_POST['mode'] ?? 'draft');
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID obsahu.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id', 'Invalid content ID.')]], 422);
             return;
         }
 
@@ -220,14 +221,14 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
         $payload = [
-            'name' => '(bez názvu)',
+            'name' => I18n::t('content.untitled', '(untitled)'),
             'status' => 'draft',
             'excerpt' => '',
             'body' => '',
@@ -238,7 +239,7 @@ final class AdminContentController extends BaseAdminController
         if (($result['success'] ?? false) !== true) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'CREATE_FAILED', 'message' => 'Draft se nepodařilo vytvořit.'],
+                'error' => ['code' => 'CREATE_FAILED', 'message' => I18n::t('content.draft_create_failed', 'Could not create draft.')],
             ], 422);
             return;
         }
@@ -247,7 +248,7 @@ final class AdminContentController extends BaseAdminController
         if ($id <= 0) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'INVALID_ID', 'message' => 'Draft nemá platné ID.'],
+                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.draft_invalid_id', 'Draft has invalid ID.')],
             ], 422);
             return;
         }
@@ -262,7 +263,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
@@ -286,7 +287,7 @@ final class AdminContentController extends BaseAdminController
         if (($result['success'] ?? false) !== true) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'SAVE_FAILED', 'message' => 'Autosave se nepodařil.', 'errors' => $result['errors'] ?? []],
+                'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('content.autosave_failed', 'Autosave failed.'), 'errors' => $result['errors'] ?? []],
             ], 422);
             return;
         }
@@ -310,7 +311,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
@@ -319,14 +320,14 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($id);
 
         if ($item === null) {
-            $this->flash->add('error', 'Obsah nenalezen.');
+            $this->flash->add('error', I18n::t('content.not_found', 'Content not found.'));
             $redirect('admin/content');
             return;
         }
 
         $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
         if (($upload['success'] ?? false) !== true) {
-            $this->flash->add('error', (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.'));
+            $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed', 'File upload failed.')));
             $redirect($this->editPath($id));
             return;
         }
@@ -345,12 +346,12 @@ final class AdminContentController extends BaseAdminController
                 $this->media->delete($mediaId);
             }
             $this->upload->deleteMediaFiles($data);
-            $this->flash->add('error', 'Náhled se nepodařilo uložit.');
+            $this->flash->add('error', I18n::t('content.thumbnail_save_failed', 'Could not save thumbnail.'));
             $redirect($this->editPath($id));
             return;
         }
 
-        $this->flash->add('success', 'Náhled byl nahrán.');
+        $this->flash->add('success', I18n::t('content.thumbnail_uploaded', 'Thumbnail uploaded.'));
         $redirect($this->editPath($id));
     }
 
@@ -358,18 +359,18 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         if ($id <= 0 || $this->content->find($id) === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
             return;
         }
 
         if (!$this->content->setThumbnail($id, null)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DETACH_FAILED', 'message' => 'Náhled se nepodařilo odpojit.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DETACH_FAILED', 'message' => I18n::t('content.thumbnail_detach_failed', 'Could not detach thumbnail.')]], 422);
             return;
         }
 
@@ -380,24 +381,24 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         if ($contentId <= 0 || $this->content->find($contentId) === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($mediaId <= 0 || $media === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => 'Médium nenalezeno.']], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found', 'Media not found.')]], 404);
             return;
         }
 
         if (!$this->content->setThumbnail($contentId, $mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SELECT_FAILED', 'message' => 'Náhled se nepodařilo přiřadit.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SELECT_FAILED', 'message' => I18n::t('content.thumbnail_select_failed', 'Could not assign thumbnail.')]], 422);
             return;
         }
 
@@ -415,7 +416,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
@@ -424,27 +425,27 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($id);
 
         if ($item === null) {
-            $this->flash->add('error', 'Obsah nenalezen.');
+            $this->flash->add('error', I18n::t('content.not_found', 'Content not found.'));
             $redirect('admin/content');
             return;
         }
 
         $thumbnailId = (int)($item['thumbnail'] ?? 0);
         if ($thumbnailId <= 0) {
-            $this->flash->add('info', 'Obsah nemá přiřazený náhled.');
+            $this->flash->add('info', I18n::t('content.thumbnail_missing', 'Content has no assigned thumbnail.'));
             $redirect($this->editPath($id));
             return;
         }
 
         $media = $this->media->find($thumbnailId);
         if ($media === null || !$this->media->delete($thumbnailId)) {
-            $this->flash->add('error', 'Náhled se nepodařilo smazat.');
+            $this->flash->add('error', I18n::t('content.thumbnail_delete_failed', 'Could not delete thumbnail.'));
             $redirect($this->editPath($id));
             return;
         }
 
         $this->upload->deleteMediaFiles($media);
-        $this->flash->add('success', 'Náhled byl odstraněn z databáze i disku.');
+        $this->flash->add('success', I18n::t('content.thumbnail_deleted', 'Thumbnail was removed from database and disk.'));
         $redirect($this->editPath($id));
     }
 
@@ -455,7 +456,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         if ($contentId <= 0 || $this->content->find($contentId) === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
             return;
         }
 
@@ -493,25 +494,25 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         $item = $this->content->find($contentId);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
             return;
         }
 
         if ($mediaId <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_MEDIA_ID', 'message' => 'Médium nenalezeno.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_MEDIA_ID', 'message' => I18n::t('media.not_found', 'Media not found.')]], 422);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($media === null || !$this->media->delete($mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Médium se nepodařilo smazat.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed', 'Could not delete media.')]], 422);
             return;
         }
 
@@ -527,19 +528,19 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         if ($contentId <= 0 || $this->content->find($contentId) === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
             return;
         }
 
         $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
         if (($upload['success'] ?? false) !== true) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'UPLOAD_FAILED', 'message' => (string)($upload['error'] ?? 'Soubor se nepodařilo nahrát.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'UPLOAD_FAILED', 'message' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed', 'File upload failed.'))]], 422);
             return;
         }
 
@@ -554,7 +555,7 @@ final class AdminContentController extends BaseAdminController
 
         if ($mediaId <= 0) {
             $this->upload->deleteMediaFiles($data);
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SAVE_FAILED', 'message' => 'Médium se nepodařilo uložit.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('media.save_failed', 'Could not save media.')]], 422);
             return;
         }
 
@@ -577,25 +578,25 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         $name = trim((string)($_POST['name'] ?? ''));
         if ($contentId <= 0 || $this->content->find($contentId) === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
             return;
         }
 
         if ($mediaId <= 0 || $name === '') {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => 'Neplatná data.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data', 'Invalid data.')]], 422);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($media === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => 'Médium nenalezeno.']], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found', 'Media not found.')]], 404);
             return;
         }
 
@@ -607,7 +608,7 @@ final class AdminContentController extends BaseAdminController
         ], $mediaId);
 
         if (($result['success'] ?? false) !== true) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'RENAME_FAILED', 'message' => (string)($result['errors']['name'] ?? 'Název se nepodařilo uložit.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'RENAME_FAILED', 'message' => (string)($result['errors']['name'] ?? I18n::t('media.rename_failed', 'Could not save name.'))]], 422);
             return;
         }
 
@@ -618,18 +619,18 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
         ) {
             return;
         }
 
         if ($contentId <= 0 || $mediaId <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => 'Neplatná data.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data', 'Invalid data.')]], 422);
             return;
         }
 
         if (!$this->content->attachMedia($contentId, $mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'ATTACH_FAILED', 'message' => 'Přílohu se nepodařilo uložit.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'ATTACH_FAILED', 'message' => I18n::t('content.attachment_attach_failed', 'Could not save attachment.')]], 422);
             return;
         }
 
@@ -645,7 +646,7 @@ final class AdminContentController extends BaseAdminController
     {
         $name = trim((string)($input['name'] ?? ''));
         if ($name === '' && trim((string)($input['body'] ?? '')) !== '') {
-            $name = '(bez názvu)';
+            $name = I18n::t('content.untitled', '(untitled)');
         }
 
         return [

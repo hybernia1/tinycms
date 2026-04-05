@@ -9,12 +9,12 @@
     <form method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <div class="mb-3">
-            <label>Název</label>
+            <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
             <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
             <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <div class="mb-3">
-            <label>Soubor <?= $mode === 'add' ? '' : '(volitelné, nahradí stávající)' ?></label>
+            <label><?= htmlspecialchars($t('media.file', 'File'), ENT_QUOTES, 'UTF-8') ?> <?= $mode === 'add' ? '' : '(' . htmlspecialchars($t('media.file_optional_replace', 'optional, replaces current'), ENT_QUOTES, 'UTF-8') . ')' ?></label>
             <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" <?= $mode === 'add' ? 'required' : '' ?>>
             <?php if (!empty($errors['file'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['file'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
@@ -33,18 +33,18 @@
                 </div>
             <?php endif; ?>
             <div class="mb-3">
-                <label>Vytvořeno</label>
+                <label><?= htmlspecialchars($t('common.created', 'Created'), ENT_QUOTES, 'UTF-8') ?></label>
                 <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
             <div class="mb-3">
-                <label>Aktualizováno</label>
+                <label><?= htmlspecialchars($t('common.updated', 'Updated'), ENT_QUOTES, 'UTF-8') ?></label>
                 <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['updated'] ?? ''), '—'), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
         <?php endif; ?>
         <div class="mb-4">
-            <label>Autor</label>
+            <label><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></label>
             <select name="author">
-                <option value="">Bez autora</option>
+                <option value=""><?= htmlspecialchars($t('common.no_author', 'No author'), ENT_QUOTES, 'UTF-8') ?></option>
                 <?php foreach ($authors as $author): ?>
                     <?php $authorId = (int)($author['ID'] ?? 0); ?>
                     <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
@@ -54,21 +54,21 @@
             </select>
             <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
-        <button class="btn btn-primary" type="submit">Uložit</button>
-        <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>">Zpět</a>
+        <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
+        <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
     </form>
 
     <?php if ($mode === 'edit'): ?>
         <hr>
-        <h3 class="mb-3">Použito jako thumbnail</h3>
+        <h3 class="mb-3"><?= htmlspecialchars($t('media.used_as_thumbnail', 'Used as thumbnail'), ENT_QUOTES, 'UTF-8') ?></h3>
         <?php if (($usages ?? []) === []): ?>
-            <p class="text-muted m-0">Médium není použité jako thumbnail u žádného článku.</p>
+            <p class="text-muted m-0"><?= htmlspecialchars($t('media.no_thumbnail_usage', 'Media is not used as a thumbnail in any post.'), ENT_QUOTES, 'UTF-8') ?></p>
         <?php else: ?>
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Článek</th><th>Status</th><th>Vytvořeno</th><th>Aktualizováno</th>
+                        <th><?= htmlspecialchars($t('content.post', 'Post'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('common.created', 'Created'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('common.updated', 'Updated'), ENT_QUOTES, 'UTF-8') ?></th>
                     </tr>
                     </thead>
                     <tbody>

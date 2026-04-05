@@ -6,6 +6,7 @@ namespace App\Service\Feature;
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
 use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Support\I18n;
 use InvalidArgumentException;
 
 final class TermService
@@ -53,11 +54,11 @@ final class TermService
         $errors = [];
 
         if ($name === '') {
-            $errors['name'] = 'Název je povinný.';
+            $errors['name'] = I18n::t('validation.name_required', 'Name is required.');
         }
 
         if ($name !== '' && $this->existsByName($name, $id)) {
-            $errors['name'] = 'Štítek s tímto názvem už existuje.';
+            $errors['name'] = I18n::t('terms.name_exists', 'A tag with this name already exists.');
         }
 
         $lengthErrors = $this->schemaConstraintValidator->validate('terms', [

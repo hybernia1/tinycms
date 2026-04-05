@@ -7,6 +7,7 @@ use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Feature\SettingsService;
+use App\Service\Support\I18n;
 use App\View\PageView;
 
 final class AdminSettingsController extends BaseAdminController
@@ -36,13 +37,15 @@ final class AdminSettingsController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/settings', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+            || !$this->guardCsrf($redirect, 'admin/settings', I18n::t('common.csrf_expired'))
         ) {
             return;
         }
 
-        $this->settings->save((array)($_POST['settings'] ?? []));
-        $this->flash->add('success', 'Nastavení uloženo.');
+        $input = (array)($_POST['settings'] ?? []);
+        $this->settings->save($input);
+        I18n::setLocale((string)($input['app_lang'] ?? APP_LANG));
+        $this->flash->add('success', I18n::t('settings.saved', 'Settings saved.'));
         $redirect('admin/settings');
     }
 }
