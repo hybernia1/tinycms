@@ -88,4 +88,10 @@
     <symbol id="icon-w-align-justify" viewBox="0 0 24 24">
         <path d="M4 6h16M4 10h16M4 14h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
+    <symbol id="icon-w-text-color" viewBox="0 0 24 24">
+        <path d="M4 20h16M12 4l5 12M12 4 7 16M9 12h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-w-bg-color" viewBox="0 0 24 24">
+        <path d="M4 20h16M9 4h8M8 4l3.5 9.5M16 4l-3.5 9.5M7 16h10v2H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
 </svg>

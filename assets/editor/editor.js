@@ -245,6 +245,44 @@
         return item;
     }
 
+    function createColorSwatchButton(command, value) {
+        var item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'wysiwyg-color-swatch';
+        item.setAttribute('data-command', command);
+        item.setAttribute('data-value', value);
+        item.style.backgroundColor = value;
+        item.title = value;
+        item.setAttribute('aria-label', value);
+        return item;
+    }
+
+    function createColorGroup(icon, toggleCommand, swatchCommand, title, type) {
+        var group = document.createElement('div');
+        group.className = 'wysiwyg-group wysiwyg-group-color';
+
+        var toggle = createIconButton(icon, toggleCommand, title);
+
+        var menu = document.createElement('div');
+        menu.className = 'wysiwyg-menu wysiwyg-menu-color';
+        menu.setAttribute('data-color-type', type);
+
+        var colors = [
+            '#000000', '#434343', '#666666', '#999999',
+            '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef',
+            '#f3f3f3', '#ffffff', '#980000', '#ff0000',
+            '#ff9900', '#ffff00', '#00ff00', '#00ffff',
+        ];
+
+        colors.forEach(function (color) {
+            menu.appendChild(createColorSwatchButton(swatchCommand, color));
+        });
+
+        group.appendChild(toggle);
+        group.appendChild(menu);
+        return group;
+    }
+
     function createHeadingGroup() {
         var group = document.createElement('div');
         group.className = 'wysiwyg-group wysiwyg-group-heading';
@@ -358,6 +396,8 @@
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
         var media = createIconButton('w-image', 'openMediaLibrary', 'Vložit obrázek');
         var alignGroup = createAlignGroup();
+        var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', 'Barva textu', 'text');
+        var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', 'Barva pozadí', 'background');
         var linkPanel = createLinkPanel();
 
         toolbar.appendChild(headingGroup);
@@ -372,6 +412,8 @@
         }
         toolbar.appendChild(html);
         toolbar.appendChild(alignGroup);
+        toolbar.appendChild(textColorGroup);
+        toolbar.appendChild(backgroundColorGroup);
 
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
@@ -388,6 +430,8 @@
             wrapper.classList.remove('is-heading-open');
             wrapper.classList.remove('is-list-open');
             wrapper.classList.remove('is-align-open');
+            wrapper.classList.remove('is-text-color-open');
+            wrapper.classList.remove('is-bg-color-open');
             wrapper.classList.remove('is-link-open');
             activeLink = null;
         }
@@ -473,6 +517,8 @@
                 }
                 wrapper.classList.remove('is-heading-open');
                 wrapper.classList.remove('is-align-open');
+                wrapper.classList.remove('is-text-color-open');
+                wrapper.classList.remove('is-bg-color-open');
                 wrapper.classList.toggle('is-list-open');
                 wrapper.classList.remove('is-link-open');
                 return;
@@ -485,6 +531,8 @@
                 wrapper.classList.toggle('is-heading-open');
                 wrapper.classList.remove('is-list-open');
                 wrapper.classList.remove('is-align-open');
+                wrapper.classList.remove('is-text-color-open');
+                wrapper.classList.remove('is-bg-color-open');
                 wrapper.classList.remove('is-link-open');
                 return;
             }
@@ -496,6 +544,34 @@
                 wrapper.classList.remove('is-heading-open');
                 wrapper.classList.remove('is-list-open');
                 wrapper.classList.toggle('is-align-open');
+                wrapper.classList.remove('is-text-color-open');
+                wrapper.classList.remove('is-bg-color-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleTextColorMenu') {
+                if (htmlMode) {
+                    return;
+                }
+                wrapper.classList.remove('is-heading-open');
+                wrapper.classList.remove('is-list-open');
+                wrapper.classList.remove('is-align-open');
+                wrapper.classList.toggle('is-text-color-open');
+                wrapper.classList.remove('is-bg-color-open');
+                wrapper.classList.remove('is-link-open');
+                return;
+            }
+
+            if (command === 'toggleBackgroundColorMenu') {
+                if (htmlMode) {
+                    return;
+                }
+                wrapper.classList.remove('is-heading-open');
+                wrapper.classList.remove('is-list-open');
+                wrapper.classList.remove('is-align-open');
+                wrapper.classList.remove('is-text-color-open');
+                wrapper.classList.toggle('is-bg-color-open');
                 wrapper.classList.remove('is-link-open');
                 return;
             }
@@ -523,6 +599,12 @@
 
             if (command.indexOf('formatBlock:') === 0) {
                 runCommand('formatBlock', '<' + command.split(':')[1] + '>');
+                return;
+            }
+
+            if (command === 'foreColor' || command === 'hiliteColor') {
+                document.execCommand('styleWithCSS', false, true);
+                runCommand(command, button.getAttribute('data-value') || '#000000');
                 return;
             }
 
