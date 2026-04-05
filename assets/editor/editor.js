@@ -276,6 +276,17 @@
         return item;
     }
 
+    function createLinkToolButton(icon, role, title) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'wysiwyg-link-tool-btn';
+        button.setAttribute('data-role', role);
+        button.setAttribute('aria-label', title);
+        button.title = title;
+        button.innerHTML = '<svg aria-hidden="true"><use href="/assets/icons.svg#icon-' + icon + '"></use></svg>';
+        return button;
+    }
+
     function createColorSwatchButton(command, value) {
         var item = document.createElement('button');
         item.type = 'button';
@@ -386,6 +397,12 @@
         input.className = 'wysiwyg-link-input';
         input.setAttribute('data-role', 'link-input');
 
+        var titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.placeholder = 'Titulek odkazu';
+        titleInput.className = 'wysiwyg-link-input';
+        titleInput.setAttribute('data-role', 'link-title-input');
+
         var options = document.createElement('div');
         options.className = 'wysiwyg-link-options';
 
@@ -433,6 +450,7 @@
         options.appendChild(nofollowOption);
         dialog.appendChild(title);
         dialog.appendChild(input);
+        dialog.appendChild(titleInput);
         dialog.appendChild(options);
         dialog.appendChild(actions);
         modal.appendChild(dialog);
@@ -464,6 +482,11 @@
         var focus = createIconButton('w-focus', 'toggleFocusMode', 'Nerušené psaní');
         focus.classList.add('wysiwyg-btn-focus');
         var linkModal = createLinkModal();
+        var linkTools = document.createElement('div');
+        linkTools.className = 'wysiwyg-link-tools';
+        linkTools.setAttribute('contenteditable', 'false');
+        linkTools.appendChild(createLinkToolButton('w-link-edit', 'link-inline-edit', 'Upravit odkaz'));
+        linkTools.appendChild(createLinkToolButton('w-link-unlink', 'link-inline-remove', 'Zrušit odkaz'));
 
         toolbar.appendChild(headingGroup);
         toolbar.appendChild(bold);
@@ -493,6 +516,50 @@
         var htmlMode = false;
         var mediaRange = null;
 
+        function hideLinkTools() {
+            linkTools.classList.remove('is-visible');
+            linkTools.style.top = '';
+            linkTools.style.left = '';
+        }
+
+        function showLinkTools(linkNode) {
+            if (!linkNode || !editor.contains(linkNode) || htmlMode) {
+                hideLinkTools();
+                return;
+            }
+            var linkRect = linkNode.getBoundingClientRect();
+            var editorRect = editor.getBoundingClientRect();
+            linkTools.style.left = (editor.offsetLeft + linkRect.left - editorRect.left + editor.scrollLeft) + 'px';
+            linkTools.style.top = (editor.offsetTop + linkRect.bottom - editorRect.top + editor.scrollTop + 6) + 'px';
+            linkTools.classList.add('is-visible');
+        }
+
+        function openLinkModal() {
+            var linkInput = linkModal.querySelector('[data-role="link-input"]');
+            var linkTitleInput = linkModal.querySelector('[data-role="link-title-input"]');
+            var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
+            var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
+            var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
+
+            wrapper.classList.add('is-link-modal-open');
+            wrapper.classList.remove('is-list-open');
+
+            if (linkInput) {
+                linkInput.value = activeLink ? (activeLink.getAttribute('href') || '') : '';
+                linkInput.focus();
+                linkInput.select();
+            }
+            if (linkTitleInput) {
+                linkTitleInput.value = activeLink ? (activeLink.getAttribute('title') || '') : '';
+            }
+            if (linkTargetBlank) {
+                linkTargetBlank.checked = !!(activeLink && activeLink.getAttribute('target') === '_blank');
+            }
+            if (linkNoFollow) {
+                linkNoFollow.checked = relValues.indexOf('nofollow') !== -1;
+            }
+        }
+
         function setFocusMode(enabled) {
             document.body.classList.toggle('admin-focus-mode', enabled);
             focus.classList.toggle('is-active', enabled);
@@ -511,6 +578,7 @@
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
             wrapper.classList.remove('is-link-modal-open');
+            hideLinkTools();
             activeLink = null;
         }
 
@@ -684,24 +752,10 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                wrapper.classList.toggle('is-link-modal-open');
-                wrapper.classList.remove('is-list-open');
                 if (wrapper.classList.contains('is-link-modal-open')) {
-                    var linkInput = linkModal.querySelector('[data-role="link-input"]');
-                    var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
-                    var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
-                    var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
-                    if (linkInput) {
-                        linkInput.value = activeLink ? (activeLink.getAttribute('href') || '') : '';
-                        linkInput.focus();
-                        linkInput.select();
-                    }
-                    if (linkTargetBlank) {
-                        linkTargetBlank.checked = !!(activeLink && activeLink.getAttribute('target') === '_blank');
-                    }
-                    if (linkNoFollow) {
-                        linkNoFollow.checked = relValues.indexOf('nofollow') !== -1;
-                    }
+                    closeMenus();
+                } else {
+                    openLinkModal();
                 }
                 return;
             }
@@ -728,6 +782,7 @@
 
         linkModal.addEventListener('click', function (event) {
             var linkInput = linkModal.querySelector('[data-role="link-input"]');
+            var linkTitleInput = linkModal.querySelector('[data-role="link-title-input"]');
             var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
             var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
 
@@ -753,6 +808,9 @@
                 if (linkInput) {
                     linkInput.value = '';
                 }
+                if (linkTitleInput) {
+                    linkTitleInput.value = '';
+                }
                 if (linkTargetBlank) {
                     linkTargetBlank.checked = false;
                 }
@@ -767,6 +825,7 @@
             var apply = event.target.closest('[data-role="link-apply"]');
             if (apply) {
                 var url = linkInput ? linkInput.value.trim() : '';
+                var titleValue = linkTitleInput ? linkTitleInput.value.trim() : '';
                 var withTargetBlank = !!(linkTargetBlank && linkTargetBlank.checked);
                 var withNoFollow = !!(linkNoFollow && linkNoFollow.checked);
                 if (url) {
@@ -799,12 +858,20 @@
                         } else {
                             linkNode.removeAttribute('rel');
                         }
+                        if (titleValue) {
+                            linkNode.setAttribute('title', titleValue);
+                        } else {
+                            linkNode.removeAttribute('title');
+                        }
                     }
                     normalizeBlocks(editor);
                     sync(textarea, editor);
                     updateFormatState();
                     if (linkInput) {
                         linkInput.value = '';
+                    }
+                    if (linkTitleInput) {
+                        linkTitleInput.value = '';
                     }
                     if (linkTargetBlank) {
                         linkTargetBlank.checked = false;
@@ -821,6 +888,9 @@
             if (event.target.closest('[data-role="link-cancel"]')) {
                 if (linkInput) {
                     linkInput.value = '';
+                }
+                if (linkTitleInput) {
+                    linkTitleInput.value = '';
                 }
                 if (linkTargetBlank) {
                     linkTargetBlank.checked = false;
@@ -848,10 +918,44 @@
             }
         });
 
+        linkTools.addEventListener('mousedown', function (event) {
+            event.preventDefault();
+        });
+
+        linkTools.addEventListener('click', function (event) {
+            var editButton = event.target.closest('[data-role="link-inline-edit"]');
+            if (editButton) {
+                if (activeLink && editor.contains(activeLink)) {
+                    openLinkModal();
+                }
+                return;
+            }
+            var removeButton = event.target.closest('[data-role="link-inline-remove"]');
+            if (!removeButton || !activeLink || !editor.contains(activeLink)) {
+                return;
+            }
+            var parent = activeLink.parentNode;
+            while (activeLink.firstChild) {
+                parent.insertBefore(activeLink.firstChild, activeLink);
+            }
+            parent.removeChild(activeLink);
+            normalizeBlocks(editor);
+            sync(textarea, editor);
+            updateFormatState();
+            hideLinkTools();
+            activeLink = null;
+        });
+
         document.addEventListener('click', function (event) {
             if (!wrapper.contains(event.target)) {
                 closeMenus();
                 updateFormatState();
+            }
+        });
+
+        editor.addEventListener('scroll', function () {
+            if (activeLink && linkTools.classList.contains('is-visible')) {
+                showLinkTools(activeLink);
             }
         });
 
@@ -910,6 +1014,24 @@
         });
 
         editor.addEventListener('click', function (event) {
+            if (event.target.closest('.wysiwyg-link-tools')) {
+                return;
+            }
+
+            var clickedLink = event.target.closest('a');
+            if (clickedLink && editor.contains(clickedLink)) {
+                event.preventDefault();
+                activeLink = clickedLink;
+                linkRange = null;
+                showLinkTools(clickedLink);
+                return;
+            }
+
+            hideLinkTools();
+            if (!wrapper.classList.contains('is-link-modal-open')) {
+                activeLink = null;
+            }
+
             var alignButton = event.target.closest('[data-image-align]');
             if (alignButton) {
                 event.preventDefault();
@@ -1036,6 +1158,7 @@
         textarea.parentNode.insertBefore(wrapper, textarea);
         wrapper.appendChild(toolbar);
         wrapper.appendChild(linkModal);
+        wrapper.appendChild(linkTools);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);
         var form = textarea.closest('form');

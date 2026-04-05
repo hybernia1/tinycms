@@ -157,6 +157,42 @@
     gap: var(--space-2);
 }
 
+.wysiwyg-link-tools {
+    position: absolute;
+    display: none;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border: 1px solid var(--color-border-soft);
+    background: var(--color-surface);
+    z-index: 6;
+}
+
+.wysiwyg-link-tools.is-visible {
+    display: inline-flex;
+}
+
+.wysiwyg-link-tool-btn {
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 1px solid transparent;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.wysiwyg-link-tool-btn:hover {
+    border-color: var(--color-border-soft);
+    background: var(--color-surface-muted);
+}
+
+.wysiwyg-link-tool-btn svg {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
 .wysiwyg-editor {
     min-height: clamp(18rem, 52svh, 34rem);
     max-height: 78svh;
@@ -164,6 +200,7 @@
     outline: none;
     overflow: auto;
     display: flow-root;
+    position: relative;
 }
 
 .wysiwyg-editor:empty::before {

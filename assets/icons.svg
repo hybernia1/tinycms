@@ -55,6 +55,12 @@
     <symbol id="icon-w-link" viewBox="0 0 24 24">
         <path d="M10 14a4 4 0 0 1 0-5.66l2.34-2.34a4 4 0 0 1 5.66 5.66L15.66 14M14 10a4 4 0 0 1 0 5.66l-2.34 2.34a4 4 0 1 1-5.66-5.66L8.34 10M9 12h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
+    <symbol id="icon-w-link-edit" viewBox="0 0 24 24">
+        <path d="M12 20h8M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-w-link-unlink" viewBox="0 0 24 24">
+        <path d="M4 4 20 20M10 14a4 4 0 0 1 0-5.66l1.5-1.5M14 10a4 4 0 0 1 0 5.66l-1.5 1.5M9 12h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
     <symbol id="icon-w-heading" viewBox="0 0 24 24">
         <path d="M5 5v14M13 5v14M5 12h8M16 9l3-2v12M16 15h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
