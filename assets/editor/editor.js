@@ -33,6 +33,19 @@
         return handle;
     }
 
+    function createImageSelectionFrame() {
+        var frame = document.createElement('span');
+        frame.className = 'image-selection-frame';
+        frame.setAttribute('contenteditable', 'false');
+        ['tl', 'tr', 'bl', 'br'].forEach(function (corner) {
+            var node = document.createElement('span');
+            node.className = 'image-selection-corner image-selection-corner-' + corner;
+            node.setAttribute('contenteditable', 'false');
+            frame.appendChild(node);
+        });
+        return frame;
+    }
+
     function applyImageAlignment(block, align) {
         var value = ['left', 'center', 'right'].indexOf(align) >= 0 ? align : 'center';
         block.classList.remove('align-left', 'align-center', 'align-right');
@@ -57,6 +70,10 @@
 
         if (!block.querySelector('.image-size-controls')) {
             block.appendChild(createImageSizeControls());
+        }
+
+        if (!block.querySelector('.image-selection-frame')) {
+            block.appendChild(createImageSelectionFrame());
         }
 
         var image = block.querySelector('img[data-media-id]');
@@ -91,7 +108,7 @@
 
     function serializeEditorHtml(editor) {
         var clone = editor.cloneNode(true);
-        clone.querySelectorAll('.image-controls, .image-size-controls, .image-resize-handle').forEach(function (node) {
+        clone.querySelectorAll('.image-controls, .image-size-controls, .image-resize-handle, .image-selection-frame').forEach(function (node) {
             node.remove();
         });
         clone.querySelectorAll('.block.block-image').forEach(function (block) {

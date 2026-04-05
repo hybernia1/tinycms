@@ -205,6 +205,7 @@
     position: relative;
     margin: 0 0 var(--space-2);
     display: block;
+    width: fit-content;
     max-width: 100%;
     clear: both;
 }
@@ -273,17 +274,59 @@
 .image-resize-handle {
     display: none;
     position: absolute;
-    right: -0.35rem;
-    bottom: -0.35rem;
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background: var(--color-primary);
+    right: -0.3rem;
+    bottom: -0.3rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    border: 1px solid var(--color-primary);
+    background: var(--color-surface);
     cursor: nwse-resize;
+    z-index: 4;
 }
 
 .wysiwyg-editor .block.block-image.is-selected .image-resize-handle {
     display: block;
+}
+
+.image-selection-frame {
+    display: none;
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--color-primary);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.wysiwyg-editor .block.block-image.is-selected .image-selection-frame {
+    display: block;
+}
+
+.image-selection-corner {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 1px solid var(--color-primary);
+    background: var(--color-surface);
+}
+
+.image-selection-corner-tl {
+    top: -0.3rem;
+    left: -0.3rem;
+}
+
+.image-selection-corner-tr {
+    top: -0.3rem;
+    right: -0.3rem;
+}
+
+.image-selection-corner-bl {
+    bottom: -0.3rem;
+    left: -0.3rem;
+}
+
+.image-selection-corner-br {
+    bottom: -0.3rem;
+    right: -0.3rem;
 }
 
 body.is-image-resizing {
