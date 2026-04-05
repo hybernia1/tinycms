@@ -17,17 +17,17 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'description' => (string)($metaDescription ?? ''),
         'keywords' => (array)($metaKeywords ?? []),
         'robots' => (string)($metaRobots ?? 'index,follow'),
-        'url' => $metaPath !== '' ? $url($metaPath) : '',
-        'shortlink' => $shortlinkPath !== '' ? $url($shortlinkPath) : '',
+        'url' => $metaPath !== '' ? $absoluteUrl($metaPath) : '',
+        'shortlink' => $shortlinkPath !== '' ? $absoluteUrl($shortlinkPath) : '',
         'og_type' => (string)($metaOgType ?? 'website'),
-        'og_image' => (string)($metaOgImage ?? ''),
+        'og_image' => (string)($metaOgImage ?? '') !== '' ? $absoluteUrl((string)$metaOgImage) : '',
         'site_name' => (string)($siteName ?? 'TinyCMS'),
         'author' => (string)($siteAuthor ?? ''),
         'theme_color' => (string)($metaThemeColor ?? '#2563eb'),
         'structured_data' => $metaStructuredData ?? null,
         'published_time' => (string)($metaPublishedTime ?? ''),
         'modified_time' => (string)($metaModifiedTime ?? ''),
-        'search_url_template' => isset($metaSearchUrlTemplate) ? $url((string)$metaSearchUrlTemplate) : '',
+        'search_url_template' => isset($metaSearchUrlTemplate) ? $absoluteUrl((string)$metaSearchUrlTemplate) : '',
     ]) ?>
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($url($themeCss), ENT_QUOTES, 'UTF-8') ?>">
@@ -45,7 +45,9 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
     </div>
     <?php endforeach; ?>
 </div>
+<main id="main-content">
 <?= $content ?>
+</main>
 <footer class="container py-4 text-muted">
     <?= htmlspecialchars((string)($siteFooter ?? '© TinyCMS'), ENT_QUOTES, 'UTF-8') ?>
 </footer>
