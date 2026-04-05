@@ -94,15 +94,6 @@ const initListApi = (config) => {
     let pendingDeleteId = 0;
     let searchTimer = null;
     let fetchController = null;
-    const adminAuth = window.tinycmsAdminAuth || null;
-
-    const ensureAccess = async () => {
-        if (!adminAuth || typeof adminAuth.ensureAccess !== 'function') {
-            return navigator.onLine;
-        }
-
-        return adminAuth.ensureAccess();
-    };
 
     const setPagination = (page, totalPages) => {
         if (!prevLink || !nextLink) {
@@ -133,10 +124,6 @@ const initListApi = (config) => {
             return;
         }
 
-        if (!await ensureAccess()) {
-            return;
-        }
-
         if (fetchController) {
             fetchController.abort();
         }
@@ -161,10 +148,7 @@ const initListApi = (config) => {
             if (error instanceof DOMException && error.name === 'AbortError') {
                 return null;
             }
-            if (adminAuth && typeof adminAuth.reportOffline === 'function') {
-                adminAuth.reportOffline();
-            }
-            return null;
+            throw error;
         });
         if (!response) {
             return;
@@ -181,10 +165,6 @@ const initListApi = (config) => {
     };
 
     const postAction = async (path, payload) => {
-        if (!await ensureAccess()) {
-            return { success: false };
-        }
-
         const formData = new FormData();
         if (csrfInput) {
             formData.append('_csrf', csrfInput.value);
@@ -196,15 +176,7 @@ const initListApi = (config) => {
             method: 'POST',
             body: formData,
             headers: { Accept: 'application/json' },
-        }).catch((error) => {
-            if (adminAuth && typeof adminAuth.reportOffline === 'function') {
-                adminAuth.reportOffline();
-            }
-            return null;
         });
-        if (!response) {
-            return { success: false };
-        }
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));

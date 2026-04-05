@@ -21,20 +21,14 @@
         }
 
         var text = modal.querySelector('[data-auth-check-modal-text]');
-        var actionButton = modal.querySelector('[data-auth-check-modal-action]');
+        var loginWrap = modal.querySelector('[data-auth-check-login]');
 
         if (text) {
             text.textContent = toText(message);
         }
 
-        if (actionButton) {
-            if (action && action.href) {
-                actionButton.textContent = toText(action.label) || 'Pokračovat';
-                actionButton.setAttribute('href', action.href);
-                actionButton.hidden = false;
-            } else {
-                actionButton.hidden = true;
-            }
+        if (loginWrap) {
+            loginWrap.hidden = action !== 'login';
         }
 
         modal.classList.add('open');
@@ -47,10 +41,7 @@
         }
 
         var endpoint = body.getAttribute('data-auth-check-endpoint') || '';
-        var loginUrl = body.getAttribute('data-login-url') || '/login';
         var homeUrl = body.getAttribute('data-home-url') || '/';
-        var ttl = 10000;
-        var checkedAt = 0;
         var pending = null;
 
         async function ensureAccess(force) {
@@ -59,19 +50,14 @@
                 return false;
             }
 
-            if (!force && Date.now() - checkedAt < ttl) {
-                return true;
-            }
-
             if (pending) {
                 return pending;
             }
 
             pending = fetch(endpoint, { headers: { Accept: 'application/json' } })
                 .then(async function (response) {
-                    checkedAt = Date.now();
                     if (response.status === 401) {
-                        openModal('Byli jste odhlášeni. Přihlaste se znovu.', { label: 'Přihlásit se', href: loginUrl });
+                        openModal('Byli jste odhlášeni. Přihlaste se znovu.', 'login');
                         return false;
                     }
 
@@ -101,7 +87,10 @@
             openModal('Jste bez připojení k síti. Zkuste to znovu po obnovení připojení.');
         }
 
-        window.addEventListener('online', closeModal);
+        window.addEventListener('online', function () {
+            closeModal();
+            ensureAccess(true).catch(function () { return null; });
+        });
         window.addEventListener('offline', reportOffline);
 
         document.addEventListener('click', function (event) {
@@ -110,6 +99,11 @@
                 closeModal();
             }
         });
+
+        ensureAccess(true).catch(function () { return null; });
+        window.setInterval(function () {
+            ensureAccess(true).catch(function () { return null; });
+        }, 5000);
 
         return {
             ensureAccess: ensureAccess,
