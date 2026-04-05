@@ -58,7 +58,7 @@ final class SchemaDefinition
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (id),
                 KEY idx_media_author (author),
-                CONSTRAINT fk_media_author_user FOREIGN KEY (author) REFERENCES users (id)
+                CONSTRAINT fk_media_author_user FOREIGN KEY (author) REFERENCES users (id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS content (
                 id INT NOT NULL AUTO_INCREMENT,
@@ -75,7 +75,7 @@ final class SchemaDefinition
                 KEY idx_content_created (created),
                 KEY idx_content_author (author),
                 KEY idx_content_thumbnail (thumbnail),
-                CONSTRAINT fk_content_author_user FOREIGN KEY (author) REFERENCES users (id) ON DELETE CASCADE,
+                CONSTRAINT fk_content_author_user FOREIGN KEY (author) REFERENCES users (id) ON DELETE SET NULL,
                 CONSTRAINT fk_content_thumbnail_media FOREIGN KEY (thumbnail) REFERENCES media (id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS terms (

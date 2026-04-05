@@ -49,6 +49,8 @@ final class UserService
             return false;
         }
 
+        $this->query->update('content', ['author' => null], ['author' => $id]);
+        $this->query->update('media', ['author' => null], ['author' => $id]);
         return $this->query->delete('users', ['ID' => $id]) > 0;
     }
 
