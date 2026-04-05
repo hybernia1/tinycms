@@ -15,6 +15,8 @@ final class MetaHead
         $shortlink = $this->clean((string)($meta['shortlink'] ?? ''));
         $ogType = $this->clean((string)($meta['og_type'] ?? 'website'));
         $ogImage = $this->clean((string)($meta['og_image'] ?? ''));
+        $publishedTime = $this->isoDate((string)($meta['published_time'] ?? ''));
+        $modifiedTime = $this->isoDate((string)($meta['modified_time'] ?? ''));
         $siteName = $this->clean((string)($meta['site_name'] ?? ''));
         $author = $this->clean((string)($meta['author'] ?? ''));
         $themeColor = $this->clean((string)($meta['theme_color'] ?? ''));
@@ -53,6 +55,14 @@ final class MetaHead
         if ($ogImage !== '') {
             $parts[] = '<meta property="og:image" content="' . $this->esc($ogImage) . '">';
             $parts[] = '<meta name="twitter:image" content="' . $this->esc($ogImage) . '">';
+        }
+
+        if ($publishedTime !== '') {
+            $parts[] = '<meta property="article:published_time" content="' . $this->esc($publishedTime) . '">';
+        }
+
+        if ($modifiedTime !== '') {
+            $parts[] = '<meta property="article:modified_time" content="' . $this->esc($modifiedTime) . '">';
         }
 
         if ($siteName !== '') {
@@ -101,6 +111,12 @@ final class MetaHead
         $url = $this->clean((string)($meta['url'] ?? ''));
         $image = $this->clean((string)($meta['og_image'] ?? ''));
         $type = $this->clean((string)($meta['og_type'] ?? 'website'));
+        $author = $this->clean((string)($meta['author'] ?? ''));
+        $siteName = $this->clean((string)($meta['site_name'] ?? ''));
+        $publishedTime = $this->isoDate((string)($meta['published_time'] ?? ''));
+        $modifiedTime = $this->isoDate((string)($meta['modified_time'] ?? ''));
+        $searchUrlTemplate = $this->clean((string)($meta['search_url_template'] ?? ''));
+        $keywords = $this->keywords($meta['keywords'] ?? '');
 
         if ($title === '') {
             return [];
@@ -118,12 +134,60 @@ final class MetaHead
         }
         if ($url !== '') {
             $data['url'] = $url;
+            if ($schemaType === 'Article') {
+                $data['mainEntityOfPage'] = $url;
+            }
         }
         if ($image !== '') {
             $data['image'] = $image;
         }
+        if ($keywords !== '') {
+            $data['keywords'] = $keywords;
+        }
+
+        if ($schemaType === 'Article') {
+            $data['headline'] = $title;
+            if ($publishedTime !== '') {
+                $data['datePublished'] = $publishedTime;
+            }
+            if ($modifiedTime !== '') {
+                $data['dateModified'] = $modifiedTime;
+            }
+            if ($author !== '') {
+                $data['author'] = [
+                    '@type' => 'Person',
+                    'name' => $author,
+                ];
+            }
+            if ($siteName !== '') {
+                $data['publisher'] = [
+                    '@type' => 'Organization',
+                    'name' => $siteName,
+                ];
+            }
+            return $data;
+        }
+
+        if ($searchUrlTemplate !== '') {
+            $data['potentialAction'] = [
+                '@type' => 'SearchAction',
+                'target' => $searchUrlTemplate,
+                'query-input' => 'required name=search_term_string',
+            ];
+        }
 
         return $data;
+    }
+
+    private function isoDate(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+
+        $timestamp = strtotime($value);
+        return $timestamp === false ? '' : gmdate('c', $timestamp);
     }
 
     private function keywords(mixed $value): string

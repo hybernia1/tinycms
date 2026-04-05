@@ -34,6 +34,7 @@ final class PageView
             'metaKeywords' => [(string)($site['name'] ?? 'TinyCMS')],
             'metaPath' => '',
             'metaOgType' => 'website',
+            'metaSearchUrlTemplate' => 'search?q={search_term_string}',
         ]);
     }
 
@@ -57,6 +58,7 @@ final class PageView
             'metaPath' => (string)($item['slug'] ?? ''),
             'shortlinkPath' => (string)($item['id'] ?? ''),
             'metaOgType' => 'article',
+            'metaPublishedTime' => (string)($item['created'] ?? ''),
         ]);
     }
 
@@ -75,6 +77,7 @@ final class PageView
             'metaKeywords' => [(string)($term['name'] ?? '')],
             'metaPath' => $termSlug !== '' ? 'term/' . $termSlug : '',
             'metaOgType' => 'website',
+            'metaSearchUrlTemplate' => 'search?q={search_term_string}',
         ]);
     }
 
@@ -96,6 +99,7 @@ final class PageView
             'metaPath' => $query !== '' ? 'search?q=' . rawurlencode($query) : 'search',
             'metaRobots' => 'noindex,follow',
             'metaOgType' => 'website',
+            'metaSearchUrlTemplate' => 'search?q={search_term_string}',
         ]);
     }
 

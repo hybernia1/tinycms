@@ -25,6 +25,9 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'author' => (string)($siteAuthor ?? ''),
         'theme_color' => (string)($metaThemeColor ?? '#2563eb'),
         'structured_data' => $metaStructuredData ?? null,
+        'published_time' => (string)($metaPublishedTime ?? ''),
+        'modified_time' => (string)($metaModifiedTime ?? ''),
+        'search_url_template' => isset($metaSearchUrlTemplate) ? $url((string)$metaSearchUrlTemplate) : '',
     ]) ?>
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($url($themeCss), ENT_QUOTES, 'UTF-8') ?>">
