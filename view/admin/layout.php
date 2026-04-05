@@ -51,7 +51,7 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 'unsuspended' => $t('users.unsuspended', 'User unsuspended.'),
                 'status_suspended_single' => $t('users.status.suspended_single'),
                 'roles' => [
-                    'user' => $t('users.roles.user', 'User'),
+                    'editor' => $t('users.roles.editor', 'Editor'),
                     'admin' => $t('users.roles.admin', 'Administrator'),
                 ],
                 'delete' => $t('users.delete'),

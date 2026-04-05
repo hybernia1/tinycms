@@ -28,7 +28,7 @@
         <div class="mb-3">
             <label><?= htmlspecialchars($t('users.role', 'Role'), ENT_QUOTES, 'UTF-8') ?></label>
             <select name="role">
-                <option value="user" <?= (($user['role'] ?? 'user') === 'user') ? 'selected' : '' ?>><?= htmlspecialchars($t('users.roles.user', 'User'), ENT_QUOTES, 'UTF-8') ?></option>
+                <option value="editor" <?= (($user['role'] ?? 'editor') === 'editor') ? 'selected' : '' ?>><?= htmlspecialchars($t('users.roles.editor', 'Editor'), ENT_QUOTES, 'UTF-8') ?></option>
                 <option value="admin" <?= (($user['role'] ?? '') === 'admin') ? 'selected' : '' ?>><?= htmlspecialchars($t('users.roles.admin', 'Administrator'), ENT_QUOTES, 'UTF-8') ?></option>
             </select>
             <?php if (!empty($errors['role'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['role'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>

@@ -84,7 +84,7 @@ final class UserService
     {
         $name = trim((string)($input['name'] ?? ''));
         $email = mb_strtolower(trim((string)($input['email'] ?? '')));
-        $role = trim((string)($input['role'] ?? 'user'));
+        $role = trim((string)($input['role'] ?? 'editor'));
         $suspend = (int)($input['suspend'] ?? 0) === 1 ? 1 : 0;
         $password = (string)($input['password'] ?? '');
         $errors = [];
@@ -97,8 +97,8 @@ final class UserService
             $errors['email'] = I18n::t('validation.email_invalid', 'Email is not valid.');
         }
 
-        if (!in_array($role, ['admin', 'user'], true)) {
-            $errors['role'] = I18n::t('validation.role_invalid', 'Role must be admin or user.');
+        if (!in_array($role, ['admin', 'editor'], true)) {
+            $errors['role'] = I18n::t('validation.role_invalid', 'Role must be admin or editor.');
         }
 
         if ($id === null && $password === '') {

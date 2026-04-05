@@ -130,7 +130,7 @@ return [
             'suspended_single' => 'Suspended',
         ],
         'roles' => [
-            'user' => 'User',
+            'editor' => 'Editor',
             'admin' => 'Administrator',
         ],
     ],
@@ -258,7 +258,7 @@ return [
     'validation' => [
         'name_required' => 'Name is required.',
         'email_invalid' => 'Email is not valid.',
-        'role_invalid' => 'Role must be admin or user.',
+        'role_invalid' => 'Role must be admin or editor.',
         'password_required_new_user' => 'Password is required for a new user.',
         'email_already_used' => 'Email is already used.',
         'author_invalid' => 'Author is not valid.',

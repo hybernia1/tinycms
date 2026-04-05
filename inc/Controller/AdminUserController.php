@@ -125,7 +125,7 @@ final class AdminUserController extends BaseAdminController
             'ID' => null,
             'name' => '',
             'email' => '',
-            'role' => 'user',
+            'role' => 'editor',
             'suspend' => 0,
         ];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add');
@@ -209,7 +209,7 @@ final class AdminUserController extends BaseAdminController
             'id' => (int)($row['ID'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
             'email' => (string)($row['email'] ?? ''),
-            'role' => (string)($row['role'] ?? 'user'),
+            'role' => (string)($row['role'] ?? 'editor'),
             'is_admin' => (string)($row['role'] ?? '') === 'admin',
             'is_suspended' => $isSuspended,
         ];
