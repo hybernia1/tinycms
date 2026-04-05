@@ -4,6 +4,7 @@ declare(strict_types=1);
 define('INC_DIR', 'inc/');
 
 const APP_DEBUG = false;
+const APP_LANG = 'cs';
 const APP_DATE_FORMAT = 'd.m.Y';
 const APP_DATETIME_FORMAT = 'd.m.Y H:i';
 

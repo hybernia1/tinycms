@@ -2,7 +2,7 @@
 declare(strict_types=1);
 ?>
 <!doctype html>
-<html lang="cs">
+<html lang="<?= htmlspecialchars((string)$lang, ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +17,7 @@ declare(strict_types=1);
     <?php foreach ($flashes as $flash): ?>
     <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">
         <span><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
-        <button type="button" data-flash-close aria-label="Zavřít notifikaci" title="Zavřít notifikaci">
+        <button type="button" data-flash-close aria-label="<?= htmlspecialchars($t('admin.close_notice'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.close_notice'), ENT_QUOTES, 'UTF-8') ?>">
             <?= $icon('cancel') ?>
         </button>
     </div>

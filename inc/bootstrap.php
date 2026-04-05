@@ -23,6 +23,7 @@ use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\FlashService;
 use App\Service\Infra\Router\Router;
 use App\Service\Feature\SettingsService;
+use App\Service\Support\I18n;
 use App\Service\Support\SluggerService;
 use App\Service\Feature\UserService;
 use App\View\PageView;
@@ -56,6 +57,7 @@ if (!$isInstalled) {
     $install = new InstallController($view, $csrf, new InstallService());
 
     $allowedWhenMissingConfig = $requestPath === 'install'
+        || $requestPath === 'install/db'
         || $requestPath === 'install/admin'
         || $requestPath === 'install/done'
         || str_starts_with($requestPath, 'assets/');
@@ -74,6 +76,8 @@ if (!$isInstalled) {
 if (str_starts_with($requestPath, 'install')) {
     $redirect('admin/dashboard');
 }
+
+I18n::setLocale((string)APP_LANG);
 
 $auth = new Auth();
 $authService = new AuthService($auth);

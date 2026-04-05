@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service\Feature;
 
 use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Support\I18n;
 use PDO;
 use PDOException;
 
@@ -26,15 +27,15 @@ final class InstallService
         $errors = [];
 
         if ($host === '') {
-            $errors['db_host'] = 'Host je povinný.';
+            $errors['db_host'] = I18n::t('install.db_host_required', 'Host is required.');
         }
 
         if ($name === '') {
-            $errors['db_name'] = 'Databáze je povinná.';
+            $errors['db_name'] = I18n::t('install.db_name_required', 'Database name is required.');
         }
 
         if ($user === '') {
-            $errors['db_user'] = 'Uživatel je povinný.';
+            $errors['db_user'] = I18n::t('install.db_user_required', 'Database user is required.');
         }
 
         return [
@@ -55,7 +56,7 @@ final class InstallService
             $pdo->query('SELECT 1');
             return null;
         } catch (PDOException $e) {
-            return 'Nelze se připojit k databázi.';
+            return I18n::t('install.db_connect_failed', 'Cannot connect to database.');
         }
     }
 
@@ -68,15 +69,15 @@ final class InstallService
         $errors = [];
 
         if ($name === '') {
-            $errors['name'] = 'Jméno je povinné.';
+            $errors['name'] = I18n::t('install.admin_name_required', 'Name is required.');
         }
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'E-mail není validní.';
+            $errors['email'] = I18n::t('install.admin_email_invalid', 'Email is not valid.');
         }
 
         if (mb_strlen($password) < 8) {
-            $errors['password'] = 'Heslo musí mít alespoň 8 znaků.';
+            $errors['password'] = I18n::t('install.admin_password_min', 'Password must have at least 8 characters.');
         }
 
         $lengthErrors = $this->schemaValidator->validate('users', [
@@ -105,18 +106,18 @@ final class InstallService
         ];
     }
 
-    public function install(array $db, array $admin): array
+    public function install(array $db, array $admin, string $lang): array
     {
         try {
             $pdo = $this->connect($db);
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Nelze se připojit k databázi.'];
+            return ['success' => false, 'message' => I18n::t('install.db_connect_failed', 'Cannot connect to database.')];
         }
 
         try {
             $this->createSchema($pdo);
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Nepodařilo se vytvořit databázové tabulky.'];
+            return ['success' => false, 'message' => I18n::t('install.schema_failed', 'Could not create database schema.')];
         }
 
         $adminResult = $this->createAdmin($pdo, $admin);
@@ -125,12 +126,12 @@ final class InstallService
         }
 
         try {
-            $this->writeConfig($db);
+            $this->writeConfig($db, $lang);
         } catch (\RuntimeException $e) {
-            return ['success' => false, 'message' => 'Nepodařilo se vytvořit config.php. Zkontrolujte oprávnění zápisu.'];
+            return ['success' => false, 'message' => I18n::t('install.config_failed', 'Could not create config.php. Check write permissions.')];
         }
 
-        return ['success' => true, 'message' => 'Instalace proběhla úspěšně.'];
+        return ['success' => true, 'message' => I18n::t('install.success', 'Installation completed successfully.')];
     }
 
     private function connect(array $db): PDO
@@ -153,7 +154,7 @@ final class InstallService
                     return null;
                 }
 
-                return 'Tento e-mail už existuje pod jinou rolí.';
+                return I18n::t('install.email_exists_other_role', 'This email already exists with a different role.');
             }
 
             $insert = $pdo->prepare('INSERT INTO users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)');
@@ -170,13 +171,14 @@ final class InstallService
 
             return null;
         } catch (PDOException $e) {
-            return 'Nepodařilo se vytvořit admin účet.';
+            return I18n::t('install.create_admin_failed', 'Could not create admin account.');
         }
     }
 
-    private function writeConfig(array $db): void
+    private function writeConfig(array $db, string $lang = APP_LANG): void
     {
-        $content = "<?php\ndeclare(strict_types=1);\n\ndefine('INC_DIR', 'inc/');\n\nconst APP_DEBUG = false;\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\n\n"
+        $normalizedLang = strtolower(trim($lang));
+        $content = "<?php\ndeclare(strict_types=1);\n\ndefine('INC_DIR', 'inc/');\n\nconst APP_DEBUG = false;\nconst APP_LANG = " . var_export($normalizedLang, true) . ";\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\n\n"
             . "const DB_HOST = " . var_export((string)$db['db_host'], true) . ";\n"
             . "const DB_NAME = " . var_export((string)$db['db_name'], true) . ";\n"
             . "const DB_USER = " . var_export((string)$db['db_user'], true) . ";\n"

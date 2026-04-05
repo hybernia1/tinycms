@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Service\Feature\InstallService;
 use App\Service\Support\CsrfService;
+use App\Service\Support\I18n;
 use App\View\View;
 
 final class InstallController
@@ -27,9 +28,10 @@ final class InstallController
     public function formDb(): void
     {
         $state = $_SESSION['install'] ?? [];
+        $this->applyInstallLocale($state);
 
         $this->view->render('front/layout', 'front/install/step-db', [
-            'pageTitle' => 'Instalace - databáze',
+            'pageTitle' => I18n::t('install.page_database', 'Installation - database'),
             'errors' => (array)($state['errors_db'] ?? []),
             'old' => (array)($state['db'] ?? ['db_host' => '127.0.0.1', 'db_name' => '', 'db_user' => '', 'db_pass' => '']),
             'message' => (string)($state['message'] ?? ''),
@@ -40,9 +42,11 @@ final class InstallController
 
     public function submitDb(callable $redirect): void
     {
+        $this->applyInstallLocale($_SESSION['install'] ?? []);
+
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $_SESSION['install']['message'] = 'Token vypršel, odešlete formulář znovu.';
-            $redirect('install');
+            $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
+            $redirect('install/db');
         }
 
         $result = $this->installService->validateDatabaseInput($_POST);
@@ -50,7 +54,7 @@ final class InstallController
         if ($result['errors'] !== []) {
             $_SESSION['install']['errors_db'] = $result['errors'];
             $_SESSION['install']['db'] = $result['values'];
-            $redirect('install');
+            $redirect('install/db');
         }
 
         $error = $this->installService->canConnect($result['values']);
@@ -58,7 +62,7 @@ final class InstallController
         if ($error !== null) {
             $_SESSION['install']['errors_db'] = ['db' => $error];
             $_SESSION['install']['db'] = $result['values'];
-            $redirect('install');
+            $redirect('install/db');
         }
 
         $_SESSION['install']['db'] = $result['values'];
@@ -71,13 +75,14 @@ final class InstallController
     public function formAdmin(callable $redirect): void
     {
         if (!isset($_SESSION['install']['db'])) {
-            $redirect('install');
+            $redirect('install/db');
         }
 
         $state = $_SESSION['install'] ?? [];
+        $this->applyInstallLocale($state);
 
         $this->view->render('front/layout', 'front/install/step-admin', [
-            'pageTitle' => 'Instalace - admin',
+            'pageTitle' => I18n::t('install.page_admin', 'Installation - admin'),
             'errors' => (array)($state['errors_admin'] ?? []),
             'old' => (array)($state['admin'] ?? ['name' => '', 'email' => '', 'password' => '']),
             'message' => (string)($state['message'] ?? ''),
@@ -89,11 +94,13 @@ final class InstallController
     public function submitAdmin(callable $redirect): void
     {
         if (!isset($_SESSION['install']['db'])) {
-            $redirect('install');
+            $redirect('install/db');
         }
 
+        $this->applyInstallLocale($_SESSION['install'] ?? []);
+
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $_SESSION['install']['message'] = 'Token vypršel, odešlete formulář znovu.';
+            $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
             $redirect('install/admin');
         }
 
@@ -107,10 +114,14 @@ final class InstallController
 
         $_SESSION['install']['admin'] = $result['values'];
 
-        $install = $this->installService->install((array)$_SESSION['install']['db'], (array)$_SESSION['install']['admin']);
+        $install = $this->installService->install(
+            (array)$_SESSION['install']['db'],
+            (array)$_SESSION['install']['admin'],
+            (string)($_SESSION['install']['lang'] ?? APP_LANG)
+        );
 
         if (($install['success'] ?? false) !== true) {
-            $_SESSION['install']['message'] = (string)($install['message'] ?? 'Instalace selhala.');
+            $_SESSION['install']['message'] = (string)($install['message'] ?? I18n::t('install.failed'));
             $redirect('install/admin');
         }
 
@@ -121,13 +132,53 @@ final class InstallController
     public function done(callable $redirect): void
     {
         if (!isset($_SESSION['install']['done']) || $_SESSION['install']['done'] !== true) {
-            $redirect('install');
+            $redirect('install/db');
         }
 
+        $this->applyInstallLocale($_SESSION['install'] ?? []);
         unset($_SESSION['install']);
 
         $this->view->render('front/layout', 'front/install/done', [
-            'pageTitle' => 'Instalace dokončena',
+            'pageTitle' => I18n::t('install.page_done', 'Installation completed'),
         ]);
+    }
+
+    public function formLanguage(): void
+    {
+        $state = $_SESSION['install'] ?? [];
+        $selected = (string)($state['lang'] ?? APP_LANG);
+        I18n::setLocale($selected);
+
+        $this->view->render('front/layout', 'front/install/step-language', [
+            'pageTitle' => I18n::t('install.page_language', 'Installation - language'),
+            'message' => (string)($state['message'] ?? ''),
+            'selectedLang' => $selected,
+            'locales' => I18n::availableLocales(),
+        ]);
+
+        unset($_SESSION['install']['message']);
+    }
+
+    public function submitLanguage(callable $redirect): void
+    {
+        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
+            $redirect('install');
+        }
+
+        $lang = strtolower(trim((string)($_POST['lang'] ?? APP_LANG)));
+        $locales = I18n::availableLocales();
+        if (!in_array($lang, $locales, true)) {
+            $lang = (string)APP_LANG;
+        }
+
+        $_SESSION['install']['lang'] = $lang;
+        I18n::setLocale($lang);
+        $redirect('install/db');
+    }
+
+    private function applyInstallLocale(array $state): void
+    {
+        I18n::setLocale((string)($state['lang'] ?? APP_LANG));
     }
 }
