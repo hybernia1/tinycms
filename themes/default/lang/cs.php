@@ -18,5 +18,13 @@ return [
             'title' => 'Štítek',
             'no_posts' => 'Pro tento štítek zatím nejsou žádné publikované články.',
         ],
+        'search' => [
+            'title' => 'Vyhledávání',
+            'placeholder' => 'Hledat v publikovaném obsahu...',
+            'submit' => 'Hledat',
+            'results_for' => 'Výsledky hledání pro',
+            'no_results' => 'Nenalezen žádný publikovaný obsah.',
+            'meta_description' => 'Výsledky hledání na webu.',
+        ],
     ],
 ];

@@ -340,6 +340,53 @@ final class ContentService
         ];
     }
 
+    public function paginatePublishedSearch(string $query, int $page = 1, int $perPage = 10): array
+    {
+        $needle = trim($query);
+        if ($needle === '') {
+            return ['data' => [], 'page' => 1, 'per_page' => $perPage, 'total' => 0, 'total_pages' => 1];
+        }
+
+        $safePerPage = $perPage > 0 ? $perPage : 10;
+        $safePage = $page > 0 ? $page : 1;
+        $offset = ($safePage - 1) * $safePerPage;
+
+        $countStmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM content c
+             WHERE c.status = :status AND c.created <= NOW()
+             AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)'
+        );
+        $countStmt->execute(['status' => 'published', 'search' => '%' . $needle . '%']);
+        $total = (int)$countStmt->fetchColumn();
+        $totalPages = max(1, (int)ceil($total / $safePerPage));
+        $currentPage = min($safePage, $totalPages);
+        $offset = ($currentPage - 1) * $safePerPage;
+
+        $stmt = $this->pdo->prepare(
+            'SELECT c.id, c.name, c.excerpt, c.created,
+                    (SELECT path FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path,
+                    (SELECT path_webp FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
+             FROM content c
+             WHERE c.status = :status AND c.created <= NOW()
+             AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)
+             ORDER BY c.created DESC, c.id DESC
+             LIMIT :limit OFFSET :offset'
+        );
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':search', '%' . $needle . '%');
+        $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'page' => $currentPage,
+            'per_page' => $safePerPage,
+            'total' => $total,
+            'total_pages' => $totalPages,
+        ];
+    }
+
     public function sitemapPublishedPage(int $page = 1, int $perPage = 2000): array
     {
         $safePerPage = $perPage > 0 ? $perPage : 2000;

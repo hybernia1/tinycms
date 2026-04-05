@@ -103,6 +103,20 @@ final class FrontController
         ], $posts, $pagination, $this->currentTheme());
     }
 
+    public function search(): void
+    {
+        $query = trim((string)($_GET['q'] ?? ''));
+        $page = (int)($_GET['page'] ?? 1);
+        $pagination = $this->contentService->paginatePublishedSearch($query, $page, 10);
+        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
+        $settings = $this->settings->resolved();
+        $site = [
+            'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
+        ];
+
+        $this->pages->search($posts, $pagination, $query, $this->currentTheme(), $site);
+    }
+
     private function contentDetail(string $requestedSlug, callable $redirect): void
     {
         $id = $this->slugger->extractId($requestedSlug);

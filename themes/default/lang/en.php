@@ -18,5 +18,13 @@ return [
             'title' => 'Tag',
             'no_posts' => 'There are no published posts for this tag yet.',
         ],
+        'search' => [
+            'title' => 'Search',
+            'placeholder' => 'Search published content...',
+            'submit' => 'Search',
+            'results_for' => 'Search results for',
+            'no_results' => 'No matching published content found.',
+            'meta_description' => 'Search results on the website.',
+        ],
     ],
 ];

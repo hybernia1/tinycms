@@ -78,6 +78,27 @@ final class PageView
         ]);
     }
 
+    public function search(array $posts, array $pagination, string $query, string $theme, array $site = []): void
+    {
+        $resolvedTheme = $this->themes->resolveTheme($theme);
+        $title = $query === '' ? I18n::t('front.search.title', 'Search') : I18n::t('front.search.results_for', 'Search results for') . ': ' . $query;
+
+        $this->view->renderTheme($resolvedTheme, 'search', [
+            'posts' => $posts,
+            'pagination' => $pagination,
+            'query' => $query,
+            'themeName' => $resolvedTheme,
+            'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
+            'pageTitle' => $title,
+            'metaTitle' => $title,
+            'metaDescription' => I18n::t('front.search.meta_description', 'Search results on the website.'),
+            'metaKeywords' => $query !== '' ? [$query] : [],
+            'metaPath' => $query !== '' ? 'search?q=' . rawurlencode($query) : 'search',
+            'metaRobots' => 'noindex,follow',
+            'metaOgType' => 'website',
+        ]);
+    }
+
     public function adminDashboard(?array $user): void
     {
         $this->view->render('admin/layout', 'admin/dashboard', [
