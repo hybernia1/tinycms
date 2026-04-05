@@ -180,6 +180,12 @@
     padding-left: 1.25rem;
 }
 
+.wysiwyg-editor hr.wysiwyg-pagebreak {
+    border: 0;
+    border-top: 1px dashed var(--color-border-soft);
+    margin: var(--space-4) 0;
+}
+
 .wysiwyg-editor a {
     color: var(--color-primary);
 }

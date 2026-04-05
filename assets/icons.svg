@@ -97,4 +97,7 @@
     <symbol id="icon-w-focus" viewBox="0 0 24 24">
         <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
+    <symbol id="icon-w-pagebreak" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 17h16M9 12h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
 </svg>

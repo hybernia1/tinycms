@@ -426,6 +426,7 @@
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
         var media = createIconButton('w-image', 'openMediaLibrary', 'Vložit obrázek');
+        var pagebreak = createIconButton('w-pagebreak', 'insertPagebreak', 'Oddělovač stránky');
         var alignGroup = createAlignGroup();
         var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', 'Barva textu', 'text');
         var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', 'Barva pozadí', 'background');
@@ -443,6 +444,7 @@
         if ((textarea.dataset.mediaLibraryEndpoint || '').trim() !== '') {
             toolbar.appendChild(media);
         }
+        toolbar.appendChild(pagebreak);
         toolbar.appendChild(html);
         toolbar.appendChild(alignGroup);
         toolbar.appendChild(textColorGroup);
@@ -560,6 +562,21 @@
                         baseUrl: textarea.dataset.mediaBaseUrl || '',
                     },
                 }));
+                return;
+            }
+
+            if (command === 'insertPagebreak') {
+                if (htmlMode) {
+                    return;
+                }
+                if (!isSelectionInside(editor)) {
+                    focusEditorEnd(editor);
+                }
+                document.execCommand('insertHTML', false, '<hr class="wysiwyg-pagebreak"><p><br></p>');
+                normalizeBlocks(editor);
+                enhanceImageBlocks(editor);
+                sync(textarea, editor);
+                updateFormatState();
                 return;
             }
 
