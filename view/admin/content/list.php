@@ -9,6 +9,9 @@ $statusLinks = ['all' => $t('common.all', 'All')];
 foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue));
 }
+$authUser = $_SESSION['auth'] ?? [];
+$isEditor = (string)($authUser['role'] ?? '') === 'editor';
+$currentUserId = (int)($authUser['id'] ?? 0);
 $csrfMarkup = $csrfField();
 ?>
 <div data-content-list data-endpoint="<?= htmlspecialchars($url('admin/api/v1/content'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>">
@@ -47,10 +50,15 @@ $csrfMarkup = $csrfField();
                 $isPlanned = $createdStamp !== false && $createdStamp > time();
                 $statusValue = (string)($row['status'] ?? '');
                 $statusClass = $statusValue === 'published' ? 'text-bg-success' : ($statusValue === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
+                $canManage = !$isEditor || (int)($row['author'] ?? 0) === $currentUserId;
             ?>
                 <tr>
                     <td>
+                        <?php if ($canManage): ?>
                         <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                        <?php else: ?>
+                        <span><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                        <?php endif; ?>
                         <div class="text-muted">
                             <?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>
                         </div>
@@ -62,6 +70,7 @@ $csrfMarkup = $csrfField();
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="table-col-actions">
                         <?php $isPublished = (string)($row['status'] ?? '') === 'published'; ?>
+                        <?php if ($canManage): ?>
                         <form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $id . '/status'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
                             <?= $csrfField() ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
@@ -75,6 +84,7 @@ $csrfMarkup = $csrfField();
                                 <?= $icon('delete') ?>
                                 <span class="sr-only"><?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?></span>
                         </button>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

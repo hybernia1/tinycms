@@ -343,11 +343,15 @@ initListApi({
         const statusClass = status === 'published' ? 'text-bg-success' : (status === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
         const isPublished = status === 'published';
         const toggleLabel = isPublished ? t('content.switch_to_draft', 'Switch to draft') : t('content.publish', 'Publish');
+        const canEdit = item.can_edit === true;
+        const canDelete = item.can_delete === true;
 
         return `
             <tr>
                 <td>
-                    <a href="${esc(editBase)}${Number(item.id || 0)}">${esc(item.name)}</a>
+                    ${canEdit
+        ? `<a href="${esc(editBase)}${Number(item.id || 0)}">${esc(item.name)}</a>`
+        : `<span>${esc(item.name)}</span>`}
                     <div class="text-muted">${esc(item.created_label || item.created)}</div>
                     <div class="d-flex gap-2 mt-2">
                         <span class="badge ${esc(statusClass)}">${esc(t(`content.statuses.${status}`, status))}</span>
@@ -356,14 +360,18 @@ initListApi({
                 </td>
                 <td>${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
+                    ${canEdit ? `
                     <button class="btn btn-light btn-icon" type="button" data-content-toggle="${Number(item.id || 0)}" data-content-mode="${isPublished ? 'draft' : 'publish'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
                         ${icon(isPublished ? 'hide' : 'show')}
                         <span class="sr-only">${esc(toggleLabel)}</span>
                     </button>
+                    ` : ''}
+                    ${canDelete ? `
                     <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}" aria-label="${esc(t('common.delete', 'Delete'))}" title="${esc(t('common.delete', 'Delete'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('common.delete', 'Delete'))}</span>
                     </button>
+                    ` : ''}
                 </td>
             </tr>
         `;
@@ -410,6 +418,8 @@ initListApi({
         const preview = String(item.preview_path || '');
         const webp = String(item.path_webp || '');
         const img = preview !== '' ? preview : (webp !== '' ? webp.replace(/\.webp$/i, thumbSuffix) : String(item.path || ''));
+        const canEdit = item.can_edit === true;
+        const canDelete = item.can_delete === true;
 
         return `
             <tr>
@@ -419,7 +429,7 @@ initListApi({
         ? `<div class="media-list-thumb"><img src="${esc(img)}" alt="${esc(item.name)}"></div>`
         : '<div class="media-list-thumb media-list-thumb-empty"></div>'}
                         <div>
-                            <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
+                            ${canEdit ? `<a href="${esc(editBase)}${id}">${esc(item.name)}</a>` : `<span>${esc(item.name)}</span>`}
                             <div class="text-muted">${esc(item.path)}</div>
                             <div class="text-muted">${esc(item.created_label || item.created)}</div>
                         </div>
@@ -427,10 +437,12 @@ initListApi({
                 </td>
                 <td>${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
+                    ${canDelete ? `
                     <button class="btn btn-light btn-icon" type="button" data-media-delete-open="${id}" aria-label="${esc(t('media.delete', 'Delete media'))}" title="${esc(t('media.delete', 'Delete media'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('media.delete', 'Delete media'))}</span>
                     </button>
+                    ` : ''}
                 </td>
             </tr>
         `;

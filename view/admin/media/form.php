@@ -5,6 +5,9 @@
         $previewPath = trim((string)($item['path'] ?? ''));
     }
     $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
+    $authUser = $_SESSION['auth'] ?? [];
+    $isEditor = (string)($authUser['role'] ?? '') === 'editor';
+    $currentUserId = (int)($authUser['id'] ?? 0);
     ?>
     <form method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
@@ -41,19 +44,23 @@
                 <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['updated'] ?? ''), '—'), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
         <?php endif; ?>
-        <div class="mb-4">
-            <label><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></label>
-            <select name="author">
-                <option value=""><?= htmlspecialchars($t('common.no_author', 'No author'), ENT_QUOTES, 'UTF-8') ?></option>
-                <?php foreach ($authors as $author): ?>
-                    <?php $authorId = (int)($author['ID'] ?? 0); ?>
-                    <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
-                        <?= htmlspecialchars((string)($author['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars((string)($author['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
-        </div>
+        <?php if ($isEditor): ?>
+            <input type="hidden" name="author" value="<?= $currentUserId > 0 ? $currentUserId : '' ?>">
+        <?php else: ?>
+            <div class="mb-4">
+                <label><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></label>
+                <select name="author">
+                    <option value=""><?= htmlspecialchars($t('common.no_author', 'No author'), ENT_QUOTES, 'UTF-8') ?></option>
+                    <?php foreach ($authors as $author): ?>
+                        <?php $authorId = (int)($author['ID'] ?? 0); ?>
+                        <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
+                            <?= htmlspecialchars((string)($author['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars((string)($author['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+            </div>
+        <?php endif; ?>
         <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
         <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
     </form>

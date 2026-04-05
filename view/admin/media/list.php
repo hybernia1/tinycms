@@ -11,6 +11,9 @@ if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
         $thumbSuffix = (string)$firstVariant['suffix'];
     }
 }
+$authUser = $_SESSION['auth'] ?? [];
+$isEditor = (string)($authUser['role'] ?? '') === 'editor';
+$currentUserId = (int)($authUser['id'] ?? 0);
 $csrfMarkup = $csrfField();
 ?>
 <div data-media-list data-endpoint="<?= htmlspecialchars($url('admin/api/v1/media'), ENT_QUOTES, 'UTF-8') ?>" data-edit-base="<?= htmlspecialchars($url('admin/media/edit?id='), ENT_QUOTES, 'UTF-8') ?>" data-thumb-suffix="<?= htmlspecialchars($thumbSuffix, ENT_QUOTES, 'UTF-8') ?>">
@@ -45,6 +48,7 @@ $csrfMarkup = $csrfField();
                     $previewPath = trim((string)($row['path'] ?? ''));
                 }
                 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
+                $canManage = !$isEditor || (int)($row['author'] ?? 0) === $currentUserId;
             ?>
                 <tr>
                     <td>
@@ -57,7 +61,11 @@ $csrfMarkup = $csrfField();
                                 <div class="media-list-thumb media-list-thumb-empty"></div>
                             <?php endif; ?>
                             <div>
+                                <?php if ($canManage): ?>
                                 <a href="<?= htmlspecialchars($url('admin/media/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                                <?php else: ?>
+                                <span><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                                <?php endif; ?>
                                 <div class="text-muted"><?= htmlspecialchars((string)($row['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($row['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
                             </div>
@@ -65,10 +73,12 @@ $csrfMarkup = $csrfField();
                     </td>
                     <td><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="table-col-actions">
+                            <?php if ($canManage): ?>
                             <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('media.delete', 'Delete media'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete', 'Delete media'), ENT_QUOTES, 'UTF-8') ?>">
                                 <?= $icon('delete') ?>
                                 <span class="sr-only"><?= htmlspecialchars($t('media.delete', 'Delete media'), ENT_QUOTES, 'UTF-8') ?></span>
                             </button>
+                            <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

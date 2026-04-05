@@ -12,7 +12,7 @@ final class SchemaDefinition
                 'email' => ['max' => 255, 'nullable' => true],
                 'password' => ['max' => 255, 'nullable' => false],
                 'name' => ['max' => 255, 'nullable' => true],
-                'role' => ['max' => 50, 'nullable' => false, 'allowed' => ['admin', 'user']],
+                'role' => ['max' => 50, 'nullable' => false, 'allowed' => ['admin', 'editor']],
             ],
             'media' => [
                 'path' => ['max' => 500, 'nullable' => true],
@@ -43,7 +43,7 @@ final class SchemaDefinition
                 name VARCHAR(255) DEFAULT NULL,
                 created DATETIME NOT NULL DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                role VARCHAR(50) NOT NULL DEFAULT 'user',
+                role VARCHAR(50) NOT NULL DEFAULT 'editor',
                 suspend TINYINT(1) NOT NULL DEFAULT 0,
                 PRIMARY KEY (id),
                 UNIQUE KEY uq_users_email (email)
@@ -58,7 +58,7 @@ final class SchemaDefinition
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (id),
                 KEY idx_media_author (author),
-                CONSTRAINT fk_media_author_user FOREIGN KEY (author) REFERENCES users (id)
+                CONSTRAINT fk_media_author_user FOREIGN KEY (author) REFERENCES users (id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS content (
                 id INT NOT NULL AUTO_INCREMENT,
@@ -75,8 +75,8 @@ final class SchemaDefinition
                 KEY idx_content_created (created),
                 KEY idx_content_author (author),
                 KEY idx_content_thumbnail (thumbnail),
-                CONSTRAINT fk_content_author_user FOREIGN KEY (author) REFERENCES users (id) ON DELETE CASCADE,
-                CONSTRAINT fk_content_thumbnail_media FOREIGN KEY (thumbnail) REFERENCES media (id) ON DELETE CASCADE
+                CONSTRAINT fk_content_author_user FOREIGN KEY (author) REFERENCES users (id) ON DELETE SET NULL,
+                CONSTRAINT fk_content_thumbnail_media FOREIGN KEY (thumbnail) REFERENCES media (id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS terms (
                 id INT NOT NULL AUTO_INCREMENT,

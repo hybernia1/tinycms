@@ -51,7 +51,7 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 'unsuspended' => $t('users.unsuspended', 'User unsuspended.'),
                 'status_suspended_single' => $t('users.status.suspended_single'),
                 'roles' => [
-                    'user' => $t('users.roles.user', 'User'),
+                    'editor' => $t('users.roles.editor', 'Editor'),
                     'admin' => $t('users.roles.admin', 'Administrator'),
                 ],
                 'delete' => $t('users.delete'),
@@ -153,7 +153,12 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
         <h2 class="admin-brand"><?= htmlspecialchars($t('admin.brand'), ENT_QUOTES, 'UTF-8') ?></h2>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
-                $itemPath = trim(parse_url((string)$item['url'], PHP_URL_PATH) ?? '', '/');
+                $role = (string)($authUser['role'] ?? '');
+                $itemUrl = (string)($item['url'] ?? '');
+                $itemPath = trim(parse_url($itemUrl, PHP_URL_PATH) ?? '', '/');
+                if ($role !== 'admin' && in_array($itemPath, ['admin/users', 'admin/settings'], true)) {
+                    continue;
+                }
                 $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
             ?>
             <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= htmlspecialchars((string)$item['url'], ENT_QUOTES, 'UTF-8') ?>">

@@ -27,7 +27,7 @@ final class AdminUserController extends BaseAdminController
 
     public function list(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect)) {
+        if (!$this->guardSuperAdmin($redirect)) {
             return;
         }
 
@@ -39,7 +39,7 @@ final class AdminUserController extends BaseAdminController
 
     public function listApiV1(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect)) {
+        if (!$this->guardSuperAdmin($redirect)) {
             return;
         }
 
@@ -63,7 +63,7 @@ final class AdminUserController extends BaseAdminController
     public function deleteApiV1(callable $redirect, int $id): void
     {
         if (
-            !$this->guardAdmin($redirect)
+            !$this->guardSuperAdmin($redirect)
             || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
         ) {
             return;
@@ -85,7 +85,7 @@ final class AdminUserController extends BaseAdminController
     public function suspendApiV1(callable $redirect, int $id): void
     {
         if (
-            !$this->guardAdmin($redirect)
+            !$this->guardSuperAdmin($redirect)
             || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
         ) {
             return;
@@ -117,7 +117,7 @@ final class AdminUserController extends BaseAdminController
 
     public function addForm(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect)) {
+        if (!$this->guardSuperAdmin($redirect)) {
             return;
         }
 
@@ -125,7 +125,7 @@ final class AdminUserController extends BaseAdminController
             'ID' => null,
             'name' => '',
             'email' => '',
-            'role' => 'user',
+            'role' => 'editor',
             'suspend' => 0,
         ];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add');
@@ -135,7 +135,7 @@ final class AdminUserController extends BaseAdminController
     public function addSubmit(callable $redirect): void
     {
         if (
-            !$this->guardAdmin($redirect)
+            !$this->guardSuperAdmin($redirect)
             || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
         ) {
             return;
@@ -155,7 +155,7 @@ final class AdminUserController extends BaseAdminController
 
     public function editForm(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect)) {
+        if (!$this->guardSuperAdmin($redirect)) {
             return;
         }
 
@@ -175,7 +175,7 @@ final class AdminUserController extends BaseAdminController
     public function editSubmit(callable $redirect): void
     {
         if (
-            !$this->guardAdmin($redirect)
+            !$this->guardSuperAdmin($redirect)
             || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
         ) {
             return;
@@ -209,7 +209,7 @@ final class AdminUserController extends BaseAdminController
             'id' => (int)($row['ID'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
             'email' => (string)($row['email'] ?? ''),
-            'role' => (string)($row['role'] ?? 'user'),
+            'role' => (string)($row['role'] ?? 'editor'),
             'is_admin' => (string)($row['role'] ?? '') === 'admin',
             'is_suspended' => $isSuspended,
         ];

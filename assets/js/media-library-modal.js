@@ -165,6 +165,8 @@ if (modal && openTrigger) {
             button.dataset.mediaWebpPath = String(item.webp_path || '');
             button.dataset.mediaCreated = String(item.created || '');
             button.dataset.mediaPreviewPath = previewPath;
+            button.dataset.mediaCanEdit = item.can_edit === true ? '1' : '0';
+            button.dataset.mediaCanDelete = item.can_delete === true ? '1' : '0';
             grid.appendChild(button);
         });
     };
@@ -186,6 +188,8 @@ if (modal && openTrigger) {
             webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
             previewPath: target.dataset.mediaPreviewPath || '',
+            canEdit: target.dataset.mediaCanEdit === '1',
+            canDelete: target.dataset.mediaCanDelete === '1',
         };
 
         grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
@@ -209,7 +213,7 @@ if (modal && openTrigger) {
 
         if (detailNameInput) {
             detailNameInput.value = selectedMedia ? selectedMedia.name : '';
-            detailNameInput.disabled = !selectedMedia;
+            detailNameInput.disabled = !(selectedMedia && selectedMedia.canEdit);
         }
 
         if (detailPath) {
@@ -225,11 +229,15 @@ if (modal && openTrigger) {
         }
 
         if (deleteButton) {
-            deleteButton.disabled = !selectedMedia;
+            const canDelete = !!(selectedMedia && selectedMedia.canDelete);
+            deleteButton.disabled = !canDelete;
+            deleteButton.classList.toggle('d-none', !canDelete);
         }
 
         if (renameButton) {
-            renameButton.disabled = !selectedMedia;
+            const canEdit = !!(selectedMedia && selectedMedia.canEdit);
+            renameButton.disabled = !canEdit;
+            renameButton.classList.toggle('d-none', !canEdit);
         }
 
         if (mediaIdField) {

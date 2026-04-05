@@ -103,7 +103,7 @@ final class AdminMediaController extends BaseAdminController
             'path_webp' => (string)($uploadData['path_webp'] ?? ''),
             'author' => trim((string)($_POST['author'] ?? '')) !== '' ? (string)$_POST['author'] : ($authorId > 0 ? (string)$authorId : ''),
         ]);
-        $result = $this->media->save($input);
+        $result = $this->media->save($this->normalizeMediaInput($input, $authorId));
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.created', 'Media created.'));
@@ -128,6 +128,12 @@ final class AdminMediaController extends BaseAdminController
 
         if ($item === null) {
             $this->flash->add('info', I18n::t('media.not_found', 'Media not found.'));
+            $redirect('admin/media');
+            return;
+        }
+
+        if (!$this->canManageMedia($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
             $redirect('admin/media');
             return;
         }
@@ -159,6 +165,12 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
+        if (!$this->canManageMedia($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $redirect('admin/media');
+            return;
+        }
+
         $input = array_merge($_POST, [
             'path' => (string)($item['path'] ?? ''),
             'path_webp' => (string)($item['path_webp'] ?? ''),
@@ -182,7 +194,8 @@ final class AdminMediaController extends BaseAdminController
             }
         }
 
-        $result = $this->media->save($input, $id);
+        $authorId = (int)($this->authService->auth()->id() ?? 0);
+        $result = $this->media->save($this->normalizeMediaInput($input, $authorId), $id);
 
         if (($result['success'] ?? false) === true) {
             if (is_array($newUploadData)) {
@@ -226,6 +239,14 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
+        if (!$this->canDeleteMedia($item)) {
+            $this->respondJson([
+                'ok' => false,
+                'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')],
+            ], 403);
+            return;
+        }
+
         if (!$this->media->delete($id)) {
             $this->respondJson([
                 'ok' => false,
@@ -264,11 +285,37 @@ final class AdminMediaController extends BaseAdminController
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
     }
 
+    private function normalizeMediaInput(array $input, int $authorId): array
+    {
+        if (!$this->isEditor()) {
+            return $input;
+        }
+
+        $input['author'] = $authorId > 0 ? (string)$authorId : '';
+        return $input;
+    }
+
+    private function canDeleteMedia(array $item): bool
+    {
+        return $this->canManageMedia($item);
+    }
+
+    private function canManageMedia(array $item): bool
+    {
+        if (!$this->isEditor()) {
+            return true;
+        }
+
+        return (int)($item['author'] ?? 0) === $this->currentUserId();
+    }
+
     private function mapListItem(array $row): array
     {
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
+            'can_edit' => $this->canManageMedia($row),
+            'can_delete' => $this->canDeleteMedia($row),
             'path' => (string)($row['path'] ?? ''),
             'path_webp' => (string)($row['path_webp'] ?? ''),
             'preview_path' => $this->resolvePreviewPath($row),

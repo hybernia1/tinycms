@@ -36,6 +36,25 @@ abstract class BaseAdminController
         return true;
     }
 
+    protected function guardSuperAdmin(callable $redirect, bool $flashDenied = true): bool
+    {
+        if (!$this->authService->auth()->check()) {
+            $redirect('login');
+            return false;
+        }
+
+        if (!$this->authService->auth()->isAdmin()) {
+            if ($flashDenied) {
+                $this->flash->add('info', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            }
+
+            $redirect('admin/dashboard');
+            return false;
+        }
+
+        return true;
+    }
+
     protected function guardCsrf(callable $redirect, string $redirectPath, string $message): bool
     {
         if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
@@ -99,6 +118,16 @@ abstract class BaseAdminController
         header('Content-Type: application/json; charset=utf-8');
         http_response_code($statusCode);
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
+
+    protected function currentUserId(): int
+    {
+        return (int)($this->authService->auth()->id() ?? 0);
+    }
+
+    protected function isEditor(): bool
+    {
+        return (string)($this->authService->auth()->role() ?? '') === 'editor';
     }
 
     private function ensureSession(): void

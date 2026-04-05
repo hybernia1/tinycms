@@ -51,11 +51,11 @@ final class AuthService
 
     public function redirectAfterLogin(): string
     {
-        return $this->auth->isAdmin() ? 'admin/dashboard' : '';
+        return $this->canAccessAdmin() ? 'admin/dashboard' : '';
     }
 
     public function canAccessAdmin(): bool
     {
-        return $this->auth->check() && $this->auth->isAdmin();
+        return $this->auth->check() && in_array((string)$this->auth->role(), ['admin', 'editor'], true);
     }
 }
