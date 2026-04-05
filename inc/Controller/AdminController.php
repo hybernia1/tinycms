@@ -4,17 +4,20 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\Feature\AuthService;
+use App\Service\Support\CsrfService;
 use App\View\PageView;
 
 final class AdminController
 {
     private PageView $pages;
     private AuthService $authService;
+    private CsrfService $csrf;
 
-    public function __construct(PageView $pages, AuthService $authService)
+    public function __construct(PageView $pages, AuthService $authService, CsrfService $csrf)
     {
         $this->pages = $pages;
         $this->authService = $authService;
+        $this->csrf = $csrf;
     }
 
     public function index(callable $redirect): void
@@ -59,6 +62,9 @@ final class AdminController
                 'error' => [
                     'code' => 'AUTH_REQUIRED',
                     'message' => 'Byli jste odhlášeni. Přihlaste se znovu.',
+                ],
+                'data' => [
+                    'csrf' => $this->csrf->token(),
                 ],
             ], JSON_UNESCAPED_UNICODE);
             return;

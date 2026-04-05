@@ -43,6 +43,18 @@
         var endpoint = body.getAttribute('data-auth-check-endpoint') || '';
         var homeUrl = body.getAttribute('data-home-url') || '/';
         var pending = null;
+        var loginCsrfInput = document.querySelector('[data-auth-check-login] input[name="_csrf"]');
+
+        function syncLoginCsrf(payload) {
+            if (!loginCsrfInput) {
+                return;
+            }
+
+            var token = String(payload?.data?.csrf || '').trim();
+            if (token !== '') {
+                loginCsrfInput.value = token;
+            }
+        }
 
         async function ensureAccess(force) {
             if (!navigator.onLine) {
@@ -57,6 +69,7 @@
             pending = fetch(endpoint, { headers: { Accept: 'application/json' } })
                 .then(async function (response) {
                     if (response.status === 401) {
+                        syncLoginCsrf(await response.json().catch(function () { return {}; }));
                         openModal('Byli jste odhlášeni. Přihlaste se znovu.', 'login');
                         return false;
                     }
