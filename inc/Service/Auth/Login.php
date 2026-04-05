@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service\Auth;
 
 use App\Service\Infra\Db\Query;
+use App\Service\Support\I18n;
 
 class Login
 {
@@ -37,21 +38,21 @@ class Login
         $errors = [];
 
         if ($email === '') {
-            $errors['email'] = 'E-mail je povinný.';
+            $errors['email'] = I18n::t('auth.email_required', 'Email is required.');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'E-mail není ve správném formátu.';
+            $errors['email'] = I18n::t('auth.email_invalid_format', 'Email format is invalid.');
         } else {
             $email = mb_strtolower($email);
         }
 
         if ($password === '') {
-            $errors['password'] = 'Heslo je povinné.';
+            $errors['password'] = I18n::t('auth.password_required', 'Password is required.');
         }
 
         if (!empty($errors)) {
             return [
                 'success' => false,
-                'message' => 'Formulář obsahuje chyby.',
+                'message' => I18n::t('auth.form_has_errors', 'The form contains errors.'),
                 'errors' => $errors,
             ];
         }
@@ -63,9 +64,9 @@ class Login
         if (empty($users)) {
             return [
                 'success' => false,
-                'message' => 'Neplatné přihlašovací údaje.',
+                'message' => I18n::t('auth.invalid_credentials', 'Invalid login credentials.'),
                 'errors' => [
-                    'email' => 'Uživatel nebyl nalezen.',
+                    'email' => I18n::t('auth.user_not_found', 'User was not found.'),
                 ],
             ];
         }
@@ -75,16 +76,16 @@ class Login
         if ((int)($user['suspend'] ?? 0) === 1) {
             return [
                 'success' => false,
-                'message' => 'Tento účet je blokovaný.',
+                'message' => I18n::t('auth.account_blocked', 'This account is blocked.'),
             ];
         }
 
         if (!isset($user['password']) || !password_verify($password, (string)$user['password'])) {
             return [
                 'success' => false,
-                'message' => 'Neplatné přihlašovací údaje.',
+                'message' => I18n::t('auth.invalid_credentials', 'Invalid login credentials.'),
                 'errors' => [
-                    'password' => 'Nesprávné heslo.',
+                    'password' => I18n::t('auth.wrong_password', 'Wrong password.'),
                 ],
             ];
         }
@@ -119,7 +120,7 @@ class Login
 
         return [
             'success' => true,
-            'message' => 'Přihlášení proběhlo úspěšně.',
+            'message' => I18n::t('auth.login_success', 'Login successful.'),
             'user' => [
                 'id' => (int)$user['ID'],
                 'name' => (string)$user['name'],

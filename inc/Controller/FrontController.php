@@ -8,6 +8,7 @@ use App\Service\Feature\ContentService;
 use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Feature\SettingsService;
+use App\Service\Support\I18n;
 use App\Service\Support\SluggerService;
 use App\View\PageView;
 
@@ -138,7 +139,7 @@ final class FrontController
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
             $this->pages->loginForm([
                 'errors' => [],
-                'message' => 'Bezpečnostní token vypršel, odešlete formulář znovu.',
+                'message' => I18n::t('common.csrf_expired'),
                 'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'remember' => (int)((int)($_POST['remember'] ?? 0) === 1)],
             ]);
             return;
@@ -152,7 +153,7 @@ final class FrontController
 
         $this->pages->loginForm([
             'errors' => $result['errors'] ?? [],
-            'message' => (string)($result['message'] ?? 'Přihlášení selhalo.'),
+            'message' => (string)($result['message'] ?? I18n::t('auth.login_failed', 'Login failed.')),
             'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'remember' => (int)((int)($_POST['remember'] ?? 0) === 1)],
         ]);
     }

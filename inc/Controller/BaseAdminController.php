@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
+use App\Service\Support\I18n;
 
 abstract class BaseAdminController
 {
@@ -25,7 +26,7 @@ abstract class BaseAdminController
 
         if (!$this->authService->canAccessAdmin()) {
             if ($flashDenied) {
-                $this->flash->add('info', 'Nemáte přístup do administrace.');
+                $this->flash->add('info', I18n::t('admin.access_denied', 'You do not have access to administration.'));
             }
 
             $redirect('');

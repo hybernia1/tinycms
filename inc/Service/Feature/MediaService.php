@@ -6,6 +6,7 @@ namespace App\Service\Feature;
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
 use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Support\I18n;
 use InvalidArgumentException;
 
 final class MediaService
@@ -71,15 +72,15 @@ final class MediaService
         $errors = [];
 
         if ($name === '') {
-            $errors['name'] = 'Název je povinný.';
+            $errors['name'] = I18n::t('validation.name_required', 'Name is required.');
         }
 
         if ($path === '') {
-            $errors['path'] = 'Path je povinná.';
+            $errors['path'] = I18n::t('media.path_required', 'Path is required.');
         }
 
         if (($input['author'] ?? '') !== '' && $author === null) {
-            $errors['author'] = 'Autor není validní.';
+            $errors['author'] = I18n::t('validation.author_invalid', 'Author is not valid.');
         }
 
         $lengthErrors = $this->schemaConstraintValidator->validate('media', [
