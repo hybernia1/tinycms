@@ -226,6 +226,14 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
+        if (!$this->canDeleteMedia($item)) {
+            $this->respondJson([
+                'ok' => false,
+                'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')],
+            ], 403);
+            return;
+        }
+
         if (!$this->media->delete($id)) {
             $this->respondJson([
                 'ok' => false,
@@ -262,6 +270,15 @@ final class AdminMediaController extends BaseAdminController
     private function hasUpload(string $field): bool
     {
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    }
+
+    private function canDeleteMedia(array $item): bool
+    {
+        if (!$this->isEditor()) {
+            return true;
+        }
+
+        return (int)($item['author'] ?? 0) === $this->currentUserId();
     }
 
     private function mapListItem(array $row): array

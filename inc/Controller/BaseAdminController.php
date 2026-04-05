@@ -120,6 +120,16 @@ abstract class BaseAdminController
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     }
 
+    protected function currentUserId(): int
+    {
+        return (int)($this->authService->auth()->id() ?? 0);
+    }
+
+    protected function isEditor(): bool
+    {
+        return (string)($this->authService->auth()->role() ?? '') === 'editor';
+    }
+
     private function ensureSession(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
