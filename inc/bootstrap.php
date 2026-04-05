@@ -77,8 +77,6 @@ if (str_starts_with($requestPath, 'install')) {
     $redirect('admin/dashboard');
 }
 
-I18n::setLocale((string)APP_LANG);
-
 $auth = new Auth();
 $authService = new AuthService($auth);
 $userService = new UserService();
@@ -87,6 +85,8 @@ $mediaService = new MediaService();
 $slugger = new SluggerService();
 $uploadService = new UploadService(dirname(__DIR__), $slugger);
 $settingsService = new SettingsService();
+$resolvedSettings = $settingsService->resolved();
+I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
 $termService = new TermService();
 $pageView = new PageView($view);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $termService, $slugger);

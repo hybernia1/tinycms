@@ -226,6 +226,7 @@ return [
         'save' => 'Save settings',
         'saved' => 'Settings saved.',
         'fields' => [
+            'app_lang' => 'Application language',
             'sitename' => 'Site name',
             'sitefooter' => 'Site footer',
             'siteauthor' => 'Site author',

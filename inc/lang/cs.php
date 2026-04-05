@@ -226,6 +226,7 @@ return [
         'save' => 'Uložit nastavení',
         'saved' => 'Nastavení uloženo.',
         'fields' => [
+            'app_lang' => 'Jazyk aplikace',
             'sitename' => 'Název webu',
             'sitefooter' => 'Patička webu',
             'siteauthor' => 'Autor webu',
