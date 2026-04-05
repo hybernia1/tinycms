@@ -369,7 +369,6 @@ initListApi({
         `;
     },
 });
-})();
 
 initListApi({
     name: 'terms',
@@ -480,3 +479,4 @@ initListApi({
         `;
     },
 });
+})();
