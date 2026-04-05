@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
+use App\Service\Support\I18n;
 use App\Service\Feature\UserService;
 use App\View\PageView;
 
@@ -63,18 +64,18 @@ final class AdminUserController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+            || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
         ) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID uživatele.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('users.invalid_id', 'Invalid user ID.')]], 422);
             return;
         }
 
         if (!$this->users->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => 'Uživatele se nepodařilo smazat.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('users.delete_failed', 'Could not delete user.')]], 422);
             return;
         }
 
@@ -85,20 +86,20 @@ final class AdminUserController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+            || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
         ) {
             return;
         }
 
         $mode = (string)($_POST['mode'] ?? 'suspend');
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => 'Neplatné ID uživatele.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('users.invalid_id', 'Invalid user ID.')]], 422);
             return;
         }
 
         if ($mode === 'unsuspend') {
             if (!$this->users->unsuspend($id)) {
-                $this->respondJson(['ok' => false, 'error' => ['code' => 'UNSUSPEND_FAILED', 'message' => 'Uživatele se nepodařilo odsuspendovat.']], 422);
+                $this->respondJson(['ok' => false, 'error' => ['code' => 'UNSUSPEND_FAILED', 'message' => I18n::t('users.unsuspend_failed', 'Could not unsuspend user.')]], 422);
                 return;
             }
 
@@ -107,7 +108,7 @@ final class AdminUserController extends BaseAdminController
         }
 
         if (!$this->users->suspend($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SUSPEND_FAILED', 'message' => 'Uživatele se nepodařilo suspendovat.']], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SUSPEND_FAILED', 'message' => I18n::t('users.suspend_failed', 'Could not suspend user.')]], 422);
             return;
         }
 
@@ -135,7 +136,7 @@ final class AdminUserController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+            || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
         ) {
             return;
         }
@@ -143,11 +144,11 @@ final class AdminUserController extends BaseAdminController
         $result = $this->users->save($_POST);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', 'Uživatel vytvořen.');
+            $this->flash->add('success', I18n::t('users.created', 'User created.'));
             $redirect('admin/users');
         }
 
-        $this->flash->add('error', 'Nepodařilo se uložit uživatele.');
+        $this->flash->add('error', I18n::t('users.save_failed', 'Could not save user.'));
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/users/add');
     }
@@ -162,7 +163,7 @@ final class AdminUserController extends BaseAdminController
         $user = $this->users->find($id);
 
         if ($user === null) {
-            $this->flash->add('info', 'Uživatel nenalezen.');
+            $this->flash->add('info', I18n::t('users.not_found', 'User not found.'));
             $redirect('admin/users');
             return;
         }
@@ -175,7 +176,7 @@ final class AdminUserController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', 'Bezpečnostní token vypršel, odešlete formulář znovu.')
+            || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
         ) {
             return;
         }
@@ -183,7 +184,7 @@ final class AdminUserController extends BaseAdminController
         $id = (int)($_GET['id'] ?? 0);
 
         if ($id <= 0) {
-            $this->flash->add('error', 'Neplatné ID uživatele.');
+            $this->flash->add('error', I18n::t('users.invalid_id', 'Invalid user ID.'));
             $redirect('admin/users');
             return;
         }
@@ -191,11 +192,11 @@ final class AdminUserController extends BaseAdminController
         $result = $this->users->save($_POST, $id);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', 'Uživatel upraven.');
+            $this->flash->add('success', I18n::t('users.updated', 'User updated.'));
             $redirect('admin/users');
         }
 
-        $this->flash->add('error', 'Nepodařilo se upravit uživatele.');
+        $this->flash->add('error', I18n::t('users.update_failed', 'Could not update user.'));
         $data = array_merge($_POST, ['ID' => $id]);
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, $data, $result['errors'] ?? []);
         $redirect('admin/users/edit?id=' . $id);

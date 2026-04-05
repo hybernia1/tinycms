@@ -16,6 +16,71 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/admin.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/editor/style.css'), ENT_QUOTES, 'UTF-8') ?>">
+    <script>
+        window.tinycmsI18n = <?= json_encode([
+            'common' => [
+                'delete' => $t('common.delete'),
+                'close_notice' => $t('admin.close_notice'),
+                'invalid_data' => $t('common.invalid_data', 'Invalid data.'),
+            ],
+            'content' => [
+                'planned' => $t('content.planned'),
+                'switch_to_draft' => $t('content.switch_to_draft'),
+                'publish' => $t('content.publish'),
+                'deleted' => $t('content.deleted', 'Content deleted.'),
+                'published' => $t('content.published', 'Content published.'),
+                'switched_to_draft' => $t('content.switched_to_draft', 'Content switched to draft.'),
+            ],
+            'terms' => [
+                'deleted' => $t('terms.deleted', 'Tag deleted.'),
+                'delete' => $t('terms.delete'),
+            ],
+            'media' => [
+                'deleted' => $t('media.deleted', 'Media deleted.'),
+                'delete' => $t('media.delete'),
+            ],
+            'users' => [
+                'deleted' => $t('users.deleted', 'User deleted.'),
+                'suspended' => $t('users.suspended', 'User suspended.'),
+                'unsuspended' => $t('users.unsuspended', 'User unsuspended.'),
+                'status_suspended_single' => $t('users.status.suspended_single'),
+                'delete' => $t('users.delete'),
+                'suspend' => $t('users.suspend'),
+                'unsuspend' => $t('users.unsuspend'),
+            ],
+            'editor' => [
+                'placeholder' => $t('editor.placeholder', 'Start writing content…'),
+                'align_left' => $t('editor.align_left', 'Left'),
+                'align_center' => $t('editor.align_center', 'Center'),
+                'align_right' => $t('editor.align_right', 'Right'),
+                'list_bulleted' => $t('editor.list_bulleted', 'Bulleted list'),
+                'list_numbered' => $t('editor.list_numbered', 'Numbered list'),
+                'alignment' => $t('editor.alignment', 'Alignment'),
+                'insert_link' => $t('editor.insert_link', 'Insert link'),
+                'open_new_window' => $t('editor.open_new_window', 'Open in new window'),
+                'add_nofollow' => $t('editor.add_nofollow', 'Add nofollow'),
+                'clear' => $t('editor.clear', 'Clear'),
+                'insert_image' => $t('editor.insert_image', 'Insert image'),
+                'page_break' => $t('editor.page_break', 'Page break'),
+                'background_color' => $t('editor.background_color', 'Background color'),
+                'focus_mode' => $t('editor.focus_mode', 'Focus mode'),
+                'focus_mode_exit' => $t('editor.focus_mode_exit', 'Exit focus mode'),
+                'unlink' => $t('editor.unlink', 'Remove link'),
+                'bold' => $t('editor.bold', 'Bold'),
+                'italic' => $t('editor.italic', 'Italic'),
+                'cancel' => $t('common.cancel'),
+                'save' => $t('common.save'),
+            ],
+            'modal' => [
+                'confirm_delete_type' => $t('modal.confirm_delete_type', 'Do you really want to delete this %s?'),
+                'default_type' => $t('modal.default_type', 'item'),
+            ],
+            'auth' => [
+                'show_password' => $t('front.login.show_password'),
+                'hide_password' => $t('auth.hide_password', 'Hide password'),
+            ],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script defer src="<?= htmlspecialchars($url('assets/js/flash.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/modal.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/admin-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>

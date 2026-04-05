@@ -1,4 +1,11 @@
 (function () {
+    var i18n = window.tinycmsI18n || {};
+    var t = function (path, fallback) {
+        var value = path.split('.').reduce(function (acc, key) {
+            return acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined;
+        }, i18n);
+        return typeof value === 'string' && value !== '' ? value : fallback;
+    };
     var editorCounter = 0;
 
     function normalizeHtml(html) {
@@ -9,9 +16,9 @@
         var controls = document.createElement('div');
         controls.className = 'image-controls';
         controls.setAttribute('contenteditable', 'false');
-        controls.innerHTML = '<button type="button" class="btn btn-light btn-xs" data-image-align="left">Vlevo</button>'
-            + '<button type="button" class="btn btn-light btn-xs" data-image-align="center">Střed</button>'
-            + '<button type="button" class="btn btn-light btn-xs" data-image-align="right">Vpravo</button>';
+        controls.innerHTML = '<button type="button" class="btn btn-light btn-xs" data-image-align="left">' + t('editor.align_left', 'Left') + '</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-align="center">' + t('editor.align_center', 'Center') + '</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-align="right">' + t('editor.align_right', 'Right') + '</button>';
         return controls;
     }
 
@@ -355,8 +362,8 @@
         var menu = document.createElement('div');
         menu.className = 'wysiwyg-menu wysiwyg-menu-list';
 
-        menu.appendChild(createMenuItem('w-ul', 'insertUnorderedList', 'Odrážky'));
-        menu.appendChild(createMenuItem('w-ol', 'insertOrderedList', 'Číslování'));
+        menu.appendChild(createMenuItem('w-ul', 'insertUnorderedList', ''+ t('editor.list_bulleted', 'Bulleted list') + ''));
+        menu.appendChild(createMenuItem('w-ol', 'insertOrderedList', ''+ t('editor.list_numbered', 'Numbered list') + ''));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -366,14 +373,14 @@
         var group = document.createElement('div');
         group.className = 'wysiwyg-group wysiwyg-group-align';
 
-        var toggle = createIconButton('w-align-left', 'toggleAlignMenu', 'Zarovnání');
+        var toggle = createIconButton('w-align-left', 'toggleAlignMenu', ''+ t('editor.alignment', 'Alignment') + '');
 
         var menu = document.createElement('div');
         menu.className = 'wysiwyg-menu wysiwyg-menu-align';
 
-        menu.appendChild(createMenuItem('w-align-left', 'justifyLeft', 'Vlevo'));
-        menu.appendChild(createMenuItem('w-align-center', 'justifyCenter', 'Na střed'));
-        menu.appendChild(createMenuItem('w-align-right', 'justifyRight', 'Vpravo'));
+        menu.appendChild(createMenuItem('w-align-left', 'justifyLeft', '' + t('editor.align_left', 'Left') + ''));
+        menu.appendChild(createMenuItem('w-align-center', 'justifyCenter', ''+ t('editor.align_center', 'Center') + ''));
+        menu.appendChild(createMenuItem('w-align-right', 'justifyRight', '' + t('editor.align_right', 'Right') + ''));
         menu.appendChild(createMenuItem('w-align-justify', 'justifyFull', 'Do bloku'));
         group.appendChild(toggle);
         group.appendChild(menu);
@@ -389,7 +396,7 @@
 
         var title = document.createElement('h3');
         title.className = 'wysiwyg-link-title';
-        title.textContent = 'Vložit odkaz';
+        title.textContent = '' + t('editor.insert_link', 'Insert link') + '';
 
         var input = document.createElement('input');
         input.type = 'url';
@@ -412,7 +419,7 @@
         targetInput.type = 'checkbox';
         targetInput.setAttribute('data-role', 'link-target-blank');
         targetOption.appendChild(targetInput);
-        targetOption.appendChild(document.createTextNode(' Otevřít v novém okně'));
+        targetOption.appendChild(document.createTextNode(' ' + t('editor.open_new_window', 'Open in new window')));
 
         var nofollowOption = document.createElement('label');
         nofollowOption.className = 'wysiwyg-link-option';
@@ -420,7 +427,7 @@
         nofollowInput.type = 'checkbox';
         nofollowInput.setAttribute('data-role', 'link-nofollow');
         nofollowOption.appendChild(nofollowInput);
-        nofollowOption.appendChild(document.createTextNode(' Přidat nofollow'));
+        nofollowOption.appendChild(document.createTextNode(' ' + t('editor.add_nofollow', 'Add nofollow')));
 
         var actions = document.createElement('div');
         actions.className = 'wysiwyg-link-actions';
@@ -429,7 +436,7 @@
         cancel.type = 'button';
         cancel.className = 'btn btn-light';
         cancel.setAttribute('data-role', 'link-cancel');
-        cancel.textContent = 'Zrušit';
+        cancel.textContent = '' + t('editor.cancel', 'Cancel') + '';
 
         var remove = document.createElement('button');
         remove.type = 'button';
@@ -441,7 +448,7 @@
         confirm.type = 'button';
         confirm.className = 'btn btn-primary';
         confirm.setAttribute('data-role', 'link-apply');
-        confirm.textContent = 'Uložit';
+        confirm.textContent = '' + t('editor.save', 'Save') + '';
 
         actions.appendChild(cancel);
         actions.appendChild(remove);
@@ -467,26 +474,26 @@
         toolbar.className = 'wysiwyg-toolbar';
 
         var headingGroup = createHeadingGroup();
-        var bold = createIconButton('w-bold', 'bold', 'Tučně');
-        var italic = createIconButton('w-italic', 'italic', 'Kurzíva');
+        var bold = createIconButton('w-bold', 'bold', ''+ t('editor.bold', 'Bold') + '');
+        var italic = createIconButton('w-italic', 'italic', ''+ t('editor.italic', 'Italic') + '');
         var quote = createIconButton('w-quote', 'formatBlock:blockquote', 'Citace');
         var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
-        var clear = createIconButton('w-clear', 'removeFormat', 'Vyčistit');
+        var clear = createIconButton('w-clear', 'removeFormat', ''+ t('editor.clear', 'Clear') + '');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
-        var media = createIconButton('w-image', 'openMediaLibrary', 'Vložit obrázek');
-        var pagebreak = createIconButton('w-pagebreak', 'insertPagebreak', 'Oddělovač stránky');
+        var media = createIconButton('w-image', 'openMediaLibrary', ''+ t('editor.insert_image', 'Insert image') + '');
+        var pagebreak = createIconButton('w-pagebreak', 'insertPagebreak', ''+ t('editor.page_break', 'Page break') + '');
         var alignGroup = createAlignGroup();
         var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', 'Barva textu', 'text');
-        var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', 'Barva pozadí', 'background');
-        var focus = createIconButton('w-focus', 'toggleFocusMode', 'Nerušené psaní');
+        var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', ''+ t('editor.background_color', 'Background color') + '', 'background');
+        var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode', 'Focus mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
         var linkModal = createLinkModal();
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
         linkTools.setAttribute('contenteditable', 'false');
         linkTools.appendChild(createLinkToolButton('w-link-edit', 'link-inline-edit', 'Upravit odkaz'));
-        linkTools.appendChild(createLinkToolButton('w-link-unlink', 'link-inline-remove', 'Zrušit odkaz'));
+        linkTools.appendChild(createLinkToolButton('w-link-unlink', 'link-inline-remove', t('editor.unlink', 'Remove link')));
 
         toolbar.appendChild(headingGroup);
         toolbar.appendChild(bold);
@@ -508,7 +515,7 @@
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
         editor.contentEditable = 'true';
-        editor.dataset.placeholder = 'Začněte psát obsah…';
+        editor.dataset.placeholder = '' + t('editor.placeholder', 'Start writing content…') + '';
         editor.innerHTML = textarea.value.trim();
 
         var linkRange = null;
@@ -564,7 +571,7 @@
             document.body.classList.toggle('admin-focus-mode', enabled);
             focus.classList.toggle('is-active', enabled);
             focus.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-            var label = enabled ? 'Ukončit nerušené psaní' : 'Nerušené psaní';
+            var label = enabled ? '' + t('editor.focus_mode_exit', 'Exit focus mode') + '' : ''+ t('editor.focus_mode', 'Focus mode') + '';
             focus.title = label;
             focus.setAttribute('aria-label', label);
         }
