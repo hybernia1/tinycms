@@ -6,6 +6,7 @@ namespace App\View;
 use App\Service\Support\FlashService;
 use App\Service\Infra\Router\Router;
 use App\Service\Support\CsrfService;
+use App\Service\Support\DateTimeFormatter;
 
 final class View
 {
@@ -13,13 +14,15 @@ final class View
     private Router $router;
     private FlashService $flash;
     private CsrfService $csrf;
+    private DateTimeFormatter $dateTimeFormatter;
 
-    public function __construct(string $rootPath, Router $router, FlashService $flash, CsrfService $csrf)
+    public function __construct(string $rootPath, Router $router, FlashService $flash, CsrfService $csrf, DateTimeFormatter $dateTimeFormatter)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
         $this->flash = $flash;
         $this->csrf = $csrf;
+        $this->dateTimeFormatter = $dateTimeFormatter;
     }
 
     public function render(string $layout, string $template, array $data = []): void
@@ -34,6 +37,9 @@ final class View
             return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
         };
         $csrfField = fn(string $name = '_csrf'): string => $this->csrf->field($name);
+        $formatDate = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDate($value, $fallback);
+        $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
+        $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -56,6 +62,9 @@ final class View
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
         $data['icon'] = $icon;
         $data['csrfField'] = $csrfField;
+        $data['formatDate'] = $formatDate;
+        $data['formatDateTime'] = $formatDateTime;
+        $data['formatInputDateTime'] = $formatInputDateTime;
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
 

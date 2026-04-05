@@ -720,8 +720,19 @@ final class AdminContentController extends BaseAdminController
             'author_name' => (string)($row['author_name'] ?? '—'),
             'status' => (string)($row['status'] ?? 'draft'),
             'created' => $createdAt,
+            'created_label' => $this->formatDateTime($createdAt),
             'is_planned' => $createdStamp !== false && $createdStamp > time(),
         ];
+    }
+
+    private function formatDateTime(string $value): string
+    {
+        $stamp = $value !== '' ? strtotime($value) : false;
+        if ($stamp === false) {
+            return '';
+        }
+
+        return date(APP_DATETIME_FORMAT, $stamp);
     }
 
     private function matchesLibraryQuery(array $item, string $query): bool

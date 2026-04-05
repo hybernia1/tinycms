@@ -341,7 +341,7 @@ initListApi({
             <tr>
                 <td>
                     <a href="${esc(editBase)}${Number(item.id || 0)}">${esc(item.name)}</a>
-                    <div class="text-muted">${esc(item.created)}</div>
+                    <div class="text-muted">${esc(item.created_label || item.created)}</div>
                     <div class="d-flex gap-2 mt-2">
                         <span class="badge ${esc(statusClass)}">${esc(status)}</span>
                         ${item.is_planned ? '<span class="badge text-bg-warning">Plánováno</span>' : ''}
@@ -376,7 +376,7 @@ initListApi({
             <tr>
                 <td>
                     <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
-                    <div class="text-muted">${esc(item.created)}</div>
+                    <div class="text-muted">${esc(item.created_label || item.created)}</div>
                 </td>
                 <td>${esc(item.body || '—')}</td>
                 <td class="table-col-actions">
@@ -414,7 +414,7 @@ initListApi({
                         <div>
                             <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
                             <div class="text-muted">${esc(item.path)}</div>
-                            <div class="text-muted">${esc(item.created)}</div>
+                            <div class="text-muted">${esc(item.created_label || item.created)}</div>
                         </div>
                     </div>
                 </td>

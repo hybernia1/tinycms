@@ -34,11 +34,11 @@
             <?php endif; ?>
             <div class="mb-3">
                 <label>Vytvořeno</label>
-                <div class="text-muted"><?= htmlspecialchars((string)($item['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
             <div class="mb-3">
                 <label>Aktualizováno</label>
-                <div class="text-muted"><?= htmlspecialchars((string)($item['updated'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['updated'] ?? ''), '—'), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
         <?php endif; ?>
         <div class="mb-4">
@@ -80,8 +80,8 @@
                                 </a>
                             </td>
                             <td><?= htmlspecialchars((string)($usage['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars((string)($usage['created'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars((string)($usage['updated'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($formatDateTime((string)($usage['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($formatDateTime((string)($usage['updated'] ?? ''), '—'), ENT_QUOTES, 'UTF-8') ?></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
