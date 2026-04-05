@@ -193,6 +193,48 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     color: var(--color-text-muted);
 }
 
+.settings-media-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+
+.settings-media-open {
+    min-width: 186px;
+}
+
+.settings-media-preview {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: #3b4652;
+    color: #fff;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.settings-media-preview-image {
+    width: 58px;
+    height: 58px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #2d3741;
+    flex: 0 0 58px;
+}
+
+.settings-media-preview-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.settings-media-preview-name {
+    font-weight: 600;
+    font-size: var(--fs-sm);
+}
+
 .table .content-thumbnail-preview {
     max-width: 140px;
 }

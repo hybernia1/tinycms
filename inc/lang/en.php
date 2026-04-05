@@ -222,6 +222,9 @@ return [
     'settings' => [
         'save' => 'Save settings',
         'saved' => 'Settings saved.',
+        'select_media' => 'Select',
+        'change_media' => 'Change',
+        'remove_media' => 'Remove',
         'fields' => [
             'app_lang' => 'Application language',
             'theme' => 'Theme',

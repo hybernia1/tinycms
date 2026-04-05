@@ -83,8 +83,64 @@ if (modal && openTriggers.length > 0) {
         }
     };
 
+    const updateSettingsPreview = (trigger, media = null) => {
+        const target = String(trigger?.getAttribute('data-settings-media-target') || '');
+        if (target === '') {
+            return;
+        }
+
+        const preview = document.querySelector(`[data-settings-media-preview="${target}"]`);
+        const previewImage = preview ? preview.querySelector('img') : null;
+        const previewName = document.querySelector(`[data-settings-media-preview-name="${target}"]`);
+        const clearButton = document.querySelector(`[data-settings-media-clear="${target}"]`);
+        const selectLabel = String(trigger?.getAttribute('data-settings-label-select') || t('content.choose_image', 'Choose image'));
+        const changeLabel = String(trigger?.getAttribute('data-settings-label-change') || selectLabel);
+
+        if (!media || !media.path) {
+            if (preview) {
+                preview.classList.add('d-none');
+            }
+            if (previewImage) {
+                previewImage.removeAttribute('src');
+            }
+            if (previewName) {
+                previewName.textContent = '';
+            }
+            if (clearButton) {
+                clearButton.classList.add('d-none');
+            }
+            if (trigger) {
+                trigger.textContent = selectLabel;
+            }
+            return;
+        }
+
+        const previewPath = absoluteUrl(media.preview_path || media.webp_path || media.path || '');
+        if (preview) {
+            preview.classList.remove('d-none');
+        }
+        if (previewImage && previewPath !== '') {
+            previewImage.src = previewPath;
+        }
+        if (previewName) {
+            const fileName = String(media.path || '').split('/').pop() || '';
+            previewName.textContent = fileName;
+        }
+        if (clearButton) {
+            clearButton.classList.remove('d-none');
+        }
+        if (trigger) {
+            trigger.textContent = changeLabel;
+        }
+    };
+
     const setTriggerEmpty = () => {
         if (!activeTrigger) {
+            return;
+        }
+        if (mode === 'settings') {
+            updateSettingsPreview(activeTrigger, null);
+            activeTrigger.setAttribute('data-current-media-id', '0');
             return;
         }
         activeTrigger.classList.add('empty');
@@ -97,6 +153,12 @@ if (modal && openTriggers.length > 0) {
 
     const setTriggerThumbnail = (media) => {
         if (!activeTrigger || !media) {
+            return;
+        }
+        if (mode === 'settings') {
+            updateSettingsPreview(activeTrigger, media);
+            activeTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
+            currentMediaId = Number(media.id || 0);
             return;
         }
 

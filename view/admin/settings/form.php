@@ -13,28 +13,37 @@
                     <textarea name="settings[<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" rows="4"><?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?></textarea>
                 <?php elseif ($fieldType === 'media'): ?>
                     <?php $previewUrl = $fieldValue !== '' ? $url($fieldValue) : ''; ?>
-                    <div class="d-flex align-center gap-2">
+                    <?php $fieldLabel = (string)$t($labelKey, (string)$fieldKey); ?>
+                    <?php $selectLabel = $t('settings.select_media', 'Výběr') . ' ' . strtolower($fieldLabel); ?>
+                    <?php $changeLabel = $t('settings.change_media', 'Změnit') . ' ' . strtolower($fieldLabel); ?>
+                    <?php $removeLabel = $t('settings.remove_media', 'Odstranit') . ' ' . strtolower($fieldLabel); ?>
+                    <?php $fileName = $fieldValue !== '' ? basename($fieldValue) : ''; ?>
+                    <div class="settings-media-field">
+                        <div class="settings-media-preview<?= $previewUrl === '' ? ' d-none' : '' ?>" data-settings-media-preview="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>">
+                            <div class="settings-media-preview-image">
+                                <?php if ($previewUrl !== ''): ?>
+                                    <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="">
+                                <?php endif; ?>
+                            </div>
+                            <div class="settings-media-preview-name" data-settings-media-preview-name="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
                         <button
-                            class="content-thumbnail-trigger<?= $previewUrl === '' ? ' empty' : '' ?>"
+                            class="btn btn-light settings-media-open"
                             type="button"
                             data-media-library-open
                             data-media-library-mode="settings"
                             data-settings-media-target="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>"
                             data-settings-media-input="[data-settings-media-input='<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>']"
+                            data-settings-label-select="<?= htmlspecialchars($selectLabel, ENT_QUOTES, 'UTF-8') ?>"
+                            data-settings-label-change="<?= htmlspecialchars($changeLabel, ENT_QUOTES, 'UTF-8') ?>"
                             data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/settings/media'), ENT_QUOTES, 'UTF-8') ?>"
                             data-media-library-upload-endpoint="<?= htmlspecialchars($url('admin/api/v1/settings/media/upload'), ENT_QUOTES, 'UTF-8') ?>"
                             data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
                             data-current-media-id="0"
                         >
-                            <?php if ($previewUrl !== ''): ?>
-                                <div class="content-thumbnail-preview">
-                                    <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="">
-                                </div>
-                            <?php else: ?>
-                                <span><?= htmlspecialchars($t('content.choose_image', 'Choose image'), ENT_QUOTES, 'UTF-8') ?></span>
-                            <?php endif; ?>
+                            <?= htmlspecialchars($previewUrl === '' ? $selectLabel : $changeLabel, ENT_QUOTES, 'UTF-8') ?>
                         </button>
-                        <button class="btn btn-light" type="button" data-settings-media-clear="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>">×</button>
+                        <button class="btn btn-light<?= $previewUrl === '' ? ' d-none' : '' ?>" type="button" data-settings-media-clear="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($removeLabel, ENT_QUOTES, 'UTF-8') ?></button>
                     </div>
                     <input type="hidden" name="settings[<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" value="<?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?>" data-settings-media-input="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>">
                 <?php elseif ($fieldType === 'select'): ?>

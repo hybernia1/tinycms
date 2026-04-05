@@ -222,6 +222,9 @@ return [
     'settings' => [
         'save' => 'Uložit nastavení',
         'saved' => 'Nastavení uloženo.',
+        'select_media' => 'Výběr',
+        'change_media' => 'Změnit',
+        'remove_media' => 'Odstranit',
         'fields' => [
             'app_lang' => 'Jazyk aplikace',
             'theme' => 'Šablona',
