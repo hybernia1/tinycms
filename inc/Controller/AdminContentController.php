@@ -411,8 +411,14 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if ($id <= 0 || $this->content->find($id) === null) {
+        $item = $this->content->find($id);
+        if ($id <= 0 || $item === null) {
             $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            return;
+        }
+
+        if (!$this->canManageContent($item)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
             return;
         }
 
@@ -433,14 +439,25 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+        $content = $this->content->find($contentId);
+        if ($contentId <= 0 || $content === null) {
             $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            return;
+        }
+
+        if (!$this->canManageContent($content)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($mediaId <= 0 || $media === null) {
             $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found', 'Media not found.')]], 404);
+            return;
+        }
+
+        if (!$this->canManageMedia($media)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
             return;
         }
 
@@ -477,6 +494,12 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
+        if (!$this->canDeleteContent($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $redirect('admin/content');
+            return;
+        }
+
         $thumbnailId = (int)($item['thumbnail'] ?? 0);
         if ($thumbnailId <= 0) {
             $this->flash->add('info', I18n::t('content.thumbnail_missing', 'Content has no assigned thumbnail.'));
@@ -502,8 +525,14 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+        $content = $this->content->find($contentId);
+        if ($contentId <= 0 || $content === null) {
             $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            return;
+        }
+
+        if (!$this->canManageContent($content)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
             return;
         }
 
@@ -590,8 +619,14 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+        $content = $this->content->find($contentId);
+        if ($contentId <= 0 || $content === null) {
             $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            return;
+        }
+
+        if (!$this->canManageContent($content)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
             return;
         }
 
@@ -657,6 +692,11 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
+        if (!$this->canManageMedia($media)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            return;
+        }
+
         $result = $this->media->save([
             'name' => $name,
             'path' => (string)($media['path'] ?? ''),
@@ -683,6 +723,17 @@ final class AdminContentController extends BaseAdminController
 
         if ($contentId <= 0 || $mediaId <= 0) {
             $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data', 'Invalid data.')]], 422);
+            return;
+        }
+
+        $content = $this->content->find($contentId);
+        if ($content === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            return;
+        }
+
+        if (!$this->canManageContent($content)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
             return;
         }
 
@@ -787,6 +838,11 @@ final class AdminContentController extends BaseAdminController
         return (int)($item['author'] ?? 0) === $this->currentUserId();
     }
 
+    private function canManageMedia(array $item): bool
+    {
+        return $this->canDeleteMedia($item);
+    }
+
     private function canManageContent(array $item): bool
     {
         if (!$this->isEditor()) {
@@ -801,6 +857,7 @@ final class AdminContentController extends BaseAdminController
         return [
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
+            'can_edit' => $this->canManageMedia($item),
             'can_delete' => $this->canDeleteMedia($item),
             'preview_path' => $this->resolvePreviewPath($item),
             'path' => (string)($item['path'] ?? ''),
