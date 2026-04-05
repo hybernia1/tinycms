@@ -29,6 +29,8 @@ final class PageView
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
             'themeName' => $theme,
             'pageTitle' => $siteName,
+            'metaTitle' => (string)($site['meta_title'] ?? $siteName),
+            'metaDescription' => (string)($site['meta_description'] ?? ''),
         ]);
     }
 
@@ -45,6 +47,8 @@ final class PageView
             'item' => $item,
             'themeName' => $resolvedTheme,
             'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
+            'metaTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
+            'metaDescription' => (string)($item['excerpt'] ?? ''),
         ]);
     }
 
@@ -57,6 +61,8 @@ final class PageView
             'pagination' => $pagination,
             'themeName' => $resolvedTheme,
             'pageTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
+            'metaTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
+            'metaDescription' => trim(strip_tags((string)($term['body'] ?? ''))),
         ]);
     }
 

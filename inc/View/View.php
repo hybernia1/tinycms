@@ -60,6 +60,24 @@ final class View
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
+        $renderFrontHead = static function (array $options = []): string {
+            $title = trim((string)($options['title'] ?? 'TinyCMS'));
+            $description = trim((string)($options['description'] ?? ''));
+            $robots = trim((string)($options['robots'] ?? 'index,follow'));
+
+            $parts = [
+                '<meta charset="utf-8">',
+                '<meta name="viewport" content="width=device-width, initial-scale=1">',
+                '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>',
+                '<meta name="robots" content="' . htmlspecialchars($robots, ENT_QUOTES, 'UTF-8') . '">',
+            ];
+
+            if ($description !== '') {
+                $parts[] = '<meta name="description" content="' . htmlspecialchars($description, ENT_QUOTES, 'UTF-8') . '">';
+            }
+
+            return implode("\n", $parts);
+        };
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -86,6 +104,7 @@ final class View
         $data['formatDateTime'] = $formatDateTime;
         $data['formatInputDateTime'] = $formatInputDateTime;
         $data['t'] = $t;
+        $data['renderFrontHead'] = $renderFrontHead;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);

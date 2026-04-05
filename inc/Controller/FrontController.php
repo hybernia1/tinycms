@@ -41,6 +41,8 @@ final class FrontController
             'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['siteauthor'] ?? 'Admin'),
             'theme' => (string)($settings['theme'] ?? 'default'),
+            'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
+            'meta_description' => (string)($settings['meta_description'] ?? ''),
         ];
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(30));
 
