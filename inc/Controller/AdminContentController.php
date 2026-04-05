@@ -157,6 +157,12 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
+        if (!$this->canManageContent($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $redirect('admin/content');
+            return;
+        }
+
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $statuses = $this->content->statuses();
         $formItem = $state['data'] ?? $item;
@@ -177,6 +183,19 @@ final class AdminContentController extends BaseAdminController
 
         if ($id <= 0) {
             $this->flash->add('error', I18n::t('content.invalid_id', 'Invalid content ID.'));
+            $redirect('admin/content');
+            return;
+        }
+
+        $item = $this->content->find($id);
+        if ($item === null) {
+            $this->flash->add('error', I18n::t('content.not_found', 'Content not found.'));
+            $redirect('admin/content');
+            return;
+        }
+
+        if (!$this->canManageContent($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
             $redirect('admin/content');
             return;
         }
@@ -207,6 +226,17 @@ final class AdminContentController extends BaseAdminController
         $mode = (string)($_POST['mode'] ?? 'draft');
         if ($id <= 0) {
             $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id', 'Invalid content ID.')]], 422);
+            return;
+        }
+
+        $item = $this->content->find($id);
+        if ($item === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            return;
+        }
+
+        if (!$this->canManageContent($item)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
             return;
         }
 
@@ -728,6 +758,11 @@ final class AdminContentController extends BaseAdminController
 
     private function canDeleteContent(array $item): bool
     {
+        return $this->canManageContent($item);
+    }
+
+    private function canDeleteMedia(array $item): bool
+    {
         if (!$this->isEditor()) {
             return true;
         }
@@ -735,7 +770,7 @@ final class AdminContentController extends BaseAdminController
         return (int)($item['author'] ?? 0) === $this->currentUserId();
     }
 
-    private function canDeleteMedia(array $item): bool
+    private function canManageContent(array $item): bool
     {
         if (!$this->isEditor()) {
             return true;
@@ -763,6 +798,8 @@ final class AdminContentController extends BaseAdminController
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
+            'can_edit' => $this->canManageContent($row),
+            'can_delete' => $this->canDeleteContent($row),
             'author_name' => (string)($row['author_name'] ?? '—'),
             'status' => (string)($row['status'] ?? 'draft'),
             'created' => $createdAt,

@@ -60,6 +60,7 @@ final class MediaService
 
     public function delete(int $id): bool
     {
+        $this->query->update('content', ['thumbnail' => null], ['thumbnail' => $id]);
         return $this->query->delete('media', ['id' => $id]) > 0;
     }
 

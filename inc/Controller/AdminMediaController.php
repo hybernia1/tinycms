@@ -132,6 +132,12 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
+        if (!$this->canManageMedia($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $redirect('admin/media');
+            return;
+        }
+
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $this->pages->adminMediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions(), $this->media->thumbnailUsages($id));
     }
@@ -155,6 +161,12 @@ final class AdminMediaController extends BaseAdminController
         $item = $this->media->find($id);
         if ($item === null) {
             $this->flash->add('error', I18n::t('media.not_found', 'Media not found.'));
+            $redirect('admin/media');
+            return;
+        }
+
+        if (!$this->canManageMedia($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
             $redirect('admin/media');
             return;
         }
@@ -274,6 +286,11 @@ final class AdminMediaController extends BaseAdminController
 
     private function canDeleteMedia(array $item): bool
     {
+        return $this->canManageMedia($item);
+    }
+
+    private function canManageMedia(array $item): bool
+    {
         if (!$this->isEditor()) {
             return true;
         }
@@ -286,6 +303,8 @@ final class AdminMediaController extends BaseAdminController
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
+            'can_edit' => $this->canManageMedia($row),
+            'can_delete' => $this->canDeleteMedia($row),
             'path' => (string)($row['path'] ?? ''),
             'path_webp' => (string)($row['path_webp'] ?? ''),
             'preview_path' => $this->resolvePreviewPath($row),
