@@ -369,15 +369,41 @@
         return group;
     }
 
-    function createLinkPanel() {
-        var panel = document.createElement('div');
-        panel.className = 'wysiwyg-link-panel';
+    function createLinkModal() {
+        var modal = document.createElement('div');
+        modal.className = 'wysiwyg-link-modal';
+
+        var dialog = document.createElement('div');
+        dialog.className = 'wysiwyg-link-dialog';
+
+        var title = document.createElement('h3');
+        title.className = 'wysiwyg-link-title';
+        title.textContent = 'Vložit odkaz';
 
         var input = document.createElement('input');
         input.type = 'url';
         input.placeholder = 'https://';
         input.className = 'wysiwyg-link-input';
         input.setAttribute('data-role', 'link-input');
+
+        var options = document.createElement('div');
+        options.className = 'wysiwyg-link-options';
+
+        var targetOption = document.createElement('label');
+        targetOption.className = 'wysiwyg-link-option';
+        var targetInput = document.createElement('input');
+        targetInput.type = 'checkbox';
+        targetInput.setAttribute('data-role', 'link-target-blank');
+        targetOption.appendChild(targetInput);
+        targetOption.appendChild(document.createTextNode(' Otevřít v novém okně'));
+
+        var nofollowOption = document.createElement('label');
+        nofollowOption.className = 'wysiwyg-link-option';
+        var nofollowInput = document.createElement('input');
+        nofollowInput.type = 'checkbox';
+        nofollowInput.setAttribute('data-role', 'link-nofollow');
+        nofollowOption.appendChild(nofollowInput);
+        nofollowOption.appendChild(document.createTextNode(' Přidat nofollow'));
 
         var actions = document.createElement('div');
         actions.className = 'wysiwyg-link-actions';
@@ -398,14 +424,19 @@
         confirm.type = 'button';
         confirm.className = 'btn btn-primary';
         confirm.setAttribute('data-role', 'link-apply');
-        confirm.textContent = 'Vložit';
+        confirm.textContent = 'Uložit';
 
         actions.appendChild(cancel);
         actions.appendChild(remove);
         actions.appendChild(confirm);
-        panel.appendChild(input);
-        panel.appendChild(actions);
-        return panel;
+        options.appendChild(targetOption);
+        options.appendChild(nofollowOption);
+        dialog.appendChild(title);
+        dialog.appendChild(input);
+        dialog.appendChild(options);
+        dialog.appendChild(actions);
+        modal.appendChild(dialog);
+        return modal;
     }
 
     function init(textarea) {
@@ -432,7 +463,7 @@
         var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', 'Barva pozadí', 'background');
         var focus = createIconButton('w-focus', 'toggleFocusMode', 'Nerušené psaní');
         focus.classList.add('wysiwyg-btn-focus');
-        var linkPanel = createLinkPanel();
+        var linkModal = createLinkModal();
 
         toolbar.appendChild(headingGroup);
         toolbar.appendChild(bold);
@@ -479,7 +510,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            wrapper.classList.remove('is-link-open');
+            wrapper.classList.remove('is-link-modal-open');
             activeLink = null;
         }
 
@@ -589,7 +620,7 @@
                 wrapper.classList.remove('is-text-color-open');
                 wrapper.classList.remove('is-bg-color-open');
                 wrapper.classList.toggle('is-list-open');
-                wrapper.classList.remove('is-link-open');
+                wrapper.classList.remove('is-link-modal-open');
                 return;
             }
 
@@ -602,7 +633,7 @@
                 wrapper.classList.remove('is-align-open');
                 wrapper.classList.remove('is-text-color-open');
                 wrapper.classList.remove('is-bg-color-open');
-                wrapper.classList.remove('is-link-open');
+                wrapper.classList.remove('is-link-modal-open');
                 return;
             }
 
@@ -615,7 +646,7 @@
                 wrapper.classList.toggle('is-align-open');
                 wrapper.classList.remove('is-text-color-open');
                 wrapper.classList.remove('is-bg-color-open');
-                wrapper.classList.remove('is-link-open');
+                wrapper.classList.remove('is-link-modal-open');
                 return;
             }
 
@@ -628,7 +659,7 @@
                 wrapper.classList.remove('is-align-open');
                 wrapper.classList.toggle('is-text-color-open');
                 wrapper.classList.remove('is-bg-color-open');
-                wrapper.classList.remove('is-link-open');
+                wrapper.classList.remove('is-link-modal-open');
                 return;
             }
 
@@ -641,7 +672,7 @@
                 wrapper.classList.remove('is-align-open');
                 wrapper.classList.remove('is-text-color-open');
                 wrapper.classList.toggle('is-bg-color-open');
-                wrapper.classList.remove('is-link-open');
+                wrapper.classList.remove('is-link-modal-open');
                 return;
             }
 
@@ -653,14 +684,23 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                wrapper.classList.toggle('is-link-open');
+                wrapper.classList.toggle('is-link-modal-open');
                 wrapper.classList.remove('is-list-open');
-                if (wrapper.classList.contains('is-link-open')) {
-                    var linkInput = linkPanel.querySelector('[data-role="link-input"]');
+                if (wrapper.classList.contains('is-link-modal-open')) {
+                    var linkInput = linkModal.querySelector('[data-role="link-input"]');
+                    var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
+                    var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
+                    var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
                     if (linkInput) {
                         linkInput.value = activeLink ? (activeLink.getAttribute('href') || '') : '';
                         linkInput.focus();
                         linkInput.select();
+                    }
+                    if (linkTargetBlank) {
+                        linkTargetBlank.checked = !!(activeLink && activeLink.getAttribute('target') === '_blank');
+                    }
+                    if (linkNoFollow) {
+                        linkNoFollow.checked = relValues.indexOf('nofollow') !== -1;
                     }
                 }
                 return;
@@ -686,8 +726,15 @@
             runCommand(command);
         });
 
-        linkPanel.addEventListener('click', function (event) {
-            var linkInput = linkPanel.querySelector('[data-role="link-input"]');
+        linkModal.addEventListener('click', function (event) {
+            var linkInput = linkModal.querySelector('[data-role="link-input"]');
+            var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
+            var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
+
+            if (event.target === linkModal) {
+                closeMenus();
+                return;
+            }
 
             if (event.target.closest('[data-role="link-remove"]')) {
                 if (activeLink && editor.contains(activeLink)) {
@@ -706,6 +753,12 @@
                 if (linkInput) {
                     linkInput.value = '';
                 }
+                if (linkTargetBlank) {
+                    linkTargetBlank.checked = false;
+                }
+                if (linkNoFollow) {
+                    linkNoFollow.checked = false;
+                }
                 activeLink = null;
                 closeMenus();
                 return;
@@ -714,19 +767,50 @@
             var apply = event.target.closest('[data-role="link-apply"]');
             if (apply) {
                 var url = linkInput ? linkInput.value.trim() : '';
+                var withTargetBlank = !!(linkTargetBlank && linkTargetBlank.checked);
+                var withNoFollow = !!(linkNoFollow && linkNoFollow.checked);
                 if (url) {
+                    var linkNode = null;
                     if (activeLink && editor.contains(activeLink) && (!linkRange || linkRange.collapsed)) {
                         activeLink.setAttribute('href', url);
+                        linkNode = activeLink;
                     } else {
                         restoreSelection(linkRange, editor);
                         document.execCommand('defaultParagraphSeparator', false, 'p');
                         document.execCommand('createLink', false, url);
+                        linkNode = getCurrentLink(editor);
+                    }
+                    if (linkNode && editor.contains(linkNode)) {
+                        if (withTargetBlank) {
+                            linkNode.setAttribute('target', '_blank');
+                        } else {
+                            linkNode.removeAttribute('target');
+                        }
+                        var relTokens = [];
+                        if (withTargetBlank) {
+                            relTokens.push('noopener');
+                            relTokens.push('noreferrer');
+                        }
+                        if (withNoFollow) {
+                            relTokens.push('nofollow');
+                        }
+                        if (relTokens.length) {
+                            linkNode.setAttribute('rel', relTokens.join(' '));
+                        } else {
+                            linkNode.removeAttribute('rel');
+                        }
                     }
                     normalizeBlocks(editor);
                     sync(textarea, editor);
                     updateFormatState();
                     if (linkInput) {
                         linkInput.value = '';
+                    }
+                    if (linkTargetBlank) {
+                        linkTargetBlank.checked = false;
+                    }
+                    if (linkNoFollow) {
+                        linkNoFollow.checked = false;
                     }
                     activeLink = null;
                 }
@@ -738,15 +822,26 @@
                 if (linkInput) {
                     linkInput.value = '';
                 }
+                if (linkTargetBlank) {
+                    linkTargetBlank.checked = false;
+                }
+                if (linkNoFollow) {
+                    linkNoFollow.checked = false;
+                }
                 activeLink = null;
                 closeMenus();
             }
         });
 
-        linkPanel.addEventListener('keydown', function (event) {
+        linkModal.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeMenus();
+                return;
+            }
             if (event.key === 'Enter') {
                 event.preventDefault();
-                var apply = linkPanel.querySelector('[data-role="link-apply"]');
+                var apply = linkModal.querySelector('[data-role="link-apply"]');
                 if (apply) {
                     apply.click();
                 }
@@ -940,7 +1035,7 @@
         textarea.style.display = 'none';
         textarea.parentNode.insertBefore(wrapper, textarea);
         wrapper.appendChild(toolbar);
-        wrapper.appendChild(linkPanel);
+        wrapper.appendChild(linkModal);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);
         var form = textarea.closest('form');

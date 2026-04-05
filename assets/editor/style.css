@@ -106,25 +106,54 @@
     border-color: var(--color-text);
 }
 
-.wysiwyg-link-panel {
+.wysiwyg-link-modal {
+    position: fixed;
+    inset: 0;
     display: none;
     align-items: center;
-    gap: var(--space-2);
-    border-bottom: 1px solid var(--color-border-soft);
-    padding: var(--space-2);
-    background: var(--color-surface-muted);
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    padding: var(--space-4);
+    z-index: 120;
 }
 
-.wysiwyg.is-link-open .wysiwyg-link-panel {
+.wysiwyg.is-link-modal-open .wysiwyg-link-modal {
     display: flex;
 }
 
+.wysiwyg-link-dialog {
+    width: min(100%, 34rem);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-soft);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
+}
+
+.wysiwyg-link-title {
+    margin: 0;
+    font-size: var(--fs-base);
+}
+
 .wysiwyg-link-input {
-    flex: 1;
+    width: 100%;
+}
+
+.wysiwyg-link-options {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.wysiwyg-link-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--fs-sm);
 }
 
 .wysiwyg-link-actions {
     display: flex;
+    justify-content: flex-end;
     gap: var(--space-2);
 }
 
@@ -199,7 +228,7 @@
     vertical-align: middle;
     background-repeat: no-repeat;
     background-size: contain;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.5 13.5 13.5 10.5M8 16a4 4 0 0 1 0-5.7l2.3-2.3a4 4 0 0 1 5.7 0M16 8a4 4 0 0 1 0 5.7l-2.3 2.3a4 4 0 0 1-5.7 0' fill='none' stroke='%231d4ed8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 14a4 4 0 0 1 0-5.66l2.34-2.34a4 4 0 0 1 5.66 5.66L15.66 14M14 10a4 4 0 0 1 0 5.66l-2.34 2.34a4 4 0 1 1-5.66-5.66L8.34 10M9 12h6' fill='none' stroke='%231d4ed8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .wysiwyg-editor img {
