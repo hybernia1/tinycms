@@ -39,6 +39,16 @@ final class PageView
         ]);
     }
 
+    public function termArchive(array $term, array $posts, array $pagination): void
+    {
+        $this->view->render('front/layout', 'front/term', [
+            'term' => $term,
+            'posts' => $posts,
+            'pagination' => $pagination,
+            'pageTitle' => (string)($term['name'] ?? 'Štítek'),
+        ]);
+    }
+
     public function adminDashboard(?array $user): void
     {
         $this->view->render('admin/layout', 'admin/dashboard', [
