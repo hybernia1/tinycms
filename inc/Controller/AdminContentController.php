@@ -695,8 +695,14 @@ final class AdminContentController extends BaseAdminController
         }
 
         $name = trim((string)($_POST['name'] ?? ''));
-        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+        $content = $this->content->find($contentId);
+        if ($contentId <= 0 || $content === null) {
             $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            return;
+        }
+
+        if (!$this->canManageContent($content)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
             return;
         }
 
