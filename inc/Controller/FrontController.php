@@ -40,6 +40,7 @@ final class FrontController
             'name' => (string)($settings['sitename'] ?? 'TinyCMS'),
             'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['siteauthor'] ?? 'Admin'),
+            'theme' => (string)($settings['theme'] ?? 'default'),
         ];
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(30));
 
@@ -97,7 +98,7 @@ final class FrontController
             'name' => (string)($term['name'] ?? ''),
             'slug' => $slug,
             'body' => (string)($term['body'] ?? ''),
-        ], $posts, $pagination);
+        ], $posts, $pagination, $this->currentTheme());
     }
 
     private function contentDetail(string $requestedSlug, callable $redirect): void
@@ -114,7 +115,7 @@ final class FrontController
             $redirect($slug, true);
         }
 
-        $this->pages->contentDetail($this->toDetailItem($item, $slug));
+        $this->pages->contentDetail($this->toDetailItem($item, $slug), $this->currentTheme());
     }
 
     public function loginForm(callable $redirect): void
@@ -190,6 +191,12 @@ final class FrontController
             'body' => (string)($item['body'] ?? ''),
             'created' => (string)($item['created'] ?? ''),
         ];
+    }
+
+
+    private function currentTheme(): string
+    {
+        return (string)($this->settings->resolved()['theme'] ?? 'default');
     }
 
     private function robots(): void

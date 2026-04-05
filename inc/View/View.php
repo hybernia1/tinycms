@@ -28,9 +28,27 @@ final class View
 
     public function render(string $layout, string $template, array $data = []): void
     {
-        $templateFile = $this->resolve('view/' . $template . '.php', '/view/');
-        $layoutFile = $this->resolve('view/' . $layout . '.php', '/view/');
+        $this->renderFiles(
+            $this->resolve('view/' . $template . '.php', '/view/'),
+            $this->resolve('view/' . $layout . '.php', '/view/'),
+            $layout,
+            $data
+        );
+    }
 
+    public function renderTheme(string $theme, string $template, array $data = []): void
+    {
+        $base = 'themes/' . trim($theme, '/');
+        $this->renderFiles(
+            $this->resolve($base . '/' . $template . '.php', '/themes/'),
+            $this->resolve($base . '/layout.php', '/themes/'),
+            'theme/' . $theme,
+            $data
+        );
+    }
+
+    private function renderFiles(string $templateFile, string $layoutFile, string $layout, array $data = []): void
+    {
         $url = fn(string $path = ''): string => $this->router->url($path);
         $icon = static function (string $name, string $classes = 'icon') use ($url): string {
             $sprite = htmlspecialchars($url('assets/icons.svg#icon-' . $name), ENT_QUOTES, 'UTF-8');

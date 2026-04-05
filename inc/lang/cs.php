@@ -100,20 +100,6 @@ return [
             'remember' => 'Zapamatovat si mě',
             'submit' => 'Přihlásit',
         ],
-        'home' => [
-            'tagline' => 'Minimalistické CMS bez balastu.',
-            'author' => 'Autor',
-            'user' => 'Uživatel',
-            'role' => 'Role',
-            'published_posts' => 'Publikované články',
-            'no_posts' => 'Zatím nejsou žádné publikované články.',
-            'slug_url' => 'Slug URL',
-            'short_url' => 'Short URL',
-        ],
-        'term' => [
-            'title' => 'Štítek',
-            'no_posts' => 'Pro tento štítek zatím nejsou žádné publikované články.',
-        ],
     ],
     'users' => [
         'password_optional' => 'volitelné',
@@ -238,6 +224,7 @@ return [
         'saved' => 'Nastavení uloženo.',
         'fields' => [
             'app_lang' => 'Jazyk aplikace',
+            'theme' => 'Šablona',
             'sitename' => 'Název webu',
             'sitefooter' => 'Patička webu',
             'siteauthor' => 'Autor webu',

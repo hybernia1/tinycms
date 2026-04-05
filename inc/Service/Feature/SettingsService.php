@@ -10,10 +10,12 @@ use App\Service\Support\I18n;
 final class SettingsService
 {
     private Query $query;
+    private ThemeService $themes;
 
-    public function __construct()
+    public function __construct(ThemeService $themes)
     {
         $this->query = new Query(Connection::get());
+        $this->themes = $themes;
     }
 
     public function fields(): array
@@ -24,12 +26,23 @@ final class SettingsService
             $localeOptions[$locale] = I18n::languageLabel($locale);
         }
 
+        $themeOptions = [];
+        foreach ($this->themes->availableThemes() as $theme) {
+            $themeOptions[$theme] = ucfirst($theme);
+        }
+
         return [
             'app_lang' => [
                 'label_key' => 'settings.fields.app_lang',
                 'type' => 'select',
                 'default' => (string)APP_LANG,
                 'options' => $localeOptions,
+            ],
+            'theme' => [
+                'label_key' => 'settings.fields.theme',
+                'type' => 'select',
+                'default' => $this->themes->resolveTheme('default'),
+                'options' => $themeOptions,
             ],
             'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
             'sitefooter' => ['label_key' => 'settings.fields.sitefooter', 'type' => 'text', 'default' => '© TinyCMS'],
@@ -94,6 +107,9 @@ final class SettingsService
             }
 
             $value = trim((string)$rawValue);
+            if ($key === 'theme') {
+                $value = $this->themes->resolveTheme($value);
+            }
             $payload = ['value' => json_encode($value, JSON_UNESCAPED_UNICODE)];
 
             if (isset($existingKeys[$key])) {

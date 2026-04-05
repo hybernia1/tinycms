@@ -7,6 +7,7 @@ final class I18n
 {
     private const DEFAULT_LOCALE = 'en';
     private static ?string $locale = null;
+    private static ?string $theme = null;
     private static array $catalogues = [];
 
     public static function setLocale(string $locale): void
@@ -28,6 +29,13 @@ final class I18n
     public static function htmlLang(): string
     {
         return self::locale();
+    }
+
+    public static function setTheme(?string $theme): void
+    {
+        $normalized = self::normalizeLocale((string)$theme);
+        self::$theme = $normalized === '' ? null : $normalized;
+        self::$catalogues = [];
     }
 
     public static function t(string $key, ?string $fallback = null): string
@@ -88,19 +96,32 @@ final class I18n
 
     private static function loadCatalogue(string $locale): array
     {
-        if (isset(self::$catalogues[$locale])) {
-            return self::$catalogues[$locale];
+        $cacheKey = $locale . '|' . (self::$theme ?? '');
+        if (isset(self::$catalogues[$cacheKey])) {
+            return self::$catalogues[$cacheKey];
         }
 
-        $file = dirname(__DIR__, 2) . '/lang/' . $locale . '.php';
-        if (!is_file($file)) {
-            self::$catalogues[$locale] = [];
-            return [];
+        $catalogue = [];
+        $baseFile = dirname(__DIR__, 2) . '/lang/' . $locale . '.php';
+        if (is_file($baseFile)) {
+            $base = require $baseFile;
+            if (is_array($base)) {
+                $catalogue = $base;
+            }
         }
 
-        $catalogue = require $file;
-        self::$catalogues[$locale] = is_array($catalogue) ? $catalogue : [];
-        return self::$catalogues[$locale];
+        if (self::$theme !== null) {
+            $themeFile = dirname(__DIR__, 3) . '/themes/' . self::$theme . '/lang/' . $locale . '.php';
+            if (is_file($themeFile)) {
+                $themeCatalogue = require $themeFile;
+                if (is_array($themeCatalogue)) {
+                    $catalogue = array_replace_recursive($catalogue, $themeCatalogue);
+                }
+            }
+        }
+
+        self::$catalogues[$cacheKey] = $catalogue;
+        return $catalogue;
     }
 
     private static function getByPath(array $catalogue, string $key): mixed

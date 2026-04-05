@@ -3,21 +3,25 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\Feature\ThemeService;
 use App\Service\Support\I18n;
 
 final class PageView
 {
     private View $view;
+    private ThemeService $themes;
 
-    public function __construct(View $view)
+    public function __construct(View $view, ThemeService $themes)
     {
         $this->view = $view;
+        $this->themes = $themes;
     }
 
     public function home(?array $user, array $site, array $posts = []): void
     {
         $siteName = (string)($site['name'] ?? 'TinyCMS');
-        $this->view->render('front/layout', 'front/index', [
+        $theme = $this->themes->resolveTheme((string)($site['theme'] ?? 'default'));
+        $this->view->renderTheme($theme, 'index', [
             'user' => $user,
             'posts' => $posts,
             'siteName' => $siteName,
@@ -33,17 +37,17 @@ final class PageView
         $this->view->render('front/layout', 'front/auth/login', $state);
     }
 
-    public function contentDetail(array $item): void
+    public function contentDetail(array $item, string $theme): void
     {
-        $this->view->render('front/layout', 'front/content', [
+        $this->view->renderTheme($this->themes->resolveTheme($theme), 'content', [
             'item' => $item,
             'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
         ]);
     }
 
-    public function termArchive(array $term, array $posts, array $pagination): void
+    public function termArchive(array $term, array $posts, array $pagination, string $theme): void
     {
-        $this->view->render('front/layout', 'front/term', [
+        $this->view->renderTheme($this->themes->resolveTheme($theme), 'terms', [
             'term' => $term,
             'posts' => $posts,
             'pagination' => $pagination,
