@@ -4,12 +4,9 @@ const t = (path, fallback = '') => {
     const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
     return typeof value === 'string' && value !== '' ? value : fallback;
 };
-const openTrigger = Array.prototype.find.call(
-    document.querySelectorAll('[data-media-library-open]'),
-    (node) => node.getAttribute('data-media-library-mode') !== 'editor',
-) || null;
+const openTriggers = document.querySelectorAll('[data-media-library-open]');
 
-if (modal && openTrigger) {
+if (modal && openTriggers.length > 0) {
     const grid = modal.querySelector('[data-media-library-grid]');
     const pageLabel = modal.querySelector('[data-media-library-page]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
@@ -41,6 +38,7 @@ if (modal && openTrigger) {
     const renameName = document.querySelector('[data-media-library-rename-name]');
 
     let endpoint = '';
+    let uploadEndpoint = '';
     let baseUrl = '';
     let currentMediaId = 0;
     let mode = 'thumbnail';
@@ -51,6 +49,7 @@ if (modal && openTrigger) {
     let query = '';
     let selectedMedia = null;
     let searchTimer = null;
+    let activeTrigger = null;
 
     const normalizePayload = (payload) => {
         if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
@@ -85,15 +84,19 @@ if (modal && openTrigger) {
     };
 
     const setTriggerEmpty = () => {
-        openTrigger.classList.add('empty');
-        openTrigger.innerHTML = `<span>${t('content.choose_image', 'Choose image')}</span>`;
-        if (detachWrap) {
+        if (!activeTrigger) {
+            return;
+        }
+        activeTrigger.classList.add('empty');
+        activeTrigger.innerHTML = `<span>${t('content.choose_image', 'Choose image')}</span>`;
+        activeTrigger.setAttribute('data-current-media-id', '0');
+        if (mode === 'thumbnail' && detachWrap) {
             detachWrap.remove();
         }
     };
 
     const setTriggerThumbnail = (media) => {
-        if (!openTrigger || !media) {
+        if (!activeTrigger || !media) {
             return;
         }
 
@@ -102,9 +105,9 @@ if (modal && openTrigger) {
             return;
         }
 
-        openTrigger.classList.remove('empty');
-        openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
-        openTrigger.innerHTML = '<div class="content-thumbnail-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
+        activeTrigger.classList.remove('empty');
+        activeTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
+        activeTrigger.innerHTML = '<div class="content-thumbnail-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
         currentMediaId = Number(media.id || 0);
     };
 
@@ -229,13 +232,13 @@ if (modal && openTrigger) {
         }
 
         if (deleteButton) {
-            const canDelete = !!(selectedMedia && selectedMedia.canDelete);
+            const canDelete = !!(selectedMedia && selectedMedia.canDelete && mode !== 'settings');
             deleteButton.disabled = !canDelete;
             deleteButton.classList.toggle('d-none', !canDelete);
         }
 
         if (renameButton) {
-            const canEdit = !!(selectedMedia && selectedMedia.canEdit);
+            const canEdit = !!(selectedMedia && selectedMedia.canEdit && mode !== 'settings');
             renameButton.disabled = !canEdit;
             renameButton.classList.toggle('d-none', !canEdit);
         }
@@ -310,6 +313,7 @@ if (modal && openTrigger) {
 
     const setContext = (detail) => {
         endpoint = String(detail.endpoint || '');
+        uploadEndpoint = String(detail.uploadEndpoint || '');
         baseUrl = String(detail.baseUrl || '');
         mode = String(detail.mode || 'thumbnail');
         editorId = String(detail.editorId || '');
@@ -319,15 +323,26 @@ if (modal && openTrigger) {
 
     const open = (detail) => {
         setContext(detail || {});
+        activeTrigger = detail.trigger || null;
         modal.classList.add('open');
         if (searchTimer) {
             clearTimeout(searchTimer);
             searchTimer = null;
         }
         page = 1;
+        query = '';
         selectedMedia = null;
         setStatus('');
         renderSelected();
+        if (searchForm) {
+            const searchField = searchForm.querySelector('input[name="q"]');
+            if (searchField) {
+                searchField.value = '';
+            }
+        }
+        if (uploadForm && uploadEndpoint !== '') {
+            uploadForm.action = uploadEndpoint;
+        }
         load().catch(() => {
             if (grid) {
                 grid.innerHTML = '<p class="text-danger m-0">Nepodařilo se načíst knihovnu.</p>';
@@ -348,22 +363,44 @@ if (modal && openTrigger) {
         modal.classList.remove('open');
     };
 
-    if (openTrigger) {
-        openTrigger.addEventListener('click', async () => {
-            const contentInput = document.querySelector('[data-media-library-attach-form] input[name="content_id"]');
-            let resolvedId = Number(contentInput ? contentInput.value : '0');
-            if (resolvedId <= 0) {
-                resolvedId = await waitForDraftId();
+    openTriggers.forEach((trigger) => {
+        trigger.addEventListener('click', async () => {
+            const triggerMode = trigger.getAttribute('data-media-library-mode') || 'thumbnail';
+            let resolvedId = Number(trigger.getAttribute('data-content-id') || '0');
+            if (triggerMode === 'thumbnail') {
+                const contentInput = document.querySelector('[data-media-library-attach-form] input[name="content_id"]');
+                resolvedId = Number(contentInput ? contentInput.value : '0');
+                if (resolvedId <= 0) {
+                    resolvedId = await waitForDraftId();
+                }
             }
+
             open({
-                mode: 'thumbnail',
-                endpoint: openTrigger.getAttribute('data-media-library-endpoint') || '',
-                baseUrl: openTrigger.getAttribute('data-media-base-url') || '',
-                currentMediaId: Number(openTrigger.getAttribute('data-current-media-id') || '0'),
+                trigger,
+                mode: triggerMode,
+                endpoint: trigger.getAttribute('data-media-library-endpoint') || '',
+                uploadEndpoint: trigger.getAttribute('data-media-library-upload-endpoint') || (uploadForm ? uploadForm.action : ''),
+                baseUrl: trigger.getAttribute('data-media-base-url') || '',
+                currentMediaId: Number(trigger.getAttribute('data-current-media-id') || '0'),
                 contentId: resolvedId,
             });
         });
-    }
+    });
+
+    document.querySelectorAll('[data-settings-media-clear]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const target = String(button.getAttribute('data-settings-media-clear') || '');
+            const trigger = target !== '' ? document.querySelector(`[data-media-library-open][data-settings-media-target=\"${target}\"]`) : null;
+            const input = target !== '' ? document.querySelector(`[data-settings-media-input=\"${target}\"]`) : null;
+            if (!trigger || !input) {
+                return;
+            }
+            activeTrigger = trigger;
+            mode = 'settings';
+            input.value = '';
+            setTriggerEmpty();
+        });
+    });
 
     document.addEventListener('tinycms:media-library-open', async (event) => {
         const detail = event.detail || {};
@@ -373,6 +410,7 @@ if (modal && openTrigger) {
         }
         open(detail);
     });
+
     closeButtons.forEach((button) => button.addEventListener('click', close));
     modal.addEventListener('click', (event) => {
         if (event.target === modal) {
@@ -429,12 +467,11 @@ if (modal && openTrigger) {
             if (!target) {
                 return;
             }
-
             selectCard(target);
         });
     }
 
-    if (chooseButton && selectForm && mediaIdField) {
+    if (chooseButton) {
         chooseButton.addEventListener('click', async () => {
             if (!selectedMedia) {
                 return;
@@ -470,6 +507,23 @@ if (modal && openTrigger) {
                     },
                 }));
                 close();
+                return;
+            }
+
+            if (mode === 'settings') {
+                const inputSelector = activeTrigger ? String(activeTrigger.getAttribute('data-settings-media-input') || '') : '';
+                const settingsInput = inputSelector !== '' ? document.querySelector(inputSelector) : null;
+                if (!settingsInput) {
+                    setStatus('Nelze uložit vybraný obrázek.');
+                    return;
+                }
+                settingsInput.value = String(selectedMedia.path || selectedMedia.webpPath || '');
+                setTriggerThumbnail(selectedMedia);
+                close();
+                return;
+            }
+
+            if (!selectForm || !mediaIdField) {
                 return;
             }
 
@@ -537,7 +591,7 @@ if (modal && openTrigger) {
             event.preventDefault();
             setStatus('');
 
-            if (contentId <= 0) {
+            if (mode === 'thumbnail' && contentId <= 0) {
                 contentId = await waitForDraftId();
                 if (contentId <= 0) {
                     setStatus('Nejdřív se musí vytvořit draft.');

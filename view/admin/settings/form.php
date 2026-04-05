@@ -17,8 +17,14 @@
                         <button
                             class="content-thumbnail-trigger<?= $previewUrl === '' ? ' empty' : '' ?>"
                             type="button"
-                            data-settings-media-open
+                            data-media-library-open
+                            data-media-library-mode="settings"
                             data-settings-media-target="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>"
+                            data-settings-media-input="[data-settings-media-input='<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>']"
+                            data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/settings/media'), ENT_QUOTES, 'UTF-8') ?>"
+                            data-media-library-upload-endpoint="<?= htmlspecialchars($url('admin/api/v1/settings/media/upload'), ENT_QUOTES, 'UTF-8') ?>"
+                            data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
+                            data-current-media-id="0"
                         >
                             <?php if ($previewUrl !== ''): ?>
                                 <div class="content-thumbnail-preview">
@@ -28,7 +34,7 @@
                                 <span><?= htmlspecialchars($t('content.choose_image', 'Choose image'), ENT_QUOTES, 'UTF-8') ?></span>
                             <?php endif; ?>
                         </button>
-                        <button class="btn btn-light" type="button" data-settings-media-clear data-settings-media-target="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>">×</button>
+                        <button class="btn btn-light" type="button" data-settings-media-clear="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>">×</button>
                     </div>
                     <input type="hidden" name="settings[<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" value="<?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?>" data-settings-media-input="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>">
                 <?php elseif ($fieldType === 'select'): ?>
@@ -51,20 +57,55 @@
         <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('settings.save', 'Save settings'), ENT_QUOTES, 'UTF-8') ?></button>
     </form>
 </div>
-<div class="media-library-modal" data-settings-media-modal data-endpoint="<?= htmlspecialchars($url('admin/api/v1/settings/media'), ENT_QUOTES, 'UTF-8') ?>" data-upload-endpoint="<?= htmlspecialchars($url('admin/api/v1/settings/media/upload'), ENT_QUOTES, 'UTF-8') ?>" data-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>">
+<div class="media-library-modal" data-media-library-modal>
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
             <strong>Media library</strong>
-            <button class="btn btn-light btn-icon" type="button" data-settings-media-close aria-label="<?= htmlspecialchars($t('common.close', 'Close'), ENT_QUOTES, 'UTF-8') ?>"><?= $icon('cancel') ?></button>
+            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="<?= htmlspecialchars($t('common.close', 'Close'), ENT_QUOTES, 'UTF-8') ?>">
+                <?= $icon('cancel') ?>
+            </button>
         </div>
-        <div class="p-3 d-flex gap-2">
-            <input type="search" class="search-input" placeholder="<?= htmlspecialchars($t('content.search_image', 'Search image'), ENT_QUOTES, 'UTF-8') ?>" data-settings-media-search>
-            <form method="post" enctype="multipart/form-data" data-settings-media-upload>
-                <?= $csrfField() ?>
-                <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
-                <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('content.upload_new', 'Upload new'), ENT_QUOTES, 'UTF-8') ?></button>
-            </form>
+        <div class="media-library-modal-layout">
+            <div class="media-library-detail">
+                <div class="media-library-detail-preview" data-media-library-detail-preview></div>
+                <div class="media-library-detail-meta">
+                    <div>
+                        <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <div class="d-flex gap-2">
+                            <input type="text" value="" data-media-library-detail-name-input>
+                            <button class="btn btn-light d-none" type="button" data-media-library-rename disabled><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
+                        </div>
+                    </div>
+                    <div><strong><?= htmlspecialchars($t('content.path', 'Path'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-path>—</span></div>
+                    <div><strong><?= htmlspecialchars($t('common.created', 'Created'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-created>—</span></div>
+                </div>
+                <small class="text-muted" data-media-library-status></small>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="button" data-media-library-choose disabled><?= htmlspecialchars($t('content.choose', 'Choose'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <button class="btn btn-danger d-none" type="button" data-media-library-delete-open disabled><?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?></button>
+                </div>
+            </div>
+            <div class="media-library-list">
+                <form class="media-library-search" data-media-library-search>
+                    <div class="search-field">
+                        <input class="search-input" type="search" name="q" placeholder="<?= htmlspecialchars($t('content.search_image', 'Search image'), ENT_QUOTES, 'UTF-8') ?>">
+                        <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
+                    </div>
+                </form>
+                <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/api/v1/settings/media/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
+                    <?= $csrfField() ?>
+                    <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                    <button class="btn btn-primary" type="submit" data-media-library-upload-button>
+                        <span data-media-library-upload-label><?= htmlspecialchars($t('content.upload_new', 'Upload new'), ENT_QUOTES, 'UTF-8') ?></span>
+                    </button>
+                </form>
+                <div class="media-library-grid" data-media-library-grid></div>
+                <div class="media-library-pagination">
+                    <button class="btn btn-light" type="button" data-media-library-prev><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <span data-media-library-page>1 / 1</span>
+                    <button class="btn btn-light" type="button" data-media-library-next><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></button>
+                </div>
+            </div>
         </div>
-        <div class="media-library-grid p-3 pt-0" data-settings-media-grid></div>
     </div>
 </div>
