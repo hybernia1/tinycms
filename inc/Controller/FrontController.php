@@ -174,10 +174,11 @@ final class FrontController
         return [
             'id' => $id,
             'name' => (string)($item['name'] ?? ''),
-            'excerpt' => (string)($item['excerpt'] ?? ''),
+            'excerpt' => $this->plainExcerpt((string)($item['excerpt'] ?? '')),
             'created' => (string)($item['created'] ?? ''),
             'slug' => $slug,
             'url' => $slug,
+            'thumbnail' => $this->thumbnailData($item),
         ];
     }
 
@@ -187,12 +188,86 @@ final class FrontController
             'slug' => $slug,
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
-            'excerpt' => (string)($item['excerpt'] ?? ''),
+            'excerpt' => $this->plainExcerpt((string)($item['excerpt'] ?? '')),
             'body' => (string)($item['body'] ?? ''),
             'created' => (string)($item['created'] ?? ''),
+            'thumbnail' => $this->thumbnailData($item),
         ];
     }
 
+
+
+    private function plainExcerpt(string $excerpt): string
+    {
+        $plain = trim(strip_tags($excerpt));
+        return preg_replace('/\s+/u', ' ', $plain) ?? '';
+    }
+
+    private function thumbnailData(array $item): array
+    {
+        $path = trim((string)($item['thumbnail_path'] ?? ''));
+        $webp = trim((string)($item['thumbnail_path_webp'] ?? ''));
+
+        if ($path === '' && $webp === '') {
+            return [];
+        }
+
+        return [
+            'path' => $path,
+            'webp' => $webp,
+            'webp_sources' => $this->buildWebpSources($webp),
+        ];
+    }
+
+    private function buildWebpSources(string $webpPath): array
+    {
+        if ($webpPath === '') {
+            return [];
+        }
+
+        $sources = [
+            ['path' => $webpPath, 'width' => 1024],
+        ];
+
+        foreach ($this->thumbSuffixes() as $suffix => $width) {
+            $variant = (string)(preg_replace('/\.webp$/i', $suffix, $webpPath) ?? '');
+            if ($variant !== '') {
+                $sources[] = ['path' => $variant, 'width' => $width];
+            }
+        }
+
+        usort($sources, static fn(array $a, array $b): int => ((int)$a['width']) <=> ((int)$b['width']));
+        return $sources;
+    }
+
+    private function thumbSuffixes(): array
+    {
+        $raw = defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS) ? MEDIA_THUMB_VARIANTS : [];
+        $suffixes = [];
+
+        foreach ($raw as $variant) {
+            if (!is_array($variant)) {
+                continue;
+            }
+
+            $suffix = trim((string)($variant['suffix'] ?? ''));
+            $width = (int)($variant['width'] ?? 0);
+            if ($suffix === '' || $width <= 0 || !str_ends_with(strtolower($suffix), '.webp')) {
+                continue;
+            }
+
+            $suffixes[$suffix] = $width;
+        }
+
+        if ($suffixes === []) {
+            return [
+                '_100x100.webp' => 100,
+                '_w768.webp' => 768,
+            ];
+        }
+
+        return $suffixes;
+    }
 
     private function currentTheme(): string
     {

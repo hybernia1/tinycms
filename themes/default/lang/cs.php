@@ -12,6 +12,7 @@ return [
             'no_posts' => 'Zatím nejsou žádné publikované články.',
             'slug_url' => 'Slug URL',
             'short_url' => 'Short URL',
+            'read_more' => 'Číst více',
         ],
         'term' => [
             'title' => 'Štítek',

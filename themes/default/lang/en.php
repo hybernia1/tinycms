@@ -12,6 +12,7 @@ return [
             'no_posts' => 'No published posts yet.',
             'slug_url' => 'Slug URL',
             'short_url' => 'Short URL',
+            'read_more' => 'Read more',
         ],
         'term' => [
             'title' => 'Tag',

@@ -276,7 +276,14 @@ final class ContentService
 
     public function listPublished(int $limit = 20): array
     {
-        $rows = $this->query->select('content', ['id', 'name', 'excerpt', 'created'], ['status' => 'published']);
+        $rows = $this->query->select('content', [
+            'id',
+            'name',
+            'excerpt',
+            'created',
+            '(SELECT path FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path',
+            '(SELECT path_webp FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path_webp',
+        ], ['status' => 'published']);
         $now = time();
         $items = array_values(array_filter($rows, static fn(array $row): bool => self::isPublishedVisible($row, $now)));
 
@@ -309,7 +316,9 @@ final class ContentService
         $offset = ($currentPage - 1) * $safePerPage;
 
         $stmt = $this->pdo->prepare(
-            'SELECT c.id, c.name, c.excerpt, c.created
+            'SELECT c.id, c.name, c.excerpt, c.created,
+                    (SELECT path FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path,
+                    (SELECT path_webp FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
              FROM content c
              INNER JOIN content_terms ct ON ct.content = c.id
              WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()

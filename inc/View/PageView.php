@@ -27,6 +27,7 @@ final class PageView
             'siteName' => $siteName,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
+            'themeName' => $theme,
             'pageTitle' => $siteName,
         ]);
     }
@@ -39,18 +40,22 @@ final class PageView
 
     public function contentDetail(array $item, string $theme): void
     {
-        $this->view->renderTheme($this->themes->resolveTheme($theme), 'content', [
+        $resolvedTheme = $this->themes->resolveTheme($theme);
+        $this->view->renderTheme($resolvedTheme, 'content', [
             'item' => $item,
+            'themeName' => $resolvedTheme,
             'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
         ]);
     }
 
     public function termArchive(array $term, array $posts, array $pagination, string $theme): void
     {
-        $this->view->renderTheme($this->themes->resolveTheme($theme), 'terms', [
+        $resolvedTheme = $this->themes->resolveTheme($theme);
+        $this->view->renderTheme($resolvedTheme, 'terms', [
             'term' => $term,
             'posts' => $posts,
             'pagination' => $pagination,
+            'themeName' => $resolvedTheme,
             'pageTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
         ]);
     }
