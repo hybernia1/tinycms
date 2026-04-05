@@ -320,6 +320,25 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
+        if ($id > 0) {
+            $item = $this->content->find($id);
+            if ($item === null) {
+                $this->respondJson([
+                    'ok' => false,
+                    'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')],
+                ], 404);
+                return;
+            }
+
+            if (!$this->canManageContent($item)) {
+                $this->respondJson([
+                    'ok' => false,
+                    'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')],
+                ], 403);
+                return;
+            }
+        }
+
         $authorId = (int)($this->authService->auth()->id() ?? 0);
         $payload = $this->resolveAutosavePayload($_POST, $authorId);
         $isCreate = $id <= 0;
