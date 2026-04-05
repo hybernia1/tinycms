@@ -21,6 +21,10 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'shortlink' => $shortlinkPath !== '' ? $url($shortlinkPath) : '',
         'og_type' => (string)($metaOgType ?? 'website'),
         'og_image' => (string)($metaOgImage ?? ''),
+        'site_name' => (string)($siteName ?? 'TinyCMS'),
+        'author' => (string)($siteAuthor ?? ''),
+        'theme_color' => (string)($metaThemeColor ?? '#2563eb'),
+        'structured_data' => $metaStructuredData ?? null,
     ]) ?>
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($url($themeCss), ENT_QUOTES, 'UTF-8') ?>">

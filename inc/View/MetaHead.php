@@ -15,6 +15,10 @@ final class MetaHead
         $shortlink = $this->clean((string)($meta['shortlink'] ?? ''));
         $ogType = $this->clean((string)($meta['og_type'] ?? 'website'));
         $ogImage = $this->clean((string)($meta['og_image'] ?? ''));
+        $siteName = $this->clean((string)($meta['site_name'] ?? ''));
+        $author = $this->clean((string)($meta['author'] ?? ''));
+        $themeColor = $this->clean((string)($meta['theme_color'] ?? ''));
+        $jsonLd = $this->jsonLdScript($meta);
 
         $parts = [
             '<meta charset="utf-8">',
@@ -23,11 +27,14 @@ final class MetaHead
             '<meta name="robots" content="' . $this->esc($robots) . '">',
             '<meta property="og:title" content="' . $this->esc($title) . '">',
             '<meta property="og:type" content="' . $this->esc($ogType) . '">',
+            '<meta name="twitter:card" content="' . $this->esc($ogImage !== '' ? 'summary_large_image' : 'summary') . '">',
+            '<meta name="twitter:title" content="' . $this->esc($title) . '">',
         ];
 
         if ($description !== '') {
             $parts[] = '<meta name="description" content="' . $this->esc($description) . '">';
             $parts[] = '<meta property="og:description" content="' . $this->esc($description) . '">';
+            $parts[] = '<meta name="twitter:description" content="' . $this->esc($description) . '">';
         }
 
         if ($keywords !== '') {
@@ -45,9 +52,78 @@ final class MetaHead
 
         if ($ogImage !== '') {
             $parts[] = '<meta property="og:image" content="' . $this->esc($ogImage) . '">';
+            $parts[] = '<meta name="twitter:image" content="' . $this->esc($ogImage) . '">';
+        }
+
+        if ($siteName !== '') {
+            $parts[] = '<meta property="og:site_name" content="' . $this->esc($siteName) . '">';
+        }
+
+        if ($author !== '') {
+            $parts[] = '<meta name="author" content="' . $this->esc($author) . '">';
+        }
+
+        if ($themeColor !== '') {
+            $parts[] = '<meta name="theme-color" content="' . $this->esc($themeColor) . '">';
+        }
+
+        if ($jsonLd !== '') {
+            $parts[] = $jsonLd;
         }
 
         return implode("\n", $parts);
+    }
+
+    private function jsonLdScript(array $meta): string
+    {
+        $structured = $meta['structured_data'] ?? null;
+        if (is_string($structured) && trim($structured) !== '') {
+            return '<script type="application/ld+json">' . trim($structured) . '</script>';
+        }
+
+        $payload = is_array($structured) ? $structured : $this->defaultStructuredData($meta);
+        if ($payload === []) {
+            return '';
+        }
+
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($json) || $json === '') {
+            return '';
+        }
+
+        return '<script type="application/ld+json">' . $json . '</script>';
+    }
+
+    private function defaultStructuredData(array $meta): array
+    {
+        $title = $this->clean((string)($meta['title'] ?? ''));
+        $description = $this->clean((string)($meta['description'] ?? ''));
+        $url = $this->clean((string)($meta['url'] ?? ''));
+        $image = $this->clean((string)($meta['og_image'] ?? ''));
+        $type = $this->clean((string)($meta['og_type'] ?? 'website'));
+
+        if ($title === '') {
+            return [];
+        }
+
+        $schemaType = $type === 'article' ? 'Article' : 'WebSite';
+        $data = [
+            '@context' => 'https://schema.org',
+            '@type' => $schemaType,
+            'name' => $title,
+        ];
+
+        if ($description !== '') {
+            $data['description'] = $description;
+        }
+        if ($url !== '') {
+            $data['url'] = $url;
+        }
+        if ($image !== '') {
+            $data['image'] = $image;
+        }
+
+        return $data;
     }
 
     private function keywords(mixed $value): string
