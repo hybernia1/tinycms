@@ -3,6 +3,16 @@
         <h1><?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></h1>
         <p class="theme-post-date"><?= htmlspecialchars($formatDateTime((string)($item['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></p>
 
+
+        <?php $terms = (array)($item['terms'] ?? []); ?>
+        <?php if ($terms !== []): ?>
+            <div class="theme-tags mb-3">
+                <?php foreach ($terms as $term): ?>
+                    <a class="theme-tag" href="<?= htmlspecialchars($url('term/' . (string)($term['slug'] ?? '')), ENT_QUOTES, 'UTF-8') ?>">#<?= htmlspecialchars((string)($term['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
         <?php
         $thumb = (array)($item['thumbnail'] ?? []);
         $thumbWebp = trim((string)($thumb['webp'] ?? ''));

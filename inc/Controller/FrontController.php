@@ -115,7 +115,8 @@ final class FrontController
             $redirect($slug, true);
         }
 
-        $this->pages->contentDetail($this->toDetailItem($item, $slug), $this->currentTheme());
+        $terms = $this->termService->listByContent((int)($item['id'] ?? 0));
+        $this->pages->contentDetail($this->toDetailItem($item, $slug, $terms), $this->currentTheme());
     }
 
     public function loginForm(callable $redirect): void
@@ -182,7 +183,7 @@ final class FrontController
         ];
     }
 
-    private function toDetailItem(array $item, string $slug): array
+    private function toDetailItem(array $item, string $slug, array $terms): array
     {
         return [
             'slug' => $slug,
@@ -192,10 +193,32 @@ final class FrontController
             'body' => (string)($item['body'] ?? ''),
             'created' => (string)($item['created'] ?? ''),
             'thumbnail' => $this->thumbnailData($item),
+            'terms' => $this->toPublicTerms($terms),
         ];
     }
 
 
+
+
+    private function toPublicTerms(array $terms): array
+    {
+        $result = [];
+        foreach ($terms as $term) {
+            $id = (int)($term['id'] ?? 0);
+            $name = trim((string)($term['name'] ?? ''));
+            if ($id <= 0 || $name === '') {
+                continue;
+            }
+
+            $result[] = [
+                'id' => $id,
+                'name' => $name,
+                'slug' => $this->slugger->slug($name, $id),
+            ];
+        }
+
+        return $result;
+    }
 
     private function plainExcerpt(string $excerpt): string
     {

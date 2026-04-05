@@ -134,6 +134,22 @@ final class TermService
         ], $stmt->fetchAll(\PDO::FETCH_ASSOC));
     }
 
+
+    public function listByContent(int $contentId): array
+    {
+        if ($contentId <= 0) {
+            return [];
+        }
+
+        $stmt = $this->pdo->prepare('SELECT t.id, t.name FROM terms t INNER JOIN content_terms ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC');
+        $stmt->execute(['content' => $contentId]);
+
+        return array_map(static fn(array $row): array => [
+            'id' => (int)($row['id'] ?? 0),
+            'name' => trim((string)($row['name'] ?? '')),
+        ], $stmt->fetchAll(\PDO::FETCH_ASSOC));
+    }
+
     public function namesByContent(int $contentId): array
     {
         if ($contentId <= 0) {

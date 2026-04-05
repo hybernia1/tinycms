@@ -183,3 +183,24 @@
     border: 0;
     border-top: 1px solid var(--theme-border);
 }
+
+
+.theme-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.theme-tag {
+    display: inline-flex;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #3730a3;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.theme-tag:hover {
+    background: #e0e7ff;
+}
