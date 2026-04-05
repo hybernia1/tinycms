@@ -276,7 +276,14 @@ final class ContentService
 
     public function listPublished(int $limit = 20): array
     {
-        $rows = $this->query->select('content', ['id', 'name', 'excerpt', 'created'], ['status' => 'published']);
+        $rows = $this->query->select('content', [
+            'id',
+            'name',
+            'excerpt',
+            'created',
+            '(SELECT path FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path',
+            '(SELECT path_webp FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path_webp',
+        ], ['status' => 'published']);
         $now = time();
         $items = array_values(array_filter($rows, static fn(array $row): bool => self::isPublishedVisible($row, $now)));
 
@@ -287,6 +294,44 @@ final class ContentService
         }
 
         return $items;
+    }
+
+    public function listPublishedFeed(int $limit = 50): array
+    {
+        $safeLimit = $limit > 0 ? $limit : 50;
+        $stmt = $this->pdo->prepare(
+            'SELECT c.id, c.name, c.excerpt, c.body, c.created
+             FROM content c
+             WHERE c.status = :status AND c.created <= NOW()
+             ORDER BY c.created DESC, c.id DESC
+             LIMIT :limit'
+        );
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':limit', $safeLimit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function listPublishedByTermFeed(int $termId, int $limit = 50): array
+    {
+        if ($termId <= 0) {
+            return [];
+        }
+
+        $safeLimit = $limit > 0 ? $limit : 50;
+        $stmt = $this->pdo->prepare(
+            'SELECT DISTINCT c.id, c.name, c.excerpt, c.body, c.created
+             FROM content c
+             INNER JOIN content_terms ct ON ct.content = c.id
+             WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()
+             ORDER BY c.created DESC, c.id DESC
+             LIMIT :limit'
+        );
+        $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':limit', $safeLimit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function paginatePublishedByTerm(int $termId, int $page = 1, int $perPage = 10): array
@@ -300,7 +345,7 @@ final class ContentService
         $offset = ($safePage - 1) * $safePerPage;
 
         $countStmt = $this->pdo->prepare(
-            'SELECT COUNT(*) FROM content c INNER JOIN content_terms ct ON ct.content = c.id WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()'
+            'SELECT COUNT(DISTINCT c.id) FROM content c INNER JOIN content_terms ct ON ct.content = c.id WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()'
         );
         $countStmt->execute(['term' => $termId, 'status' => 'published']);
         $total = (int)$countStmt->fetchColumn();
@@ -309,7 +354,9 @@ final class ContentService
         $offset = ($currentPage - 1) * $safePerPage;
 
         $stmt = $this->pdo->prepare(
-            'SELECT c.id, c.name, c.excerpt, c.created
+            'SELECT DISTINCT c.id, c.name, c.excerpt, c.created,
+                    (SELECT path FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path,
+                    (SELECT path_webp FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
              FROM content c
              INNER JOIN content_terms ct ON ct.content = c.id
              WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()
@@ -318,6 +365,53 @@ final class ContentService
         );
         $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
         $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'page' => $currentPage,
+            'per_page' => $safePerPage,
+            'total' => $total,
+            'total_pages' => $totalPages,
+        ];
+    }
+
+    public function paginatePublishedSearch(string $query, int $page = 1, int $perPage = 10): array
+    {
+        $needle = trim($query);
+        if ($needle === '') {
+            return ['data' => [], 'page' => 1, 'per_page' => $perPage, 'total' => 0, 'total_pages' => 1];
+        }
+
+        $safePerPage = $perPage > 0 ? $perPage : 10;
+        $safePage = $page > 0 ? $page : 1;
+        $offset = ($safePage - 1) * $safePerPage;
+
+        $countStmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM content c
+             WHERE c.status = :status AND c.created <= NOW()
+             AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)'
+        );
+        $countStmt->execute(['status' => 'published', 'search' => '%' . $needle . '%']);
+        $total = (int)$countStmt->fetchColumn();
+        $totalPages = max(1, (int)ceil($total / $safePerPage));
+        $currentPage = min($safePage, $totalPages);
+        $offset = ($currentPage - 1) * $safePerPage;
+
+        $stmt = $this->pdo->prepare(
+            'SELECT c.id, c.name, c.excerpt, c.created,
+                    (SELECT path FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path,
+                    (SELECT path_webp FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
+             FROM content c
+             WHERE c.status = :status AND c.created <= NOW()
+             AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)
+             ORDER BY c.created DESC, c.id DESC
+             LIMIT :limit OFFSET :offset'
+        );
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':search', '%' . $needle . '%');
         $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();

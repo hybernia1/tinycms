@@ -3,27 +3,46 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\Feature\ThemeService;
 use App\Service\Support\I18n;
 
 final class PageView
 {
     private View $view;
+    private ThemeService $themes;
 
-    public function __construct(View $view)
+    public function __construct(View $view, ThemeService $themes)
     {
         $this->view = $view;
+        $this->themes = $themes;
     }
 
     public function home(?array $user, array $site, array $posts = []): void
     {
         $siteName = (string)($site['name'] ?? 'TinyCMS');
-        $this->view->render('front/layout', 'front/index', [
+        $theme = $this->themes->resolveTheme((string)($site['theme'] ?? 'default'));
+        $this->view->renderTheme($theme, 'index', [
             'user' => $user,
             'posts' => $posts,
             'siteName' => $siteName,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
+            'themeName' => $theme,
             'pageTitle' => $siteName,
+            'metaTitle' => (string)($site['meta_title'] ?? $siteName),
+            'metaDescription' => (string)($site['meta_description'] ?? ''),
+            'metaKeywords' => [(string)($site['name'] ?? 'TinyCMS')],
+            'metaPath' => '',
+            'metaOgType' => 'website',
+            'metaSearchUrlTemplate' => 'search?q={search_term_string}',
+            'metaAlternateLinks' => [
+                [
+                    'rel' => 'alternate',
+                    'type' => 'application/rss+xml',
+                    'title' => I18n::t('front.feed.title', 'RSS feed'),
+                    'href' => 'feed',
+                ],
+            ],
         ]);
     }
 
@@ -33,21 +52,87 @@ final class PageView
         $this->view->render('front/layout', 'front/auth/login', $state);
     }
 
-    public function contentDetail(array $item): void
+    public function contentDetail(array $item, string $theme): void
     {
-        $this->view->render('front/layout', 'front/content', [
+        $resolvedTheme = $this->themes->resolveTheme($theme);
+        $terms = array_map(static fn(array $term): string => trim((string)($term['name'] ?? '')), (array)($item['terms'] ?? []));
+        $thumb = (array)($item['thumbnail'] ?? []);
+        $ogImage = trim((string)($thumb['path'] ?? ''));
+        if ($ogImage === '') {
+            $ogImage = trim((string)($thumb['webp'] ?? ''));
+        }
+        $this->view->renderTheme($resolvedTheme, 'content', [
             'item' => $item,
+            'themeName' => $resolvedTheme,
             'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
+            'metaTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
+            'metaDescription' => (string)($item['excerpt'] ?? ''),
+            'metaKeywords' => array_values(array_filter($terms, static fn(string $term): bool => $term !== '')),
+            'metaPath' => (string)($item['slug'] ?? ''),
+            'shortlinkPath' => (string)($item['id'] ?? ''),
+            'metaOgType' => 'article',
+            'metaOgImage' => $ogImage,
+            'metaPublishedTime' => (string)($item['created'] ?? ''),
         ]);
     }
 
-    public function termArchive(array $term, array $posts, array $pagination): void
+    public function termArchive(array $term, array $posts, array $pagination, string $theme): void
     {
-        $this->view->render('front/layout', 'front/term', [
+        $resolvedTheme = $this->themes->resolveTheme($theme);
+        $termSlug = (string)($term['slug'] ?? '');
+        $termName = (string)($term['name'] ?? '');
+        $this->view->renderTheme($resolvedTheme, 'terms', [
             'term' => $term,
             'posts' => $posts,
             'pagination' => $pagination,
-            'pageTitle' => (string)($term['name'] ?? I18n::t('admin.menu.terms', 'Tags')),
+            'themeName' => $resolvedTheme,
+            'pageTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
+            'metaTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
+            'metaDescription' => I18n::t('front.term.meta_description_prefix', 'Articles on topic') . ': ' . $termName,
+            'metaKeywords' => [$termName],
+            'metaPath' => $termSlug !== '' ? 'term/' . $termSlug : '',
+            'metaOgType' => 'website',
+            'metaSearchUrlTemplate' => 'search?q={search_term_string}',
+            'metaAlternateLinks' => $termSlug !== '' ? [
+                [
+                    'rel' => 'alternate',
+                    'type' => 'application/rss+xml',
+                    'title' => I18n::t('front.feed.title', 'RSS feed'),
+                    'href' => 'term/' . $termSlug . '/feed',
+                ],
+            ] : [],
+        ]);
+    }
+
+    public function search(array $posts, array $pagination, string $query, string $theme, array $site = []): void
+    {
+        $resolvedTheme = $this->themes->resolveTheme($theme);
+        $title = $query === '' ? I18n::t('front.search.title', 'Search') : I18n::t('front.search.results_for', 'Search results for') . ': ' . $query;
+
+        $this->view->renderTheme($resolvedTheme, 'search', [
+            'posts' => $posts,
+            'pagination' => $pagination,
+            'query' => $query,
+            'themeName' => $resolvedTheme,
+            'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
+            'pageTitle' => $title,
+            'metaTitle' => $title,
+            'metaDescription' => $query === ''
+                ? I18n::t('front.search.meta_description', 'Search results on the website.')
+                : I18n::t('front.search.meta_description_prefix', 'Search results for') . ': ' . $query,
+            'metaKeywords' => $query !== '' ? [$query] : [],
+            'metaPath' => $query !== '' ? 'search?q=' . rawurlencode($query) : 'search',
+            'metaRobots' => 'noindex,follow',
+            'metaOgType' => 'website',
+            'metaSearchUrlTemplate' => 'search?q={search_term_string}',
+        ]);
+    }
+
+    public function rssFeed(array $channel, array $items): void
+    {
+        $this->view->render('rss/layout', 'rss/feed', [
+            'channel' => $channel,
+            'items' => $items,
         ]);
     }
 

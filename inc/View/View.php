@@ -16,6 +16,7 @@ final class View
     private FlashService $flash;
     private CsrfService $csrf;
     private DateTimeFormatter $dateTimeFormatter;
+    private MetaHead $metaHead;
 
     public function __construct(string $rootPath, Router $router, FlashService $flash, CsrfService $csrf, DateTimeFormatter $dateTimeFormatter)
     {
@@ -24,14 +25,52 @@ final class View
         $this->flash = $flash;
         $this->csrf = $csrf;
         $this->dateTimeFormatter = $dateTimeFormatter;
+        $this->metaHead = new MetaHead();
     }
 
     public function render(string $layout, string $template, array $data = []): void
     {
-        $templateFile = $this->resolve('view/' . $template . '.php', '/view/');
-        $layoutFile = $this->resolve('view/' . $layout . '.php', '/view/');
+        $this->renderFiles(
+            $this->resolve('view/' . $template . '.php', '/view/'),
+            $this->resolve('view/' . $layout . '.php', '/view/'),
+            $layout,
+            $data
+        );
+    }
 
+    public function renderTheme(string $theme, string $template, array $data = []): void
+    {
+        $base = 'themes/' . trim($theme, '/');
+        $this->renderFiles(
+            $this->resolve($base . '/' . $template . '.php', '/themes/'),
+            $this->resolve($base . '/layout.php', '/themes/'),
+            'theme/' . $theme,
+            $data
+        );
+    }
+
+    private function renderFiles(string $templateFile, string $layoutFile, string $layout, array $data = []): void
+    {
         $url = fn(string $path = ''): string => $this->router->url($path);
+        $absoluteUrl = static function (string $path = '') use ($url): string {
+            $value = trim($path);
+            if ($value === '') {
+                $value = '/';
+            }
+
+            if (preg_match('#^https?://#i', $value) === 1) {
+                return $value;
+            }
+
+            $resolved = $url($value);
+            $host = trim((string)($_SERVER['HTTP_HOST'] ?? ''));
+            if ($host === '') {
+                return $resolved;
+            }
+
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            return $scheme . '://' . $host . $resolved;
+        };
         $icon = static function (string $name, string $classes = 'icon') use ($url): string {
             $sprite = htmlspecialchars($url('assets/icons.svg#icon-' . $name), ENT_QUOTES, 'UTF-8');
             $classAttr = htmlspecialchars($classes, ENT_QUOTES, 'UTF-8');
@@ -42,6 +81,7 @@ final class View
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
+        $renderFrontHead = fn(array $options = []): string => $this->metaHead->render($options);
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -67,7 +107,9 @@ final class View
         $data['formatDate'] = $formatDate;
         $data['formatDateTime'] = $formatDateTime;
         $data['formatInputDateTime'] = $formatInputDateTime;
+        $data['absoluteUrl'] = $absoluteUrl;
         $data['t'] = $t;
+        $data['renderFrontHead'] = $renderFrontHead;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);

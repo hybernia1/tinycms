@@ -91,6 +91,7 @@ final class SchemaDefinition
                 content INT DEFAULT NULL,
                 term INT DEFAULT NULL,
                 PRIMARY KEY (id),
+                UNIQUE KEY uq_content_terms_content_term (content, term),
                 KEY idx_content_terms_content (content),
                 KEY idx_content_terms_term (term),
                 CONSTRAINT fk_content_terms_content FOREIGN KEY (content) REFERENCES content (id) ON DELETE CASCADE,

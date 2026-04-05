@@ -40,6 +40,9 @@ final class FrontController
             'name' => (string)($settings['sitename'] ?? 'TinyCMS'),
             'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['siteauthor'] ?? 'Admin'),
+            'theme' => (string)($settings['theme'] ?? 'default'),
+            'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
+            'meta_description' => (string)($settings['meta_description'] ?? ''),
         ];
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(30));
 
@@ -97,7 +100,62 @@ final class FrontController
             'name' => (string)($term['name'] ?? ''),
             'slug' => $slug,
             'body' => (string)($term['body'] ?? ''),
-        ], $posts, $pagination);
+        ], $posts, $pagination, $this->currentTheme());
+    }
+
+    public function search(): void
+    {
+        $query = trim((string)($_GET['q'] ?? ''));
+        $page = (int)($_GET['page'] ?? 1);
+        $pagination = $this->contentService->paginatePublishedSearch($query, $page, 10);
+        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
+        $settings = $this->settings->resolved();
+        $site = [
+            'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
+        ];
+
+        $this->pages->search($posts, $pagination, $query, $this->currentTheme(), $site);
+    }
+
+    public function feed(): void
+    {
+        $settings = $this->settings->resolved();
+        $siteName = (string)($settings['sitename'] ?? 'TinyCMS');
+        $description = (string)($settings['meta_description'] ?? '');
+        $items = array_map(fn(array $item): array => $this->toRssItem($item), $this->contentService->listPublishedFeed(100));
+
+        $this->pages->rssFeed([
+            'title' => $siteName,
+            'link' => $this->absoluteUrl('/'),
+            'self' => $this->absoluteUrl('feed'),
+            'description' => $description !== '' ? $description : $siteName,
+        ], $items);
+    }
+
+    public function termFeed(array $params, callable $redirect): void
+    {
+        $requestedSlug = trim((string)($params['slug'] ?? ''));
+        $id = $this->slugger->extractId($requestedSlug);
+        $term = $id > 0 ? $this->termService->find($id) : null;
+
+        if ($term === null) {
+            $this->notFound();
+        }
+
+        $slug = $this->slugger->slug((string)($term['name'] ?? ''), (int)($term['id'] ?? 0));
+        if ($requestedSlug !== $slug) {
+            $redirect('term/' . $slug . '/feed', true);
+        }
+
+        $items = array_map(fn(array $item): array => $this->toRssItem($item), $this->contentService->listPublishedByTermFeed((int)($term['id'] ?? 0), 100));
+        $termName = (string)($term['name'] ?? '');
+
+        $this->pages->rssFeed([
+            'title' => $termName,
+            'link' => $this->absoluteUrl('term/' . $slug),
+            'self' => $this->absoluteUrl('term/' . $slug . '/feed'),
+            'description' => I18n::t('front.term.meta_description_prefix', 'Articles on topic') . ': ' . $termName,
+        ], $items);
     }
 
     private function contentDetail(string $requestedSlug, callable $redirect): void
@@ -114,7 +172,8 @@ final class FrontController
             $redirect($slug, true);
         }
 
-        $this->pages->contentDetail($this->toDetailItem($item, $slug));
+        $terms = $this->termService->listByContent((int)($item['id'] ?? 0));
+        $this->pages->contentDetail($this->toDetailItem($item, $slug, $terms), $this->currentTheme());
     }
 
     public function loginForm(callable $redirect): void
@@ -173,23 +232,148 @@ final class FrontController
         return [
             'id' => $id,
             'name' => (string)($item['name'] ?? ''),
-            'excerpt' => (string)($item['excerpt'] ?? ''),
+            'excerpt' => $this->plainExcerpt((string)($item['excerpt'] ?? '')),
             'created' => (string)($item['created'] ?? ''),
             'slug' => $slug,
             'url' => $slug,
+            'thumbnail' => $this->thumbnailData($item),
         ];
     }
 
-    private function toDetailItem(array $item, string $slug): array
+    private function toDetailItem(array $item, string $slug, array $terms): array
     {
         return [
             'slug' => $slug,
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
-            'excerpt' => (string)($item['excerpt'] ?? ''),
+            'excerpt' => $this->plainExcerpt((string)($item['excerpt'] ?? '')),
             'body' => (string)($item['body'] ?? ''),
             'created' => (string)($item['created'] ?? ''),
+            'thumbnail' => $this->thumbnailData($item),
+            'terms' => $this->toPublicTerms($terms),
         ];
+    }
+
+    private function toRssItem(array $item): array
+    {
+        $id = (int)($item['id'] ?? 0);
+        $slug = $this->slugger->slug((string)($item['name'] ?? ''), $id);
+        $link = $this->absoluteUrl($slug);
+        $description = trim((string)($item['excerpt'] ?? ''));
+        if ($description === '') {
+            $description = trim((string)($item['body'] ?? ''));
+        }
+
+        $timestamp = strtotime((string)($item['created'] ?? ''));
+        $pubDate = $timestamp === false ? gmdate(DATE_RSS) : gmdate(DATE_RSS, $timestamp);
+
+        return [
+            'title' => (string)($item['name'] ?? ''),
+            'link' => $link,
+            'guid' => $link,
+            'pubDate' => $pubDate,
+            'description' => $description,
+        ];
+    }
+
+
+
+
+    private function toPublicTerms(array $terms): array
+    {
+        $result = [];
+        foreach ($terms as $term) {
+            $id = (int)($term['id'] ?? 0);
+            $name = trim((string)($term['name'] ?? ''));
+            if ($id <= 0 || $name === '') {
+                continue;
+            }
+
+            $result[] = [
+                'id' => $id,
+                'name' => $name,
+                'slug' => $this->slugger->slug($name, $id),
+            ];
+        }
+
+        return $result;
+    }
+
+    private function plainExcerpt(string $excerpt): string
+    {
+        $plain = trim(strip_tags($excerpt));
+        return preg_replace('/\s+/u', ' ', $plain) ?? '';
+    }
+
+    private function thumbnailData(array $item): array
+    {
+        $path = trim((string)($item['thumbnail_path'] ?? ''));
+        $webp = trim((string)($item['thumbnail_path_webp'] ?? ''));
+
+        if ($path === '' && $webp === '') {
+            return [];
+        }
+
+        return [
+            'path' => $path,
+            'webp' => $webp,
+            'webp_sources' => $this->buildWebpSources($webp),
+        ];
+    }
+
+    private function buildWebpSources(string $webpPath): array
+    {
+        if ($webpPath === '') {
+            return [];
+        }
+
+        $sources = [
+            ['path' => $webpPath, 'width' => 1024],
+        ];
+
+        foreach ($this->thumbSuffixes() as $suffix => $width) {
+            $variant = (string)(preg_replace('/\.webp$/i', $suffix, $webpPath) ?? '');
+            if ($variant !== '') {
+                $sources[] = ['path' => $variant, 'width' => $width];
+            }
+        }
+
+        usort($sources, static fn(array $a, array $b): int => ((int)$a['width']) <=> ((int)$b['width']));
+        return $sources;
+    }
+
+    private function thumbSuffixes(): array
+    {
+        $raw = defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS) ? MEDIA_THUMB_VARIANTS : [];
+        $suffixes = [];
+
+        foreach ($raw as $variant) {
+            if (!is_array($variant)) {
+                continue;
+            }
+
+            $suffix = trim((string)($variant['suffix'] ?? ''));
+            $width = (int)($variant['width'] ?? 0);
+            if ($suffix === '' || $width <= 0 || !str_ends_with(strtolower($suffix), '.webp')) {
+                continue;
+            }
+
+            $suffixes[$suffix] = $width;
+        }
+
+        if ($suffixes === []) {
+            return [
+                '_100x100.webp' => 100,
+                '_w768.webp' => 768,
+            ];
+        }
+
+        return $suffixes;
+    }
+
+    private function currentTheme(): string
+    {
+        return (string)($this->settings->resolved()['theme'] ?? 'default');
     }
 
     private function robots(): void
