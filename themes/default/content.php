@@ -36,7 +36,7 @@
                     ?>
                     <source type="image/webp" srcset="<?= htmlspecialchars($srcset, ENT_QUOTES, 'UTF-8') ?>" sizes="(max-width: 900px) 100vw, 900px">
                 <?php endif; ?>
-                <img src="<?= htmlspecialchars($url($thumbPath !== '' ? $thumbPath : $thumbWebp), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" loading="eager" decoding="async">
+                <img src="<?= htmlspecialchars($url($thumbPath !== '' ? $thumbPath : $thumbWebp), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" loading="eager" fetchpriority="high" decoding="async">
             </picture>
         <?php endif; ?>
 
