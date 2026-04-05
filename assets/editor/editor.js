@@ -398,6 +398,8 @@
         var alignGroup = createAlignGroup();
         var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', 'Barva textu', 'text');
         var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', 'Barva pozadí', 'background');
+        var focus = createIconButton('w-focus', 'toggleFocusMode', 'Nerušené psaní');
+        focus.classList.add('wysiwyg-btn-focus');
         var linkPanel = createLinkPanel();
 
         toolbar.appendChild(headingGroup);
@@ -414,6 +416,7 @@
         toolbar.appendChild(alignGroup);
         toolbar.appendChild(textColorGroup);
         toolbar.appendChild(backgroundColorGroup);
+        toolbar.appendChild(focus);
 
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
@@ -425,6 +428,17 @@
         var activeLink = null;
         var htmlMode = false;
         var mediaRange = null;
+
+        function setFocusMode(enabled) {
+            document.body.classList.toggle('admin-focus-mode', enabled);
+            focus.classList.toggle('is-active', enabled);
+            focus.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+            var label = enabled ? 'Ukončit nerušené psaní' : 'Nerušené psaní';
+            focus.title = label;
+            focus.setAttribute('aria-label', label);
+        }
+
+        setFocusMode(document.body.classList.contains('admin-focus-mode'));
 
         function closeMenus() {
             wrapper.classList.remove('is-heading-open');
@@ -489,6 +503,11 @@
             }
 
             var command = button.getAttribute('data-command');
+            if (command === 'toggleFocusMode') {
+                setFocusMode(!document.body.classList.contains('admin-focus-mode'));
+                return;
+            }
+
             if (command === 'toggleHtml') {
                 setHtmlMode(!htmlMode);
                 return;
@@ -688,6 +707,12 @@
         document.addEventListener('selectionchange', function () {
             if (isSelectionInside(editor)) {
                 updateFormatState();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && document.body.classList.contains('admin-focus-mode')) {
+                setFocusMode(false);
             }
         });
 
