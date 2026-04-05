@@ -5,7 +5,7 @@ namespace App\Service\Support;
 
 final class I18n
 {
-    private const DEFAULT_LOCALE = 'cs';
+    private const DEFAULT_LOCALE = 'en';
     private static ?string $locale = null;
     private static array $catalogues = [];
 

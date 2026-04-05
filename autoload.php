@@ -20,7 +20,7 @@ if (!defined('APP_DEBUG')) {
 }
 
 if (!defined('APP_LANG')) {
-    define('APP_LANG', 'cs');
+    define('APP_LANG', 'en');
 }
 
 if (!defined('APP_DATE_FORMAT')) {
