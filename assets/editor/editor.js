@@ -232,7 +232,7 @@
         button.setAttribute('data-command', command);
         button.setAttribute('aria-label', title);
         button.title = title;
-        button.innerHTML = '<svg aria-hidden="true"><use href="#' + icon + '"></use></svg>';
+        button.innerHTML = '<svg aria-hidden="true"><use href="/assets/icons.svg#icon-' + icon + '"></use></svg>';
         return button;
     }
 
@@ -241,7 +241,7 @@
         item.type = 'button';
         item.className = 'wysiwyg-menu-item';
         item.setAttribute('data-command', command);
-        item.innerHTML = '<svg aria-hidden="true"><use href="#' + icon + '"></use></svg><span>' + label + '</span>';
+        item.innerHTML = '<svg aria-hidden="true"><use href="/assets/icons.svg#icon-' + icon + '"></use></svg><span>' + label + '</span>';
         return item;
     }
 
