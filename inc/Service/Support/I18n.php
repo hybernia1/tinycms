@@ -75,6 +75,17 @@ final class I18n
         return $locales !== [] ? $locales : [self::DEFAULT_LOCALE];
     }
 
+    public static function languageLabel(string $locale): string
+    {
+        $normalized = self::normalizeLocale($locale);
+        $value = self::getByPath(self::loadCatalogue($normalized), 'meta.language_name');
+        if (is_string($value) && $value !== '') {
+            return $value;
+        }
+
+        return strtoupper($normalized);
+    }
+
     private static function loadCatalogue(string $locale): array
     {
         if (isset(self::$catalogues[$locale])) {

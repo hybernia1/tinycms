@@ -12,11 +12,13 @@
                 <?php if ($fieldType === 'textarea'): ?>
                     <textarea name="settings[<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" rows="4"><?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?></textarea>
                 <?php elseif ($fieldType === 'select'): ?>
-                    <?php $options = array_values(array_filter(array_map(static fn($value): string => trim((string)$value), (array)($field['options'] ?? [])))); ?>
+                    <?php $options = (array)($field['options'] ?? []); ?>
                     <select name="settings[<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]">
-                        <?php foreach ($options as $option): ?>
-                            <option value="<?= htmlspecialchars($option, ENT_QUOTES, 'UTF-8') ?>" <?= $fieldValue === $option ? 'selected' : '' ?>>
-                                <?= htmlspecialchars(strtoupper($option), ENT_QUOTES, 'UTF-8') ?>
+                        <?php foreach ($options as $optionValue => $optionLabel): ?>
+                            <?php $value = is_string($optionValue) ? trim($optionValue) : trim((string)$optionLabel); ?>
+                            <?php if ($value === '') { continue; } ?>
+                            <option value="<?= htmlspecialchars($value, ENT_QUOTES, 'UTF-8') ?>" <?= $fieldValue === $value ? 'selected' : '' ?>>
+                                <?= htmlspecialchars((string)$optionLabel, ENT_QUOTES, 'UTF-8') ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

@@ -2,6 +2,9 @@
 declare(strict_types=1);
 
 return [
+    'meta' => [
+        'language_name' => 'English',
+    ],
     'common' => [
         'save' => 'Save',
         'back' => 'Back',

@@ -14,7 +14,7 @@
                         <select name="lang" required>
                             <?php foreach ($locales as $locale): ?>
                             <option value="<?= htmlspecialchars((string)$locale, ENT_QUOTES, 'UTF-8') ?>"<?= $selectedLang === (string)$locale ? ' selected' : '' ?>>
-                                <?= htmlspecialchars(strtoupper((string)$locale), ENT_QUOTES, 'UTF-8') ?>
+                                <?= htmlspecialchars((string)($localeLabels[$locale] ?? strtoupper((string)$locale)), ENT_QUOTES, 'UTF-8') ?>
                             </option>
                             <?php endforeach; ?>
                         </select>

@@ -148,12 +148,18 @@ final class InstallController
         $state = $_SESSION['install'] ?? [];
         $selected = (string)($state['lang'] ?? APP_LANG);
         I18n::setLocale($selected);
+        $locales = I18n::availableLocales();
+        $localeLabels = [];
+        foreach ($locales as $locale) {
+            $localeLabels[$locale] = I18n::languageLabel($locale);
+        }
 
         $this->view->render('front/layout', 'front/install/step-language', [
             'pageTitle' => I18n::t('install.page_language', 'Installation - language'),
             'message' => (string)($state['message'] ?? ''),
             'selectedLang' => $selected,
-            'locales' => I18n::availableLocales(),
+            'locales' => $locales,
+            'localeLabels' => $localeLabels,
         ]);
 
         unset($_SESSION['install']['message']);

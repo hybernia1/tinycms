@@ -18,12 +18,18 @@ final class SettingsService
 
     public function fields(): array
     {
+        $locales = I18n::availableLocales();
+        $localeOptions = [];
+        foreach ($locales as $locale) {
+            $localeOptions[$locale] = I18n::languageLabel($locale);
+        }
+
         return [
             'app_lang' => [
                 'label_key' => 'settings.fields.app_lang',
                 'type' => 'select',
                 'default' => (string)APP_LANG,
-                'options' => I18n::availableLocales(),
+                'options' => $localeOptions,
             ],
             'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
             'sitefooter' => ['label_key' => 'settings.fields.sitefooter', 'type' => 'text', 'default' => '© TinyCMS'],
