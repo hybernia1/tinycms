@@ -43,6 +43,9 @@ final class FrontController
             'theme' => (string)($settings['theme'] ?? 'default'),
             'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
             'meta_description' => (string)($settings['meta_description'] ?? ''),
+            'logo' => (string)($settings['site_logo'] ?? ''),
+            'favicon' => (string)($settings['site_favicon'] ?? ''),
+            'allow_registration' => (int)($settings['allow_registration'] ?? '1') === 1,
         ];
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(30));
 
@@ -186,7 +189,8 @@ final class FrontController
             'errors' => [],
             'message' => '',
             'old' => ['email' => '', 'remember' => 0],
-        ]);
+            'allowRegistration' => $this->authService->isRegistrationAllowed(),
+        ], $this->siteSettings());
     }
 
     public function loginSubmit(callable $redirect): void
@@ -200,7 +204,8 @@ final class FrontController
                 'errors' => [],
                 'message' => I18n::t('common.csrf_expired'),
                 'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'remember' => (int)((int)($_POST['remember'] ?? 0) === 1)],
-            ]);
+                'allowRegistration' => $this->authService->isRegistrationAllowed(),
+            ], $this->siteSettings());
             return;
         }
 
@@ -214,8 +219,93 @@ final class FrontController
             'errors' => $result['errors'] ?? [],
             'message' => (string)($result['message'] ?? I18n::t('auth.login_failed', 'Login failed.')),
             'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'remember' => (int)((int)($_POST['remember'] ?? 0) === 1)],
-        ]);
+            'allowRegistration' => $this->authService->isRegistrationAllowed(),
+        ], $this->siteSettings());
     }
+
+    public function registerForm(callable $redirect): void
+    {
+        if ($this->authService->auth()->check()) {
+            $redirect($this->authService->redirectAfterLogin());
+        }
+
+        if (!$this->authService->isRegistrationAllowed()) {
+            $this->pages->loginForm([
+                'errors' => [],
+                'message' => I18n::t('auth.registration_disabled', 'Registration is disabled.'),
+                'old' => ['email' => '', 'remember' => 0],
+                'allowRegistration' => false,
+            ], $this->siteSettings());
+            return;
+        }
+
+        $this->pages->registerForm(['errors' => [], 'message' => '', 'old' => ['name' => '', 'email' => '']], $this->siteSettings());
+    }
+
+    public function registerSubmit(callable $redirect): void
+    {
+        if ($this->authService->auth()->check()) {
+            $redirect($this->authService->redirectAfterLogin());
+        }
+
+        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            $this->pages->registerForm(['errors' => [], 'message' => I18n::t('common.csrf_expired'), 'old' => ['name' => trim((string)($_POST['name'] ?? '')), 'email' => trim((string)($_POST['email'] ?? ''))]], $this->siteSettings());
+            return;
+        }
+
+        $baseUrl = $this->absoluteUrl('/');
+        $result = $this->authService->register($_POST, rtrim($baseUrl, '/'));
+        if (($result['success'] ?? false) === true) {
+            $this->pages->loginForm([
+                'errors' => [],
+                'message' => (string)($result['message'] ?? ''),
+                'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'remember' => 0],
+                'allowRegistration' => $this->authService->isRegistrationAllowed(),
+            ], $this->siteSettings());
+            return;
+        }
+
+        $this->pages->registerForm([
+            'errors' => (array)($result['errors'] ?? []),
+            'message' => (string)($result['message'] ?? ''),
+            'old' => ['name' => trim((string)($_POST['name'] ?? '')), 'email' => trim((string)($_POST['email'] ?? ''))],
+        ], $this->siteSettings());
+    }
+
+    public function activateForm(): void
+    {
+        $result = $this->authService->activate(trim((string)($_GET['token'] ?? '')));
+        $this->pages->activationResult($result, $this->siteSettings());
+    }
+
+    public function lostForm(): void
+    {
+        $this->pages->lostForm(['message' => '', 'errors' => [], 'old' => ['email' => '', 'mode' => 'password']], $this->siteSettings());
+    }
+
+    public function lostSubmit(): void
+    {
+        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            $this->pages->lostForm(['message' => I18n::t('common.csrf_expired'), 'errors' => [], 'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'mode' => trim((string)($_POST['mode'] ?? 'password'))]], $this->siteSettings());
+            return;
+        }
+
+        $result = $this->authService->lost($_POST, rtrim($this->absoluteUrl('/'), '/'));
+        $this->pages->lostForm(['message' => (string)($result['message'] ?? ''), 'errors' => (array)($result['errors'] ?? []), 'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'mode' => trim((string)($_POST['mode'] ?? 'password'))]], $this->siteSettings());
+    }
+
+    private function siteSettings(): array
+    {
+        $settings = $this->settings->resolved();
+        return [
+            'siteName' => (string)($settings['sitename'] ?? 'TinyCMS'),
+            'siteFooter' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
+            'siteLogo' => (string)($settings['site_logo'] ?? ''),
+            'siteFavicon' => (string)($settings['site_favicon'] ?? ''),
+            'allowRegistration' => (int)($settings['allow_registration'] ?? '1') === 1,
+        ];
+    }
+
 
     private function notFound(): void
     {

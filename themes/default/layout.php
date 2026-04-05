@@ -42,6 +42,9 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'search_url_template' => isset($metaSearchUrlTemplate) ? $absoluteUrl((string)$metaSearchUrlTemplate) : '',
         'alternate_links' => $alternateLinks,
     ]) ?>
+    <?php if (trim((string)($siteFavicon ?? '')) !== ''): ?>
+    <link rel="icon" href="<?= htmlspecialchars($url((string)$siteFavicon), ENT_QUOTES, 'UTF-8') ?>">
+    <?php endif; ?>
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($url($themeCss), ENT_QUOTES, 'UTF-8') ?>">
     <script defer src="<?= htmlspecialchars($url($themeJs), ENT_QUOTES, 'UTF-8') ?>"></script>

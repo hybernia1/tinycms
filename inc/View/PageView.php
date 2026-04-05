@@ -28,6 +28,9 @@ final class PageView
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
             'themeName' => $theme,
+            'siteLogo' => (string)($site['logo'] ?? ''),
+            'siteFavicon' => (string)($site['favicon'] ?? ''),
+            'allow_registration' => (bool)($site['allow_registration'] ?? true),
             'pageTitle' => $siteName,
             'metaTitle' => (string)($site['meta_title'] ?? $siteName),
             'metaDescription' => (string)($site['meta_description'] ?? ''),
@@ -46,10 +49,45 @@ final class PageView
         ]);
     }
 
-    public function loginForm(array $state): void
+    public function loginForm(array $state, array $site = []): void
     {
         $state['pageTitle'] = 'Login';
+        $state['siteName'] = (string)($site['siteName'] ?? 'TinyCMS');
+        $state['siteFooter'] = (string)($site['siteFooter'] ?? '© TinyCMS');
+        $state['siteLogo'] = (string)($site['siteLogo'] ?? '');
+        $state['siteFavicon'] = (string)($site['siteFavicon'] ?? '');
+        $state['allowRegistration'] = (bool)($state['allowRegistration'] ?? $site['allowRegistration'] ?? true);
         $this->view->render('front/layout', 'front/auth/login', $state);
+    }
+
+    public function registerForm(array $state, array $site = []): void
+    {
+        $state['pageTitle'] = I18n::t('front.register.title', 'Register');
+        $state['siteName'] = (string)($site['siteName'] ?? 'TinyCMS');
+        $state['siteFooter'] = (string)($site['siteFooter'] ?? '© TinyCMS');
+        $state['siteLogo'] = (string)($site['siteLogo'] ?? '');
+        $state['siteFavicon'] = (string)($site['siteFavicon'] ?? '');
+        $this->view->render('front/layout', 'front/auth/register', $state);
+    }
+
+    public function activationResult(array $state, array $site = []): void
+    {
+        $state['pageTitle'] = I18n::t('front.activate.title', 'Account activation');
+        $state['siteName'] = (string)($site['siteName'] ?? 'TinyCMS');
+        $state['siteFooter'] = (string)($site['siteFooter'] ?? '© TinyCMS');
+        $state['siteLogo'] = (string)($site['siteLogo'] ?? '');
+        $state['siteFavicon'] = (string)($site['siteFavicon'] ?? '');
+        $this->view->render('front/layout', 'front/auth/activate', $state);
+    }
+
+    public function lostForm(array $state, array $site = []): void
+    {
+        $state['pageTitle'] = I18n::t('front.lost.title', 'Lost access');
+        $state['siteName'] = (string)($site['siteName'] ?? 'TinyCMS');
+        $state['siteFooter'] = (string)($site['siteFooter'] ?? '© TinyCMS');
+        $state['siteLogo'] = (string)($site['siteLogo'] ?? '');
+        $state['siteFavicon'] = (string)($site['siteFavicon'] ?? '');
+        $this->view->render('front/layout', 'front/auth/lost', $state);
     }
 
     public function contentDetail(array $item, string $theme): void

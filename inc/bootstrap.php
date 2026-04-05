@@ -79,7 +79,7 @@ if (str_starts_with($requestPath, 'install')) {
 }
 
 $auth = new Auth();
-$authService = new AuthService($auth);
+
 $userService = new UserService();
 $contentService = new ContentService();
 $mediaService = new MediaService();
@@ -87,6 +87,7 @@ $slugger = new SluggerService();
 $uploadService = new UploadService(dirname(__DIR__), $slugger);
 $themeService = new ThemeService(dirname(__DIR__));
 $settingsService = new SettingsService($themeService);
+$authService = new AuthService($auth, $settingsService);
 $resolvedSettings = $settingsService->resolved();
 I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
 I18n::setTheme($themeService->resolveTheme((string)($resolvedSettings['theme'] ?? 'default')));

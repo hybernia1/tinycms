@@ -5,16 +5,19 @@ namespace App\Service\Feature;
 
 use App\Service\Infra\Db\SchemaConstraintValidator;
 use App\Service\Support\I18n;
+use App\Service\Support\MailService;
 use PDO;
 use PDOException;
 
 final class InstallService
 {
     private SchemaConstraintValidator $schemaValidator;
+    private MailService $mail;
 
     public function __construct(?SchemaConstraintValidator $schemaValidator = null)
     {
         $this->schemaValidator = $schemaValidator ?? new SchemaConstraintValidator();
+        $this->mail = new MailService();
     }
 
     public function validateDatabaseInput(array $input): array
@@ -125,11 +128,20 @@ final class InstallService
             return ['success' => false, 'message' => $adminResult];
         }
 
+        $this->seedDefaultSettings($pdo, $lang);
+
         try {
             $this->writeConfig($db, $lang);
         } catch (\RuntimeException $e) {
             return ['success' => false, 'message' => I18n::t('install.config_failed', 'Could not create config.php. Check write permissions.')];
         }
+
+        $this->mail->send(
+            ['mail_driver' => 'php'],
+            (string)$admin['email'],
+            I18n::t('email.install_success.subject', 'Installation completed'),
+            str_replace('{site}', 'TinyCMS', I18n::t('email.install_success.body', 'Installation for {site} was completed successfully.'))
+        );
 
         return ['success' => true, 'message' => I18n::t('install.success', 'Installation completed successfully.')];
     }
@@ -172,6 +184,23 @@ final class InstallService
             return null;
         } catch (PDOException $e) {
             return I18n::t('install.create_admin_failed', 'Could not create admin account.');
+        }
+    }
+
+    private function seedDefaultSettings(PDO $pdo, string $lang): void
+    {
+        $rows = [
+            'app_lang' => strtolower(trim($lang)) !== '' ? strtolower(trim($lang)) : (string)APP_LANG,
+            'allow_registration' => '1',
+            'mail_driver' => 'php',
+        ];
+
+        $stmt = $pdo->prepare('INSERT INTO settings (key_name, value) VALUES (:key_name, :value) ON DUPLICATE KEY UPDATE value = VALUES(value)');
+        foreach ($rows as $key => $value) {
+            $stmt->execute([
+                'key_name' => $key,
+                'value' => json_encode($value, JSON_UNESCAPED_UNICODE),
+            ]);
         }
     }
 

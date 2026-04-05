@@ -15,21 +15,6 @@ class Register
         $this->query = $query;
     }
 
-    /**
-     * Registrace nového uživatele
-     *
-     * @param array{
-     *     name:string,
-     *     email:string,
-     *     password:string
-     * } $data
-     * @return array{
-     *     success:bool,
-     *     message:string,
-     *     user_id?:int,
-     *     errors?:array<string,string>
-     * }
-     */
     public function create(array $data): array
     {
         $name = trim((string)($data['name'] ?? ''));
@@ -102,7 +87,7 @@ class Register
             'created'  => $now,
             'updated'  => $now,
             'role'     => 'user',
-            'suspend'  => 0,
+            'suspend'  => 1,
         ]);
 
         if ($userId <= 0) {

@@ -17,6 +17,27 @@ $router->post('login', static function () use ($front, $redirect): void {
     $front->loginSubmit($redirect);
 });
 
+
+$router->get('register', static function () use ($front, $redirect): void {
+    $front->registerForm($redirect);
+});
+
+$router->post('register', static function () use ($front, $redirect): void {
+    $front->registerSubmit($redirect);
+});
+
+$router->get('activate', static function () use ($front): void {
+    $front->activateForm();
+});
+
+$router->get('lost', static function () use ($front): void {
+    $front->lostForm();
+});
+
+$router->post('lost', static function () use ($front): void {
+    $front->lostSubmit();
+});
+
 $router->get('search', static function () use ($front): void {
     $front->search();
 });

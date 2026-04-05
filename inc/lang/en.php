@@ -28,6 +28,8 @@ return [
         'csrf_expired' => 'Security token expired, please submit the form again.',
         'invalid_csrf' => 'Invalid CSRF token.',
         'invalid_data' => 'Invalid data.',
+        'yes' => 'Yes',
+        'no' => 'No',
     ],
     'install' => [
         'title' => 'Installation',
@@ -99,6 +101,20 @@ return [
             'show_password' => 'Show password',
             'remember' => 'Remember me',
             'submit' => 'Sign in',
+        ],
+        'register' => [
+            'title' => 'Register',
+            'submit' => 'Create account',
+        ],
+        'activate' => [
+            'title' => 'Account activation',
+        ],
+        'lost' => [
+            'title' => 'Lost access',
+            'mode' => 'Action',
+            'password' => 'Send new password',
+            'activation' => 'Send activation token',
+            'submit' => 'Send',
         ],
     ],
     'users' => [
@@ -222,12 +238,28 @@ return [
     'settings' => [
         'save' => 'Save settings',
         'saved' => 'Settings saved.',
+        'mail_driver' => [
+            'php' => 'PHP mail',
+            'smtp' => 'SMTP',
+        ],
+        'smtp' => [
+            'none' => 'None',
+        ],
         'fields' => [
             'app_lang' => 'Application language',
             'theme' => 'Theme',
             'sitename' => 'Site name',
             'sitefooter' => 'Site footer',
             'siteauthor' => 'Site author',
+            'site_logo' => 'Site logo path',
+            'site_favicon' => 'Favicon path',
+            'allow_registration' => 'Allow registration',
+            'mail_driver' => 'Mail transport',
+            'smtp_host' => 'SMTP host',
+            'smtp_port' => 'SMTP port',
+            'smtp_user' => 'SMTP user',
+            'smtp_pass' => 'SMTP password',
+            'smtp_secure' => 'SMTP encryption',
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
         ],
@@ -254,6 +286,29 @@ return [
         'password_hash_failed' => 'Failed to create password hash.',
         'registration_save_failed' => 'Registration could not be saved.',
         'registration_success' => 'Registration successful.',
+        'registration_pending_activation' => 'Registration successful. Check your email to activate account.',
+        'registration_disabled' => 'Registration is disabled.',
+        'account_activated' => 'Account was activated.',
+        'token_expired' => 'token je již neplatný',
+        'lost_sent' => 'If account exists, email was sent.',
+    ],
+    'email' => [
+        'registration' => [
+            'subject' => 'Confirm your registration',
+            'body' => "Welcome to {site}.\n\nActivate account: {link}",
+        ],
+        'activation' => [
+            'subject' => 'Activation token',
+            'body' => "New activation link for {site}:\n{link}",
+        ],
+        'reset' => [
+            'subject' => 'New password',
+            'body' => "New password for {site}: {password}\n\nIf you need activation token: {lost_link}",
+        ],
+        'install_success' => [
+            'subject' => 'Installation completed',
+            'body' => 'Installation for {site} was completed successfully.',
+        ],
     ],
     'validation' => [
         'name_required' => 'Name is required.',

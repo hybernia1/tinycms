@@ -28,6 +28,8 @@ return [
         'csrf_expired' => 'Bezpečnostní token vypršel, odešlete formulář znovu.',
         'invalid_csrf' => 'Neplatný CSRF token.',
         'invalid_data' => 'Neplatná data.',
+        'yes' => 'Ano',
+        'no' => 'Ne',
     ],
     'install' => [
         'title' => 'Instalace',
@@ -99,6 +101,20 @@ return [
             'show_password' => 'Zobrazit heslo',
             'remember' => 'Zapamatovat si mě',
             'submit' => 'Přihlásit',
+        ],
+        'register' => [
+            'title' => 'Registrace',
+            'submit' => 'Vytvořit účet',
+        ],
+        'activate' => [
+            'title' => 'Aktivace účtu',
+        ],
+        'lost' => [
+            'title' => 'Ztracený přístup',
+            'mode' => 'Akce',
+            'password' => 'Poslat nové heslo',
+            'activation' => 'Poslat aktivační token',
+            'submit' => 'Odeslat',
         ],
     ],
     'users' => [
@@ -222,12 +238,28 @@ return [
     'settings' => [
         'save' => 'Uložit nastavení',
         'saved' => 'Nastavení uloženo.',
+        'mail_driver' => [
+            'php' => 'PHP mail',
+            'smtp' => 'SMTP',
+        ],
+        'smtp' => [
+            'none' => 'Bez šifrování',
+        ],
         'fields' => [
             'app_lang' => 'Jazyk aplikace',
             'theme' => 'Šablona',
             'sitename' => 'Název webu',
             'sitefooter' => 'Patička webu',
             'siteauthor' => 'Autor webu',
+            'site_logo' => 'Cesta k logu webu',
+            'site_favicon' => 'Cesta k favicon',
+            'allow_registration' => 'Povolit registraci',
+            'mail_driver' => 'Typ odesílání e-mailu',
+            'smtp_host' => 'SMTP host',
+            'smtp_port' => 'SMTP port',
+            'smtp_user' => 'SMTP uživatel',
+            'smtp_pass' => 'SMTP heslo',
+            'smtp_secure' => 'SMTP šifrování',
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
         ],
@@ -254,6 +286,29 @@ return [
         'password_hash_failed' => 'Nepodařilo se vytvořit hash hesla.',
         'registration_save_failed' => 'Registraci se nepodařilo uložit.',
         'registration_success' => 'Registrace proběhla úspěšně.',
+        'registration_pending_activation' => 'Registrace byla úspěšná. Pro aktivaci účtu zkontrolujte e-mail.',
+        'registration_disabled' => 'Registrace je vypnutá.',
+        'account_activated' => 'Účet byl aktivován.',
+        'token_expired' => 'token je již neplatný',
+        'lost_sent' => 'Pokud účet existuje, e-mail byl odeslán.',
+    ],
+    'email' => [
+        'registration' => [
+            'subject' => 'Potvrzení registrace',
+            'body' => "Vítejte na {site}.\n\nAktivujte účet: {link}",
+        ],
+        'activation' => [
+            'subject' => 'Aktivační token',
+            'body' => "Nový aktivační odkaz pro {site}:\n{link}",
+        ],
+        'reset' => [
+            'subject' => 'Nové heslo',
+            'body' => "Nové heslo pro {site}: {password}\n\nPokud potřebujete aktivační token: {lost_link}",
+        ],
+        'install_success' => [
+            'subject' => 'Instalace dokončena',
+            'body' => 'Instalace webu {site} byla úspěšně dokončena.',
+        ],
     ],
     'validation' => [
         'name_required' => 'Název je povinný.',
