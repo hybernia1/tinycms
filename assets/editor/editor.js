@@ -336,18 +336,18 @@
         var group = document.createElement('div');
         group.className = 'wysiwyg-group wysiwyg-group-heading';
 
-        var toggle = createIconButton('w-heading', 'toggleHeadingMenu', 'Nadpisy');
+        var toggle = createIconButton('w-heading', 'toggleHeadingMenu', t('editor.headings', 'Headings'));
 
         var menu = document.createElement('div');
         menu.className = 'wysiwyg-menu wysiwyg-menu-heading';
 
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:p', 'Odstavec'));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h1', 'Nadpis 1'));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h2', 'Nadpis 2'));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h3', 'Nadpis 3'));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h4', 'Nadpis 4'));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h5', 'Nadpis 5'));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h6', 'Nadpis 6'));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:p', t('editor.paragraph', 'Paragraph')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h1', t('editor.heading_1', 'Heading 1')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h2', t('editor.heading_2', 'Heading 2')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h3', t('editor.heading_3', 'Heading 3')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h4', t('editor.heading_4', 'Heading 4')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h5', t('editor.heading_5', 'Heading 5')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h6', t('editor.heading_6', 'Heading 6')));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -357,7 +357,7 @@
         var group = document.createElement('div');
         group.className = 'wysiwyg-group wysiwyg-group-list';
 
-        var toggle = createIconButton('w-ul', 'toggleListMenu', 'Seznamy');
+        var toggle = createIconButton('w-ul', 'toggleListMenu', t('editor.lists', 'Lists'));
 
         var menu = document.createElement('div');
         menu.className = 'wysiwyg-menu wysiwyg-menu-list';
@@ -381,7 +381,7 @@
         menu.appendChild(createMenuItem('w-align-left', 'justifyLeft', '' + t('editor.align_left', 'Left') + ''));
         menu.appendChild(createMenuItem('w-align-center', 'justifyCenter', ''+ t('editor.align_center', 'Center') + ''));
         menu.appendChild(createMenuItem('w-align-right', 'justifyRight', '' + t('editor.align_right', 'Right') + ''));
-        menu.appendChild(createMenuItem('w-align-justify', 'justifyFull', 'Do bloku'));
+        menu.appendChild(createMenuItem('w-align-justify', 'justifyFull', t('editor.align_justify', 'Justify')));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -406,7 +406,7 @@
 
         var titleInput = document.createElement('input');
         titleInput.type = 'text';
-        titleInput.placeholder = 'Titulek odkazu';
+        titleInput.placeholder = t('editor.link_title', 'Link title');
         titleInput.className = 'wysiwyg-link-input';
         titleInput.setAttribute('data-role', 'link-title-input');
 
@@ -442,7 +442,7 @@
         remove.type = 'button';
         remove.className = 'btn btn-light';
         remove.setAttribute('data-role', 'link-remove');
-        remove.textContent = 'Odebrat odkaz';
+        remove.textContent = t('editor.remove_link', 'Remove link');
 
         var confirm = document.createElement('button');
         confirm.type = 'button';
@@ -476,7 +476,7 @@
         var headingGroup = createHeadingGroup();
         var bold = createIconButton('w-bold', 'bold', ''+ t('editor.bold', 'Bold') + '');
         var italic = createIconButton('w-italic', 'italic', ''+ t('editor.italic', 'Italic') + '');
-        var quote = createIconButton('w-quote', 'formatBlock:blockquote', 'Citace');
+        var quote = createIconButton('w-quote', 'formatBlock:blockquote', t('editor.quote', 'Quote'));
         var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
         var clear = createIconButton('w-clear', 'removeFormat', ''+ t('editor.clear', 'Clear') + '');
         var listGroup = createListGroup();
@@ -484,7 +484,7 @@
         var media = createIconButton('w-image', 'openMediaLibrary', ''+ t('editor.insert_image', 'Insert image') + '');
         var pagebreak = createIconButton('w-pagebreak', 'insertPagebreak', ''+ t('editor.page_break', 'Page break') + '');
         var alignGroup = createAlignGroup();
-        var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', 'Barva textu', 'text');
+        var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', t('editor.text_color', 'Text color'), 'text');
         var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', ''+ t('editor.background_color', 'Background color') + '', 'background');
         var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode', 'Focus mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
