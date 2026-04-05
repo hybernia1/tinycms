@@ -153,6 +153,11 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
         <h2 class="admin-brand"><?= htmlspecialchars($t('admin.brand'), ENT_QUOTES, 'UTF-8') ?></h2>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
+                $role = (string)($authUser['role'] ?? '');
+                $itemUrl = (string)($item['url'] ?? '');
+                if ($role !== 'admin' && in_array($itemUrl, ['admin/users', 'admin/settings'], true)) {
+                    continue;
+                }
                 $itemPath = trim(parse_url((string)$item['url'], PHP_URL_PATH) ?? '', '/');
                 $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
             ?>
