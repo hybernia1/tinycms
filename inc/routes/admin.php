@@ -188,6 +188,14 @@ $router->post('admin/settings', static function () use ($adminSettings, $redirec
     $adminSettings->submit($redirect);
 });
 
+$router->get('admin/api/v1/settings/media', static function () use ($adminSettings, $redirect): void {
+    $adminSettings->mediaLibraryApiV1($redirect);
+});
+
+$router->post('admin/api/v1/settings/media/upload', static function () use ($adminSettings, $redirect): void {
+    $adminSettings->mediaLibraryUploadApiV1($redirect);
+});
+
 $router->get('admin/logout', static function () use ($admin, $redirect): void {
     $admin->logout($redirect);
 });

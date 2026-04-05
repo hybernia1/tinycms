@@ -11,6 +11,8 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
     <?php
     $metaPath = trim((string)($metaPath ?? ''));
     $shortlinkPath = trim((string)($shortlinkPath ?? ''));
+    $siteFavicon = trim((string)($siteFavicon ?? ''));
+    $siteLogo = trim((string)($siteLogo ?? ''));
     $alternateLinks = [];
     foreach ((array)($metaAlternateLinks ?? []) as $link) {
         if (!is_array($link)) {
@@ -32,7 +34,7 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'url' => $metaPath !== '' ? $absoluteUrl($metaPath) : '',
         'shortlink' => $shortlinkPath !== '' ? $absoluteUrl($shortlinkPath) : '',
         'og_type' => (string)($metaOgType ?? 'website'),
-        'og_image' => (string)($metaOgImage ?? '') !== '' ? $absoluteUrl((string)$metaOgImage) : '',
+        'og_image' => (string)($metaOgImage ?? '') !== '' ? $absoluteUrl((string)$metaOgImage) : ($siteLogo !== '' ? $absoluteUrl($siteLogo) : ''),
         'site_name' => (string)($siteName ?? 'TinyCMS'),
         'author' => (string)($siteAuthor ?? ''),
         'theme_color' => (string)($metaThemeColor ?? '#2563eb'),
@@ -42,6 +44,10 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'search_url_template' => isset($metaSearchUrlTemplate) ? $absoluteUrl((string)$metaSearchUrlTemplate) : '',
         'alternate_links' => $alternateLinks,
     ]) ?>
+    <?php if ($siteFavicon !== ''): ?>
+        <link rel="icon" href="<?= htmlspecialchars($absoluteUrl($siteFavicon), ENT_QUOTES, 'UTF-8') ?>">
+        <link rel="apple-touch-icon" href="<?= htmlspecialchars($absoluteUrl($siteFavicon), ENT_QUOTES, 'UTF-8') ?>">
+    <?php endif; ?>
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($url($themeCss), ENT_QUOTES, 'UTF-8') ?>">
     <script defer src="<?= htmlspecialchars($url($themeJs), ENT_QUOTES, 'UTF-8') ?>"></script>

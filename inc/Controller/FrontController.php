@@ -40,6 +40,8 @@ final class FrontController
             'name' => (string)($settings['sitename'] ?? 'TinyCMS'),
             'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['siteauthor'] ?? 'Admin'),
+            'logo' => (string)($settings['site_logo'] ?? ''),
+            'favicon' => (string)($settings['site_favicon'] ?? ''),
             'theme' => (string)($settings['theme'] ?? 'default'),
             'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
             'meta_description' => (string)($settings['meta_description'] ?? ''),
@@ -95,12 +97,13 @@ final class FrontController
         $pagination = $this->contentService->paginatePublishedByTerm((int)($term['id'] ?? 0), $page, 10);
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
 
+        $settings = $this->settings->resolved();
         $this->pages->termArchive([
             'id' => (int)($term['id'] ?? 0),
             'name' => (string)($term['name'] ?? ''),
             'slug' => $slug,
             'body' => (string)($term['body'] ?? ''),
-        ], $posts, $pagination, $this->currentTheme());
+        ], $posts, $pagination, $this->currentTheme(), $this->siteBranding($settings));
     }
 
     public function search(): void
@@ -112,6 +115,8 @@ final class FrontController
         $settings = $this->settings->resolved();
         $site = [
             'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
+            'logo' => (string)($settings['site_logo'] ?? ''),
+            'favicon' => (string)($settings['site_favicon'] ?? ''),
         ];
 
         $this->pages->search($posts, $pagination, $query, $this->currentTheme(), $site);
@@ -173,7 +178,8 @@ final class FrontController
         }
 
         $terms = $this->termService->listByContent((int)($item['id'] ?? 0));
-        $this->pages->contentDetail($this->toDetailItem($item, $slug, $terms), $this->currentTheme());
+        $settings = $this->settings->resolved();
+        $this->pages->contentDetail($this->toDetailItem($item, $slug, $terms), $this->currentTheme(), $this->siteBranding($settings));
     }
 
     public function loginForm(callable $redirect): void
@@ -318,6 +324,14 @@ final class FrontController
             'path' => $path,
             'webp' => $webp,
             'webp_sources' => $this->buildWebpSources($webp),
+        ];
+    }
+
+    private function siteBranding(array $settings): array
+    {
+        return [
+            'logo' => (string)($settings['site_logo'] ?? ''),
+            'favicon' => (string)($settings['site_favicon'] ?? ''),
         ];
     }
 

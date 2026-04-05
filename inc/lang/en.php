@@ -230,6 +230,8 @@ return [
             'siteauthor' => 'Site author',
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
+            'site_logo' => 'Site logo',
+            'site_favicon' => 'Favicon',
         ],
     ],
     'auth' => [
