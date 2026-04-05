@@ -61,6 +61,14 @@ $router->post('admin/api/v1/content/{id}/status', static function (array $params
     $adminContent->statusApiV1($redirect, (int)($params['id'] ?? 0));
 });
 
+$router->post('admin/api/v1/content/draft/init', static function () use ($adminContent, $redirect): void {
+    $adminContent->draftInitApiV1($redirect);
+});
+
+$router->post('admin/api/v1/content/autosave', static function () use ($adminContent, $redirect): void {
+    $adminContent->autosaveApiV1($redirect);
+});
+
 $router->get('admin/content/add', static function () use ($adminContent, $redirect): void {
     $adminContent->addForm($redirect);
 });
@@ -79,10 +87,6 @@ $router->post('admin/content/edit', static function () use ($adminContent, $redi
 
 $router->post('admin/content/thumbnail/upload', static function () use ($adminContent, $redirect): void {
     $adminContent->thumbnailUploadSubmit($redirect);
-});
-
-$router->post('admin/content/thumbnail/select', static function () use ($adminContent, $redirect): void {
-    $adminContent->thumbnailSelectSubmit($redirect);
 });
 
 $router->post('admin/content/thumbnail/delete', static function () use ($adminContent, $redirect): void {
@@ -111,6 +115,10 @@ $router->post('admin/api/v1/content/{id}/media/{mediaId}/attach', static functio
 
 $router->post('admin/api/v1/content/{id}/thumbnail/detach', static function (array $params) use ($adminContent, $redirect): void {
     $adminContent->thumbnailDetachApiV1($redirect, (int)($params['id'] ?? 0));
+});
+
+$router->post('admin/api/v1/content/{id}/thumbnail/{mediaId}/select', static function (array $params) use ($adminContent, $redirect): void {
+    $adminContent->thumbnailSelectApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
 });
 
 $router->get('admin/terms', static function () use ($adminTerms, $redirect): void {

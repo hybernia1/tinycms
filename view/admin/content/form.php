@@ -16,8 +16,17 @@ if ($thumbnailPath === '') {
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
 ?>
-<form class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+<form
+    class="content-editor-form"
+    method="post"
+    enctype="multipart/form-data"
+    action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>"
+    data-autosave-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/autosave'), ENT_QUOTES, 'UTF-8') ?>"
+    data-draft-init-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/draft/init'), ENT_QUOTES, 'UTF-8') ?>"
+    data-edit-url-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>"
+>
     <?= $csrfField() ?>
+    <input type="hidden" name="id" value="<?= $contentId ?>" data-content-id-hidden>
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">
@@ -35,11 +44,9 @@ $contentId = (int)($item['id'] ?? 0);
                     name="body"
                     rows="14"
                     data-wysiwyg
-                    <?php if ($mode !== 'add'): ?>
-                        data-content-id="<?= $contentId ?>"
-                        data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media'), ENT_QUOTES, 'UTF-8') ?>"
-                        data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
-                    <?php endif; ?>
+                    data-content-id="<?= $contentId ?>"
+                    data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media'), ENT_QUOTES, 'UTF-8') ?>"
+                    data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
                 ><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
         </div>
@@ -109,37 +116,34 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="content-box-header">Thumbnail</div>
                 <div class="p-3">
                     <?php if ($mode === 'add'): ?>
-                        <small class="text-muted">Nejdřív uložte obsah, poté přidejte thumbnail.</small>
-                    <?php else: ?>
-                        <button
-                            class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
-                            type="button"
-                            data-media-library-open
-                            data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media'), ENT_QUOTES, 'UTF-8') ?>"
-                            data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
-                            data-current-media-id="<?= (int)($item['thumbnail'] ?? 0) ?>"
-                        >
-                            <?php if ($thumbnailUrl !== ''): ?>
-                                <div class="content-thumbnail-preview">
-                                    <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
-                                </div>
-                            <?php else: ?>
-                                <span>Zvolit obrázek</span>
-                            <?php endif; ?>
-                        </button>
-                        <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
-                            <div class="mt-2 d-flex gap-2" data-media-library-detach-wrap>
-                                <button class="btn btn-light" type="button" data-media-library-detach>Odpojit</button>
+                        <small class="text-muted">Thumbnail lze vybrat i před ručním uložením.</small>
+                    <?php endif; ?>
+                    <button
+                        class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
+                        type="button"
+                        data-media-library-open
+                        data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media'), ENT_QUOTES, 'UTF-8') ?>"
+                        data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
+                        data-current-media-id="<?= (int)($item['thumbnail'] ?? 0) ?>"
+                    >
+                        <?php if ($thumbnailUrl !== ''): ?>
+                            <div class="content-thumbnail-preview">
+                                <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                             </div>
+                        <?php else: ?>
+                            <span>Zvolit obrázek</span>
                         <?php endif; ?>
+                    </button>
+                    <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
+                        <div class="mt-2 d-flex gap-2" data-media-library-detach-wrap>
+                            <button class="btn btn-light" type="button" data-media-library-detach>Odpojit</button>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
         </aside>
     </div>
 </form>
-
-<?php if ($mode !== 'add'): ?>
 <div class="media-library-modal" data-media-library-modal>
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
@@ -204,7 +208,7 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
     </div>
 </div>
-<form method="post" action="<?= htmlspecialchars($url('admin/content/thumbnail/select'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-select-form>
+<form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/thumbnail/0/select'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-select-form data-action-template="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/thumbnail/{mediaId}/select'), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <input type="hidden" name="id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-media-id>
@@ -238,4 +242,3 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
     </div>
 </div>
-<?php endif; ?>

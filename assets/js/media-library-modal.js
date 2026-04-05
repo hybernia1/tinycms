@@ -87,6 +87,22 @@ if (modal && openTrigger) {
         }
     };
 
+    const setTriggerThumbnail = (media) => {
+        if (!openTrigger || !media) {
+            return;
+        }
+
+        const imagePath = absoluteUrl(media.preview_path || media.webp_path || media.path || '');
+        if (imagePath === '') {
+            return;
+        }
+
+        openTrigger.classList.remove('empty');
+        openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
+        openTrigger.innerHTML = '<div class="content-thumbnail-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
+        currentMediaId = Number(media.id || 0);
+    };
+
     const absoluteUrl = (path) => {
         if (!path) {
             return '';
@@ -306,25 +322,43 @@ if (modal && openTrigger) {
         });
     };
 
+    const waitForDraftId = () => new Promise((resolve) => {
+        const onReady = (event) => {
+            document.removeEventListener('tinycms:content-draft-ready', onReady);
+            resolve(Number(event.detail?.id || 0));
+        };
+        document.addEventListener('tinycms:content-draft-ready', onReady);
+        document.dispatchEvent(new CustomEvent('tinycms:content-ensure-draft'));
+    });
+
     const close = () => {
         modal.classList.remove('open');
     };
 
     if (openTrigger) {
-        openTrigger.addEventListener('click', () => {
+        openTrigger.addEventListener('click', async () => {
             const contentInput = document.querySelector('[data-media-library-attach-form] input[name="content_id"]');
+            let resolvedId = Number(contentInput ? contentInput.value : '0');
+            if (resolvedId <= 0) {
+                resolvedId = await waitForDraftId();
+            }
             open({
                 mode: 'thumbnail',
                 endpoint: openTrigger.getAttribute('data-media-library-endpoint') || '',
                 baseUrl: openTrigger.getAttribute('data-media-base-url') || '',
                 currentMediaId: Number(openTrigger.getAttribute('data-current-media-id') || '0'),
-                contentId: Number(contentInput ? contentInput.value : '0'),
+                contentId: resolvedId,
             });
         });
     }
 
-    document.addEventListener('tinycms:media-library-open', (event) => {
-        open(event.detail || {});
+    document.addEventListener('tinycms:media-library-open', async (event) => {
+        const detail = event.detail || {};
+        if (Number(detail.contentId || 0) <= 0) {
+            const resolvedId = await waitForDraftId();
+            detail.contentId = resolvedId;
+        }
+        open(detail);
     });
     closeButtons.forEach((button) => button.addEventListener('click', close));
     modal.addEventListener('click', (event) => {
@@ -427,7 +461,21 @@ if (modal && openTrigger) {
             }
 
             mediaIdField.value = String(selectedMedia.id);
-            selectForm.submit();
+            const selectAction = resolveAction(selectForm, selectedMedia.id);
+            const response = await fetch(selectAction, {
+                method: 'POST',
+                body: new FormData(selectForm),
+                headers: { Accept: 'application/json' },
+            });
+            const data = normalizePayload(await response.json().catch(() => ({})));
+            if (!response.ok || !data.success) {
+                setStatus(data.message || 'Náhled se nepodařilo přiřadit.');
+                return;
+            }
+            if (data.data && data.data.media) {
+                setTriggerThumbnail(data.data.media);
+            }
+            close();
         });
     }
 
@@ -475,6 +523,14 @@ if (modal && openTrigger) {
         uploadForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             setStatus('');
+
+            if (contentId <= 0) {
+                contentId = await waitForDraftId();
+                if (contentId <= 0) {
+                    setStatus('Nejdřív se musí vytvořit draft.');
+                    return;
+                }
+            }
 
             uploadButton.disabled = true;
             uploadLabel.textContent = 'Nahrávám...';

@@ -216,6 +216,96 @@ final class AdminContentController extends BaseAdminController
         $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'status' => 'draft']]);
     }
 
+    public function draftInitApiV1(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $authorId = (int)($this->authService->auth()->id() ?? 0);
+        $payload = [
+            'name' => '(bez názvu)',
+            'status' => 'draft',
+            'excerpt' => '',
+            'body' => '',
+            'author' => $authorId > 0 ? (string)$authorId : '',
+            'created' => '',
+        ];
+        $result = $this->content->save($payload, $authorId);
+        if (($result['success'] ?? false) !== true) {
+            $this->respondJson([
+                'ok' => false,
+                'error' => ['code' => 'CREATE_FAILED', 'message' => 'Draft se nepodařilo vytvořit.'],
+            ], 422);
+            return;
+        }
+
+        $id = (int)($result['id'] ?? 0);
+        if ($id <= 0) {
+            $this->respondJson([
+                'ok' => false,
+                'error' => ['code' => 'INVALID_ID', 'message' => 'Draft nemá platné ID.'],
+            ], 422);
+            return;
+        }
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => ['id' => $id, 'created_new' => true],
+        ]);
+    }
+
+    public function autosaveApiV1(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', 'Neplatný CSRF token.')
+        ) {
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $name = trim((string)($_POST['name'] ?? ''));
+        $body = trim((string)($_POST['body'] ?? ''));
+        if ($id <= 0 && $name === '' && $body === '') {
+            $this->respondJson([
+                'ok' => true,
+                'data' => ['id' => 0, 'skipped' => true, 'reason' => 'empty'],
+            ]);
+            return;
+        }
+
+        $authorId = (int)($this->authService->auth()->id() ?? 0);
+        $payload = $this->resolveAutosavePayload($_POST, $authorId);
+        $isCreate = $id <= 0;
+        $result = $this->content->save($payload, $authorId, $isCreate ? null : $id);
+
+        if (($result['success'] ?? false) !== true) {
+            $this->respondJson([
+                'ok' => false,
+                'error' => ['code' => 'SAVE_FAILED', 'message' => 'Autosave se nepodařil.', 'errors' => $result['errors'] ?? []],
+            ], 422);
+            return;
+        }
+
+        $savedId = (int)($result['id'] ?? 0);
+        if ($savedId > 0 && isset($_POST['terms'])) {
+            $this->terms->syncContentTerms($savedId, (string)$_POST['terms']);
+        }
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => [
+                'id' => $savedId,
+                'created_new' => $isCreate,
+                'updated' => date('Y-m-d H:i:s'),
+            ],
+        ]);
+    }
+
     public function thumbnailUploadSubmit(callable $redirect): void
     {
         if (
@@ -286,7 +376,7 @@ final class AdminContentController extends BaseAdminController
         $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
     }
 
-    public function thumbnailSelectSubmit(callable $redirect): void
+    public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
         if (
             !$this->guardAdmin($redirect, false)
@@ -295,25 +385,30 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $id = (int)($_POST['id'] ?? 0);
-        $mediaId = (int)($_POST['media_id'] ?? 0);
-        $item = $this->content->find($id);
-
-        if ($item === null) {
-            $this->flash->add('error', 'Obsah nenalezen.');
-            $redirect('admin/content');
+        if ($contentId <= 0 || $this->content->find($contentId) === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'Obsah nenalezen.']], 404);
             return;
         }
 
-        if ($mediaId <= 0 || $this->media->find($mediaId) === null) {
-            $this->flash->add('error', 'Médium nenalezeno.');
-            $redirect($this->editPath($id));
+        $media = $this->media->find($mediaId);
+        if ($mediaId <= 0 || $media === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => 'Médium nenalezeno.']], 404);
             return;
         }
 
-        $ok = $this->content->setThumbnail($id, $mediaId);
-        $this->flash->add($ok ? 'success' : 'error', $ok ? 'Náhled byl přiřazen.' : 'Náhled se nepodařilo přiřadit.');
-        $redirect($this->editPath($id));
+        if (!$this->content->setThumbnail($contentId, $mediaId)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SELECT_FAILED', 'message' => 'Náhled se nepodařilo přiřadit.']], 422);
+            return;
+        }
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => [
+                'content_id' => $contentId,
+                'media_id' => $mediaId,
+                'media' => $this->mapLibraryItem($media),
+            ],
+        ]);
     }
 
     public function thumbnailDeleteSubmit(callable $redirect): void
@@ -544,6 +639,23 @@ final class AdminContentController extends BaseAdminController
     private function editPath(int $id): string
     {
         return 'admin/content/edit?id=' . $id;
+    }
+
+    private function resolveAutosavePayload(array $input, int $authorId): array
+    {
+        $name = trim((string)($input['name'] ?? ''));
+        if ($name === '' && trim((string)($input['body'] ?? '')) !== '') {
+            $name = '(bez názvu)';
+        }
+
+        return [
+            'name' => $name,
+            'status' => trim((string)($input['status'] ?? 'draft')) ?: 'draft',
+            'excerpt' => (string)($input['excerpt'] ?? ''),
+            'body' => (string)($input['body'] ?? ''),
+            'author' => trim((string)($input['author'] ?? '')) !== '' ? (string)$input['author'] : ($authorId > 0 ? (string)$authorId : ''),
+            'created' => (string)($input['created'] ?? ''),
+        ];
     }
 
     private function resolveListQuery(): array
