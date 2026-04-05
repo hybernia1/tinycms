@@ -296,6 +296,44 @@ final class ContentService
         return $items;
     }
 
+    public function listPublishedFeed(int $limit = 50): array
+    {
+        $safeLimit = $limit > 0 ? $limit : 50;
+        $stmt = $this->pdo->prepare(
+            'SELECT c.id, c.name, c.excerpt, c.body, c.created
+             FROM content c
+             WHERE c.status = :status AND c.created <= NOW()
+             ORDER BY c.created DESC, c.id DESC
+             LIMIT :limit'
+        );
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':limit', $safeLimit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function listPublishedByTermFeed(int $termId, int $limit = 50): array
+    {
+        if ($termId <= 0) {
+            return [];
+        }
+
+        $safeLimit = $limit > 0 ? $limit : 50;
+        $stmt = $this->pdo->prepare(
+            'SELECT DISTINCT c.id, c.name, c.excerpt, c.body, c.created
+             FROM content c
+             INNER JOIN content_terms ct ON ct.content = c.id
+             WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()
+             ORDER BY c.created DESC, c.id DESC
+             LIMIT :limit'
+        );
+        $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':limit', $safeLimit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function paginatePublishedByTerm(int $termId, int $page = 1, int $perPage = 10): array
     {
         if ($termId <= 0) {

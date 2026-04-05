@@ -28,5 +28,8 @@ return [
             'meta_description' => 'Search results on the website.',
             'meta_description_prefix' => 'Search results for',
         ],
+        'feed' => [
+            'title' => 'RSS feed',
+        ],
     ],
 ];

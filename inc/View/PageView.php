@@ -35,6 +35,14 @@ final class PageView
             'metaPath' => '',
             'metaOgType' => 'website',
             'metaSearchUrlTemplate' => 'search?q={search_term_string}',
+            'metaAlternateLinks' => [
+                [
+                    'rel' => 'alternate',
+                    'type' => 'application/rss+xml',
+                    'title' => I18n::t('front.feed.title', 'RSS feed'),
+                    'href' => 'feed',
+                ],
+            ],
         ]);
     }
 
@@ -85,6 +93,14 @@ final class PageView
             'metaPath' => $termSlug !== '' ? 'term/' . $termSlug : '',
             'metaOgType' => 'website',
             'metaSearchUrlTemplate' => 'search?q={search_term_string}',
+            'metaAlternateLinks' => $termSlug !== '' ? [
+                [
+                    'rel' => 'alternate',
+                    'type' => 'application/rss+xml',
+                    'title' => I18n::t('front.feed.title', 'RSS feed'),
+                    'href' => 'term/' . $termSlug . '/feed',
+                ],
+            ] : [],
         ]);
     }
 
@@ -109,6 +125,14 @@ final class PageView
             'metaRobots' => 'noindex,follow',
             'metaOgType' => 'website',
             'metaSearchUrlTemplate' => 'search?q={search_term_string}',
+        ]);
+    }
+
+    public function rssFeed(array $channel, array $items): void
+    {
+        $this->view->render('rss/layout', 'rss/feed', [
+            'channel' => $channel,
+            'items' => $items,
         ]);
     }
 

@@ -28,5 +28,8 @@ return [
             'meta_description' => 'Výsledky hledání na webu.',
             'meta_description_prefix' => 'Výsledky vyhledávání pro',
         ],
+        'feed' => [
+            'title' => 'RSS kanál',
+        ],
     ],
 ];

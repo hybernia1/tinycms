@@ -117,6 +117,47 @@ final class FrontController
         $this->pages->search($posts, $pagination, $query, $this->currentTheme(), $site);
     }
 
+    public function feed(): void
+    {
+        $settings = $this->settings->resolved();
+        $siteName = (string)($settings['sitename'] ?? 'TinyCMS');
+        $description = (string)($settings['meta_description'] ?? '');
+        $items = array_map(fn(array $item): array => $this->toRssItem($item), $this->contentService->listPublishedFeed(100));
+
+        $this->pages->rssFeed([
+            'title' => $siteName,
+            'link' => $this->absoluteUrl('/'),
+            'self' => $this->absoluteUrl('feed'),
+            'description' => $description !== '' ? $description : $siteName,
+        ], $items);
+    }
+
+    public function termFeed(array $params, callable $redirect): void
+    {
+        $requestedSlug = trim((string)($params['slug'] ?? ''));
+        $id = $this->slugger->extractId($requestedSlug);
+        $term = $id > 0 ? $this->termService->find($id) : null;
+
+        if ($term === null) {
+            $this->notFound();
+        }
+
+        $slug = $this->slugger->slug((string)($term['name'] ?? ''), (int)($term['id'] ?? 0));
+        if ($requestedSlug !== $slug) {
+            $redirect('term/' . $slug . '/feed', true);
+        }
+
+        $items = array_map(fn(array $item): array => $this->toRssItem($item), $this->contentService->listPublishedByTermFeed((int)($term['id'] ?? 0), 100));
+        $termName = (string)($term['name'] ?? '');
+
+        $this->pages->rssFeed([
+            'title' => $termName,
+            'link' => $this->absoluteUrl('term/' . $slug),
+            'self' => $this->absoluteUrl('term/' . $slug . '/feed'),
+            'description' => I18n::t('front.term.meta_description_prefix', 'Articles on topic') . ': ' . $termName,
+        ], $items);
+    }
+
     private function contentDetail(string $requestedSlug, callable $redirect): void
     {
         $id = $this->slugger->extractId($requestedSlug);
@@ -210,6 +251,28 @@ final class FrontController
             'created' => (string)($item['created'] ?? ''),
             'thumbnail' => $this->thumbnailData($item),
             'terms' => $this->toPublicTerms($terms),
+        ];
+    }
+
+    private function toRssItem(array $item): array
+    {
+        $id = (int)($item['id'] ?? 0);
+        $slug = $this->slugger->slug((string)($item['name'] ?? ''), $id);
+        $link = $this->absoluteUrl($slug);
+        $description = trim((string)($item['excerpt'] ?? ''));
+        if ($description === '') {
+            $description = trim((string)($item['body'] ?? ''));
+        }
+
+        $timestamp = strtotime((string)($item['created'] ?? ''));
+        $pubDate = $timestamp === false ? gmdate(DATE_RSS) : gmdate(DATE_RSS, $timestamp);
+
+        return [
+            'title' => (string)($item['name'] ?? ''),
+            'link' => $link,
+            'guid' => $link,
+            'pubDate' => $pubDate,
+            'description' => $description,
         ];
     }
 

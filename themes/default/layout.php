@@ -11,6 +11,18 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
     <?php
     $metaPath = trim((string)($metaPath ?? ''));
     $shortlinkPath = trim((string)($shortlinkPath ?? ''));
+    $alternateLinks = [];
+    foreach ((array)($metaAlternateLinks ?? []) as $link) {
+        if (!is_array($link)) {
+            continue;
+        }
+        $href = trim((string)($link['href'] ?? ''));
+        if ($href === '') {
+            continue;
+        }
+        $link['href'] = $absoluteUrl($href);
+        $alternateLinks[] = $link;
+    }
     ?>
     <?= $renderFrontHead([
         'title' => (string)($metaTitle ?? $pageTitle ?? 'TinyCMS'),
@@ -28,6 +40,7 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'published_time' => (string)($metaPublishedTime ?? ''),
         'modified_time' => (string)($metaModifiedTime ?? ''),
         'search_url_template' => isset($metaSearchUrlTemplate) ? $absoluteUrl((string)$metaSearchUrlTemplate) : '',
+        'alternate_links' => $alternateLinks,
     ]) ?>
     <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars($url($themeCss), ENT_QUOTES, 'UTF-8') ?>">

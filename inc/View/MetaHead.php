@@ -20,6 +20,7 @@ final class MetaHead
         $siteName = $this->clean((string)($meta['site_name'] ?? ''));
         $author = $this->clean((string)($meta['author'] ?? ''));
         $themeColor = $this->clean((string)($meta['theme_color'] ?? ''));
+        $alternateLinks = $this->alternateLinks($meta['alternate_links'] ?? []);
         $jsonLd = $this->jsonLdScript($meta);
 
         $parts = [
@@ -77,11 +78,53 @@ final class MetaHead
             $parts[] = '<meta name="theme-color" content="' . $this->esc($themeColor) . '">';
         }
 
+        foreach ($alternateLinks as $link) {
+            $parts[] = $link;
+        }
+
         if ($jsonLd !== '') {
             $parts[] = $jsonLd;
         }
 
         return implode("\n", $parts);
+    }
+
+    private function alternateLinks(mixed $raw): array
+    {
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($raw as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $href = $this->clean((string)($item['href'] ?? ''));
+            if ($href === '') {
+                continue;
+            }
+
+            $rel = $this->clean((string)($item['rel'] ?? 'alternate'));
+            $type = $this->clean((string)($item['type'] ?? ''));
+            $title = $this->clean((string)($item['title'] ?? ''));
+
+            $attrs = [
+                'rel="' . $this->esc($rel) . '"',
+                'href="' . $this->esc($href) . '"',
+            ];
+            if ($type !== '') {
+                $attrs[] = 'type="' . $this->esc($type) . '"';
+            }
+            if ($title !== '') {
+                $attrs[] = 'title="' . $this->esc($title) . '"';
+            }
+
+            $result[] = '<link ' . implode(' ', $attrs) . '>';
+        }
+
+        return $result;
     }
 
     private function jsonLdScript(array $meta): string
