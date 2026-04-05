@@ -1,4 +1,9 @@
 const modal = document.querySelector('[data-media-library-modal]');
+const i18n = window.tinycmsI18n || {};
+const t = (path, fallback = '') => {
+    const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
+    return typeof value === 'string' && value !== '' ? value : fallback;
+};
 const openTrigger = Array.prototype.find.call(
     document.querySelectorAll('[data-media-library-open]'),
     (node) => node.getAttribute('data-media-library-mode') !== 'editor',
@@ -81,7 +86,7 @@ if (modal && openTrigger) {
 
     const setTriggerEmpty = () => {
         openTrigger.classList.add('empty');
-        openTrigger.innerHTML = '<span>Zvolit obrázek</span>';
+        openTrigger.innerHTML = `<span>${t('content.choose_image', 'Choose image')}</span>`;
         if (detachWrap) {
             detachWrap.remove();
         }
@@ -198,7 +203,7 @@ if (modal && openTrigger) {
                 image.alt = selectedMedia.name;
                 detailPreview.appendChild(image);
             } else {
-                detailPreview.textContent = 'Bez náhledu';
+                detailPreview.textContent = t('media.no_preview', 'No preview');
             }
         }
 

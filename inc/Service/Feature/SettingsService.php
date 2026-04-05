@@ -18,11 +18,11 @@ final class SettingsService
     public function fields(): array
     {
         return [
-            'sitename' => ['label' => 'Site name', 'type' => 'text', 'default' => 'TinyCMS'],
-            'sitefooter' => ['label' => 'Site footer', 'type' => 'text', 'default' => '© TinyCMS'],
-            'siteauthor' => ['label' => 'Site author', 'type' => 'text', 'default' => 'Admin'],
-            'meta_title' => ['label' => 'Meta title', 'type' => 'text', 'default' => 'TinyCMS'],
-            'meta_description' => ['label' => 'Meta description', 'type' => 'textarea', 'default' => ''],
+            'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
+            'sitefooter' => ['label_key' => 'settings.fields.sitefooter', 'type' => 'text', 'default' => '© TinyCMS'],
+            'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
+            'meta_title' => ['label_key' => 'settings.fields.meta_title', 'type' => 'text', 'default' => 'TinyCMS'],
+            'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
         ];
     }
 

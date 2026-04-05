@@ -27,6 +27,7 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 'planned' => $t('content.planned'),
                 'switch_to_draft' => $t('content.switch_to_draft'),
                 'publish' => $t('content.publish'),
+                'choose_image' => $t('content.choose_image', 'Choose image'),
                 'deleted' => $t('content.deleted', 'Content deleted.'),
                 'published' => $t('content.published', 'Content published.'),
                 'switched_to_draft' => $t('content.switched_to_draft', 'Content switched to draft.'),
@@ -38,6 +39,7 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
             'media' => [
                 'deleted' => $t('media.deleted', 'Media deleted.'),
                 'delete' => $t('media.delete'),
+                'no_preview' => $t('media.no_preview', 'No preview'),
             ],
             'users' => [
                 'deleted' => $t('users.deleted', 'User deleted.'),

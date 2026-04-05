@@ -1,3 +1,4 @@
+(() => {
 const i18n = window.tinycmsI18n || {};
 const t = (path, fallback = '') => {
     const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
@@ -26,3 +27,4 @@ document.addEventListener('click', (event) => {
     button.setAttribute('aria-label', label);
     button.setAttribute('title', label);
 });
+})();

@@ -174,6 +174,7 @@ return [
         'rename_failed' => 'Název se nepodařilo uložit.',
         'upload_file_required' => 'Nahrajte prosím soubor média.',
         'file_required' => 'Soubor je povinný.',
+        'no_preview' => 'Bez náhledu',
     ],
     'content' => [
         'search_placeholder' => 'Hledat název nebo obsah',
@@ -224,6 +225,13 @@ return [
     'settings' => [
         'save' => 'Uložit nastavení',
         'saved' => 'Nastavení uloženo.',
+        'fields' => [
+            'sitename' => 'Název webu',
+            'sitefooter' => 'Patička webu',
+            'siteauthor' => 'Autor webu',
+            'meta_title' => 'Meta title',
+            'meta_description' => 'Meta description',
+        ],
     ],
     'auth' => [
         'email_required' => 'E-mail je povinný.',

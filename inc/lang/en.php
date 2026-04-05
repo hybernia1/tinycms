@@ -174,6 +174,7 @@ return [
         'rename_failed' => 'Could not save name.',
         'upload_file_required' => 'Please upload a media file.',
         'file_required' => 'File is required.',
+        'no_preview' => 'No preview',
     ],
     'content' => [
         'search_placeholder' => 'Search title or content',
@@ -224,6 +225,13 @@ return [
     'settings' => [
         'save' => 'Save settings',
         'saved' => 'Settings saved.',
+        'fields' => [
+            'sitename' => 'Site name',
+            'sitefooter' => 'Site footer',
+            'siteauthor' => 'Site author',
+            'meta_title' => 'Meta title',
+            'meta_description' => 'Meta description',
+        ],
     ],
     'auth' => [
         'email_required' => 'Email is required.',
