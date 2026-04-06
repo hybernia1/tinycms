@@ -624,10 +624,13 @@
         function resetTypingColors() {
             var defaultColor = window.getComputedStyle(editor).color || 'rgb(0, 0, 0)';
             var defaultBackground = window.getComputedStyle(editor).backgroundColor || 'rgba(0, 0, 0, 0)';
+            var backgroundFallback = defaultBackground === 'rgba(0, 0, 0, 0)' || defaultBackground === 'transparent' ? '#ffffff' : defaultBackground;
+            document.execCommand('styleWithCSS', false, false);
+            document.execCommand('removeFormat', false, null);
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, defaultColor);
-            document.execCommand('hiliteColor', false, defaultBackground);
-            document.execCommand('backColor', false, defaultBackground);
+            document.execCommand('hiliteColor', false, backgroundFallback);
+            document.execCommand('backColor', false, backgroundFallback);
         }
 
         function setHtmlMode(enabled) {
