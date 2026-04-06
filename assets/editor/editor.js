@@ -49,6 +49,17 @@
         return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
     }
 
+    function normalizeLinkUrl(url) {
+        var value = String(url || '').trim();
+        if (!value) {
+            return '';
+        }
+        if (/^(mailto:|tel:|https?:\/\/|\/|#)/i.test(value)) {
+            return value;
+        }
+        return 'https://' + value.replace(/^\/+/, '');
+    }
+
     function createImageControls() {
         var controls = document.createElement('div');
         controls.className = 'image-controls';
@@ -624,6 +635,46 @@
 
         setFocusMode(document.body.classList.contains('admin-focus-mode'));
 
+        function updateLinkApplyState() {
+            var linkInput = linkModal.querySelector('[data-role="link-input"]');
+            var applyButton = linkModal.querySelector('[data-role="link-apply"]');
+            if (!applyButton) {
+                return;
+            }
+            applyButton.disabled = !linkInput || linkInput.value.trim() === '';
+        }
+
+        function resetLinkModalFields() {
+            var linkInput = linkModal.querySelector('[data-role="link-input"]');
+            var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
+            var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
+            var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
+            if (linkInput) {
+                linkInput.value = '';
+            }
+            if (linkTextInput) {
+                linkTextInput.value = '';
+            }
+            if (linkTargetBlank) {
+                linkTargetBlank.checked = false;
+            }
+            if (linkNoFollow) {
+                linkNoFollow.checked = false;
+            }
+            updateLinkApplyState();
+        }
+
+        function toggleMenu(menuClass) {
+            ['is-heading-open', 'is-list-open', 'is-align-open', 'is-text-color-open', 'is-bg-color-open'].forEach(function (className) {
+                if (className === menuClass) {
+                    wrapper.classList.toggle(className);
+                    return;
+                }
+                wrapper.classList.remove(className);
+            });
+            wrapper.classList.remove('is-link-modal-open');
+        }
+
         function closeMenus() {
             wrapper.classList.remove('is-heading-open');
             wrapper.classList.remove('is-list-open');
@@ -633,6 +684,15 @@
             wrapper.classList.remove('is-link-modal-open');
             hideLinkTools();
             activeLink = null;
+        }
+
+        function persistEditorState(withFormatState) {
+            normalizeBlocks(editor);
+            enhanceImageBlocks(editor);
+            sync(textarea, editor);
+            if (withFormatState) {
+                updateFormatState();
+            }
         }
 
         function updateFormatState() {
@@ -655,11 +715,8 @@
             editor.focus();
             document.execCommand('defaultParagraphSeparator', false, 'p');
             document.execCommand(command, false, value || null);
-            normalizeBlocks(editor);
-            enhanceImageBlocks(editor);
-            sync(textarea, editor);
+            persistEditorState(true);
             closeMenus();
-            updateFormatState();
         }
 
         function resetTypingColors() {
@@ -748,10 +805,7 @@
                     focusEditorEnd(editor);
                 }
                 document.execCommand('insertHTML', false, '<hr class="wysiwyg-pagebreak"><p><br></p>');
-                normalizeBlocks(editor);
-                enhanceImageBlocks(editor);
-                sync(textarea, editor);
-                updateFormatState();
+                persistEditorState(true);
                 return;
             }
 
@@ -759,12 +813,7 @@
                 if (htmlMode) {
                     return;
                 }
-                wrapper.classList.remove('is-heading-open');
-                wrapper.classList.remove('is-align-open');
-                wrapper.classList.remove('is-text-color-open');
-                wrapper.classList.remove('is-bg-color-open');
-                wrapper.classList.toggle('is-list-open');
-                wrapper.classList.remove('is-link-modal-open');
+                toggleMenu('is-list-open');
                 return;
             }
 
@@ -772,12 +821,7 @@
                 if (htmlMode) {
                     return;
                 }
-                wrapper.classList.toggle('is-heading-open');
-                wrapper.classList.remove('is-list-open');
-                wrapper.classList.remove('is-align-open');
-                wrapper.classList.remove('is-text-color-open');
-                wrapper.classList.remove('is-bg-color-open');
-                wrapper.classList.remove('is-link-modal-open');
+                toggleMenu('is-heading-open');
                 return;
             }
 
@@ -785,12 +829,7 @@
                 if (htmlMode) {
                     return;
                 }
-                wrapper.classList.remove('is-heading-open');
-                wrapper.classList.remove('is-list-open');
-                wrapper.classList.toggle('is-align-open');
-                wrapper.classList.remove('is-text-color-open');
-                wrapper.classList.remove('is-bg-color-open');
-                wrapper.classList.remove('is-link-modal-open');
+                toggleMenu('is-align-open');
                 return;
             }
 
@@ -798,12 +837,7 @@
                 if (htmlMode) {
                     return;
                 }
-                wrapper.classList.remove('is-heading-open');
-                wrapper.classList.remove('is-list-open');
-                wrapper.classList.remove('is-align-open');
-                wrapper.classList.toggle('is-text-color-open');
-                wrapper.classList.remove('is-bg-color-open');
-                wrapper.classList.remove('is-link-modal-open');
+                toggleMenu('is-text-color-open');
                 return;
             }
 
@@ -811,12 +845,7 @@
                 if (htmlMode) {
                     return;
                 }
-                wrapper.classList.remove('is-heading-open');
-                wrapper.classList.remove('is-list-open');
-                wrapper.classList.remove('is-align-open');
-                wrapper.classList.remove('is-text-color-open');
-                wrapper.classList.toggle('is-bg-color-open');
-                wrapper.classList.remove('is-link-modal-open');
+                toggleMenu('is-bg-color-open');
                 return;
             }
 
@@ -878,21 +907,8 @@
                     restoreSelection(linkRange, editor);
                     document.execCommand('unlink', false, null);
                 }
-                normalizeBlocks(editor);
-                sync(textarea, editor);
-                updateFormatState();
-                if (linkInput) {
-                    linkInput.value = '';
-                }
-                if (linkTextInput) {
-                    linkTextInput.value = '';
-                }
-                if (linkTargetBlank) {
-                    linkTargetBlank.checked = false;
-                }
-                if (linkNoFollow) {
-                    linkNoFollow.checked = false;
-                }
+                persistEditorState(true);
+                resetLinkModalFields();
                 activeLink = null;
                 closeMenus();
                 return;
@@ -900,7 +916,7 @@
 
             var apply = event.target.closest('[data-role="link-apply"]');
             if (apply) {
-                var url = linkInput ? linkInput.value.trim() : '';
+                var url = normalizeLinkUrl(linkInput ? linkInput.value : '');
                 var textValue = linkTextInput ? linkTextInput.value.trim() : '';
                 var withTargetBlank = !!(linkTargetBlank && linkTargetBlank.checked);
                 var withNoFollow = !!(linkNoFollow && linkNoFollow.checked);
@@ -938,21 +954,8 @@
                             linkNode.textContent = textValue;
                         }
                     }
-                    normalizeBlocks(editor);
-                    sync(textarea, editor);
-                    updateFormatState();
-                    if (linkInput) {
-                        linkInput.value = '';
-                    }
-                    if (linkTextInput) {
-                        linkTextInput.value = '';
-                    }
-                    if (linkTargetBlank) {
-                        linkTargetBlank.checked = false;
-                    }
-                    if (linkNoFollow) {
-                        linkNoFollow.checked = false;
-                    }
+                    persistEditorState(true);
+                    resetLinkModalFields();
                     activeLink = null;
                 }
                 closeMenus();
@@ -960,20 +963,15 @@
             }
 
             if (event.target.closest('[data-role="link-cancel"]')) {
-                if (linkInput) {
-                    linkInput.value = '';
-                }
-                if (linkTextInput) {
-                    linkTextInput.value = '';
-                }
-                if (linkTargetBlank) {
-                    linkTargetBlank.checked = false;
-                }
-                if (linkNoFollow) {
-                    linkNoFollow.checked = false;
-                }
+                resetLinkModalFields();
                 activeLink = null;
                 closeMenus();
+            }
+        });
+
+        linkModal.addEventListener('input', function (event) {
+            if (event.target && event.target.matches('[data-role="link-input"]')) {
+                updateLinkApplyState();
             }
         });
 
@@ -1013,9 +1011,7 @@
                 parent.insertBefore(activeLink.firstChild, activeLink);
             }
             parent.removeChild(activeLink);
-            normalizeBlocks(editor);
-            sync(textarea, editor);
-            updateFormatState();
+            persistEditorState(true);
             hideLinkTools();
             activeLink = null;
         });
@@ -1160,10 +1156,7 @@
                 focusEditorEnd(editor);
             }
             document.execCommand('insertHTML', false, '<div class="block block-image align-center"><img src="' + String(detail.url).replace(/"/g, '&quot;') + '" alt="' + String(detail.name || '').replace(/"/g, '&quot;') + '" data-media-id="' + mediaId + '"></div><p><br></p>');
-            normalizeBlocks(editor);
-            enhanceImageBlocks(editor);
-            sync(textarea, editor);
-            updateFormatState();
+            persistEditorState(true);
         });
 
         editor.addEventListener('keydown', function (event) {
@@ -1177,7 +1170,7 @@
                         selectedImageBlock.parentNode.insertBefore(target, selectedImageBlock.nextSibling);
                     }
                     placeCaret(target);
-                    sync(textarea, editor);
+                    persistEditorState(false);
                     return;
                 }
             }
@@ -1191,8 +1184,7 @@
                     paragraph.innerHTML = '<br>';
                     quoteBlock.parentNode.insertBefore(paragraph, quoteBlock.nextSibling);
                     placeCaret(paragraph);
-                    sync(textarea, editor);
-                    updateFormatState();
+                    persistEditorState(true);
                     return;
                 }
             }
@@ -1232,10 +1224,7 @@
             }
             var embedHtml = '<div class="block block-embed block-embed-youtube"><div class="embed-frame"><iframe src="https://www.youtube.com/embed/' + videoId + '" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe></div></div><p><br></p>';
             document.execCommand('insertHTML', false, embedHtml);
-            normalizeBlocks(editor);
-            enhanceImageBlocks(editor);
-            sync(textarea, editor);
-            updateFormatState();
+            persistEditorState(true);
         });
 
         editor.addEventListener('input', function () {
@@ -1247,10 +1236,7 @@
             if (htmlMode) {
                 return;
             }
-            normalizeBlocks(editor);
-            enhanceImageBlocks(editor);
-            sync(textarea, editor);
-            updateFormatState();
+            persistEditorState(true);
         });
 
         textarea.addEventListener('tinycms:editor-sync-from-textarea', function () {
@@ -1270,9 +1256,7 @@
                 if (htmlMode) {
                     return;
                 }
-                normalizeBlocks(editor);
-                enhanceImageBlocks(editor);
-                sync(textarea, editor);
+                persistEditorState(false);
             });
         }
 
@@ -1281,6 +1265,7 @@
         enhanceImageBlocks(editor);
         sync(textarea, editor);
         updateFormatState();
+        updateLinkApplyState();
     }
 
     document.addEventListener('DOMContentLoaded', function () {
