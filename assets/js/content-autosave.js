@@ -61,6 +61,7 @@
         var saving = false;
         var pending = false;
         var lastSent = '';
+        var bypassLeaveWarning = false;
         var appRoot = '';
         var allowSuspiciousOnce = false;
         var guardActive = false;
@@ -350,8 +351,26 @@
             }, 1200);
         }
 
+        function hasUnsavedChanges() {
+            return signature(serializePayload()) !== lastSent;
+        }
+
+        function warnBeforeUnload(event) {
+            if (bypassLeaveWarning || !hasUnsavedChanges()) {
+                return;
+            }
+            event.preventDefault();
+            event.returnValue = '';
+        }
+
+        lastSent = signature(serializePayload());
+
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
+        form.addEventListener('submit', function () {
+            bypassLeaveWarning = true;
+        });
+        window.addEventListener('beforeunload', warnBeforeUnload);
 
         document.addEventListener('tinycms:content-ensure-draft', function () {
             ensureDraft().then(function (id) {
