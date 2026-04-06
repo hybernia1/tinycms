@@ -621,6 +621,13 @@
             updateFormatState();
         }
 
+        function resetTypingColors() {
+            var defaultColor = window.getComputedStyle(editor).color || 'rgb(0, 0, 0)';
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('foreColor', false, defaultColor);
+            document.execCommand('hiliteColor', false, 'transparent');
+        }
+
         function setHtmlMode(enabled) {
             htmlMode = enabled;
             wrapper.classList.toggle('is-html-mode', enabled);
@@ -1152,6 +1159,7 @@
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
                 document.execCommand('removeFormat', false, null);
+                resetTypingColors();
                 if (wasBold) {
                     document.execCommand('bold', false, null);
                 }
