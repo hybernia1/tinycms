@@ -150,7 +150,8 @@ return [
     ],
     'media' => [
         'file' => 'File',
-        'file_optional_replace' => 'optional, replaces current',
+        'path' => 'Path',
+        'path_webp' => 'Path webp',
         'used_as_thumbnail' => 'Used as thumbnail',
         'no_thumbnail_usage' => 'Media is not used as a thumbnail in any post.',
         'search_placeholder' => 'Search name or path',

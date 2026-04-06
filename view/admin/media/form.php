@@ -16,18 +16,20 @@
             <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
             <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
-        <div class="mb-3">
-            <label><?= htmlspecialchars($t('media.file', 'File'), ENT_QUOTES, 'UTF-8') ?> <?= $mode === 'add' ? '' : '(' . htmlspecialchars($t('media.file_optional_replace', 'optional, replaces current'), ENT_QUOTES, 'UTF-8') . ')' ?></label>
-            <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" <?= $mode === 'add' ? 'required' : '' ?>>
-            <?php if (!empty($errors['file'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['file'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
-        </div>
+        <?php if ($mode === 'add'): ?>
+            <div class="mb-3">
+                <label><?= htmlspecialchars($t('media.file', 'File'), ENT_QUOTES, 'UTF-8') ?></label>
+                <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                <?php if (!empty($errors['file'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['file'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+            </div>
+        <?php endif; ?>
         <?php if ($mode === 'edit'): ?>
             <div class="mb-3">
-                <label>Path</label>
+                <label><?= htmlspecialchars($t('media.path', 'Path'), ENT_QUOTES, 'UTF-8') ?></label>
                 <div class="text-muted"><?= htmlspecialchars((string)($item['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
             <div class="mb-3">
-                <label>Path webp</label>
+                <label><?= htmlspecialchars($t('media.path_webp', 'Path webp'), ENT_QUOTES, 'UTF-8') ?></label>
                 <div class="text-muted"><?= htmlspecialchars((string)($item['path_webp'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
             <?php if ($previewUrl !== ''): ?>
