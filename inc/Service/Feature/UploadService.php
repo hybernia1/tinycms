@@ -20,6 +20,12 @@ final class UploadService
         'image/webp' => 'webp',
         'image/gif' => 'gif',
     ];
+    private const FAVICON_MIME_TO_EXTENSION = [
+        'image/png' => 'png',
+        'image/x-icon' => 'ico',
+        'image/vnd.microsoft.icon' => 'ico',
+        'image/svg+xml' => 'svg',
+    ];
 
     public function __construct(
         private string $rootPath,
@@ -131,6 +137,53 @@ final class UploadService
             if (is_file($absolute)) {
                 @unlink($absolute);
             }
+        }
+    }
+
+    public function uploadFavicon(array $file): array
+    {
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
+        }
+
+        $tmpPath = (string)($file['tmp_name'] ?? '');
+        if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
+            return ['success' => false, 'error' => I18n::t('upload.invalid_upload', 'Invalid file upload.')];
+        }
+
+        $mime = $this->detectMime($tmpPath);
+        $extension = self::FAVICON_MIME_TO_EXTENSION[$mime] ?? '';
+        if ($extension === '') {
+            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type', 'Unsupported file type.')];
+        }
+
+        $subdir = 'uploads/favicons';
+        $absDir = $this->rootPath . '/' . $subdir;
+        if (!is_dir($absDir) && !mkdir($absDir, 0775, true) && !is_dir($absDir)) {
+            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed', 'Cannot create target directory.')];
+        }
+
+        $name = 'favicon-' . date('YmdHis') . '-' . random_int(1000, 9999) . '.' . $extension;
+        $path = $subdir . '/' . $name;
+        $absolute = $this->rootPath . '/' . $path;
+
+        if (!move_uploaded_file($tmpPath, $absolute)) {
+            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed', 'Failed to save file to disk.')];
+        }
+
+        return ['success' => true, 'data' => ['path' => $path]];
+    }
+
+    public function deleteRelativeFile(string $path): void
+    {
+        $trimmedPath = trim($path);
+        if ($trimmedPath === '') {
+            return;
+        }
+
+        $absolute = $this->rootPath . '/' . ltrim($trimmedPath, '/');
+        if (is_file($absolute)) {
+            @unlink($absolute);
         }
     }
 

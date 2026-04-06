@@ -27,6 +27,7 @@ final class PageView
             'siteName' => $siteName,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
+            'siteFavicon' => (string)($site['favicon'] ?? ''),
             'themeName' => $theme,
             'pageTitle' => $siteName,
             'metaTitle' => (string)($site['meta_title'] ?? $siteName),
@@ -52,7 +53,7 @@ final class PageView
         $this->view->render('front/layout', 'front/auth/login', $state);
     }
 
-    public function contentDetail(array $item, string $theme): void
+    public function contentDetail(array $item, string $theme, array $site = []): void
     {
         $resolvedTheme = $this->themes->resolveTheme($theme);
         $terms = array_map(static fn(array $term): string => trim((string)($term['name'] ?? '')), (array)($item['terms'] ?? []));
@@ -64,6 +65,10 @@ final class PageView
         $this->view->renderTheme($resolvedTheme, 'content', [
             'item' => $item,
             'themeName' => $resolvedTheme,
+            'siteName' => (string)($site['name'] ?? 'TinyCMS'),
+            'siteAuthor' => (string)($site['author'] ?? 'Admin'),
+            'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
+            'siteFavicon' => (string)($site['favicon'] ?? ''),
             'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
             'metaTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
             'metaDescription' => (string)($item['excerpt'] ?? ''),
@@ -76,7 +81,7 @@ final class PageView
         ]);
     }
 
-    public function termArchive(array $term, array $posts, array $pagination, string $theme): void
+    public function termArchive(array $term, array $posts, array $pagination, string $theme, array $site = []): void
     {
         $resolvedTheme = $this->themes->resolveTheme($theme);
         $termSlug = (string)($term['slug'] ?? '');
@@ -86,6 +91,10 @@ final class PageView
             'posts' => $posts,
             'pagination' => $pagination,
             'themeName' => $resolvedTheme,
+            'siteName' => (string)($site['name'] ?? 'TinyCMS'),
+            'siteAuthor' => (string)($site['author'] ?? 'Admin'),
+            'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
+            'siteFavicon' => (string)($site['favicon'] ?? ''),
             'pageTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
             'metaTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
             'metaDescription' => I18n::t('front.term.meta_description_prefix', 'Articles on topic') . ': ' . $termName,
@@ -115,6 +124,9 @@ final class PageView
             'query' => $query,
             'themeName' => $resolvedTheme,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
+            'siteFavicon' => (string)($site['favicon'] ?? ''),
+            'siteName' => (string)($site['name'] ?? 'TinyCMS'),
+            'siteAuthor' => (string)($site['author'] ?? 'Admin'),
             'pageTitle' => $title,
             'metaTitle' => $title,
             'metaDescription' => $query === ''

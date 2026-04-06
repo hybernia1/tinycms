@@ -36,6 +36,7 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'site_name' => (string)($siteName ?? 'TinyCMS'),
         'author' => (string)($siteAuthor ?? ''),
         'theme_color' => (string)($metaThemeColor ?? '#2563eb'),
+        'favicon' => (string)($siteFavicon ?? '') !== '' ? $absoluteUrl((string)$siteFavicon) : '',
         'structured_data' => $metaStructuredData ?? null,
         'published_time' => (string)($metaPublishedTime ?? ''),
         'modified_time' => (string)($metaModifiedTime ?? ''),

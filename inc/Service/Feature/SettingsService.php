@@ -49,6 +49,7 @@ final class SettingsService
             'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
             'meta_title' => ['label_key' => 'settings.fields.meta_title', 'type' => 'text', 'default' => 'TinyCMS'],
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
+            'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
         ];
     }
 
