@@ -50,6 +50,8 @@ const pushFlash = (type, message) => {
         return;
     }
 
+    container.querySelectorAll('.flash').forEach((node) => node.remove());
+
     const flashType = ['success', 'error', 'info'].includes(type) ? type : 'info';
     const flash = document.createElement('div');
     flash.className = `flash flash-${flashType}`;
