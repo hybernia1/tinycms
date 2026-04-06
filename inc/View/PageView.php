@@ -288,12 +288,12 @@ final class PageView
     private function adminMenu(): array
     {
         return [
-            ['label' => I18n::t('admin.menu.dashboard', 'Dashboard'), 'url' => 'admin/dashboard'],
-            ['label' => I18n::t('admin.menu.users', 'Users'), 'url' => 'admin/users'],
-            ['label' => I18n::t('admin.menu.content', 'Content'), 'url' => 'admin/content'],
-            ['label' => I18n::t('admin.menu.media', 'Media'), 'url' => 'admin/media'],
-            ['label' => I18n::t('admin.menu.terms', 'Tags'), 'url' => 'admin/terms'],
-            ['label' => I18n::t('admin.menu.settings', 'Settings'), 'url' => 'admin/settings'],
+            ['label' => I18n::t('admin.menu.dashboard', 'Dashboard'), 'url' => 'admin/dashboard', 'icon' => 'dashboard'],
+            ['label' => I18n::t('admin.menu.users', 'Users'), 'url' => 'admin/users', 'icon' => 'users'],
+            ['label' => I18n::t('admin.menu.content', 'Content'), 'url' => 'admin/content', 'icon' => 'content'],
+            ['label' => I18n::t('admin.menu.media', 'Media'), 'url' => 'admin/media', 'icon' => 'media'],
+            ['label' => I18n::t('admin.menu.terms', 'Tags'), 'url' => 'admin/terms', 'icon' => 'terms'],
+            ['label' => I18n::t('admin.menu.settings', 'Settings'), 'url' => 'admin/settings', 'icon' => 'settings'],
         ];
     }
 }
