@@ -737,7 +737,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
     align-items: center;
     justify-content: center;
     padding: var(--space-4);
-    z-index: 140;
+    z-index: 170;
 }
 
 .modal-overlay.open {
