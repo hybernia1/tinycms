@@ -779,7 +779,7 @@ final class AdminContentController extends BaseAdminController
     {
         $name = trim((string)($input['name'] ?? ''));
         if ($name === '' && trim((string)($input['body'] ?? '')) !== '') {
-            $name = I18n::t('content.untitled', '(untitled)');
+            $name = $this->resolveAutosaveDraftName((int)($input['id'] ?? 0));
         }
 
         $author = trim((string)($input['author'] ?? ''));
@@ -797,6 +797,11 @@ final class AdminContentController extends BaseAdminController
             'author' => $author,
             'created' => (string)($input['created'] ?? ''),
         ];
+    }
+
+    private function resolveAutosaveDraftName(int $id): string
+    {
+        return $id > 0 ? sprintf('(draft-%d)', $id) : '(draft)';
     }
 
     private function normalizeContentInput(array $input, int $authorId): array

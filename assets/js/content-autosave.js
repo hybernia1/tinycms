@@ -350,7 +350,7 @@
             }
             saveTimer = window.setTimeout(function () {
                 runAutosave().catch(function () { return null; });
-            }, 1200);
+            }, 60000);
         }
 
         function hasUnsavedChanges() {
