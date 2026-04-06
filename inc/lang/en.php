@@ -192,6 +192,7 @@ return [
         'cat_keyboard_warning' => 'Unusual change detected. Possible cat-on-keyboard event. Restore safe version or continue?',
         'cat_keyboard_restore' => 'Restore safe version',
         'cat_keyboard_continue' => 'Continue and save',
+        'leave_page_confirm' => 'Unsaved changes will be lost. Do you really want to continue?',
         'thumbnail_save_failed' => 'Could not save thumbnail.',
         'thumbnail_uploaded' => 'Thumbnail uploaded.',
         'thumbnail_detach_failed' => 'Could not detach thumbnail.',

@@ -62,6 +62,8 @@
         var pending = false;
         var lastSent = '';
         var bypassLeaveWarning = false;
+        var pendingNavigation = '';
+        var pendingReload = false;
         var appRoot = '';
         var allowSuspiciousOnce = false;
         var guardActive = false;
@@ -355,12 +357,39 @@
             return signature(serializePayload()) !== lastSent;
         }
 
-        function warnBeforeUnload(event) {
-            if (bypassLeaveWarning || !hasUnsavedChanges()) {
+        function leaveModal() {
+            return document.querySelector('[data-content-leave-modal]');
+        }
+
+        function closeLeaveModal() {
+            var modal = leaveModal();
+            if (modal) {
+                modal.classList.remove('open');
+            }
+            pendingNavigation = '';
+            pendingReload = false;
+        }
+
+        function openLeaveModal() {
+            var modal = leaveModal();
+            if (!modal) {
                 return;
             }
-            event.preventDefault();
-            event.returnValue = '';
+            modal.classList.add('open');
+        }
+
+        function shouldGuardLink(link) {
+            if (!link) {
+                return false;
+            }
+            var href = String(link.getAttribute('href') || '').trim();
+            if (href === '' || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) {
+                return false;
+            }
+            if (link.hasAttribute('download') || (link.getAttribute('target') || '') === '_blank') {
+                return false;
+            }
+            return true;
         }
 
         lastSent = signature(serializePayload());
@@ -370,7 +399,58 @@
         form.addEventListener('submit', function () {
             bypassLeaveWarning = true;
         });
-        window.addEventListener('beforeunload', warnBeforeUnload);
+        window.addEventListener('keydown', function (event) {
+            if (bypassLeaveWarning || !hasUnsavedChanges()) {
+                return;
+            }
+            var isReload = event.key === 'F5' || ((event.ctrlKey || event.metaKey) && String(event.key || '').toLowerCase() === 'r');
+            if (!isReload) {
+                return;
+            }
+            event.preventDefault();
+            pendingNavigation = '';
+            pendingReload = true;
+            openLeaveModal();
+        });
+
+        document.addEventListener('click', function (event) {
+            var cancelLeave = event.target.closest('[data-content-leave-cancel]');
+            if (cancelLeave) {
+                event.preventDefault();
+                closeLeaveModal();
+                return;
+            }
+
+            var confirmLeave = event.target.closest('[data-content-leave-confirm]');
+            if (confirmLeave) {
+                event.preventDefault();
+                bypassLeaveWarning = true;
+                if (pendingReload) {
+                    window.location.reload();
+                    return;
+                }
+                if (pendingNavigation !== '') {
+                    window.location.href = pendingNavigation;
+                    return;
+                }
+                closeLeaveModal();
+                return;
+            }
+
+            if (bypassLeaveWarning || !hasUnsavedChanges()) {
+                return;
+            }
+
+            var link = event.target.closest('a[href]');
+            if (!shouldGuardLink(link)) {
+                return;
+            }
+
+            event.preventDefault();
+            pendingNavigation = String(link.href || '');
+            pendingReload = false;
+            openLeaveModal();
+        });
 
         document.addEventListener('tinycms:content-ensure-draft', function () {
             ensureDraft().then(function (id) {
