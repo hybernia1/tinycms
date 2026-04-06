@@ -171,7 +171,10 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
             ?>
             <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= htmlspecialchars((string)$item['url'], ENT_QUOTES, 'UTF-8') ?>">
-                <?= htmlspecialchars((string)$item['label'], ENT_QUOTES, 'UTF-8') ?>
+                <?php if (!empty($item['icon'])): ?>
+                <?= $icon((string)$item['icon'], 'icon admin-nav-link-icon') ?>
+                <?php endif; ?>
+                <span><?= htmlspecialchars((string)$item['label'], ENT_QUOTES, 'UTF-8') ?></span>
             </a>
             <?php endforeach; ?>
         </nav>
