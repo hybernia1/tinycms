@@ -604,6 +604,7 @@
             var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
             var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
+            var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
             wrapper.classList.add('is-link-modal-open');
             wrapper.classList.remove('is-list-open');
@@ -614,7 +615,7 @@
                 linkInput.select();
             }
             if (linkTextInput) {
-                linkTextInput.value = activeLink ? (activeLink.textContent || '').trim() : '';
+                linkTextInput.value = activeLink ? (activeLink.textContent || '').trim() : selectedText;
             }
             if (linkTargetBlank) {
                 linkTargetBlank.checked = !!(activeLink && activeLink.getAttribute('target') === '_blank');
