@@ -231,6 +231,21 @@
     margin: 0 0 var(--space-2);
 }
 
+.wysiwyg-editor .block.block-embed .embed-frame {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    background: #000;
+}
+
+.wysiwyg-editor .block.block-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
 .wysiwyg-editor .block.block-list ul,
 .wysiwyg-editor .block.block-list ol {
     margin: 0;
