@@ -33,6 +33,18 @@
             .replace(/'/g, '&#039;');
     }
 
+    var iconSprite = (function () {
+        var iconUse = document.querySelector('svg use[href*="#icon-"]');
+        return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
+    })();
+
+    function icon(name) {
+        if (iconSprite === '') {
+            return '';
+        }
+        return '<svg class="icon" aria-hidden="true" focusable="false"><use href="' + esc(iconSprite) + '#icon-' + esc(name) + '"></use></svg>';
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var form = document.querySelector('.content-editor-form');
         if (!form) {
@@ -120,7 +132,7 @@
             var flash = document.createElement('div');
             flash.className = 'flash flash-error';
             flash.setAttribute('data-cat-keyboard-guard', '1');
-            flash.innerHTML = '<span>' + esc(i18n('content.cat_keyboard_warning', 'Detekována neobvyklá změna.')) + '</span>'
+            flash.innerHTML = '<span class="d-flex align-center gap-2">' + icon('cat') + '<span>' + esc(i18n('content.cat_keyboard_warning', 'Detekována neobvyklá změna.')) + '</span></span>'
                 + '<div class="d-flex gap-2">'
                 + '<button type="button" class="btn btn-light" data-cat-keyboard-restore="1">' + esc(i18n('content.cat_keyboard_restore', 'Obnovit bezpečnou verzi')) + '</button>'
                 + '<button type="button" class="btn btn-light" data-cat-keyboard-continue="1">' + esc(i18n('content.cat_keyboard_continue', 'Pokračovat a uložit')) + '</button>'
