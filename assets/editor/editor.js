@@ -623,9 +623,11 @@
 
         function resetTypingColors() {
             var defaultColor = window.getComputedStyle(editor).color || 'rgb(0, 0, 0)';
+            var defaultBackground = window.getComputedStyle(editor).backgroundColor || 'rgba(0, 0, 0, 0)';
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, defaultColor);
-            document.execCommand('hiliteColor', false, 'transparent');
+            document.execCommand('hiliteColor', false, defaultBackground);
+            document.execCommand('backColor', false, defaultBackground);
         }
 
         function setHtmlMode(enabled) {
