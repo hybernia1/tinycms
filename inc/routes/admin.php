@@ -77,6 +77,14 @@ $router->post('admin/content/add', static function () use ($adminContent, $redir
     $adminContent->addSubmit($redirect);
 });
 
+$router->get('admin/content/import/wordpress', static function () use ($adminContent, $redirect): void {
+    $adminContent->importWordpressForm($redirect);
+});
+
+$router->post('admin/content/import/wordpress', static function () use ($adminContent, $redirect): void {
+    $adminContent->importWordpressSubmit($redirect);
+});
+
 $router->get('admin/content/edit', static function () use ($adminContent, $redirect): void {
     $adminContent->editForm($redirect);
 });

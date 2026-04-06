@@ -205,6 +205,14 @@ final class PageView
         ]);
     }
 
+    public function adminContentImportWordpress(): void
+    {
+        $this->view->render('admin/layout', 'admin/content/import-wordpress', [
+            'adminMenu' => $this->adminMenu(),
+            'pageTitle' => I18n::t('content.wp_import_title', 'WordPress import'),
+        ]);
+    }
+
     public function adminTermList(array $pagination, array $allowedPerPage, string $query): void
     {
         $this->view->render('admin/layout', 'admin/terms/list', [

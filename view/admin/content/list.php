@@ -31,6 +31,9 @@ $csrfMarkup = $csrfField();
             <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
         </div>
     </form>
+    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content/import/wordpress'), ENT_QUOTES, 'UTF-8') ?>">
+        <span><?= htmlspecialchars($t('content.wp_import_title', 'WordPress import'), ENT_QUOTES, 'UTF-8') ?></span>
+    </a>
 </div>
 
 <div class="card p-2">

@@ -8,6 +8,7 @@ use App\Service\Feature\ContentService;
 use App\Service\Feature\MediaService;
 use App\Service\Feature\UploadService;
 use App\Service\Feature\TermService;
+use App\Service\Feature\WordpressImportService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Feature\UserService;
@@ -27,6 +28,7 @@ final class AdminContentController extends BaseAdminController
         private UploadService $upload,
         private UserService $users,
         private TermService $terms,
+        private WordpressImportService $wordpressImport,
         FlashService $flash,
         CsrfService $csrf
     ) {
@@ -114,6 +116,55 @@ final class AdminContentController extends BaseAdminController
         $item = $state['data'] ?? $fallback;
         $selectedTerms = $this->resolveSelectedTerms($item, null);
         $this->pages->adminContentForm('add', $item, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
+    }
+
+    public function importWordpressForm(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        $this->pages->adminContentImportWordpress();
+    }
+
+    public function importWordpressSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content/import/wordpress', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+        ) {
+            return;
+        }
+
+        $siteUrl = trim((string)($_POST['site_url'] ?? ''));
+        $mode = trim((string)($_POST['import_mode'] ?? 'count'));
+        $count = (int)($_POST['count'] ?? 10);
+        $authorId = (int)($this->authService->auth()->id() ?? 0);
+
+        $importAll = $mode === 'all';
+        if (!$importAll && $count <= 0) {
+            $this->flash->add('error', I18n::t('content.wp_import_invalid_count', 'Invalid number of posts.'));
+            $redirect('admin/content/import/wordpress');
+            return;
+        }
+
+        $result = $this->wordpressImport->import($siteUrl, $importAll ? null : $count, $importAll, $authorId);
+        if (($result['success'] ?? false) !== true) {
+            $this->flash->add('error', I18n::t('content.wp_import_failed', 'WordPress import failed.'));
+            $redirect('admin/content/import/wordpress');
+            return;
+        }
+
+        $this->flash->add(
+            'success',
+            sprintf(
+                I18n::t('content.wp_import_done', 'Imported: %d, skipped: %d, failed: %d.'),
+                (int)($result['imported'] ?? 0),
+                (int)($result['skipped'] ?? 0),
+                (int)($result['failed'] ?? 0),
+            )
+        );
+        $redirect('admin/content');
     }
 
     public function addSubmit(callable $redirect): void

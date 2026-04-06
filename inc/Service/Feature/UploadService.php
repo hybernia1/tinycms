@@ -39,7 +39,56 @@ final class UploadService
             return ['success' => false, 'error' => I18n::t('upload.invalid_upload', 'Invalid file upload.')];
         }
 
-        $originalName = trim((string)($file['name'] ?? ''));
+        return $this->storeImageFromPath($tmpPath, trim((string)($file['name'] ?? '')), true);
+    }
+
+    public function importRemoteImage(string $url): array
+    {
+        $sourceUrl = trim($url);
+        if ($sourceUrl === '' || !preg_match('#^https?://#i', $sourceUrl)) {
+            return ['success' => false, 'error' => I18n::t('upload.invalid_upload', 'Invalid file upload.')];
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 20,
+                'follow_location' => 1,
+                'max_redirects' => 5,
+                'header' => "User-Agent: TinyCMS-Importer/1.0\r\n",
+            ],
+        ]);
+        $remote = @fopen($sourceUrl, 'rb', false, $context);
+        if ($remote === false) {
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
+        }
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'tinycms_import_');
+        if ($tmpPath === false) {
+            fclose($remote);
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
+        }
+
+        $tmpHandle = fopen($tmpPath, 'wb');
+        if ($tmpHandle === false) {
+            fclose($remote);
+            @unlink($tmpPath);
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
+        }
+
+        stream_copy_to_stream($remote, $tmpHandle);
+        fclose($tmpHandle);
+        fclose($remote);
+
+        $nameFromUrl = basename((string)(parse_url($sourceUrl, PHP_URL_PATH) ?? ''));
+        $originalName = $nameFromUrl !== '' ? $nameFromUrl : ('image-' . date('Ymd-His') . '.jpg');
+        $result = $this->storeImageFromPath($tmpPath, $originalName, false);
+        @unlink($tmpPath);
+        return $result;
+    }
+
+    private function storeImageFromPath(string $tmpPath, string $originalName, bool $isUploaded): array
+    {
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         $mime = $this->detectMime($tmpPath);
 
@@ -67,7 +116,11 @@ final class UploadService
         $fileRel = $subdir . '/' . $slug . '.' . $extension;
         $fileAbs = $this->rootPath . '/' . $fileRel;
 
-        if (!move_uploaded_file($tmpPath, $fileAbs)) {
+        $stored = $isUploaded ? move_uploaded_file($tmpPath, $fileAbs) : @rename($tmpPath, $fileAbs);
+        if (!$stored && !$isUploaded) {
+            $stored = @copy($tmpPath, $fileAbs);
+        }
+        if (!$stored) {
             return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed', 'Failed to save file to disk.')];
         }
 

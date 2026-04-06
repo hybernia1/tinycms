@@ -214,6 +214,23 @@ final class ContentService
         ]);
     }
 
+    public function existsByWpImportId(int $wpPostId): bool
+    {
+        if ($wpPostId <= 0) {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare('SELECT id FROM content WHERE body LIKE :needle1 OR body LIKE :needle2 LIMIT 1');
+        $needle1 = '%data-wp-import-id="' . $wpPostId . '"%';
+        $needle2 = "%data-wp-import-id='" . $wpPostId . "'%";
+        $stmt->execute([
+            'needle1' => $needle1,
+            'needle2' => $needle2,
+        ]);
+
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
     private function syncAttachments(int $contentId, string $body): void
     {
         if ($contentId <= 0) {
