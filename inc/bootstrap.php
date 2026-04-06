@@ -91,7 +91,7 @@ $resolvedSettings = $settingsService->resolved();
 I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
 I18n::setTheme($themeService->resolveTheme((string)($resolvedSettings['theme'] ?? 'default')));
 $termService = new TermService();
-$pageView = new PageView($view, $themeService);
+$pageView = new PageView($view, $themeService, $settingsService);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $termService, $slugger);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);

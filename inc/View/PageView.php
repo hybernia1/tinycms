@@ -4,17 +4,20 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Service\Feature\ThemeService;
+use App\Service\Feature\SettingsService;
 use App\Service\Support\I18n;
 
 final class PageView
 {
     private View $view;
     private ThemeService $themes;
+    private SettingsService $settings;
 
-    public function __construct(View $view, ThemeService $themes)
+    public function __construct(View $view, ThemeService $themes, SettingsService $settings)
     {
         $this->view = $view;
         $this->themes = $themes;
+        $this->settings = $settings;
     }
 
     public function home(?array $user, array $site, array $posts = []): void
@@ -28,6 +31,7 @@ final class PageView
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
             'siteFavicon' => (string)($site['favicon'] ?? ''),
+            'siteLogo' => (string)($site['logo'] ?? ''),
             'themeName' => $theme,
             'pageTitle' => $siteName,
             'metaTitle' => (string)($site['meta_title'] ?? $siteName),
@@ -69,6 +73,7 @@ final class PageView
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteFavicon' => (string)($site['favicon'] ?? ''),
+            'siteLogo' => (string)($site['logo'] ?? ''),
             'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
             'metaTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
             'metaDescription' => (string)($item['excerpt'] ?? ''),
@@ -95,6 +100,7 @@ final class PageView
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteFavicon' => (string)($site['favicon'] ?? ''),
+            'siteLogo' => (string)($site['logo'] ?? ''),
             'pageTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
             'metaTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
             'metaDescription' => I18n::t('front.term.meta_description_prefix', 'Articles on topic') . ': ' . $termName,
@@ -125,6 +131,7 @@ final class PageView
             'themeName' => $resolvedTheme,
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteFavicon' => (string)($site['favicon'] ?? ''),
+            'siteLogo' => (string)($site['logo'] ?? ''),
             'siteName' => (string)($site['name'] ?? 'TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
             'pageTitle' => $title,
@@ -150,7 +157,7 @@ final class PageView
 
     public function adminDashboard(?array $user): void
     {
-        $this->view->render('admin/layout', 'admin/dashboard', [
+        $this->renderAdmin('admin/dashboard', [
             'user' => $user,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.dashboard', 'Dashboard'),
@@ -159,7 +166,7 @@ final class PageView
 
     public function adminUsersList(array $pagination, array $allowedPerPage, string $status, string $query): void
     {
-        $this->view->render('admin/layout', 'admin/users/list', [
+        $this->renderAdmin('admin/users/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
             'status' => $status,
@@ -171,7 +178,7 @@ final class PageView
 
     public function adminSettingsForm(array $fields, array $values): void
     {
-        $this->view->render('admin/layout', 'admin/settings/form', [
+        $this->renderAdmin('admin/settings/form', [
             'fields' => $fields,
             'values' => $values,
             'adminMenu' => $this->adminMenu(),
@@ -181,7 +188,7 @@ final class PageView
 
     public function adminUsersForm(string $mode, array $user, array $errors): void
     {
-        $this->view->render('admin/layout', 'admin/users/form', [
+        $this->renderAdmin('admin/users/form', [
             'mode' => $mode,
             'user' => $user,
             'errors' => $errors,
@@ -192,7 +199,7 @@ final class PageView
 
     public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $availableStatuses): void
     {
-        $this->view->render('admin/layout', 'admin/content/list', [
+        $this->renderAdmin('admin/content/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
             'status' => $status,
@@ -205,7 +212,7 @@ final class PageView
 
     public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $authors, array $selectedTerms = []): void
     {
-        $this->view->render('admin/layout', 'admin/content/form', [
+        $this->renderAdmin('admin/content/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
@@ -219,7 +226,7 @@ final class PageView
 
     public function adminTermList(array $pagination, array $allowedPerPage, string $query): void
     {
-        $this->view->render('admin/layout', 'admin/terms/list', [
+        $this->renderAdmin('admin/terms/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
             'query' => $query,
@@ -230,7 +237,7 @@ final class PageView
 
     public function adminTermForm(string $mode, array $item, array $errors): void
     {
-        $this->view->render('admin/layout', 'admin/terms/form', [
+        $this->renderAdmin('admin/terms/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
@@ -241,7 +248,7 @@ final class PageView
 
     public function adminMediaList(array $pagination, array $allowedPerPage, string $query): void
     {
-        $this->view->render('admin/layout', 'admin/media/list', [
+        $this->renderAdmin('admin/media/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
             'query' => $query,
@@ -252,7 +259,7 @@ final class PageView
 
     public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = []): void
     {
-        $this->view->render('admin/layout', 'admin/media/form', [
+        $this->renderAdmin('admin/media/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
@@ -261,6 +268,21 @@ final class PageView
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media', 'Add media') : I18n::t('admin.edit_media', 'Edit media'),
         ]);
+    }
+
+    private function renderAdmin(string $template, array $data): void
+    {
+        $this->view->render('admin/layout', $template, array_merge($data, $this->adminBranding()));
+    }
+
+    private function adminBranding(): array
+    {
+        $settings = $this->settings->resolved();
+        return [
+            'siteName' => (string)($settings['sitename'] ?? 'TinyCMS'),
+            'siteFavicon' => (string)($settings['favicon'] ?? ''),
+            'siteLogo' => (string)($settings['logo'] ?? ''),
+        ];
     }
 
     private function adminMenu(): array

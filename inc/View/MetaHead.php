@@ -21,6 +21,7 @@ final class MetaHead
         $author = $this->clean((string)($meta['author'] ?? ''));
         $themeColor = $this->clean((string)($meta['theme_color'] ?? ''));
         $favicon = $this->clean((string)($meta['favicon'] ?? ''));
+        $logo = $this->clean((string)($meta['logo'] ?? ''));
         $alternateLinks = $this->alternateLinks($meta['alternate_links'] ?? []);
         $jsonLd = $this->jsonLdScript($meta);
 
@@ -80,6 +81,9 @@ final class MetaHead
         }
         if ($favicon !== '') {
             $parts[] = '<link rel="icon" href="' . $this->esc($favicon) . '"' . $this->faviconTypeAttr($favicon) . '>';
+        }
+        if ($logo !== '') {
+            $parts[] = '<meta property="og:logo" content="' . $this->esc($logo) . '">';
         }
 
         foreach ($alternateLinks as $link) {
@@ -157,6 +161,9 @@ final class MetaHead
         $description = $this->clean((string)($meta['description'] ?? ''));
         $url = $this->clean((string)($meta['url'] ?? ''));
         $image = $this->clean((string)($meta['og_image'] ?? ''));
+        if ($image === '') {
+            $image = $this->clean((string)($meta['logo'] ?? ''));
+        }
         $type = $this->clean((string)($meta['og_type'] ?? 'website'));
         $author = $this->clean((string)($meta['author'] ?? ''));
         $siteName = $this->clean((string)($meta['site_name'] ?? ''));

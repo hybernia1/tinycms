@@ -50,6 +50,7 @@ final class SettingsService
             'meta_title' => ['label_key' => 'settings.fields.meta_title', 'type' => 'text', 'default' => 'TinyCMS'],
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
+            'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
         ];
     }
 

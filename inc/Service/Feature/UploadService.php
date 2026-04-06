@@ -20,11 +20,14 @@ final class UploadService
         'image/webp' => 'webp',
         'image/gif' => 'gif',
     ];
-    private const FAVICON_MIME_TO_EXTENSION = [
+    private const SITE_IMAGE_MIME_TO_EXTENSION = [
         'image/png' => 'png',
         'image/x-icon' => 'ico',
         'image/vnd.microsoft.icon' => 'ico',
         'image/svg+xml' => 'svg',
+        'image/jpeg' => 'jpg',
+        'image/webp' => 'webp',
+        'image/gif' => 'gif',
     ];
 
     public function __construct(
@@ -142,36 +145,12 @@ final class UploadService
 
     public function uploadFavicon(array $file): array
     {
-        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
-        }
+        return $this->uploadSiteImage($file, 'favicon');
+    }
 
-        $tmpPath = (string)($file['tmp_name'] ?? '');
-        if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
-            return ['success' => false, 'error' => I18n::t('upload.invalid_upload', 'Invalid file upload.')];
-        }
-
-        $mime = $this->detectMime($tmpPath);
-        $extension = self::FAVICON_MIME_TO_EXTENSION[$mime] ?? '';
-        if ($extension === '') {
-            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type', 'Unsupported file type.')];
-        }
-
-        $subdir = 'uploads/favicons';
-        $absDir = $this->rootPath . '/' . $subdir;
-        if (!is_dir($absDir) && !mkdir($absDir, 0775, true) && !is_dir($absDir)) {
-            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed', 'Cannot create target directory.')];
-        }
-
-        $name = 'favicon-' . date('YmdHis') . '-' . random_int(1000, 9999) . '.' . $extension;
-        $path = $subdir . '/' . $name;
-        $absolute = $this->rootPath . '/' . $path;
-
-        if (!move_uploaded_file($tmpPath, $absolute)) {
-            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed', 'Failed to save file to disk.')];
-        }
-
-        return ['success' => true, 'data' => ['path' => $path]];
+    public function uploadLogo(array $file): array
+    {
+        return $this->uploadSiteImage($file, 'logo');
     }
 
     public function deleteRelativeFile(string $path): void
@@ -185,6 +164,40 @@ final class UploadService
         if (is_file($absolute)) {
             @unlink($absolute);
         }
+    }
+
+    private function uploadSiteImage(array $file, string $prefix): array
+    {
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
+        }
+
+        $tmpPath = (string)($file['tmp_name'] ?? '');
+        if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
+            return ['success' => false, 'error' => I18n::t('upload.invalid_upload', 'Invalid file upload.')];
+        }
+
+        $mime = $this->detectMime($tmpPath);
+        $extension = self::SITE_IMAGE_MIME_TO_EXTENSION[$mime] ?? '';
+        if ($extension === '') {
+            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type', 'Unsupported file type.')];
+        }
+
+        $subdir = 'uploads/img';
+        $absDir = $this->rootPath . '/' . $subdir;
+        if (!is_dir($absDir) && !mkdir($absDir, 0775, true) && !is_dir($absDir)) {
+            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed', 'Cannot create target directory.')];
+        }
+
+        $name = $prefix . '-' . date('YmdHis') . '-' . random_int(1000, 9999) . '.' . $extension;
+        $path = $subdir . '/' . $name;
+        $absolute = $this->rootPath . '/' . $path;
+
+        if (!move_uploaded_file($tmpPath, $absolute)) {
+            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed', 'Failed to save file to disk.')];
+        }
+
+        return ['success' => true, 'data' => ['path' => $path]];
     }
 
     private function detectMime(string $path): string

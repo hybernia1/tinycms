@@ -376,6 +376,7 @@ final class FrontController
             'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
             'meta_description' => (string)($settings['meta_description'] ?? ''),
             'favicon' => (string)($settings['favicon'] ?? ''),
+            'logo' => (string)($settings['logo'] ?? ''),
         ];
     }
 
