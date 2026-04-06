@@ -150,7 +150,8 @@ return [
     ],
     'media' => [
         'file' => 'Soubor',
-        'file_optional_replace' => 'volitelné, nahradí stávající',
+        'path' => 'Cesta',
+        'path_webp' => 'Cesta webp',
         'used_as_thumbnail' => 'Použito jako thumbnail',
         'no_thumbnail_usage' => 'Médium není použité jako thumbnail u žádného článku.',
         'search_placeholder' => 'Hledat název nebo cestu',

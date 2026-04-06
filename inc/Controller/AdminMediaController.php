@@ -175,39 +175,15 @@ final class AdminMediaController extends BaseAdminController
             'path' => (string)($item['path'] ?? ''),
             'path_webp' => (string)($item['path_webp'] ?? ''),
         ]);
-        $newUploadData = null;
-
-        if ($this->hasUpload('file')) {
-            $upload = $this->upload->uploadImage($_FILES['file'] ?? []);
-            if (($upload['success'] ?? false) !== true) {
-                $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
-                $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), ['file' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed'))]);
-                $redirect($this->editPath($id));
-                return;
-            }
-
-            $newUploadData = (array)($upload['data'] ?? []);
-            $input['path'] = (string)($newUploadData['path'] ?? '');
-            $input['path_webp'] = (string)($newUploadData['path_webp'] ?? '');
-            if (trim((string)($input['name'] ?? '')) === '') {
-                $input['name'] = (string)($newUploadData['name'] ?? '');
-            }
-        }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
         $result = $this->media->save($this->normalizeMediaInput($input, $authorId), $id);
 
         if (($result['success'] ?? false) === true) {
-            if (is_array($newUploadData)) {
-                $this->upload->deleteMediaFiles($item);
-            }
             $this->flash->add('success', I18n::t('media.updated', 'Media updated.'));
             $redirect($this->editPath($id));
         }
 
-        if (is_array($newUploadData)) {
-            $this->upload->deleteMediaFiles($newUploadData);
-        }
         $this->flash->add('error', I18n::t('media.update_failed', 'Could not update media.'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect($this->editPath($id));
