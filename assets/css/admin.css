@@ -473,7 +473,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     cursor: pointer;
 }
 
-.tag-picker .tag-picker-input {
+.tag-picker input.tag-picker-input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']) {
     border: 0;
     border-style: none;
     background: transparent;
