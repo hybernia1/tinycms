@@ -263,6 +263,11 @@
         return !!(container && container.closest(tagName));
     }
 
+    function isSelectionInsideHeading(editor) {
+        var container = getSelectionContainer(editor);
+        return !!(container && container.closest('h1, h2, h3, h4, h5, h6'));
+    }
+
     function createIconButton(icon, command, title) {
         var button = document.createElement('button');
         button.type = 'button';
@@ -404,11 +409,11 @@
         input.className = 'wysiwyg-link-input';
         input.setAttribute('data-role', 'link-input');
 
-        var titleInput = document.createElement('input');
-        titleInput.type = 'text';
-        titleInput.placeholder = t('editor.link_title', 'Link title');
-        titleInput.className = 'wysiwyg-link-input';
-        titleInput.setAttribute('data-role', 'link-title-input');
+        var textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.placeholder = t('editor.link_text', 'Link text');
+        textInput.className = 'wysiwyg-link-input';
+        textInput.setAttribute('data-role', 'link-text-input');
 
         var options = document.createElement('div');
         options.className = 'wysiwyg-link-options';
@@ -457,7 +462,7 @@
         options.appendChild(nofollowOption);
         dialog.appendChild(title);
         dialog.appendChild(input);
-        dialog.appendChild(titleInput);
+        dialog.appendChild(textInput);
         dialog.appendChild(options);
         dialog.appendChild(actions);
         modal.appendChild(dialog);
@@ -543,7 +548,7 @@
 
         function openLinkModal() {
             var linkInput = linkModal.querySelector('[data-role="link-input"]');
-            var linkTitleInput = linkModal.querySelector('[data-role="link-title-input"]');
+            var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
             var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
             var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
@@ -556,8 +561,8 @@
                 linkInput.focus();
                 linkInput.select();
             }
-            if (linkTitleInput) {
-                linkTitleInput.value = activeLink ? (activeLink.getAttribute('title') || '') : '';
+            if (linkTextInput) {
+                linkTextInput.value = activeLink ? (activeLink.textContent || '').trim() : '';
             }
             if (linkTargetBlank) {
                 linkTargetBlank.checked = !!(activeLink && activeLink.getAttribute('target') === '_blank');
@@ -596,7 +601,8 @@
                 quote.classList.remove('is-active');
                 return;
             }
-            bold.classList.toggle('is-active', document.queryCommandState('bold'));
+            var insideHeading = isSelectionInsideHeading(editor);
+            bold.classList.toggle('is-active', !insideHeading && document.queryCommandState('bold'));
             italic.classList.toggle('is-active', document.queryCommandState('italic'));
             quote.classList.toggle('is-active', isSelectionInsideTag(editor, 'blockquote'));
         }
@@ -789,7 +795,7 @@
 
         linkModal.addEventListener('click', function (event) {
             var linkInput = linkModal.querySelector('[data-role="link-input"]');
-            var linkTitleInput = linkModal.querySelector('[data-role="link-title-input"]');
+            var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
             var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
             var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
 
@@ -815,8 +821,8 @@
                 if (linkInput) {
                     linkInput.value = '';
                 }
-                if (linkTitleInput) {
-                    linkTitleInput.value = '';
+                if (linkTextInput) {
+                    linkTextInput.value = '';
                 }
                 if (linkTargetBlank) {
                     linkTargetBlank.checked = false;
@@ -832,7 +838,7 @@
             var apply = event.target.closest('[data-role="link-apply"]');
             if (apply) {
                 var url = linkInput ? linkInput.value.trim() : '';
-                var titleValue = linkTitleInput ? linkTitleInput.value.trim() : '';
+                var textValue = linkTextInput ? linkTextInput.value.trim() : '';
                 var withTargetBlank = !!(linkTargetBlank && linkTargetBlank.checked);
                 var withNoFollow = !!(linkNoFollow && linkNoFollow.checked);
                 if (url) {
@@ -865,10 +871,8 @@
                         } else {
                             linkNode.removeAttribute('rel');
                         }
-                        if (titleValue) {
-                            linkNode.setAttribute('title', titleValue);
-                        } else {
-                            linkNode.removeAttribute('title');
+                        if (textValue) {
+                            linkNode.textContent = textValue;
                         }
                     }
                     normalizeBlocks(editor);
@@ -877,8 +881,8 @@
                     if (linkInput) {
                         linkInput.value = '';
                     }
-                    if (linkTitleInput) {
-                        linkTitleInput.value = '';
+                    if (linkTextInput) {
+                        linkTextInput.value = '';
                     }
                     if (linkTargetBlank) {
                         linkTargetBlank.checked = false;
@@ -896,8 +900,8 @@
                 if (linkInput) {
                     linkInput.value = '';
                 }
-                if (linkTitleInput) {
-                    linkTitleInput.value = '';
+                if (linkTextInput) {
+                    linkTextInput.value = '';
                 }
                 if (linkTargetBlank) {
                     linkTargetBlank.checked = false;
@@ -1131,11 +1135,13 @@
             }
 
             if (event.key === 'Enter' && !event.shiftKey) {
-                var wasBold = document.queryCommandState('bold');
+                var insideHeading = isSelectionInsideHeading(editor);
+                var wasBold = !insideHeading && document.queryCommandState('bold');
                 var wasItalic = document.queryCommandState('italic');
                 document.execCommand('defaultParagraphSeparator', false, 'p');
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
+                document.execCommand('removeFormat', false, null);
                 if (wasBold) {
                     document.execCommand('bold', false, null);
                 }

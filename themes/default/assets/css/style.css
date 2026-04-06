@@ -120,23 +120,30 @@
 }
 
 .theme-content .block.block-image {
-    display: table;
+    display: block;
     max-width: 100%;
 }
 
 .theme-content .block.block-image.align-left {
+    float: left;
     margin-right: auto;
     margin-left: 0;
+    margin-bottom: 1rem;
+    margin-right: 1rem;
 }
 
 .theme-content .block.block-image.align-center {
+    float: none;
     margin-left: auto;
     margin-right: auto;
 }
 
 .theme-content .block.block-image.align-right {
+    float: right;
     margin-left: auto;
     margin-right: 0;
+    margin-bottom: 1rem;
+    margin-left: 1rem;
 }
 
 .theme-content blockquote {
