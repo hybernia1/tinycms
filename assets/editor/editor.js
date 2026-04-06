@@ -12,6 +12,43 @@
         return html === '<br>' ? '' : html;
     }
 
+    function extractYoutubeVideoId(value) {
+        var raw = String(value || '').trim();
+        if (!raw) {
+            return null;
+        }
+        if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) {
+            return raw;
+        }
+
+        var normalized = raw;
+        if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(normalized)) {
+            normalized = 'https://' + normalized.replace(/^\/+/, '');
+        }
+
+        var parsed = null;
+        try {
+            parsed = new URL(normalized);
+        } catch (error) {
+            return null;
+        }
+
+        var host = parsed.hostname.toLowerCase().replace(/^www\\./, '').replace(/^m\\./, '');
+        var id = '';
+        if (host === 'youtu.be') {
+            id = (parsed.pathname.split('/')[1] || '').trim();
+        } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+            if (parsed.pathname === '/watch') {
+                id = (parsed.searchParams.get('v') || '').trim();
+            } else {
+                var pathMatch = parsed.pathname.match(/^\/(embed|shorts|live)\/([^/?#]+)/);
+                id = pathMatch ? pathMatch[2].trim() : '';
+            }
+        }
+
+        return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+    }
+
     function createImageControls() {
         var controls = document.createElement('div');
         controls.className = 'image-controls';
@@ -180,6 +217,10 @@
 
                 if (node.classList.contains('block') && node.classList.contains('block-image')) {
                     ensureImageBlock(node);
+                    return;
+                }
+
+                if (node.classList.contains('block') && node.classList.contains('block-embed')) {
                     return;
                 }
 
@@ -1173,6 +1214,28 @@
                 }
                 updateFormatState();
             }
+        });
+
+        editor.addEventListener('paste', function (event) {
+            if (htmlMode) {
+                return;
+            }
+            var clipboard = event.clipboardData;
+            var text = clipboard ? clipboard.getData('text/plain') : '';
+            var videoId = extractYoutubeVideoId(text);
+            if (!videoId) {
+                return;
+            }
+            event.preventDefault();
+            if (!isSelectionInside(editor)) {
+                focusEditorEnd(editor);
+            }
+            var embedHtml = '<div class="block block-embed block-embed-youtube"><div class="embed-frame"><iframe src="https://www.youtube.com/embed/' + videoId + '" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe></div></div><p><br></p>';
+            document.execCommand('insertHTML', false, embedHtml);
+            normalizeBlocks(editor);
+            enhanceImageBlocks(editor);
+            sync(textarea, editor);
+            updateFormatState();
         });
 
         editor.addEventListener('input', function () {
