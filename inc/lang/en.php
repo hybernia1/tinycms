@@ -235,6 +235,8 @@ return [
             'siteauthor' => 'Site author',
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
+            'favicon' => 'Favicon',
+            'logo' => 'Logo',
         ],
     ],
     'auth' => [

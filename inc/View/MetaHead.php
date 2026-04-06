@@ -20,6 +20,8 @@ final class MetaHead
         $siteName = $this->clean((string)($meta['site_name'] ?? ''));
         $author = $this->clean((string)($meta['author'] ?? ''));
         $themeColor = $this->clean((string)($meta['theme_color'] ?? ''));
+        $favicon = $this->clean((string)($meta['favicon'] ?? ''));
+        $logo = $this->clean((string)($meta['logo'] ?? ''));
         $alternateLinks = $this->alternateLinks($meta['alternate_links'] ?? []);
         $jsonLd = $this->jsonLdScript($meta);
 
@@ -76,6 +78,12 @@ final class MetaHead
 
         if ($themeColor !== '') {
             $parts[] = '<meta name="theme-color" content="' . $this->esc($themeColor) . '">';
+        }
+        if ($favicon !== '') {
+            $parts[] = '<link rel="icon" href="' . $this->esc($favicon) . '"' . $this->faviconTypeAttr($favicon) . '>';
+        }
+        if ($logo !== '') {
+            $parts[] = '<meta property="og:logo" content="' . $this->esc($logo) . '">';
         }
 
         foreach ($alternateLinks as $link) {
@@ -153,6 +161,9 @@ final class MetaHead
         $description = $this->clean((string)($meta['description'] ?? ''));
         $url = $this->clean((string)($meta['url'] ?? ''));
         $image = $this->clean((string)($meta['og_image'] ?? ''));
+        if ($image === '') {
+            $image = $this->clean((string)($meta['logo'] ?? ''));
+        }
         $type = $this->clean((string)($meta['og_type'] ?? 'website'));
         $author = $this->clean((string)($meta['author'] ?? ''));
         $siteName = $this->clean((string)($meta['site_name'] ?? ''));
@@ -257,6 +268,19 @@ final class MetaHead
     private function clean(string $value): string
     {
         return trim(preg_replace('/\s+/u', ' ', strip_tags($value)) ?? '');
+    }
+
+    private function faviconTypeAttr(string $favicon): string
+    {
+        $path = parse_url($favicon, PHP_URL_PATH);
+        $extension = strtolower(pathinfo((string)$path, PATHINFO_EXTENSION));
+
+        return match ($extension) {
+            'svg' => ' type="image/svg+xml"',
+            'png' => ' type="image/png"',
+            'ico' => ' type="image/x-icon"',
+            default => '',
+        };
     }
 
     private function esc(string $value): string

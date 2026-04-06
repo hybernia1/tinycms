@@ -35,15 +35,7 @@ final class FrontController
 
     public function home(): void
     {
-        $settings = $this->settings->resolved();
-        $site = [
-            'name' => (string)($settings['sitename'] ?? 'TinyCMS'),
-            'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
-            'author' => (string)($settings['siteauthor'] ?? 'Admin'),
-            'theme' => (string)($settings['theme'] ?? 'default'),
-            'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
-            'meta_description' => (string)($settings['meta_description'] ?? ''),
-        ];
+        $site = $this->siteData();
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(30));
 
         $this->pages->home($this->authService->auth()->user(), $site, $posts);
@@ -100,7 +92,7 @@ final class FrontController
             'name' => (string)($term['name'] ?? ''),
             'slug' => $slug,
             'body' => (string)($term['body'] ?? ''),
-        ], $posts, $pagination, $this->currentTheme());
+        ], $posts, $pagination, $this->currentTheme(), $this->siteData());
     }
 
     public function search(): void
@@ -109,10 +101,7 @@ final class FrontController
         $page = (int)($_GET['page'] ?? 1);
         $pagination = $this->contentService->paginatePublishedSearch($query, $page, 10);
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
-        $settings = $this->settings->resolved();
-        $site = [
-            'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
-        ];
+        $site = $this->siteData();
 
         $this->pages->search($posts, $pagination, $query, $this->currentTheme(), $site);
     }
@@ -173,7 +162,7 @@ final class FrontController
         }
 
         $terms = $this->termService->listByContent((int)($item['id'] ?? 0));
-        $this->pages->contentDetail($this->toDetailItem($item, $slug, $terms), $this->currentTheme());
+        $this->pages->contentDetail($this->toDetailItem($item, $slug, $terms), $this->currentTheme(), $this->siteData());
     }
 
     public function loginForm(callable $redirect): void
@@ -374,6 +363,21 @@ final class FrontController
     private function currentTheme(): string
     {
         return (string)($this->settings->resolved()['theme'] ?? 'default');
+    }
+
+    private function siteData(): array
+    {
+        $settings = $this->settings->resolved();
+        return [
+            'name' => (string)($settings['sitename'] ?? 'TinyCMS'),
+            'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
+            'author' => (string)($settings['siteauthor'] ?? 'Admin'),
+            'theme' => (string)($settings['theme'] ?? 'default'),
+            'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
+            'meta_description' => (string)($settings['meta_description'] ?? ''),
+            'favicon' => (string)($settings['favicon'] ?? ''),
+            'logo' => (string)($settings['logo'] ?? ''),
+        ];
     }
 
     private function robots(): void

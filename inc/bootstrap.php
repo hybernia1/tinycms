@@ -91,13 +91,13 @@ $resolvedSettings = $settingsService->resolved();
 I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
 I18n::setTheme($themeService->resolveTheme((string)($resolvedSettings['theme'] ?? 'default')));
 $termService = new TermService();
-$pageView = new PageView($view, $themeService);
+$pageView = new PageView($view, $themeService, $settingsService);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $termService, $slugger);
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
 $adminContent = new AdminContentController($pageView, $authService, $contentService, $mediaService, $uploadService, $userService, $termService, $flash, $csrf);
 $adminMedia = new AdminMediaController($pageView, $authService, $mediaService, $uploadService, $flash, $csrf);
-$adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $flash, $csrf);
+$adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $uploadService, $flash, $csrf);
 $adminTerms = new AdminTermController($pageView, $authService, $termService, $flash, $csrf);
 
 require __DIR__ . '/routes/front.php';

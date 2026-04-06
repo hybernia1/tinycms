@@ -32,10 +32,14 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
         'url' => $metaPath !== '' ? $absoluteUrl($metaPath) : '',
         'shortlink' => $shortlinkPath !== '' ? $absoluteUrl($shortlinkPath) : '',
         'og_type' => (string)($metaOgType ?? 'website'),
-        'og_image' => (string)($metaOgImage ?? '') !== '' ? $absoluteUrl((string)$metaOgImage) : '',
+        'og_image' => (string)($metaOgImage ?? '') !== ''
+            ? $absoluteUrl((string)$metaOgImage)
+            : ((string)($siteLogo ?? '') !== '' ? $absoluteUrl((string)$siteLogo) : ''),
         'site_name' => (string)($siteName ?? 'TinyCMS'),
         'author' => (string)($siteAuthor ?? ''),
         'theme_color' => (string)($metaThemeColor ?? '#2563eb'),
+        'favicon' => (string)($siteFavicon ?? '') !== '' ? $absoluteUrl((string)$siteFavicon) : '',
+        'logo' => (string)($siteLogo ?? '') !== '' ? $absoluteUrl((string)$siteLogo) : '',
         'structured_data' => $metaStructuredData ?? null,
         'published_time' => (string)($metaPublishedTime ?? ''),
         'modified_time' => (string)($metaModifiedTime ?? ''),
