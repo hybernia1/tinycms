@@ -6,6 +6,9 @@ $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
 $isTermsList = str_ends_with($currentPath, 'admin/terms');
+$isUsersEdit = str_ends_with($currentPath, 'admin/users/edit');
+$isContentEdit = str_ends_with($currentPath, 'admin/content/edit');
+$isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
 ?>
 <!doctype html>
 <html lang="<?= htmlspecialchars((string)$lang, ENT_QUOTES, 'UTF-8') ?>">
@@ -201,12 +204,12 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 </button>
                 <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
-            <?php if ($isUsersList): ?>
+            <?php if ($isUsersList || $isUsersEdit): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isContentList): ?>
+            <?php elseif ($isContentList || $isContentEdit): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/content/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_content'), ENT_QUOTES, 'UTF-8') ?></span>
@@ -216,7 +219,7 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isTermsList): ?>
+            <?php elseif ($isTermsList || $isTermsEdit): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_term'), ENT_QUOTES, 'UTF-8') ?></span>
