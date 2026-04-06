@@ -33,7 +33,7 @@
             return null;
         }
 
-        var host = parsed.hostname.toLowerCase().replace(/^www\\./, '').replace(/^m\\./, '');
+        var host = parsed.hostname.toLowerCase().replace(/^www\./, '').replace(/^m\./, '');
         var id = '';
         if (host === 'youtu.be') {
             id = (parsed.pathname.split('/')[1] || '').trim();
