@@ -13,6 +13,38 @@
         };
     }
 
+    function i18n(path, fallback) {
+        var root = window.tinycmsI18n || {};
+        var value = path.split('.').reduce(function (acc, key) {
+            if (acc && Object.prototype.hasOwnProperty.call(acc, key)) {
+                return acc[key];
+            }
+            return undefined;
+        }, root);
+        return typeof value === 'string' && value !== '' ? value : fallback;
+    }
+
+    function esc(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    var iconSprite = (function () {
+        var iconUse = document.querySelector('svg use[href*="#icon-"]');
+        return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
+    })();
+
+    function icon(name) {
+        if (iconSprite === '') {
+            return '';
+        }
+        return '<svg class="icon" aria-hidden="true" focusable="false"><use href="' + esc(iconSprite) + '#icon-' + esc(name) + '"></use></svg>';
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var form = document.querySelector('.content-editor-form');
         if (!form) {
@@ -29,10 +61,122 @@
         var saving = false;
         var pending = false;
         var lastSent = '';
+        var bypassLeaveWarning = false;
+        var pendingNavigation = '';
+        var pendingReload = false;
         var appRoot = '';
+        var allowSuspiciousOnce = false;
+        var guardActive = false;
+        var safeBodies = [];
+        var historyLimit = 10;
+        var lastSafeBody = bodyTextarea ? String(bodyTextarea.value || '') : '';
+
+        if (lastSafeBody !== '') {
+            safeBodies.push(lastSafeBody);
+        }
+
         if (autosaveEndpoint.indexOf('/admin/api/v1/content/autosave') >= 0) {
             appRoot = autosaveEndpoint.replace(/\/admin\/api\/v1\/content\/autosave.*$/, '');
         }
+
+        function pushSafeBody(value) {
+            var body = String(value || '');
+            if (safeBodies.length > 0 && safeBodies[safeBodies.length - 1] === body) {
+                return;
+            }
+            safeBodies.push(body);
+            if (safeBodies.length > historyLimit) {
+                safeBodies = safeBodies.slice(safeBodies.length - historyLimit);
+            }
+        }
+
+        function latestSafeBody() {
+            if (safeBodies.length === 0) {
+                return '';
+            }
+            return safeBodies[safeBodies.length - 1];
+        }
+
+        function suspiciousBodyChange(previousBody, currentBody) {
+            var prev = String(previousBody || '');
+            var curr = String(currentBody || '');
+            if (prev === '' || curr === '') {
+                return false;
+            }
+
+            var drop = prev.length >= 120 && curr.length <= Math.floor(prev.length * 0.4);
+            var largeJump = Math.abs(curr.length - prev.length) >= 500;
+            var repeated = /([^\s])\1{9,}/.test(curr);
+            var symbols = curr.replace(/[\p{L}\p{N}\s.,:;!?()\-_'"/]/gu, '').length;
+            var symbolRatio = curr.length > 0 ? symbols / curr.length : 0;
+            var heavyNoise = curr.length >= 120 && symbolRatio > 0.35;
+
+            return drop || (largeJump && repeated) || heavyNoise;
+        }
+
+        function removeGuardFlash() {
+            var old = document.querySelector('[data-cat-keyboard-guard]');
+            if (old) {
+                old.remove();
+            }
+        }
+
+        function showGuardFlash() {
+            if (guardActive) {
+                return;
+            }
+
+            var container = document.querySelector('.admin-content');
+            if (!container) {
+                return;
+            }
+
+            removeGuardFlash();
+            var flash = document.createElement('div');
+            flash.className = 'flash flash-error';
+            flash.setAttribute('data-cat-keyboard-guard', '1');
+            flash.innerHTML = '<span class="d-flex align-center gap-2">' + icon('cat') + '<span>' + esc(i18n('content.cat_keyboard_warning', 'Detekována neobvyklá změna.')) + '</span></span>'
+                + '<div class="d-flex gap-2">'
+                + '<button type="button" class="btn btn-light" data-cat-keyboard-restore="1">' + esc(i18n('content.cat_keyboard_restore', 'Obnovit bezpečnou verzi')) + '</button>'
+                + '<button type="button" class="btn btn-light" data-cat-keyboard-continue="1">' + esc(i18n('content.cat_keyboard_continue', 'Pokračovat a uložit')) + '</button>'
+                + '</div>';
+            container.prepend(flash);
+            guardActive = true;
+        }
+
+        function restoreSafeBody() {
+            if (!bodyTextarea) {
+                return;
+            }
+
+            var safeBody = latestSafeBody();
+            bodyTextarea.value = safeBody;
+            bodyTextarea.dispatchEvent(new Event('tinycms:editor-sync-from-textarea', { bubbles: true }));
+            bodyTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            removeGuardFlash();
+            guardActive = false;
+            allowSuspiciousOnce = false;
+        }
+
+        function continueSuspiciousSave() {
+            allowSuspiciousOnce = true;
+            guardActive = false;
+            removeGuardFlash();
+            runAutosave().catch(function () { return null; });
+        }
+
+        document.addEventListener('click', function (event) {
+            var restoreButton = event.target.closest('[data-cat-keyboard-restore]');
+            if (restoreButton) {
+                restoreSafeBody();
+                return;
+            }
+
+            var continueButton = event.target.closest('[data-cat-keyboard-continue]');
+            if (continueButton) {
+                continueSuspiciousSave();
+            }
+        });
 
         function contentApi(path) {
             var normalized = path.charAt(0) === '/' ? path : '/' + path;
@@ -157,6 +301,14 @@
                 return;
             }
 
+            var currentBody = bodyTextarea ? String(bodyTextarea.value || '') : '';
+            if (!allowSuspiciousOnce && suspiciousBodyChange(lastSafeBody, currentBody)) {
+                showGuardFlash();
+                pending = false;
+                return;
+            }
+
+            allowSuspiciousOnce = false;
             saving = true;
             pending = false;
             var data = serializePayload();
@@ -178,6 +330,12 @@
                 if (id > 0) {
                     setContentId(id);
                 }
+                if (bodyTextarea) {
+                    lastSafeBody = String(bodyTextarea.value || '');
+                    pushSafeBody(lastSafeBody);
+                }
+                guardActive = false;
+                removeGuardFlash();
             }
 
             saving = false;
@@ -195,8 +353,104 @@
             }, 1200);
         }
 
+        function hasUnsavedChanges() {
+            return signature(serializePayload()) !== lastSent;
+        }
+
+        function leaveModal() {
+            return document.querySelector('[data-content-leave-modal]');
+        }
+
+        function closeLeaveModal() {
+            var modal = leaveModal();
+            if (modal) {
+                modal.classList.remove('open');
+            }
+            pendingNavigation = '';
+            pendingReload = false;
+        }
+
+        function openLeaveModal() {
+            var modal = leaveModal();
+            if (!modal) {
+                return;
+            }
+            modal.classList.add('open');
+        }
+
+        function shouldGuardLink(link) {
+            if (!link) {
+                return false;
+            }
+            var href = String(link.getAttribute('href') || '').trim();
+            if (href === '' || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) {
+                return false;
+            }
+            if (link.hasAttribute('download') || (link.getAttribute('target') || '') === '_blank') {
+                return false;
+            }
+            return true;
+        }
+
+        lastSent = signature(serializePayload());
+
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
+        form.addEventListener('submit', function () {
+            bypassLeaveWarning = true;
+        });
+        window.addEventListener('keydown', function (event) {
+            if (bypassLeaveWarning || !hasUnsavedChanges()) {
+                return;
+            }
+            var isReload = event.key === 'F5' || ((event.ctrlKey || event.metaKey) && String(event.key || '').toLowerCase() === 'r');
+            if (!isReload) {
+                return;
+            }
+            event.preventDefault();
+            pendingNavigation = '';
+            pendingReload = true;
+            openLeaveModal();
+        });
+
+        document.addEventListener('click', function (event) {
+            var cancelLeave = event.target.closest('[data-content-leave-cancel]');
+            if (cancelLeave) {
+                event.preventDefault();
+                closeLeaveModal();
+                return;
+            }
+
+            var confirmLeave = event.target.closest('[data-content-leave-confirm]');
+            if (confirmLeave) {
+                event.preventDefault();
+                bypassLeaveWarning = true;
+                if (pendingReload) {
+                    window.location.reload();
+                    return;
+                }
+                if (pendingNavigation !== '') {
+                    window.location.href = pendingNavigation;
+                    return;
+                }
+                closeLeaveModal();
+                return;
+            }
+
+            if (bypassLeaveWarning || !hasUnsavedChanges()) {
+                return;
+            }
+
+            var link = event.target.closest('a[href]');
+            if (!shouldGuardLink(link)) {
+                return;
+            }
+
+            event.preventDefault();
+            pendingNavigation = String(link.href || '');
+            pendingReload = false;
+            openLeaveModal();
+        });
 
         document.addEventListener('tinycms:content-ensure-draft', function () {
             ensureDraft().then(function (id) {

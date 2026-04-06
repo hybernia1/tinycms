@@ -35,6 +35,9 @@ $isTermsList = str_ends_with($currentPath, 'admin/terms');
                 'deleted' => $t('content.deleted', 'Content deleted.'),
                 'published' => $t('content.published', 'Content published.'),
                 'switched_to_draft' => $t('content.switched_to_draft', 'Content switched to draft.'),
+                'cat_keyboard_warning' => $t('content.cat_keyboard_warning'),
+                'cat_keyboard_restore' => $t('content.cat_keyboard_restore'),
+                'cat_keyboard_continue' => $t('content.cat_keyboard_continue'),
             ],
             'terms' => [
                 'deleted' => $t('terms.deleted', 'Tag deleted.'),
