@@ -16,7 +16,7 @@ $selfLink = (string)($channel['self'] ?? $channelLink);
                 <link><?= htmlspecialchars((string)($item['link'] ?? ''), ENT_XML1, 'UTF-8') ?></link>
                 <guid isPermaLink="true"><?= htmlspecialchars((string)($item['guid'] ?? ''), ENT_XML1, 'UTF-8') ?></guid>
                 <pubDate><?= htmlspecialchars((string)($item['pubDate'] ?? ''), ENT_XML1, 'UTF-8') ?></pubDate>
-                <description><![CDATA[<?= (string)($item['description'] ?? '') ?>]]></description>
+                <description><?= htmlspecialchars((string)($item['description'] ?? ''), ENT_XML1, 'UTF-8') ?></description>
             </item>
         <?php endforeach; ?>
     </channel>
