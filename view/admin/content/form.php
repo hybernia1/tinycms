@@ -79,7 +79,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <div class="card">
                     <div class="content-box-header"><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></div>
                     <div class="p-3">
-                        <label><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></label>
                         <select name="author">
                             <option value=""><?= htmlspecialchars($t('common.no_author', 'No author'), ENT_QUOTES, 'UTF-8') ?></option>
                             <?php foreach ($authors as $author): ?>
