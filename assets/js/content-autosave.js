@@ -136,6 +136,7 @@
 
             var safeBody = latestSafeBody();
             bodyTextarea.value = safeBody;
+            bodyTextarea.dispatchEvent(new Event('tinycms:editor-sync-from-textarea', { bubbles: true }));
             bodyTextarea.dispatchEvent(new Event('input', { bubbles: true }));
             removeGuardFlash();
             guardActive = false;

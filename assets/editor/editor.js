@@ -637,6 +637,16 @@
             sync(textarea, editor);
         }
 
+        function syncEditorFromTextarea() {
+            if (htmlMode) {
+                return;
+            }
+            editor.innerHTML = textarea.value.trim();
+            normalizeBlocks(editor);
+            enhanceImageBlocks(editor);
+            updateFormatState();
+        }
+
         toolbar.addEventListener('mousedown', function (event) {
             if (event.target.closest('[data-command]')) {
                 event.preventDefault();
@@ -1165,6 +1175,10 @@
             enhanceImageBlocks(editor);
             sync(textarea, editor);
             updateFormatState();
+        });
+
+        textarea.addEventListener('tinycms:editor-sync-from-textarea', function () {
+            syncEditorFromTextarea();
         });
 
         textarea.style.display = 'none';
