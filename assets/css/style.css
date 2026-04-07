@@ -72,25 +72,7 @@ a:focus-visible {
     padding: 0 var(--space-4);
 }
 
-@media (min-width: 576px) {
-    .container {
-        max-width: 540px;
-    }
-}
-
 @media (min-width: 768px) {
-    .container {
-        max-width: 720px;
-    }
-}
-
-@media (min-width: 992px) {
-    .container {
-        max-width: 960px;
-    }
-}
-
-@media (min-width: 1200px) {
     .container {
         max-width: 1140px;
     }
@@ -129,9 +111,6 @@ a:focus-visible {
 
 @media (min-width: 768px) {
     .col-md-6 { width: 50%; }
-}
-
-@media (min-width: 992px) {
     .col-lg-8 { width: 66.6666%; }
 }
 
