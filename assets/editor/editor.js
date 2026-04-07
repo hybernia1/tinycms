@@ -85,6 +85,20 @@
         return normalized;
     }
 
+    function findPastedImageFile(event) {
+        var clipboard = event.clipboardData;
+        if (!clipboard || !clipboard.items) {
+            return null;
+        }
+        for (var i = 0; i < clipboard.items.length; i += 1) {
+            var item = clipboard.items[i];
+            if (item && item.kind === 'file' && /^image\//i.test(item.type || '')) {
+                return item.getAsFile();
+            }
+        }
+        return null;
+    }
+
     function createImageControls() {
         var controls = document.createElement('div');
         controls.className = 'image-controls';
@@ -605,6 +619,139 @@
         var htmlMode = false;
         var mediaRange = null;
         var linkPasteSeq = 0;
+        var draftInitPromise = null;
+
+        function absoluteMediaUrl(path) {
+            var value = String(path || '').trim();
+            if (!value) {
+                return '';
+            }
+            if (/^https?:\/\//i.test(value)) {
+                return value;
+            }
+            var base = String(textarea.dataset.mediaBaseUrl || '').trim().replace(/\/$/, '');
+            return base === '' ? value : (base + '/' + value.replace(/^\//, ''));
+        }
+
+        function contentApiBase() {
+            var draftEndpoint = String((textarea.closest('form') || {}).dataset ? textarea.closest('form').dataset.draftInitEndpoint || '' : '').trim();
+            if (!draftEndpoint) {
+                return '';
+            }
+            return draftEndpoint.replace(/\/admin\/api\/v1\/content\/draft\/init.*$/, '');
+        }
+
+        function setContentIdEverywhere(id) {
+            var value = Number(id || 0);
+            if (value <= 0) {
+                return;
+            }
+            var form = textarea.closest('form');
+            if (form) {
+                form.querySelectorAll('input[name="id"]').forEach(function (node) {
+                    node.value = String(value);
+                });
+                form.querySelectorAll('input[name="content_id"]').forEach(function (node) {
+                    node.value = String(value);
+                });
+            }
+            textarea.dataset.contentId = String(value);
+            var base = contentApiBase();
+            if (base !== '') {
+                textarea.dataset.mediaLibraryEndpoint = base + '/admin/api/v1/content/' + value + '/media';
+            }
+        }
+
+        function ensureDraftId() {
+            var currentId = Number(textarea.dataset.contentId || '0');
+            if (currentId > 0) {
+                return Promise.resolve(currentId);
+            }
+            if (draftInitPromise) {
+                return draftInitPromise;
+            }
+            var form = textarea.closest('form');
+            var endpoint = String(form && form.dataset ? form.dataset.draftInitEndpoint || '' : '').trim();
+            var csrfInput = form ? form.querySelector('input[name="_csrf"]') : null;
+            if (!endpoint || !csrfInput) {
+                return Promise.resolve(0);
+            }
+
+            draftInitPromise = fetch(endpoint, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: '_csrf=' + encodeURIComponent(csrfInput.value || '')
+            }).then(function (response) {
+                return response.ok ? response.json() : null;
+            }).then(function (payload) {
+                var newId = payload && payload.ok && payload.data ? Number(payload.data.id || 0) : 0;
+                if (newId > 0) {
+                    setContentIdEverywhere(newId);
+                }
+                return newId;
+            }).catch(function () {
+                return 0;
+            }).finally(function () {
+                draftInitPromise = null;
+            });
+
+            return draftInitPromise;
+        }
+
+        function uploadPastedImage(file, selectionRange) {
+            if (!file) {
+                return;
+            }
+            ensureDraftId().then(function (contentId) {
+                if (contentId <= 0) {
+                    return null;
+                }
+                var endpoint = String(textarea.dataset.mediaLibraryEndpoint || '').trim();
+                if (!endpoint) {
+                    return null;
+                }
+                var form = textarea.closest('form');
+                var csrfInput = form ? form.querySelector('input[name="_csrf"]') : null;
+                if (!csrfInput) {
+                    return null;
+                }
+                var data = new FormData();
+                data.append('_csrf', csrfInput.value || '');
+                data.append('content_id', String(contentId));
+                data.append('thumbnail', file, file.name || 'clipboard-image.png');
+                return fetch(endpoint + '/upload', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: data
+                });
+            }).then(function (response) {
+                return response && response.ok ? response.json() : null;
+            }).then(function (payload) {
+                if (!payload || !payload.ok || !payload.data) {
+                    return;
+                }
+                var media = payload.data;
+                var mediaId = Number(media.id || 0);
+                var imageUrl = absoluteMediaUrl(media.path || media.webp_path || media.preview_path || '');
+                if (mediaId <= 0 || !imageUrl) {
+                    return;
+                }
+                if (selectionRange) {
+                    restoreSelection(selectionRange, editor);
+                } else if (!isSelectionInside(editor)) {
+                    focusEditorEnd(editor);
+                }
+                document.execCommand('insertHTML', false, '<div class="block block-image align-center"><img src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(String(media.name || '')) + '" data-media-id="' + mediaId + '"></div><p><br></p>');
+                persistEditorState(true);
+            }).catch(function () {});
+        }
 
         function hideLinkTools() {
             linkTools.classList.remove('is-visible');
@@ -1237,6 +1384,16 @@
 
         editor.addEventListener('paste', function (event) {
             if (htmlMode) {
+                return;
+            }
+            var pastedImage = findPastedImageFile(event);
+            if (pastedImage) {
+                event.preventDefault();
+                var imageRange = isSelectionInside(editor) ? rememberSelection() : null;
+                if (!imageRange) {
+                    focusEditorEnd(editor);
+                }
+                uploadPastedImage(pastedImage, imageRange);
                 return;
             }
             var clipboard = event.clipboardData;
