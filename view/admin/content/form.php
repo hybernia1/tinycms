@@ -71,6 +71,9 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <div class="content-box-footer d-flex gap-2">
                     <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
                     <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
+                    <?php if ($mode === 'edit'): ?>
+                        <button class="btn btn-light" type="button" data-modal-open data-modal-target="#content-delete-modal"><?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php if ($isEditor): ?>
@@ -146,6 +149,11 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         </aside>
     </div>
 </form>
+<?php if ($mode === 'edit'): ?>
+<form id="content-delete-form" method="post" action="<?= htmlspecialchars($url('admin/content/edit/delete?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
+    <?= $csrfField() ?>
+</form>
+<?php endif; ?>
 <div class="media-library-modal" data-media-library-modal>
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
@@ -195,10 +203,14 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
                     <?= $csrfField() ?>
                     <input type="hidden" name="content_id" value="<?= $contentId ?>">
-                    <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
-                    <button class="btn btn-primary" type="submit" data-media-library-upload-button>
-                        <span data-media-library-upload-label><?= htmlspecialchars($t('content.upload_new', 'Upload new'), ENT_QUOTES, 'UTF-8') ?></span>
-                    </button>
+                    <div class="custom-upload-field" data-media-library-upload-field>
+                        <label class="btn btn-light custom-upload-button" for="content-thumbnail-upload">
+                            <span class="custom-upload-main-icon" data-custom-upload-icon><?= $icon('upload') ?></span>
+                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= $icon('loader') ?></span>
+                        </label>
+                        <input id="content-thumbnail-upload" type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                    </div>
                 </form>
                 <div class="media-library-grid" data-media-library-grid></div>
                 <div class="media-library-pagination">
@@ -253,3 +265,14 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         </div>
     </div>
 </div>
+<?php if ($mode === 'edit'): ?>
+<div class="modal-overlay" data-modal id="content-delete-modal">
+    <div class="modal">
+        <p data-modal-text><?= htmlspecialchars($t('content.delete_confirm', 'Do you really want to delete this content?'), ENT_QUOTES, 'UTF-8') ?></p>
+        <div class="modal-actions">
+            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="content-delete-form"><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

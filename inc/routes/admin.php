@@ -85,6 +85,10 @@ $router->post('admin/content/edit', static function () use ($adminContent, $redi
     $adminContent->editSubmit($redirect);
 });
 
+$router->post('admin/content/edit/delete', static function () use ($adminContent, $redirect): void {
+    $adminContent->deleteSubmit($redirect);
+});
+
 $router->post('admin/content/thumbnail/upload', static function () use ($adminContent, $redirect): void {
     $adminContent->thumbnailUploadSubmit($redirect);
 });
@@ -178,6 +182,10 @@ $router->get('admin/media/edit', static function () use ($adminMedia, $redirect)
 
 $router->post('admin/media/edit', static function () use ($adminMedia, $redirect): void {
     $adminMedia->editSubmit($redirect);
+});
+
+$router->post('admin/media/edit/delete', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->deleteSubmit($redirect);
 });
 
 $router->get('admin/settings', static function () use ($adminSettings, $redirect): void {

@@ -24,7 +24,14 @@
                     </select>
                 <?php elseif ($fieldType === 'file'): ?>
                     <?php $inputName = $fieldKey === 'logo' ? 'logo_file' : 'favicon_file'; ?>
-                    <input type="file" name="<?= htmlspecialchars($inputName, ENT_QUOTES, 'UTF-8') ?>" accept=".png,.ico,.svg,.jpg,.jpeg,.webp,.gif,image/png,image/x-icon,image/vnd.microsoft.icon,image/svg+xml,image/jpeg,image/webp,image/gif">
+                    <?php $fileInputId = 'settings-file-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>
+                    <div class="custom-upload-field">
+                        <label class="btn btn-light custom-upload-button" for="<?= htmlspecialchars($fileInputId, ENT_QUOTES, 'UTF-8') ?>">
+                            <?= $icon('upload') ?>
+                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?></span>
+                        </label>
+                        <input id="<?= htmlspecialchars($fileInputId, ENT_QUOTES, 'UTF-8') ?>" type="file" name="<?= htmlspecialchars($inputName, ENT_QUOTES, 'UTF-8') ?>" accept=".png,.ico,.svg,.jpg,.jpeg,.webp,.gif,image/png,image/x-icon,image/vnd.microsoft.icon,image/svg+xml,image/jpeg,image/webp,image/gif">
+                    </div>
                     <?php if ($fieldValue !== ''): ?>
                         <div class="mt-2">
                             <div class="text-muted"><?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?></div>
