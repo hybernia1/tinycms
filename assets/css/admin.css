@@ -3,6 +3,10 @@
     --sidebar-text: var(--color-inverse);
     --sidebar-link: #cbd5e1;
     --sidebar-link-active-bg: #1e293b;
+    --admin-z-header: 20;
+    --admin-z-menu-overlay: 30;
+    --admin-z-sidebar: 40;
+    --admin-z-modal: 200;
 }
 
 html,
@@ -89,7 +93,7 @@ body {
     flex: 0 0 auto;
     position: sticky;
     top: 0;
-    z-index: 3;
+    z-index: var(--admin-z-header);
 }
 
 .admin-menu-toggle {
@@ -239,7 +243,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     display: none;
-    z-index: 150;
+    z-index: var(--admin-z-modal);
     padding: var(--space-4);
 }
 
@@ -424,7 +428,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
         height: 100%;
         transform: translateX(-100%);
         transition: transform 0.2s ease-in-out;
-        z-index: 20;
+        z-index: var(--admin-z-sidebar);
     }
 
     .admin-main {
@@ -440,7 +444,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.45);
-        z-index: 15;
+        z-index: var(--admin-z-menu-overlay);
     }
 
     body.admin-menu-open .admin-sidebar {

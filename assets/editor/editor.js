@@ -606,7 +606,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            wrapper.classList.add('is-link-modal-open');
+            linkModal.classList.add('is-open');
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -673,7 +673,7 @@
                 }
                 wrapper.classList.remove(className);
             });
-            wrapper.classList.remove('is-link-modal-open');
+            linkModal.classList.remove('is-open');
         }
 
         function closeMenus() {
@@ -682,7 +682,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            wrapper.classList.remove('is-link-modal-open');
+            linkModal.classList.remove('is-open');
             hideLinkTools();
             activeLink = null;
         }
@@ -858,7 +858,7 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                if (wrapper.classList.contains('is-link-modal-open')) {
+                if (linkModal.classList.contains('is-open')) {
                     closeMenus();
                 } else {
                     openLinkModal();
@@ -1018,7 +1018,7 @@
         });
 
         document.addEventListener('click', function (event) {
-            if (!wrapper.contains(event.target)) {
+            if (!wrapper.contains(event.target) && !linkModal.contains(event.target)) {
                 closeMenus();
                 updateFormatState();
             }
@@ -1099,7 +1099,7 @@
             }
 
             hideLinkTools();
-            if (!wrapper.classList.contains('is-link-modal-open')) {
+            if (!linkModal.classList.contains('is-open')) {
                 activeLink = null;
             }
 
@@ -1247,7 +1247,7 @@
         textarea.style.display = 'none';
         textarea.parentNode.insertBefore(wrapper, textarea);
         wrapper.appendChild(toolbar);
-        wrapper.appendChild(linkModal);
+        document.body.appendChild(linkModal);
         wrapper.appendChild(linkTools);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);
