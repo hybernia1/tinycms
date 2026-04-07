@@ -610,10 +610,11 @@ input[type='week']::-webkit-calendar-picker-indicator {
     --flash-bg: #fef2f2;
 }
 
+.flash-warning,
 .flash-info {
-    --flash-border: #93c5fd;
-    --flash-text: #1e3a8a;
-    --flash-bg: #eff6ff;
+    --flash-border: #fcd34d;
+    --flash-text: #92400e;
+    --flash-bg: #fffbeb;
 }
 
 .pagination,
