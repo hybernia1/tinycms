@@ -21,6 +21,8 @@
 
     var overlay = null;
     var pageCounter = 0;
+    var pageLeaveStarted = false;
+    var pageRequestId = 0;
     function ensureOverlay() {
         if (!overlay) {
             overlay = createOverlay();
@@ -36,8 +38,17 @@
     }
 
     function startPage() {
+        pageRequestId += 1;
+        var requestId = pageRequestId;
         pageCounter += 1;
         ensureOverlay().classList.add('is-visible');
+        window.setTimeout(function () {
+            if (requestId !== pageRequestId || pageLeaveStarted) {
+                return;
+            }
+            pageCounter = 0;
+            ensureOverlay().classList.remove('is-visible');
+        }, 900);
     }
 
     function stopPage() {
@@ -57,6 +68,18 @@
         }
         return link.origin === window.location.origin;
     }
+
+    window.addEventListener('pagehide', function () {
+        pageLeaveStarted = true;
+    });
+
+    window.addEventListener('pageshow', function () {
+        pageLeaveStarted = false;
+        pageCounter = 0;
+        if (overlay) {
+            overlay.classList.remove('is-visible');
+        }
+    });
 
     document.addEventListener('click', function (event) {
         if (event.defaultPrevented) {
