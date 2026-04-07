@@ -58,6 +58,7 @@ body {
 
 a {
     color: var(--link-text);
+    text-decoration: none;
 }
 
 a:hover,
@@ -133,6 +134,7 @@ a:focus-visible {
 .mt-2 { margin-top: var(--space-2); }
 
 .text-muted { color: var(--color-muted); }
+.small { font-size: 75%; }
 .text-danger { color: var(--danger); }
 
 .badge {

@@ -364,7 +364,7 @@ initListApi({
                     ${canEdit
         ? `<a href="${esc(editBase)}${Number(item.id || 0)}">${esc(item.name)}</a>`
         : `<span>${esc(item.name)}</span>`}
-                    <div class="text-muted">${esc(item.created_label || item.created)}</div>
+                    <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                     <div class="d-flex gap-2 mt-2">
                         <span class="badge ${esc(statusClass)}">${esc(t(`content.statuses.${status}`, status))}</span>
                         ${item.is_planned ? `<span class="badge text-bg-warning">${esc(t('content.planned', 'Planned'))}</span>` : ''}
@@ -403,7 +403,7 @@ initListApi({
             <tr>
                 <td>
                     <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
-                    <div class="text-muted">${esc(item.created_label || item.created)}</div>
+                    <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                 </td>
                 <td>${esc(item.body || '—')}</td>
                 <td class="table-col-actions">
@@ -442,8 +442,8 @@ initListApi({
         : '<div class="media-list-thumb media-list-thumb-empty"></div>'}
                         <div>
                             ${canEdit ? `<a href="${esc(editBase)}${id}">${esc(item.name)}</a>` : `<span>${esc(item.name)}</span>`}
-                            <div class="text-muted">${esc(item.path)}</div>
-                            <div class="text-muted">${esc(item.created_label || item.created)}</div>
+                            <div class="text-muted small">${esc(item.path)}</div>
+                            <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                         </div>
                     </div>
                 </td>
@@ -482,7 +482,7 @@ initListApi({
             <tr>
                 <td>
                     <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
-                    <div class="text-muted">${esc(item.email)}</div>
+                    <div class="text-muted small">${esc(item.email)}</div>
                     <div class="d-flex gap-2 mt-2">
                         <span class="badge text-bg-primary">${esc(t(`users.roles.${String(item.role || '')}`, String(item.role || '')))}</span>
                         ${isSuspended ? `<span class="badge text-bg-warning">${esc(t('users.status_suspended_single', 'Suspended'))}</span>` : ''}

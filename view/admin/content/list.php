@@ -48,7 +48,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
             <?php else: ?>
                 <span><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
             <?php endif; ?>
-            <div class="text-muted"><?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?></div>
+            <div class="text-muted small"><?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?></div>
             <div class="d-flex gap-2 mt-2">
                 <span class="badge <?= htmlspecialchars($statusClass, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('content.statuses.' . $statusValue, $statusValue), ENT_QUOTES, 'UTF-8') ?></span>
                 <?php if ($isPlanned): ?><span class="badge text-bg-warning"><?= htmlspecialchars($t('content.planned', 'Planned'), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
