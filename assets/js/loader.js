@@ -55,6 +55,9 @@
     }
 
     document.addEventListener('click', function (event) {
+        if (event.defaultPrevented) {
+            return;
+        }
         var link = event.target.closest('a[href]');
         if (!shouldHandleLink(link)) {
             return;
@@ -63,6 +66,9 @@
     });
 
     document.addEventListener('submit', function (event) {
+        if (event.defaultPrevented) {
+            return;
+        }
         var form = event.target;
         if (!form || form.hasAttribute('data-no-loader')) {
             return;
