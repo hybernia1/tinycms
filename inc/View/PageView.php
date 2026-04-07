@@ -149,9 +149,31 @@ final class PageView
 
     public function rssFeed(array $channel, array $items): void
     {
-        $this->view->render('rss/layout', 'rss/feed', [
+        $this->view->render('front/xml/layout', 'front/rss/feed', [
             'channel' => $channel,
             'items' => $items,
+            'contentType' => 'application/rss+xml; charset=utf-8',
+        ]);
+    }
+
+    public function robots(string $sitemapUrl): void
+    {
+        $this->view->render('front/plain/layout', 'front/robots', [
+            'sitemapUrl' => $sitemapUrl,
+        ]);
+    }
+
+    public function sitemapIndex(array $paths): void
+    {
+        $this->view->render('front/xml/layout', 'front/sitemap/index', [
+            'paths' => $paths,
+        ]);
+    }
+
+    public function sitemapUrlSet(array $urls): void
+    {
+        $this->view->render('front/xml/layout', 'front/sitemap/urlset', [
+            'urls' => $urls,
         ]);
     }
 
