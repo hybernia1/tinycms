@@ -13,7 +13,7 @@ $searchHidden = ['per_page' => (string)$listPerPage, 'page' => '1'];
 $perPageHidden = ['q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('common.name', 'Name')],
-    ['label' => $t('common.description', 'Description')],
+    ['label' => $t('common.description', 'Description'), 'mobile_hide' => true],
     ['label' => $t('common.actions', 'Actions'), 'class' => 'table-col-actions'],
 ];
 $listAllowedPerPage = $allowedPerPage;
@@ -29,7 +29,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
             <a href="<?= htmlspecialchars($url('admin/terms/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
             <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($row['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
         </td>
-        <td><?= htmlspecialchars((string)($row['body'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+        <td class="table-col-mobile-hide"><?= htmlspecialchars((string)($row['body'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
         <td class="table-col-actions">
             <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('terms.delete', 'Delete tag'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('terms.delete', 'Delete tag'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('delete') ?>

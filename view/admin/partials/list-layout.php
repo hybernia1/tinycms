@@ -67,6 +67,9 @@ foreach ($listRootAttrs as $attr => $value) {
                         <?php
                         $label = (string)($column['label'] ?? '');
                         $class = trim((string)($column['class'] ?? ''));
+                        if (!empty($column['mobile_hide'])) {
+                            $class = trim($class . ' table-col-mobile-hide');
+                        }
                         ?>
                         <th<?= $class !== '' ? ' class="' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . '"' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></th>
                     <?php endforeach; ?>

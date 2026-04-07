@@ -424,6 +424,30 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 @media (max-width: 900px) {
+    body {
+        font-size: 75%;
+    }
+
+    .admin-content .table {
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+    .admin-content .table th,
+    .admin-content .table td {
+        word-break: break-word;
+    }
+
+    .admin-content .table .table-col-mobile-hide {
+        display: none;
+    }
+
+    .media-list-thumb {
+        width: 75px;
+        height: 75px;
+        flex: 0 0 75px;
+    }
+
     .admin-sidebar {
         height: 100%;
         transform: translateX(-100%);
