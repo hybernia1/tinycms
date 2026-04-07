@@ -382,10 +382,7 @@ final class FrontController
 
     private function robots(): void
     {
-        header('Content-Type: text/plain; charset=utf-8');
-        echo "User-agent: *\n";
-        echo "Allow: /\n";
-        echo 'Sitemap: ' . $this->absoluteUrl('sitemap.xml') . "\n";
+        $this->pages->robots($this->absoluteUrl('sitemap.xml'));
         exit;
     }
 
@@ -399,8 +396,7 @@ final class FrontController
             $items[] = $path;
         }
 
-        header('Content-Type: application/xml; charset=utf-8');
-        echo $this->renderSitemapIndex($items);
+        $this->pages->sitemapIndex($items);
         exit;
     }
 
@@ -419,8 +415,7 @@ final class FrontController
             ];
         }, $links);
 
-        header('Content-Type: application/xml; charset=utf-8');
-        echo $this->renderSitemapUrlSet($urls);
+        $this->pages->sitemapUrlSet($urls);
         exit;
     }
 
@@ -439,8 +434,7 @@ final class FrontController
             ];
         }, $links);
 
-        header('Content-Type: application/xml; charset=utf-8');
-        echo $this->renderSitemapUrlSet($urls);
+        $this->pages->sitemapUrlSet($urls);
         exit;
     }
 
@@ -453,31 +447,6 @@ final class FrontController
         }
 
         return $paths;
-    }
-
-    private function renderSitemapIndex(array $paths): string
-    {
-        $items = array_map(fn(string $path): string => '<sitemap><loc>' . htmlspecialchars($this->absoluteUrl($path), ENT_XML1, 'UTF-8') . '</loc></sitemap>', $paths);
-        return '<?xml version="1.0" encoding="UTF-8"?>'
-            . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-            . implode('', $items)
-            . '</sitemapindex>';
-    }
-
-    private function renderSitemapUrlSet(array $urls): string
-    {
-        $items = array_map(static function (array $url): string {
-            $xml = '<url><loc>' . htmlspecialchars((string)($url['loc'] ?? ''), ENT_XML1, 'UTF-8') . '</loc>';
-            if ((string)($url['lastmod'] ?? '') !== '') {
-                $xml .= '<lastmod>' . htmlspecialchars((string)$url['lastmod'], ENT_XML1, 'UTF-8') . '</lastmod>';
-            }
-            return $xml . '</url>';
-        }, $urls);
-
-        return '<?xml version="1.0" encoding="UTF-8"?>'
-            . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-            . implode('', $items)
-            . '</urlset>';
     }
 
     private function absoluteUrl(string $path): string
