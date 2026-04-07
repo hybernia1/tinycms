@@ -72,7 +72,6 @@ body {
 .admin-nav-link.active,
 .admin-nav-link:hover {
     color: var(--sidebar-text);
-    background: var(--sidebar-link-active-bg);
 }
 
 .admin-main {
