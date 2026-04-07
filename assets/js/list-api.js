@@ -88,9 +88,11 @@ const initListApi = (config) => {
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
     const loader = window.tinycmsLoader || null;
 
+    const defaultPerPage = Number(perPageField?.value || perPageField?.querySelector('option')?.value || '10') || 10;
+
     let state = {
         page: 1,
-        perPage: Number(perPageField?.value || '10'),
+        perPage: defaultPerPage,
         query: searchField?.value.trim() || '',
     };
 
@@ -318,7 +320,7 @@ const initListApi = (config) => {
 
     if (perPageField) {
         perPageField.addEventListener('change', async () => {
-            state.perPage = Number(perPageField.value || '10');
+            state.perPage = Number(perPageField.value || String(defaultPerPage)) || defaultPerPage;
             state.page = 1;
             await fetchList();
         });

@@ -1,7 +1,7 @@
 <?php
 $listItems = $pagination['data'] ?? [];
 $listPage = (int)($pagination['page'] ?? 1);
-$listPerPage = (int)($pagination['per_page'] ?? 10);
+$listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
 $listTotalPages = (int)($pagination['total_pages'] ?? 1);
 $listQuery = (string)($query ?? '');
 $csrfMarkup = $csrfField();

@@ -12,11 +12,11 @@ use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Feature\UserService;
 use App\Service\Support\I18n;
+use App\Service\Support\PaginationConfig;
 use App\View\PageView;
 
 final class AdminContentController extends BaseAdminController
 {
-    private const PER_PAGE_ALLOWED = [10, 20, 50];
     private const FORM_STATE_KEY = 'admin_content_form_state';
 
     public function __construct(
@@ -42,7 +42,7 @@ final class AdminContentController extends BaseAdminController
         [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveListQuery();
 
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
-        $this->pages->adminContentList($pagination, self::PER_PAGE_ALLOWED, $status, $query, $availableStatuses);
+        $this->pages->adminContentList($pagination, PaginationConfig::allowed(), $status, $query, $availableStatuses);
     }
 
     public function listApiV1(callable $redirect): void
@@ -616,11 +616,12 @@ final class AdminContentController extends BaseAdminController
         }
 
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
+        $defaultPerPage = PaginationConfig::perPage();
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
         $query = trim((string)($_GET['q'] ?? ''));
         $currentMediaId = (int)($_GET['current_media_id'] ?? 0);
-        if ($perPage <= 0 || $perPage > 20) {
-            $perPage = 10;
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
         }
 
         $pagination = $this->media->paginate($page, $perPage, $query);
@@ -943,12 +944,13 @@ final class AdminContentController extends BaseAdminController
     private function resolveListQuery(): array
     {
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
+        $defaultPerPage = PaginationConfig::perPage();
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
         $status = trim((string)($_GET['status'] ?? 'all'));
         $query = trim((string)($_GET['q'] ?? ''));
 
-        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
-            $perPage = 10;
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
         }
 
         $availableStatuses = $this->content->statuses();

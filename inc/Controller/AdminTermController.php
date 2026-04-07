@@ -8,11 +8,11 @@ use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
+use App\Service\Support\PaginationConfig;
 use App\View\PageView;
 
 final class AdminTermController extends BaseAdminController
 {
-    private const PER_PAGE_ALLOWED = [10, 20, 50];
     private const FORM_STATE_KEY = 'admin_term_form_state';
 
     public function __construct(
@@ -31,16 +31,17 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
+        $defaultPerPage = PaginationConfig::perPage();
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
         $query = trim((string)($_GET['q'] ?? ''));
 
-        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
-            $perPage = 10;
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
         }
 
         $pagination = $this->terms->paginate($page, $perPage, $query);
-        $this->pages->adminTermList($pagination, self::PER_PAGE_ALLOWED, $query);
+        $this->pages->adminTermList($pagination, PaginationConfig::allowed(), $query);
     }
 
     public function listApiV1(callable $redirect): void
@@ -49,11 +50,12 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
+        $defaultPerPage = PaginationConfig::perPage();
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
         $query = trim((string)($_GET['q'] ?? ''));
-        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
-            $perPage = 10;
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
         }
 
         $pagination = $this->terms->paginate($page, $perPage, $query);

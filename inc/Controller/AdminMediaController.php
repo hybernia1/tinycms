@@ -9,11 +9,11 @@ use App\Service\Feature\UploadService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
+use App\Service\Support\PaginationConfig;
 use App\View\PageView;
 
 final class AdminMediaController extends BaseAdminController
 {
-    private const PER_PAGE_ALLOWED = [10, 20, 50];
     private const FORM_STATE_KEY = 'admin_media_form_state';
 
     public function __construct(
@@ -35,7 +35,7 @@ final class AdminMediaController extends BaseAdminController
 
         [$page, $perPage, $query] = $this->resolveListQuery();
         $pagination = $this->media->paginate($page, $perPage, $query);
-        $this->pages->adminMediaList($pagination, self::PER_PAGE_ALLOWED, $query);
+        $this->pages->adminMediaList($pagination, PaginationConfig::allowed(), $query);
     }
 
     public function listApiV1(callable $redirect): void
@@ -291,11 +291,12 @@ final class AdminMediaController extends BaseAdminController
     private function resolveListQuery(): array
     {
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
+        $defaultPerPage = PaginationConfig::perPage();
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
         $query = trim((string)($_GET['q'] ?? ''));
 
-        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
-            $perPage = 10;
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
         }
 
         return [$page, $perPage, $query];
