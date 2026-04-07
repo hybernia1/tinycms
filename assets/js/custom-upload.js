@@ -1,4 +1,5 @@
 document.querySelectorAll('.custom-upload-field').forEach((field) => {
+    const loader = window.tinycmsLoader || null;
     const fileInput = field.querySelector('input[type="file"]');
     const label = field.querySelector('[data-custom-upload-label]');
     const autoSubmit = field.hasAttribute('data-custom-upload-auto-submit');
@@ -38,7 +39,11 @@ document.querySelectorAll('.custom-upload-field').forEach((field) => {
             nameInput.value = fileName;
         }
 
-        field.classList.add('is-loading');
+        if (loader) {
+            loader.set(field, true);
+        } else {
+            field.classList.add('is-loading');
+        }
         form.requestSubmit();
     };
 
