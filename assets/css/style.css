@@ -279,7 +279,7 @@ a:focus-visible {
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 640px;
+    table-layout: fixed;
 }
 
 .table th,
