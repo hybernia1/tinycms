@@ -31,15 +31,7 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
-        $defaultPerPage = PaginationConfig::perPage();
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
-
+        [$page, $perPage, $query] = $this->resolveListQuery();
         $pagination = $this->terms->paginate($page, $perPage, $query);
         $this->pages->adminTermList($pagination, PaginationConfig::allowed(), $query);
     }
@@ -50,14 +42,7 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
-        $defaultPerPage = PaginationConfig::perPage();
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        $query = trim((string)($_GET['q'] ?? ''));
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
-
+        [$page, $perPage, $query] = $this->resolveListQuery();
         $pagination = $this->terms->paginate($page, $perPage, $query);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
 
@@ -215,5 +200,19 @@ final class AdminTermController extends BaseAdminController
         }
 
         return date(APP_DATETIME_FORMAT, $stamp);
+    }
+
+    private function resolveListQuery(): array
+    {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $defaultPerPage = PaginationConfig::perPage();
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        $query = trim((string)($_GET['q'] ?? ''));
+
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
+        }
+
+        return [$page, $perPage, $query];
     }
 }

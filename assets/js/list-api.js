@@ -27,6 +27,7 @@ const normalizeListResponse = (payload) => {
         items: Array.isArray(payload?.data) ? payload.data : [],
         page: Number(meta.page || 1),
         totalPages: Number(meta.total_pages || 1),
+        perPage: Number(meta.per_page || 0),
     };
 };
 
@@ -175,8 +176,12 @@ const initListApi = (config) => {
 
             const data = await response.json();
             const normalized = normalizeListResponse(data);
+            state.page = Math.max(1, normalized.page || 1);
+            if (normalized.perPage > 0) {
+                state.perPage = normalized.perPage;
+            }
             body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
-            setPagination(normalized.page, normalized.totalPages);
+            setPagination(state.page, normalized.totalPages);
             syncFilters();
         } finally {
             if (loader) {
