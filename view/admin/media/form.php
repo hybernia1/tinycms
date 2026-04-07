@@ -72,6 +72,9 @@
         <?php endif; ?>
         <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
         <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
+        <?php if ($mode === 'edit'): ?>
+            <button class="btn btn-light" type="button" data-modal-open data-modal-target="#media-delete-modal"><?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?></button>
+        <?php endif; ?>
     </form>
 
     <?php if ($mode === 'edit'): ?>
@@ -104,5 +107,17 @@
                 </table>
             </div>
         <?php endif; ?>
+        <form id="media-delete-form" method="post" action="<?= htmlspecialchars($url('admin/media/edit/delete?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+            <?= $csrfField() ?>
+        </form>
+        <div class="modal-overlay" data-modal id="media-delete-modal">
+            <div class="modal">
+                <p data-modal-text><?= htmlspecialchars($t('media.delete_confirm', 'Do you really want to delete this media?'), ENT_QUOTES, 'UTF-8') ?></p>
+                <div class="modal-actions">
+                    <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="media-delete-form"><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+                </div>
+            </div>
+        </div>
     <?php endif; ?>
 </div>

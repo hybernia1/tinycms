@@ -143,6 +143,49 @@ final class MediaService
         return $rows;
     }
 
+    public function editNavigation(int $id, ?int $authorId = null): array
+    {
+        $ids = $this->accessibleIds($authorId);
+        if ($ids === []) {
+            return ['prev' => null, 'next' => null];
+        }
+
+        $index = array_search($id, $ids, true);
+        if ($index === false) {
+            return ['prev' => null, 'next' => null];
+        }
+
+        return [
+            'prev' => $ids[$index - 1] ?? null,
+            'next' => $ids[$index + 1] ?? null,
+        ];
+    }
+
+    public function nextIdAfterDelete(int $id, ?int $authorId = null): ?int
+    {
+        $ids = array_values(array_filter($this->accessibleIds($authorId), static fn(int $itemId): bool => $itemId !== $id));
+        if ($ids === []) {
+            return null;
+        }
+
+        foreach ($ids as $itemId) {
+            if ($itemId > $id) {
+                return $itemId;
+            }
+        }
+
+        return $ids[count($ids) - 1] ?? null;
+    }
+
+    private function accessibleIds(?int $authorId): array
+    {
+        $where = $authorId !== null ? ['author' => $authorId] : [];
+        $rows = $this->query->select('media', ['id'], $where);
+        $ids = array_values(array_filter(array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $rows), static fn(int $itemId): bool => $itemId > 0));
+        sort($ids);
+        return $ids;
+    }
+
     private function resolveAuthor(array $input): ?int
     {
         if (!array_key_exists('author', $input) || trim((string)$input['author']) === '') {

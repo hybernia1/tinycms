@@ -5,6 +5,7 @@ $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
+$isMediaEdit = str_ends_with($currentPath, 'admin/media/edit');
 $isTermsList = str_ends_with($currentPath, 'admin/terms');
 $isUsersEdit = str_ends_with($currentPath, 'admin/users/edit');
 $isContentEdit = str_ends_with($currentPath, 'admin/content/edit');
@@ -205,7 +206,23 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 </button>
                 <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
-            <?php if ($isUsersList || $isUsersEdit): ?>
+            <?php if ($isMediaEdit && isset($navigation) && is_array($navigation)): ?>
+            <?php $prevMediaId = (int)($navigation['prev'] ?? 0); $nextMediaId = (int)($navigation['next'] ?? 0); ?>
+            <div class="d-flex align-center gap-2">
+                <?php if ($prevMediaId > 0): ?>
+                <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/edit?id=' . $prevMediaId), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('prev') ?>
+                    <span><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
+                <?php endif; ?>
+                <?php if ($nextMediaId > 0): ?>
+                <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/edit?id=' . $nextMediaId), ENT_QUOTES, 'UTF-8') ?>">
+                    <span><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></span>
+                    <?= $icon('next') ?>
+                </a>
+                <?php endif; ?>
+            </div>
+            <?php elseif ($isUsersList || $isUsersEdit): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?></span>

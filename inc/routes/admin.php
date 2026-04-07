@@ -180,6 +180,10 @@ $router->post('admin/media/edit', static function () use ($adminMedia, $redirect
     $adminMedia->editSubmit($redirect);
 });
 
+$router->post('admin/media/edit/delete', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->deleteSubmit($redirect);
+});
+
 $router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
     $adminSettings->form($redirect);
 });

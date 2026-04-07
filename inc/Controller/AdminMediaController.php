@@ -139,7 +139,9 @@ final class AdminMediaController extends BaseAdminController
         }
 
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
-        $this->pages->adminMediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions(), $this->media->thumbnailUsages($id));
+        $authorFilter = $this->isEditor() ? $this->currentUserId() : null;
+        $navigation = $this->media->editNavigation($id, $authorFilter > 0 ? $authorFilter : null);
+        $this->pages->adminMediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
     }
 
     public function editSubmit(callable $redirect): void
@@ -236,6 +238,49 @@ final class AdminMediaController extends BaseAdminController
             'ok' => true,
             'data' => ['id' => $id],
         ]);
+    }
+
+    public function deleteSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+        ) {
+            return;
+        }
+
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id <= 0) {
+            $this->flash->add('error', I18n::t('media.invalid_id', 'Invalid media ID.'));
+            $redirect('admin/media');
+            return;
+        }
+
+        $item = $this->media->find($id);
+        if ($item === null) {
+            $this->flash->add('error', I18n::t('media.not_found', 'Media not found.'));
+            $redirect('admin/media');
+            return;
+        }
+
+        if (!$this->canDeleteMedia($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $redirect('admin/media');
+            return;
+        }
+
+        $authorFilter = $this->isEditor() ? $this->currentUserId() : null;
+        $nextId = $this->media->nextIdAfterDelete($id, $authorFilter > 0 ? $authorFilter : null);
+
+        if (!$this->media->delete($id)) {
+            $this->flash->add('error', I18n::t('media.delete_failed', 'Could not delete media.'));
+            $redirect($this->editPath($id));
+            return;
+        }
+
+        $this->upload->deleteMediaFiles($item);
+        $this->flash->add('success', I18n::t('media.deleted', 'Media deleted.'));
+        $redirect($nextId !== null ? $this->editPath($nextId) : 'admin/media');
     }
 
     private function editPath(int $id): string

@@ -257,7 +257,7 @@ final class PageView
         ]);
     }
 
-    public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = []): void
+    public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = [], array $navigation = []): void
     {
         $this->renderAdmin('admin/media/form', [
             'mode' => $mode,
@@ -265,6 +265,7 @@ final class PageView
             'errors' => $errors,
             'authors' => $authors,
             'usages' => $usages,
+            'navigation' => $navigation,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media', 'Add media') : I18n::t('admin.edit_media', 'Edit media'),
         ]);
