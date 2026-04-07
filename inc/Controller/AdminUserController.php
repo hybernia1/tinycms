@@ -7,12 +7,12 @@ use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
+use App\Service\Support\PaginationConfig;
 use App\Service\Feature\UserService;
 use App\View\PageView;
 
 final class AdminUserController extends BaseAdminController
 {
-    private const PER_PAGE_ALLOWED = [10, 20, 50];
     private const FORM_STATE_KEY = 'admin_users_form_state';
 
     private PageView $pages;
@@ -34,7 +34,7 @@ final class AdminUserController extends BaseAdminController
         [$page, $perPage, $status, $suspend, $query] = $this->resolveListQuery();
 
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
-        $this->pages->adminUsersList($pagination, self::PER_PAGE_ALLOWED, $status, $query);
+        $this->pages->adminUsersList($pagination, PaginationConfig::allowed(), $status, $query);
     }
 
     public function listApiV1(callable $redirect): void
@@ -218,14 +218,15 @@ final class AdminUserController extends BaseAdminController
     private function resolveListQuery(): array
     {
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? 10);
+        $defaultPerPage = PaginationConfig::perPage();
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
         $status = (string)($_GET['status'] ?? 'all');
         $status = in_array($status, ['all', 'active', 'suspended'], true) ? $status : 'all';
         $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
         $query = trim((string)($_GET['q'] ?? ''));
 
-        if (!in_array($perPage, self::PER_PAGE_ALLOWED, true)) {
-            $perPage = 10;
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
         }
 
         return [$page, $perPage, $status, $suspend, $query];

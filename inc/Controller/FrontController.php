@@ -9,6 +9,7 @@ use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Feature\SettingsService;
 use App\Service\Support\I18n;
+use App\Service\Support\PaginationConfig;
 use App\Service\Support\SluggerService;
 use App\View\PageView;
 
@@ -36,7 +37,7 @@ final class FrontController
     public function home(): void
     {
         $site = $this->siteData();
-        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(30));
+        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(PaginationConfig::perPage()));
 
         $this->pages->home($this->authService->auth()->user(), $site, $posts);
     }
@@ -84,7 +85,7 @@ final class FrontController
         }
 
         $page = (int)($_GET['page'] ?? 1);
-        $pagination = $this->contentService->paginatePublishedByTerm((int)($term['id'] ?? 0), $page, 10);
+        $pagination = $this->contentService->paginatePublishedByTerm((int)($term['id'] ?? 0), $page, PaginationConfig::perPage());
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
 
         $this->pages->termArchive([
@@ -99,7 +100,7 @@ final class FrontController
     {
         $query = trim((string)($_GET['q'] ?? ''));
         $page = (int)($_GET['page'] ?? 1);
-        $pagination = $this->contentService->paginatePublishedSearch($query, $page, 10);
+        $pagination = $this->contentService->paginatePublishedSearch($query, $page, PaginationConfig::perPage());
         $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
         $site = $this->siteData();
 
@@ -111,7 +112,7 @@ final class FrontController
         $settings = $this->settings->resolved();
         $siteName = (string)($settings['sitename'] ?? 'TinyCMS');
         $description = (string)($settings['meta_description'] ?? '');
-        $items = array_map(fn(array $item): array => $this->toRssItem($item), $this->contentService->listPublishedFeed(100));
+        $items = array_map(fn(array $item): array => $this->toRssItem($item), $this->contentService->listPublishedFeed(PaginationConfig::perPage()));
 
         $this->pages->rssFeed([
             'title' => $siteName,
@@ -136,7 +137,7 @@ final class FrontController
             $redirect('term/' . $slug . '/feed', true);
         }
 
-        $items = array_map(fn(array $item): array => $this->toRssItem($item), $this->contentService->listPublishedByTermFeed((int)($term['id'] ?? 0), 100));
+        $items = array_map(fn(array $item): array => $this->toRssItem($item), $this->contentService->listPublishedByTermFeed((int)($term['id'] ?? 0), PaginationConfig::perPage()));
         $termName = (string)($term['name'] ?? '');
 
         $this->pages->rssFeed([

@@ -156,7 +156,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <?= $csrfField() ?>
 </form>
 <?php endif; ?>
-<div class="media-library-modal" data-media-library-modal>
+<div class="media-library-modal" data-media-library-modal data-media-library-per-page="<?= (int)APP_POSTS_PER_PAGE ?>">
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
             <strong>Media library</strong>

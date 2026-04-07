@@ -50,6 +50,7 @@ if (modal && openTrigger) {
     let page = 1;
     let totalPages = 1;
     let query = '';
+    const perPage = Number(modal.getAttribute('data-media-library-per-page') || '10') || 10;
     let selectedMedia = null;
     let searchTimer = null;
 
@@ -339,7 +340,7 @@ if (modal && openTrigger) {
 
         const url = new URL(endpoint, window.location.origin);
         url.searchParams.set('page', String(page));
-        url.searchParams.set('per_page', '10');
+        url.searchParams.set('per_page', String(perPage));
         if (query !== '') {
             url.searchParams.set('q', query);
         }

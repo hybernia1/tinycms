@@ -31,6 +31,10 @@ if (!defined('APP_DATETIME_FORMAT')) {
     define('APP_DATETIME_FORMAT', 'Y-m-d H:i:s');
 }
 
+if (!defined('APP_POSTS_PER_PAGE')) {
+    define('APP_POSTS_PER_PAGE', 10);
+}
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
 
