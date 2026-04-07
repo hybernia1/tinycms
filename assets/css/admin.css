@@ -110,6 +110,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
 .admin-sidebar-bottom {
@@ -360,6 +361,37 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     to {
         transform: rotate(360deg);
     }
+}
+
+.admin-global-loader {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .16s ease;
+}
+
+.admin-global-loader.is-fixed {
+    position: fixed;
+}
+
+.admin-global-loader.is-visible {
+    opacity: 1;
+}
+
+.admin-global-loader .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    animation: custom-upload-spin 1s linear infinite;
+}
+
+.is-loading {
+    opacity: .65;
 }
 
 .custom-upload-field input[type='file'] {

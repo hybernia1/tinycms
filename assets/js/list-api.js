@@ -86,6 +86,7 @@ const initListApi = (config) => {
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
         : [];
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
+    const loader = window.tinycmsLoader || null;
 
     let state = {
         page: 1,
@@ -138,39 +139,48 @@ const initListApi = (config) => {
         }
         fetchController = new AbortController();
 
-        const url = new URL(endpoint, window.location.origin);
-        url.searchParams.set('page', String(state.page));
-        url.searchParams.set('per_page', String(state.perPage));
-
-        if (config.withStatus) {
-            url.searchParams.set('status', state.status);
+        if (loader) {
+            loader.set(root, true);
         }
+        try {
+            const url = new URL(endpoint, window.location.origin);
+            url.searchParams.set('page', String(state.page));
+            url.searchParams.set('per_page', String(state.perPage));
 
-        if (state.query !== '') {
-            url.searchParams.set('q', state.query);
-        }
-
-        const response = await fetch(url.toString(), {
-            headers: { Accept: 'application/json' },
-            signal: fetchController.signal,
-        }).catch((error) => {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return null;
+            if (config.withStatus) {
+                url.searchParams.set('status', state.status);
             }
-            throw error;
-        });
-        if (!response) {
-            return;
-        }
-        if (!response.ok) {
-            return;
-        }
 
-        const data = await response.json();
-        const normalized = normalizeListResponse(data);
-        body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
-        setPagination(normalized.page, normalized.totalPages);
-        syncFilters();
+            if (state.query !== '') {
+                url.searchParams.set('q', state.query);
+            }
+
+            const response = await fetch(url.toString(), {
+                headers: { Accept: 'application/json' },
+                signal: fetchController.signal,
+            }).catch((error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return null;
+                }
+                throw error;
+            });
+            if (!response) {
+                return;
+            }
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+            const normalized = normalizeListResponse(data);
+            body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
+            setPagination(normalized.page, normalized.totalPages);
+            syncFilters();
+        } finally {
+            if (loader) {
+                loader.set(root, false);
+            }
+        }
     };
 
     const postAction = async (path, payload) => {

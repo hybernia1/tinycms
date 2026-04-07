@@ -10,6 +10,7 @@ const openTrigger = Array.prototype.find.call(
 ) || null;
 
 if (modal && openTrigger) {
+    const loader = window.tinycmsLoader || null;
     const grid = modal.querySelector('[data-media-library-grid]');
     const pageLabel = modal.querySelector('[data-media-library-page]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
@@ -274,6 +275,9 @@ if (modal && openTrigger) {
 
         if (grid) {
             grid.innerHTML = '<p class="text-muted m-0">Načítám...</p>';
+            if (loader) {
+                loader.set(grid, true);
+            }
         }
 
         const url = new URL(endpoint, window.location.origin);
@@ -286,26 +290,31 @@ if (modal && openTrigger) {
             url.searchParams.set('current_media_id', String(currentMediaId));
         }
 
-        const response = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
-        if (!response.ok) {
-            throw new Error('load_failed');
-        }
-
-        const raw = await response.json();
-        const normalized = normalizePayload(raw);
-        const items = Array.isArray(normalized.data) ? normalized.data : (Array.isArray(raw.items) ? raw.items : []);
-        const total = Number(normalized.meta.total_pages || raw.total_pages || 1);
-        const current = Number(normalized.meta.page || raw.page || 1);
-        totalPages = Math.max(1, total);
-        page = Math.min(Math.max(1, current), totalPages);
-        renderItems(items);
-        if (!selectedMedia && currentMediaId > 0 && grid) {
-            const currentCard = grid.querySelector(`[data-media-library-select="${currentMediaId}"]`);
-            if (currentCard) {
-                selectCard(currentCard);
+        try {
+            const response = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
+            if (!response.ok) {
+                throw new Error('load_failed');
+            }
+            const raw = await response.json();
+            const normalized = normalizePayload(raw);
+            const items = Array.isArray(normalized.data) ? normalized.data : (Array.isArray(raw.items) ? raw.items : []);
+            const total = Number(normalized.meta.total_pages || raw.total_pages || 1);
+            const current = Number(normalized.meta.page || raw.page || 1);
+            totalPages = Math.max(1, total);
+            page = Math.min(Math.max(1, current), totalPages);
+            renderItems(items);
+            if (!selectedMedia && currentMediaId > 0 && grid) {
+                const currentCard = grid.querySelector(`[data-media-library-select="${currentMediaId}"]`);
+                if (currentCard) {
+                    selectCard(currentCard);
+                }
+            }
+            updatePager();
+        } finally {
+            if (grid && loader) {
+                loader.set(grid, false);
             }
         }
-        updatePager();
     };
 
     const setContext = (detail) => {
@@ -551,7 +560,11 @@ if (modal && openTrigger) {
             }
 
             if (uploadField) {
-                uploadField.classList.add('is-loading');
+                if (loader) {
+                    loader.set(uploadField, true);
+                } else {
+                    uploadField.classList.add('is-loading');
+                }
             }
 
             const response = await fetch(uploadForm.action, {
@@ -562,7 +575,11 @@ if (modal && openTrigger) {
             const data = normalizePayload(await response.json().catch(() => ({})));
 
             if (uploadField) {
-                uploadField.classList.remove('is-loading');
+                if (loader) {
+                    loader.set(uploadField, false);
+                } else {
+                    uploadField.classList.remove('is-loading');
+                }
             }
 
             if (!response.ok || !data.success) {

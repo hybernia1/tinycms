@@ -60,6 +60,52 @@
         return 'https://' + value.replace(/^\/+/, '');
     }
 
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function extractPastedUrl(value) {
+        var raw = String(value || '').trim();
+        if (!raw || /\s/.test(raw)) {
+            return '';
+        }
+        var normalized = normalizeLinkUrl(raw);
+        if (!/^https?:\/\//i.test(normalized)) {
+            return '';
+        }
+        try {
+            new URL(normalized);
+        } catch (error) {
+            return '';
+        }
+        return normalized;
+    }
+
+    function findPastedImageFile(event) {
+        var clipboard = event.clipboardData;
+        if (!clipboard || !clipboard.items) {
+            return null;
+        }
+        for (var i = 0; i < clipboard.items.length; i += 1) {
+            var item = clipboard.items[i];
+            if (item && item.kind === 'file' && /^image\//i.test(item.type || '')) {
+                return item.getAsFile();
+            }
+        }
+        return null;
+    }
+
+    function createLoadingImageBlock() {
+        var block = document.createElement('div');
+        block.className = 'block block-image align-center is-loading';
+        block.innerHTML = '<div class="image-upload-loading" contenteditable="false"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#icon-loader"></use></svg></div>';
+        return block;
+    }
+
     function createImageControls() {
         var controls = document.createElement('div');
         controls.className = 'image-controls';
@@ -579,6 +625,192 @@
         var activeLink = null;
         var htmlMode = false;
         var mediaRange = null;
+        var linkPasteSeq = 0;
+        var draftInitPromise = null;
+
+        function absoluteMediaUrl(path) {
+            var value = String(path || '').trim();
+            if (!value) {
+                return '';
+            }
+            if (/^https?:\/\//i.test(value)) {
+                return value;
+            }
+            var base = String(textarea.dataset.mediaBaseUrl || '').trim().replace(/\/$/, '');
+            var normalized = value.charAt(0) === '/' ? value : ('/' + value);
+            return base === '' ? normalized : (base + normalized);
+        }
+
+        function contentApiBase() {
+            var draftEndpoint = String((textarea.closest('form') || {}).dataset ? textarea.closest('form').dataset.draftInitEndpoint || '' : '').trim();
+            if (!draftEndpoint) {
+                return '';
+            }
+            return draftEndpoint.replace(/\/admin\/api\/v1\/content\/draft\/init.*$/, '');
+        }
+
+        function setContentIdEverywhere(id) {
+            var value = Number(id || 0);
+            if (value <= 0) {
+                return;
+            }
+            var form = textarea.closest('form');
+            if (form) {
+                form.querySelectorAll('input[name="id"]').forEach(function (node) {
+                    node.value = String(value);
+                });
+                form.querySelectorAll('input[name="content_id"]').forEach(function (node) {
+                    node.value = String(value);
+                });
+            }
+            textarea.dataset.contentId = String(value);
+            var base = contentApiBase();
+            if (base !== '') {
+                textarea.dataset.mediaLibraryEndpoint = base + '/admin/api/v1/content/' + value + '/media';
+            }
+        }
+
+        function ensureDraftId() {
+            var currentId = Number(textarea.dataset.contentId || '0');
+            if (currentId > 0) {
+                return Promise.resolve(currentId);
+            }
+            if (draftInitPromise) {
+                return draftInitPromise;
+            }
+            var form = textarea.closest('form');
+            var endpoint = String(form && form.dataset ? form.dataset.draftInitEndpoint || '' : '').trim();
+            var csrfInput = form ? form.querySelector('input[name="_csrf"]') : null;
+            if (!endpoint || !csrfInput) {
+                return Promise.resolve(0);
+            }
+
+            draftInitPromise = fetch(endpoint, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: '_csrf=' + encodeURIComponent(csrfInput.value || '')
+            }).then(function (response) {
+                return response.ok ? response.json() : null;
+            }).then(function (payload) {
+                var newId = payload && payload.ok && payload.data ? Number(payload.data.id || 0) : 0;
+                if (newId > 0) {
+                    setContentIdEverywhere(newId);
+                }
+                return newId;
+            }).catch(function () {
+                return 0;
+            }).finally(function () {
+                draftInitPromise = null;
+            });
+
+            return draftInitPromise;
+        }
+
+        function waitForImageReady(url, retries) {
+            var maxRetries = typeof retries === 'number' ? retries : 8;
+            return new Promise(function (resolve) {
+                var attempt = 0;
+                function tryLoad() {
+                    var image = new Image();
+                    image.onload = function () {
+                        resolve(true);
+                    };
+                    image.onerror = function () {
+                        attempt += 1;
+                        if (attempt >= maxRetries) {
+                            resolve(false);
+                            return;
+                        }
+                        window.setTimeout(tryLoad, 350);
+                    };
+                    image.src = url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now();
+                }
+                tryLoad();
+            });
+        }
+
+        function uploadPastedImage(file, loadingBlock) {
+            if (!file) {
+                return;
+            }
+            ensureDraftId().then(function (contentId) {
+                if (contentId <= 0) {
+                    return null;
+                }
+                var endpoint = String(textarea.dataset.mediaLibraryEndpoint || '').trim();
+                if (!endpoint) {
+                    return null;
+                }
+                var form = textarea.closest('form');
+                var csrfInput = form ? form.querySelector('input[name="_csrf"]') : null;
+                if (!csrfInput) {
+                    return null;
+                }
+                var data = new FormData();
+                data.append('_csrf', csrfInput.value || '');
+                data.append('content_id', String(contentId));
+                data.append('thumbnail', file, file.name || 'clipboard-image.png');
+                return fetch(endpoint + '/upload', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: data
+                });
+            }).then(function (response) {
+                return response && response.ok ? response.json() : null;
+            }).then(function (payload) {
+                if (!payload || !payload.ok || !payload.data) {
+                    if (loadingBlock && loadingBlock.parentNode) {
+                        loadingBlock.remove();
+                        persistEditorState(true);
+                    }
+                    return;
+                }
+                var media = payload.data;
+                var mediaId = Number(media.id || 0);
+                var imageUrl = absoluteMediaUrl(media.webp_path || media.path || media.preview_path || '');
+                if (mediaId <= 0 || !imageUrl) {
+                    if (loadingBlock && loadingBlock.parentNode) {
+                        loadingBlock.remove();
+                        persistEditorState(true);
+                    }
+                    return;
+                }
+                waitForImageReady(imageUrl).then(function (ready) {
+                    if (!loadingBlock || !loadingBlock.parentNode) {
+                        return;
+                    }
+                    if (!ready) {
+                        loadingBlock.remove();
+                        persistEditorState(true);
+                        return;
+                    }
+                    loadingBlock.classList.remove('is-loading');
+                    loadingBlock.innerHTML = '<img src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(String(media.name || '')) + '" data-media-id="' + mediaId + '">';
+                    ensureImageBlock(loadingBlock);
+                    if (!loadingBlock.nextElementSibling || loadingBlock.nextElementSibling.tagName !== 'P') {
+                        loadingBlock.parentNode.insertBefore(createImageBreakParagraph(), loadingBlock.nextSibling);
+                    }
+                    persistEditorState(true);
+                }).catch(function () {
+                    if (loadingBlock && loadingBlock.parentNode) {
+                        loadingBlock.remove();
+                        persistEditorState(true);
+                    }
+                });
+            }).catch(function () {
+                if (loadingBlock && loadingBlock.parentNode) {
+                    loadingBlock.remove();
+                    persistEditorState(true);
+                }
+            });
+        }
 
         function hideLinkTools() {
             linkTools.classList.remove('is-visible');
@@ -1213,10 +1445,72 @@
             if (htmlMode) {
                 return;
             }
+            var pastedImage = findPastedImageFile(event);
+            if (pastedImage) {
+                event.preventDefault();
+                var imageRange = isSelectionInside(editor) ? rememberSelection() : null;
+                if (!imageRange) {
+                    focusEditorEnd(editor);
+                    imageRange = rememberSelection();
+                }
+                var loadingBlock = createLoadingImageBlock();
+                if (imageRange) {
+                    restoreSelection(imageRange, editor);
+                    imageRange.deleteContents();
+                    imageRange.insertNode(loadingBlock);
+                    imageRange.setStartAfter(loadingBlock);
+                    imageRange.collapse(true);
+                    restoreSelection(imageRange, editor);
+                } else {
+                    editor.appendChild(loadingBlock);
+                }
+                sync(textarea, editor);
+                uploadPastedImage(pastedImage, loadingBlock);
+                return;
+            }
             var clipboard = event.clipboardData;
             var text = clipboard ? clipboard.getData('text/plain') : '';
             var videoId = extractYoutubeVideoId(text);
             if (!videoId) {
+                var pastedUrl = extractPastedUrl(text);
+                if (!pastedUrl) {
+                    return;
+                }
+                event.preventDefault();
+                if (!isSelectionInside(editor)) {
+                    focusEditorEnd(editor);
+                }
+                linkPasteSeq += 1;
+                var linkId = 'paste-link-' + editorId + '-' + linkPasteSeq;
+                document.execCommand('insertHTML', false, '<a href="' + escapeHtml(pastedUrl) + '" data-paste-link-id="' + linkId + '">' + escapeHtml(pastedUrl) + '</a>');
+                persistEditorState(true);
+                var endpoint = (textarea.dataset.linkTitleEndpoint || '').trim();
+                if (!endpoint) {
+                    return;
+                }
+                fetch(endpoint + '?url=' + encodeURIComponent(pastedUrl), {
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then(function (response) {
+                    if (!response.ok) {
+                        return null;
+                    }
+                    return response.json();
+                }).then(function (payload) {
+                    var title = payload && payload.ok && payload.data ? String(payload.data.title || '').trim() : '';
+                    if (!title) {
+                        return;
+                    }
+                    var linkNode = editor.querySelector('a[data-paste-link-id="' + linkId + '"]');
+                    if (!linkNode) {
+                        return;
+                    }
+                    linkNode.textContent = title;
+                    linkNode.removeAttribute('data-paste-link-id');
+                    sync(textarea, editor);
+                }).catch(function () {});
                 return;
             }
             event.preventDefault();
