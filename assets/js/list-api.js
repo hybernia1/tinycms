@@ -361,8 +361,8 @@ initListApi({
     },
     rowHtml: (item, { editBase }) => {
         const status = String(item.status || 'draft');
-        const statusClass = status === 'published' ? 'text-bg-success' : (status === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
         const isPublished = status === 'published';
+        const statusIcon = status === 'published' ? 'success' : (status === 'draft' ? 'concept' : '');
         const toggleLabel = isPublished ? t('content.switch_to_draft', 'Switch to draft') : t('content.publish', 'Publish');
         const canEdit = item.can_edit === true;
         const canDelete = item.can_delete === true;
@@ -370,14 +370,14 @@ initListApi({
         return `
             <tr>
                 <td>
-                    ${canEdit
+                    <span class="d-flex align-center gap-2">
+                        ${statusIcon !== '' ? icon(statusIcon) : ''}
+                        ${canEdit
         ? `<a href="${esc(editBase)}${Number(item.id || 0)}">${esc(item.name)}</a>`
         : `<span>${esc(item.name)}</span>`}
+                    </span>
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
-                    <div class="d-flex gap-2 mt-2">
-                        <span class="badge ${esc(statusClass)}">${esc(t(`content.statuses.${status}`, status))}</span>
-                        ${item.is_planned ? `<span class="badge text-bg-warning">${esc(t('content.planned', 'Planned'))}</span>` : ''}
-                    </div>
+                    ${item.is_planned ? `<div class="mt-2"><span class="badge text-bg-warning">${esc(t('content.planned', 'Planned'))}</span></div>` : ''}
                 </td>
                 <td class="table-col-mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
