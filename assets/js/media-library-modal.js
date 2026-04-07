@@ -79,6 +79,63 @@ if (modal && openTrigger) {
         return form?.action || '';
     };
 
+    const endpointWithContentId = (value, id) => {
+        const numericId = Number(id || 0);
+        if (numericId <= 0) {
+            return String(value || '');
+        }
+        return String(value || '').replace(/\/admin\/api\/v1\/content\/\d+\//, `/admin/api/v1/content/${numericId}/`);
+    };
+
+    const syncContentContext = (id) => {
+        const numericId = Number(id || 0);
+        if (numericId <= 0) {
+            return;
+        }
+
+        contentId = numericId;
+        endpoint = endpointWithContentId(endpoint, numericId);
+
+        if (openTrigger) {
+            openTrigger.setAttribute('data-media-library-endpoint', endpointWithContentId(openTrigger.getAttribute('data-media-library-endpoint') || '', numericId));
+        }
+        if (uploadForm) {
+            uploadForm.action = endpointWithContentId(uploadForm.action, numericId) || uploadForm.action;
+            uploadForm.querySelectorAll('input[name="content_id"]').forEach((node) => {
+                node.value = String(numericId);
+            });
+        }
+        if (selectForm) {
+            selectForm.action = endpointWithContentId(selectForm.action, numericId) || selectForm.action;
+            selectForm.setAttribute('data-action-template', endpointWithContentId(selectForm.getAttribute('data-action-template') || '', numericId));
+            selectForm.querySelectorAll('input[name="content_id"]').forEach((node) => {
+                node.value = String(numericId);
+            });
+        }
+        if (detachForm) {
+            detachForm.action = endpointWithContentId(detachForm.action, numericId) || detachForm.action;
+            detachForm.querySelectorAll('input[name="content_id"]').forEach((node) => {
+                node.value = String(numericId);
+            });
+        }
+        const attachForm = document.querySelector('[data-media-library-attach-form]');
+        if (attachForm) {
+            attachForm.action = endpointWithContentId(attachForm.action, numericId) || attachForm.action;
+            attachForm.setAttribute('data-action-template', endpointWithContentId(attachForm.getAttribute('data-action-template') || '', numericId));
+            attachForm.querySelectorAll('input[name="content_id"]').forEach((node) => {
+                node.value = String(numericId);
+            });
+        }
+        if (deleteForm) {
+            deleteForm.action = endpointWithContentId(deleteForm.action, numericId) || deleteForm.action;
+            deleteForm.setAttribute('data-action-template', endpointWithContentId(deleteForm.getAttribute('data-action-template') || '', numericId));
+        }
+        if (renameForm) {
+            renameForm.action = endpointWithContentId(renameForm.action, numericId) || renameForm.action;
+            renameForm.setAttribute('data-action-template', endpointWithContentId(renameForm.getAttribute('data-action-template') || '', numericId));
+        }
+    };
+
     const setStatus = (message) => {
         if (status) {
             status.textContent = message;
@@ -324,6 +381,7 @@ if (modal && openTrigger) {
         editorId = String(detail.editorId || '');
         contentId = Number(detail.contentId || 0);
         currentMediaId = Number(detail.currentMediaId || 0);
+        syncContentContext(contentId);
     };
 
     const open = (detail) => {
@@ -364,6 +422,7 @@ if (modal && openTrigger) {
             if (resolvedId <= 0) {
                 resolvedId = await waitForDraftId();
             }
+            syncContentContext(resolvedId);
             open({
                 mode: 'thumbnail',
                 endpoint: openTrigger.getAttribute('data-media-library-endpoint') || '',
@@ -379,6 +438,7 @@ if (modal && openTrigger) {
         if (Number(detail.contentId || 0) <= 0) {
             const resolvedId = await waitForDraftId();
             detail.contentId = resolvedId;
+            detail.endpoint = endpointWithContentId(detail.endpoint || '', resolvedId);
         }
         open(detail);
     });
@@ -557,6 +617,7 @@ if (modal && openTrigger) {
                     uploadInput.dispatchEvent(new Event('change'));
                     return;
                 }
+                syncContentContext(contentId);
             }
 
             if (uploadField) {

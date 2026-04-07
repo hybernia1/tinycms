@@ -649,6 +649,25 @@
             return draftEndpoint.replace(/\/admin\/api\/v1\/content\/draft\/init.*$/, '');
         }
 
+        function mediaEndpointForContentId(id) {
+            var value = Number(id || 0);
+            if (value <= 0) {
+                return '';
+            }
+            var current = String(textarea.dataset.mediaLibraryEndpoint || '').trim();
+            if (current !== '') {
+                var rewritten = current.replace(/\/admin\/api\/v1\/content\/\d+\/media(?:\/.*)?$/, '/admin/api/v1/content/' + value + '/media');
+                if (rewritten !== current || /\/admin\/api\/v1\/content\/\d+\/media/.test(rewritten)) {
+                    return rewritten;
+                }
+            }
+            var base = contentApiBase();
+            if (base === '') {
+                return '';
+            }
+            return base + '/admin/api/v1/content/' + value + '/media';
+        }
+
         function setContentIdEverywhere(id) {
             var value = Number(id || 0);
             if (value <= 0) {
@@ -664,9 +683,9 @@
                 });
             }
             textarea.dataset.contentId = String(value);
-            var base = contentApiBase();
-            if (base !== '') {
-                textarea.dataset.mediaLibraryEndpoint = base + '/admin/api/v1/content/' + value + '/media';
+            var mediaEndpoint = mediaEndpointForContentId(value);
+            if (mediaEndpoint !== '') {
+                textarea.dataset.mediaLibraryEndpoint = mediaEndpoint;
             }
         }
 
@@ -741,7 +760,7 @@
                 if (contentId <= 0) {
                     return null;
                 }
-                var endpoint = String(textarea.dataset.mediaLibraryEndpoint || '').trim();
+                var endpoint = mediaEndpointForContentId(contentId);
                 if (!endpoint) {
                     return null;
                 }
