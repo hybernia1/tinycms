@@ -36,24 +36,9 @@
     --table-head-bg: #f9fafb;
     --table-row-alt-bg: #fcfcfd;
     --table-row-hover-bg: #f8fafc;
-    --tone-primary-bg: var(--primary);
-    --tone-primary-text: var(--color-inverse);
-    --tone-primary-border: var(--primary);
-    --tone-neutral-bg: var(--color-surface-muted);
-    --tone-neutral-text: var(--color-text);
-    --tone-neutral-border: var(--color-border);
-    --tone-success-bg: #f0fdf4;
-    --tone-success-text: #166534;
-    --tone-success-border: #86efac;
-    --tone-danger-bg: #fef2f2;
-    --tone-danger-text: #991b1b;
-    --tone-danger-border: #fca5a5;
-    --tone-info-bg: #eff6ff;
-    --tone-info-text: #1e3a8a;
-    --tone-info-border: #93c5fd;
-    --badge-bg: var(--tone-info-bg);
-    --badge-text: var(--tone-info-text);
-    --badge-border: var(--tone-info-border);
+    --badge-bg: #eff6ff;
+    --badge-text: #1e3a8a;
+    --badge-border: #93c5fd;
     --warning-bg: #fef3c7;
     --warning-text: var(--warning);
 }
@@ -216,21 +201,21 @@ a:focus-visible {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    background: var(--btn-bg, var(--tone-neutral-bg));
-    color: var(--btn-text, var(--tone-neutral-text));
-    border-color: var(--btn-border, var(--tone-neutral-border));
+    background: var(--btn-bg, var(--color-surface-muted));
+    color: var(--btn-text, var(--color-text));
+    border-color: var(--btn-border, var(--color-border));
 }
 
 .btn-primary {
-    --btn-bg: var(--tone-primary-bg);
-    --btn-text: var(--tone-primary-text);
-    --btn-border: var(--tone-primary-border);
+    --btn-bg: var(--primary);
+    --btn-text: var(--color-inverse);
+    --btn-border: var(--primary);
 }
 
 .btn-light {
-    --btn-bg: var(--tone-neutral-bg);
-    --btn-text: var(--tone-neutral-text);
-    --btn-border: var(--tone-neutral-border);
+    --btn-bg: var(--color-surface-muted);
+    --btn-text: var(--color-text);
+    --btn-border: var(--color-border);
 }
 
 .w-100 { width: 100%; }
@@ -657,9 +642,9 @@ input[type='week']::-webkit-calendar-picker-indicator {
     gap: calc(var(--space-2) + var(--space-1) / 2);
     padding: calc(var(--space-2) + var(--space-1) / 2) var(--space-3);
     margin-bottom: calc(var(--space-2) + var(--space-1) / 2);
-    border: 1px solid var(--flash-border, var(--tone-info-border));
-    background: var(--flash-bg, var(--tone-info-bg));
-    color: var(--flash-text, var(--tone-info-text));
+    border: 1px solid var(--flash-border, #93c5fd);
+    background: var(--flash-bg, #eff6ff);
+    color: var(--flash-text, #1e3a8a);
 }
 
 .flash button {
@@ -670,21 +655,21 @@ input[type='week']::-webkit-calendar-picker-indicator {
 }
 
 .flash-success {
-    --flash-border: var(--tone-success-border);
-    --flash-text: var(--tone-success-text);
-    --flash-bg: var(--tone-success-bg);
+    --flash-border: #86efac;
+    --flash-text: #166534;
+    --flash-bg: #f0fdf4;
 }
 
 .flash-error {
-    --flash-border: var(--tone-danger-border);
-    --flash-text: var(--tone-danger-text);
-    --flash-bg: var(--tone-danger-bg);
+    --flash-border: #fca5a5;
+    --flash-text: #991b1b;
+    --flash-bg: #fef2f2;
 }
 
 .flash-info {
-    --flash-border: var(--tone-info-border);
-    --flash-text: var(--tone-info-text);
-    --flash-bg: var(--tone-info-bg);
+    --flash-border: #93c5fd;
+    --flash-text: #1e3a8a;
+    --flash-bg: #eff6ff;
 }
 
 .pagination,
