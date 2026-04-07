@@ -50,7 +50,10 @@ if (modal && openTrigger) {
     let page = 1;
     let totalPages = 1;
     let query = '';
-    const perPage = Number(modal.getAttribute('data-media-library-per-page') || '10') || 10;
+    const configuredPerPage = Number(modal.getAttribute('data-media-library-per-page') || '10');
+    const perPage = Number.isFinite(configuredPerPage) && configuredPerPage > 0
+        ? Math.min(Math.floor(configuredPerPage), 50)
+        : 10;
     let selectedMedia = null;
     let searchTimer = null;
 
