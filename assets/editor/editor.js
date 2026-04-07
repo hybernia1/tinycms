@@ -99,6 +99,13 @@
         return null;
     }
 
+    function createLoadingImageBlock() {
+        var block = document.createElement('div');
+        block.className = 'block block-image align-center is-loading';
+        block.innerHTML = '<div class="image-upload-loading" contenteditable="false"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#icon-loader"></use></svg></div>';
+        return block;
+    }
+
     function createImageControls() {
         var controls = document.createElement('div');
         controls.className = 'image-controls';
@@ -702,7 +709,30 @@
             return draftInitPromise;
         }
 
-        function uploadPastedImage(file, selectionRange) {
+        function waitForImageReady(url, retries) {
+            var maxRetries = typeof retries === 'number' ? retries : 8;
+            return new Promise(function (resolve) {
+                var attempt = 0;
+                function tryLoad() {
+                    var image = new Image();
+                    image.onload = function () {
+                        resolve(true);
+                    };
+                    image.onerror = function () {
+                        attempt += 1;
+                        if (attempt >= maxRetries) {
+                            resolve(false);
+                            return;
+                        }
+                        window.setTimeout(tryLoad, 350);
+                    };
+                    image.src = url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now();
+                }
+                tryLoad();
+            });
+        }
+
+        function uploadPastedImage(file, loadingBlock) {
             if (!file) {
                 return;
             }
@@ -735,22 +765,50 @@
                 return response && response.ok ? response.json() : null;
             }).then(function (payload) {
                 if (!payload || !payload.ok || !payload.data) {
+                    if (loadingBlock && loadingBlock.parentNode) {
+                        loadingBlock.remove();
+                        persistEditorState(true);
+                    }
                     return;
                 }
                 var media = payload.data;
                 var mediaId = Number(media.id || 0);
                 var imageUrl = absoluteMediaUrl(media.path || media.webp_path || media.preview_path || '');
                 if (mediaId <= 0 || !imageUrl) {
+                    if (loadingBlock && loadingBlock.parentNode) {
+                        loadingBlock.remove();
+                        persistEditorState(true);
+                    }
                     return;
                 }
-                if (selectionRange) {
-                    restoreSelection(selectionRange, editor);
-                } else if (!isSelectionInside(editor)) {
-                    focusEditorEnd(editor);
+                waitForImageReady(imageUrl).then(function (ready) {
+                    if (!loadingBlock || !loadingBlock.parentNode) {
+                        return;
+                    }
+                    if (!ready) {
+                        loadingBlock.remove();
+                        persistEditorState(true);
+                        return;
+                    }
+                    loadingBlock.classList.remove('is-loading');
+                    loadingBlock.innerHTML = '<img src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(String(media.name || '')) + '" data-media-id="' + mediaId + '">';
+                    ensureImageBlock(loadingBlock);
+                    if (!loadingBlock.nextElementSibling || loadingBlock.nextElementSibling.tagName !== 'P') {
+                        loadingBlock.parentNode.insertBefore(createImageBreakParagraph(), loadingBlock.nextSibling);
+                    }
+                    persistEditorState(true);
+                }).catch(function () {
+                    if (loadingBlock && loadingBlock.parentNode) {
+                        loadingBlock.remove();
+                        persistEditorState(true);
+                    }
+                });
+            }).catch(function () {
+                if (loadingBlock && loadingBlock.parentNode) {
+                    loadingBlock.remove();
+                    persistEditorState(true);
                 }
-                document.execCommand('insertHTML', false, '<div class="block block-image align-center"><img src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(String(media.name || '')) + '" data-media-id="' + mediaId + '"></div><p><br></p>');
-                persistEditorState(true);
-            }).catch(function () {});
+            });
         }
 
         function hideLinkTools() {
@@ -1392,8 +1450,21 @@
                 var imageRange = isSelectionInside(editor) ? rememberSelection() : null;
                 if (!imageRange) {
                     focusEditorEnd(editor);
+                    imageRange = rememberSelection();
                 }
-                uploadPastedImage(pastedImage, imageRange);
+                var loadingBlock = createLoadingImageBlock();
+                if (imageRange) {
+                    restoreSelection(imageRange, editor);
+                    imageRange.deleteContents();
+                    imageRange.insertNode(loadingBlock);
+                    imageRange.setStartAfter(loadingBlock);
+                    imageRange.collapse(true);
+                    restoreSelection(imageRange, editor);
+                } else {
+                    editor.appendChild(loadingBlock);
+                }
+                sync(textarea, editor);
+                uploadPastedImage(pastedImage, loadingBlock);
                 return;
             }
             var clipboard = event.clipboardData;

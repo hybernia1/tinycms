@@ -302,6 +302,30 @@
     max-width: 100%;
 }
 
+.image-upload-loading {
+    width: 8rem;
+    height: 8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+}
+
+.image-upload-loading .icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    animation: wysiwyg-image-upload-spin 1s linear infinite;
+}
+
+@keyframes wysiwyg-image-upload-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .wysiwyg-editor .block.block-image.align-left {
     float: left;
     clear: none;
