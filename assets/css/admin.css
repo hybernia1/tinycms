@@ -110,6 +110,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
 .admin-sidebar-bottom {
@@ -363,7 +364,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 .admin-global-loader {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: rgba(255, 255, 255, 0.5);
     display: flex;
@@ -373,6 +374,10 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     opacity: 0;
     pointer-events: none;
     transition: opacity .16s ease;
+}
+
+.admin-global-loader.is-fixed {
+    position: fixed;
 }
 
 .admin-global-loader.is-visible {

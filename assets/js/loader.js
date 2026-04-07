@@ -8,10 +8,14 @@
     }
 
     function createOverlay() {
+        var scope = document.querySelector('.admin-content');
         var overlay = document.createElement('div');
         overlay.className = 'admin-global-loader';
+        if (!scope) {
+            overlay.classList.add('is-fixed');
+        }
         overlay.innerHTML = '<svg class="icon" aria-hidden="true"><use href="' + iconSpritePath() + '#icon-loader"></use></svg>';
-        document.body.appendChild(overlay);
+        (scope || document.body).appendChild(overlay);
         return overlay;
     }
 
