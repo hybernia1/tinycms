@@ -10,9 +10,9 @@
                     <?= $csrfField() ?>
                     <div class="mb-3">
                         <label><?= htmlspecialchars($t('common.email', 'Email'), ENT_QUOTES, 'UTF-8') ?></label>
-                        <div class="input-with-icon">
-                            <span class="input-with-icon-symbol" aria-hidden="true"><?= $icon('email') ?></span>
-                            <input class="input-with-icon-field" type="email" name="email" value="<?= htmlspecialchars((string)($old['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+                        <div class="field-with-icon">
+                            <span class="field-overlay field-overlay-start field-icon" aria-hidden="true"><?= $icon('email') ?></span>
+                            <input class="field-control-with-start-icon" type="email" name="email" value="<?= htmlspecialchars((string)($old['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
                         </div>
                         <?php if (!empty($errors['email'])): ?>
                         <small class="text-danger"><?= htmlspecialchars((string)$errors['email'], ENT_QUOTES, 'UTF-8') ?></small>
@@ -20,9 +20,9 @@
                     </div>
                     <div class="mb-4">
                         <label><?= htmlspecialchars($t('common.password', 'Password'), ENT_QUOTES, 'UTF-8') ?></label>
-                        <div class="input-with-icon">
-                            <input class="input-with-icon-toggle" type="password" name="password" data-password-input required>
-                            <button class="input-with-icon-action" type="button" data-password-toggle aria-label="<?= htmlspecialchars($t('front.login.show_password', 'Show password'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('front.login.show_password', 'Show password'), ENT_QUOTES, 'UTF-8') ?>">
+                        <div class="field-with-icon">
+                            <input class="field-control-with-end-icon" type="password" name="password" data-password-input required>
+                            <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= htmlspecialchars($t('front.login.show_password', 'Show password'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('front.login.show_password', 'Show password'), ENT_QUOTES, 'UTF-8') ?>">
                                 <?= $icon('show') ?>
                             </button>
                         </div>

@@ -56,7 +56,7 @@
         buttonLabel.className = 'custom-select-button-label';
 
         const buttonIcon = document.createElement('span');
-        buttonIcon.className = 'custom-select-button-icon';
+        buttonIcon.className = 'field-overlay field-overlay-end field-icon';
         buttonIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${arrowIconHref}"></use></svg>`;
 
         button.appendChild(buttonLabel);
