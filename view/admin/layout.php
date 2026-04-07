@@ -247,8 +247,10 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
         </div>
         <section class="admin-content p-2">
             <?php foreach ($flashes as $flash): ?>
-            <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">
-                <span><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+            <?php $flashType = (string)($flash['type'] ?? 'warning'); ?>
+            <?php $flashIcon = $flashType === 'success' ? 'success' : ($flashType === 'error' ? 'error' : 'warning'); ?>
+            <div class="flash flash-<?= htmlspecialchars($flashType === 'info' ? 'warning' : $flashType, ENT_QUOTES, 'UTF-8') ?>">
+                <span class="d-flex align-center gap-2"><?= $icon($flashIcon) ?><span><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></span>
                 <button type="button" data-flash-close aria-label="<?= htmlspecialchars($t('admin.close_notice'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.close_notice'), ENT_QUOTES, 'UTF-8') ?>">
                     <?= $icon('cancel') ?>
                 </button>

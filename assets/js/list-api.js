@@ -53,11 +53,13 @@ const pushFlash = (type, message) => {
 
     container.querySelectorAll('.flash').forEach((node) => node.remove());
 
-    const flashType = ['success', 'error', 'info'].includes(type) ? type : 'info';
+    const flashType = ['success', 'error', 'warning', 'info'].includes(type) ? type : 'warning';
     const flash = document.createElement('div');
-    flash.className = `flash flash-${flashType}`;
+    const uiType = flashType === 'info' ? 'warning' : flashType;
+    const flashIcon = uiType === 'success' ? 'success' : (uiType === 'error' ? 'error' : 'warning');
+    flash.className = `flash flash-${uiType}`;
     flash.innerHTML = `
-        <span>${esc(text)}</span>
+        <span class="d-flex align-center gap-2">${icon(flashIcon)}<span>${esc(text)}</span></span>
         <button type="button" data-flash-close aria-label="${esc(t('common.close_notice', 'Close notification'))}" title="${esc(t('common.close_notice', 'Close notification'))}">
             ${icon('cancel')}
         </button>
