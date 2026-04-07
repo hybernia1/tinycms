@@ -21,7 +21,11 @@ document.addEventListener('click', (event) => {
 
     const show = input.getAttribute('type') === 'password';
     input.setAttribute('type', show ? 'text' : 'password');
-    icon.setAttribute('href', show ? '#icon-hide' : '#icon-show');
+    const iconHref = icon.getAttribute('href') || icon.getAttribute('xlink:href') || '';
+    const iconBase = iconHref.includes('#') ? iconHref.split('#')[0] : '';
+    const nextIcon = `${iconBase}#icon-${show ? 'hide' : 'show'}`;
+    icon.setAttribute('href', nextIcon);
+    icon.setAttribute('xlink:href', nextIcon);
 
     const label = show ? t('auth.hide_password', 'Hide password') : t('auth.show_password', 'Show password');
     button.setAttribute('aria-label', label);
