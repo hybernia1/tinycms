@@ -424,8 +424,17 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 @media (max-width: 900px) {
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
     body {
         font-size: 75%;
+    }
+
+    .table thead th {
+        font-size: inherit;
     }
 
     .admin-sidebar {
