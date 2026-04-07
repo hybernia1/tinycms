@@ -195,7 +195,14 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
                     <?= $csrfField() ?>
                     <input type="hidden" name="content_id" value="<?= $contentId ?>">
-                    <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                    <div class="custom-upload-field" data-custom-upload data-placeholder="<?= htmlspecialchars($t('common.upload_choose_files', 'Choose files to upload'), ENT_QUOTES, 'UTF-8') ?>">
+                        <input class="custom-upload-value" type="text" value="<?= htmlspecialchars($t('common.upload_choose_files', 'Choose files to upload'), ENT_QUOTES, 'UTF-8') ?>" readonly>
+                        <label class="btn btn-light custom-upload-button" for="content-thumbnail-upload">
+                            <?= $icon('upload') ?>
+                            <span><?= htmlspecialchars($t('common.upload_browse_files', 'Browse files'), ENT_QUOTES, 'UTF-8') ?></span>
+                        </label>
+                        <input id="content-thumbnail-upload" type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                    </div>
                     <button class="btn btn-primary" type="submit" data-media-library-upload-button>
                         <span data-media-library-upload-label><?= htmlspecialchars($t('content.upload_new', 'Upload new'), ENT_QUOTES, 'UTF-8') ?></span>
                     </button>

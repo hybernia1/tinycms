@@ -323,8 +323,39 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     gap: var(--space-2);
 }
 
+.custom-upload-field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.custom-upload-value {
+    border-right: 0;
+    border-radius: 0;
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.custom-upload-button {
+    border-radius: 0;
+    white-space: nowrap;
+}
+
+.custom-upload-field input[type='file'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
 .media-library-search .search-field {
     width: 100%;
+}
+
+.media-library-upload .custom-upload-field {
+    flex: 1 1 auto;
 }
 
 .media-library-grid {
