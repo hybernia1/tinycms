@@ -198,7 +198,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                     <div class="custom-upload-field">
                         <label class="btn btn-light custom-upload-button" for="content-thumbnail-upload">
                             <?= $icon('upload') ?>
-                            <span><?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?></span>
                         </label>
                         <input id="content-thumbnail-upload" type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
                     </div>

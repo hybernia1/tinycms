@@ -332,6 +332,13 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     white-space: nowrap;
 }
 
+.custom-upload-label {
+    max-width: 15rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .custom-upload-field input[type='file'] {
     position: absolute;
     width: 1px;
