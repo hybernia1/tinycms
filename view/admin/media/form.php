@@ -19,10 +19,11 @@
         <?php if ($mode === 'add'): ?>
             <div class="mb-3">
                 <label><?= htmlspecialchars($t('media.file', 'File'), ENT_QUOTES, 'UTF-8') ?></label>
-                <div class="custom-upload-field">
+                <div class="custom-upload-field" data-custom-upload-auto-submit>
                     <label class="btn btn-light custom-upload-button" for="media-file-upload">
-                        <?= $icon('upload') ?>
+                        <span class="custom-upload-main-icon" data-custom-upload-icon><?= $icon('upload') ?></span>
                         <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= $icon('loader') ?></span>
                     </label>
                     <input id="media-file-upload" type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
                 </div>

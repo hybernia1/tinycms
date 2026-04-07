@@ -332,11 +332,34 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     white-space: nowrap;
 }
 
+.custom-upload-spinner {
+    display: none;
+}
+
 .custom-upload-label {
     max-width: 15rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.custom-upload-field.is-loading [data-custom-upload-icon],
+.custom-upload-field.is-loading .custom-upload-label {
+    display: none;
+}
+
+.custom-upload-field.is-loading .custom-upload-spinner {
+    display: inline-flex;
+}
+
+.custom-upload-spinner .icon {
+    animation: custom-upload-spin 1s linear infinite;
+}
+
+@keyframes custom-upload-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .custom-upload-field input[type='file'] {

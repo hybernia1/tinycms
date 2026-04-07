@@ -1,6 +1,7 @@
 document.querySelectorAll('.custom-upload-field').forEach((field) => {
     const fileInput = field.querySelector('input[type="file"]');
     const label = field.querySelector('[data-custom-upload-label]');
+    const autoSubmit = field.hasAttribute('data-custom-upload-auto-submit');
 
     if (!fileInput || !label) {
         return;
@@ -21,6 +22,29 @@ document.querySelectorAll('.custom-upload-field').forEach((field) => {
         label.setAttribute('title', text);
     };
 
-    fileInput.addEventListener('change', updateLabel);
+    const submitForm = () => {
+        if (!autoSubmit || !fileInput.files || fileInput.files.length === 0) {
+            return;
+        }
+
+        const form = field.closest('form');
+        if (!form) {
+            return;
+        }
+
+        const nameInput = form.querySelector('input[name="name"]');
+        if (nameInput && nameInput.value.trim() === '') {
+            const fileName = String(fileInput.files[0]?.name || '').replace(/\.[^/.]+$/, '');
+            nameInput.value = fileName;
+        }
+
+        field.classList.add('is-loading');
+        form.requestSubmit();
+    };
+
+    fileInput.addEventListener('change', () => {
+        updateLabel();
+        submitForm();
+    });
     updateLabel();
 });

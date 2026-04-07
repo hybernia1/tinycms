@@ -17,8 +17,8 @@ if (modal && openTrigger) {
     const closeButtons = modal.querySelectorAll('[data-media-library-close]');
     const searchForm = modal.querySelector('[data-media-library-search]');
     const uploadForm = modal.querySelector('[data-media-library-upload-form]');
-    const uploadButton = modal.querySelector('[data-media-library-upload-button]');
-    const uploadLabel = modal.querySelector('[data-media-library-upload-label]');
+    const uploadField = modal.querySelector('[data-media-library-upload-field]');
+    const uploadInput = uploadForm ? uploadForm.querySelector('input[type="file"]') : null;
     const detachButton = document.querySelector('[data-media-library-detach]');
     const detachWrap = document.querySelector('[data-media-library-detach-wrap]');
     const detachForm = document.querySelector('[data-media-library-detach-form]');
@@ -532,21 +532,27 @@ if (modal && openTrigger) {
         });
     }
 
-    if (uploadForm && uploadButton && uploadLabel) {
-        uploadForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+    if (uploadForm && uploadInput) {
+        uploadInput.addEventListener('change', async () => {
+            if (!uploadInput.files || uploadInput.files.length === 0) {
+                return;
+            }
+
             setStatus('');
 
             if (contentId <= 0) {
                 contentId = await waitForDraftId();
                 if (contentId <= 0) {
                     setStatus('Nejdřív se musí vytvořit draft.');
+                    uploadInput.value = '';
+                    uploadInput.dispatchEvent(new Event('change'));
                     return;
                 }
             }
 
-            uploadButton.disabled = true;
-            uploadLabel.textContent = 'Nahrávám...';
+            if (uploadField) {
+                uploadField.classList.add('is-loading');
+            }
 
             const response = await fetch(uploadForm.action, {
                 method: 'POST',
@@ -555,19 +561,17 @@ if (modal && openTrigger) {
             });
             const data = normalizePayload(await response.json().catch(() => ({})));
 
-            uploadButton.disabled = false;
-            uploadLabel.textContent = 'Nahrát nový';
+            if (uploadField) {
+                uploadField.classList.remove('is-loading');
+            }
 
             if (!response.ok || !data.success) {
                 setStatus(data.message || 'Upload se nepodařil.');
                 return;
             }
 
-            const fileInput = uploadForm.querySelector('input[type="file"]');
-            if (fileInput) {
-                fileInput.value = '';
-                fileInput.dispatchEvent(new Event('change'));
-            }
+            uploadInput.value = '';
+            uploadInput.dispatchEvent(new Event('change'));
 
             page = 1;
             await load().catch(() => null);
