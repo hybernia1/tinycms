@@ -33,7 +33,6 @@
     --color-border-soft: #e5e7eb;
     --link-text: var(--primary);
     --link-hover-text: #1e40af;
-    --table-head-bg: #f9fafb;
     --table-row-alt-bg: #fcfcfd;
     --table-row-hover-bg: #f8fafc;
     --badge-bg: #eff6ff;
@@ -240,11 +239,9 @@ a:focus-visible {
     padding: var(--space-3);
     border-bottom: 1px solid var(--color-border-soft);
     text-align: left;
-    vertical-align: top;
 }
 
 .table thead th {
-    background: var(--table-head-bg);
     font-weight: 600;
 }
 
@@ -636,9 +633,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
 
 .pagination-link.active,
 .filter-link.active {
-    background: var(--primary);
-    color: var(--color-inverse);
-    border-color: var(--primary);
+    font-weight: bold;
 }
 
 .pagination-link.disabled {
