@@ -11,7 +11,7 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    const wrapper = button.closest('.input-with-icon');
+    const wrapper = button.closest('.field-with-icon');
     const input = wrapper ? wrapper.querySelector('input[data-password-input]') : null;
     const icon = button.querySelector('use');
 

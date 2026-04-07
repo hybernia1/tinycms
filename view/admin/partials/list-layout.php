@@ -51,9 +51,9 @@ foreach ($listRootAttrs as $attr => $value) {
             <?php foreach ($searchHidden as $name => $value): ?>
                 <input type="hidden" name="<?= htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8') ?>" value="<?= htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') ?>">
             <?php endforeach; ?>
-            <div class="search-field">
+            <div class="search-field field-with-icon">
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($listQuery, ENT_QUOTES, 'UTF-8') ?>" placeholder="<?= htmlspecialchars($searchPlaceholder, ENT_QUOTES, 'UTF-8') ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-search>
-                <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
+                <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= $icon('search') ?></span>
             </div>
         </form>
     </div>

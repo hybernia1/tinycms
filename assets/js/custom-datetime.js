@@ -116,7 +116,7 @@
         triggerLabel.className = 'custom-datetime-trigger-label';
 
         const triggerIcon = document.createElement('span');
-        triggerIcon.className = 'custom-datetime-trigger-icon';
+        triggerIcon.className = 'field-overlay field-overlay-end field-icon';
         triggerIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${iconHref('calendar')}"></use></svg>`;
 
         trigger.appendChild(triggerLabel);

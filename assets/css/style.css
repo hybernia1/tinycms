@@ -374,15 +374,6 @@ select option {
     min-width: 0;
 }
 
-.custom-select-button-icon {
-    position: absolute;
-    top: 50%;
-    right: var(--select-arrow-offset);
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--color-muted);
-}
-
 .custom-select-dropdown {
     position: absolute;
     top: calc(100% + var(--space-1));
@@ -461,34 +452,44 @@ input[type='week']::-webkit-calendar-picker-indicator {
     padding-right: calc(var(--control-padding-x) * 2.6);
 }
 
-.input-with-icon {
+.field-with-icon {
     position: relative;
 }
 
-.input-with-icon-field {
+.field-control-with-start-icon {
     padding-left: calc(var(--control-padding-x) * 2.4) !important;
 }
 
-.input-with-icon-toggle {
+.field-control-with-end-icon {
     padding-right: calc(var(--control-padding-x) * 2.4) !important;
 }
 
-.input-with-icon-symbol {
+.field-overlay {
     position: absolute;
     top: 50%;
+    transform: translateY(-50%);
+}
+
+.field-overlay-start {
     left: var(--select-arrow-offset);
+}
+
+.field-overlay-end {
+    right: var(--select-arrow-offset);
+}
+
+.field-icon {
     width: var(--size-icon);
     height: var(--size-icon);
-    transform: translateY(-50%);
     pointer-events: none;
     color: var(--color-muted);
 }
 
-.input-with-icon-action {
-    position: absolute;
-    top: 50%;
-    right: var(--select-arrow-offset);
-    transform: translateY(-50%);
+.field-icon-soft {
+    opacity: 0.75;
+}
+
+.field-icon-button {
     width: var(--size-icon);
     height: var(--size-icon);
     padding: 0;
@@ -506,17 +507,6 @@ input[type='week']::-webkit-calendar-picker-indicator {
 }
 .search-field {
     position: relative;
-}
-
-.search-field-icon {
-    position: absolute;
-    top: 50%;
-    right: var(--select-arrow-offset);
-    width: var(--size-icon);
-    height: var(--size-icon);
-    transform: translateY(-50%);
-    pointer-events: none;
-    opacity: 0.75;
 }
 
 .has-custom-datetime .custom-datetime-native {
@@ -540,15 +530,6 @@ input[type='week']::-webkit-calendar-picker-indicator {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-}
-
-.custom-datetime-trigger-icon {
-    position: absolute;
-    top: 50%;
-    right: var(--select-arrow-offset);
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--color-muted);
 }
 
 .custom-datetime-panel {

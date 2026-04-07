@@ -187,9 +187,9 @@ $currentUserId = (int)($authUser['id'] ?? 0);
             </div>
             <div class="media-library-list">
                 <form class="media-library-search" data-media-library-search>
-                    <div class="search-field">
+                    <div class="search-field field-with-icon">
                         <input class="search-input" type="search" name="q" placeholder="<?= htmlspecialchars($t('content.search_image', 'Search image'), ENT_QUOTES, 'UTF-8') ?>">
-                        <span class="search-field-icon" aria-hidden="true"><?= $icon('search') ?></span>
+                        <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= $icon('search') ?></span>
                     </div>
                 </form>
                 <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media/upload'), ENT_QUOTES, 'UTF-8') ?>" data-media-library-upload-form>
