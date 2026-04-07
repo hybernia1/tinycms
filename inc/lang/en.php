@@ -28,8 +28,7 @@ return [
         'csrf_expired' => 'Security token expired, please submit the form again.',
         'invalid_csrf' => 'Invalid CSRF token.',
         'invalid_data' => 'Invalid data.',
-        'upload_choose_files' => 'Choose files to upload',
-        'upload_browse_files' => 'Browse files',
+        'upload_add_files' => 'Add files',
     ],
     'install' => [
         'title' => 'Installation',

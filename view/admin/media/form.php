@@ -19,11 +19,10 @@
         <?php if ($mode === 'add'): ?>
             <div class="mb-3">
                 <label><?= htmlspecialchars($t('media.file', 'File'), ENT_QUOTES, 'UTF-8') ?></label>
-                <div class="custom-upload-field" data-custom-upload data-placeholder="<?= htmlspecialchars($t('common.upload_choose_files', 'Choose files to upload'), ENT_QUOTES, 'UTF-8') ?>">
-                    <input class="custom-upload-value" type="text" value="<?= htmlspecialchars($t('common.upload_choose_files', 'Choose files to upload'), ENT_QUOTES, 'UTF-8') ?>" readonly>
+                <div class="custom-upload-field">
                     <label class="btn btn-light custom-upload-button" for="media-file-upload">
                         <?= $icon('upload') ?>
-                        <span><?= htmlspecialchars($t('common.upload_browse_files', 'Browse files'), ENT_QUOTES, 'UTF-8') ?></span>
+                        <span><?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?></span>
                     </label>
                     <input id="media-file-upload" type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
                 </div>

@@ -324,21 +324,11 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 .custom-upload-field {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.custom-upload-value {
-    border-right: 0;
-    border-radius: 0;
-    color: var(--color-text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: inline-flex;
+    position: relative;
 }
 
 .custom-upload-button {
-    border-radius: 0;
     white-space: nowrap;
 }
 
@@ -355,7 +345,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 .media-library-upload .custom-upload-field {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
 }
 
 .media-library-grid {

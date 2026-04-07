@@ -28,8 +28,7 @@ return [
         'csrf_expired' => 'Bezpečnostní token vypršel, odešlete formulář znovu.',
         'invalid_csrf' => 'Neplatný CSRF token.',
         'invalid_data' => 'Neplatná data.',
-        'upload_choose_files' => 'Vyberte soubory k nahrání',
-        'upload_browse_files' => 'Procházet soubory',
+        'upload_add_files' => 'Přidat soubory',
     ],
     'install' => [
         'title' => 'Instalace',

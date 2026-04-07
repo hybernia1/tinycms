@@ -566,7 +566,6 @@ if (modal && openTrigger) {
             const fileInput = uploadForm.querySelector('input[type="file"]');
             if (fileInput) {
                 fileInput.value = '';
-                fileInput.dispatchEvent(new Event('change'));
             }
 
             page = 1;
