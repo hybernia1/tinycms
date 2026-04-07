@@ -60,6 +60,31 @@
         return 'https://' + value.replace(/^\/+/, '');
     }
 
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function extractPastedUrl(value) {
+        var raw = String(value || '').trim();
+        if (!raw || /\s/.test(raw)) {
+            return '';
+        }
+        var normalized = normalizeLinkUrl(raw);
+        if (!/^https?:\/\//i.test(normalized)) {
+            return '';
+        }
+        try {
+            new URL(normalized);
+        } catch (error) {
+            return '';
+        }
+        return normalized;
+    }
+
     function createImageControls() {
         var controls = document.createElement('div');
         controls.className = 'image-controls';
@@ -579,6 +604,7 @@
         var activeLink = null;
         var htmlMode = false;
         var mediaRange = null;
+        var linkPasteSeq = 0;
 
         function hideLinkTools() {
             linkTools.classList.remove('is-visible');
@@ -1217,6 +1243,45 @@
             var text = clipboard ? clipboard.getData('text/plain') : '';
             var videoId = extractYoutubeVideoId(text);
             if (!videoId) {
+                var pastedUrl = extractPastedUrl(text);
+                if (!pastedUrl) {
+                    return;
+                }
+                event.preventDefault();
+                if (!isSelectionInside(editor)) {
+                    focusEditorEnd(editor);
+                }
+                linkPasteSeq += 1;
+                var linkId = 'paste-link-' + editorId + '-' + linkPasteSeq;
+                document.execCommand('insertHTML', false, '<a href="' + escapeHtml(pastedUrl) + '" data-paste-link-id="' + linkId + '">' + escapeHtml(pastedUrl) + '</a>');
+                persistEditorState(true);
+                var endpoint = (textarea.dataset.linkTitleEndpoint || '').trim();
+                if (!endpoint) {
+                    return;
+                }
+                fetch(endpoint + '?url=' + encodeURIComponent(pastedUrl), {
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then(function (response) {
+                    if (!response.ok) {
+                        return null;
+                    }
+                    return response.json();
+                }).then(function (payload) {
+                    var title = payload && payload.ok && payload.data ? String(payload.data.title || '').trim() : '';
+                    if (!title) {
+                        return;
+                    }
+                    var linkNode = editor.querySelector('a[data-paste-link-id="' + linkId + '"]');
+                    if (!linkNode) {
+                        return;
+                    }
+                    linkNode.textContent = title;
+                    linkNode.removeAttribute('data-paste-link-id');
+                    sync(textarea, editor);
+                }).catch(function () {});
                 return;
             }
             event.preventDefault();

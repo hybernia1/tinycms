@@ -69,6 +69,10 @@ $router->post('admin/api/v1/content/autosave', static function () use ($adminCon
     $adminContent->autosaveApiV1($redirect);
 });
 
+$router->get('admin/api/v1/link-title', static function () use ($adminContent, $redirect): void {
+    $adminContent->linkTitleApiV1($redirect);
+});
+
 $router->get('admin/content/add', static function () use ($adminContent, $redirect): void {
     $adminContent->addForm($redirect);
 });

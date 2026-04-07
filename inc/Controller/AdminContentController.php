@@ -406,6 +406,27 @@ final class AdminContentController extends BaseAdminController
         ]);
     }
 
+    public function linkTitleApiV1(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        $url = trim((string)($_GET['url'] ?? ''));
+        if ($url === '' || !$this->isValidExternalUrl($url)) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_URL', 'message' => I18n::t('common.invalid_data', 'Invalid data.')]], 422);
+            return;
+        }
+
+        $title = $this->fetchRemoteTitle($url);
+        if ($title === '') {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'TITLE_NOT_FOUND', 'message' => I18n::t('content.link_title_not_found', 'Link title not found.')]], 404);
+            return;
+        }
+
+        $this->respondJson(['ok' => true, 'data' => ['title' => $title]]);
+    }
+
     public function thumbnailUploadSubmit(callable $redirect): void
     {
         if (
@@ -812,6 +833,77 @@ final class AdminContentController extends BaseAdminController
     private function editPath(int $id): string
     {
         return 'admin/content/edit?id=' . $id;
+    }
+
+    private function isValidExternalUrl(string $url): bool
+    {
+        if (!preg_match('#^https?://#i', $url)) {
+            return false;
+        }
+
+        $parts = parse_url($url);
+        $host = strtolower((string)($parts['host'] ?? ''));
+        if ($host === '' || $host === 'localhost') {
+            return false;
+        }
+
+        return filter_var($url, FILTER_VALIDATE_URL) !== false;
+    }
+
+    private function fetchRemoteTitle(string $url): string
+    {
+        $html = $this->fetchRemoteHtml($url);
+        if ($html === '') {
+            return '';
+        }
+
+        if (preg_match('/<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $match) === 1) {
+            return $this->sanitizeRemoteTitle($match[1]);
+        }
+
+        if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $match) === 1) {
+            return $this->sanitizeRemoteTitle($match[1]);
+        }
+
+        return '';
+    }
+
+    private function fetchRemoteHtml(string $url): string
+    {
+        if (function_exists('curl_init')) {
+            $curl = curl_init($url);
+            if ($curl !== false) {
+                curl_setopt_array($curl, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_MAXREDIRS => 3,
+                    CURLOPT_TIMEOUT => 4,
+                    CURLOPT_CONNECTTIMEOUT => 2,
+                    CURLOPT_USERAGENT => 'TinyCMS/1.0',
+                ]);
+                $result = curl_exec($curl);
+                curl_close($curl);
+                if (is_string($result) && $result !== '') {
+                    return mb_substr($result, 0, 120000);
+                }
+            }
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 4,
+                'header' => "User-Agent: TinyCMS/1.0\r\n",
+            ],
+        ]);
+        $result = @file_get_contents($url, false, $context);
+        return is_string($result) ? mb_substr($result, 0, 120000) : '';
+    }
+
+    private function sanitizeRemoteTitle(string $value): string
+    {
+        $clean = trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return preg_replace('/\s+/', ' ', $clean) ?? '';
     }
 
     private function resolveAutosavePayload(array $input, int $authorId): array
