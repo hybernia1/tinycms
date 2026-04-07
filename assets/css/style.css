@@ -359,17 +359,6 @@ select option {
     position: relative;
 }
 
-.custom-select-button {
-    width: 100%;
-    padding: var(--control-padding-y) calc(var(--control-padding-x) * 2.6) var(--control-padding-y) var(--control-padding-x);
-    text-align: left;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-
 .custom-select-button-label {
     min-width: 0;
 }
@@ -395,11 +384,6 @@ select option {
     max-height: calc(var(--size-touch) * 5);
 }
 
-.custom-select.disabled .custom-select-button {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .custom-select-list {
     margin: 0;
     padding: 0;
@@ -414,11 +398,6 @@ select option {
 .custom-select-option:hover,
 .custom-select-option.selected {
     background: var(--table-row-hover-bg);
-}
-
-.custom-select-option.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 input[type='date'],
@@ -452,7 +431,8 @@ input[type='week']::-webkit-calendar-picker-indicator {
     padding-right: calc(var(--control-padding-x) * 2.6);
 }
 
-.field-with-icon {
+.field-with-icon,
+.search-field {
     position: relative;
 }
 
@@ -479,9 +459,13 @@ input[type='week']::-webkit-calendar-picker-indicator {
 }
 
 .field-icon {
+    pointer-events: none;
+}
+
+.field-icon,
+.field-icon-button {
     width: var(--size-icon);
     height: var(--size-icon);
-    pointer-events: none;
     color: var(--color-muted);
 }
 
@@ -505,9 +489,6 @@ input[type='week']::-webkit-calendar-picker-indicator {
 .search-form {
     min-width: 260px;
 }
-.search-field {
-    position: relative;
-}
 
 .has-custom-datetime .custom-datetime-native {
     position: absolute;
@@ -521,6 +502,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
     position: relative;
 }
 
+.custom-select-button,
 .custom-datetime-trigger {
     width: 100%;
     padding: var(--control-padding-y) calc(var(--control-padding-x) * 2.6) var(--control-padding-y) var(--control-padding-x);
@@ -716,8 +698,10 @@ input[type='week']::-webkit-calendar-picker-indicator {
     display: inline-block;
 }
 
+.disabled,
 button:disabled,
-select:disabled {
+select:disabled,
+.custom-select.disabled .custom-select-button {
     opacity: 0.5;
     cursor: not-allowed;
 }

@@ -360,7 +360,7 @@ initListApi({
                         ${item.is_planned ? `<span class="badge text-bg-warning">${esc(t('content.planned', 'Planned'))}</span>` : ''}
                     </div>
                 </td>
-                <td>${esc(item.author_name || '—')}</td>
+                <td class="table-col-mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
                     ${canEdit ? `
                     <button class="btn btn-light btn-icon" type="button" data-content-toggle="${Number(item.id || 0)}" data-content-mode="${isPublished ? 'draft' : 'publish'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
@@ -437,7 +437,7 @@ initListApi({
                         </div>
                     </div>
                 </td>
-                <td>${esc(item.author_name || '—')}</td>
+                <td class="table-col-mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
                     ${canDelete ? `
                     <button class="btn btn-light btn-icon" type="button" data-media-delete-open="${id}" aria-label="${esc(t('media.delete', 'Delete media'))}" title="${esc(t('media.delete', 'Delete media'))}">
