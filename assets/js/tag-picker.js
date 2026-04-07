@@ -8,6 +8,7 @@ if (tagPickers.length) {
         const suggestions = picker.querySelector('[data-tag-picker-suggestions]');
         const endpoint = picker.getAttribute('data-suggest-endpoint') || '';
         const initialRaw = picker.getAttribute('data-initial') || '[]';
+        const maxTagLength = 255;
 
         let tags = [];
         let timer = null;
@@ -32,6 +33,29 @@ if (tagPickers.length) {
 
         const normalize = (value) => value.trim().toLowerCase();
 
+        const emitAutosave = () => {
+            picker.dispatchEvent(new CustomEvent('tinycms:tag-picker-change', {
+                bubbles: true,
+                detail: { valid: picker.getAttribute('data-tag-picker-valid') !== '0' },
+            }));
+        };
+
+        const setError = (message) => {
+            if (!valueField) {
+                return;
+            }
+
+            if (message) {
+                valueField.setCustomValidity(message);
+                picker.setAttribute('data-tag-picker-valid', '0');
+            } else {
+                valueField.setCustomValidity('');
+                picker.setAttribute('data-tag-picker-valid', '1');
+            }
+
+            emitAutosave();
+        };
+
         const sync = () => {
             if (!chips || !valueField) {
                 return;
@@ -43,14 +67,21 @@ if (tagPickers.length) {
                 </button>
             `).join('');
             valueField.value = tags.join(', ');
+            setError('');
         };
 
         const addTag = (value) => {
             const clean = value.trim();
             if (clean === '') {
+                setError('');
+                return;
+            }
+            if (clean.length > maxTagLength) {
+                setError('Tag is too long.');
                 return;
             }
             if (tags.some((tag) => normalize(tag) === normalize(clean))) {
+                setError('');
                 return;
             }
             tags.push(clean);

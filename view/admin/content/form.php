@@ -99,9 +99,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
             <div class="card">
                 <div class="content-box-header"><?= htmlspecialchars($t('admin.menu.terms', 'Tags'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
-                    <?php if ($mode === 'add'): ?>
-                        <small class="text-muted"><?= htmlspecialchars($t('content.save_to_assign_tags', 'Save content first to assign tags.'), ENT_QUOTES, 'UTF-8') ?></small>
-                    <?php endif; ?>
                     <div
                         class="tag-picker"
                         data-tag-picker

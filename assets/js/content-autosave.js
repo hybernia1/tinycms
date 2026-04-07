@@ -295,6 +295,11 @@
             return id;
         }
 
+        function tagsValid() {
+            var invalidTagPicker = form.querySelector('[data-tag-picker][data-tag-picker-valid="0"]');
+            return invalidTagPicker === null;
+        }
+
         async function runAutosave() {
             if (saving || !autosaveEndpoint) {
                 pending = true;
@@ -311,6 +316,11 @@
             allowSuspiciousOnce = false;
             saving = true;
             pending = false;
+            if (!tagsValid()) {
+                saving = false;
+                return;
+            }
+
             var data = serializePayload();
             var currentSignature = signature(data);
             if (currentSignature === lastSent) {
@@ -396,6 +406,12 @@
 
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
+        form.addEventListener('tinycms:tag-picker-change', function (event) {
+            if (event.detail && event.detail.valid === false) {
+                return;
+            }
+            scheduleAutosave();
+        });
         form.addEventListener('submit', function () {
             bypassLeaveWarning = true;
         });

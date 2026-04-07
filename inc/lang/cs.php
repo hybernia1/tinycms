@@ -208,7 +208,6 @@ return [
         'status' => 'Status',
         'publish_date' => 'Datum publikace',
         'post' => 'Článek',
-        'save_to_assign_tags' => 'Uložte obsah a štítky se přiřadí.',
         'find_or_add_tag' => 'Najít nebo přidat štítek',
         'thumbnail' => 'Thumbnail',
         'thumbnail_hint' => 'Thumbnail lze vybrat i před ručním uložením.',
