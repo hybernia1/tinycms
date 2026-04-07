@@ -384,11 +384,6 @@ select option {
     max-height: calc(var(--size-touch) * 5);
 }
 
-.custom-select.disabled .custom-select-button {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .custom-select-list {
     margin: 0;
     padding: 0;
@@ -403,11 +398,6 @@ select option {
 .custom-select-option:hover,
 .custom-select-option.selected {
     background: var(--table-row-hover-bg);
-}
-
-.custom-select-option.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 input[type='date'],
@@ -708,8 +698,10 @@ input[type='week']::-webkit-calendar-picker-indicator {
     display: inline-block;
 }
 
+.disabled,
 button:disabled,
-select:disabled {
+select:disabled,
+.custom-select.disabled .custom-select-button {
     opacity: 0.5;
     cursor: not-allowed;
 }
