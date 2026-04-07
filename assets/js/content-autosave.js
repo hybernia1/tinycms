@@ -410,6 +410,9 @@
             if (event.detail && event.detail.valid === false) {
                 return;
             }
+            if (contentId() <= 0) {
+                return;
+            }
             scheduleAutosave();
         });
         form.addEventListener('submit', function () {
