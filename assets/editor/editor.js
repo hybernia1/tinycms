@@ -1412,6 +1412,40 @@
         });
 
         editor.addEventListener('keydown', function (event) {
+            if (event.key === 'Backspace' || event.key === 'Delete') {
+                var selectedImageForDelete = editor.querySelector('.block.block-image.is-selected');
+                if (selectedImageForDelete) {
+                    event.preventDefault();
+                    var nextNode = selectedImageForDelete.nextElementSibling;
+                    var prevNode = selectedImageForDelete.previousElementSibling;
+                    if (nextNode && nextNode.classList.contains('block-image-break')) {
+                        nextNode.remove();
+                        nextNode = selectedImageForDelete.nextElementSibling;
+                    } else if (prevNode && prevNode.classList.contains('block-image-break')) {
+                        prevNode.remove();
+                        prevNode = selectedImageForDelete.previousElementSibling;
+                    }
+                    selectedImageForDelete.remove();
+                    var caretTarget = null;
+                    if (nextNode && nextNode.parentNode === editor) {
+                        caretTarget = nextNode;
+                    } else if (prevNode && prevNode.parentNode === editor) {
+                        caretTarget = prevNode;
+                    } else {
+                        caretTarget = createImageBreakParagraph();
+                        editor.appendChild(caretTarget);
+                    }
+                    if (caretTarget.classList && caretTarget.classList.contains('block') && caretTarget.classList.contains('block-image')) {
+                        var spacer = createImageBreakParagraph();
+                        editor.insertBefore(spacer, caretTarget);
+                        caretTarget = spacer;
+                    }
+                    placeCaret(caretTarget);
+                    persistEditorState(false);
+                    return;
+                }
+            }
+
             if (event.key === 'Enter' && !event.shiftKey) {
                 var selectedImageBlock = editor.querySelector('.block.block-image.is-selected');
                 if (selectedImageBlock) {
