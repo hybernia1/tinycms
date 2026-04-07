@@ -112,7 +112,7 @@ final class UploadService
         return [
             'success' => true,
             'data' => [
-                'name' => $originalName !== '' ? $originalName : basename($fileRel),
+                'name' => trim($baseName) !== '' ? trim($baseName) : (string)pathinfo($fileRel, PATHINFO_FILENAME),
                 'path' => $fileRel,
                 'path_webp' => $webpRel,
             ],
