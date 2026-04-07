@@ -637,7 +637,8 @@
                 return value;
             }
             var base = String(textarea.dataset.mediaBaseUrl || '').trim().replace(/\/$/, '');
-            return base === '' ? value : (base + '/' + value.replace(/^\//, ''));
+            var normalized = value.charAt(0) === '/' ? value : ('/' + value);
+            return base === '' ? normalized : (base + normalized);
         }
 
         function contentApiBase() {
@@ -773,7 +774,7 @@
                 }
                 var media = payload.data;
                 var mediaId = Number(media.id || 0);
-                var imageUrl = absoluteMediaUrl(media.path || media.webp_path || media.preview_path || '');
+                var imageUrl = absoluteMediaUrl(media.webp_path || media.path || media.preview_path || '');
                 if (mediaId <= 0 || !imageUrl) {
                     if (loadingBlock && loadingBlock.parentNode) {
                         loadingBlock.remove();
