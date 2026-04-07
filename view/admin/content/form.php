@@ -71,6 +71,9 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <div class="content-box-footer d-flex gap-2">
                     <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
                     <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
+                    <?php if ($mode === 'edit'): ?>
+                        <button class="btn btn-light" type="button" data-modal-open data-modal-target="#content-delete-modal"><?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php if ($isEditor): ?>
@@ -146,6 +149,11 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         </aside>
     </div>
 </form>
+<?php if ($mode === 'edit'): ?>
+<form id="content-delete-form" method="post" action="<?= htmlspecialchars($url('admin/content/edit/delete?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
+    <?= $csrfField() ?>
+</form>
+<?php endif; ?>
 <div class="media-library-modal" data-media-library-modal>
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
@@ -257,3 +265,14 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         </div>
     </div>
 </div>
+<?php if ($mode === 'edit'): ?>
+<div class="modal-overlay" data-modal id="content-delete-modal">
+    <div class="modal">
+        <p data-modal-text><?= htmlspecialchars($t('content.delete_confirm', 'Do you really want to delete this content?'), ENT_QUOTES, 'UTF-8') ?></p>
+        <div class="modal-actions">
+            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="content-delete-form"><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

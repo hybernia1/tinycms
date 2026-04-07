@@ -85,6 +85,10 @@ $router->post('admin/content/edit', static function () use ($adminContent, $redi
     $adminContent->editSubmit($redirect);
 });
 
+$router->post('admin/content/edit/delete', static function () use ($adminContent, $redirect): void {
+    $adminContent->deleteSubmit($redirect);
+});
+
 $router->post('admin/content/thumbnail/upload', static function () use ($adminContent, $redirect): void {
     $adminContent->thumbnailUploadSubmit($redirect);
 });

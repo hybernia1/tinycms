@@ -101,6 +101,45 @@ final class AdminContentController extends BaseAdminController
         $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
     }
 
+    public function deleteSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+        ) {
+            return;
+        }
+
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id <= 0) {
+            $this->flash->add('error', I18n::t('content.invalid_id', 'Invalid content ID.'));
+            $redirect('admin/content');
+            return;
+        }
+
+        $item = $this->content->find($id);
+        if ($item === null) {
+            $this->flash->add('error', I18n::t('content.not_found', 'Content not found.'));
+            $redirect('admin/content');
+            return;
+        }
+
+        if (!$this->canDeleteContent($item)) {
+            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $redirect('admin/content');
+            return;
+        }
+
+        if (!$this->content->delete($id)) {
+            $this->flash->add('error', I18n::t('content.delete_failed', 'Could not delete content.'));
+            $redirect($this->editPath($id));
+            return;
+        }
+
+        $this->flash->add('success', I18n::t('content.deleted', 'Content deleted.'));
+        $redirect('admin/content');
+    }
+
     public function addForm(callable $redirect): void
     {
         if (!$this->guardAdmin($redirect, false)) {
