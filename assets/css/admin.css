@@ -98,26 +98,28 @@ body {
     transition: transform 0.2s ease-in-out;
 }
 
-body.admin-sidebar-collapsed .admin-sidebar {
-    width: var(--admin-sidebar-collapsed-width);
-}
+@media (min-width: 901px) {
+    body.admin-sidebar-collapsed .admin-sidebar {
+        width: var(--admin-sidebar-collapsed-width);
+    }
 
-body.admin-sidebar-collapsed .admin-main {
-    margin-left: var(--admin-sidebar-collapsed-width);
-}
+    body.admin-sidebar-collapsed .admin-main {
+        margin-left: var(--admin-sidebar-collapsed-width);
+    }
 
-body.admin-sidebar-collapsed .admin-brand {
-    margin-inline: auto;
-}
+    body.admin-sidebar-collapsed .admin-brand {
+        margin-inline: auto;
+    }
 
-body.admin-sidebar-collapsed .admin-nav-link {
-    justify-content: center;
-    padding-inline: var(--space-2);
-}
+    body.admin-sidebar-collapsed .admin-nav-link {
+        justify-content: center;
+        padding-inline: var(--space-2);
+    }
 
-body.admin-sidebar-collapsed .admin-nav-link > span,
-body.admin-sidebar-collapsed .admin-user-meta {
-    display: none;
+    body.admin-sidebar-collapsed .admin-nav-link > span,
+    body.admin-sidebar-collapsed .admin-user-meta {
+        display: none;
+    }
 }
 
 
