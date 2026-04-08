@@ -461,7 +461,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     height: 1.35rem;
     border-radius: 0;
     background: var(--primary);
-    border: 1px solid #fff;
     color: #fff;
     display: none;
     align-items: center;
