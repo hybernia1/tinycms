@@ -492,32 +492,32 @@
 
     function createLinkModal() {
         var modal = document.createElement('div');
-        modal.className = 'wysiwyg-link-modal';
+        modal.className = 'editor-link-modal';
 
         var dialog = document.createElement('div');
-        dialog.className = 'wysiwyg-link-dialog';
+        dialog.className = 'editor-link-dialog';
 
         var title = document.createElement('h3');
-        title.className = 'wysiwyg-link-title';
+        title.className = 'editor-link-title';
         title.textContent = '' + t('editor.insert_link', 'Insert link') + '';
 
         var input = document.createElement('input');
         input.type = 'url';
         input.placeholder = 'https://';
-        input.className = 'wysiwyg-link-input';
+        input.className = 'editor-link-input';
         input.setAttribute('data-role', 'link-input');
 
         var textInput = document.createElement('input');
         textInput.type = 'text';
         textInput.placeholder = t('editor.link_text', 'Link text');
-        textInput.className = 'wysiwyg-link-input';
+        textInput.className = 'editor-link-input';
         textInput.setAttribute('data-role', 'link-text-input');
 
         var options = document.createElement('div');
-        options.className = 'wysiwyg-link-options';
+        options.className = 'editor-link-options';
 
         var targetOption = document.createElement('label');
-        targetOption.className = 'wysiwyg-link-option';
+        targetOption.className = 'editor-link-option';
         var targetInput = document.createElement('input');
         targetInput.type = 'checkbox';
         targetInput.setAttribute('data-role', 'link-target-blank');
@@ -525,7 +525,7 @@
         targetOption.appendChild(document.createTextNode(' ' + t('editor.open_new_window', 'Open in new window')));
 
         var nofollowOption = document.createElement('label');
-        nofollowOption.className = 'wysiwyg-link-option';
+        nofollowOption.className = 'editor-link-option';
         var nofollowInput = document.createElement('input');
         nofollowInput.type = 'checkbox';
         nofollowInput.setAttribute('data-role', 'link-nofollow');
@@ -533,7 +533,7 @@
         nofollowOption.appendChild(document.createTextNode(' ' + t('editor.add_nofollow', 'Add nofollow')));
 
         var actions = document.createElement('div');
-        actions.className = 'wysiwyg-link-actions';
+        actions.className = 'editor-link-actions';
 
         var cancel = document.createElement('button');
         cancel.type = 'button';

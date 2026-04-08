@@ -105,13 +105,14 @@ foreach ($listRootAttrs as $attr => $value) {
         </div>
     </div>
 
-    <div class="modal-overlay" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-modal>
-        <div class="modal">
-            <p><?= htmlspecialchars($deleteConfirmText, ENT_QUOTES, 'UTF-8') ?></p>
-            <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-cancel><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-                <button class="btn btn-primary" type="button" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
-            </div>
-        </div>
-    </div>
+    <?php
+    $modal = [
+        'id' => $listName . '-delete-modal',
+        'attributes' => ['data-modal' => null, 'data-' . $listName . '-delete-modal' => null],
+        'message' => $deleteConfirmText,
+        'cancel_attributes' => ['type' => 'button', 'data-modal-close' => null, 'data-' . $listName . '-delete-cancel' => null],
+        'confirm_attributes' => ['type' => 'button', 'data-' . $listName . '-delete-confirm' => null],
+    ];
+    require __DIR__ . '/modals/confirm.php';
+    ?>
 </div>

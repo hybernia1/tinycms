@@ -182,13 +182,14 @@ if ($mode === 'edit') {
     <form id="media-delete-form" method="post" action="<?= htmlspecialchars($url('admin/media/edit/delete?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
     </form>
-    <div class="modal-overlay" data-modal id="media-delete-modal">
-        <div class="modal">
-            <p data-modal-text><?= htmlspecialchars($t('media.delete_confirm', 'Do you really want to delete this media?'), ENT_QUOTES, 'UTF-8') ?></p>
-            <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-                <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="media-delete-form"><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
-            </div>
-        </div>
-    </div>
+    <?php
+    $modal = [
+        'id' => 'media-delete-modal',
+        'attributes' => ['data-modal' => null],
+        'message' => $t('media.delete_confirm', 'Do you really want to delete this media?'),
+        'message_attributes' => ['data-modal-text' => null],
+        'confirm_attributes' => ['type' => 'button', 'data-modal-confirm' => null, 'data-form-id' => 'media-delete-form'],
+    ];
+    require __DIR__ . '/../partials/modals/confirm.php';
+    ?>
 <?php endif; ?>
