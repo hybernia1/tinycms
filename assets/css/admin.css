@@ -6,7 +6,8 @@
     --admin-z-header: 20;
     --admin-z-menu-overlay: 30;
     --admin-z-sidebar: 40;
-    --admin-z-modal: 200;
+    --admin-z-loader: 1200;
+    --admin-z-modal: 1300;
     --admin-sidebar-width: 240px;
     --admin-sidebar-collapsed-width: 72px;
 }
@@ -427,7 +428,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1200;
+    z-index: var(--admin-z-loader);
     opacity: 0;
     pointer-events: none;
     transition: opacity .16s ease;
@@ -534,12 +535,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     height: 0.875rem;
 }
 
-.media-library-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-1);
-}
 
 @media (max-width: 900px) {
     .media-library-modal-layout {

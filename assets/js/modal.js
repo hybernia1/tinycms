@@ -7,10 +7,7 @@ const t = (path, fallback = '') => {
 
 const getModal = (trigger) => {
     const target = trigger?.getAttribute('data-modal-target') || '';
-    if (target) {
-        return document.querySelector(target);
-    }
-    return document.querySelector('[data-modal]');
+    return target !== '' ? document.querySelector(target) : null;
 };
 
 const closeModal = (modal) => {
@@ -19,8 +16,27 @@ const closeModal = (modal) => {
     }
 };
 
+const resolveModal = (value) => {
+    if (typeof value === 'string' && value !== '') {
+        return document.querySelector(value);
+    }
+    return value || null;
+};
+
+window.tinycmsModal = {
+    open: (value) => {
+        const modal = resolveModal(value);
+        if (modal) {
+            modal.classList.add('open');
+        }
+    },
+    close: (value) => {
+        closeModal(resolveModal(value));
+    },
+};
+
 const hoistModalsToBody = () => {
-    document.querySelectorAll('[data-modal], [data-content-leave-modal], [data-media-library-modal]').forEach((modal) => {
+    document.querySelectorAll('[data-modal]').forEach((modal) => {
         if (modal.parentElement !== document.body) {
             document.body.appendChild(modal);
         }
@@ -48,7 +64,7 @@ const openModal = (trigger) => {
         confirm.setAttribute('data-form-id', formId);
     }
 
-    modal.classList.add('open');
+    window.tinycmsModal.open(modal);
 };
 
 document.addEventListener('click', (event) => {
@@ -68,6 +84,23 @@ document.addEventListener('click', (event) => {
     const confirmTrigger = event.target.closest('[data-modal-confirm]');
     if (!confirmTrigger) {
         return;
+    }
+
+    const action = confirmTrigger.getAttribute('data-modal-confirm-action') || '';
+    if (action !== '') {
+        const confirmEvent = new CustomEvent('tinycms:modal-confirm', {
+            bubbles: true,
+            cancelable: true,
+            detail: {
+                action,
+                trigger: confirmTrigger,
+                modal: confirmTrigger.closest('[data-modal]'),
+            },
+        });
+        document.dispatchEvent(confirmEvent);
+        if (confirmEvent.defaultPrevented) {
+            return;
+        }
     }
 
     const formId = confirmTrigger.getAttribute('data-form-id') || '';

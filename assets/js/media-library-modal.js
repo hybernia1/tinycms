@@ -34,7 +34,6 @@ if (modal && openTrigger) {
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
     const deleteMediaIdField = document.querySelector('[data-media-library-delete-media-id]');
     const deleteForm = document.getElementById('media-library-delete-form');
-    const deleteConfirmButton = document.querySelector('[data-media-library-delete-confirm]');
     const deleteConfirmModal = document.getElementById('media-library-delete-modal');
     const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
     const detailNameInput = modal.querySelector('[data-media-library-detail-name-input]');
@@ -407,7 +406,7 @@ if (modal && openTrigger) {
 
     const open = (detail) => {
         setContext(detail || {});
-        modal.classList.add('open');
+        window.tinycmsModal.open(modal);
         if (searchTimer) {
             clearTimeout(searchTimer);
             searchTimer = null;
@@ -433,7 +432,7 @@ if (modal && openTrigger) {
     });
 
     const close = () => {
-        modal.classList.remove('open');
+        window.tinycmsModal.close(modal);
     };
 
     if (openTrigger) {
@@ -680,8 +679,12 @@ if (modal && openTrigger) {
         });
     }
 
-    if (deleteConfirmButton && deleteForm && deleteMediaIdField) {
-        deleteConfirmButton.addEventListener('click', async () => {
+    if (deleteForm && deleteMediaIdField) {
+        document.addEventListener('tinycms:modal-confirm', async (event) => {
+            if (!event.detail || event.detail.action !== 'media-library-delete') {
+                return;
+            }
+            event.preventDefault();
             if (!selectedMedia) {
                 return;
             }
@@ -710,7 +713,7 @@ if (modal && openTrigger) {
             renderSelected();
             await load().catch(() => null);
             if (deleteConfirmModal) {
-                deleteConfirmModal.classList.remove('open');
+                window.tinycmsModal.close(deleteConfirmModal);
             }
             setStatus('Médium smazáno.');
         });

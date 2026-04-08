@@ -358,16 +358,20 @@
         }
 
         function leaveModal() {
-            return document.querySelector('[data-content-leave-modal]');
+            return document.getElementById('content-leave-modal');
+        }
+
+        function resetLeaveState() {
+            pendingNavigation = '';
+            pendingReload = false;
         }
 
         function closeLeaveModal() {
             var modal = leaveModal();
             if (modal) {
-                modal.classList.remove('open');
+                window.tinycmsModal.close(modal);
             }
-            pendingNavigation = '';
-            pendingReload = false;
+            resetLeaveState();
         }
 
         function openLeaveModal() {
@@ -375,7 +379,7 @@
             if (!modal) {
                 return;
             }
-            modal.classList.add('open');
+            window.tinycmsModal.open(modal);
         }
 
         function shouldGuardLink(link) {
@@ -413,29 +417,32 @@
             openLeaveModal();
         });
 
+
+        document.addEventListener('tinycms:modal-confirm', function (event) {
+            if (!event.detail || event.detail.action !== 'content-leave') {
+                return;
+            }
+            event.preventDefault();
+            bypassLeaveWarning = true;
+            if (pendingReload) {
+                window.location.reload();
+                return;
+            }
+            if (pendingNavigation !== '') {
+                window.location.href = pendingNavigation;
+                return;
+            }
+            closeLeaveModal();
+        });
+
         document.addEventListener('click', function (event) {
             var cancelLeave = event.target.closest('[data-content-leave-cancel]');
             if (cancelLeave) {
                 event.preventDefault();
-                closeLeaveModal();
+                resetLeaveState();
                 return;
             }
 
-            var confirmLeave = event.target.closest('[data-content-leave-confirm]');
-            if (confirmLeave) {
-                event.preventDefault();
-                bypassLeaveWarning = true;
-                if (pendingReload) {
-                    window.location.reload();
-                    return;
-                }
-                if (pendingNavigation !== '') {
-                    window.location.href = pendingNavigation;
-                    return;
-                }
-                closeLeaveModal();
-                return;
-            }
 
             if (bypassLeaveWarning || !hasUnsavedChanges()) {
                 return;

@@ -167,7 +167,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <?= $csrfField() ?>
 </form>
 <?php endif; ?>
-<div class="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
+<div class="media-library-modal" data-modal id="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
             <strong>Media library</strong>
@@ -225,7 +225,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                     </div>
                 </form>
                 <div class="media-library-grid" data-media-library-grid></div>
-                <div class="media-library-pagination pagination">
+                <div class="pagination">
                     <a class="pagination-link disabled" href="#" data-media-library-prev aria-disabled="true" tabindex="-1"><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
                     <span data-media-library-page>1 / 1</span>
                     <a class="pagination-link disabled" href="#" data-media-library-next aria-disabled="true" tabindex="-1"><span><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
@@ -264,16 +264,16 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         <p data-modal-text><?= htmlspecialchars($t('content.delete_image_confirm', 'Do you really want to delete this image?'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-modal-confirm-action="media-library-delete" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>
-<div class="modal-overlay" data-content-leave-modal>
+<div class="modal-overlay" data-modal id="content-leave-modal">
     <div class="modal">
         <p><?= htmlspecialchars($t('content.leave_page_confirm', 'Neuložené změny budou ztraceny. Opravdu chcete pokračovat?'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-content-leave-cancel><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-content-leave-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-light" type="button" data-content-leave-cancel data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-modal-confirm-action="content-leave" data-content-leave-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>

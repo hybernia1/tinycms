@@ -84,7 +84,6 @@ const initListApi = (config) => {
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
     const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`);
-    const deleteCancel = deleteModal?.querySelector(`[data-${config.name}-delete-cancel]`);
     const deleteConfirm = deleteModal?.querySelector(`[data-${config.name}-delete-confirm]`);
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
@@ -311,20 +310,9 @@ const initListApi = (config) => {
         if (delOpen) {
             event.preventDefault();
             pendingDeleteId = Number(delOpen.getAttribute(`data-${config.name}-delete-open`) || '0');
-            if (deleteModal) {
-                deleteModal.classList.add('open');
-            }
         }
     });
 
-    if (deleteCancel) {
-        deleteCancel.addEventListener('click', () => {
-            pendingDeleteId = 0;
-            if (deleteModal) {
-                deleteModal.classList.remove('open');
-            }
-        });
-    }
 
     if (deleteConfirm) {
         deleteConfirm.addEventListener('click', async () => {
@@ -341,7 +329,7 @@ const initListApi = (config) => {
             if (result.success === true) {
                 pendingDeleteId = 0;
                 if (deleteModal) {
-                    deleteModal.classList.remove('open');
+                    window.tinycmsModal.close(deleteModal);
                 }
                 if (config.messages?.deleteSuccess) {
                     pushFlash('success', config.messages.deleteSuccess);
@@ -414,7 +402,7 @@ initListApi({
                     </button>
                     ` : ''}
                     ${canDelete ? `
-                    <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}" aria-label="${esc(t('common.delete', 'Delete'))}" title="${esc(t('common.delete', 'Delete'))}">
+                    <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}" data-modal-open data-modal-target="#content-delete-modal" aria-label="${esc(t('common.delete', 'Delete'))}" title="${esc(t('common.delete', 'Delete'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('common.delete', 'Delete'))}</span>
                     </button>
@@ -442,7 +430,7 @@ initListApi({
                 </td>
                 <td class="mobile-hide">${esc(item.body || '—')}</td>
                 <td class="table-col-actions">
-                    <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="${id}" aria-label="${esc(t('terms.delete', 'Delete tag'))}" title="${esc(t('terms.delete', 'Delete tag'))}">
+                    <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="${id}" data-modal-open data-modal-target="#terms-delete-modal" aria-label="${esc(t('terms.delete', 'Delete tag'))}" title="${esc(t('terms.delete', 'Delete tag'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('terms.delete', 'Delete tag'))}</span>
                     </button>
@@ -485,7 +473,7 @@ initListApi({
                 <td class="mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
                     ${canDelete ? `
-                    <button class="btn btn-light btn-icon" type="button" data-media-delete-open="${id}" aria-label="${esc(t('media.delete', 'Delete media'))}" title="${esc(t('media.delete', 'Delete media'))}">
+                    <button class="btn btn-light btn-icon" type="button" data-media-delete-open="${id}" data-modal-open data-modal-target="#media-delete-modal" aria-label="${esc(t('media.delete', 'Delete media'))}" title="${esc(t('media.delete', 'Delete media'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('media.delete', 'Delete media'))}</span>
                     </button>
@@ -529,7 +517,7 @@ initListApi({
                         ${icon(isSuspended ? 'show' : 'hide')}
                         <span class="sr-only">${esc(toggleLabel)}</span>
                     </button>
-                    <button class="btn btn-light btn-icon" type="button" data-users-delete-open="${id}" aria-label="${esc(t('users.delete', 'Delete user'))}" title="${esc(t('users.delete', 'Delete user'))}">
+                    <button class="btn btn-light btn-icon" type="button" data-users-delete-open="${id}" data-modal-open data-modal-target="#users-delete-modal" aria-label="${esc(t('users.delete', 'Delete user'))}" title="${esc(t('users.delete', 'Delete user'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('users.delete', 'Delete user'))}</span>
                     </button>`}

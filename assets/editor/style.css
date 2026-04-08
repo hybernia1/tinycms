@@ -114,10 +114,10 @@
     justify-content: center;
     background: rgba(0, 0, 0, 0.45);
     padding: var(--space-4);
-    z-index: var(--admin-z-modal, 200);
+    z-index: var(--admin-z-modal, 1300);
 }
 
-.wysiwyg-link-modal.is-open {
+.wysiwyg-link-modal.open {
     display: flex;
 }
 
