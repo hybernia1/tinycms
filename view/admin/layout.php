@@ -166,7 +166,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.brand'), ENT_QUOTES, 'UTF-8') ?>">
-            <img src="<?= htmlspecialchars($url('assets/logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
+            <img src="<?= htmlspecialchars($url('assets/svg/logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
         </a>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
