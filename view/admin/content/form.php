@@ -58,18 +58,18 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                     <div class="mb-3">
                         <label><?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?></label>
                         <?php $currentStatus = (string)($item['status'] ?? 'draft'); ?>
-                        <div class="publication-status-switch" role="radiogroup" aria-label="<?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?>">
+                        <div class="content-status-group" role="radiogroup" aria-label="<?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?>">
                             <?php foreach ($availableStatuses as $statusValue): ?>
                                 <?php $statusKey = (string)$statusValue; ?>
                                 <input
-                                    class="publication-status-switch-input"
+                                    class="sr-only content-status-input"
                                     type="radio"
                                     id="content-status-<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>"
                                     name="status"
                                     value="<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>"
                                     <?= $currentStatus === $statusKey ? 'checked' : '' ?>
                                 >
-                                <label class="publication-status-switch-option" for="content-status-<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>">
+                                <label class="btn btn-light" for="content-status-<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>">
                                     <?= htmlspecialchars($t('content.statuses.' . $statusKey, $statusKey), ENT_QUOTES, 'UTF-8') ?>
                                 </label>
                             <?php endforeach; ?>
