@@ -10,6 +10,11 @@ try {
     $router = $app['router'];
 
     if (!$router->dispatch($_SERVER['REQUEST_URI'] ?? '/', $_SERVER['REQUEST_METHOD'] ?? 'GET')) {
+        $front = $app['front'] ?? null;
+        if ($front instanceof \App\Controller\FrontController) {
+            $front->notFoundResponse();
+            return;
+        }
         http_response_code(404);
         echo '404';
     }

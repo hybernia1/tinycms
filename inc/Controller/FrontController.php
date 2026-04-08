@@ -207,10 +207,14 @@ final class FrontController
         ]);
     }
 
+    public function notFoundResponse(): void
+    {
+        $this->notFound();
+    }
+
     private function notFound(): void
     {
-        http_response_code(404);
-        echo '404';
+        $this->pages->notFound((string)($_SERVER['REQUEST_URI'] ?? '/'));
         exit;
     }
 

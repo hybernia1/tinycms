@@ -105,4 +105,5 @@ require __DIR__ . '/routes/admin.php';
 
 return [
     'router' => $router,
+    'front' => $front,
 ];
