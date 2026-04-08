@@ -19,7 +19,6 @@ const openTrigger = Array.prototype.find.call(
 if (modal && openTrigger) {
     const loader = window.tinycmsLoader || null;
     const grid = modal.querySelector('[data-media-library-grid]');
-    const pageLabel = modal.querySelector('[data-media-library-page]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
     const nextButton = modal.querySelector('[data-media-library-next]');
     const closeButtons = modal.querySelectorAll('[data-media-library-close]');
@@ -321,10 +320,6 @@ if (modal && openTrigger) {
     };
 
     const updatePager = () => {
-        if (pageLabel) {
-            pageLabel.textContent = `${page} / ${totalPages}`;
-        }
-
         if (prevButton) {
             const prevDisabled = page <= 1;
             prevButton.classList.toggle('disabled', prevDisabled);
