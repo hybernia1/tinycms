@@ -177,6 +177,37 @@ final class PageView
         ]);
     }
 
+
+    public function notFound(string $requestUri = ''): void
+    {
+        http_response_code(404);
+
+        $path = trim((string)(parse_url($requestUri !== '' ? $requestUri : (string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? ''), '/');
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
+
+        $mode = match (true) {
+            in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'avif'], true) => 'image',
+            $ext === 'xml' || str_contains($accept, 'xml') => 'xml',
+            $ext === 'txt' || str_contains($accept, 'text/plain') => 'text',
+            default => 'html',
+        };
+
+        $layout = match ($mode) {
+            'image' => 'front/svg/layout',
+            'xml' => 'front/xml/layout',
+            'text' => 'front/plain/layout',
+            default => 'front/layout',
+        };
+
+        $payload = ['notFoundMode' => $mode, 'pageTitle' => '404'];
+        if ($mode === 'xml') {
+            $payload['contentType'] = 'application/xml; charset=utf-8';
+        }
+
+        $this->view->render($layout, 'front/errors/404', $payload);
+    }
+
     public function adminDashboard(?array $user): void
     {
         $this->renderAdmin('admin/dashboard', [
