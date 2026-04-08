@@ -168,7 +168,17 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->normalizeContentInput($_POST, $authorId), $authorId);
+        $requestedId = (int)($_POST['id'] ?? 0);
+        $saveId = null;
+
+        if ($requestedId > 0) {
+            $existing = $this->content->find($requestedId);
+            if ($existing !== null && $this->canManageContent($existing)) {
+                $saveId = $requestedId;
+            }
+        }
+
+        $result = $this->content->save($this->normalizeContentInput($_POST, $authorId), $authorId, $saveId);
 
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
