@@ -83,7 +83,10 @@ const initListApi = (config) => {
     const body = root.querySelector(`[data-${config.name}-list-body]`);
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
-    const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`);
+    let deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`);
+    if (deleteModal && deleteModal.parentElement !== document.body) {
+        document.body.appendChild(deleteModal);
+    }
     const deleteCancel = deleteModal?.querySelector(`[data-${config.name}-delete-cancel]`);
     const deleteConfirm = deleteModal?.querySelector(`[data-${config.name}-delete-confirm]`);
     const filterLinks = config.withStatus
