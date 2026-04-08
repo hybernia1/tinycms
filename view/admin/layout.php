@@ -163,6 +163,14 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body>
+<script>
+    (function () {
+        var collapsed = (document.cookie.split(';').map(function (part) { return part.trim(); }).indexOf('tinycms_admin_sidebar=collapsed') !== -1);
+        if (collapsed) {
+            document.body.classList.add('admin-sidebar-collapsed');
+        }
+    })();
+</script>
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.brand'), ENT_QUOTES, 'UTF-8') ?>">

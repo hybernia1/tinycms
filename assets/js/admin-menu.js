@@ -25,10 +25,6 @@ const closeMobileMenu = () => {
     body.classList.remove('admin-menu-open');
 };
 
-if (getCookie(sidebarCookieName) === sidebarCollapsedValue) {
-    body.classList.add('admin-sidebar-collapsed');
-}
-
 document.addEventListener('click', (event) => {
     if (event.target.closest('[data-admin-sidebar-toggle]')) {
         setSidebarCollapsed(!body.classList.contains('admin-sidebar-collapsed'));
