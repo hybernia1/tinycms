@@ -31,7 +31,6 @@ if (modal && openTrigger) {
     const deleteConfirmModal = document.getElementById('media-library-delete-modal');
     const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
     const detailNameInput = modal.querySelector('[data-media-library-detail-name-input]');
-    const detailPath = modal.querySelector('[data-media-library-detail-path]');
     const detailCreated = modal.querySelector('[data-media-library-detail-created]');
     const chooseButton = modal.querySelector('[data-media-library-choose]');
     const deleteButton = modal.querySelector('[data-media-library-delete-open]');
@@ -226,6 +225,7 @@ if (modal && openTrigger) {
             button.dataset.mediaPath = String(item.path || '');
             button.dataset.mediaWebpPath = String(item.webp_path || '');
             button.dataset.mediaCreated = String(item.created || '');
+            button.dataset.mediaCreatedLabel = String(item.created_label || item.created || '');
             button.dataset.mediaPreviewPath = previewPath;
             button.dataset.mediaCanEdit = item.can_edit === true ? '1' : '0';
             button.dataset.mediaCanDelete = item.can_delete === true ? '1' : '0';
@@ -249,6 +249,7 @@ if (modal && openTrigger) {
             path: target.dataset.mediaPath || '',
             webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
+            createdLabel: target.dataset.mediaCreatedLabel || target.dataset.mediaCreated || '',
             previewPath: target.dataset.mediaPreviewPath || '',
             canEdit: target.dataset.mediaCanEdit === '1',
             canDelete: target.dataset.mediaCanDelete === '1',
@@ -278,12 +279,8 @@ if (modal && openTrigger) {
             detailNameInput.disabled = !(selectedMedia && selectedMedia.canEdit);
         }
 
-        if (detailPath) {
-            detailPath.textContent = selectedMedia ? selectedMedia.path : '—';
-        }
-
         if (detailCreated) {
-            detailCreated.textContent = selectedMedia ? selectedMedia.created : '—';
+            detailCreated.textContent = selectedMedia ? (selectedMedia.createdLabel || selectedMedia.created) : '—';
         }
 
         if (chooseButton) {

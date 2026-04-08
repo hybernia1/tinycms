@@ -175,7 +175,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                             <button class="btn btn-light" type="button" data-media-library-rename disabled><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
                         </div>
                     </div>
-                    <div><strong><?= htmlspecialchars($t('content.path', 'Path'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-path>—</span></div>
                     <div><strong><?= htmlspecialchars($t('common.created', 'Created'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-created>—</span></div>
                 </div>
                 <small class="text-muted" data-media-library-status></small>
