@@ -20,7 +20,7 @@ const closeModal = (modal) => {
 };
 
 const hoistModalsToBody = () => {
-    document.querySelectorAll('[data-modal], [data-content-leave-modal], [data-media-library-modal]').forEach((modal) => {
+    document.querySelectorAll('.modal-overlay, [data-media-library-modal]').forEach((modal) => {
         if (modal.parentElement !== document.body) {
             document.body.appendChild(modal);
         }
