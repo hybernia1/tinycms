@@ -859,7 +859,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('open');
+            window.tinycmsModal.open(linkModal);
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -926,7 +926,7 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('open');
+            window.tinycmsModal.close(linkModal);
         }
 
         function closeMenus() {
@@ -935,7 +935,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            linkModal.classList.remove('open');
+            window.tinycmsModal.close(linkModal);
             hideLinkTools();
             activeLink = null;
         }

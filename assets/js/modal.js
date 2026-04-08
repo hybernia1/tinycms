@@ -77,7 +77,7 @@ document.addEventListener('click', (event) => {
 
     const closeTrigger = event.target.closest('[data-modal-close]');
     if (closeTrigger) {
-        closeModal(closeTrigger.closest('[data-modal]'));
+        window.tinycmsModal.close(closeTrigger.closest('[data-modal]'));
         return;
     }
 

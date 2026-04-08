@@ -264,7 +264,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         <p data-modal-text><?= htmlspecialchars($t('content.delete_image_confirm', 'Do you really want to delete this image?'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-modal-confirm-action="media-library-delete" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-modal-confirm-action="media-library-delete"><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>
@@ -273,7 +273,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         <p><?= htmlspecialchars($t('content.leave_page_confirm', 'Neuložené změny budou ztraceny. Opravdu chcete pokračovat?'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-content-leave-cancel data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-modal-confirm-action="content-leave" data-content-leave-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-modal-confirm-action="content-leave"><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>
