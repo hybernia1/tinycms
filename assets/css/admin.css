@@ -7,6 +7,8 @@
     --admin-z-menu-overlay: 30;
     --admin-z-sidebar: 40;
     --admin-z-modal: 200;
+    --admin-sidebar-width: 240px;
+    --admin-sidebar-collapsed-width: 72px;
 }
 
 html,
@@ -30,7 +32,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 240px;
+    width: var(--admin-sidebar-width);
     height: 100%;
     overflow-y: auto;
     background: var(--sidebar-bg);
@@ -83,13 +85,41 @@ body {
 
 .admin-main {
     flex: 1 1 auto;
-    margin-left: 240px;
+    margin-left: var(--admin-sidebar-width);
     height: 100%;
     min-width: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: margin-left 0.2s ease-in-out;
 }
+
+.admin-sidebar {
+    transition: transform 0.2s ease-in-out;
+}
+
+body.admin-sidebar-collapsed .admin-sidebar {
+    width: var(--admin-sidebar-collapsed-width);
+}
+
+body.admin-sidebar-collapsed .admin-main {
+    margin-left: var(--admin-sidebar-collapsed-width);
+}
+
+body.admin-sidebar-collapsed .admin-brand {
+    margin-inline: auto;
+}
+
+body.admin-sidebar-collapsed .admin-nav-link {
+    justify-content: center;
+    padding-inline: var(--space-2);
+}
+
+body.admin-sidebar-collapsed .admin-nav-link > span,
+body.admin-sidebar-collapsed .admin-user-meta {
+    display: none;
+}
+
 
 .admin-header-spacer {
     background: var(--color-surface);
@@ -100,6 +130,10 @@ body {
     position: sticky;
     top: 0;
     z-index: var(--admin-z-header);
+}
+
+.admin-sidebar-toggle {
+    display: inline-flex;
 }
 
 .admin-menu-toggle {
@@ -121,13 +155,13 @@ body {
 
 .admin-sidebar-bottom {
     margin-top: auto;
-    border-top: 1px solid var(--color-border-soft);
     padding-top: var(--space-3);
 }
 
 .admin-user-meta {
     margin-bottom: calc(var(--space-2) + var(--space-1) / 2);
 }
+
 
 .admin-user-name {
     font-weight: 600;
@@ -573,9 +607,14 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
         width: 100%;
     }
 
+    .admin-sidebar-toggle {
+        display: none;
+    }
+
     .admin-menu-toggle {
         display: inline-flex;
     }
+
 
     .admin-menu-overlay {
         position: fixed;

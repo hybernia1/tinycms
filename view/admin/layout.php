@@ -163,6 +163,14 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body>
+<script>
+    (function () {
+        var collapsed = (document.cookie.split(';').map(function (part) { return part.trim(); }).indexOf('tinycms_admin_sidebar=collapsed') !== -1);
+        if (collapsed) {
+            document.body.classList.add('admin-sidebar-collapsed');
+        }
+    })();
+</script>
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.brand'), ENT_QUOTES, 'UTF-8') ?>">
@@ -190,10 +198,9 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
             <?php if (is_array($authUser)): ?>
             <div class="admin-user-meta">
                 <div class="admin-user-name"><?= htmlspecialchars((string)($authUser['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                <div class="text-muted"><?= htmlspecialchars((string)($authUser['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
             <?php endif; ?>
-            <a class="btn btn-light w-100" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
+            <a class="admin-nav-link" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('logout') ?>
                 <span><?= htmlspecialchars($t('admin.logout'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
@@ -203,6 +210,10 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
     <main class="admin-main">
         <div class="admin-header-spacer d-flex justify-between align-center">
             <div class="d-flex align-center gap-2">
+                <button class="btn btn-light btn-icon admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-label="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('menu') ?>
+                    <span class="sr-only"><?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?></span>
+                </button>
                 <button class="btn btn-light btn-icon admin-menu-toggle" type="button" data-admin-menu-toggle aria-label="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>">
                     <?= $icon('menu') ?>
                     <span class="sr-only"><?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?></span>
