@@ -102,6 +102,18 @@ return [
             'remember' => 'Remember me',
             'submit' => 'Sign in',
         ],
+        'feed' => [
+            'title' => 'RSS feed',
+        ],
+        'search' => [
+            'title' => 'Search',
+            'results_for' => 'Search results for',
+            'meta_description' => 'Search results on the website.',
+            'meta_description_prefix' => 'Search results for',
+        ],
+        'term' => [
+            'meta_description_prefix' => 'Articles on topic',
+        ],
         'not_found' => [
             'title' => '404 Not Found',
             'page' => 'Page not found.',
@@ -170,6 +182,7 @@ return [
         'updated' => 'Media updated.',
         'save_failed' => 'Could not save media.',
         'update_failed' => 'Could not update media.',
+        'path_required' => 'Path is required.',
         'delete_failed' => 'Could not delete media.',
         'not_found' => 'Media not found.',
         'deleted' => 'Media deleted.',
@@ -227,6 +240,7 @@ return [
         'thumbnail_delete_failed' => 'Could not delete thumbnail.',
         'thumbnail_deleted' => 'Thumbnail was removed from database and disk.',
         'attachment_attach_failed' => 'Could not save attachment.',
+        'link_title_not_found' => 'Link title not found.',
         'body' => 'Content',
         'publication' => 'Publication',
         'status' => 'Status',

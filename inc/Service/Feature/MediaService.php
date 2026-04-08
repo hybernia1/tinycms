@@ -72,15 +72,15 @@ final class MediaService
         $errors = [];
 
         if ($name === '') {
-            $errors['name'] = I18n::t('validation.name_required', 'Name is required.');
+            $errors['name'] = I18n::t('validation.name_required');
         }
 
         if ($path === '') {
-            $errors['path'] = I18n::t('media.path_required', 'Path is required.');
+            $errors['path'] = I18n::t('media.path_required');
         }
 
         if (($input['author'] ?? '') !== '' && $author === null) {
-            $errors['author'] = I18n::t('validation.author_invalid', 'Author is not valid.');
+            $errors['author'] = I18n::t('validation.author_invalid');
         }
 
         $lengthErrors = $this->schemaConstraintValidator->validate('media', [

@@ -58,7 +58,7 @@ final class AdminSettingsController extends BaseAdminController
         $this->settings->save($input);
         I18n::setLocale((string)($input['app_lang'] ?? APP_LANG));
         I18n::setTheme((string)($this->settings->resolved()['theme'] ?? 'default'));
-        $this->flash->add('success', I18n::t('settings.saved', 'Settings saved.'));
+        $this->flash->add('success', I18n::t('settings.saved'));
         $redirect('admin/settings');
     }
 

@@ -102,6 +102,18 @@ return [
             'remember' => 'Zapamatovat si mě',
             'submit' => 'Přihlásit',
         ],
+        'feed' => [
+            'title' => 'RSS kanál',
+        ],
+        'search' => [
+            'title' => 'Hledání',
+            'results_for' => 'Výsledky hledání pro',
+            'meta_description' => 'Výsledky hledání na webu.',
+            'meta_description_prefix' => 'Výsledky hledání pro',
+        ],
+        'term' => [
+            'meta_description_prefix' => 'Články na téma',
+        ],
         'not_found' => [
             'title' => '404 Nenalezeno',
             'page' => 'Stránka nebyla nalezena.',
@@ -170,6 +182,7 @@ return [
         'updated' => 'Médium upraveno.',
         'save_failed' => 'Nepodařilo se uložit médium.',
         'update_failed' => 'Nepodařilo se upravit médium.',
+        'path_required' => 'Cesta je povinná.',
         'delete_failed' => 'Médium se nepodařilo smazat.',
         'not_found' => 'Médium nenalezeno.',
         'deleted' => 'Médium smazáno.',
@@ -227,6 +240,7 @@ return [
         'thumbnail_delete_failed' => 'Náhled se nepodařilo smazat.',
         'thumbnail_deleted' => 'Náhled byl odstraněn z databáze i disku.',
         'attachment_attach_failed' => 'Přílohu se nepodařilo uložit.',
+        'link_title_not_found' => 'Titulek odkazu nebyl nalezen.',
         'body' => 'Obsah',
         'publication' => 'Publikace',
         'status' => 'Status',

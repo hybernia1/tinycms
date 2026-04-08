@@ -40,12 +40,12 @@ final class UploadService
     public function uploadImage(array $file): array
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed')];
         }
 
         $tmpPath = (string)($file['tmp_name'] ?? '');
         if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
-            return ['success' => false, 'error' => I18n::t('upload.invalid_upload', 'Invalid file upload.')];
+            return ['success' => false, 'error' => I18n::t('upload.invalid_upload')];
         }
 
         $originalName = trim((string)($file['name'] ?? ''));
@@ -53,7 +53,7 @@ final class UploadService
         $mime = $this->detectMime($tmpPath);
 
         if (!isset(self::MIME_TO_EXTENSION[$mime])) {
-            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type', 'Unsupported file type.')];
+            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type')];
         }
 
         if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
@@ -61,7 +61,7 @@ final class UploadService
         }
 
         if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
-            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_extension', 'Unsupported file extension.')];
+            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_extension')];
         }
 
         $baseName = pathinfo($originalName, PATHINFO_FILENAME);
@@ -70,14 +70,14 @@ final class UploadService
         $absDir = $this->rootPath . '/' . $subdir;
 
         if (!is_dir($absDir) && !mkdir($absDir, 0775, true) && !is_dir($absDir)) {
-            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed', 'Cannot create target directory.')];
+            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed')];
         }
 
         $fileRel = $subdir . '/' . $slug . '.' . $extension;
         $fileAbs = $this->rootPath . '/' . $fileRel;
 
         if (!move_uploaded_file($tmpPath, $fileAbs)) {
-            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed', 'Failed to save file to disk.')];
+            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed')];
         }
 
         $webpRel = $extension === 'webp' ? $fileRel : $subdir . '/' . $slug . '.webp';
@@ -87,7 +87,7 @@ final class UploadService
             if ($fileAbs !== $webpAbs) {
                 @unlink($fileAbs);
             }
-            return ['success' => false, 'error' => I18n::t('upload.webp_create_failed', 'Failed to create WEBP variant.')];
+            return ['success' => false, 'error' => I18n::t('upload.webp_create_failed')];
         }
 
         $createdThumbs = [];
@@ -106,7 +106,7 @@ final class UploadService
                 @unlink($fileAbs);
             }
             @unlink($webpAbs);
-            return ['success' => false, 'error' => I18n::t('upload.thumbnail_create_failed', 'Failed to create thumbnail variant.')];
+            return ['success' => false, 'error' => I18n::t('upload.thumbnail_create_failed')];
         }
 
         return [
@@ -169,24 +169,24 @@ final class UploadService
     private function uploadSiteImage(array $file, string $prefix): array
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed', 'File upload failed.')];
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed')];
         }
 
         $tmpPath = (string)($file['tmp_name'] ?? '');
         if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
-            return ['success' => false, 'error' => I18n::t('upload.invalid_upload', 'Invalid file upload.')];
+            return ['success' => false, 'error' => I18n::t('upload.invalid_upload')];
         }
 
         $mime = $this->detectMime($tmpPath);
         $extension = self::SITE_IMAGE_MIME_TO_EXTENSION[$mime] ?? '';
         if ($extension === '') {
-            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type', 'Unsupported file type.')];
+            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type')];
         }
 
         $subdir = 'uploads/img';
         $absDir = $this->rootPath . '/' . $subdir;
         if (!is_dir($absDir) && !mkdir($absDir, 0775, true) && !is_dir($absDir)) {
-            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed', 'Cannot create target directory.')];
+            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed')];
         }
 
         $name = $prefix . '-' . date('YmdHis') . '-' . random_int(1000, 9999) . '.' . $extension;
@@ -194,7 +194,7 @@ final class UploadService
         $absolute = $this->rootPath . '/' . $path;
 
         if (!move_uploaded_file($tmpPath, $absolute)) {
-            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed', 'Failed to save file to disk.')];
+            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed')];
         }
 
         return ['success' => true, 'data' => ['path' => $path]];

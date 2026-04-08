@@ -84,8 +84,8 @@ foreach ($listRootAttrs as $attr => $value) {
             <?php if ($listTotalPages > 1): ?>
                 <div class="pagination">
                     <?php $prevPage = max(1, $listPage - 1); $nextPage = min($listTotalPages, $listPage + 1); ?>
-                    <a class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($paginationUrl !== null ? (string)$paginationUrl($prevPage) : '#', ENT_QUOTES, 'UTF-8') ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-prev<?= $listPage <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
-                    <a class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($paginationUrl !== null ? (string)$paginationUrl($nextPage) : '#', ENT_QUOTES, 'UTF-8') ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-next<?= $listPage >= $listTotalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
+                    <a class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($paginationUrl !== null ? (string)$paginationUrl($prevPage) : '#', ENT_QUOTES, 'UTF-8') ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-prev<?= $listPage <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
+                    <a class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($paginationUrl !== null ? (string)$paginationUrl($nextPage) : '#', ENT_QUOTES, 'UTF-8') ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-next<?= $listPage >= $listTotalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
                 </div>
             <?php else: ?>
                 <div></div>
@@ -100,7 +100,7 @@ foreach ($listRootAttrs as $attr => $value) {
                 <?php foreach ($perPageHidden as $name => $value): ?>
                     <input type="hidden" name="<?= htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8') ?>" value="<?= htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') ?>">
                 <?php endforeach; ?>
-                <button class="btn btn-light" type="submit"><?= htmlspecialchars($t('common.apply', 'Apply'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button class="btn btn-light" type="submit"><?= htmlspecialchars($t('common.apply'), ENT_QUOTES, 'UTF-8') ?></button>
             </form>
         </div>
     </div>
@@ -109,8 +109,8 @@ foreach ($listRootAttrs as $attr => $value) {
         <div class="modal">
             <p><?= htmlspecialchars($deleteConfirmText, ENT_QUOTES, 'UTF-8') ?></p>
             <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-cancel><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-                <button class="btn btn-primary" type="button" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button class="btn btn-light" type="button" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-cancel><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button class="btn btn-primary" type="button" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
             </div>
         </div>
     </div>

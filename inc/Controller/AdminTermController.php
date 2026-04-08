@@ -89,7 +89,7 @@ final class AdminTermController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
@@ -97,12 +97,12 @@ final class AdminTermController extends BaseAdminController
         $result = $this->terms->save($_POST);
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
-            $this->flash->add('success', I18n::t('terms.created', 'Tag created.'));
+            $this->flash->add('success', I18n::t('terms.created'));
             $redirect($newId > 0 ? $this->editPath($newId) : 'admin/terms');
             return;
         }
 
-        $this->flash->add('error', I18n::t('terms.save_failed', 'Could not save tag.'));
+        $this->flash->add('error', I18n::t('terms.save_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/terms/add');
     }
@@ -117,7 +117,7 @@ final class AdminTermController extends BaseAdminController
         $item = $this->terms->find($id);
 
         if ($item === null) {
-            $this->flash->add('info', I18n::t('terms.not_found', 'Tag not found.'));
+            $this->flash->add('info', I18n::t('terms.not_found'));
             $redirect('admin/terms');
             return;
         }
@@ -130,26 +130,26 @@ final class AdminTermController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('terms.invalid_id', 'Invalid tag ID.'));
+            $this->flash->add('error', I18n::t('terms.invalid_id'));
             $redirect('admin/terms');
             return;
         }
 
         $result = $this->terms->save($_POST, $id);
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', I18n::t('terms.updated', 'Tag updated.'));
+            $this->flash->add('success', I18n::t('terms.updated'));
             $redirect($this->editPath($id));
             return;
         }
 
-        $this->flash->add('error', I18n::t('terms.update_failed', 'Could not update tag.'));
+        $this->flash->add('error', I18n::t('terms.update_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect($this->editPath($id));
     }
@@ -158,18 +158,18 @@ final class AdminTermController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('terms.invalid_id', 'Invalid tag ID.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('terms.invalid_id')]], 422);
             return;
         }
 
         if (!$this->terms->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('terms.delete_failed', 'Could not delete tag.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('terms.delete_failed')]], 422);
             return;
         }
 

@@ -8,17 +8,17 @@ $csrfMarkup = $csrfField();
 $listName = 'terms';
 $listEndpoint = $url('admin/api/v1/terms');
 $listEditBase = $url('admin/terms/edit?id=');
-$searchPlaceholder = $t('terms.search_placeholder', 'Search tag');
+$searchPlaceholder = $t('terms.search_placeholder');
 $searchHidden = ['per_page' => (string)$listPerPage, 'page' => '1'];
 $perPageHidden = ['q' => $listQuery, 'page' => '1'];
 $listColumns = [
-    ['label' => $t('common.name', 'Name')],
-    ['label' => $t('common.description', 'Description'), 'class' => 'mobile-hide'],
-    ['label' => $t('common.actions', 'Actions'), 'class' => 'table-col-actions'],
+    ['label' => $t('common.name')],
+    ['label' => $t('common.description'), 'class' => 'mobile-hide'],
+    ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
 ];
 $listAllowedPerPage = $allowedPerPage;
 $statusEnabled = false;
-$deleteConfirmText = $t('terms.delete_confirm', 'Do you really want to delete this tag?');
+$deleteConfirmText = $t('terms.delete_confirm');
 $paginationUrl = static fn(int $targetPage): string => $url('admin/terms?page=' . $targetPage . '&per_page=' . $listPerPage . '&q=' . urlencode($listQuery));
 $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t): string {
     $id = (int)($row['id'] ?? 0);
@@ -31,9 +31,9 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
         </td>
         <td class="mobile-hide"><?= htmlspecialchars((string)($row['body'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
         <td class="table-col-actions">
-            <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('terms.delete', 'Delete tag'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('terms.delete', 'Delete tag'), ENT_QUOTES, 'UTF-8') ?>">
+            <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('terms.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('terms.delete'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('delete') ?>
-                <span class="sr-only"><?= htmlspecialchars($t('terms.delete', 'Delete tag'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span class="sr-only"><?= htmlspecialchars($t('terms.delete'), ENT_QUOTES, 'UTF-8') ?></span>
             </button>
         </td>
     </tr>

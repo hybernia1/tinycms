@@ -116,19 +116,19 @@ final class ContentService
         $errors = [];
 
         if ($name === '') {
-            $errors['name'] = I18n::t('validation.name_required', 'Name is required.');
+            $errors['name'] = I18n::t('validation.name_required');
         }
 
         if ($status === '') {
-            $errors['status'] = I18n::t('validation.status_required', 'Status is required.');
+            $errors['status'] = I18n::t('validation.status_required');
         }
 
         if (($input['author'] ?? '') !== '' && $author === null) {
-            $errors['author'] = I18n::t('validation.author_invalid', 'Author is not valid.');
+            $errors['author'] = I18n::t('validation.author_invalid');
         }
 
         if (($input['created'] ?? '') !== '' && $created === null) {
-            $errors['created'] = I18n::t('validation.publish_date_invalid', 'Publish date is not valid.');
+            $errors['created'] = I18n::t('validation.publish_date_invalid');
         }
 
         $lengthErrors = $this->schemaConstraintValidator->validate('content', [

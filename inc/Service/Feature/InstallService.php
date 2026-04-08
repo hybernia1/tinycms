@@ -27,15 +27,15 @@ final class InstallService
         $errors = [];
 
         if ($host === '') {
-            $errors['db_host'] = I18n::t('install.db_host_required', 'Host is required.');
+            $errors['db_host'] = I18n::t('install.db_host_required');
         }
 
         if ($name === '') {
-            $errors['db_name'] = I18n::t('install.db_name_required', 'Database name is required.');
+            $errors['db_name'] = I18n::t('install.db_name_required');
         }
 
         if ($user === '') {
-            $errors['db_user'] = I18n::t('install.db_user_required', 'Database user is required.');
+            $errors['db_user'] = I18n::t('install.db_user_required');
         }
 
         return [
@@ -56,7 +56,7 @@ final class InstallService
             $pdo->query('SELECT 1');
             return null;
         } catch (PDOException $e) {
-            return I18n::t('install.db_connect_failed', 'Cannot connect to database.');
+            return I18n::t('install.db_connect_failed');
         }
     }
 
@@ -69,15 +69,15 @@ final class InstallService
         $errors = [];
 
         if ($name === '') {
-            $errors['name'] = I18n::t('install.admin_name_required', 'Name is required.');
+            $errors['name'] = I18n::t('install.admin_name_required');
         }
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = I18n::t('install.admin_email_invalid', 'Email is not valid.');
+            $errors['email'] = I18n::t('install.admin_email_invalid');
         }
 
         if (mb_strlen($password) < 8) {
-            $errors['password'] = I18n::t('install.admin_password_min', 'Password must have at least 8 characters.');
+            $errors['password'] = I18n::t('install.admin_password_min');
         }
 
         $lengthErrors = $this->schemaValidator->validate('users', [
@@ -111,13 +111,13 @@ final class InstallService
         try {
             $pdo = $this->connect($db);
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => I18n::t('install.db_connect_failed', 'Cannot connect to database.')];
+            return ['success' => false, 'message' => I18n::t('install.db_connect_failed')];
         }
 
         try {
             $this->createSchema($pdo);
         } catch (PDOException $e) {
-            return ['success' => false, 'message' => I18n::t('install.schema_failed', 'Could not create database schema.')];
+            return ['success' => false, 'message' => I18n::t('install.schema_failed')];
         }
 
         $adminResult = $this->createAdmin($pdo, $admin);
@@ -128,10 +128,10 @@ final class InstallService
         try {
             $this->writeConfig($db, $lang);
         } catch (\RuntimeException $e) {
-            return ['success' => false, 'message' => I18n::t('install.config_failed', 'Could not create config.php. Check write permissions.')];
+            return ['success' => false, 'message' => I18n::t('install.config_failed')];
         }
 
-        return ['success' => true, 'message' => I18n::t('install.success', 'Installation completed successfully.')];
+        return ['success' => true, 'message' => I18n::t('install.success')];
     }
 
     private function connect(array $db): PDO
@@ -154,7 +154,7 @@ final class InstallService
                     return null;
                 }
 
-                return I18n::t('install.email_exists_other_role', 'This email already exists with a different role.');
+                return I18n::t('install.email_exists_other_role');
             }
 
             $insert = $pdo->prepare('INSERT INTO users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)');
@@ -171,7 +171,7 @@ final class InstallService
 
             return null;
         } catch (PDOException $e) {
-            return I18n::t('install.create_admin_failed', 'Could not create admin account.');
+            return I18n::t('install.create_admin_failed');
         }
     }
 

@@ -37,7 +37,7 @@ final class AuthService
             return [
                 'success' => false,
                 'errors' => $result['errors'] ?? [],
-                'message' => (string)($result['message'] ?? I18n::t('auth.login_failed', 'Login failed.')),
+                'message' => (string)($result['message'] ?? I18n::t('auth.login_failed')),
             ];
         }
 

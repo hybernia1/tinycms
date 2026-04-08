@@ -54,11 +54,11 @@ final class TermService
         $errors = [];
 
         if ($name === '') {
-            $errors['name'] = I18n::t('validation.name_required', 'Name is required.');
+            $errors['name'] = I18n::t('validation.name_required');
         }
 
         if ($name !== '' && $this->existsByName($name, $id)) {
-            $errors['name'] = I18n::t('terms.name_exists', 'A tag with this name already exists.');
+            $errors['name'] = I18n::t('terms.name_exists');
         }
 
         $lengthErrors = $this->schemaConstraintValidator->validate('terms', [

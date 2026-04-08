@@ -87,9 +87,9 @@ final class View
 
         if ($isAdminLayout && !isset($data['adminMenu'])) {
             $data['adminMenu'] = [
-                ['label' => I18n::t('admin.menu.dashboard', 'Dashboard'), 'url' => $url('admin/dashboard'), 'icon' => 'dashboard'],
-                ['label' => I18n::t('admin.menu.users', 'Users'), 'url' => $url('admin/users'), 'icon' => 'users'],
-                ['label' => I18n::t('admin.menu.settings', 'Settings'), 'url' => $url('admin/settings'), 'icon' => 'settings'],
+                ['label' => I18n::t('admin.menu.dashboard'), 'url' => $url('admin/dashboard'), 'icon' => 'dashboard'],
+                ['label' => I18n::t('admin.menu.users'), 'url' => $url('admin/users'), 'icon' => 'users'],
+                ['label' => I18n::t('admin.menu.settings'), 'url' => $url('admin/settings'), 'icon' => 'settings'],
             ];
         } elseif ($isAdminLayout && isset($data['adminMenu']) && is_array($data['adminMenu'])) {
             $data['adminMenu'] = array_map(static function (array $item) use ($url): array {
