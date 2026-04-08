@@ -102,18 +102,6 @@ return [
             'remember' => 'Zapamatovat si mě',
             'submit' => 'Přihlásit',
         ],
-        'feed' => [
-            'title' => 'RSS kanál',
-        ],
-        'search' => [
-            'title' => 'Hledání',
-            'results_for' => 'Výsledky hledání pro',
-            'meta_description' => 'Výsledky hledání na webu.',
-            'meta_description_prefix' => 'Výsledky hledání pro',
-        ],
-        'term' => [
-            'meta_description_prefix' => 'Články na téma',
-        ],
         'not_found' => [
             'title' => '404 Nenalezeno',
             'page' => 'Stránka nebyla nalezena.',

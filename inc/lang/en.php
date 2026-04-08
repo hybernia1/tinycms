@@ -102,18 +102,6 @@ return [
             'remember' => 'Remember me',
             'submit' => 'Sign in',
         ],
-        'feed' => [
-            'title' => 'RSS feed',
-        ],
-        'search' => [
-            'title' => 'Search',
-            'results_for' => 'Search results for',
-            'meta_description' => 'Search results on the website.',
-            'meta_description_prefix' => 'Search results for',
-        ],
-        'term' => [
-            'meta_description_prefix' => 'Articles on topic',
-        ],
         'not_found' => [
             'title' => '404 Not Found',
             'page' => 'Page not found.',
