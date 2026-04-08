@@ -84,7 +84,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 </div>
                 <div class="content-box-footer d-flex gap-2">
                     <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
-                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
                     <?php if ($mode === 'edit'): ?>
                         <button class="btn btn-light" type="button" data-modal-open data-modal-target="#content-delete-modal"><?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?></button>
                     <?php endif; ?>

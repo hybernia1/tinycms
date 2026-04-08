@@ -194,7 +194,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
 .content-status-group {
     display: flex;
-    gap: var(--space-2);
+    gap: 0;
     flex-wrap: wrap;
 }
 
