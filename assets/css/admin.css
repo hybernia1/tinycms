@@ -116,12 +116,12 @@ body.admin-sidebar-collapsed .admin-nav-link {
 }
 
 body.admin-sidebar-collapsed .admin-nav-link > span,
-body.admin-sidebar-collapsed .admin-sidebar-bottom .btn > span,
+body.admin-sidebar-collapsed .admin-logout-link > span,
 body.admin-sidebar-collapsed .admin-user-meta {
     display: none;
 }
 
-body.admin-sidebar-collapsed .admin-sidebar-bottom .btn {
+body.admin-sidebar-collapsed .admin-logout-link {
     justify-content: center;
     padding-inline: 0;
 }
@@ -160,13 +160,22 @@ body.admin-sidebar-collapsed .admin-sidebar-bottom .btn {
 
 .admin-sidebar-bottom {
     margin-top: auto;
-    border-top: 1px solid var(--color-border-soft);
     padding-top: var(--space-3);
 }
 
 .admin-user-meta {
     margin-bottom: calc(var(--space-2) + var(--space-1) / 2);
 }
+
+.admin-logout-link {
+    color: var(--sidebar-text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+}
+
 
 .admin-user-name {
     font-weight: 600;
