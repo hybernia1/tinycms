@@ -222,7 +222,14 @@ class Query
             return '*';
         }
 
-        $filtered = $this->filterIdentifiers($columns);
+        $filtered = [];
+        foreach ($columns as $column) {
+            $value = trim((string)$column);
+            if ($value !== '') {
+                $filtered[] = $value;
+            }
+        }
+        $filtered = array_values(array_unique($filtered));
 
         if ($filtered === []) {
             throw new InvalidArgumentException(I18n::t('errors.db.columns_empty', 'Columns cannot be empty.'));
