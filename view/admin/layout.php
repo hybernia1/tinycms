@@ -208,7 +208,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
     </aside>
     <div class="admin-menu-overlay" data-admin-menu-close></div>
     <main class="admin-main">
-        <div class="admin-header-spacer d-flex justify-between align-center">
+        <div class="admin-header-spacer d-flex justify-between align-center p-2">
             <div class="d-flex align-center gap-2">
                 <button class="btn btn-light btn-icon admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-label="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>">
                     <?= $icon('menu') ?>
