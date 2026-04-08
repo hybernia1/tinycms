@@ -450,16 +450,18 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
 .media-library-card.selected .media-library-card-image {
     border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px #fff inset, 0 0 0 2px var(--color-primary);
 }
 
 .media-library-card-check {
     position: absolute;
-    top: var(--space-1);
-    right: var(--space-1);
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 999px;
+    top: 4px;
+    right: 4px;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 0;
     background: var(--color-primary);
+    border: 1px solid #fff;
     color: #fff;
     display: none;
     align-items: center;
