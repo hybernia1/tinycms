@@ -104,10 +104,8 @@ return [
         'not_found' => [
             'title' => '404 Not Found',
             'page' => 'Page not found.',
-            'message_cs' => 'Požadovaný dokument nebyl nalezen.',
-            'message_en' => 'Requested document was not found.',
-            'detail_cs' => 'Zkontrolujte URL adresu nebo požadovaný XML dokument.',
-            'detail_en' => 'Check the URL or requested XML document.',
+            'message' => 'Requested document was not found.',
+            'detail' => 'Check the URL or requested XML document.',
         ],
     ],
     'users' => [
