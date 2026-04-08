@@ -56,6 +56,18 @@
         }
     };
     const getActiveItem = (list) => list.querySelector('.custom-select-option.active:not(.disabled)');
+    const moveActiveItem = (list, direction) => {
+        const enabledItems = getEnabledItems(list);
+        if (!enabledItems.length) {
+            return;
+        }
+        const activeItem = getActiveItem(list) || getCurrentItem(list);
+        const activeIndex = Math.max(0, enabledItems.indexOf(activeItem));
+        const nextIndex = direction === 'next'
+            ? Math.min(enabledItems.length - 1, activeIndex + 1)
+            : Math.max(0, activeIndex - 1);
+        setActiveItem(list, enabledItems[nextIndex]);
+    };
     const selectItem = (select, list, item, buttonLabel) => {
         if (!item || item.classList.contains('disabled')) {
             return;
@@ -156,45 +168,12 @@
                 return;
             }
             if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-                const enabledItems = getEnabledItems(list);
-                if (!enabledItems.length) {
-                    return;
-                }
-                const activeItem = getActiveItem(list) || getCurrentItem(list);
-                const activeIndex = Math.max(0, enabledItems.indexOf(activeItem));
-                const nextIndex = event.key === 'ArrowDown'
-                    ? Math.min(enabledItems.length - 1, activeIndex + 1)
-                    : Math.max(0, activeIndex - 1);
-                setActiveItem(list, enabledItems[nextIndex]);
+                moveActiveItem(list, event.key === 'ArrowDown' ? 'next' : 'prev');
                 return;
             }
             if (event.key === 'Enter' || event.key === ' ') {
                 selectItem(select, list, getActiveItem(list) || getCurrentItem(list), buttonLabel);
             }
-        });
-
-        list.addEventListener('keydown', (event) => {
-            if (!wrapper.classList.contains('open')) {
-                return;
-            }
-            if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {
-                return;
-            }
-            event.preventDefault();
-            const enabledItems = getEnabledItems(list);
-            if (!enabledItems.length) {
-                return;
-            }
-            if (event.key === 'Enter' || event.key === ' ') {
-                selectItem(select, list, getActiveItem(list) || getCurrentItem(list), buttonLabel);
-                return;
-            }
-            const activeItem = getActiveItem(list) || getCurrentItem(list);
-            const activeIndex = Math.max(0, enabledItems.indexOf(activeItem));
-            const nextIndex = event.key === 'ArrowDown'
-                ? Math.min(enabledItems.length - 1, activeIndex + 1)
-                : Math.max(0, activeIndex - 1);
-            setActiveItem(list, enabledItems[nextIndex]);
         });
 
         select.addEventListener('change', () => {
