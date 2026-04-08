@@ -25,6 +25,10 @@
         if (button) {
             button.setAttribute('aria-expanded', 'false');
         }
+        const list = opened.querySelector('.custom-select-list');
+        if (list) {
+            setActiveItem(list, null);
+        }
         opened = null;
     };
 
