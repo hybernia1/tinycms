@@ -29,7 +29,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">
-                <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
+                <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
                 <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
             </div>
@@ -39,7 +39,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <?php if (!empty($errors['excerpt'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['excerpt'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
             </div>
             <div class="m-0">
-                <label><?= htmlspecialchars($t('content.body', 'Content'), ENT_QUOTES, 'UTF-8') ?></label>
+                <label><?= htmlspecialchars($t('content.body'), ENT_QUOTES, 'UTF-8') ?></label>
                 <textarea
                     name="body"
                     rows="14"
@@ -53,12 +53,12 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         </div>
         <aside class="content-editor-sidebar">
             <div class="card">
-                <div class="content-box-header"><?= htmlspecialchars($t('content.publication', 'Publication'), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="content-box-header"><?= htmlspecialchars($t('content.publication'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
                     <div class="mb-3">
-                        <label><?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <label><?= htmlspecialchars($t('content.status'), ENT_QUOTES, 'UTF-8') ?></label>
                         <?php $currentStatus = (string)($item['status'] ?? 'draft'); ?>
-                        <div class="content-status-group" role="radiogroup" aria-label="<?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?>">
+                        <div class="content-status-group" role="radiogroup" aria-label="<?= htmlspecialchars($t('content.status'), ENT_QUOTES, 'UTF-8') ?>">
                             <?php foreach ($availableStatuses as $statusValue): ?>
                                 <?php $statusKey = (string)$statusValue; ?>
                                 <input
@@ -77,15 +77,15 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                         <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
                     </div>
                     <div class="m-0">
-                        <label><?= htmlspecialchars($t('content.publish_date', 'Publish date'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <label><?= htmlspecialchars($t('content.publish_date'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="datetime-local" name="created" value="<?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['created'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
                     </div>
                 </div>
                 <div class="content-box-footer d-flex gap-2">
-                    <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></button>
                     <?php if ($mode === 'edit'): ?>
-                        <button class="btn btn-light" type="button" data-modal-open data-modal-target="#content-delete-modal"><?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?></button>
+                        <button class="btn btn-light" type="button" data-modal-open data-modal-target="#content-delete-modal"><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></button>
                     <?php endif; ?>
                 </div>
             </div>
@@ -93,10 +93,10 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <input type="hidden" name="author" value="<?= $currentUserId > 0 ? $currentUserId : '' ?>">
             <?php else: ?>
                 <div class="card">
-                    <div class="content-box-header"><?= htmlspecialchars($t('common.author', 'Author'), ENT_QUOTES, 'UTF-8') ?></div>
+                    <div class="content-box-header"><?= htmlspecialchars($t('common.author'), ENT_QUOTES, 'UTF-8') ?></div>
                     <div class="p-3">
                         <select name="author">
-                            <option value=""><?= htmlspecialchars($t('common.no_author', 'No author'), ENT_QUOTES, 'UTF-8') ?></option>
+                            <option value=""><?= htmlspecialchars($t('common.no_author'), ENT_QUOTES, 'UTF-8') ?></option>
                             <?php foreach ($authors as $author): ?>
                                 <?php $authorId = (int)($author['ID'] ?? 0); ?>
                                 <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
@@ -110,10 +110,10 @@ $currentUserId = (int)($authUser['id'] ?? 0);
             <?php endif; ?>
 
             <div class="card">
-                <div class="content-box-header"><?= htmlspecialchars($t('admin.menu.terms', 'Tags'), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="content-box-header"><?= htmlspecialchars($t('admin.menu.terms'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
                     <?php if ($mode === 'add'): ?>
-                        <small class="text-muted"><?= htmlspecialchars($t('content.save_to_assign_tags', 'Save content first to assign tags.'), ENT_QUOTES, 'UTF-8') ?></small>
+                        <small class="text-muted"><?= htmlspecialchars($t('content.save_to_assign_tags'), ENT_QUOTES, 'UTF-8') ?></small>
                     <?php endif; ?>
                     <div
                         class="tag-picker"
@@ -123,7 +123,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                     >
                         <div class="tag-picker-field">
                             <div class="tag-picker-chips" data-tag-picker-chips></div>
-                            <input class="tag-picker-input" type="text" data-tag-picker-input placeholder="<?= htmlspecialchars($t('content.find_or_add_tag', 'Find or add tag'), ENT_QUOTES, 'UTF-8') ?>">
+                            <input class="tag-picker-input" type="text" data-tag-picker-input placeholder="<?= htmlspecialchars($t('content.find_or_add_tag'), ENT_QUOTES, 'UTF-8') ?>">
                         </div>
                         <div class="tag-picker-suggestions" data-tag-picker-suggestions></div>
                         <input type="hidden" name="terms" value="<?= htmlspecialchars($termsValue, ENT_QUOTES, 'UTF-8') ?>" data-tag-picker-value>
@@ -131,10 +131,10 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 </div>
             </div>
             <div class="card">
-                <div class="content-box-header"><?= htmlspecialchars($t('content.thumbnail', 'Thumbnail'), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="content-box-header"><?= htmlspecialchars($t('content.thumbnail'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
                     <?php if ($mode === 'add'): ?>
-                        <small class="text-muted"><?= htmlspecialchars($t('content.thumbnail_hint', 'Thumbnail can be selected before manual save.'), ENT_QUOTES, 'UTF-8') ?></small>
+                        <small class="text-muted"><?= htmlspecialchars($t('content.thumbnail_hint'), ENT_QUOTES, 'UTF-8') ?></small>
                     <?php endif; ?>
                     <button
                         class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
@@ -149,12 +149,12 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                                 <img src="<?= htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['thumbnail_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                             </div>
                         <?php else: ?>
-                            <span><?= htmlspecialchars($t('content.choose_image', 'Choose image'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span><?= htmlspecialchars($t('content.choose_image'), ENT_QUOTES, 'UTF-8') ?></span>
                         <?php endif; ?>
                     </button>
                     <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
                         <div class="mt-2 d-flex gap-2" data-media-library-detach-wrap>
-                            <button class="btn btn-light" type="button" data-media-library-detach><?= htmlspecialchars($t('content.detach', 'Detach'), ENT_QUOTES, 'UTF-8') ?></button>
+                            <button class="btn btn-light" type="button" data-media-library-detach><?= htmlspecialchars($t('content.detach'), ENT_QUOTES, 'UTF-8') ?></button>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -171,7 +171,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
             <strong>Media library</strong>
-            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="<?= htmlspecialchars($t('common.close', 'Close'), ENT_QUOTES, 'UTF-8') ?>">
+            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="<?= htmlspecialchars($t('common.close'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('cancel') ?>
             </button>
         </div>
@@ -180,35 +180,35 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <div class="media-library-detail-preview" data-media-library-detail-preview></div>
                 <div class="media-library-detail-meta">
                     <div>
-                        <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
                         <div class="d-flex gap-2">
                             <input type="text" value="" data-media-library-detail-name-input>
-                            <button class="btn btn-light" type="button" data-media-library-rename disabled><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
+                            <button class="btn btn-light" type="button" data-media-library-rename disabled><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></button>
                         </div>
                     </div>
-                    <div><strong><?= htmlspecialchars($t('common.created', 'Created'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-created>—</span></div>
+                    <div><strong><?= htmlspecialchars($t('common.created'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-created>—</span></div>
                 </div>
                 <small class="text-muted" data-media-library-status></small>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-primary" type="button" data-media-library-choose disabled><?= htmlspecialchars($t('content.choose', 'Choose'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <button class="btn btn-primary" type="button" data-media-library-choose disabled><?= htmlspecialchars($t('content.choose'), ENT_QUOTES, 'UTF-8') ?></button>
                     <button
                         class="btn btn-danger"
                         type="button"
                         data-media-library-delete-open
                         data-modal-open
                         data-modal-target="#media-library-delete-modal"
-                        data-type="<?= htmlspecialchars($t('content.image', 'image'), ENT_QUOTES, 'UTF-8') ?>"
+                        data-type="<?= htmlspecialchars($t('content.image'), ENT_QUOTES, 'UTF-8') ?>"
                         data-form-id="media-library-delete-form"
                         disabled
                     >
-                        <?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?>
+                        <?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?>
                     </button>
                 </div>
             </div>
             <div class="media-library-list">
                 <form class="media-library-search" data-media-library-search>
                     <div class="search-field field-with-icon">
-                        <input class="search-input" type="search" name="q" placeholder="<?= htmlspecialchars($t('content.search_image', 'Search image'), ENT_QUOTES, 'UTF-8') ?>">
+                        <input class="search-input" type="search" name="q" placeholder="<?= htmlspecialchars($t('content.search_image'), ENT_QUOTES, 'UTF-8') ?>">
                         <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= $icon('search') ?></span>
                     </div>
                 </form>
@@ -218,7 +218,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                     <div class="custom-upload-field" data-media-library-upload-field>
                         <label class="btn btn-light custom-upload-button" for="content-thumbnail-upload">
                             <span class="custom-upload-main-icon" data-custom-upload-icon><?= $icon('upload') ?></span>
-                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files', 'Add files'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?></span>
                             <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= $icon('loader') ?></span>
                         </label>
                         <input id="content-thumbnail-upload" type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
@@ -226,8 +226,8 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 </form>
                 <div class="media-library-grid" data-media-library-grid></div>
                 <div class="pagination pagination-centered">
-                    <a class="pagination-link disabled" href="#" data-media-library-prev aria-disabled="true" tabindex="-1"><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
-                    <a class="pagination-link disabled" href="#" data-media-library-next aria-disabled="true" tabindex="-1"><span><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
+                    <a class="pagination-link disabled" href="#" data-media-library-prev aria-disabled="true" tabindex="-1"><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
+                    <a class="pagination-link disabled" href="#" data-media-library-next aria-disabled="true" tabindex="-1"><span><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
                 </div>
             </div>
         </div>
@@ -260,29 +260,29 @@ $currentUserId = (int)($authUser['id'] ?? 0);
 </form>
 <div class="modal-overlay" data-modal id="media-library-delete-modal">
     <div class="modal">
-        <p data-modal-text><?= htmlspecialchars($t('content.delete_image_confirm', 'Do you really want to delete this image?'), ENT_QUOTES, 'UTF-8') ?></p>
+        <p data-modal-text><?= htmlspecialchars($t('content.delete_image_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>
 <div class="modal-overlay" data-content-leave-modal>
     <div class="modal">
-        <p><?= htmlspecialchars($t('content.leave_page_confirm', 'Neuložené změny budou ztraceny. Opravdu chcete pokračovat?'), ENT_QUOTES, 'UTF-8') ?></p>
+        <p><?= htmlspecialchars($t('content.leave_page_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-content-leave-cancel><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-content-leave-confirm><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-light" type="button" data-content-leave-cancel><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-content-leave-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>
 <?php if ($mode === 'edit'): ?>
 <div class="modal-overlay" data-modal id="content-delete-modal">
     <div class="modal">
-        <p data-modal-text><?= htmlspecialchars($t('content.delete_confirm', 'Do you really want to delete this content?'), ENT_QUOTES, 'UTF-8') ?></p>
+        <p data-modal-text><?= htmlspecialchars($t('content.delete_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel', 'Cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="content-delete-form"><?= htmlspecialchars($t('common.confirm', 'Confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="content-delete-form"><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>

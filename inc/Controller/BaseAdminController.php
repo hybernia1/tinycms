@@ -26,7 +26,7 @@ abstract class BaseAdminController
 
         if (!$this->authService->canAccessAdmin()) {
             if ($flashDenied) {
-                $this->flash->add('info', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+                $this->flash->add('info', I18n::t('admin.access_denied'));
             }
 
             $redirect('');
@@ -45,7 +45,7 @@ abstract class BaseAdminController
 
         if (!$this->authService->auth()->isAdmin()) {
             if ($flashDenied) {
-                $this->flash->add('info', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+                $this->flash->add('info', I18n::t('admin.access_denied'));
             }
 
             $redirect('admin/dashboard');

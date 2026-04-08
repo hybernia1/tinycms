@@ -90,7 +90,7 @@ class Query
     {
         $this->assertIdentifier($table, 'table');
         if ($data === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.insert_data_empty', 'Insert data cannot be empty.'));
+            throw new InvalidArgumentException(I18n::t('errors.db.insert_data_empty'));
         }
 
         $data = $this->normalizeDataKeys($data);
@@ -113,11 +113,11 @@ class Query
     {
         $this->assertIdentifier($table, 'table');
         if ($data === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.update_data_empty', 'Update data cannot be empty.'));
+            throw new InvalidArgumentException(I18n::t('errors.db.update_data_empty'));
         }
 
         if ($where === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.update_conditions_empty', 'Update conditions cannot be empty.'));
+            throw new InvalidArgumentException(I18n::t('errors.db.update_conditions_empty'));
         }
 
         $data = $this->normalizeDataKeys($data);
@@ -148,7 +148,7 @@ class Query
     {
         $this->assertIdentifier($table, 'table');
         if ($where === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.delete_conditions_empty', 'Delete conditions cannot be empty.'));
+            throw new InvalidArgumentException(I18n::t('errors.db.delete_conditions_empty'));
         }
 
         [$whereSql, $params] = $this->buildWhere($where);
@@ -232,7 +232,7 @@ class Query
         $filtered = array_values(array_unique($filtered));
 
         if ($filtered === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.columns_empty', 'Columns cannot be empty.'));
+            throw new InvalidArgumentException(I18n::t('errors.db.columns_empty'));
         }
 
         return implode(', ', $filtered);
@@ -286,21 +286,21 @@ class Query
         $driverCode = (int)($e->errorInfo[1] ?? 0);
 
         if ($sqlState === "22001" || $driverCode === 1406) {
-            return new InvalidArgumentException(I18n::t('errors.db.value_too_long', 'One or more values are too long for the database column.'), 0, $e);
+            return new InvalidArgumentException(I18n::t('errors.db.value_too_long'), 0, $e);
         }
 
         if ($driverCode === 1048 || $driverCode === 1364) {
-            return new InvalidArgumentException(I18n::t('errors.db.required_value_missing', 'A required value (NOT NULL) is missing.'), 0, $e);
+            return new InvalidArgumentException(I18n::t('errors.db.required_value_missing'), 0, $e);
         }
 
         if ($driverCode === 1062) {
-            return new InvalidArgumentException(I18n::t('errors.db.unique_violation', 'The value already exists and must be unique.'), 0, $e);
+            return new InvalidArgumentException(I18n::t('errors.db.unique_violation'), 0, $e);
         }
 
         if ($driverCode === 1452) {
-            return new InvalidArgumentException(I18n::t('errors.db.invalid_foreign_key', 'Invalid reference to related record (foreign key).'), 0, $e);
+            return new InvalidArgumentException(I18n::t('errors.db.invalid_foreign_key'), 0, $e);
         }
 
-        return new InvalidArgumentException(I18n::t('errors.db.operation_failed', 'Database operation failed.'), 0, $e);
+        return new InvalidArgumentException(I18n::t('errors.db.operation_failed'), 0, $e);
     }
 }

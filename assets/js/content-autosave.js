@@ -13,7 +13,7 @@
         };
     }
 
-    function i18n(path, fallback) {
+    function t(path, fallback) {
         var root = window.tinycmsI18n || {};
         var value = path.split('.').reduce(function (acc, key) {
             if (acc && Object.prototype.hasOwnProperty.call(acc, key)) {
@@ -135,10 +135,10 @@
             var flash = document.createElement('div');
             flash.className = 'flash flash-error';
             flash.setAttribute('data-cat-keyboard-guard', '1');
-            flash.innerHTML = '<span class="d-flex align-center gap-2">' + icon('cat') + '<span>' + esc(i18n('content.cat_keyboard_warning', 'Detekována neobvyklá změna.')) + '</span></span>'
+            flash.innerHTML = '<span class="d-flex align-center gap-2">' + icon('cat') + '<span>' + esc(t('content.cat_keyboard_warning', 'Unusual change detected.')) + '</span></span>'
                 + '<div class="d-flex gap-2">'
-                + '<button type="button" class="btn btn-light" data-cat-keyboard-restore="1">' + esc(i18n('content.cat_keyboard_restore', 'Obnovit bezpečnou verzi')) + '</button>'
-                + '<button type="button" class="btn btn-light" data-cat-keyboard-continue="1">' + esc(i18n('content.cat_keyboard_continue', 'Pokračovat a uložit')) + '</button>'
+                + '<button type="button" class="btn btn-light" data-cat-keyboard-restore="1">' + esc(t('content.cat_keyboard_restore', 'Restore safe version')) + '</button>'
+                + '<button type="button" class="btn btn-light" data-cat-keyboard-continue="1">' + esc(t('content.cat_keyboard_continue', 'Continue and save')) + '</button>'
                 + '</div>';
             container.prepend(flash);
             guardActive = true;

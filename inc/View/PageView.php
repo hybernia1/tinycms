@@ -44,7 +44,7 @@ final class PageView
                 [
                     'rel' => 'alternate',
                     'type' => 'application/rss+xml',
-                    'title' => I18n::t('front.feed.title', 'RSS feed'),
+                    'title' => I18n::t('front.feed.title'),
                     'href' => 'feed',
                 ],
             ],
@@ -74,8 +74,8 @@ final class PageView
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteFavicon' => (string)($site['favicon'] ?? ''),
             'siteLogo' => (string)($site['logo'] ?? ''),
-            'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
-            'metaTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content', 'Content')),
+            'pageTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content')),
+            'metaTitle' => (string)($item['name'] ?? I18n::t('admin.menu.content')),
             'metaDescription' => (string)($item['excerpt'] ?? ''),
             'metaKeywords' => array_values(array_filter($terms, static fn(string $term): bool => $term !== '')),
             'metaPath' => (string)($item['slug'] ?? ''),
@@ -101,9 +101,9 @@ final class PageView
             'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteFavicon' => (string)($site['favicon'] ?? ''),
             'siteLogo' => (string)($site['logo'] ?? ''),
-            'pageTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
-            'metaTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms', 'Tags'),
-            'metaDescription' => I18n::t('front.term.meta_description_prefix', 'Articles on topic') . ': ' . $termName,
+            'pageTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms'),
+            'metaTitle' => $termName !== '' ? $termName : I18n::t('admin.menu.terms'),
+            'metaDescription' => I18n::t('front.term.meta_description_prefix') . ': ' . $termName,
             'metaKeywords' => [$termName],
             'metaPath' => $termSlug !== '' ? 'term/' . $termSlug : '',
             'metaOgType' => 'website',
@@ -112,7 +112,7 @@ final class PageView
                 [
                     'rel' => 'alternate',
                     'type' => 'application/rss+xml',
-                    'title' => I18n::t('front.feed.title', 'RSS feed'),
+                    'title' => I18n::t('front.feed.title'),
                     'href' => 'term/' . $termSlug . '/feed',
                 ],
             ] : [],
@@ -122,7 +122,7 @@ final class PageView
     public function search(array $posts, array $pagination, string $query, string $theme, array $site = []): void
     {
         $resolvedTheme = $this->themes->resolveTheme($theme);
-        $title = $query === '' ? I18n::t('front.search.title', 'Search') : I18n::t('front.search.results_for', 'Search results for') . ': ' . $query;
+        $title = $query === '' ? I18n::t('front.search.title') : I18n::t('front.search.results_for') . ': ' . $query;
 
         $this->view->renderTheme($resolvedTheme, 'search', [
             'posts' => $posts,
@@ -137,8 +137,8 @@ final class PageView
             'pageTitle' => $title,
             'metaTitle' => $title,
             'metaDescription' => $query === ''
-                ? I18n::t('front.search.meta_description', 'Search results on the website.')
-                : I18n::t('front.search.meta_description_prefix', 'Search results for') . ': ' . $query,
+                ? I18n::t('front.search.meta_description')
+                : I18n::t('front.search.meta_description_prefix') . ': ' . $query,
             'metaKeywords' => $query !== '' ? [$query] : [],
             'metaPath' => $query !== '' ? 'search?q=' . rawurlencode($query) : 'search',
             'metaRobots' => 'noindex,follow',
@@ -208,7 +208,7 @@ final class PageView
         $this->renderAdmin('admin/dashboard', [
             'user' => $user,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => I18n::t('admin.menu.dashboard', 'Dashboard'),
+            'pageTitle' => I18n::t('admin.menu.dashboard'),
         ]);
     }
 
@@ -221,7 +221,7 @@ final class PageView
             'query' => $query,
             'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => I18n::t('admin.menu.users', 'Users'),
+            'pageTitle' => I18n::t('admin.menu.users'),
         ]);
     }
 
@@ -231,7 +231,7 @@ final class PageView
             'fields' => $fields,
             'values' => $values,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => I18n::t('admin.menu.settings', 'Settings'),
+            'pageTitle' => I18n::t('admin.menu.settings'),
         ]);
     }
 
@@ -242,7 +242,7 @@ final class PageView
             'user' => $user,
             'errors' => $errors,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_user', 'Add user') : I18n::t('admin.edit_user', 'Edit user'),
+            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_user') : I18n::t('admin.edit_user'),
         ]);
     }
 
@@ -256,7 +256,7 @@ final class PageView
             'availableStatuses' => $availableStatuses,
             'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => I18n::t('admin.menu.content', 'Content'),
+            'pageTitle' => I18n::t('admin.menu.content'),
         ]);
     }
 
@@ -270,7 +270,7 @@ final class PageView
             'authors' => $authors,
             'selectedTerms' => $selectedTerms,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_content', 'Add content') : I18n::t('admin.edit_content', 'Edit content'),
+            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_content') : I18n::t('admin.edit_content'),
         ]);
     }
 
@@ -281,7 +281,7 @@ final class PageView
             'allowedPerPage' => $allowedPerPage,
             'query' => $query,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => I18n::t('admin.menu.terms', 'Tags'),
+            'pageTitle' => I18n::t('admin.menu.terms'),
         ]);
     }
 
@@ -292,7 +292,7 @@ final class PageView
             'item' => $item,
             'errors' => $errors,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_term', 'Add tag') : I18n::t('admin.edit_term', 'Edit tag'),
+            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_term') : I18n::t('admin.edit_term'),
         ]);
     }
 
@@ -303,7 +303,7 @@ final class PageView
             'allowedPerPage' => $allowedPerPage,
             'query' => $query,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => I18n::t('admin.menu.media', 'Media'),
+            'pageTitle' => I18n::t('admin.menu.media'),
         ]);
     }
 
@@ -317,7 +317,7 @@ final class PageView
             'usages' => $usages,
             'navigation' => $navigation,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media', 'Add media') : I18n::t('admin.edit_media', 'Edit media'),
+            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media') : I18n::t('admin.edit_media'),
         ]);
     }
 
@@ -339,12 +339,12 @@ final class PageView
     private function adminMenu(): array
     {
         return [
-            ['label' => I18n::t('admin.menu.dashboard', 'Dashboard'), 'url' => 'admin/dashboard', 'icon' => 'dashboard'],
-            ['label' => I18n::t('admin.menu.users', 'Users'), 'url' => 'admin/users', 'icon' => 'users'],
-            ['label' => I18n::t('admin.menu.content', 'Content'), 'url' => 'admin/content', 'icon' => 'content'],
-            ['label' => I18n::t('admin.menu.media', 'Media'), 'url' => 'admin/media', 'icon' => 'media'],
-            ['label' => I18n::t('admin.menu.terms', 'Tags'), 'url' => 'admin/terms', 'icon' => 'terms'],
-            ['label' => I18n::t('admin.menu.settings', 'Settings'), 'url' => 'admin/settings', 'icon' => 'settings'],
+            ['label' => I18n::t('admin.menu.dashboard'), 'url' => 'admin/dashboard', 'icon' => 'dashboard'],
+            ['label' => I18n::t('admin.menu.users'), 'url' => 'admin/users', 'icon' => 'users'],
+            ['label' => I18n::t('admin.menu.content'), 'url' => 'admin/content', 'icon' => 'content'],
+            ['label' => I18n::t('admin.menu.media'), 'url' => 'admin/media', 'icon' => 'media'],
+            ['label' => I18n::t('admin.menu.terms'), 'url' => 'admin/terms', 'icon' => 'terms'],
+            ['label' => I18n::t('admin.menu.settings'), 'url' => 'admin/settings', 'icon' => 'settings'],
         ];
     }
 }

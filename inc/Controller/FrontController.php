@@ -144,7 +144,7 @@ final class FrontController
             'title' => $termName,
             'link' => $this->absoluteUrl('term/' . $slug),
             'self' => $this->absoluteUrl('term/' . $slug . '/feed'),
-            'description' => I18n::t('front.term.meta_description_prefix', 'Articles on topic') . ': ' . $termName,
+            'description' => I18n::t('front.term.meta_description_prefix') . ': ' . $termName,
         ], $items);
     }
 
@@ -202,7 +202,7 @@ final class FrontController
 
         $this->pages->loginForm([
             'errors' => $result['errors'] ?? [],
-            'message' => (string)($result['message'] ?? I18n::t('auth.login_failed', 'Login failed.')),
+            'message' => (string)($result['message'] ?? I18n::t('auth.login_failed')),
             'old' => ['email' => trim((string)($_POST['email'] ?? '')), 'remember' => (int)((int)($_POST['remember'] ?? 0) === 1)],
         ]);
     }

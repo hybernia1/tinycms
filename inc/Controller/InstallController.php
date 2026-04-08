@@ -31,7 +31,7 @@ final class InstallController
         $this->applyInstallLocale($state);
 
         $this->view->render('front/layout', 'front/install/step-db', [
-            'pageTitle' => I18n::t('install.page_database', 'Installation - database'),
+            'pageTitle' => I18n::t('install.page_database'),
             'errors' => (array)($state['errors_db'] ?? []),
             'old' => (array)($state['db'] ?? ['db_host' => '127.0.0.1', 'db_name' => '', 'db_user' => '', 'db_pass' => '']),
             'message' => (string)($state['message'] ?? ''),
@@ -82,7 +82,7 @@ final class InstallController
         $this->applyInstallLocale($state);
 
         $this->view->render('front/layout', 'front/install/step-admin', [
-            'pageTitle' => I18n::t('install.page_admin', 'Installation - admin'),
+            'pageTitle' => I18n::t('install.page_admin'),
             'errors' => (array)($state['errors_admin'] ?? []),
             'old' => (array)($state['admin'] ?? ['name' => '', 'email' => '', 'password' => '']),
             'message' => (string)($state['message'] ?? ''),
@@ -139,7 +139,7 @@ final class InstallController
         unset($_SESSION['install']);
 
         $this->view->render('front/layout', 'front/install/done', [
-            'pageTitle' => I18n::t('install.page_done', 'Installation completed'),
+            'pageTitle' => I18n::t('install.page_done'),
         ]);
     }
 
@@ -155,7 +155,7 @@ final class InstallController
         }
 
         $this->view->render('front/layout', 'front/install/step-language', [
-            'pageTitle' => I18n::t('install.page_language', 'Installation - language'),
+            'pageTitle' => I18n::t('install.page_language'),
             'message' => (string)($state['message'] ?? ''),
             'selectedLang' => $selected,
             'locales' => $locales,

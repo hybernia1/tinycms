@@ -75,14 +75,14 @@ final class AdminMediaController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         if (!$this->hasUpload('file')) {
-            $this->flash->add('error', I18n::t('media.upload_file_required', 'Please upload a media file.'));
-            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => I18n::t('media.file_required', 'File is required.')]);
+            $this->flash->add('error', I18n::t('media.upload_file_required'));
+            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => I18n::t('media.file_required')]);
             $redirect('admin/media/add');
             return;
         }
@@ -106,13 +106,13 @@ final class AdminMediaController extends BaseAdminController
         $result = $this->media->save($this->normalizeMediaInput($input, $authorId));
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', I18n::t('media.created', 'Media created.'));
+            $this->flash->add('success', I18n::t('media.created'));
             $newId = (int)($result['id'] ?? 0);
             $redirect($newId > 0 ? $this->editPath($newId) : 'admin/media');
         }
 
         $this->upload->deleteMediaFiles($uploadData);
-        $this->flash->add('error', I18n::t('media.save_failed', 'Could not save media.'));
+        $this->flash->add('error', I18n::t('media.save_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/media/add');
     }
@@ -127,13 +127,13 @@ final class AdminMediaController extends BaseAdminController
         $item = $this->media->find($id);
 
         if ($item === null) {
-            $this->flash->add('info', I18n::t('media.not_found', 'Media not found.'));
+            $this->flash->add('info', I18n::t('media.not_found'));
             $redirect('admin/media');
             return;
         }
 
         if (!$this->canManageMedia($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
         }
@@ -148,27 +148,27 @@ final class AdminMediaController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('media.invalid_id', 'Invalid media ID.'));
+            $this->flash->add('error', I18n::t('media.invalid_id'));
             $redirect('admin/media');
             return;
         }
 
         $item = $this->media->find($id);
         if ($item === null) {
-            $this->flash->add('error', I18n::t('media.not_found', 'Media not found.'));
+            $this->flash->add('error', I18n::t('media.not_found'));
             $redirect('admin/media');
             return;
         }
 
         if (!$this->canManageMedia($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
         }
@@ -182,11 +182,11 @@ final class AdminMediaController extends BaseAdminController
         $result = $this->media->save($this->normalizeMediaInput($input, $authorId), $id);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', I18n::t('media.updated', 'Media updated.'));
+            $this->flash->add('success', I18n::t('media.updated'));
             $redirect($this->editPath($id));
         }
 
-        $this->flash->add('error', I18n::t('media.update_failed', 'Could not update media.'));
+        $this->flash->add('error', I18n::t('media.update_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect($this->editPath($id));
     }
@@ -195,7 +195,7 @@ final class AdminMediaController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
@@ -203,7 +203,7 @@ final class AdminMediaController extends BaseAdminController
         if ($id <= 0) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('media.invalid_id', 'Invalid media ID.')],
+                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('media.invalid_id')],
             ], 422);
             return;
         }
@@ -212,7 +212,7 @@ final class AdminMediaController extends BaseAdminController
         if ($item === null) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('media.not_found', 'Media not found.')],
+                'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('media.not_found')],
             ], 404);
             return;
         }
@@ -220,7 +220,7 @@ final class AdminMediaController extends BaseAdminController
         if (!$this->canDeleteMedia($item)) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')],
+                'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')],
             ], 403);
             return;
         }
@@ -228,7 +228,7 @@ final class AdminMediaController extends BaseAdminController
         if (!$this->media->delete($id)) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed', 'Could not delete media.')],
+                'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed')],
             ], 422);
             return;
         }
@@ -244,27 +244,27 @@ final class AdminMediaController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('media.invalid_id', 'Invalid media ID.'));
+            $this->flash->add('error', I18n::t('media.invalid_id'));
             $redirect('admin/media');
             return;
         }
 
         $item = $this->media->find($id);
         if ($item === null) {
-            $this->flash->add('error', I18n::t('media.not_found', 'Media not found.'));
+            $this->flash->add('error', I18n::t('media.not_found'));
             $redirect('admin/media');
             return;
         }
 
         if (!$this->canDeleteMedia($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
         }
@@ -273,13 +273,13 @@ final class AdminMediaController extends BaseAdminController
         $nextId = $this->media->nextIdAfterDelete($id, $authorFilter > 0 ? $authorFilter : null);
 
         if (!$this->media->delete($id)) {
-            $this->flash->add('error', I18n::t('media.delete_failed', 'Could not delete media.'));
+            $this->flash->add('error', I18n::t('media.delete_failed'));
             $redirect($this->editPath($id));
             return;
         }
 
         $this->upload->deleteMediaFiles($item);
-        $this->flash->add('success', I18n::t('media.deleted', 'Media deleted.'));
+        $this->flash->add('success', I18n::t('media.deleted'));
         $redirect($nextId !== null ? $this->editPath($nextId) : 'admin/media');
     }
 

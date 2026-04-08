@@ -75,29 +75,29 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id', 'Invalid content ID.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id')]], 422);
             return;
         }
 
         $item = $this->content->find($id);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canDeleteContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         if (!$this->content->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('content.delete_failed', 'Could not delete content.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('content.delete_failed')]], 422);
             return;
         }
 
@@ -108,38 +108,38 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('content.invalid_id', 'Invalid content ID.'));
+            $this->flash->add('error', I18n::t('content.invalid_id'));
             $redirect('admin/content');
             return;
         }
 
         $item = $this->content->find($id);
         if ($item === null) {
-            $this->flash->add('error', I18n::t('content.not_found', 'Content not found.'));
+            $this->flash->add('error', I18n::t('content.not_found'));
             $redirect('admin/content');
             return;
         }
 
         if (!$this->canDeleteContent($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
         }
 
         if (!$this->content->delete($id)) {
-            $this->flash->add('error', I18n::t('content.delete_failed', 'Could not delete content.'));
+            $this->flash->add('error', I18n::t('content.delete_failed'));
             $redirect($this->editPath($id));
             return;
         }
 
-        $this->flash->add('success', I18n::t('content.deleted', 'Content deleted.'));
+        $this->flash->add('success', I18n::t('content.deleted'));
         $redirect('admin/content');
     }
 
@@ -162,7 +162,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
@@ -175,11 +175,11 @@ final class AdminContentController extends BaseAdminController
             if ($newId > 0) {
                 $this->terms->syncContentTerms($newId, (string)($_POST['terms'] ?? ''));
             }
-            $this->flash->add('success', I18n::t('content.created', 'Content created.'));
+            $this->flash->add('success', I18n::t('content.created'));
             $redirect($newId > 0 ? $this->editPath($newId) : 'admin/content');
         }
 
-        $this->flash->add('error', I18n::t('content.save_failed', 'Could not save content.'));
+        $this->flash->add('error', I18n::t('content.save_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/content/add');
     }
@@ -194,13 +194,13 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($id);
 
         if ($item === null) {
-            $this->flash->add('info', I18n::t('content.not_found', 'Content not found.'));
+            $this->flash->add('info', I18n::t('content.not_found'));
             $redirect('admin/content');
             return;
         }
 
         if (!$this->canManageContent($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
         }
@@ -216,7 +216,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
@@ -224,20 +224,20 @@ final class AdminContentController extends BaseAdminController
         $id = (int)($_GET['id'] ?? 0);
 
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('content.invalid_id', 'Invalid content ID.'));
+            $this->flash->add('error', I18n::t('content.invalid_id'));
             $redirect('admin/content');
             return;
         }
 
         $item = $this->content->find($id);
         if ($item === null) {
-            $this->flash->add('error', I18n::t('content.not_found', 'Content not found.'));
+            $this->flash->add('error', I18n::t('content.not_found'));
             $redirect('admin/content');
             return;
         }
 
         if (!$this->canManageContent($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
         }
@@ -247,11 +247,11 @@ final class AdminContentController extends BaseAdminController
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
-            $this->flash->add('success', I18n::t('content.updated', 'Content updated.'));
+            $this->flash->add('success', I18n::t('content.updated'));
             $redirect($this->editPath($id));
         }
 
-        $this->flash->add('error', I18n::t('content.update_failed', 'Could not update content.'));
+        $this->flash->add('error', I18n::t('content.update_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
         $redirect('admin/content/edit?id=' . $id);
     }
@@ -260,25 +260,25 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $mode = (string)($_POST['mode'] ?? 'draft');
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id', 'Invalid content ID.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id')]], 422);
             return;
         }
 
         $item = $this->content->find($id);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
@@ -304,14 +304,14 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
         $payload = [
-            'name' => I18n::t('content.untitled', '(untitled)'),
+            'name' => I18n::t('content.untitled'),
             'status' => 'draft',
             'excerpt' => '',
             'body' => '',
@@ -322,7 +322,7 @@ final class AdminContentController extends BaseAdminController
         if (($result['success'] ?? false) !== true) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'CREATE_FAILED', 'message' => I18n::t('content.draft_create_failed', 'Could not create draft.')],
+                'error' => ['code' => 'CREATE_FAILED', 'message' => I18n::t('content.draft_create_failed')],
             ], 422);
             return;
         }
@@ -331,7 +331,7 @@ final class AdminContentController extends BaseAdminController
         if ($id <= 0) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.draft_invalid_id', 'Draft has invalid ID.')],
+                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.draft_invalid_id')],
             ], 422);
             return;
         }
@@ -346,7 +346,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
@@ -367,7 +367,7 @@ final class AdminContentController extends BaseAdminController
             if ($item === null) {
                 $this->respondJson([
                     'ok' => false,
-                    'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')],
+                    'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')],
                 ], 404);
                 return;
             }
@@ -375,7 +375,7 @@ final class AdminContentController extends BaseAdminController
             if (!$this->canManageContent($item)) {
                 $this->respondJson([
                     'ok' => false,
-                    'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')],
+                    'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')],
                 ], 403);
                 return;
             }
@@ -389,7 +389,7 @@ final class AdminContentController extends BaseAdminController
         if (($result['success'] ?? false) !== true) {
             $this->respondJson([
                 'ok' => false,
-                'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('content.autosave_failed', 'Autosave failed.'), 'errors' => $result['errors'] ?? []],
+                'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('content.autosave_failed'), 'errors' => $result['errors'] ?? []],
             ], 422);
             return;
         }
@@ -417,13 +417,13 @@ final class AdminContentController extends BaseAdminController
 
         $url = trim((string)($_GET['url'] ?? ''));
         if ($url === '' || !$this->isValidExternalUrl($url)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_URL', 'message' => I18n::t('common.invalid_data', 'Invalid data.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_URL', 'message' => I18n::t('common.invalid_data')]], 422);
             return;
         }
 
         $title = $this->fetchRemoteTitle($url);
         if ($title === '') {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'TITLE_NOT_FOUND', 'message' => I18n::t('content.link_title_not_found', 'Link title not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'TITLE_NOT_FOUND', 'message' => I18n::t('content.link_title_not_found')]], 404);
             return;
         }
 
@@ -434,7 +434,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
@@ -443,20 +443,20 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($id);
 
         if ($item === null) {
-            $this->flash->add('error', I18n::t('content.not_found', 'Content not found.'));
+            $this->flash->add('error', I18n::t('content.not_found'));
             $redirect('admin/content');
             return;
         }
 
         if (!$this->canDeleteContent($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
         }
 
         $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
         if (($upload['success'] ?? false) !== true) {
-            $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed', 'File upload failed.')));
+            $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
             $redirect($this->editPath($id));
             return;
         }
@@ -475,12 +475,12 @@ final class AdminContentController extends BaseAdminController
                 $this->media->delete($mediaId);
             }
             $this->upload->deleteMediaFiles($data);
-            $this->flash->add('error', I18n::t('content.thumbnail_save_failed', 'Could not save thumbnail.'));
+            $this->flash->add('error', I18n::t('content.thumbnail_save_failed'));
             $redirect($this->editPath($id));
             return;
         }
 
-        $this->flash->add('success', I18n::t('content.thumbnail_uploaded', 'Thumbnail uploaded.'));
+        $this->flash->add('success', I18n::t('content.thumbnail_uploaded'));
         $redirect($this->editPath($id));
     }
 
@@ -488,24 +488,24 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $item = $this->content->find($id);
         if ($id <= 0 || $item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         if (!$this->content->setThumbnail($id, null)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DETACH_FAILED', 'message' => I18n::t('content.thumbnail_detach_failed', 'Could not detach thumbnail.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DETACH_FAILED', 'message' => I18n::t('content.thumbnail_detach_failed')]], 422);
             return;
         }
 
@@ -516,35 +516,35 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($mediaId <= 0 || $media === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found', 'Media not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         if (!$this->content->setThumbnail($contentId, $mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SELECT_FAILED', 'message' => I18n::t('content.thumbnail_select_failed', 'Could not assign thumbnail.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SELECT_FAILED', 'message' => I18n::t('content.thumbnail_select_failed')]], 422);
             return;
         }
 
@@ -562,7 +562,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
@@ -571,33 +571,33 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($id);
 
         if ($item === null) {
-            $this->flash->add('error', I18n::t('content.not_found', 'Content not found.'));
+            $this->flash->add('error', I18n::t('content.not_found'));
             $redirect('admin/content');
             return;
         }
 
         if (!$this->canDeleteContent($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied', 'You do not have access to administration.'));
+            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
         }
 
         $thumbnailId = (int)($item['thumbnail'] ?? 0);
         if ($thumbnailId <= 0) {
-            $this->flash->add('info', I18n::t('content.thumbnail_missing', 'Content has no assigned thumbnail.'));
+            $this->flash->add('info', I18n::t('content.thumbnail_missing'));
             $redirect($this->editPath($id));
             return;
         }
 
         $media = $this->media->find($thumbnailId);
         if ($media === null || !$this->media->delete($thumbnailId)) {
-            $this->flash->add('error', I18n::t('content.thumbnail_delete_failed', 'Could not delete thumbnail.'));
+            $this->flash->add('error', I18n::t('content.thumbnail_delete_failed'));
             $redirect($this->editPath($id));
             return;
         }
 
         $this->upload->deleteMediaFiles($media);
-        $this->flash->add('success', I18n::t('content.thumbnail_deleted', 'Thumbnail was removed from database and disk.'));
+        $this->flash->add('success', I18n::t('content.thumbnail_deleted'));
         $redirect($this->editPath($id));
     }
 
@@ -609,12 +609,12 @@ final class AdminContentController extends BaseAdminController
 
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
@@ -653,35 +653,35 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $item = $this->content->find($contentId);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canDeleteContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         if ($mediaId <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_MEDIA_ID', 'message' => I18n::t('media.not_found', 'Media not found.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_MEDIA_ID', 'message' => I18n::t('media.not_found')]], 422);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($media !== null && !$this->canDeleteMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         if ($media === null || !$this->media->delete($mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed', 'Could not delete media.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed')]], 422);
             return;
         }
 
@@ -697,25 +697,25 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
         if (($upload['success'] ?? false) !== true) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'UPLOAD_FAILED', 'message' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed', 'File upload failed.'))]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'UPLOAD_FAILED', 'message' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed'))]], 422);
             return;
         }
 
@@ -730,7 +730,7 @@ final class AdminContentController extends BaseAdminController
 
         if ($mediaId <= 0) {
             $this->upload->deleteMediaFiles($data);
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('media.save_failed', 'Could not save media.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('media.save_failed')]], 422);
             return;
         }
 
@@ -754,7 +754,7 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
@@ -762,28 +762,28 @@ final class AdminContentController extends BaseAdminController
         $name = trim((string)($_POST['name'] ?? ''));
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         if ($mediaId <= 0 || $name === '') {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data', 'Invalid data.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data')]], 422);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($media === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found', 'Media not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
@@ -795,7 +795,7 @@ final class AdminContentController extends BaseAdminController
         ], $mediaId);
 
         if (($result['success'] ?? false) !== true) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'RENAME_FAILED', 'message' => (string)($result['errors']['name'] ?? I18n::t('media.rename_failed', 'Could not save name.'))]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'RENAME_FAILED', 'message' => (string)($result['errors']['name'] ?? I18n::t('media.rename_failed'))]], 422);
             return;
         }
 
@@ -806,29 +806,29 @@ final class AdminContentController extends BaseAdminController
     {
         if (
             !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf', 'Invalid CSRF token.'))
+            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
         ) {
             return;
         }
 
         if ($contentId <= 0 || $mediaId <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data', 'Invalid data.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data')]], 422);
             return;
         }
 
         $content = $this->content->find($contentId);
         if ($content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found', 'Content not found.')]], 404);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied', 'You do not have access to administration.')]], 403);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
             return;
         }
 
         if (!$this->content->attachMedia($contentId, $mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'ATTACH_FAILED', 'message' => I18n::t('content.attachment_attach_failed', 'Could not save attachment.')]], 422);
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'ATTACH_FAILED', 'message' => I18n::t('content.attachment_attach_failed')]], 422);
             return;
         }
 
@@ -915,7 +915,7 @@ final class AdminContentController extends BaseAdminController
     {
         $name = trim((string)($input['name'] ?? ''));
         if ($name === '' && trim((string)($input['body'] ?? '')) !== '') {
-            $name = I18n::t('content.untitled', '(untitled)');
+            $name = I18n::t('content.untitled');
         }
 
         $author = trim((string)($input['author'] ?? ''));

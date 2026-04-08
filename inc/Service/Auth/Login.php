@@ -38,21 +38,21 @@ class Login
         $errors = [];
 
         if ($email === '') {
-            $errors['email'] = I18n::t('auth.email_required', 'Email is required.');
+            $errors['email'] = I18n::t('auth.email_required');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = I18n::t('auth.email_invalid_format', 'Email format is invalid.');
+            $errors['email'] = I18n::t('auth.email_invalid_format');
         } else {
             $email = mb_strtolower($email);
         }
 
         if ($password === '') {
-            $errors['password'] = I18n::t('auth.password_required', 'Password is required.');
+            $errors['password'] = I18n::t('auth.password_required');
         }
 
         if (!empty($errors)) {
             return [
                 'success' => false,
-                'message' => I18n::t('auth.form_has_errors', 'The form contains errors.'),
+                'message' => I18n::t('auth.form_has_errors'),
                 'errors' => $errors,
             ];
         }
@@ -64,9 +64,9 @@ class Login
         if (empty($users)) {
             return [
                 'success' => false,
-                'message' => I18n::t('auth.invalid_credentials', 'Invalid login credentials.'),
+                'message' => I18n::t('auth.invalid_credentials'),
                 'errors' => [
-                    'email' => I18n::t('auth.user_not_found', 'User was not found.'),
+                    'email' => I18n::t('auth.user_not_found'),
                 ],
             ];
         }
@@ -76,16 +76,16 @@ class Login
         if ((int)($user['suspend'] ?? 0) === 1) {
             return [
                 'success' => false,
-                'message' => I18n::t('auth.account_blocked', 'This account is blocked.'),
+                'message' => I18n::t('auth.account_blocked'),
             ];
         }
 
         if (!isset($user['password']) || !password_verify($password, (string)$user['password'])) {
             return [
                 'success' => false,
-                'message' => I18n::t('auth.invalid_credentials', 'Invalid login credentials.'),
+                'message' => I18n::t('auth.invalid_credentials'),
                 'errors' => [
-                    'password' => I18n::t('auth.wrong_password', 'Wrong password.'),
+                    'password' => I18n::t('auth.wrong_password'),
                 ],
             ];
         }
@@ -120,7 +120,7 @@ class Login
 
         return [
             'success' => true,
-            'message' => I18n::t('auth.login_success', 'Login successful.'),
+            'message' => I18n::t('auth.login_success'),
             'user' => [
                 'id' => (int)$user['ID'],
                 'name' => (string)$user['name'],
