@@ -77,8 +77,10 @@ foreach ($listRootAttrs as $attr => $value) {
                 <?php if ($items === []): ?>
                     <tr data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-empty-row>
                         <td colspan="<?= $listColumnsCount ?>" class="admin-list-empty">
-                            <?= $icon('empty-list', 'admin-list-empty-icon') ?>
-                            <div class="admin-list-empty-text"><?= htmlspecialchars($t('common.nothing_found'), ENT_QUOTES, 'UTF-8') ?></div>
+                            <div class="admin-list-empty-wrap">
+                                <?= $icon('empty-list', 'admin-list-empty-icon') ?>
+                                <div class="admin-list-empty-text"><?= htmlspecialchars($t('common.nothing_found'), ENT_QUOTES, 'UTF-8') ?></div>
+                            </div>
                         </td>
                     </tr>
                 <?php else: ?>

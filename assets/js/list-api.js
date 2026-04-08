@@ -24,8 +24,10 @@ const icon = (name, classes = 'icon') => iconSprite !== ''
 const emptyRowHtml = (columnsCount) => `
     <tr>
         <td colspan="${Math.max(1, Number(columnsCount) || 1)}" class="admin-list-empty">
-            ${icon('empty-list', 'admin-list-empty-icon')}
-            <div class="admin-list-empty-text">${esc(t('common.nothing_found', 'Nothing found.'))}</div>
+            <div class="admin-list-empty-wrap">
+                ${icon('empty-list', 'admin-list-empty-icon')}
+                <div class="admin-list-empty-text">${esc(t('common.nothing_found', 'Nothing found.'))}</div>
+            </div>
         </td>
     </tr>
 `;

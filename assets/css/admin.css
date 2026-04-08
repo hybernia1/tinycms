@@ -570,9 +570,14 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     text-align: center;
     padding: var(--space-5) var(--space-3);
     color: var(--color-muted);
+}
+
+.admin-list-empty-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .admin-list-empty-icon {
