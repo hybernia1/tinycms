@@ -118,12 +118,18 @@ if (modal && openTrigger) {
         if (selectForm) {
             selectForm.action = endpointWithContentId(selectForm.action, numericId) || selectForm.action;
             selectForm.setAttribute('data-action-template', endpointWithContentId(selectForm.getAttribute('data-action-template') || '', numericId));
+            selectForm.querySelectorAll('input[name="id"]').forEach((node) => {
+                node.value = String(numericId);
+            });
             selectForm.querySelectorAll('input[name="content_id"]').forEach((node) => {
                 node.value = String(numericId);
             });
         }
         if (detachForm) {
             detachForm.action = endpointWithContentId(detachForm.action, numericId) || detachForm.action;
+            detachForm.querySelectorAll('input[name="id"]').forEach((node) => {
+                node.value = String(numericId);
+            });
             detachForm.querySelectorAll('input[name="content_id"]').forEach((node) => {
                 node.value = String(numericId);
             });
@@ -563,6 +569,15 @@ if (modal && openTrigger) {
                 }));
                 close();
                 return;
+            }
+
+            if (contentId <= 0) {
+                contentId = await waitForDraftId();
+                if (contentId <= 0) {
+                    setStatus('Nejdřív se musí vytvořit draft.');
+                    return;
+                }
+                syncContentContext(contentId);
             }
 
             mediaIdField.value = String(selectedMedia.id);
