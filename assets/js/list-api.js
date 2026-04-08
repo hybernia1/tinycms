@@ -405,7 +405,7 @@ initListApi({
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                     ${item.is_planned ? `<div class="mt-2"><span class="badge text-bg-warning">${esc(t('content.planned', 'Planned'))}</span></div>` : ''}
                 </td>
-                <td class="table-col-mobile-hide">${esc(item.author_name || '—')}</td>
+                <td class="mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
                     ${canEdit ? `
                     <button class="btn btn-light btn-icon" type="button" data-content-toggle="${Number(item.id || 0)}" data-content-mode="${isPublished ? 'draft' : 'publish'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
@@ -440,7 +440,7 @@ initListApi({
                     <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                 </td>
-                <td>${esc(item.body || '—')}</td>
+                <td class="mobile-hide">${esc(item.body || '—')}</td>
                 <td class="table-col-actions">
                     <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="${id}" aria-label="${esc(t('terms.delete', 'Delete tag'))}" title="${esc(t('terms.delete', 'Delete tag'))}">
                         ${icon('delete')}
@@ -482,7 +482,7 @@ initListApi({
                         </div>
                     </div>
                 </td>
-                <td class="table-col-mobile-hide">${esc(item.author_name || '—')}</td>
+                <td class="mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
                     ${canDelete ? `
                     <button class="btn btn-light btn-icon" type="button" data-media-delete-open="${id}" aria-label="${esc(t('media.delete', 'Delete media'))}" title="${esc(t('media.delete', 'Delete media'))}">

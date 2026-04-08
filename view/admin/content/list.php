@@ -22,7 +22,7 @@ $searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage,
 $perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('common.name', 'Name')],
-    ['label' => $t('common.author', 'Author'), 'class' => 'table-col-mobile-hide'],
+    ['label' => $t('common.author', 'Author'), 'class' => 'mobile-hide'],
     ['label' => $t('common.actions', 'Actions'), 'class' => 'table-col-actions'],
 ];
 $listAllowedPerPage = $allowedPerPage;
@@ -55,7 +55,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
             <div class="text-muted small"><?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?></div>
             <?php if ($isPlanned): ?><div class="mt-2"><span class="badge text-bg-warning"><?= htmlspecialchars($t('content.planned', 'Planned'), ENT_QUOTES, 'UTF-8') ?></span></div><?php endif; ?>
         </td>
-        <td class="table-col-mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+        <td class="mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
         <td class="table-col-actions">
             <?php if ($canManage): ?>
                 <form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $id . '/status'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">

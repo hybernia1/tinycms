@@ -24,7 +24,7 @@ $searchHidden = ['per_page' => (string)$listPerPage, 'page' => '1'];
 $perPageHidden = ['q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('admin.menu.media', 'Media')],
-    ['label' => $t('common.author', 'Author'), 'class' => 'table-col-mobile-hide'],
+    ['label' => $t('common.author', 'Author'), 'class' => 'mobile-hide'],
     ['label' => $t('common.actions', 'Actions'), 'class' => 'table-col-actions'],
 ];
 $listAllowedPerPage = $allowedPerPage;
@@ -64,7 +64,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
                 </div>
             </div>
         </td>
-        <td class="table-col-mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+        <td class="mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
         <td class="table-col-actions">
             <?php if ($canManage): ?>
                 <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('media.delete', 'Delete media'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete', 'Delete media'), ENT_QUOTES, 'UTF-8') ?>">
