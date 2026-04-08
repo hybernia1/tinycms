@@ -37,7 +37,7 @@ body {
     overflow-y: auto;
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
-    padding: var(--space-5) var(--space-3);
+    padding: var(--space-2) var(--space-3);
     display: flex;
     flex-direction: column;
 }
