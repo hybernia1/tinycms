@@ -30,6 +30,7 @@ return [
         'invalid_data' => 'Neplatná data.',
         'upload_add_files' => 'Přidat soubory',
         'loading' => 'Načítám...',
+        'nothing_found' => 'Nic nenalezeno.',
     ],
     'install' => [
         'title' => 'Instalace',

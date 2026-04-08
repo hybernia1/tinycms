@@ -30,6 +30,7 @@ return [
         'invalid_data' => 'Invalid data.',
         'upload_add_files' => 'Add files',
         'loading' => 'Loading...',
+        'nothing_found' => 'Nothing found.',
     ],
     'install' => [
         'title' => 'Installation',

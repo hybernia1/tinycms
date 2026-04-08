@@ -566,6 +566,24 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     min-width: 0;
 }
 
+.admin-list-empty {
+    text-align: center;
+    padding: var(--space-5) var(--space-3);
+    color: var(--color-muted);
+}
+
+.admin-list-empty-icon {
+    width: 8.25rem;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto var(--space-3);
+}
+
+.admin-list-empty-text {
+    font-weight: 600;
+}
+
 @media (max-width: 640px) {
     .admin-list-toolbar .search-form {
         max-width: none;
