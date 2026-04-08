@@ -195,13 +195,13 @@ if (modal && openTrigger) {
         }
 
         if (!Array.isArray(items) || items.length === 0) {
-            grid.innerHTML = '<p class="text-muted m-0">Žádné výsledky.</p>';
+            grid.innerHTML = `<p class="text-muted m-0">${t('media.no_results', 'No results.')}</p>`;
             return;
         }
 
         grid.innerHTML = '';
         items.forEach((item) => {
-            const name = String(item.name || 'Bez názvu');
+            const name = String(item.name || t('media.untitled', 'Untitled'));
             const previewPath = String(item.preview_path || '');
             const button = document.createElement('button');
             button.className = 'media-library-card';
@@ -252,7 +252,7 @@ if (modal && openTrigger) {
 
         selectedMedia = {
             id: mediaId,
-            name: target.dataset.mediaName || 'Bez názvu',
+            name: target.dataset.mediaName || t('media.untitled', 'Untitled'),
             path: target.dataset.mediaPath || '',
             webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
@@ -347,7 +347,7 @@ if (modal && openTrigger) {
         }
 
         if (grid) {
-            grid.innerHTML = '<p class="text-muted m-0">Načítám...</p>';
+            grid.innerHTML = `<p class="text-muted m-0">${t('common.loading', 'Loading...')}</p>`;
             if (loader) {
                 loader.set(grid, true);
             }
@@ -413,7 +413,7 @@ if (modal && openTrigger) {
         renderSelected();
         load().catch(() => {
             if (grid) {
-                grid.innerHTML = '<p class="text-danger m-0">Nepodařilo se načíst knihovnu.</p>';
+                grid.innerHTML = `<p class="text-danger m-0">${t('media.library_load_failed', 'Failed to load media library.')}</p>`;
             }
         });
     };
@@ -530,7 +530,7 @@ if (modal && openTrigger) {
             if (mode === 'editor') {
                 const imageUrl = absoluteUrl(selectedMedia.webpPath || selectedMedia.path || selectedMedia.previewPath || '');
                 if (imageUrl === '') {
-                    setStatus('Obrázek nemá platnou URL.');
+                    setStatus(t('media.invalid_url', 'Image has no valid URL.'));
                     return;
                 }
                 const attachForm = document.querySelector('[data-media-library-attach-form]');
@@ -569,7 +569,7 @@ if (modal && openTrigger) {
             });
             const data = normalizePayload(await response.json().catch(() => ({})));
             if (!response.ok || !data.success) {
-                setStatus(data.message || 'Náhled se nepodařilo přiřadit.');
+                setStatus(data.message || t('media.assign_failed', 'Failed to assign preview.'));
                 return;
             }
             if (data.data && data.data.media) {
@@ -587,7 +587,7 @@ if (modal && openTrigger) {
 
             const value = detailNameInput.value.trim();
             if (value === '') {
-                setStatus('Název nesmí být prázdný.');
+                setStatus(t('media.name_required', 'Name cannot be empty.'));
                 return;
             }
 
@@ -601,7 +601,7 @@ if (modal && openTrigger) {
             const data = normalizePayload(await response.json());
 
             if (!response.ok || !data.success) {
-                setStatus(data.message || 'Název se nepodařilo uložit.');
+                setStatus(data.message || t('media.rename_failed', 'Failed to save name.'));
                 return;
             }
 
@@ -615,7 +615,7 @@ if (modal && openTrigger) {
                 }
             }
 
-            setStatus('Název uložen.');
+            setStatus(t('media.rename_saved', 'Name saved.'));
         });
     }
 
@@ -630,7 +630,7 @@ if (modal && openTrigger) {
             if (contentId <= 0) {
                 contentId = await waitForDraftId();
                 if (contentId <= 0) {
-                    setStatus('Nejdřív se musí vytvořit draft.');
+                    setStatus(t('content.draft_required', 'Draft must be created first.'));
                     uploadInput.value = '';
                     uploadInput.dispatchEvent(new Event('change'));
                     return;
@@ -662,7 +662,7 @@ if (modal && openTrigger) {
             }
 
             if (!response.ok || !data.success) {
-                setStatus(data.message || 'Upload se nepodařil.');
+                setStatus(data.message || t('media.upload_failed', 'Upload failed.'));
                 return;
             }
 
@@ -671,7 +671,7 @@ if (modal && openTrigger) {
 
             page = 1;
             await load().catch(() => null);
-            setStatus('Soubor nahrán.');
+            setStatus(t('media.uploaded', 'File uploaded.'));
         });
     }
 
@@ -692,7 +692,7 @@ if (modal && openTrigger) {
             const data = normalizePayload(await response.json().catch(() => ({})));
 
             if (!response.ok || !data.success) {
-                setStatus(data.message || 'Mazání se nepodařilo.');
+                setStatus(data.message || t('media.delete_failed', 'Delete failed.'));
                 return;
             }
 
@@ -707,7 +707,7 @@ if (modal && openTrigger) {
             if (deleteConfirmModal) {
                 deleteConfirmModal.classList.remove('open');
             }
-            setStatus('Médium smazáno.');
+            setStatus(t('media.deleted', 'Media deleted.'));
         });
     }
 
@@ -721,13 +721,13 @@ if (modal && openTrigger) {
             const data = normalizePayload(await response.json().catch(() => ({})));
 
             if (!response.ok || !data.success) {
-                setStatus(data.message || 'Odpojení se nepodařilo.');
+                setStatus(data.message || t('media.detach_failed', 'Detach failed.'));
                 return;
             }
 
             currentMediaId = 0;
             setTriggerEmpty();
-            setStatus('Náhled odpojen.');
+            setStatus(t('media.detached', 'Preview detached.'));
         });
     }
 }
