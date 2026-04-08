@@ -45,9 +45,6 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 'deleted' => $t('content.deleted'),
                 'published' => $t('content.published'),
                 'switched_to_draft' => $t('content.switched_to_draft'),
-                'cat_keyboard_warning' => $t('content.cat_keyboard_warning'),
-                'cat_keyboard_restore' => $t('content.cat_keyboard_restore'),
-                'cat_keyboard_continue' => $t('content.cat_keyboard_continue'),
             ],
             'terms' => [
                 'deleted' => $t('terms.deleted'),
