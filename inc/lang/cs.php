@@ -101,6 +101,12 @@ return [
             'remember' => 'Zapamatovat si mě',
             'submit' => 'Přihlásit',
         ],
+        'not_found' => [
+            'title' => '404 Nenalezeno',
+            'page' => 'Stránka nebyla nalezena.',
+            'message' => 'Požadovaný dokument nebyl nalezen.',
+            'detail' => 'Zkontrolujte URL adresu nebo požadovaný XML dokument.',
+        ],
     ],
     'users' => [
         'password_optional' => 'volitelné',

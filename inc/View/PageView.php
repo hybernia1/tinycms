@@ -188,23 +188,18 @@ final class PageView
 
         $mode = match (true) {
             in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'avif'], true) => 'image',
-            $ext === 'xml' || str_contains($accept, 'xml') => 'xml',
+            $ext === 'xml' || str_contains($accept, 'xml') => 'document',
             $ext === 'txt' || str_contains($accept, 'text/plain') => 'text',
             default => 'html',
         };
 
         $layout = match ($mode) {
             'image' => 'front/svg/layout',
-            'xml' => 'front/xml/layout',
-            'text' => 'front/plain/layout',
+            'document', 'text' => 'front/plain/layout',
             default => 'front/layout',
         };
 
         $payload = ['notFoundMode' => $mode, 'pageTitle' => '404'];
-        if ($mode === 'xml') {
-            $payload['contentType'] = 'application/xml; charset=utf-8';
-        }
-
         $this->view->render($layout, 'front/errors/404', $payload);
     }
 

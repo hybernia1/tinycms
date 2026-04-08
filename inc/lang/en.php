@@ -101,6 +101,12 @@ return [
             'remember' => 'Remember me',
             'submit' => 'Sign in',
         ],
+        'not_found' => [
+            'title' => '404 Not Found',
+            'page' => 'Page not found.',
+            'message' => 'Requested document was not found.',
+            'detail' => 'Check the URL or requested XML document.',
+        ],
     ],
     'users' => [
         'password_optional' => 'optional',
