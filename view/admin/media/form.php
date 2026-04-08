@@ -12,11 +12,13 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <?= $csrfField() ?>
     <div class="content-editor-layout">
         <div class="card p-5">
-            <div class="mb-3">
-                <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
-                <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
-                <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
-            </div>
+            <?php if ($mode === 'add'): ?>
+                <div class="mb-3">
+                    <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
+                    <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+                    <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                </div>
+            <?php endif; ?>
 
             <?php if ($mode === 'add'): ?>
                 <div class="mb-3">
@@ -39,15 +41,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                         <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 <?php endif; ?>
-                <div class="mb-3">
-                    <label><?= htmlspecialchars($t('media.path', 'Path'), ENT_QUOTES, 'UTF-8') ?></label>
-                    <div class="text-muted"><?= htmlspecialchars((string)($item['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                </div>
-                <div class="mb-3">
-                    <label><?= htmlspecialchars($t('media.path_webp', 'Path webp'), ENT_QUOTES, 'UTF-8') ?></label>
-                    <div class="text-muted"><?= htmlspecialchars((string)($item['path_webp'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                </div>
-
                 <hr>
                 <h3 class="mb-3"><?= htmlspecialchars($t('media.used_as_thumbnail', 'Used as thumbnail'), ENT_QUOTES, 'UTF-8') ?></h3>
                 <?php if (($usages ?? []) === []): ?>
@@ -85,6 +78,19 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <div class="content-box-header"><?= htmlspecialchars($t('common.actions', 'Actions'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
                     <?php if ($mode === 'edit'): ?>
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('common.name', 'Name'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+                            <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                        </div>
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('media.path', 'Path'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)($item['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('media.path_webp', 'Path webp'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)($item['path_webp'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
                         <div class="mb-3">
                             <label><?= htmlspecialchars($t('common.created', 'Created'), ENT_QUOTES, 'UTF-8') ?></label>
                             <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
