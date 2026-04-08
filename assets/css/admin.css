@@ -116,15 +116,10 @@ body.admin-sidebar-collapsed .admin-nav-link {
 }
 
 body.admin-sidebar-collapsed .admin-nav-link > span,
-body.admin-sidebar-collapsed .admin-logout-link > span,
 body.admin-sidebar-collapsed .admin-user-meta {
     display: none;
 }
 
-body.admin-sidebar-collapsed .admin-logout-link {
-    justify-content: center;
-    padding-inline: 0;
-}
 
 .admin-header-spacer {
     background: var(--color-surface);
@@ -165,15 +160,6 @@ body.admin-sidebar-collapsed .admin-logout-link {
 
 .admin-user-meta {
     margin-bottom: calc(var(--space-2) + var(--space-1) / 2);
-}
-
-.admin-logout-link {
-    color: var(--sidebar-text);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    width: 100%;
 }
 
 

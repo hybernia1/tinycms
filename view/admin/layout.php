@@ -200,7 +200,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 <div class="admin-user-name"><?= htmlspecialchars((string)($authUser['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
             <?php endif; ?>
-            <a class="admin-logout-link" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
+            <a class="admin-nav-link" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('logout') ?>
                 <span><?= htmlspecialchars($t('admin.logout'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
