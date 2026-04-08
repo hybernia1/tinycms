@@ -42,7 +42,8 @@ final class AdminContentController extends BaseAdminController
         [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveListQuery();
 
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
-        $this->pages->adminContentList($pagination, PaginationConfig::allowed(), $status, $query, $availableStatuses);
+        $statusCounts = $this->content->statusCounts($availableStatuses);
+        $this->pages->adminContentList($pagination, PaginationConfig::allowed(), $status, $query, $availableStatuses, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void

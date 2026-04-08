@@ -34,7 +34,8 @@ final class AdminUserController extends BaseAdminController
         [$page, $perPage, $status, $suspend, $query] = $this->resolveListQuery();
 
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
-        $this->pages->adminUsersList($pagination, PaginationConfig::allowed(), $status, $query);
+        $statusCounts = $this->users->statusCounts();
+        $this->pages->adminUsersList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void
