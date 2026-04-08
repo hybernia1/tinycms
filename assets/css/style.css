@@ -391,6 +391,7 @@ select option {
 }
 
 .custom-select-option:hover,
+.custom-select-option.active,
 .custom-select-option.selected {
     background: var(--table-row-hover-bg);
 }
