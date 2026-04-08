@@ -373,6 +373,11 @@ return [
             'unique_violation' => 'Hodnota už existuje a musí být unikátní.',
             'invalid_foreign_key' => 'Neplatná vazba na související záznam (foreign key).',
             'operation_failed' => 'Databázová operace selhala.',
+            'insert_data_empty' => 'Data pro vložení nesmí být prázdná.',
+            'update_data_empty' => 'Data pro aktualizaci nesmí být prázdná.',
+            'update_conditions_empty' => 'Podmínky pro aktualizaci nesmí být prázdné.',
+            'delete_conditions_empty' => 'Podmínky pro smazání nesmí být prázdné.',
+            'columns_empty' => 'Sloupce nesmí být prázdné.',
         ],
         'validation' => [
             'required' => 'Pole je povinné.',

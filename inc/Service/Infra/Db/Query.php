@@ -20,8 +20,8 @@ class Query
     public function select(string $table, array $columns = ['*'], array $where = []): array
     {
         $this->assertIdentifier($table, 'table');
+        $cols = $this->buildColumns($columns);
         [$whereSql, $params] = $this->buildWhere($where);
-        $cols = implode(', ', $columns);
         $sql = "SELECT $cols FROM $table$whereSql";
 
         $stmt = $this->pdo->prepare($sql);
@@ -33,10 +33,11 @@ class Query
     public function paginate(string $table, array $columns = ['*'], array $where = [], array $options = []): array
     {
         $this->assertIdentifier($table, 'table');
+        $cols = $this->buildColumns($columns);
         $page = max(1, (int)($options['page'] ?? 1));
         $perPage = max(1, (int)($options['perPage'] ?? 10));
         $orderBy = (string)($options['orderBy'] ?? 'ID');
-        $orderByAllowed = (array)($options['orderByAllowed'] ?? []);
+        $orderByAllowed = $this->filterIdentifiers((array)($options['orderByAllowed'] ?? []));
         $orderDir = strtoupper((string)($options['orderDir'] ?? 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
         $search = trim((string)($options['search'] ?? ''));
         $searchColumns = (array)($options['searchColumns'] ?? []);
@@ -64,7 +65,6 @@ class Query
         $page = min($page, $totalPages);
         $offset = ($page - 1) * $perPage;
 
-        $cols = implode(', ', $columns);
         $sql = "SELECT $cols FROM $table$conditionsSql ORDER BY $orderBy $orderDir LIMIT :limit OFFSET :offset";
 
         $stmt = $this->pdo->prepare($sql);
@@ -89,6 +89,11 @@ class Query
     public function insert(string $table, array $data): int
     {
         $this->assertIdentifier($table, 'table');
+        if ($data === []) {
+            throw new InvalidArgumentException(I18n::t('errors.db.insert_data_empty', 'Insert data cannot be empty.'));
+        }
+
+        $data = $this->normalizeDataKeys($data);
         $columns = implode(', ', array_keys($data));
         $placeholders = ':' . implode(', :', array_keys($data));
 
@@ -107,15 +112,23 @@ class Query
     public function update(string $table, array $data, array $where): int
     {
         $this->assertIdentifier($table, 'table');
+        if ($data === []) {
+            throw new InvalidArgumentException(I18n::t('errors.db.update_data_empty', 'Update data cannot be empty.'));
+        }
+
+        if ($where === []) {
+            throw new InvalidArgumentException(I18n::t('errors.db.update_conditions_empty', 'Update conditions cannot be empty.'));
+        }
+
+        $data = $this->normalizeDataKeys($data);
+        $where = $this->normalizeDataKeys($where);
         $set = [];
         foreach ($data as $col => $val) {
-            $this->assertIdentifier((string)$col, 'column');
             $set[] = "$col = :$col";
         }
 
         $conditions = [];
         foreach ($where as $col => $val) {
-            $this->assertIdentifier((string)$col, 'column');
             $conditions[] = "$col = :where_$col";
             $data["where_$col"] = $val;
         }
@@ -134,6 +147,10 @@ class Query
     public function delete(string $table, array $where): int
     {
         $this->assertIdentifier($table, 'table');
+        if ($where === []) {
+            throw new InvalidArgumentException(I18n::t('errors.db.delete_conditions_empty', 'Delete conditions cannot be empty.'));
+        }
+
         [$whereSql, $params] = $this->buildWhere($where);
         $sql = "DELETE FROM $table$whereSql";
 
@@ -197,6 +214,49 @@ class Query
         }
 
         return ['(' . implode(' OR ', $conditions) . ')', $params];
+    }
+
+    private function buildColumns(array $columns): string
+    {
+        if ($columns === ['*']) {
+            return '*';
+        }
+
+        $filtered = $this->filterIdentifiers($columns);
+
+        if ($filtered === []) {
+            throw new InvalidArgumentException(I18n::t('errors.db.columns_empty', 'Columns cannot be empty.'));
+        }
+
+        return implode(', ', $filtered);
+    }
+
+    private function filterIdentifiers(array $identifiers): array
+    {
+        $filtered = [];
+        foreach ($identifiers as $identifier) {
+            $identifier = (string)$identifier;
+            if (!$this->isIdentifier($identifier)) {
+                continue;
+            }
+
+            $filtered[] = $identifier;
+        }
+
+        return array_values(array_unique($filtered));
+    }
+
+    private function normalizeDataKeys(array $data): array
+    {
+        $normalized = [];
+
+        foreach ($data as $key => $value) {
+            $key = (string)$key;
+            $this->assertIdentifier($key, 'column');
+            $normalized[$key] = $value;
+        }
+
+        return $normalized;
     }
 
     private function assertIdentifier(string $value, string $context): void
