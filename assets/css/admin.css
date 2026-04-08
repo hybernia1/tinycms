@@ -89,6 +89,19 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: margin-left 0.2s ease-in-out;
+}
+
+.admin-sidebar {
+    transition: transform 0.2s ease-in-out;
+}
+
+body.admin-sidebar-collapsed .admin-sidebar {
+    transform: translateX(-100%);
+}
+
+body.admin-sidebar-collapsed .admin-main {
+    margin-left: 0;
 }
 
 .admin-header-spacer {
@@ -100,6 +113,10 @@ body {
     position: sticky;
     top: 0;
     z-index: var(--admin-z-header);
+}
+
+.admin-sidebar-toggle {
+    display: inline-flex;
 }
 
 .admin-menu-toggle {
@@ -573,8 +590,16 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
         width: 100%;
     }
 
+    .admin-sidebar-toggle {
+        display: none;
+    }
+
     .admin-menu-toggle {
         display: inline-flex;
+    }
+
+    body.admin-sidebar-collapsed .admin-sidebar {
+        transform: translateX(-100%);
     }
 
     .admin-menu-overlay {
