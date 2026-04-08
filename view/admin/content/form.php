@@ -57,11 +57,23 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <div class="p-3">
                     <div class="mb-3">
                         <label><?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?></label>
-                        <select name="status">
+                        <?php $currentStatus = (string)($item['status'] ?? 'draft'); ?>
+                        <div class="content-status-group" role="radiogroup" aria-label="<?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?>">
                             <?php foreach ($availableStatuses as $statusValue): ?>
-                                <option value="<?= htmlspecialchars((string)$statusValue, ENT_QUOTES, 'UTF-8') ?>" <?= (string)($item['status'] ?? 'draft') === (string)$statusValue ? 'selected' : '' ?>><?= htmlspecialchars($t('content.statuses.' . (string)$statusValue, (string)$statusValue), ENT_QUOTES, 'UTF-8') ?></option>
+                                <?php $statusKey = (string)$statusValue; ?>
+                                <input
+                                    class="sr-only content-status-input"
+                                    type="radio"
+                                    id="content-status-<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>"
+                                    name="status"
+                                    value="<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>"
+                                    <?= $currentStatus === $statusKey ? 'checked' : '' ?>
+                                >
+                                <label class="btn btn-light" for="content-status-<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>">
+                                    <?= htmlspecialchars($t('content.statuses.' . $statusKey, $statusKey), ENT_QUOTES, 'UTF-8') ?>
+                                </label>
                             <?php endforeach; ?>
-                        </select>
+                        </div>
                         <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
                     </div>
                     <div class="m-0">
@@ -72,7 +84,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 </div>
                 <div class="content-box-footer d-flex gap-2">
                     <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save', 'Save'), ENT_QUOTES, 'UTF-8') ?></button>
-                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back', 'Back'), ENT_QUOTES, 'UTF-8') ?></a>
                     <?php if ($mode === 'edit'): ?>
                         <button class="btn btn-light" type="button" data-modal-open data-modal-target="#content-delete-modal"><?= htmlspecialchars($t('common.delete', 'Delete'), ENT_QUOTES, 'UTF-8') ?></button>
                     <?php endif; ?>
