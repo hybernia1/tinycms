@@ -81,6 +81,7 @@ body {
 .admin-nav-link.active,
 .admin-nav-link:hover {
     color: var(--sidebar-text);
+    font-weight:bold;
 }
 
 .admin-main {
