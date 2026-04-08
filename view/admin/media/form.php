@@ -152,23 +152,23 @@ if ($mode === 'edit') {
                             <div class="text-muted"><?= htmlspecialchars((string)($item['path_webp'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
                         <div class="mb-3">
-                            <label>Filename</label>
+                            <label><?= htmlspecialchars($t('media.filename', 'Filename'), ENT_QUOTES, 'UTF-8') ?></label>
                             <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['filename'], ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
                         <div class="mb-3">
-                            <label>MIME</label>
+                            <label><?= htmlspecialchars($t('media.mime', 'MIME'), ENT_QUOTES, 'UTF-8') ?></label>
                             <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['mime'], ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
                         <div class="mb-3">
-                            <label>Extension</label>
+                            <label><?= htmlspecialchars($t('media.extension', 'Extension'), ENT_QUOTES, 'UTF-8') ?></label>
                             <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['extension'], ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
                         <div class="mb-3">
-                            <label>Dimensions</label>
+                            <label><?= htmlspecialchars($t('media.dimensions', 'Dimensions'), ENT_QUOTES, 'UTF-8') ?></label>
                             <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['dimensions'], ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
                         <div class="m-0">
-                            <label>Size</label>
+                            <label><?= htmlspecialchars($t('media.size', 'Size'), ENT_QUOTES, 'UTF-8') ?></label>
                             <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['size'], ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
                     </div>
