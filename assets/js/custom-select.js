@@ -4,7 +4,7 @@
         return;
     }
 
-    const selects = Array.from(document.querySelectorAll('.admin-content select:not([multiple]):not([size])'));
+    const selects = Array.from(document.querySelectorAll('.admin-content select:not([multiple]):not([size]), [data-install-content] select:not([multiple]):not([size])'));
     if (!selects.length) {
         return;
     }
@@ -13,7 +13,7 @@
 
     let opened = null;
     const sampleIconUse = document.querySelector('svg.icon use');
-    const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '';
+    const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : String(window.tinycmsIconSprite || '');
     const arrowIconHref = `${iconBase}#icon-chevron-down`;
 
     const closeOpened = () => {
