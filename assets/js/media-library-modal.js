@@ -4,6 +4,13 @@ const t = (path, fallback = '') => {
     const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
     return typeof value === 'string' && value !== '' ? value : fallback;
 };
+const iconSprite = (() => {
+    const iconUse = document.querySelector('svg use[href*="#icon-"]');
+    return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
+})();
+const icon = (name) => iconSprite !== ''
+    ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${iconSprite}#icon-${name}"></use></svg>`
+    : '';
 const openTrigger = Array.prototype.find.call(
     document.querySelectorAll('[data-media-library-open]'),
     (node) => node.getAttribute('data-media-library-mode') !== 'editor',
@@ -216,11 +223,12 @@ if (modal && openTrigger) {
                 imageWrap.appendChild(empty);
             }
 
-            const label = document.createElement('span');
-            label.textContent = name;
+            const check = document.createElement('span');
+            check.className = 'media-library-card-check';
+            check.innerHTML = icon('check');
 
             button.appendChild(imageWrap);
-            button.appendChild(label);
+            button.appendChild(check);
             button.dataset.mediaName = name;
             button.dataset.mediaPath = String(item.path || '');
             button.dataset.mediaWebpPath = String(item.webp_path || '');
@@ -318,11 +326,23 @@ if (modal && openTrigger) {
         }
 
         if (prevButton) {
-            prevButton.disabled = page <= 1;
+            const prevDisabled = page <= 1;
+            prevButton.classList.toggle('disabled', prevDisabled);
+            prevButton.setAttribute('aria-disabled', prevDisabled ? 'true' : 'false');
+            prevButton.setAttribute('tabindex', prevDisabled ? '-1' : '0');
+            if ('disabled' in prevButton) {
+                prevButton.disabled = prevDisabled;
+            }
         }
 
         if (nextButton) {
-            nextButton.disabled = page >= totalPages;
+            const nextDisabled = page >= totalPages;
+            nextButton.classList.toggle('disabled', nextDisabled);
+            nextButton.setAttribute('aria-disabled', nextDisabled ? 'true' : 'false');
+            nextButton.setAttribute('tabindex', nextDisabled ? '-1' : '0');
+            if ('disabled' in nextButton) {
+                nextButton.disabled = nextDisabled;
+            }
         }
     };
 
@@ -451,7 +471,8 @@ if (modal && openTrigger) {
     });
 
     if (prevButton) {
-        prevButton.addEventListener('click', () => {
+        prevButton.addEventListener('click', (event) => {
+            event.preventDefault();
             if (page <= 1) {
                 return;
             }
@@ -461,7 +482,8 @@ if (modal && openTrigger) {
     }
 
     if (nextButton) {
-        nextButton.addEventListener('click', () => {
+        nextButton.addEventListener('click', (event) => {
+            event.preventDefault();
             if (page >= totalPages) {
                 return;
             }
