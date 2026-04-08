@@ -165,7 +165,9 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
 <body>
 <div class="admin-shell">
     <aside class="admin-sidebar">
-        <h2 class="admin-brand"><?= htmlspecialchars($t('admin.brand'), ENT_QUOTES, 'UTF-8') ?></h2>
+        <a class="admin-brand" href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.brand'), ENT_QUOTES, 'UTF-8') ?>">
+            <img src="<?= htmlspecialchars($url('assets/logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
+        </a>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
                 $role = (string)($authUser['role'] ?? '');
