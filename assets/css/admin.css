@@ -534,12 +534,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     height: 0.875rem;
 }
 
-.media-library-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-1);
-}
 
 @media (max-width: 900px) {
     .media-library-modal-layout {

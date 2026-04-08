@@ -225,7 +225,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                     </div>
                 </form>
                 <div class="media-library-grid" data-media-library-grid></div>
-                <div class="media-library-pagination pagination">
+                <div class="pagination">
                     <a class="pagination-link disabled" href="#" data-media-library-prev aria-disabled="true" tabindex="-1"><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous', 'Previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
                     <span data-media-library-page>1 / 1</span>
                     <a class="pagination-link disabled" href="#" data-media-library-next aria-disabled="true" tabindex="-1"><span><?= htmlspecialchars($t('common.next', 'Next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
