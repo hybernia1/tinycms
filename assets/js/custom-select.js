@@ -25,6 +25,10 @@
         if (button) {
             button.setAttribute('aria-expanded', 'false');
         }
+        const list = opened.querySelector('.custom-select-list');
+        if (list) {
+            setActiveItem(list, null);
+        }
         opened = null;
     };
 
@@ -39,6 +43,39 @@
         if (select.disabled && opened === wrapper) {
             closeOpened();
         }
+    };
+
+    const getEnabledItems = (list) => Array.from(list.querySelectorAll('.custom-select-option:not(.disabled)'));
+    const getCurrentItem = (list) => list.querySelector('.custom-select-option.selected:not(.disabled)') || getEnabledItems(list)[0] || null;
+    const setActiveItem = (list, item) => {
+        list.querySelectorAll('.custom-select-option').forEach((el) => {
+            el.classList.toggle('active', el === item);
+        });
+        if (item) {
+            item.scrollIntoView({ block: 'nearest' });
+        }
+    };
+    const getActiveItem = (list) => list.querySelector('.custom-select-option.active:not(.disabled)');
+    const moveActiveItem = (list, direction) => {
+        const enabledItems = getEnabledItems(list);
+        if (!enabledItems.length) {
+            return;
+        }
+        const activeItem = getActiveItem(list) || getCurrentItem(list);
+        const activeIndex = Math.max(0, enabledItems.indexOf(activeItem));
+        const nextIndex = direction === 'next'
+            ? Math.min(enabledItems.length - 1, activeIndex + 1)
+            : Math.max(0, activeIndex - 1);
+        setActiveItem(list, enabledItems[nextIndex]);
+    };
+    const selectItem = (select, list, item, buttonLabel) => {
+        if (!item || item.classList.contains('disabled')) {
+            return;
+        }
+        select.value = item.dataset.value || '';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        sync(select, buttonLabel);
+        closeOpened();
     };
 
     selects.forEach((select) => {
@@ -87,17 +124,7 @@
             item.dataset.value = option.value;
 
             item.addEventListener('click', () => {
-                if (option.disabled) {
-                    return;
-                }
-                select.value = option.value;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                list.querySelectorAll('.custom-select-option').forEach((el) => {
-                    el.classList.toggle('selected', el === item);
-                    el.setAttribute('aria-selected', el === item ? 'true' : 'false');
-                });
-                sync(select, buttonLabel);
-                closeOpened();
+                selectItem(select, list, item, buttonLabel);
             });
 
             list.appendChild(item);
@@ -120,6 +147,32 @@
                 wrapper.classList.add('open');
                 button.setAttribute('aria-expanded', 'true');
                 opened = wrapper;
+                setActiveItem(list, getCurrentItem(list));
+            }
+        });
+
+        button.addEventListener('keydown', (event) => {
+            if (button.disabled) {
+                return;
+            }
+            if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {
+                return;
+            }
+            event.preventDefault();
+            if (!wrapper.classList.contains('open')) {
+                closeOpened();
+                wrapper.classList.add('open');
+                button.setAttribute('aria-expanded', 'true');
+                opened = wrapper;
+                setActiveItem(list, getCurrentItem(list));
+                return;
+            }
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                moveActiveItem(list, event.key === 'ArrowDown' ? 'next' : 'prev');
+                return;
+            }
+            if (event.key === 'Enter' || event.key === ' ') {
+                selectItem(select, list, getActiveItem(list) || getCurrentItem(list), buttonLabel);
             }
         });
 
@@ -130,6 +183,9 @@
                 el.classList.toggle('selected', el === selected);
                 el.setAttribute('aria-selected', el === selected ? 'true' : 'false');
             });
+            if (!wrapper.classList.contains('open')) {
+                setActiveItem(list, null);
+            }
             syncDisabled(select, button, wrapper);
         });
 
