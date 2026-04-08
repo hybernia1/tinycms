@@ -567,7 +567,7 @@
         return modal;
     }
 
-    function init(textarea) {
+        function init(textarea) {
         editorCounter += 1;
         var editorId = 'wysiwyg-' + editorCounter;
         var wrapper = document.createElement('div');
@@ -627,6 +627,20 @@
         var mediaRange = null;
         var linkPasteSeq = 0;
         var draftInitPromise = null;
+        var linkModalFields = {
+            input: linkModal.querySelector('[data-role="link-input"]'),
+            textInput: linkModal.querySelector('[data-role="link-text-input"]'),
+            targetBlank: linkModal.querySelector('[data-role="link-target-blank"]'),
+            noFollow: linkModal.querySelector('[data-role="link-nofollow"]'),
+            apply: linkModal.querySelector('[data-role="link-apply"]'),
+        };
+        var menuCommands = {
+            toggleListMenu: 'is-list-open',
+            toggleHeadingMenu: 'is-heading-open',
+            toggleAlignMenu: 'is-align-open',
+            toggleTextColorMenu: 'is-text-color-open',
+            toggleBackgroundColorMenu: 'is-bg-color-open',
+        };
 
         function absoluteMediaUrl(path) {
             var value = String(path || '').trim();
@@ -843,11 +857,10 @@
         }
 
         function openLinkModal() {
-            var linkFields = getLinkModalFields();
-            var linkInput = linkFields.input;
-            var linkTextInput = linkFields.textInput;
-            var linkTargetBlank = linkFields.targetBlank;
-            var linkNoFollow = linkFields.noFollow;
+            var linkInput = linkModalFields.input;
+            var linkTextInput = linkModalFields.textInput;
+            var linkTargetBlank = linkModalFields.targetBlank;
+            var linkNoFollow = linkModalFields.noFollow;
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
@@ -881,20 +894,9 @@
 
         setFocusMode(document.body.classList.contains('admin-focus-mode'));
 
-        function getLinkModalFields() {
-            return {
-                input: linkModal.querySelector('[data-role="link-input"]'),
-                textInput: linkModal.querySelector('[data-role="link-text-input"]'),
-                targetBlank: linkModal.querySelector('[data-role="link-target-blank"]'),
-                noFollow: linkModal.querySelector('[data-role="link-nofollow"]'),
-                apply: linkModal.querySelector('[data-role="link-apply"]'),
-            };
-        }
-
         function updateLinkApplyState() {
-            var linkFields = getLinkModalFields();
-            var linkInput = linkFields.input;
-            var applyButton = linkFields.apply;
+            var linkInput = linkModalFields.input;
+            var applyButton = linkModalFields.apply;
             if (!applyButton) {
                 return;
             }
@@ -902,11 +904,10 @@
         }
 
         function resetLinkModalFields() {
-            var linkFields = getLinkModalFields();
-            var linkInput = linkFields.input;
-            var linkTextInput = linkFields.textInput;
-            var linkTargetBlank = linkFields.targetBlank;
-            var linkNoFollow = linkFields.noFollow;
+            var linkInput = linkModalFields.input;
+            var linkTextInput = linkModalFields.textInput;
+            var linkTargetBlank = linkModalFields.targetBlank;
+            var linkNoFollow = linkModalFields.noFollow;
             if (linkInput) {
                 linkInput.value = '';
             }
@@ -979,6 +980,17 @@
             if (!isSelectionInside(editor)) {
                 focusEditorEnd(editor);
             }
+        }
+
+        function unlinkNode(linkNode) {
+            if (!linkNode || !linkNode.parentNode) {
+                return;
+            }
+            var parent = linkNode.parentNode;
+            while (linkNode.firstChild) {
+                parent.insertBefore(linkNode.firstChild, linkNode);
+            }
+            parent.removeChild(linkNode);
         }
 
         function resetTypingColors() {
@@ -1069,13 +1081,6 @@
                 return;
             }
 
-            var menuCommands = {
-                toggleListMenu: 'is-list-open',
-                toggleHeadingMenu: 'is-heading-open',
-                toggleAlignMenu: 'is-align-open',
-                toggleTextColorMenu: 'is-text-color-open',
-                toggleBackgroundColorMenu: 'is-bg-color-open',
-            };
             if (Object.prototype.hasOwnProperty.call(menuCommands, command)) {
                 if (htmlMode) {
                     return;
@@ -1121,11 +1126,10 @@
         });
 
         linkModal.addEventListener('click', function (event) {
-            var linkFields = getLinkModalFields();
-            var linkInput = linkFields.input;
-            var linkTextInput = linkFields.textInput;
-            var linkTargetBlank = linkFields.targetBlank;
-            var linkNoFollow = linkFields.noFollow;
+            var linkInput = linkModalFields.input;
+            var linkTextInput = linkModalFields.textInput;
+            var linkTargetBlank = linkModalFields.targetBlank;
+            var linkNoFollow = linkModalFields.noFollow;
 
             if (event.target === linkModal) {
                 closeMenus();
@@ -1134,11 +1138,7 @@
 
             if (event.target.closest('[data-role="link-remove"]')) {
                 if (activeLink && editor.contains(activeLink)) {
-                    var parent = activeLink.parentNode;
-                    while (activeLink.firstChild) {
-                        parent.insertBefore(activeLink.firstChild, activeLink);
-                    }
-                    parent.removeChild(activeLink);
+                    unlinkNode(activeLink);
                 } else if (linkRange) {
                     restoreSelection(linkRange, editor);
                     document.execCommand('unlink', false, null);
@@ -1219,7 +1219,7 @@
             }
             if (event.key === 'Enter') {
                 event.preventDefault();
-                var apply = linkModal.querySelector('[data-role="link-apply"]');
+                var apply = linkModalFields.apply;
                 if (apply) {
                     apply.click();
                 }
@@ -1242,11 +1242,7 @@
             if (!removeButton || !activeLink || !editor.contains(activeLink)) {
                 return;
             }
-            var parent = activeLink.parentNode;
-            while (activeLink.firstChild) {
-                parent.insertBefore(activeLink.firstChild, activeLink);
-            }
-            parent.removeChild(activeLink);
+            unlinkNode(activeLink);
             persistEditorState(true);
             hideLinkTools();
             activeLink = null;
