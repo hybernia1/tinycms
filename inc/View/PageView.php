@@ -186,13 +186,14 @@ final class PageView
         ]);
     }
 
-    public function adminUsersList(array $pagination, array $allowedPerPage, string $status, string $query): void
+    public function adminUsersList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/users/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
             'status' => $status,
             'query' => $query,
+            'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.users', 'Users'),
         ]);
@@ -219,7 +220,7 @@ final class PageView
         ]);
     }
 
-    public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $availableStatuses): void
+    public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $availableStatuses, array $statusCounts): void
     {
         $this->renderAdmin('admin/content/list', [
             'pagination' => $pagination,
@@ -227,6 +228,7 @@ final class PageView
             'status' => $status,
             'query' => $query,
             'availableStatuses' => $availableStatuses,
+            'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.content', 'Content'),
         ]);

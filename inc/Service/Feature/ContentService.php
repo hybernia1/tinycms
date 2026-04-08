@@ -196,6 +196,33 @@ final class ContentService
         return $statuses;
     }
 
+    public function statusCounts(array $statuses = []): array
+    {
+        $rows = $this->query->select('content', ['status']);
+        $counts = ['all' => count($rows)];
+
+        foreach ($rows as $row) {
+            $value = trim((string)($row['status'] ?? ''));
+            if ($value === '') {
+                continue;
+            }
+
+            if (!isset($counts[$value])) {
+                $counts[$value] = 0;
+            }
+            $counts[$value]++;
+        }
+
+        foreach ($statuses as $status) {
+            $key = trim((string)$status);
+            if ($key !== '' && !isset($counts[$key])) {
+                $counts[$key] = 0;
+            }
+        }
+
+        return $counts;
+    }
+
     public function attachMedia(int $contentId, int $mediaId): bool
     {
         if ($contentId <= 0 || $mediaId <= 0 || $this->find($contentId) === null) {

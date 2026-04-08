@@ -5,10 +5,11 @@ $listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationC
 $listTotalPages = (int)($pagination['total_pages'] ?? 1);
 $statusCurrent = (string)($status ?? 'all');
 $listQuery = (string)($query ?? '');
+$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
 $statusLinks = [
-    'all' => $t('users.status.all', 'All'),
-    'active' => $t('users.status.active', 'Active'),
-    'suspended' => $t('users.status.suspended', 'Suspended'),
+    'all' => $t('users.status.all', 'All') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
+    'active' => $t('users.status.active', 'Active') . ' (' . (int)($statusCounts['active'] ?? 0) . ')',
+    'suspended' => $t('users.status.suspended', 'Suspended') . ' (' . (int)($statusCounts['suspended'] ?? 0) . ')',
 ];
 $csrfMarkup = $csrfField();
 $listName = 'users';

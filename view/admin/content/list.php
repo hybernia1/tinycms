@@ -5,9 +5,10 @@ $listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationC
 $listTotalPages = (int)($pagination['total_pages'] ?? 1);
 $statusCurrent = (string)($status ?? 'all');
 $listQuery = (string)($query ?? '');
-$statusLinks = ['all' => $t('common.all', 'All')];
+$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
+$statusLinks = ['all' => $t('common.all', 'All') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];
 foreach ($availableStatuses as $statusValue) {
-    $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue));
+    $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue)) . ' (' . (int)($statusCounts[$statusValue] ?? 0) . ')';
 }
 $authUser = $_SESSION['auth'] ?? [];
 $isEditor = (string)($authUser['role'] ?? '') === 'editor';

@@ -42,7 +42,8 @@ final class AdminContentController extends BaseAdminController
         [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveListQuery();
 
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
-        $this->pages->adminContentList($pagination, PaginationConfig::allowed(), $status, $query, $availableStatuses);
+        $statusCounts = $this->content->statusCounts($availableStatuses);
+        $this->pages->adminContentList($pagination, PaginationConfig::allowed(), $status, $query, $availableStatuses, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void
@@ -51,9 +52,10 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveListQuery();
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+        $statusCounts = $this->content->statusCounts($availableStatuses);
 
         $this->respondJson([
             'ok' => true,
@@ -64,6 +66,7 @@ final class AdminContentController extends BaseAdminController
                 'total_pages' => (int)($pagination['total_pages'] ?? 1),
                 'status' => $status,
                 'query' => $query,
+                'status_counts' => $statusCounts,
             ],
         ]);
     }

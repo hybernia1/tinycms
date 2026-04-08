@@ -28,6 +28,7 @@ const normalizeListResponse = (payload) => {
         page: Number(meta.page || 1),
         totalPages: Number(meta.total_pages || 1),
         perPage: Number(meta.per_page || 0),
+        statusCounts: meta.status_counts && typeof meta.status_counts === 'object' ? meta.status_counts : {},
     };
 };
 
@@ -88,6 +89,13 @@ const initListApi = (config) => {
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
         : [];
+    const filterBaseLabels = {};
+    filterLinks.forEach((link) => {
+        const statusKey = link.getAttribute(`data-${config.name}-status`) || '';
+        if (statusKey !== '') {
+            filterBaseLabels[statusKey] = String(link.textContent || '').replace(/\s*\(\d+\)\s*$/, '').trim();
+        }
+    });
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
     const loader = window.tinycmsLoader || null;
 
@@ -131,6 +139,23 @@ const initListApi = (config) => {
 
         filterLinks.forEach((link) => {
             link.classList.toggle('active', link.getAttribute(`data-${config.name}-status`) === state.status);
+        });
+    };
+
+    const syncStatusCounts = (statusCounts) => {
+        if (!config.withStatus || !statusCounts || typeof statusCounts !== 'object') {
+            return;
+        }
+
+        filterLinks.forEach((link) => {
+            const statusKey = link.getAttribute(`data-${config.name}-status`) || '';
+            const baseLabel = filterBaseLabels[statusKey];
+            if (statusKey === '' || typeof baseLabel !== 'string') {
+                return;
+            }
+
+            const count = Number(statusCounts[statusKey] ?? 0);
+            link.textContent = `${baseLabel} (${Number.isFinite(count) ? count : 0})`;
         });
     };
 
@@ -184,6 +209,7 @@ const initListApi = (config) => {
             }
             body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
             setPagination(state.page, normalized.totalPages);
+            syncStatusCounts(normalized.statusCounts);
             syncFilters();
         } finally {
             if (loader) {
