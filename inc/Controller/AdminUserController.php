@@ -47,6 +47,7 @@ final class AdminUserController extends BaseAdminController
         [$page, $perPage, $status, $suspend, $query] = $this->resolveListQuery();
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+        $statusCounts = $this->users->statusCounts();
 
         $this->respondJson([
             'ok' => true,
@@ -57,6 +58,7 @@ final class AdminUserController extends BaseAdminController
                 'total_pages' => (int)($pagination['total_pages'] ?? 1),
                 'status' => $status,
                 'query' => $query,
+                'status_counts' => $statusCounts,
             ],
         ]);
     }
