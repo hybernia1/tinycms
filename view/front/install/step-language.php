@@ -1,4 +1,4 @@
-<div class="container py-5">
+<div class="container py-5" data-install-content>
     <div class="row">
         <div class="col-12 col-md-6">
             <div class="card p-5">

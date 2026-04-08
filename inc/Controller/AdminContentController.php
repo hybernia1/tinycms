@@ -742,6 +742,7 @@ final class AdminContentController extends BaseAdminController
                 'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
                 'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
                 'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
+                'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
             ],
         ]);
     }
@@ -1012,6 +1013,7 @@ final class AdminContentController extends BaseAdminController
 
     private function mapLibraryItem(array $item): array
     {
+        $createdAt = (string)($item['created'] ?? '');
         return [
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
@@ -1020,7 +1022,8 @@ final class AdminContentController extends BaseAdminController
             'preview_path' => $this->resolvePreviewPath($item),
             'path' => (string)($item['path'] ?? ''),
             'webp_path' => (string)($item['path_webp'] ?? ''),
-            'created' => (string)($item['created'] ?? ''),
+            'created' => $createdAt,
+            'created_label' => $this->formatDateTime($createdAt),
         ];
     }
 

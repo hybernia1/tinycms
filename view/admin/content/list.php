@@ -36,23 +36,23 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     $createdStamp = $createdAtRaw !== '' ? strtotime($createdAtRaw) : false;
     $isPlanned = $createdStamp !== false && $createdStamp > time();
     $statusValue = (string)($row['status'] ?? '');
-    $statusClass = $statusValue === 'published' ? 'text-bg-success' : ($statusValue === 'draft' ? 'text-bg-dark' : 'text-bg-primary');
     $canManage = !$isEditor || (int)($row['author'] ?? 0) === $currentUserId;
     $isPublished = $statusValue === 'published';
     ob_start();
     ?>
     <tr>
         <td>
-            <?php if ($canManage): ?>
-                <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-            <?php else: ?>
-                <span><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
-            <?php endif; ?>
+            <?php $statusIcon = $statusValue === 'published' ? 'success' : ($statusValue === 'draft' ? 'concept' : ''); ?>
+            <span class="d-flex align-center gap-2">
+                <?php if ($statusIcon !== ''): ?><?= $icon($statusIcon) ?><?php endif; ?>
+                <?php if ($canManage): ?>
+                    <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                <?php else: ?>
+                    <span><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                <?php endif; ?>
+            </span>
             <div class="text-muted small"><?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?></div>
-            <div class="d-flex gap-2 mt-2">
-                <span class="badge <?= htmlspecialchars($statusClass, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('content.statuses.' . $statusValue, $statusValue), ENT_QUOTES, 'UTF-8') ?></span>
-                <?php if ($isPlanned): ?><span class="badge text-bg-warning"><?= htmlspecialchars($t('content.planned', 'Planned'), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
-            </div>
+            <?php if ($isPlanned): ?><div class="mt-2"><span class="badge text-bg-warning"><?= htmlspecialchars($t('content.planned', 'Planned'), ENT_QUOTES, 'UTF-8') ?></span></div><?php endif; ?>
         </td>
         <td class="table-col-mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
         <td class="table-col-actions">
