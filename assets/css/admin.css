@@ -192,6 +192,39 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     border-top: 1px solid var(--color-border-soft);
 }
 
+.publication-status-switch {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.publication-status-switch-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.publication-status-switch-option {
+    flex: 1 1 0;
+    margin: 0;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 0.375rem;
+    background: var(--color-surface);
+    padding: var(--space-2);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s ease, background-color .2s ease, color .2s ease;
+}
+
+.publication-status-switch-option:hover {
+    border-color: var(--color-border);
+}
+
+.publication-status-switch-input:checked + .publication-status-switch-option {
+    border-color: var(--primary);
+    background: var(--badge-bg);
+    color: var(--primary);
+}
+
 .content-thumbnail-preview img {
     width: 100%;
     height: auto;

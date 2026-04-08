@@ -57,11 +57,23 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <div class="p-3">
                     <div class="mb-3">
                         <label><?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?></label>
-                        <select name="status">
+                        <?php $currentStatus = (string)($item['status'] ?? 'draft'); ?>
+                        <div class="publication-status-switch" role="radiogroup" aria-label="<?= htmlspecialchars($t('content.status', 'Status'), ENT_QUOTES, 'UTF-8') ?>">
                             <?php foreach ($availableStatuses as $statusValue): ?>
-                                <option value="<?= htmlspecialchars((string)$statusValue, ENT_QUOTES, 'UTF-8') ?>" <?= (string)($item['status'] ?? 'draft') === (string)$statusValue ? 'selected' : '' ?>><?= htmlspecialchars($t('content.statuses.' . (string)$statusValue, (string)$statusValue), ENT_QUOTES, 'UTF-8') ?></option>
+                                <?php $statusKey = (string)$statusValue; ?>
+                                <input
+                                    class="publication-status-switch-input"
+                                    type="radio"
+                                    id="content-status-<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>"
+                                    name="status"
+                                    value="<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>"
+                                    <?= $currentStatus === $statusKey ? 'checked' : '' ?>
+                                >
+                                <label class="publication-status-switch-option" for="content-status-<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>">
+                                    <?= htmlspecialchars($t('content.statuses.' . $statusKey, $statusKey), ENT_QUOTES, 'UTF-8') ?>
+                                </label>
                             <?php endforeach; ?>
-                        </select>
+                        </div>
                         <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
                     </div>
                     <div class="m-0">
