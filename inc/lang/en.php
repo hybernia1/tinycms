@@ -373,6 +373,11 @@ return [
             'unique_violation' => 'The value already exists and must be unique.',
             'invalid_foreign_key' => 'Invalid reference to related record (foreign key).',
             'operation_failed' => 'Database operation failed.',
+            'insert_data_empty' => 'Insert data cannot be empty.',
+            'update_data_empty' => 'Update data cannot be empty.',
+            'update_conditions_empty' => 'Update conditions cannot be empty.',
+            'delete_conditions_empty' => 'Delete conditions cannot be empty.',
+            'columns_empty' => 'Columns cannot be empty.',
         ],
         'validation' => [
             'required' => 'This field is required.',
