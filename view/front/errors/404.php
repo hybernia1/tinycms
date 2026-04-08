@@ -6,18 +6,13 @@ if ($mode === 'image'): ?>
     <path d="M0 300l140-120 90 75 120-105 110 90 70-55 110 115H0z" fill="#d1d5db"/>
     <circle cx="200" cy="120" r="36" fill="#9ca3af"/>
 </svg>
-<?php elseif ($mode === 'xml'): ?>
-<error>
-    <code>404</code>
-    <message>
-        <cs><?= htmlspecialchars($t('front.not_found.message_cs', 'Požadovaný dokument nebyl nalezen.'), ENT_XML1, 'UTF-8') ?></cs>
-        <en><?= htmlspecialchars($t('front.not_found.message_en', 'Requested document was not found.'), ENT_XML1, 'UTF-8') ?></en>
-    </message>
-    <detail>
-        <cs><?= htmlspecialchars($t('front.not_found.detail_cs', 'Zkontrolujte URL adresu nebo požadovaný XML dokument.'), ENT_XML1, 'UTF-8') ?></cs>
-        <en><?= htmlspecialchars($t('front.not_found.detail_en', 'Check the URL or requested XML document.'), ENT_XML1, 'UTF-8') ?></en>
-    </detail>
-</error>
+<?php elseif ($mode === 'document'): ?>
+404
+CS: <?= htmlspecialchars($t('front.not_found.message_cs', 'Požadovaný dokument nebyl nalezen.'), ENT_QUOTES, 'UTF-8') ?>
+EN: <?= htmlspecialchars($t('front.not_found.message_en', 'Requested document was not found.'), ENT_QUOTES, 'UTF-8') ?>
+
+CS: <?= htmlspecialchars($t('front.not_found.detail_cs', 'Zkontrolujte URL adresu nebo požadovaný XML dokument.'), ENT_QUOTES, 'UTF-8') ?>
+EN: <?= htmlspecialchars($t('front.not_found.detail_en', 'Check the URL or requested XML document.'), ENT_QUOTES, 'UTF-8') ?>
 <?php elseif ($mode === 'text'): ?>
 <?= htmlspecialchars($t('front.not_found.title', '404 Not Found'), ENT_QUOTES, 'UTF-8') ?>
 <?php else: ?>
