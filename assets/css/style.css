@@ -171,6 +171,17 @@ a:focus-visible {
     background: var(--color-surface);
 }
 
+.auth-logo {
+    display: flex;
+    align-items: center;
+}
+
+.auth-logo img {
+    width: 44px;
+    height: 44px;
+    display: block;
+}
+
 .btn {
     padding: var(--space-2) calc(var(--space-3) + var(--space-1) / 2);
     border: 1px solid transparent;

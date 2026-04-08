@@ -72,7 +72,7 @@ final class View
             return $scheme . '://' . $host . $resolved;
         };
         $icon = static function (string $name, string $classes = 'icon') use ($url): string {
-            $sprite = htmlspecialchars($url('assets/icons.svg#icon-' . $name), ENT_QUOTES, 'UTF-8');
+            $sprite = htmlspecialchars($url('assets/svg/icons.svg#icon-' . $name), ENT_QUOTES, 'UTF-8');
             $classAttr = htmlspecialchars($classes, ENT_QUOTES, 'UTF-8');
             return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
         };
