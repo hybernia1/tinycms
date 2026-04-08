@@ -170,6 +170,11 @@ return [
         'upload_file_required' => 'Please upload a media file.',
         'file_required' => 'File is required.',
         'no_preview' => 'No preview',
+        'filename' => 'Filename',
+        'mime' => 'MIME',
+        'extension' => 'Extension',
+        'dimensions' => 'Dimensions',
+        'size' => 'Size',
     ],
     'content' => [
         'search_placeholder' => 'Search title or content',

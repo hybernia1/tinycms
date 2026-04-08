@@ -170,6 +170,11 @@ return [
         'upload_file_required' => 'Nahrajte prosím soubor média.',
         'file_required' => 'Soubor je povinný.',
         'no_preview' => 'Bez náhledu',
+        'filename' => 'Název souboru',
+        'mime' => 'MIME',
+        'extension' => 'Přípona',
+        'dimensions' => 'Rozměry',
+        'size' => 'Velikost',
     ],
     'content' => [
         'search_placeholder' => 'Hledat název nebo obsah',

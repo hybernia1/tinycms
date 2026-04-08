@@ -7,6 +7,33 @@ $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
 $authUser = $_SESSION['auth'] ?? [];
 $isEditor = (string)($authUser['role'] ?? '') === 'editor';
 $currentUserId = (int)($authUser['id'] ?? 0);
+$fileMeta = null;
+if ($mode === 'edit') {
+    $metaPath = trim((string)($item['path'] ?? ''));
+    if ($metaPath === '') {
+        $metaPath = trim((string)($item['path_webp'] ?? ''));
+    }
+    $absolutePath = dirname(__DIR__, 3) . '/' . ltrim($metaPath, '/');
+    if ($metaPath !== '' && is_file($absolutePath)) {
+        $imageInfo = @getimagesize($absolutePath) ?: [0, 0, 'mime' => ''];
+        $mime = trim((string)($imageInfo['mime'] ?? ''));
+        if ($mime === '') {
+            $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo !== false) {
+                $mime = (string)@finfo_file($finfo, $absolutePath);
+                @finfo_close($finfo);
+            }
+        }
+        $sizeBytes = (int)(@filesize($absolutePath) ?: 0);
+        $fileMeta = [
+            'filename' => (string)basename($absolutePath),
+            'extension' => strtolower((string)pathinfo($absolutePath, PATHINFO_EXTENSION)),
+            'mime' => $mime,
+            'size' => $sizeBytes > 0 ? ($sizeBytes >= 1048576 ? round($sizeBytes / 1048576, 2) . ' MB' : round($sizeBytes / 1024, 1) . ' KB') : '—',
+            'dimensions' => ((int)($imageInfo[0] ?? 0) > 0 && (int)($imageInfo[1] ?? 0) > 0) ? ((int)$imageInfo[0] . ' × ' . (int)$imageInfo[1] . ' px') : '—',
+        ];
+    }
+}
 ?>
 <form class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
@@ -39,15 +66,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                         <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 <?php endif; ?>
-                <div class="mb-3">
-                    <label><?= htmlspecialchars($t('media.path', 'Path'), ENT_QUOTES, 'UTF-8') ?></label>
-                    <div class="text-muted"><?= htmlspecialchars((string)($item['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                </div>
-                <div class="mb-3">
-                    <label><?= htmlspecialchars($t('media.path_webp', 'Path webp'), ENT_QUOTES, 'UTF-8') ?></label>
-                    <div class="text-muted"><?= htmlspecialchars((string)($item['path_webp'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                </div>
-
                 <hr>
                 <h3 class="mb-3"><?= htmlspecialchars($t('media.used_as_thumbnail', 'Used as thumbnail'), ENT_QUOTES, 'UTF-8') ?></h3>
                 <?php if (($usages ?? []) === []): ?>
@@ -121,6 +139,41 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                     <?php endif; ?>
                 </div>
             </div>
+            <?php if ($mode === 'edit' && $fileMeta !== null): ?>
+                <div class="card">
+                    <div class="content-box-header"><?= htmlspecialchars($t('media.file', 'File'), ENT_QUOTES, 'UTF-8') ?></div>
+                    <div class="p-3">
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('media.path', 'Path'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)($item['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('media.path_webp', 'Path webp'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)($item['path_webp'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('media.filename', 'Filename'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['filename'], ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('media.mime', 'MIME'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['mime'], ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('media.extension', 'Extension'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['extension'], ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <label><?= htmlspecialchars($t('media.dimensions', 'Dimensions'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['dimensions'], ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                        <div class="m-0">
+                            <label><?= htmlspecialchars($t('media.size', 'Size'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['size'], ENT_QUOTES, 'UTF-8') ?></div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
         </aside>
     </div>
 </form>
