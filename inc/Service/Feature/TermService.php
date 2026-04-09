@@ -23,8 +23,12 @@ final class TermService
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
-    public function paginate(int $page = 1, int $perPage = 10, string $search = ''): array
+    public function paginate(int $page = 1, int $perPage = 10, string $search = '', string $status = 'all'): array
     {
+        if ($status === 'unassigned') {
+            return $this->paginateUnassigned($page, $perPage, $search);
+        }
+
         return $this->query->paginate('terms', [
             'id',
             'name',
@@ -40,6 +44,24 @@ final class TermService
             'search' => $search,
             'searchColumns' => ['name', 'body'],
         ]);
+    }
+
+    public function statusCounts(): array
+    {
+        $termsTable = Table::name('terms');
+        $contentTermsTable = Table::name('content_terms');
+
+        $all = (int)($this->pdo->query("SELECT COUNT(*) FROM $termsTable")->fetchColumn() ?: 0);
+        $unassignedSql = implode("\n", [
+            "SELECT COUNT(*) FROM $termsTable t",
+            "WHERE NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)",
+        ]);
+        $unassigned = (int)($this->pdo->query($unassignedSql)->fetchColumn() ?: 0);
+
+        return [
+            'all' => $all,
+            'unassigned' => $unassigned,
+        ];
     }
 
     public function find(int $id): ?array
@@ -248,6 +270,27 @@ final class TermService
         }
     }
 
+    public function contentUsages(int $termId): array
+    {
+        if ($termId <= 0) {
+            return [];
+        }
+
+        $contentTable = Table::name('content');
+        $contentTermsTable = Table::name('content_terms');
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT c.id, c.name, c.created',
+            "FROM $contentTable c",
+            "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
+            'WHERE ct.term = :term',
+            'ORDER BY COALESCE(c.updated, c.created) DESC',
+        ]));
+        $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    }
+
     private function normalizeTerms(string $rawTerms): array
     {
         $parts = preg_split('/[\n,]+/', $rawTerms) ?: [];
@@ -278,5 +321,60 @@ final class TermService
         }
 
         return $excludeId === null || $foundId !== $excludeId;
+    }
+
+    private function paginateUnassigned(int $page, int $perPage, string $search): array
+    {
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+
+        $termsTable = Table::name('terms');
+        $contentTermsTable = Table::name('content_terms');
+
+        $params = [];
+        $searchSql = '';
+        if ($search !== '') {
+            $searchSql = ' AND (t.name LIKE :search OR t.body LIKE :search)';
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $baseSql = implode("\n", [
+            "FROM $termsTable t",
+            "WHERE NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)",
+        ]) . $searchSql;
+
+        $countStmt = $this->pdo->prepare("SELECT COUNT(*) $baseSql");
+        foreach ($params as $key => $value) {
+            $countStmt->bindValue(':' . $key, $value);
+        }
+        $countStmt->execute();
+
+        $total = (int)($countStmt->fetchColumn() ?: 0);
+        $totalPages = max(1, (int)ceil($total / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
+
+        $sql = implode("\n", [
+            'SELECT t.id, t.name, t.body, t.created, t.updated',
+            $baseSql,
+            'ORDER BY t.id DESC',
+            'LIMIT :limit OFFSET :offset',
+        ]);
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value);
+        }
+        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'total' => $total,
+            'total_pages' => $totalPages,
+            'page' => $page,
+            'per_page' => $perPage,
+        ];
     }
 }

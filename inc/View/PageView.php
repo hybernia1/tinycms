@@ -274,23 +274,26 @@ final class PageView
         ]);
     }
 
-    public function adminTermList(array $pagination, array $allowedPerPage, string $query): void
+    public function adminTermList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/terms/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
+            'status' => $status,
             'query' => $query,
+            'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.terms'),
         ]);
     }
 
-    public function adminTermForm(string $mode, array $item, array $errors): void
+    public function adminTermForm(string $mode, array $item, array $errors, array $usages = []): void
     {
         $this->renderAdmin('admin/terms/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
+            'usages' => $usages,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_term') : I18n::t('admin.edit_term'),
         ]);

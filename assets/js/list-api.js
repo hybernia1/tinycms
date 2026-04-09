@@ -428,7 +428,7 @@ initListApi({
 initListApi({
     name: 'terms',
     rootSelector: '[data-terms-list]',
-    withStatus: false,
+    withStatus: true,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: { deleteSuccess: t('terms.deleted', 'Tag deleted.') },
     rowHtml: (item, { editBase }) => {

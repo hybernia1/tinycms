@@ -10,6 +10,36 @@
             <label><?= htmlspecialchars($t('common.description'), ENT_QUOTES, 'UTF-8') ?></label>
             <textarea name="body" rows="6"><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
         </div>
+        <?php if ($mode === 'edit'): ?>
+            <hr>
+            <h3 class="mb-3"><?= htmlspecialchars($t('terms.used_in'), ENT_QUOTES, 'UTF-8') ?></h3>
+            <?php if (($usages ?? []) === []): ?>
+                <p class="text-muted m-0"><?= htmlspecialchars($t('terms.no_usage'), ENT_QUOTES, 'UTF-8') ?></p>
+            <?php else: ?>
+                <div class="table-responsive mb-3">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th><?= htmlspecialchars($t('content.post'), ENT_QUOTES, 'UTF-8') ?></th>
+                            <th><?= htmlspecialchars($t('common.created'), ENT_QUOTES, 'UTF-8') ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($usages as $usage): ?>
+                            <tr>
+                                <td>
+                                    <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . (int)($usage['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+                                        <?= htmlspecialchars((string)($usage['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                                    </a>
+                                </td>
+                                <td><?= htmlspecialchars($formatDateTime((string)($usage['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
         <div class="d-flex gap-2">
             <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></button>
             <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/terms'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back'), ENT_QUOTES, 'UTF-8') ?></a>
