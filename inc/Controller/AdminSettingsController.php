@@ -57,6 +57,7 @@ final class AdminSettingsController extends BaseAdminController
         I18n::setTheme((string)($this->settings->resolved()['theme'] ?? 'default'));
         $this->flash->add('success', I18n::t('settings.saved'));
         $redirect('admin/settings');
+        return;
     }
 
     private function handleSiteImageUpload(string $field, string $settingKey, array &$input, array $resolved, callable $uploader, callable $redirect): bool

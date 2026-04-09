@@ -157,6 +157,7 @@ final class AdminContentController extends BaseAdminController
             }
             $this->flash->add('success', I18n::t('content.created'));
             $redirect($newId > 0 ? $this->buildEditPath('admin/content', $newId) : 'admin/content');
+            return;
         }
 
         $this->flash->add('error', I18n::t('content.save_failed'));
@@ -226,6 +227,7 @@ final class AdminContentController extends BaseAdminController
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
             $this->flash->add('success', I18n::t('content.updated'));
             $redirect($this->buildEditPath('admin/content', $id));
+            return;
         }
 
         $this->flash->add('error', I18n::t('content.update_failed'));

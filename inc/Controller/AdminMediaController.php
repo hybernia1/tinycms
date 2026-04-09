@@ -99,6 +99,7 @@ final class AdminMediaController extends BaseAdminController
             $this->flash->add('success', I18n::t('media.created'));
             $newId = (int)($result['id'] ?? 0);
             $redirect($newId > 0 ? $this->buildEditPath('admin/media', $newId) : 'admin/media');
+            return;
         }
 
         $this->upload->deleteMediaFiles($uploadData);
@@ -171,6 +172,7 @@ final class AdminMediaController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.updated'));
             $redirect($this->buildEditPath('admin/media', $id));
+            return;
         }
 
         $this->flash->add('error', I18n::t('media.update_failed'));

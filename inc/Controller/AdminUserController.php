@@ -129,6 +129,7 @@ final class AdminUserController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('users.created'));
             $redirect('admin/users');
+            return;
         }
 
         $this->flash->add('error', I18n::t('users.save_failed'));
@@ -174,6 +175,7 @@ final class AdminUserController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('users.updated'));
             $redirect('admin/users');
+            return;
         }
 
         $this->flash->add('error', I18n::t('users.update_failed'));

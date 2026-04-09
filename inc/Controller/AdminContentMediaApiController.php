@@ -10,7 +10,6 @@ use App\Service\Feature\UploadService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
-use App\Service\Support\PaginationConfig;
 
 final class AdminContentMediaApiController extends BaseAdminController
 {
@@ -82,20 +81,14 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        $query = trim((string)($_GET['q'] ?? ''));
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
         $currentMediaId = (int)($_GET['current_media_id'] ?? 0);
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
 
         $pagination = $this->media->paginate($page, $perPage, $query);
         $items = array_map(fn(array $item): array => $this->mapLibraryItem($item), (array)($pagination['data'] ?? []));
         if ($currentMediaId > 0) {
             $currentItem = $this->media->find($currentMediaId);
-            if ($currentItem !== null && $this->matchesLibraryQuery($currentItem, $query)) {
+            if ($currentItem !== null && $this->canManageByAuthor($currentItem) && $this->matchesLibraryQuery($currentItem, $query)) {
                 $items = array_values(array_filter($items, static fn(array $row): bool => (int)($row['id'] ?? 0) !== $currentMediaId));
                 array_unshift($items, $this->mapLibraryItem($currentItem));
             }
@@ -115,7 +108,7 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        $item = $this->requireDeletableContent($contentId);
+        $item = $this->requireManageableContent($contentId);
         if ($item === null) {
             return;
         }
@@ -239,6 +232,10 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
+        if ($this->requireManageableMedia($mediaId) === null) {
+            return;
+        }
+
         if (!$this->content->attachMedia($contentId, $mediaId)) {
             $this->apiError('ATTACH_FAILED', I18n::t('content.attachment_attach_failed'));
             return;
@@ -248,22 +245,6 @@ final class AdminContentMediaApiController extends BaseAdminController
     }
 
     private function requireManageableContent(int $contentId): ?array
-    {
-        $content = $this->content->find($contentId);
-        if ($contentId <= 0 || $content === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
-            return null;
-        }
-
-        if (!$this->canManageByAuthor($content)) {
-            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
-            return null;
-        }
-
-        return $content;
-    }
-
-    private function requireDeletableContent(int $contentId): ?array
     {
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
