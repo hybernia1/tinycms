@@ -85,7 +85,7 @@ if ($isMass):
                             </td>
                             <td><input type="text" name="mass_name[<?= $massId ?>]" value="<?= htmlspecialchars((string)($massItem['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"></td>
                             <td class="table-col-actions">
-                                <button class="btn btn-light btn-icon" type="button" data-mass-delete-open="<?= $massId ?>" data-modal-open data-modal-target="#mass-delete-modal" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
+                                <button class="btn btn-light btn-icon" type="button" data-mass-delete-open="<?= $massId ?>" data-mass-delete-url="<?= htmlspecialchars($url('admin/api/v1/media/' . $massId . '/delete'), ENT_QUOTES, 'UTF-8') ?>" data-modal-open data-modal-target="#mass-delete-modal" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
                                     <?= $icon('delete') ?>
                                     <span class="sr-only"><?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?></span>
                                 </button>
@@ -106,11 +106,13 @@ if ($isMass):
             }
 
             let pendingDeleteId = 0;
+            let pendingDeleteUrl = '';
 
             document.addEventListener('click', async (event) => {
                 const openButton = event.target.closest('[data-mass-delete-open]');
                 if (openButton) {
                     pendingDeleteId = Number(openButton.getAttribute('data-mass-delete-open') || '0');
+                    pendingDeleteUrl = String(openButton.getAttribute('data-mass-delete-url') || '');
                     return;
                 }
 
@@ -121,7 +123,7 @@ if ($isMass):
 
                 event.preventDefault();
                 const mediaId = pendingDeleteId;
-                if (mediaId <= 0) {
+                if (mediaId <= 0 || pendingDeleteUrl === '') {
                     return;
                 }
 
@@ -132,7 +134,7 @@ if ($isMass):
                     payload.append('_csrf', csrf);
                 }
 
-                const response = await fetch('<?= htmlspecialchars($url('admin/api/v1/media'), ENT_QUOTES, 'UTF-8') ?>/' + mediaId + '/delete', {
+                const response = await fetch(pendingDeleteUrl, {
                     method: 'POST',
                     body: payload,
                     headers: { Accept: 'application/json' },
@@ -143,6 +145,7 @@ if ($isMass):
                 }
 
                 pendingDeleteId = 0;
+                pendingDeleteUrl = '';
 
                 const row = form.querySelector('[data-mass-row-id="' + mediaId + '"]');
                 if (row) {
