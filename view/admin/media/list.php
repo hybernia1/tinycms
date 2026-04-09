@@ -3,7 +3,13 @@ $listItems = $pagination['data'] ?? [];
 $listPage = (int)($pagination['page'] ?? 1);
 $listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
 $listTotalPages = (int)($pagination['total_pages'] ?? 1);
+$statusCurrent = (string)($status ?? 'all');
 $listQuery = (string)($query ?? '');
+$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
+$statusLinks = [
+    'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
+    'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
+];
 $thumbSuffix = '_100x100.webp';
 if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
     $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
@@ -20,17 +26,18 @@ $listEndpoint = $url('admin/api/v1/media');
 $listEditBase = $url('admin/media/edit?id=');
 $listRootAttrs = ['data-thumb-suffix' => $thumbSuffix];
 $searchPlaceholder = $t('media.search_placeholder');
-$searchHidden = ['per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['q' => $listQuery, 'page' => '1'];
+$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
+$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('admin.menu.media')],
     ['label' => $t('common.author'), 'class' => 'mobile-hide'],
     ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
 ];
 $listAllowedPerPage = $allowedPerPage;
-$statusEnabled = false;
+$statusEnabled = true;
 $deleteConfirmText = $t('media.delete_confirm');
-$paginationUrl = static fn(int $targetPage): string => $url('admin/media?page=' . $targetPage . '&per_page=' . $listPerPage . '&q=' . urlencode($listQuery));
+$statusUrl = static fn(string $targetStatus): string => $url('admin/media?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
+$paginationUrl = static fn(int $targetPage): string => $url('admin/media?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
 $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $isEditor, $currentUserId, $thumbSuffix): string {
     $id = (int)($row['id'] ?? 0);
     $previewPath = trim((string)($row['path_webp'] ?? ''));

@@ -455,7 +455,7 @@ initListApi({
 initListApi({
     name: 'media',
     rootSelector: '[data-media-list]',
-    withStatus: false,
+    withStatus: true,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: { deleteSuccess: t('media.deleted', 'Media deleted.') },
     getContext: (root) => ({ thumbSuffix: root.getAttribute('data-thumb-suffix') || '_100x100.webp' }),

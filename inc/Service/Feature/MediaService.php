@@ -31,8 +31,12 @@ final class MediaService
         ]);
     }
 
-    public function paginate(int $page = 1, int $perPage = 10, string $search = ''): array
+    public function paginate(int $page = 1, int $perPage = 10, string $search = '', string $status = 'all'): array
     {
+        if ($status === 'unassigned') {
+            return $this->paginateUnassigned($page, $perPage, $search);
+        }
+
         $mediaTable = Table::name('media');
         $usersTable = Table::name('users');
         return $this->query->paginate('media', [
@@ -53,6 +57,26 @@ final class MediaService
             'search' => $search,
             'searchColumns' => ['name', 'path', 'path_webp'],
         ]);
+    }
+
+    public function statusCounts(): array
+    {
+        $mediaTable = Table::name('media');
+        $contentTable = Table::name('content');
+        $attachmentsTable = Table::name('attachments');
+
+        $all = (int)(Connection::get()->query("SELECT COUNT(*) FROM $mediaTable")->fetchColumn() ?: 0);
+        $unassignedSql = implode("\n", [
+            "SELECT COUNT(*) FROM $mediaTable m",
+            "WHERE NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
+            "AND NOT EXISTS (SELECT 1 FROM $attachmentsTable a WHERE a.media = m.id)",
+        ]);
+        $unassigned = (int)(Connection::get()->query($unassignedSql)->fetchColumn() ?: 0);
+
+        return [
+            'all' => $all,
+            'unassigned' => $unassigned,
+        ];
     }
 
     public function find(int $id): ?array
@@ -134,9 +158,24 @@ final class MediaService
             return [];
         }
 
-        $rows = $this->query->select('content', ['id', 'name', 'status', 'created', 'updated'], ['thumbnail' => $mediaId]);
-        usort($rows, static fn(array $a, array $b): int => strcmp((string)($b['updated'] ?? $b['created'] ?? ''), (string)($a['updated'] ?? $a['created'] ?? '')));
-        return $rows;
+        $contentTable = Table::name('content');
+        $attachmentsTable = Table::name('attachments');
+        $sql = implode("\n", [
+            'SELECT c.id, c.name, c.created,',
+            'MAX(CASE WHEN c.thumbnail = :media THEN 1 ELSE 0 END) AS used_as_thumbnail,',
+            'MAX(CASE WHEN a.media = :media THEN 1 ELSE 0 END) AS used_in_body',
+            "FROM $contentTable c",
+            "LEFT JOIN $attachmentsTable a ON a.content = c.id",
+            'WHERE c.thumbnail = :media OR a.media = :media',
+            'GROUP BY c.id, c.name, c.created',
+            'ORDER BY COALESCE(MAX(c.updated), c.created) DESC',
+        ]);
+
+        $stmt = Connection::get()->prepare($sql);
+        $stmt->bindValue(':media', $mediaId, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
     }
 
     public function authorOptions(): array
@@ -202,5 +241,64 @@ final class MediaService
 
         $rows = $this->query->select('users', ['ID'], ['ID' => $authorId]);
         return $rows === [] ? null : $authorId;
+    }
+
+    private function paginateUnassigned(int $page, int $perPage, string $search): array
+    {
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $offset = ($page - 1) * $perPage;
+
+        $mediaTable = Table::name('media');
+        $usersTable = Table::name('users');
+        $contentTable = Table::name('content');
+        $attachmentsTable = Table::name('attachments');
+
+        $params = [];
+        $searchSql = '';
+        if ($search !== '') {
+            $searchSql = ' AND (m.name LIKE :search OR m.path LIKE :search OR m.path_webp LIKE :search)';
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $baseSql = implode("\n", [
+            "FROM $mediaTable m",
+            "WHERE NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
+            "AND NOT EXISTS (SELECT 1 FROM $attachmentsTable a WHERE a.media = m.id)",
+        ]) . $searchSql;
+
+        $countStmt = Connection::get()->prepare("SELECT COUNT(*) $baseSql");
+        foreach ($params as $key => $value) {
+            $countStmt->bindValue(':' . $key, $value);
+        }
+        $countStmt->execute();
+        $total = (int)($countStmt->fetchColumn() ?: 0);
+        $totalPages = max(1, (int)ceil($total / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
+
+        $sql = implode("\n", [
+            'SELECT',
+            'm.id, m.name, m.path, m.path_webp, m.author, m.created, m.updated,',
+            "(SELECT name FROM $usersTable u WHERE u.ID = m.author LIMIT 1) AS author_name",
+            $baseSql,
+            'ORDER BY m.id DESC',
+            'LIMIT :limit OFFSET :offset',
+        ]);
+        $stmt = Connection::get()->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value);
+        }
+        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'total' => $total,
+            'total_pages' => $totalPages,
+            'page' => $page,
+            'per_page' => $perPage,
+        ];
     }
 }

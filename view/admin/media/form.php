@@ -67,15 +67,15 @@ if ($mode === 'edit') {
                     </div>
                 <?php endif; ?>
                 <hr>
-                <h3 class="mb-3"><?= htmlspecialchars($t('media.used_as_thumbnail'), ENT_QUOTES, 'UTF-8') ?></h3>
+                <h3 class="mb-3"><?= htmlspecialchars($t('media.used_in'), ENT_QUOTES, 'UTF-8') ?></h3>
                 <?php if (($usages ?? []) === []): ?>
-                    <p class="text-muted m-0"><?= htmlspecialchars($t('media.no_thumbnail_usage'), ENT_QUOTES, 'UTF-8') ?></p>
+                    <p class="text-muted m-0"><?= htmlspecialchars($t('media.no_usage'), ENT_QUOTES, 'UTF-8') ?></p>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
                             <tr>
-                                <th><?= htmlspecialchars($t('content.post'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('content.status'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('common.created'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('common.updated'), ENT_QUOTES, 'UTF-8') ?></th>
+                                <th><?= htmlspecialchars($t('content.post'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('common.created'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('media.usage_origin'), ENT_QUOTES, 'UTF-8') ?></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -86,9 +86,17 @@ if ($mode === 'edit') {
                                             <?= htmlspecialchars((string)($usage['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
                                         </a>
                                     </td>
-                                    <td><?= htmlspecialchars((string)($usage['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                                     <td><?= htmlspecialchars($formatDateTime((string)($usage['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></td>
-                                    <td><?= htmlspecialchars($formatDateTime((string)($usage['updated'] ?? ''), '—'), ENT_QUOTES, 'UTF-8') ?></td>
+                                    <?php
+                                    $origins = [];
+                                    if ((int)($usage['used_as_thumbnail'] ?? 0) === 1) {
+                                        $origins[] = $t('media.origin_thumbnail');
+                                    }
+                                    if ((int)($usage['used_in_body'] ?? 0) === 1) {
+                                        $origins[] = $t('media.origin_post_body');
+                                    }
+                                    ?>
+                                    <td><?= htmlspecialchars(implode(', ', $origins), ENT_QUOTES, 'UTF-8') ?></td>
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
