@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use PDO;
 use PDOException;
 use App\Service\Support\I18n;
+use App\Service\Infra\Db\Table;
 
 class Query
 {
@@ -19,6 +20,7 @@ class Query
 
     public function select(string $table, array $columns = ['*'], array $where = []): array
     {
+        $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         $cols = $this->buildColumns($columns);
         [$whereSql, $params] = $this->buildWhere($where);
@@ -32,6 +34,7 @@ class Query
 
     public function paginate(string $table, array $columns = ['*'], array $where = [], array $options = []): array
     {
+        $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         $cols = $this->buildColumns($columns);
         $page = max(1, (int)($options['page'] ?? 1));
@@ -88,6 +91,7 @@ class Query
 
     public function insert(string $table, array $data): int
     {
+        $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         if ($data === []) {
             throw new InvalidArgumentException(I18n::t('errors.db.insert_data_empty'));
@@ -111,6 +115,7 @@ class Query
 
     public function update(string $table, array $data, array $where): int
     {
+        $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         if ($data === []) {
             throw new InvalidArgumentException(I18n::t('errors.db.update_data_empty'));
@@ -146,6 +151,7 @@ class Query
 
     public function delete(string $table, array $where): int
     {
+        $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         if ($where === []) {
             throw new InvalidArgumentException(I18n::t('errors.db.delete_conditions_empty'));
@@ -162,6 +168,7 @@ class Query
 
     public function deleteIn(string $table, string $column, array $values): int
     {
+        $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         $this->assertIdentifier($column, 'column');
         $ids = array_values(array_unique(array_filter(array_map('intval', $values), fn(int $v): bool => $v > 0)));

@@ -23,6 +23,7 @@ final class InstallService
         $name = trim((string)($input['db_name'] ?? ''));
         $user = trim((string)($input['db_user'] ?? ''));
         $pass = (string)($input['db_pass'] ?? '');
+        $prefix = trim((string)($input['db_prefix'] ?? ''));
 
         $errors = [];
 
@@ -37,6 +38,9 @@ final class InstallService
         if ($user === '') {
             $errors['db_user'] = I18n::t('install.db_user_required');
         }
+        if ($prefix !== '' && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $prefix) !== 1) {
+            $errors['db_prefix'] = I18n::t('install.db_prefix_invalid');
+        }
 
         return [
             'values' => [
@@ -44,6 +48,7 @@ final class InstallService
                 'db_name' => $name,
                 'db_user' => $user,
                 'db_pass' => $pass,
+                'db_prefix' => $prefix,
             ],
             'errors' => $errors,
         ];
@@ -115,12 +120,12 @@ final class InstallService
         }
 
         try {
-            $this->createSchema($pdo);
+            $this->createSchema($pdo, (string)($db['db_prefix'] ?? ''));
         } catch (PDOException $e) {
             return ['success' => false, 'message' => I18n::t('install.schema_failed')];
         }
 
-        $adminResult = $this->createAdmin($pdo, $admin);
+        $adminResult = $this->createAdmin($pdo, $admin, (string)($db['db_prefix'] ?? ''));
         if ($adminResult !== null) {
             return ['success' => false, 'message' => $adminResult];
         }
@@ -142,10 +147,11 @@ final class InstallService
         return $pdo;
     }
 
-    private function createAdmin(PDO $pdo, array $admin): ?string
+    private function createAdmin(PDO $pdo, array $admin, string $prefix = ''): ?string
     {
+        $users = $prefix . 'users';
         try {
-            $exists = $pdo->prepare('SELECT id, role FROM users WHERE email = :email LIMIT 1');
+            $exists = $pdo->prepare("SELECT id, role FROM $users WHERE email = :email LIMIT 1");
             $exists->execute(['email' => (string)$admin['email']]);
             $row = $exists->fetch(PDO::FETCH_ASSOC);
 
@@ -157,7 +163,7 @@ final class InstallService
                 return I18n::t('install.email_exists_other_role');
             }
 
-            $insert = $pdo->prepare('INSERT INTO users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)');
+            $insert = $pdo->prepare("INSERT INTO $users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)");
             $now = date('Y-m-d H:i:s');
             $insert->execute([
                 'name' => (string)$admin['name'],
@@ -178,11 +184,13 @@ final class InstallService
     private function writeConfig(array $db, string $lang = APP_LANG): void
     {
         $normalizedLang = strtolower(trim($lang));
+        $prefix = trim((string)($db['db_prefix'] ?? ''));
         $content = "<?php\ndeclare(strict_types=1);\n\ndefine('INC_DIR', 'inc/');\n\nconst APP_DEBUG = false;\nconst APP_LANG = " . var_export($normalizedLang, true) . ";\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\n\n"
             . "const DB_HOST = " . var_export((string)$db['db_host'], true) . ";\n"
             . "const DB_NAME = " . var_export((string)$db['db_name'], true) . ";\n"
             . "const DB_USER = " . var_export((string)$db['db_user'], true) . ";\n"
             . "const DB_PASS = " . var_export((string)$db['db_pass'], true) . ";\n\n"
+            . "const DB_PREFIX = " . var_export($prefix, true) . ";\n\n"
             . "const MEDIA_THUMB_VARIANTS = [\n"
             . "    ['suffix' => '_100x100.webp', 'mode' => 'crop', 'width' => 100, 'height' => 100],\n"
             . "    ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],\n"
@@ -195,9 +203,9 @@ final class InstallService
         }
     }
 
-    private function createSchema(PDO $pdo): void
+    private function createSchema(PDO $pdo, string $prefix = ''): void
     {
-        foreach (SchemaDefinition::ddl() as $query) {
+        foreach (SchemaDefinition::ddl($prefix) as $query) {
             $pdo->exec($query);
         }
     }

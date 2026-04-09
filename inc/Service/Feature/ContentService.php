@@ -6,6 +6,7 @@ namespace App\Service\Feature;
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
 use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Infra\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
@@ -24,6 +25,8 @@ final class ContentService
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
     {
+        $contentTable = Table::name('content');
+        $usersTable = Table::name('users');
         $where = [];
 
         if ($status !== 'all') {
@@ -35,7 +38,7 @@ final class ContentService
             'name',
             'status',
             'author',
-            '(SELECT name FROM users WHERE users.ID = content.author LIMIT 1) AS author_name',
+            "(SELECT name FROM $usersTable WHERE $usersTable.ID = $contentTable.author LIMIT 1) AS author_name",
             'created',
             'updated',
         ], $where, [
@@ -51,6 +54,8 @@ final class ContentService
 
     public function find(int $id): ?array
     {
+        $contentTable = Table::name('content');
+        $mediaTable = Table::name('media');
         $rows = $this->query->select('content', [
             'id',
             'name',
@@ -59,9 +64,9 @@ final class ContentService
             'body',
             'author',
             'thumbnail',
-            '(SELECT name FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_name',
-            '(SELECT path FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path',
-            '(SELECT path_webp FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path_webp',
+            "(SELECT name FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_name",
+            "(SELECT path FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path",
+            "(SELECT path_webp FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path_webp",
             'created',
             'updated',
         ], ['id' => $id]);
@@ -234,7 +239,8 @@ final class ContentService
             return false;
         }
 
-        $stmt = $this->pdo->prepare('INSERT IGNORE INTO attachments (content, media) VALUES (:content, :media)');
+        $attachmentsTable = Table::name('attachments');
+        $stmt = $this->pdo->prepare("INSERT IGNORE INTO $attachmentsTable (content, media) VALUES (:content, :media)");
         return $stmt->execute([
             'content' => $contentId,
             'media' => $mediaId,
@@ -249,7 +255,8 @@ final class ContentService
 
         $mediaIds = $this->extractMediaIdsFromBody($body);
         if ($mediaIds === []) {
-            $stmt = $this->pdo->prepare('DELETE FROM attachments WHERE content = :content');
+            $attachmentsTable = Table::name('attachments');
+            $stmt = $this->pdo->prepare("DELETE FROM $attachmentsTable WHERE content = :content");
             $stmt->execute(['content' => $contentId]);
             return;
         }
@@ -262,14 +269,15 @@ final class ContentService
             $params[$key] = $mediaId;
         }
 
+        $attachmentsTable = Table::name('attachments');
         $deleteSql = sprintf(
-            'DELETE FROM attachments WHERE content = :content AND media NOT IN (%s)',
+            "DELETE FROM $attachmentsTable WHERE content = :content AND media NOT IN (%s)",
             implode(', ', $placeholders),
         );
         $deleteStmt = $this->pdo->prepare($deleteSql);
         $deleteStmt->execute($params);
 
-        $insertStmt = $this->pdo->prepare('INSERT IGNORE INTO attachments (content, media) VALUES (:content, :media)');
+        $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $attachmentsTable (content, media) VALUES (:content, :media)");
         foreach ($mediaIds as $mediaId) {
             $insertStmt->execute([
                 'content' => $contentId,
@@ -293,7 +301,8 @@ final class ContentService
         }
 
         $placeholders = implode(', ', array_fill(0, count($ids), '?'));
-        $stmt = $this->pdo->prepare('SELECT id FROM media WHERE id IN (' . $placeholders . ')');
+        $mediaTable = Table::name('media');
+        $stmt = $this->pdo->prepare("SELECT id FROM $mediaTable WHERE id IN ($placeholders)");
         $stmt->execute($ids);
         $existingIds = array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $stmt->fetchAll(\PDO::FETCH_ASSOC));
         $allowed = array_fill_keys($existingIds, true);
@@ -303,13 +312,15 @@ final class ContentService
 
     public function listPublished(int $limit = 20): array
     {
+        $contentTable = Table::name('content');
+        $mediaTable = Table::name('media');
         $rows = $this->query->select('content', [
             'id',
             'name',
             'excerpt',
             'created',
-            '(SELECT path FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path',
-            '(SELECT path_webp FROM media WHERE media.id = content.thumbnail LIMIT 1) AS thumbnail_path_webp',
+            "(SELECT path FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path",
+            "(SELECT path_webp FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path_webp",
         ], ['status' => 'published']);
         $now = time();
         $items = array_values(array_filter($rows, static fn(array $row): bool => self::isPublishedVisible($row, $now)));
@@ -326,12 +337,13 @@ final class ContentService
     public function listPublishedFeed(int $limit = 50): array
     {
         $safeLimit = $limit > 0 ? $limit : 50;
+        $contentTable = Table::name('content');
         $stmt = $this->pdo->prepare(
-            'SELECT c.id, c.name, c.excerpt, c.body, c.created
-             FROM content c
+            "SELECT c.id, c.name, c.excerpt, c.body, c.created
+             FROM $contentTable c
              WHERE c.status = :status AND c.created <= NOW()
              ORDER BY c.created DESC, c.id DESC
-             LIMIT :limit'
+             LIMIT :limit"
         );
         $stmt->bindValue(':status', 'published');
         $stmt->bindValue(':limit', $safeLimit, \PDO::PARAM_INT);
@@ -346,13 +358,15 @@ final class ContentService
         }
 
         $safeLimit = $limit > 0 ? $limit : 50;
+        $contentTable = Table::name('content');
+        $contentTermsTable = Table::name('content_terms');
         $stmt = $this->pdo->prepare(
-            'SELECT DISTINCT c.id, c.name, c.excerpt, c.body, c.created
-             FROM content c
-             INNER JOIN content_terms ct ON ct.content = c.id
+            "SELECT DISTINCT c.id, c.name, c.excerpt, c.body, c.created
+             FROM $contentTable c
+             INNER JOIN $contentTermsTable ct ON ct.content = c.id
              WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()
              ORDER BY c.created DESC, c.id DESC
-             LIMIT :limit'
+             LIMIT :limit"
         );
         $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
         $stmt->bindValue(':status', 'published');
@@ -371,8 +385,11 @@ final class ContentService
         $safePage = $page > 0 ? $page : 1;
         $offset = ($safePage - 1) * $safePerPage;
 
+        $contentTable = Table::name('content');
+        $contentTermsTable = Table::name('content_terms');
+        $mediaTable = Table::name('media');
         $countStmt = $this->pdo->prepare(
-            'SELECT COUNT(DISTINCT c.id) FROM content c INNER JOIN content_terms ct ON ct.content = c.id WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()'
+            "SELECT COUNT(DISTINCT c.id) FROM $contentTable c INNER JOIN $contentTermsTable ct ON ct.content = c.id WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()"
         );
         $countStmt->execute(['term' => $termId, 'status' => 'published']);
         $total = (int)$countStmt->fetchColumn();
@@ -381,14 +398,14 @@ final class ContentService
         $offset = ($currentPage - 1) * $safePerPage;
 
         $stmt = $this->pdo->prepare(
-            'SELECT DISTINCT c.id, c.name, c.excerpt, c.created,
-                    (SELECT path FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path,
-                    (SELECT path_webp FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
-             FROM content c
-             INNER JOIN content_terms ct ON ct.content = c.id
+            "SELECT DISTINCT c.id, c.name, c.excerpt, c.created,
+                    (SELECT path FROM $mediaTable WHERE $mediaTable.id = c.thumbnail LIMIT 1) AS thumbnail_path,
+                    (SELECT path_webp FROM $mediaTable WHERE $mediaTable.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
+             FROM $contentTable c
+             INNER JOIN $contentTermsTable ct ON ct.content = c.id
              WHERE ct.term = :term AND c.status = :status AND c.created <= NOW()
              ORDER BY c.created DESC, c.id DESC
-             LIMIT :limit OFFSET :offset'
+             LIMIT :limit OFFSET :offset"
         );
         $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
         $stmt->bindValue(':status', 'published');
@@ -416,10 +433,12 @@ final class ContentService
         $safePage = $page > 0 ? $page : 1;
         $offset = ($safePage - 1) * $safePerPage;
 
+        $contentTable = Table::name('content');
+        $mediaTable = Table::name('media');
         $countStmt = $this->pdo->prepare(
-            'SELECT COUNT(*) FROM content c
+            "SELECT COUNT(*) FROM $contentTable c
              WHERE c.status = :status AND c.created <= NOW()
-             AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)'
+             AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)"
         );
         $countStmt->execute(['status' => 'published', 'search' => '%' . $needle . '%']);
         $total = (int)$countStmt->fetchColumn();
@@ -428,14 +447,14 @@ final class ContentService
         $offset = ($currentPage - 1) * $safePerPage;
 
         $stmt = $this->pdo->prepare(
-            'SELECT c.id, c.name, c.excerpt, c.created,
-                    (SELECT path FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path,
-                    (SELECT path_webp FROM media WHERE media.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
-             FROM content c
+            "SELECT c.id, c.name, c.excerpt, c.created,
+                    (SELECT path FROM $mediaTable WHERE $mediaTable.id = c.thumbnail LIMIT 1) AS thumbnail_path,
+                    (SELECT path_webp FROM $mediaTable WHERE $mediaTable.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
+             FROM $contentTable c
              WHERE c.status = :status AND c.created <= NOW()
              AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)
              ORDER BY c.created DESC, c.id DESC
-             LIMIT :limit OFFSET :offset'
+             LIMIT :limit OFFSET :offset"
         );
         $stmt->bindValue(':status', 'published');
         $stmt->bindValue(':search', '%' . $needle . '%');
@@ -457,8 +476,9 @@ final class ContentService
         $safePerPage = $perPage > 0 ? $perPage : 2000;
         $safePage = $page > 0 ? $page : 1;
         $offset = ($safePage - 1) * $safePerPage;
+        $contentTable = Table::name('content');
         $stmt = $this->pdo->prepare(
-            'SELECT id, name, updated, created FROM content WHERE status = :status AND created <= NOW() ORDER BY id ASC LIMIT :limit OFFSET :offset'
+            "SELECT id, name, updated, created FROM $contentTable WHERE status = :status AND created <= NOW() ORDER BY id ASC LIMIT :limit OFFSET :offset"
         );
         $stmt->bindValue(':status', 'published');
         $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
@@ -470,7 +490,8 @@ final class ContentService
 
     public function publishedVisibleCount(): int
     {
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM content WHERE status = :status AND created <= NOW()');
+        $contentTable = Table::name('content');
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable WHERE status = :status AND created <= NOW()");
         $stmt->execute(['status' => 'published']);
         return (int)$stmt->fetchColumn();
     }

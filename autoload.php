@@ -35,6 +35,10 @@ if (!defined('APP_POSTS_PER_PAGE')) {
     define('APP_POSTS_PER_PAGE', 10);
 }
 
+if (!defined('DB_PREFIX')) {
+    define('DB_PREFIX', '');
+}
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
 

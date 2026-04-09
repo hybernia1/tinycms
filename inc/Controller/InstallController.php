@@ -33,7 +33,7 @@ final class InstallController
         $this->view->render('front/layout', 'front/install/step-db', [
             'pageTitle' => I18n::t('install.page_database'),
             'errors' => (array)($state['errors_db'] ?? []),
-            'old' => (array)($state['db'] ?? ['db_host' => '127.0.0.1', 'db_name' => '', 'db_user' => '', 'db_pass' => '']),
+            'old' => (array)($state['db'] ?? ['db_host' => '127.0.0.1', 'db_name' => '', 'db_user' => '', 'db_pass' => '', 'db_prefix' => 'tiny_']),
             'message' => (string)($state['message'] ?? ''),
         ]);
 
