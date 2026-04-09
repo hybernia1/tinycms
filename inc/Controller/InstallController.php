@@ -46,6 +46,7 @@ final class InstallController
 
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
             $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
+            $_SESSION['install']['db_valid'] = false;
             $redirect('install/db');
         }
 
@@ -54,6 +55,7 @@ final class InstallController
         if ($result['errors'] !== []) {
             $_SESSION['install']['errors_db'] = $result['errors'];
             $_SESSION['install']['db'] = $result['values'];
+            $_SESSION['install']['db_valid'] = false;
             $redirect('install/db');
         }
 
@@ -62,6 +64,7 @@ final class InstallController
         if ($error !== null) {
             $_SESSION['install']['errors_db'] = ['db' => $error];
             $_SESSION['install']['db'] = $result['values'];
+            $_SESSION['install']['db_valid'] = false;
             $redirect('install/db');
         }
 
@@ -70,10 +73,12 @@ final class InstallController
         if ($prefixError !== null) {
             $_SESSION['install']['errors_db'] = ['db' => $prefixError];
             $_SESSION['install']['db'] = $result['values'];
+            $_SESSION['install']['db_valid'] = false;
             $redirect('install/db');
         }
 
         $_SESSION['install']['db'] = $result['values'];
+        $_SESSION['install']['db_valid'] = true;
         $_SESSION['install']['errors_admin'] = [];
         $_SESSION['install']['admin'] = ['name' => '', 'email' => '', 'password' => ''];
 
@@ -82,7 +87,7 @@ final class InstallController
 
     public function formAdmin(callable $redirect): void
     {
-        if (!isset($_SESSION['install']['db'])) {
+        if (!isset($_SESSION['install']['db']) || ($_SESSION['install']['db_valid'] ?? false) !== true) {
             $redirect('install/db');
         }
 
@@ -101,7 +106,7 @@ final class InstallController
 
     public function submitAdmin(callable $redirect): void
     {
-        if (!isset($_SESSION['install']['db'])) {
+        if (!isset($_SESSION['install']['db']) || ($_SESSION['install']['db_valid'] ?? false) !== true) {
             $redirect('install/db');
         }
 
