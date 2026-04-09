@@ -12,6 +12,12 @@ final class Table
 
     public static function prefix(): string
     {
-        return defined('DB_PREFIX') ? trim((string)DB_PREFIX) : '';
+        $prefix = defined('DB_PREFIX') ? trim((string)DB_PREFIX) : '';
+
+        if ($prefix !== '' && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $prefix) !== 1) {
+            throw new \RuntimeException('Invalid DB_PREFIX value.');
+        }
+
+        return $prefix;
     }
 }

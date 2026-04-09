@@ -114,23 +114,30 @@ final class InstallService
     public function install(array $db, array $admin, string $lang): array
     {
         try {
+            $prefix = $this->normalizePrefix((string)($db['db_prefix'] ?? ''));
+        } catch (\RuntimeException $e) {
+            return ['success' => false, 'message' => I18n::t('install.db_prefix_invalid')];
+        }
+
+        try {
             $pdo = $this->connect($db);
         } catch (PDOException $e) {
             return ['success' => false, 'message' => I18n::t('install.db_connect_failed')];
         }
 
         try {
-            $this->createSchema($pdo, (string)($db['db_prefix'] ?? ''));
+            $this->createSchema($pdo, $prefix);
         } catch (PDOException $e) {
             return ['success' => false, 'message' => I18n::t('install.schema_failed')];
         }
 
-        $adminResult = $this->createAdmin($pdo, $admin, (string)($db['db_prefix'] ?? ''));
+        $adminResult = $this->createAdmin($pdo, $admin, $prefix);
         if ($adminResult !== null) {
             return ['success' => false, 'message' => $adminResult];
         }
 
         try {
+            $db['db_prefix'] = $prefix;
             $this->writeConfig($db, $lang);
         } catch (\RuntimeException $e) {
             return ['success' => false, 'message' => I18n::t('install.config_failed')];
@@ -149,6 +156,7 @@ final class InstallService
 
     private function createAdmin(PDO $pdo, array $admin, string $prefix = ''): ?string
     {
+        $prefix = $this->normalizePrefix($prefix);
         $users = $prefix . 'users';
         try {
             $exists = $pdo->prepare("SELECT id, role FROM $users WHERE email = :email LIMIT 1");
@@ -184,7 +192,7 @@ final class InstallService
     private function writeConfig(array $db, string $lang = APP_LANG): void
     {
         $normalizedLang = strtolower(trim($lang));
-        $prefix = trim((string)($db['db_prefix'] ?? ''));
+        $prefix = $this->normalizePrefix((string)($db['db_prefix'] ?? ''));
         $content = "<?php\ndeclare(strict_types=1);\n\ndefine('INC_DIR', 'inc/');\n\nconst APP_DEBUG = false;\nconst APP_LANG = " . var_export($normalizedLang, true) . ";\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\n\n"
             . "const DB_HOST = " . var_export((string)$db['db_host'], true) . ";\n"
             . "const DB_NAME = " . var_export((string)$db['db_name'], true) . ";\n"
@@ -205,8 +213,20 @@ final class InstallService
 
     private function createSchema(PDO $pdo, string $prefix = ''): void
     {
+        $prefix = $this->normalizePrefix($prefix);
         foreach (SchemaDefinition::ddl($prefix) as $query) {
             $pdo->exec($query);
         }
+    }
+
+    private function normalizePrefix(string $prefix): string
+    {
+        $clean = trim($prefix);
+
+        if ($clean === '' || preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $clean) === 1) {
+            return $clean;
+        }
+
+        throw new \RuntimeException('Invalid database prefix.');
     }
 }
