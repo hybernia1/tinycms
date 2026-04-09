@@ -311,29 +311,6 @@ final class AdminContentMediaApiController extends BaseAdminController
         ];
     }
 
-    private function resolvePreviewPath(array $item): string
-    {
-        $previewPath = trim((string)($item['path_webp'] ?? ''));
-        if ($previewPath !== '') {
-            return (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $previewPath) ?? $previewPath);
-        }
-
-        return trim((string)($item['path'] ?? ''));
-    }
-
-    private function thumbnailSuffix(): string
-    {
-        $suffix = '_100x100.webp';
-        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
-            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
-            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
-                $suffix = (string)$firstVariant['suffix'];
-            }
-        }
-
-        return $suffix;
-    }
-
     private function matchesLibraryQuery(array $item, string $query): bool
     {
         $needle = mb_strtolower(trim($query), 'UTF-8');

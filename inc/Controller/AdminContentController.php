@@ -155,7 +155,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->normalizeContentInput($_POST, $authorId), $authorId);
+        $result = $this->content->save($this->applyEditorAuthor($_POST, $authorId), $authorId);
 
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
@@ -227,7 +227,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->normalizeContentInput($_POST, $authorId), $authorId, $id);
+        $result = $this->content->save($this->applyEditorAuthor($_POST, $authorId), $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
@@ -573,27 +573,10 @@ final class AdminContentController extends BaseAdminController
         ];
     }
 
-    private function normalizeContentInput(array $input, int $authorId): array
-    {
-        if (!$this->isEditor()) {
-            return $input;
-        }
-
-        $input['author'] = $authorId > 0 ? (string)$authorId : '';
-        return $input;
-    }
-
     private function resolveListQuery(): array
     {
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
         $status = trim((string)($_GET['status'] ?? 'all'));
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
 
         $availableStatuses = $this->content->statuses();
         if ($status !== 'all' && !in_array($status, $availableStatuses, true)) {

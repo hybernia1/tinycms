@@ -7,6 +7,7 @@ use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
+use App\Service\Support\PaginationConfig;
 
 abstract class BaseAdminController
 {
@@ -168,6 +169,58 @@ abstract class BaseAdminController
         }
 
         return date(APP_DATETIME_FORMAT, $stamp);
+    }
+
+    protected function hasUpload(string $field): bool
+    {
+        return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    }
+
+    protected function applyEditorAuthor(array $input, int $authorId, string $key = 'author'): array
+    {
+        if (!$this->isEditor()) {
+            return $input;
+        }
+
+        $input[$key] = $authorId > 0 ? (string)$authorId : '';
+        return $input;
+    }
+
+    protected function resolvePaginationQuery(): array
+    {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $defaultPerPage = PaginationConfig::perPage();
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        $query = trim((string)($_GET['q'] ?? ''));
+
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
+        }
+
+        return [$page, $perPage, $query];
+    }
+
+    protected function resolvePreviewPath(array $item): string
+    {
+        $pathWebp = trim((string)($item['path_webp'] ?? ''));
+        if ($pathWebp !== '') {
+            return (string)(preg_replace('/\\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
+        }
+
+        return trim((string)($item['path'] ?? ''));
+    }
+
+    protected function thumbnailSuffix(): string
+    {
+        $suffix = '_100x100.webp';
+        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
+            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
+            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
+                $suffix = (string)$firstVariant['suffix'];
+            }
+        }
+
+        return $suffix;
     }
 
     private function ensureSession(): void

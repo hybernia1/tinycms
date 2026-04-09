@@ -59,11 +59,6 @@ final class AdminSettingsController extends BaseAdminController
         $redirect('admin/settings');
     }
 
-    private function hasUpload(string $field): bool
-    {
-        return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
-    }
-
     private function handleSiteImageUpload(string $field, string $settingKey, array &$input, array $resolved, callable $uploader, callable $redirect): bool
     {
         if (!$this->hasUpload($field)) {

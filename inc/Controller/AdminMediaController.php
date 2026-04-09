@@ -100,7 +100,7 @@ final class AdminMediaController extends BaseAdminController
             'path_webp' => (string)($uploadData['path_webp'] ?? ''),
             'author' => trim((string)($_POST['author'] ?? '')) !== '' ? (string)$_POST['author'] : ($authorId > 0 ? (string)$authorId : ''),
         ]);
-        $result = $this->media->save($this->normalizeMediaInput($input, $authorId));
+        $result = $this->media->save($this->applyEditorAuthor($input, $authorId));
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.created'));
@@ -173,7 +173,7 @@ final class AdminMediaController extends BaseAdminController
         ]);
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->media->save($this->normalizeMediaInput($input, $authorId), $id);
+        $result = $this->media->save($this->applyEditorAuthor($input, $authorId), $id);
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.updated'));
@@ -263,15 +263,8 @@ final class AdminMediaController extends BaseAdminController
 
     private function resolveListQuery(): array
     {
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
         $status = (string)($_GET['status'] ?? 'all');
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
 
         if (!in_array($status, ['all', 'unassigned'], true)) {
             $status = 'all';
@@ -280,23 +273,13 @@ final class AdminMediaController extends BaseAdminController
         return [$page, $perPage, $status, $query];
     }
 
-    private function hasUpload(string $field): bool
-    {
-        return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
-    }
-
-    private function normalizeMediaInput(array $input, int $authorId): array
-    {
-        if (!$this->isEditor()) {
-            return $input;
-        }
-
-        $input['author'] = $authorId > 0 ? (string)$authorId : '';
-        return $input;
-    }
-
     private function mapListItem(array $row): array
     {
+        $previewPath = $this->resolvePreviewPath($row);
+        if ($previewPath !== '' && !str_starts_with($previewPath, '/')) {
+            $previewPath = '/' . ltrim($previewPath, '/');
+        }
+
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
@@ -304,37 +287,11 @@ final class AdminMediaController extends BaseAdminController
             'can_delete' => $this->canManageByAuthor($row),
             'path' => (string)($row['path'] ?? ''),
             'path_webp' => (string)($row['path_webp'] ?? ''),
-            'preview_path' => $this->resolvePreviewPath($row),
+            'preview_path' => $previewPath,
             'author_name' => (string)($row['author_name'] ?? '—'),
             'created' => (string)($row['created'] ?? ''),
             'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
         ];
-    }
-
-    private function resolvePreviewPath(array $row): string
-    {
-        $pathWebp = trim((string)($row['path_webp'] ?? ''));
-        if ($pathWebp !== '') {
-            $preview = (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
-            return str_starts_with($preview, '/') ? $preview : '/' . ltrim($preview, '/');
-        }
-        $path = trim((string)($row['path'] ?? ''));
-        if ($path === '') {
-            return '';
-        }
-        return str_starts_with($path, '/') ? $path : '/' . ltrim($path, '/');
-    }
-
-    private function thumbnailSuffix(): string
-    {
-        $suffix = '_100x100.webp';
-        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
-            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
-            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
-                $suffix = (string)$firstVariant['suffix'];
-            }
-        }
-        return $suffix;
     }
 
 }

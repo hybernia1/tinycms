@@ -204,17 +204,10 @@ final class AdminUserController extends BaseAdminController
 
     private function resolveListQuery(): array
     {
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
         $status = (string)($_GET['status'] ?? 'all');
         $status = in_array($status, ['all', 'active', 'suspended'], true) ? $status : 'all';
         $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
 
         return [$page, $perPage, $status, $suspend, $query];
     }

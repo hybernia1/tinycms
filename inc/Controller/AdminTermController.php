@@ -180,15 +180,8 @@ final class AdminTermController extends BaseAdminController
 
     private function resolveListQuery(): array
     {
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
         $status = trim((string)($_GET['status'] ?? 'all'));
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
 
         if (!in_array($status, ['all', 'unassigned'], true)) {
             $status = 'all';
