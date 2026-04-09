@@ -6,6 +6,7 @@ namespace App\Service\Feature;
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
 use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Infra\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
@@ -123,7 +124,8 @@ final class TermService
             ], (array)($rows['data'] ?? []));
         }
 
-        $stmt = $this->pdo->prepare('SELECT id, name FROM terms WHERE name LIKE :search ORDER BY name ASC LIMIT :limit');
+        $termsTable = Table::name('terms');
+        $stmt = $this->pdo->prepare("SELECT id, name FROM $termsTable WHERE name LIKE :search ORDER BY name ASC LIMIT :limit");
         $stmt->bindValue(':search', '%' . $needle . '%');
         $stmt->bindValue(':limit', min($limit, 50), \PDO::PARAM_INT);
         $stmt->execute();
@@ -141,7 +143,9 @@ final class TermService
             return [];
         }
 
-        $stmt = $this->pdo->prepare('SELECT DISTINCT t.id, t.name FROM terms t INNER JOIN content_terms ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC');
+        $termsTable = Table::name('terms');
+        $contentTermsTable = Table::name('content_terms');
+        $stmt = $this->pdo->prepare("SELECT DISTINCT t.id, t.name FROM $termsTable t INNER JOIN $contentTermsTable ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC");
         $stmt->execute(['content' => $contentId]);
 
         return array_map(static fn(array $row): array => [
@@ -156,7 +160,9 @@ final class TermService
             return [];
         }
 
-        $stmt = $this->pdo->prepare('SELECT DISTINCT t.name FROM terms t INNER JOIN content_terms ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC');
+        $termsTable = Table::name('terms');
+        $contentTermsTable = Table::name('content_terms');
+        $stmt = $this->pdo->prepare("SELECT DISTINCT t.name FROM $termsTable t INNER JOIN $contentTermsTable ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC");
         $stmt->execute(['content' => $contentId]);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -168,7 +174,8 @@ final class TermService
         $safePerPage = $perPage > 0 ? $perPage : 2000;
         $safePage = $page > 0 ? $page : 1;
         $offset = ($safePage - 1) * $safePerPage;
-        $stmt = $this->pdo->prepare('SELECT id, name, updated, created FROM terms ORDER BY id ASC LIMIT :limit OFFSET :offset');
+        $termsTable = Table::name('terms');
+        $stmt = $this->pdo->prepare("SELECT id, name, updated, created FROM $termsTable ORDER BY id ASC LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
@@ -178,7 +185,8 @@ final class TermService
 
     public function totalCount(): int
     {
-        $stmt = $this->pdo->query('SELECT COUNT(*) FROM terms');
+        $termsTable = Table::name('terms');
+        $stmt = $this->pdo->query("SELECT COUNT(*) FROM $termsTable");
         return (int)$stmt->fetchColumn();
     }
 
@@ -190,7 +198,8 @@ final class TermService
 
         $names = $this->normalizeTerms($rawTerms);
         if ($names === []) {
-            $stmt = $this->pdo->prepare('DELETE FROM content_terms WHERE content = :content');
+            $contentTermsTable = Table::name('content_terms');
+            $stmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
             $stmt->execute(['content' => $contentId]);
             return;
         }
@@ -198,8 +207,10 @@ final class TermService
         $this->pdo->beginTransaction();
         try {
             $termIds = [];
-            $selectStmt = $this->pdo->prepare('SELECT id FROM terms WHERE name = :name LIMIT 1');
-            $insertStmt = $this->pdo->prepare('INSERT INTO terms (name, created, updated) VALUES (:name, NOW(), NOW())');
+            $termsTable = Table::name('terms');
+            $contentTermsTable = Table::name('content_terms');
+            $selectStmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
+            $insertStmt = $this->pdo->prepare("INSERT INTO $termsTable (name, created, updated) VALUES (:name, NOW(), NOW())");
 
             foreach ($names as $name) {
                 $selectStmt->execute(['name' => $name]);
@@ -215,16 +226,16 @@ final class TermService
 
             $termIds = array_values(array_unique($termIds));
             if ($termIds === []) {
-                $deleteStmt = $this->pdo->prepare('DELETE FROM content_terms WHERE content = :content');
+                $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
                 $deleteStmt->execute(['content' => $contentId]);
                 $this->pdo->commit();
                 return;
             }
 
-            $deleteStmt = $this->pdo->prepare('DELETE FROM content_terms WHERE content = :content');
+            $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
             $deleteStmt->execute(['content' => $contentId]);
 
-            $attachStmt = $this->pdo->prepare('INSERT IGNORE INTO content_terms (content, term) VALUES (:content, :term)');
+            $attachStmt = $this->pdo->prepare("INSERT IGNORE INTO $contentTermsTable (content, term) VALUES (:content, :term)");
             foreach ($termIds as $termId) {
                 $attachStmt->execute(['content' => $contentId, 'term' => $termId]);
             }
@@ -257,7 +268,8 @@ final class TermService
 
     private function existsByName(string $name, ?int $excludeId = null): bool
     {
-        $stmt = $this->pdo->prepare('SELECT id FROM terms WHERE name = :name LIMIT 1');
+        $termsTable = Table::name('terms');
+        $stmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
         $stmt->execute(['name' => $name]);
         $foundId = (int)$stmt->fetchColumn();
 

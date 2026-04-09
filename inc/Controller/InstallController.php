@@ -33,7 +33,7 @@ final class InstallController
         $this->view->render('front/layout', 'front/install/step-db', [
             'pageTitle' => I18n::t('install.page_database'),
             'errors' => (array)($state['errors_db'] ?? []),
-            'old' => (array)($state['db'] ?? ['db_host' => '127.0.0.1', 'db_name' => '', 'db_user' => '', 'db_pass' => '']),
+            'old' => (array)($state['db'] ?? ['db_host' => '127.0.0.1', 'db_name' => '', 'db_user' => '', 'db_pass' => '', 'db_prefix' => 'tiny_']),
             'message' => (string)($state['message'] ?? ''),
         ]);
 
@@ -46,6 +46,7 @@ final class InstallController
 
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
             $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
+            $_SESSION['install']['db_valid'] = false;
             $redirect('install/db');
         }
 
@@ -54,18 +55,21 @@ final class InstallController
         if ($result['errors'] !== []) {
             $_SESSION['install']['errors_db'] = $result['errors'];
             $_SESSION['install']['db'] = $result['values'];
+            $_SESSION['install']['db_valid'] = false;
             $redirect('install/db');
         }
 
-        $error = $this->installService->canConnect($result['values']);
+        $prefixError = $this->installService->canInstallOnPrefix($result['values']);
 
-        if ($error !== null) {
-            $_SESSION['install']['errors_db'] = ['db' => $error];
+        if ($prefixError !== null) {
+            $_SESSION['install']['errors_db'] = ['db' => $prefixError];
             $_SESSION['install']['db'] = $result['values'];
+            $_SESSION['install']['db_valid'] = false;
             $redirect('install/db');
         }
 
         $_SESSION['install']['db'] = $result['values'];
+        $_SESSION['install']['db_valid'] = true;
         $_SESSION['install']['errors_admin'] = [];
         $_SESSION['install']['admin'] = ['name' => '', 'email' => '', 'password' => ''];
 
@@ -74,7 +78,7 @@ final class InstallController
 
     public function formAdmin(callable $redirect): void
     {
-        if (!isset($_SESSION['install']['db'])) {
+        if (!isset($_SESSION['install']['db']) || ($_SESSION['install']['db_valid'] ?? false) !== true) {
             $redirect('install/db');
         }
 
@@ -93,7 +97,7 @@ final class InstallController
 
     public function submitAdmin(callable $redirect): void
     {
-        if (!isset($_SESSION['install']['db'])) {
+        if (!isset($_SESSION['install']['db']) || ($_SESSION['install']['db_valid'] ?? false) !== true) {
             $redirect('install/db');
         }
 

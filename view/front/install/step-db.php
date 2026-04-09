@@ -37,6 +37,13 @@
                         <label><?= htmlspecialchars($t('install.db_pass'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="password" name="db_pass" value="<?= htmlspecialchars((string)($old['db_pass'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                     </div>
+                    <div class="mb-4">
+                        <label><?= htmlspecialchars($t('install.db_prefix'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <input type="text" name="db_prefix" value="<?= htmlspecialchars((string)($old['db_prefix'] ?? 'tiny_'), ENT_QUOTES, 'UTF-8') ?>">
+                        <?php if (!empty($errors['db_prefix'])): ?>
+                        <small class="text-danger"><?= htmlspecialchars((string)$errors['db_prefix'], ENT_QUOTES, 'UTF-8') ?></small>
+                        <?php endif; ?>
+                    </div>
                     <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></button>
                 </form>
             </div>

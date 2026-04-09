@@ -23,6 +23,7 @@ final class InstallService
         $name = trim((string)($input['db_name'] ?? ''));
         $user = trim((string)($input['db_user'] ?? ''));
         $pass = (string)($input['db_pass'] ?? '');
+        $prefix = trim((string)($input['db_prefix'] ?? ''));
 
         $errors = [];
 
@@ -37,6 +38,9 @@ final class InstallService
         if ($user === '') {
             $errors['db_user'] = I18n::t('install.db_user_required');
         }
+        if ($prefix !== '' && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $prefix) !== 1) {
+            $errors['db_prefix'] = I18n::t('install.db_prefix_invalid');
+        }
 
         return [
             'values' => [
@@ -44,20 +48,31 @@ final class InstallService
                 'db_name' => $name,
                 'db_user' => $user,
                 'db_pass' => $pass,
+                'db_prefix' => $prefix,
             ],
             'errors' => $errors,
         ];
     }
 
-    public function canConnect(array $db): ?string
+    public function canInstallOnPrefix(array $db): ?string
     {
         try {
             $pdo = $this->connect($db);
-            $pdo->query('SELECT 1');
-            return null;
         } catch (PDOException $e) {
             return I18n::t('install.db_connect_failed');
         }
+
+        try {
+            $prefix = $this->normalizePrefix((string)($db['db_prefix'] ?? ''));
+        } catch (\RuntimeException $e) {
+            return I18n::t('install.db_prefix_invalid');
+        }
+
+        if ($this->hasExistingSchema($pdo, (string)($db['db_name'] ?? ''), $prefix)) {
+            return I18n::t('install.prefix_in_use');
+        }
+
+        return null;
     }
 
     public function validateAdminInput(array $input): array
@@ -109,26 +124,37 @@ final class InstallService
     public function install(array $db, array $admin, string $lang): array
     {
         try {
+            $prefix = $this->normalizePrefix((string)($db['db_prefix'] ?? ''));
+        } catch (\RuntimeException $e) {
+            return ['success' => false, 'message' => I18n::t('install.db_prefix_invalid')];
+        }
+
+        try {
             $pdo = $this->connect($db);
         } catch (PDOException $e) {
             return ['success' => false, 'message' => I18n::t('install.db_connect_failed')];
         }
 
+        if ($this->hasExistingSchema($pdo, (string)($db['db_name'] ?? ''), $prefix)) {
+            return ['success' => false, 'message' => I18n::t('install.prefix_in_use')];
+        }
+
         try {
-            $this->createSchema($pdo);
+            $this->createSchema($pdo, $prefix);
         } catch (PDOException $e) {
             return ['success' => false, 'message' => I18n::t('install.schema_failed')];
         }
 
-        $adminResult = $this->createAdmin($pdo, $admin);
-        if ($adminResult !== null) {
-            return ['success' => false, 'message' => $adminResult];
-        }
-
         try {
+            $db['db_prefix'] = $prefix;
             $this->writeConfig($db, $lang);
         } catch (\RuntimeException $e) {
             return ['success' => false, 'message' => I18n::t('install.config_failed')];
+        }
+
+        $adminResult = $this->createAdmin($pdo, $admin, $prefix);
+        if ($adminResult !== null) {
+            return ['success' => false, 'message' => $adminResult];
         }
 
         return ['success' => true, 'message' => I18n::t('install.success')];
@@ -142,10 +168,12 @@ final class InstallService
         return $pdo;
     }
 
-    private function createAdmin(PDO $pdo, array $admin): ?string
+    private function createAdmin(PDO $pdo, array $admin, string $prefix = ''): ?string
     {
+        $prefix = $this->normalizePrefix($prefix);
+        $users = $prefix . 'users';
         try {
-            $exists = $pdo->prepare('SELECT id, role FROM users WHERE email = :email LIMIT 1');
+            $exists = $pdo->prepare("SELECT id, role FROM $users WHERE email = :email LIMIT 1");
             $exists->execute(['email' => (string)$admin['email']]);
             $row = $exists->fetch(PDO::FETCH_ASSOC);
 
@@ -157,7 +185,7 @@ final class InstallService
                 return I18n::t('install.email_exists_other_role');
             }
 
-            $insert = $pdo->prepare('INSERT INTO users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)');
+            $insert = $pdo->prepare("INSERT INTO $users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)");
             $now = date('Y-m-d H:i:s');
             $insert->execute([
                 'name' => (string)$admin['name'],
@@ -178,11 +206,13 @@ final class InstallService
     private function writeConfig(array $db, string $lang = APP_LANG): void
     {
         $normalizedLang = strtolower(trim($lang));
+        $prefix = $this->normalizePrefix((string)($db['db_prefix'] ?? ''));
         $content = "<?php\ndeclare(strict_types=1);\n\ndefine('INC_DIR', 'inc/');\n\nconst APP_DEBUG = false;\nconst APP_LANG = " . var_export($normalizedLang, true) . ";\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\n\n"
             . "const DB_HOST = " . var_export((string)$db['db_host'], true) . ";\n"
             . "const DB_NAME = " . var_export((string)$db['db_name'], true) . ";\n"
             . "const DB_USER = " . var_export((string)$db['db_user'], true) . ";\n"
             . "const DB_PASS = " . var_export((string)$db['db_pass'], true) . ";\n\n"
+            . "const DB_PREFIX = " . var_export($prefix, true) . ";\n\n"
             . "const MEDIA_THUMB_VARIANTS = [\n"
             . "    ['suffix' => '_100x100.webp', 'mode' => 'crop', 'width' => 100, 'height' => 100],\n"
             . "    ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],\n"
@@ -195,10 +225,46 @@ final class InstallService
         }
     }
 
-    private function createSchema(PDO $pdo): void
+    private function createSchema(PDO $pdo, string $prefix = ''): void
     {
-        foreach (SchemaDefinition::ddl() as $query) {
+        $prefix = $this->normalizePrefix($prefix);
+        foreach (SchemaDefinition::ddl($prefix) as $query) {
             $pdo->exec($query);
         }
+    }
+
+    private function normalizePrefix(string $prefix): string
+    {
+        $clean = trim($prefix);
+
+        if ($clean === '' || preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $clean) === 1) {
+            return $clean;
+        }
+
+        throw new \RuntimeException('Invalid database prefix.');
+    }
+
+    private function hasExistingSchema(PDO $pdo, string $dbName, string $prefix): bool
+    {
+        $schema = trim($dbName);
+        if ($schema === '') {
+            return false;
+        }
+
+        $tables = ['users', 'media', 'content', 'terms', 'content_terms', 'attachments', 'settings'];
+        $check = $pdo->prepare('SELECT 1 FROM information_schema.tables WHERE table_schema = :schema AND table_name = :table LIMIT 1');
+
+        foreach ($tables as $table) {
+            $check->execute([
+                'schema' => $schema,
+                'table' => $prefix . $table,
+            ]);
+
+            if ($check->fetchColumn() !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

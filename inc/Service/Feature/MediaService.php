@@ -6,6 +6,7 @@ namespace App\Service\Feature;
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
 use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Infra\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
@@ -32,6 +33,8 @@ final class MediaService
 
     public function paginate(int $page = 1, int $perPage = 10, string $search = ''): array
     {
+        $mediaTable = Table::name('media');
+        $usersTable = Table::name('users');
         return $this->query->paginate('media', [
             'id',
             'name',
@@ -40,7 +43,7 @@ final class MediaService
             'author',
             'created',
             'updated',
-            '(SELECT name FROM users WHERE users.ID = media.author LIMIT 1) AS author_name',
+            "(SELECT name FROM $usersTable WHERE $usersTable.ID = $mediaTable.author LIMIT 1) AS author_name",
         ], [], [
             'page' => $page,
             'perPage' => $perPage,
