@@ -11,6 +11,7 @@ $isMass = $mode === 'add_mass';
 $massData = is_array($mass ?? null) ? $mass : [];
 $massItems = is_array($massData['items'] ?? null) ? $massData['items'] : [];
 $massIds = is_array($massData['ids'] ?? null) ? $massData['ids'] : [];
+$isMassEdit = $massIds !== [];
 $thumbSuffix = '_100x100.webp';
 if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
     $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
@@ -22,24 +23,28 @@ $fileMeta = null;
 if ($isMass):
 ?>
 <div class="card p-5">
-    <p class="text-muted mb-3"><?= htmlspecialchars($t('media.mass_info'), ENT_QUOTES, 'UTF-8') ?></p>
-    <form method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/media/mass'), ENT_QUOTES, 'UTF-8') ?>">
-        <?= $csrfField() ?>
-        <div class="mb-3">
-            <label><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></label>
-            <div class="custom-upload-field">
-                <label class="btn btn-light custom-upload-button" for="media-mass-file-upload">
-                    <span class="custom-upload-main-icon" data-custom-upload-icon><?= $icon('upload') ?></span>
-                    <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?></span>
-                    <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= $icon('loader') ?></span>
-                </label>
-                <input id="media-mass-file-upload" type="file" name="files[]" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" multiple required>
+    <?php if (!$isMassEdit): ?>
+        <p class="text-muted mb-3"><?= htmlspecialchars($t('media.mass_info'), ENT_QUOTES, 'UTF-8') ?></p>
+        <form method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/media/mass'), ENT_QUOTES, 'UTF-8') ?>">
+            <?= $csrfField() ?>
+            <div class="mb-3">
+                <label><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></label>
+                <div class="custom-upload-field">
+                    <label class="btn btn-light custom-upload-button" for="media-mass-file-upload">
+                        <span class="custom-upload-main-icon" data-custom-upload-icon><?= $icon('upload') ?></span>
+                        <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= $icon('loader') ?></span>
+                    </label>
+                    <input id="media-mass-file-upload" type="file" name="files[]" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" multiple required>
+                </div>
+                <small class="text-muted d-block mt-1"><?= htmlspecialchars($t('media.mass_limit_hint'), ENT_QUOTES, 'UTF-8') ?></small>
+                <?php if (!empty($errors['files'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['files'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
             </div>
-            <small class="text-muted d-block mt-1"><?= htmlspecialchars($t('media.mass_limit_hint'), ENT_QUOTES, 'UTF-8') ?></small>
-            <?php if (!empty($errors['files'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['files'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
-        </div>
-        <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('media.mass_upload'), ENT_QUOTES, 'UTF-8') ?></button>
-    </form>
+            <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('media.mass_upload'), ENT_QUOTES, 'UTF-8') ?></button>
+        </form>
+    <?php else: ?>
+        <p class="text-muted m-0"><?= htmlspecialchars($t('media.mass_edit_info'), ENT_QUOTES, 'UTF-8') ?></p>
+    <?php endif; ?>
 </div>
 
 <?php if ($massItems !== []): ?>
@@ -80,7 +85,7 @@ if ($isMass):
                             </td>
                             <td><input type="text" name="mass_name[<?= $massId ?>]" value="<?= htmlspecialchars((string)($massItem['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"></td>
                             <td class="table-col-actions">
-                                <button class="btn btn-light btn-icon" type="button" data-mass-delete="<?= $massId ?>" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
+                                <button class="btn btn-light btn-icon" type="button" data-mass-delete-open="<?= $massId ?>" data-modal-open data-modal-target="#mass-delete-modal" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
                                     <?= $icon('delete') ?>
                                     <span class="sr-only"><?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?></span>
                                 </button>
@@ -100,19 +105,23 @@ if ($isMass):
                 return;
             }
 
+            let pendingDeleteId = 0;
+
             form.addEventListener('click', async (event) => {
-                const button = event.target.closest('[data-mass-delete]');
-                if (!button) {
+                const openButton = event.target.closest('[data-mass-delete-open]');
+                if (openButton) {
+                    pendingDeleteId = Number(openButton.getAttribute('data-mass-delete-open') || '0');
+                    return;
+                }
+
+                const confirmButton = event.target.closest('[data-mass-delete-confirm]');
+                if (!confirmButton) {
                     return;
                 }
 
                 event.preventDefault();
-                const mediaId = Number(button.getAttribute('data-mass-delete') || '0');
+                const mediaId = pendingDeleteId;
                 if (mediaId <= 0) {
-                    return;
-                }
-
-                if (!window.confirm('<?= htmlspecialchars($t('media.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')) {
                     return;
                 }
 
@@ -133,6 +142,8 @@ if ($isMass):
                     return;
                 }
 
+                pendingDeleteId = 0;
+
                 const row = form.querySelector('[data-mass-row-id="' + mediaId + '"]');
                 if (row) {
                     row.remove();
@@ -151,6 +162,15 @@ if ($isMass):
             });
         })();
     </script>
+    <div class="modal-overlay" data-modal id="mass-delete-modal">
+        <div class="modal">
+            <p data-modal-text><?= htmlspecialchars($t('media.delete_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
+            <div class="modal-actions">
+                <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button class="btn btn-primary" type="button" data-modal-close data-mass-delete-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+            </div>
+        </div>
+    </div>
 <?php endif; ?>
 <?php
 return;

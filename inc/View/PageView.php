@@ -314,6 +314,7 @@ final class PageView
 
     public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = [], array $navigation = [], array $mass = []): void
     {
+        $isMassEdit = $mode === 'add_mass' && ((array)($mass['ids'] ?? [])) !== [];
         $this->renderAdmin('admin/media/form', [
             'mode' => $mode,
             'item' => $item,
@@ -323,7 +324,9 @@ final class PageView
             'navigation' => $navigation,
             'mass' => $mass,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'edit' ? I18n::t('admin.edit_media') : ($mode === 'add_mass' ? I18n::t('media.mass_title') : I18n::t('admin.add_media')),
+            'pageTitle' => $mode === 'edit'
+                ? I18n::t('admin.edit_media')
+                : ($mode === 'add_mass' ? ($isMassEdit ? I18n::t('media.mass_edit_title') : I18n::t('media.mass_title')) : I18n::t('admin.add_media')),
         ]);
     }
 
