@@ -156,16 +156,16 @@ final class InstallService
             return ['success' => false, 'message' => I18n::t('install.schema_failed')];
         }
 
-        $adminResult = $this->createAdmin($pdo, $admin, $prefix);
-        if ($adminResult !== null) {
-            return ['success' => false, 'message' => $adminResult];
-        }
-
         try {
             $db['db_prefix'] = $prefix;
             $this->writeConfig($db, $lang);
         } catch (\RuntimeException $e) {
             return ['success' => false, 'message' => I18n::t('install.config_failed')];
+        }
+
+        $adminResult = $this->createAdmin($pdo, $admin, $prefix);
+        if ($adminResult !== null) {
+            return ['success' => false, 'message' => $adminResult];
         }
 
         return ['success' => true, 'message' => I18n::t('install.success')];
