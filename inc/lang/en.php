@@ -168,6 +168,9 @@ return [
         'usage_origin' => 'Used as',
         'origin_thumbnail' => 'Thumbnail',
         'origin_post_body' => 'Post body',
+        'status' => [
+            'unassigned' => 'Unassigned',
+        ],
         'search_placeholder' => 'Search name or path',
         'delete' => 'Delete media',
         'delete_confirm' => 'Do you really want to delete this media?',

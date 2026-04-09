@@ -168,6 +168,9 @@ return [
         'usage_origin' => 'Použito jako',
         'origin_thumbnail' => 'Thumbnail',
         'origin_post_body' => 'Tělo příspěvku',
+        'status' => [
+            'unassigned' => 'Nepřiřazené',
+        ],
         'search_placeholder' => 'Hledat název nebo cestu',
         'delete' => 'Smazat médium',
         'delete_confirm' => 'Skutečně smazat toto médium?',

@@ -296,12 +296,14 @@ final class PageView
         ]);
     }
 
-    public function adminMediaList(array $pagination, array $allowedPerPage, string $query): void
+    public function adminMediaList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/media/list', [
             'pagination' => $pagination,
             'allowedPerPage' => $allowedPerPage,
+            'status' => $status,
             'query' => $query,
+            'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.media'),
         ]);

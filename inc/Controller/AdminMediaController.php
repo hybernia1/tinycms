@@ -33,9 +33,10 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        [$page, $perPage, $query] = $this->resolveListQuery();
-        $pagination = $this->media->paginate($page, $perPage, $query);
-        $this->pages->adminMediaList($pagination, PaginationConfig::allowed(), $query);
+        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        $pagination = $this->media->paginate($page, $perPage, $query, $status);
+        $statusCounts = $this->media->statusCounts();
+        $this->pages->adminMediaList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void
@@ -44,9 +45,10 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        [$page, $perPage, $query] = $this->resolveListQuery();
-        $pagination = $this->media->paginate($page, $perPage, $query);
+        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        $pagination = $this->media->paginate($page, $perPage, $query, $status);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+        $statusCounts = $this->media->statusCounts();
 
         $this->respondJson([
             'ok' => true,
@@ -55,7 +57,9 @@ final class AdminMediaController extends BaseAdminController
                 'page' => (int)($pagination['page'] ?? 1),
                 'per_page' => (int)($pagination['per_page'] ?? $perPage),
                 'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'status' => $status,
                 'query' => $query,
+                'status_counts' => $statusCounts,
             ],
         ]);
     }
@@ -293,13 +297,18 @@ final class AdminMediaController extends BaseAdminController
         $page = max(1, (int)($_GET['page'] ?? 1));
         $defaultPerPage = PaginationConfig::perPage();
         $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        $status = (string)($_GET['status'] ?? 'all');
         $query = trim((string)($_GET['q'] ?? ''));
 
         if (!in_array($perPage, PaginationConfig::allowed(), true)) {
             $perPage = $defaultPerPage;
         }
 
-        return [$page, $perPage, $query];
+        if (!in_array($status, ['all', 'unassigned'], true)) {
+            $status = 'all';
+        }
+
+        return [$page, $perPage, $status, $query];
     }
 
     private function hasUpload(string $field): bool
