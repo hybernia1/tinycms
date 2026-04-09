@@ -48,14 +48,7 @@ final class AdminTermController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->terms->statusCounts();
 
-        $this->apiOk($items, [
-            'page' => (int)($pagination['page'] ?? 1),
-            'per_page' => (int)($pagination['per_page'] ?? $perPage),
-            'total_pages' => (int)($pagination['total_pages'] ?? 1),
-            'status' => $status,
-            'query' => $query,
-            'status_counts' => $statusCounts,
-        ]);
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function suggest(callable $redirect): void
@@ -91,7 +84,7 @@ final class AdminTermController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
             $this->flash->add('success', I18n::t('terms.created'));
-            $redirect($newId > 0 ? $this->editPath($newId) : 'admin/terms');
+            $redirect($newId > 0 ? $this->buildEditPath('admin/terms', $newId) : 'admin/terms');
             return;
         }
 
@@ -135,13 +128,13 @@ final class AdminTermController extends BaseAdminController
         $result = $this->terms->save($_POST, $id);
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('terms.updated'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/terms', $id));
             return;
         }
 
         $this->flash->add('error', I18n::t('terms.update_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect($this->editPath($id));
+        $redirect($this->buildEditPath('admin/terms', $id));
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
@@ -163,11 +156,6 @@ final class AdminTermController extends BaseAdminController
         $this->apiOk(['id' => $id]);
     }
 
-    private function editPath(int $id): string
-    {
-        return 'admin/terms/edit?id=' . $id;
-    }
-
     private function mapListItem(array $row): array
     {
         return [
@@ -181,11 +169,7 @@ final class AdminTermController extends BaseAdminController
     private function resolveListQuery(): array
     {
         [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = trim((string)($_GET['status'] ?? 'all'));
-
-        if (!in_array($status, ['all', 'unassigned'], true)) {
-            $status = 'all';
-        }
+        $status = $this->resolveStatusFilter(['all', 'unassigned']);
 
         return [$page, $perPage, $status, $query];
     }

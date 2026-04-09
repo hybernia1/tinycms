@@ -57,14 +57,7 @@ final class AdminContentController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->content->statusCounts($availableStatuses);
 
-        $this->apiOk($items, [
-            'page' => (int)($pagination['page'] ?? 1),
-            'per_page' => (int)($pagination['per_page'] ?? $perPage),
-            'total_pages' => (int)($pagination['total_pages'] ?? 1),
-            'status' => $status,
-            'query' => $query,
-            'status_counts' => $statusCounts,
-        ]);
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
@@ -125,7 +118,7 @@ final class AdminContentController extends BaseAdminController
 
         if (!$this->content->delete($id)) {
             $this->flash->add('error', I18n::t('content.delete_failed'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/content', $id));
             return;
         }
 
@@ -163,7 +156,7 @@ final class AdminContentController extends BaseAdminController
                 $this->terms->syncContentTerms($newId, (string)($_POST['terms'] ?? ''));
             }
             $this->flash->add('success', I18n::t('content.created'));
-            $redirect($newId > 0 ? $this->editPath($newId) : 'admin/content');
+            $redirect($newId > 0 ? $this->buildEditPath('admin/content', $newId) : 'admin/content');
         }
 
         $this->flash->add('error', I18n::t('content.save_failed'));
@@ -232,7 +225,7 @@ final class AdminContentController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
             $this->flash->add('success', I18n::t('content.updated'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/content', $id));
         }
 
         $this->flash->add('error', I18n::t('content.update_failed'));
@@ -405,7 +398,7 @@ final class AdminContentController extends BaseAdminController
         $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
         if (($upload['success'] ?? false) !== true) {
             $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/content', $id));
             return;
         }
 
@@ -424,12 +417,12 @@ final class AdminContentController extends BaseAdminController
             }
             $this->upload->deleteMediaFiles($data);
             $this->flash->add('error', I18n::t('content.thumbnail_save_failed'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/content', $id));
             return;
         }
 
         $this->flash->add('success', I18n::t('content.thumbnail_uploaded'));
-        $redirect($this->editPath($id));
+        $redirect($this->buildEditPath('admin/content', $id));
     }
 
 
@@ -457,25 +450,20 @@ final class AdminContentController extends BaseAdminController
         $thumbnailId = (int)($item['thumbnail'] ?? 0);
         if ($thumbnailId <= 0) {
             $this->flash->add('info', I18n::t('content.thumbnail_missing'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/content', $id));
             return;
         }
 
         $media = $this->media->find($thumbnailId);
         if ($media === null || !$this->media->delete($thumbnailId)) {
             $this->flash->add('error', I18n::t('content.thumbnail_delete_failed'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/content', $id));
             return;
         }
 
         $this->upload->deleteMediaFiles($media);
         $this->flash->add('success', I18n::t('content.thumbnail_deleted'));
-        $redirect($this->editPath($id));
-    }
-
-    private function editPath(int $id): string
-    {
-        return 'admin/content/edit?id=' . $id;
+        $redirect($this->buildEditPath('admin/content', $id));
     }
 
     private function isValidExternalUrl(string $url): bool
@@ -576,12 +564,8 @@ final class AdminContentController extends BaseAdminController
     private function resolveListQuery(): array
     {
         [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = trim((string)($_GET['status'] ?? 'all'));
-
         $availableStatuses = $this->content->statuses();
-        if ($status !== 'all' && !in_array($status, $availableStatuses, true)) {
-            $status = 'all';
-        }
+        $status = $this->resolveStatusFilter(array_merge(['all'], $availableStatuses));
 
         return [$page, $perPage, $status, $query, $availableStatuses];
     }

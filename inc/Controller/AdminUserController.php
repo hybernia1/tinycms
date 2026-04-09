@@ -49,14 +49,7 @@ final class AdminUserController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->users->statusCounts();
 
-        $this->apiOk($items, [
-            'page' => (int)($pagination['page'] ?? 1),
-            'per_page' => (int)($pagination['per_page'] ?? $perPage),
-            'total_pages' => (int)($pagination['total_pages'] ?? 1),
-            'status' => $status,
-            'query' => $query,
-            'status_counts' => $statusCounts,
-        ]);
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
@@ -205,8 +198,7 @@ final class AdminUserController extends BaseAdminController
     private function resolveListQuery(): array
     {
         [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = (string)($_GET['status'] ?? 'all');
-        $status = in_array($status, ['all', 'active', 'suspended'], true) ? $status : 'all';
+        $status = $this->resolveStatusFilter(['all', 'active', 'suspended']);
         $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
 
         return [$page, $perPage, $status, $suspend, $query];

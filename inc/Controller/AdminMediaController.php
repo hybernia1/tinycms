@@ -50,14 +50,7 @@ final class AdminMediaController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->media->statusCounts();
 
-        $this->apiOk($items, [
-            'page' => (int)($pagination['page'] ?? 1),
-            'per_page' => (int)($pagination['per_page'] ?? $perPage),
-            'total_pages' => (int)($pagination['total_pages'] ?? 1),
-            'status' => $status,
-            'query' => $query,
-            'status_counts' => $statusCounts,
-        ]);
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function addForm(callable $redirect): void
@@ -105,7 +98,7 @@ final class AdminMediaController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.created'));
             $newId = (int)($result['id'] ?? 0);
-            $redirect($newId > 0 ? $this->editPath($newId) : 'admin/media');
+            $redirect($newId > 0 ? $this->buildEditPath('admin/media', $newId) : 'admin/media');
         }
 
         $this->upload->deleteMediaFiles($uploadData);
@@ -177,12 +170,12 @@ final class AdminMediaController extends BaseAdminController
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.updated'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/media', $id));
         }
 
         $this->flash->add('error', I18n::t('media.update_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect($this->editPath($id));
+        $redirect($this->buildEditPath('admin/media', $id));
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
@@ -247,28 +240,19 @@ final class AdminMediaController extends BaseAdminController
 
         if (!$this->media->delete($id)) {
             $this->flash->add('error', I18n::t('media.delete_failed'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/media', $id));
             return;
         }
 
         $this->upload->deleteMediaFiles($item);
         $this->flash->add('success', I18n::t('media.deleted'));
-        $redirect($nextId !== null ? $this->editPath($nextId) : 'admin/media');
-    }
-
-    private function editPath(int $id): string
-    {
-        return 'admin/media/edit?id=' . $id;
+        $redirect($nextId !== null ? $this->buildEditPath('admin/media', $nextId) : 'admin/media');
     }
 
     private function resolveListQuery(): array
     {
         [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = (string)($_GET['status'] ?? 'all');
-
-        if (!in_array($status, ['all', 'unassigned'], true)) {
-            $status = 'all';
-        }
+        $status = $this->resolveStatusFilter(['all', 'unassigned']);
 
         return [$page, $perPage, $status, $query];
     }

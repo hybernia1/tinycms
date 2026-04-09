@@ -200,6 +200,29 @@ abstract class BaseAdminController
         return [$page, $perPage, $query];
     }
 
+    protected function resolveStatusFilter(array $allowed, string $default = 'all', string $param = 'status'): string
+    {
+        $status = trim((string)($_GET[$param] ?? $default));
+        return in_array($status, $allowed, true) ? $status : $default;
+    }
+
+    protected function buildListMeta(array $pagination, int $perPage, string $status, string $query, array $statusCounts): array
+    {
+        return [
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'status' => $status,
+            'query' => $query,
+            'status_counts' => $statusCounts,
+        ];
+    }
+
+    protected function buildEditPath(string $basePath, int $id): string
+    {
+        return $basePath . '/edit?id=' . $id;
+    }
+
     protected function resolvePreviewPath(array $item): string
     {
         $pathWebp = trim((string)($item['path_webp'] ?? ''));
