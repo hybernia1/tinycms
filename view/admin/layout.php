@@ -249,6 +249,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 <summary class="btn btn-primary">
                     <?= $icon('add') ?>
                     <span><?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="header-dropdown-caret" aria-hidden="true"><?= $icon('chevron-down') ?></span>
                 </summary>
                 <div class="header-dropdown-menu">
                     <a class="header-dropdown-link" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('media.single_upload'), ENT_QUOTES, 'UTF-8') ?></a>

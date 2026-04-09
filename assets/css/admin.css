@@ -152,10 +152,22 @@ body {
 
 .header-dropdown summary {
     list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
 }
 
 .header-dropdown summary::-webkit-details-marker {
     display: none;
+}
+
+.header-dropdown-caret {
+    display: inline-flex;
+    transition: transform .15s ease;
+}
+
+.header-dropdown[open] .header-dropdown-caret {
+    transform: rotate(180deg);
 }
 
 .header-dropdown-menu {

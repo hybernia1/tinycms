@@ -27,7 +27,14 @@ if ($isMass):
         <?= $csrfField() ?>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></label>
-            <input type="file" name="files[]" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" multiple required>
+            <div class="custom-upload-field">
+                <label class="btn btn-light custom-upload-button" for="media-mass-file-upload">
+                    <span class="custom-upload-main-icon" data-custom-upload-icon><?= $icon('upload') ?></span>
+                    <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= $icon('loader') ?></span>
+                </label>
+                <input id="media-mass-file-upload" type="file" name="files[]" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" multiple required>
+            </div>
             <small class="text-muted d-block mt-1"><?= htmlspecialchars($t('media.mass_limit_hint'), ENT_QUOTES, 'UTF-8') ?></small>
             <?php if (!empty($errors['files'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['files'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
