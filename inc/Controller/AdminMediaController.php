@@ -128,7 +128,11 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], []);
+        $uploadedIds = $this->parseUploadedIds((string)($_GET['id'] ?? ''));
+        $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], [
+            'ids' => $uploadedIds,
+            'items' => $this->resolveMassItems($uploadedIds),
+        ]);
     }
 
     public function massSubmit(callable $redirect): void
@@ -143,6 +147,7 @@ final class AdminMediaController extends BaseAdminController
         $uploadedIds = $this->parseUploadedIds((string)($_POST['uploaded_ids'] ?? ''));
         if (isset($_POST['mass_rename'])) {
             $this->handleMassRename($uploadedIds);
+            $this->redirectMass($redirect, $uploadedIds);
             return;
         }
 
@@ -188,10 +193,7 @@ final class AdminMediaController extends BaseAdminController
             $this->flash->add('success', I18n::t('media.mass_uploaded'));
         }
 
-        $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], [
-            'ids' => $uploadedIds,
-            'items' => $this->resolveMassItems($uploadedIds),
-        ]);
+        $this->redirectMass($redirect, $uploadedIds);
     }
 
     private function handleMassRename(array $uploadedIds): void
@@ -224,10 +226,6 @@ final class AdminMediaController extends BaseAdminController
             $this->flash->add('success', I18n::t('media.mass_names_updated'));
         }
 
-        $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], [
-            'ids' => $uploadedIds,
-            'items' => $this->resolveMassItems($uploadedIds),
-        ]);
     }
 
     public function editForm(callable $redirect): void
@@ -467,6 +465,17 @@ final class AdminMediaController extends BaseAdminController
             $items[] = $item;
         }
         return $items;
+    }
+
+    private function redirectMass(callable $redirect, array $ids): void
+    {
+        $filteredIds = array_values(array_unique(array_filter($ids, static fn(int $id): bool => $id > 0)));
+        if ($filteredIds === []) {
+            $redirect('admin/media/mass');
+            return;
+        }
+
+        $redirect('admin/media/mass?id=' . implode(',', $filteredIds));
     }
 
     private function normalizeMediaInput(array $input, int $authorId): array
