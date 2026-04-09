@@ -15,6 +15,7 @@ use App\View\PageView;
 final class AdminMediaController extends BaseAdminController
 {
     private const FORM_STATE_KEY = 'admin_media_form_state';
+    private const MASS_UPLOAD_LIMIT = 10;
 
     public function __construct(
         private PageView $pages,
@@ -70,6 +71,11 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
+        if ($this->isMassMode()) {
+            $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], []);
+            return;
+        }
+
         $fallback = ['id' => null, 'name' => '', 'path' => '', 'path_webp' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
         $this->pages->adminMediaForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->media->authorOptions(), []);
@@ -81,6 +87,11 @@ final class AdminMediaController extends BaseAdminController
             !$this->guardAdmin($redirect, false)
             || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
         ) {
+            return;
+        }
+
+        if ($this->isMassMode()) {
+            $this->addMassSubmit();
             return;
         }
 
@@ -119,6 +130,98 @@ final class AdminMediaController extends BaseAdminController
         $this->flash->add('error', I18n::t('media.save_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
         $redirect('admin/media/add');
+    }
+
+    private function addMassSubmit(): void
+    {
+        $uploadedIds = $this->parseUploadedIds((string)($_POST['uploaded_ids'] ?? ''));
+        if (isset($_POST['mass_rename'])) {
+            $this->handleMassRename($uploadedIds);
+            return;
+        }
+
+        $files = $this->normalizeMultiUploadFiles($_FILES['files'] ?? null);
+        if ($files === []) {
+            $this->flash->add('error', I18n::t('media.file_required'));
+            $this->pages->adminMediaForm('add_mass', ['id' => null], ['files' => I18n::t('media.file_required')], [], [], [], []);
+            return;
+        }
+
+        if (count($files) > self::MASS_UPLOAD_LIMIT) {
+            $this->flash->add('error', I18n::t('media.mass_limit_error'));
+            $this->pages->adminMediaForm('add_mass', ['id' => null], ['files' => I18n::t('media.mass_limit_error')], [], [], [], []);
+            return;
+        }
+
+        foreach ($files as $file) {
+            $upload = $this->upload->uploadImage($file);
+            if (($upload['success'] ?? false) !== true) {
+                $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
+                continue;
+            }
+
+            $uploadData = (array)($upload['data'] ?? []);
+            $saved = $this->media->save([
+                'name' => (string)($uploadData['name'] ?? ''),
+                'path' => (string)($uploadData['path'] ?? ''),
+                'path_webp' => (string)($uploadData['path_webp'] ?? ''),
+                'author' => '',
+            ]);
+
+            if (($saved['success'] ?? false) !== true || (int)($saved['id'] ?? 0) <= 0) {
+                $this->upload->deleteMediaFiles($uploadData);
+                $this->flash->add('error', I18n::t('media.save_failed'));
+                continue;
+            }
+
+            $uploadedIds[] = (int)$saved['id'];
+        }
+
+        $uploadedIds = array_values(array_unique(array_filter($uploadedIds, static fn(int $id): bool => $id > 0)));
+        if ($uploadedIds !== []) {
+            $this->flash->add('success', I18n::t('media.mass_uploaded'));
+        }
+
+        $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], [
+            'ids' => $uploadedIds,
+            'items' => $this->resolveMassItems($uploadedIds),
+        ]);
+    }
+
+    private function handleMassRename(array $uploadedIds): void
+    {
+        $names = is_array($_POST['mass_name'] ?? null) ? $_POST['mass_name'] : [];
+        $renamed = 0;
+        foreach ($uploadedIds as $id) {
+            $item = $this->media->find($id);
+            if ($item === null || !$this->canManageMedia($item)) {
+                continue;
+            }
+
+            $name = trim((string)($names[$id] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $saved = $this->media->save([
+                'name' => $name,
+                'path' => (string)($item['path'] ?? ''),
+                'path_webp' => (string)($item['path_webp'] ?? ''),
+                'author' => (string)($item['author'] ?? ''),
+            ], $id);
+            if (($saved['success'] ?? false) === true) {
+                $renamed++;
+            }
+        }
+
+        if ($renamed > 0) {
+            $this->flash->add('success', I18n::t('media.mass_names_updated'));
+        }
+
+        $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], [
+            'ids' => $uploadedIds,
+            'items' => $this->resolveMassItems($uploadedIds),
+        ]);
     }
 
     public function editForm(callable $redirect): void
@@ -314,6 +417,55 @@ final class AdminMediaController extends BaseAdminController
     private function hasUpload(string $field): bool
     {
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    }
+
+    private function isMassMode(): bool
+    {
+        return trim((string)($_GET['mode'] ?? '')) === 'mass';
+    }
+
+    private function normalizeMultiUploadFiles(mixed $input): array
+    {
+        if (!is_array($input) || !isset($input['name']) || !is_array($input['name'])) {
+            return [];
+        }
+
+        $files = [];
+        $names = $input['name'];
+        foreach ($names as $index => $name) {
+            if ((int)($input['error'][$index] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            $files[] = [
+                'name' => (string)$name,
+                'type' => (string)($input['type'][$index] ?? ''),
+                'tmp_name' => (string)($input['tmp_name'][$index] ?? ''),
+                'error' => (int)($input['error'][$index] ?? UPLOAD_ERR_NO_FILE),
+                'size' => (int)($input['size'][$index] ?? 0),
+            ];
+        }
+
+        return $files;
+    }
+
+    private function parseUploadedIds(string $value): array
+    {
+        $parts = array_map('trim', explode(',', $value));
+        $ids = array_map(static fn(string $part): int => (int)$part, $parts);
+        return array_values(array_unique(array_filter($ids, static fn(int $id): bool => $id > 0)));
+    }
+
+    private function resolveMassItems(array $ids): array
+    {
+        $items = [];
+        foreach ($ids as $id) {
+            $item = $this->media->find($id);
+            if ($item === null || !$this->canManageMedia($item)) {
+                continue;
+            }
+            $items[] = $item;
+        }
+        return $items;
     }
 
     private function normalizeMediaInput(array $input, int $authorId): array

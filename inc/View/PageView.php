@@ -312,7 +312,7 @@ final class PageView
         ]);
     }
 
-    public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = [], array $navigation = []): void
+    public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = [], array $navigation = [], array $mass = []): void
     {
         $this->renderAdmin('admin/media/form', [
             'mode' => $mode,
@@ -321,8 +321,9 @@ final class PageView
             'authors' => $authors,
             'usages' => $usages,
             'navigation' => $navigation,
+            'mass' => $mass,
             'adminMenu' => $this->adminMenu(),
-            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media') : I18n::t('admin.edit_media'),
+            'pageTitle' => $mode === 'edit' ? I18n::t('admin.edit_media') : ($mode === 'add_mass' ? I18n::t('media.mass_title') : I18n::t('admin.add_media')),
         ]);
     }
 
