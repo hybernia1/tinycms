@@ -45,7 +45,7 @@ if ($isMass):
 <?php if ($massItems !== []): ?>
     <div class="card p-5 mt-3">
         <h3 class="mb-3"><?= htmlspecialchars($t('media.mass_result'), ENT_QUOTES, 'UTF-8') ?></h3>
-        <form method="post" action="<?= htmlspecialchars($url('admin/media/mass'), ENT_QUOTES, 'UTF-8') ?>">
+        <form id="media-mass-result-form" method="post" action="<?= htmlspecialchars($url('admin/media/mass'), ENT_QUOTES, 'UTF-8') ?>">
             <?= $csrfField() ?>
             <input type="hidden" name="mass_rename" value="1">
             <input type="hidden" name="uploaded_ids" value="<?= htmlspecialchars(implode(',', array_map(static fn($id): int => (int)$id, $massIds)), ENT_QUOTES, 'UTF-8') ?>">
@@ -55,6 +55,7 @@ if ($isMass):
                     <tr>
                         <th><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></th>
                         <th><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></th>
+                        <th class="table-col-actions"><?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -69,7 +70,7 @@ if ($isMass):
                         }
                         $massPreviewUrl = $massPreviewPath !== '' ? $url($massPreviewPath) : '';
                         ?>
-                        <tr>
+                        <tr data-mass-row-id="<?= $massId ?>">
                             <td>
                                 <div class="media-list-thumb<?= $massPreviewUrl === '' ? ' media-list-thumb-empty' : '' ?>">
                                     <?php if ($massPreviewUrl !== ''): ?>
@@ -78,6 +79,12 @@ if ($isMass):
                                 </div>
                             </td>
                             <td><input type="text" name="mass_name[<?= $massId ?>]" value="<?= htmlspecialchars((string)($massItem['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"></td>
+                            <td class="table-col-actions">
+                                <button class="btn btn-light btn-icon" type="button" data-mass-delete="<?= $massId ?>" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
+                                    <?= $icon('delete') ?>
+                                    <span class="sr-only"><?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                                </button>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
@@ -86,6 +93,64 @@ if ($isMass):
             <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('media.mass_save_names'), ENT_QUOTES, 'UTF-8') ?></button>
         </form>
     </div>
+    <script>
+        (() => {
+            const form = document.getElementById('media-mass-result-form');
+            if (!form) {
+                return;
+            }
+
+            form.addEventListener('click', async (event) => {
+                const button = event.target.closest('[data-mass-delete]');
+                if (!button) {
+                    return;
+                }
+
+                event.preventDefault();
+                const mediaId = Number(button.getAttribute('data-mass-delete') || '0');
+                if (mediaId <= 0) {
+                    return;
+                }
+
+                if (!window.confirm('<?= htmlspecialchars($t('media.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>')) {
+                    return;
+                }
+
+                const csrfInput = form.querySelector('input[name="_csrf"]');
+                const csrf = csrfInput ? String(csrfInput.value || '') : '';
+                const payload = new FormData();
+                if (csrf !== '') {
+                    payload.append('_csrf', csrf);
+                }
+
+                const response = await fetch('<?= htmlspecialchars($url('admin/api/v1/media/'), ENT_QUOTES, 'UTF-8') ?>' + mediaId + '/delete', {
+                    method: 'POST',
+                    body: payload,
+                    headers: { Accept: 'application/json' },
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const row = form.querySelector('[data-mass-row-id="' + mediaId + '"]');
+                if (row) {
+                    row.remove();
+                }
+
+                const idsInput = form.querySelector('input[name="uploaded_ids"]');
+                if (!idsInput) {
+                    return;
+                }
+
+                const ids = String(idsInput.value || '')
+                    .split(',')
+                    .map((value) => Number(value.trim()))
+                    .filter((value) => value > 0 && value !== mediaId);
+                idsInput.value = ids.join(',');
+            });
+        })();
+    </script>
 <?php endif; ?>
 <?php
 return;
