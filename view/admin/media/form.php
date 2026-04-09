@@ -107,7 +107,7 @@ if ($isMass):
 
             let pendingDeleteId = 0;
 
-            form.addEventListener('click', async (event) => {
+            document.addEventListener('click', async (event) => {
                 const openButton = event.target.closest('[data-mass-delete-open]');
                 if (openButton) {
                     pendingDeleteId = Number(openButton.getAttribute('data-mass-delete-open') || '0');
