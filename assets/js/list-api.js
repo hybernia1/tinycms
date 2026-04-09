@@ -292,9 +292,10 @@ const initListApi = (config) => {
                 const id = Number(toggle.getAttribute(`data-${config.name}-toggle`) || '0');
                 const mode = toggle.getAttribute(`data-${config.name}-mode`) || config.toggle.defaultMode;
                 if (id > 0) {
-                    const togglePath = typeof config.togglePath === 'function'
-                        ? config.togglePath(endpointBase, id)
-                        : `${endpointBase}/${config.toggle.path}`;
+                    if (typeof config.togglePath !== 'function') {
+                        return;
+                    }
+                    const togglePath = config.togglePath(endpointBase, id);
                     const result = await postAction(togglePath, { id, mode });
                     if (result.success === true) {
                         if (config.messages?.toggleSuccess) {
@@ -378,7 +379,7 @@ initListApi({
     name: 'content',
     rootSelector: '[data-content-list]',
     withStatus: true,
-    toggle: { path: 'status-toggle', defaultMode: 'draft' },
+    toggle: { defaultMode: 'draft' },
     togglePath: (endpointBase, id) => `${endpointBase}/${id}/status`,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: {
@@ -499,7 +500,7 @@ initListApi({
     name: 'users',
     rootSelector: '[data-users-list]',
     withStatus: true,
-    toggle: { path: 'suspend-toggle', defaultMode: 'suspend' },
+    toggle: { defaultMode: 'suspend' },
     togglePath: (endpointBase, id) => `${endpointBase}/${id}/suspend`,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: {
