@@ -1,9 +1,6 @@
 <div class="container py-5">
     <article class="card p-4 mb-4">
         <h1 class="mb-3"><?= htmlspecialchars($t('front.term.title'), ENT_QUOTES, 'UTF-8') ?>: <?= htmlspecialchars((string)($term['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></h1>
-        <?php if ((string)($term['body'] ?? '') !== ''): ?>
-            <div class="theme-content"><?= $term['body'] ?></div>
-        <?php endif; ?>
     </article>
 
     <?php

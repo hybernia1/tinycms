@@ -84,7 +84,7 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
-        $fallback = ['id' => null, 'name' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
+        $fallback = ['id' => null, 'name' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
         $this->pages->adminTermForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], []);
     }
@@ -190,7 +190,6 @@ final class AdminTermController extends BaseAdminController
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
-            'body' => (string)($row['body'] ?? ''),
             'created' => (string)($row['created'] ?? ''),
             'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
         ];

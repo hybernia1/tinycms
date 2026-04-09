@@ -440,7 +440,6 @@ initListApi({
                     <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                 </td>
-                <td class="mobile-hide">${esc(item.body || '—')}</td>
                 <td class="table-col-actions">
                     <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="${id}" aria-label="${esc(t('terms.delete', 'Delete tag'))}" title="${esc(t('terms.delete', 'Delete tag'))}">
                         ${icon('delete')}

@@ -92,7 +92,6 @@ final class FrontController
             'id' => (int)($term['id'] ?? 0),
             'name' => (string)($term['name'] ?? ''),
             'slug' => $slug,
-            'body' => (string)($term['body'] ?? ''),
         ], $posts, $pagination, $this->currentTheme(), $this->siteData());
     }
 
