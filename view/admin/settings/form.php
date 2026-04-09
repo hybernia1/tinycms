@@ -1,4 +1,4 @@
-<div class="card p-5">
+<div class="card p-4">
     <form method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/settings'), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
 

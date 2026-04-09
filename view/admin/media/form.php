@@ -38,7 +38,7 @@ if ($mode === 'edit') {
 <form class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <div class="content-editor-layout">
-        <div class="card p-5">
+        <div class="card p-4">
             <div class="mb-3">
                 <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
                 <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
@@ -66,7 +66,6 @@ if ($mode === 'edit') {
                         <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 <?php endif; ?>
-                <hr>
                 <h3 class="mb-3"><?= htmlspecialchars($t('media.used_in'), ENT_QUOTES, 'UTF-8') ?></h3>
                 <?php if (($usages ?? []) === []): ?>
                     <p class="text-muted m-0"><?= htmlspecialchars($t('media.no_usage'), ENT_QUOTES, 'UTF-8') ?></p>

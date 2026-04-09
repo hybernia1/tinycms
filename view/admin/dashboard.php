@@ -1,3 +1,3 @@
-<div class="card p-5">
+<div class="card p-4">
     <p class="m-0 text-muted"><?= htmlspecialchars($t('admin.dashboard.logged_in'), ENT_QUOTES, 'UTF-8') ?>: <?= htmlspecialchars((string)($user['name'] ?? $t('front.home.user')), ENT_QUOTES, 'UTF-8') ?></p>
 </div>
