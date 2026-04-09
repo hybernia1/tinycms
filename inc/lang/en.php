@@ -54,6 +54,7 @@ return [
         'db_user_required' => 'Database user is required.',
         'db_connect_failed' => 'Cannot connect to database.',
         'db_prefix_invalid' => 'Prefix can contain only letters, numbers and underscores, and must start with a letter or underscore.',
+        'prefix_in_use' => 'TinyCMS tables already exist for the selected prefix. Choose a different prefix or remove existing tables first.',
         'admin_name_required' => 'Name is required.',
         'admin_email_invalid' => 'Email is not valid.',
         'admin_password_min' => 'Password must have at least 8 characters.',

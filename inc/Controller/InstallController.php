@@ -65,6 +65,14 @@ final class InstallController
             $redirect('install/db');
         }
 
+        $prefixError = $this->installService->canInstallOnPrefix($result['values']);
+
+        if ($prefixError !== null) {
+            $_SESSION['install']['errors_db'] = ['db' => $prefixError];
+            $_SESSION['install']['db'] = $result['values'];
+            $redirect('install/db');
+        }
+
         $_SESSION['install']['db'] = $result['values'];
         $_SESSION['install']['errors_admin'] = [];
         $_SESSION['install']['admin'] = ['name' => '', 'email' => '', 'password' => ''];

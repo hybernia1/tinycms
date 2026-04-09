@@ -65,6 +65,27 @@ final class InstallService
         }
     }
 
+    public function canInstallOnPrefix(array $db): ?string
+    {
+        try {
+            $pdo = $this->connect($db);
+        } catch (PDOException $e) {
+            return I18n::t('install.db_connect_failed');
+        }
+
+        try {
+            $prefix = $this->normalizePrefix((string)($db['db_prefix'] ?? ''));
+        } catch (\RuntimeException $e) {
+            return I18n::t('install.db_prefix_invalid');
+        }
+
+        if ($this->hasExistingSchema($pdo, (string)($db['db_name'] ?? ''), $prefix)) {
+            return I18n::t('install.prefix_in_use');
+        }
+
+        return null;
+    }
+
     public function validateAdminInput(array $input): array
     {
         $name = trim((string)($input['name'] ?? ''));
@@ -123,6 +144,10 @@ final class InstallService
             $pdo = $this->connect($db);
         } catch (PDOException $e) {
             return ['success' => false, 'message' => I18n::t('install.db_connect_failed')];
+        }
+
+        if ($this->hasExistingSchema($pdo, (string)($db['db_name'] ?? ''), $prefix)) {
+            return ['success' => false, 'message' => I18n::t('install.prefix_in_use')];
         }
 
         try {
@@ -228,5 +253,29 @@ final class InstallService
         }
 
         throw new \RuntimeException('Invalid database prefix.');
+    }
+
+    private function hasExistingSchema(PDO $pdo, string $dbName, string $prefix): bool
+    {
+        $schema = trim($dbName);
+        if ($schema === '') {
+            return false;
+        }
+
+        $tables = ['users', 'media', 'content', 'terms', 'content_terms', 'attachments', 'settings'];
+        $check = $pdo->prepare('SELECT 1 FROM information_schema.tables WHERE table_schema = :schema AND table_name = :table LIMIT 1');
+
+        foreach ($tables as $table) {
+            $check->execute([
+                'schema' => $schema,
+                'table' => $prefix . $table,
+            ]);
+
+            if ($check->fetchColumn() !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

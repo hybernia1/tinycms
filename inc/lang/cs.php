@@ -54,6 +54,7 @@ return [
         'db_user_required' => 'Uživatel je povinný.',
         'db_connect_failed' => 'Nelze se připojit k databázi.',
         'db_prefix_invalid' => 'Prefix může obsahovat jen písmena, čísla a podtržítko, a musí začínat písmenem nebo podtržítkem.',
+        'prefix_in_use' => 'Pro zvolený prefix už existují tabulky TinyCMS. Vyberte jiný prefix, nebo původní tabulky nejdříve odstraňte.',
         'admin_name_required' => 'Jméno je povinné.',
         'admin_email_invalid' => 'E-mail není validní.',
         'admin_password_min' => 'Heslo musí mít alespoň 8 znaků.',
