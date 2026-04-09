@@ -7,94 +7,93 @@ final class MetaHead
 {
     public function render(array $meta): string
     {
-        $title = $this->clean((string)($meta['title'] ?? 'TinyCMS'));
-        $description = $this->clean((string)($meta['description'] ?? ''));
-        $robots = $this->clean((string)($meta['robots'] ?? 'index,follow'));
-        $keywords = $this->keywords($meta['keywords'] ?? '');
-        $url = $this->clean((string)($meta['url'] ?? ''));
-        $shortlink = $this->clean((string)($meta['shortlink'] ?? ''));
-        $ogType = $this->clean((string)($meta['og_type'] ?? 'website'));
-        $ogImage = $this->clean((string)($meta['og_image'] ?? ''));
-        $publishedTime = $this->isoDate((string)($meta['published_time'] ?? ''));
-        $modifiedTime = $this->isoDate((string)($meta['modified_time'] ?? ''));
-        $siteName = $this->clean((string)($meta['site_name'] ?? ''));
-        $author = $this->clean((string)($meta['author'] ?? ''));
-        $themeColor = $this->clean((string)($meta['theme_color'] ?? ''));
-        $favicon = $this->clean((string)($meta['favicon'] ?? ''));
-        $logo = $this->clean((string)($meta['logo'] ?? ''));
-        $alternateLinks = $this->alternateLinks($meta['alternate_links'] ?? []);
-        $jsonLd = $this->jsonLdScript($meta);
-
+        $data = $this->normalizeMeta($meta);
         $parts = [
             '<meta charset="utf-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1">',
-            '<title>' . $this->esc($title) . '</title>',
-            '<meta name="robots" content="' . $this->esc($robots) . '">',
-            '<meta property="og:title" content="' . $this->esc($title) . '">',
-            '<meta property="og:type" content="' . $this->esc($ogType) . '">',
-            '<meta name="twitter:card" content="' . $this->esc($ogImage !== '' ? 'summary_large_image' : 'summary') . '">',
-            '<meta name="twitter:title" content="' . $this->esc($title) . '">',
+            '<title>' . $this->esc($data['title']) . '</title>',
+            '<meta name="robots" content="' . $this->esc($data['robots']) . '">',
+            '<meta property="og:title" content="' . $this->esc($data['title']) . '">',
+            '<meta property="og:type" content="' . $this->esc($data['og_type']) . '">',
+            '<meta name="twitter:card" content="' . $this->esc($data['og_image'] !== '' ? 'summary_large_image' : 'summary') . '">',
+            '<meta name="twitter:title" content="' . $this->esc($data['title']) . '">',
         ];
 
-        if ($description !== '') {
-            $parts[] = '<meta name="description" content="' . $this->esc($description) . '">';
-            $parts[] = '<meta property="og:description" content="' . $this->esc($description) . '">';
-            $parts[] = '<meta name="twitter:description" content="' . $this->esc($description) . '">';
+        $this->appendMeta($parts, 'name', 'description', $data['description']);
+        $this->appendMeta($parts, 'property', 'og:description', $data['description']);
+        $this->appendMeta($parts, 'name', 'twitter:description', $data['description']);
+
+        $this->appendMeta($parts, 'name', 'keywords', $data['keywords']);
+        $this->appendMeta($parts, 'property', 'og:url', $data['url']);
+
+        $this->appendLink($parts, 'canonical', $data['url']);
+        $this->appendLink($parts, 'shortlink', $data['shortlink']);
+
+        $this->appendMeta($parts, 'property', 'og:image', $data['og_image']);
+        $this->appendMeta($parts, 'name', 'twitter:image', $data['og_image']);
+
+        $this->appendMeta($parts, 'property', 'article:published_time', $data['published_time']);
+        $this->appendMeta($parts, 'property', 'article:modified_time', $data['modified_time']);
+        $this->appendMeta($parts, 'property', 'og:site_name', $data['site_name']);
+        $this->appendMeta($parts, 'name', 'author', $data['author']);
+        $this->appendMeta($parts, 'name', 'theme-color', $data['theme_color']);
+        $this->appendMeta($parts, 'property', 'og:logo', $data['logo']);
+
+        if ($data['favicon'] !== '') {
+            $this->appendLink($parts, 'icon', $data['favicon'], $this->faviconTypeAttr($data['favicon']));
         }
 
-        if ($keywords !== '') {
-            $parts[] = '<meta name="keywords" content="' . $this->esc($keywords) . '">';
-        }
-
-        if ($url !== '') {
-            $parts[] = '<meta property="og:url" content="' . $this->esc($url) . '">';
-            $parts[] = '<link rel="canonical" href="' . $this->esc($url) . '">';
-        }
-
-        if ($shortlink !== '') {
-            $parts[] = '<link rel="shortlink" href="' . $this->esc($shortlink) . '">';
-        }
-
-        if ($ogImage !== '') {
-            $parts[] = '<meta property="og:image" content="' . $this->esc($ogImage) . '">';
-            $parts[] = '<meta name="twitter:image" content="' . $this->esc($ogImage) . '">';
-        }
-
-        if ($publishedTime !== '') {
-            $parts[] = '<meta property="article:published_time" content="' . $this->esc($publishedTime) . '">';
-        }
-
-        if ($modifiedTime !== '') {
-            $parts[] = '<meta property="article:modified_time" content="' . $this->esc($modifiedTime) . '">';
-        }
-
-        if ($siteName !== '') {
-            $parts[] = '<meta property="og:site_name" content="' . $this->esc($siteName) . '">';
-        }
-
-        if ($author !== '') {
-            $parts[] = '<meta name="author" content="' . $this->esc($author) . '">';
-        }
-
-        if ($themeColor !== '') {
-            $parts[] = '<meta name="theme-color" content="' . $this->esc($themeColor) . '">';
-        }
-        if ($favicon !== '') {
-            $parts[] = '<link rel="icon" href="' . $this->esc($favicon) . '"' . $this->faviconTypeAttr($favicon) . '>';
-        }
-        if ($logo !== '') {
-            $parts[] = '<meta property="og:logo" content="' . $this->esc($logo) . '">';
-        }
-
-        foreach ($alternateLinks as $link) {
+        foreach ($data['alternate_links'] as $link) {
             $parts[] = $link;
         }
 
+        $jsonLd = $this->jsonLdScript($meta, $data);
         if ($jsonLd !== '') {
             $parts[] = $jsonLd;
         }
 
         return implode("\n", $parts);
+    }
+
+    private function normalizeMeta(array $meta): array
+    {
+        return [
+            'title' => $this->clean((string)($meta['title'] ?? 'TinyCMS')),
+            'description' => $this->clean((string)($meta['description'] ?? '')),
+            'robots' => $this->clean((string)($meta['robots'] ?? 'index,follow')),
+            'keywords' => $this->keywords($meta['keywords'] ?? ''),
+            'url' => $this->clean((string)($meta['url'] ?? '')),
+            'shortlink' => $this->clean((string)($meta['shortlink'] ?? '')),
+            'og_type' => $this->clean((string)($meta['og_type'] ?? 'website')),
+            'og_image' => $this->clean((string)($meta['og_image'] ?? '')),
+            'published_time' => $this->isoDate((string)($meta['published_time'] ?? '')),
+            'modified_time' => $this->isoDate((string)($meta['modified_time'] ?? '')),
+            'site_name' => $this->clean((string)($meta['site_name'] ?? '')),
+            'author' => $this->clean((string)($meta['author'] ?? '')),
+            'theme_color' => $this->clean((string)($meta['theme_color'] ?? '')),
+            'favicon' => $this->clean((string)($meta['favicon'] ?? '')),
+            'logo' => $this->clean((string)($meta['logo'] ?? '')),
+            'search_url_template' => $this->clean((string)($meta['search_url_template'] ?? '')),
+            'alternate_links' => $this->alternateLinks($meta['alternate_links'] ?? []),
+        ];
+    }
+
+    private function appendMeta(array &$parts, string $attribute, string $key, string $content): void
+    {
+        if ($content === '') {
+            return;
+        }
+
+        $parts[] = '<meta ' . $attribute . '="' . $this->esc($key) . '" content="' . $this->esc($content) . '">';
+    }
+
+    private function appendLink(array &$parts, string $rel, string $href, string $extra = ''): void
+    {
+        if ($href === '') {
+            return;
+        }
+
+        $parts[] = '<link rel="' . $this->esc($rel) . '" href="' . $this->esc($href) . '"' . $extra . '>';
     }
 
     private function alternateLinks(mixed $raw): array
@@ -135,14 +134,14 @@ final class MetaHead
         return $result;
     }
 
-    private function jsonLdScript(array $meta): string
+    private function jsonLdScript(array $meta, array $normalized): string
     {
         $structured = $meta['structured_data'] ?? null;
         if (is_string($structured) && trim($structured) !== '') {
             return '<script type="application/ld+json">' . trim($structured) . '</script>';
         }
 
-        $payload = is_array($structured) ? $structured : $this->defaultStructuredData($meta);
+        $payload = is_array($structured) ? $structured : $this->defaultStructuredData($normalized);
         if ($payload === []) {
             return '';
         }
@@ -157,20 +156,17 @@ final class MetaHead
 
     private function defaultStructuredData(array $meta): array
     {
-        $title = $this->clean((string)($meta['title'] ?? ''));
-        $description = $this->clean((string)($meta['description'] ?? ''));
-        $url = $this->clean((string)($meta['url'] ?? ''));
-        $image = $this->clean((string)($meta['og_image'] ?? ''));
-        if ($image === '') {
-            $image = $this->clean((string)($meta['logo'] ?? ''));
-        }
-        $type = $this->clean((string)($meta['og_type'] ?? 'website'));
-        $author = $this->clean((string)($meta['author'] ?? ''));
-        $siteName = $this->clean((string)($meta['site_name'] ?? ''));
-        $publishedTime = $this->isoDate((string)($meta['published_time'] ?? ''));
-        $modifiedTime = $this->isoDate((string)($meta['modified_time'] ?? ''));
-        $searchUrlTemplate = $this->clean((string)($meta['search_url_template'] ?? ''));
-        $keywords = $this->keywords($meta['keywords'] ?? '');
+        $title = $meta['title'];
+        $description = $meta['description'];
+        $url = $meta['url'];
+        $image = $meta['og_image'] !== '' ? $meta['og_image'] : $meta['logo'];
+        $type = $meta['og_type'];
+        $author = $meta['author'];
+        $siteName = $meta['site_name'];
+        $publishedTime = $meta['published_time'];
+        $modifiedTime = $meta['modified_time'];
+        $searchUrlTemplate = $meta['search_url_template'];
+        $keywords = $meta['keywords'];
 
         if ($title === '') {
             return [];
@@ -219,6 +215,7 @@ final class MetaHead
                     'name' => $siteName,
                 ];
             }
+
             return $data;
         }
 
