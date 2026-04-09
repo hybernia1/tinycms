@@ -134,9 +134,21 @@ final class MediaService
             return [];
         }
 
-        $rows = $this->query->select('content', ['id', 'name', 'status', 'created', 'updated'], ['thumbnail' => $mediaId]);
-        usort($rows, static fn(array $a, array $b): int => strcmp((string)($b['updated'] ?? $b['created'] ?? ''), (string)($a['updated'] ?? $a['created'] ?? '')));
-        return $rows;
+        $contentTable = Table::name('content');
+        $attachmentsTable = Table::name('attachments');
+        $sql = implode("\n", [
+            'SELECT DISTINCT c.id, c.name, c.status, c.created, c.updated',
+            "FROM $contentTable c",
+            "LEFT JOIN $attachmentsTable a ON a.content = c.id",
+            'WHERE c.thumbnail = :media OR a.media = :media',
+            'ORDER BY COALESCE(c.updated, c.created) DESC',
+        ]);
+
+        $stmt = Connection::get()->prepare($sql);
+        $stmt->bindValue(':media', $mediaId, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
     }
 
     public function authorOptions(): array

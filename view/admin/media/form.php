@@ -67,9 +67,9 @@ if ($mode === 'edit') {
                     </div>
                 <?php endif; ?>
                 <hr>
-                <h3 class="mb-3"><?= htmlspecialchars($t('media.used_as_thumbnail'), ENT_QUOTES, 'UTF-8') ?></h3>
+                <h3 class="mb-3"><?= htmlspecialchars($t('media.used_in'), ENT_QUOTES, 'UTF-8') ?></h3>
                 <?php if (($usages ?? []) === []): ?>
-                    <p class="text-muted m-0"><?= htmlspecialchars($t('media.no_thumbnail_usage'), ENT_QUOTES, 'UTF-8') ?></p>
+                    <p class="text-muted m-0"><?= htmlspecialchars($t('media.no_usage'), ENT_QUOTES, 'UTF-8') ?></p>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table">
