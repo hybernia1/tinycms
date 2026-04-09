@@ -49,73 +49,56 @@ final class AdminUserController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->users->statusCounts();
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-                'status_counts' => $statusCounts,
-            ],
-        ]);
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardSuperAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
-        ) {
+        if (!$this->guardSuperAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('users.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
             return;
         }
 
         if (!$this->users->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('users.delete_failed')]], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('users.delete_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
+        $this->apiOk(['id' => $id]);
     }
 
     public function suspendApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardSuperAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
-        ) {
+        if (!$this->guardSuperAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
             return;
         }
 
         $mode = (string)($_POST['mode'] ?? 'suspend');
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('users.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
             return;
         }
 
         if ($mode === 'unsuspend') {
             if (!$this->users->unsuspend($id)) {
-                $this->respondJson(['ok' => false, 'error' => ['code' => 'UNSUSPEND_FAILED', 'message' => I18n::t('users.unsuspend_failed')]], 422);
+                $this->apiError('UNSUSPEND_FAILED', I18n::t('users.unsuspend_failed'));
                 return;
             }
 
-            $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'suspend' => 0]]);
+            $this->apiOk(['id' => $id, 'suspend' => 0]);
             return;
         }
 
         if (!$this->users->suspend($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SUSPEND_FAILED', 'message' => I18n::t('users.suspend_failed')]], 422);
+            $this->apiError('SUSPEND_FAILED', I18n::t('users.suspend_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'suspend' => 1]]);
+        $this->apiOk(['id' => $id, 'suspend' => 1]);
     }
 
     public function addForm(callable $redirect): void
@@ -137,10 +120,7 @@ final class AdminUserController extends BaseAdminController
 
     public function addSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardSuperAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
-        ) {
+        if (!$this->guardSuperAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -149,6 +129,7 @@ final class AdminUserController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('users.created'));
             $redirect('admin/users');
+            return;
         }
 
         $this->flash->add('error', I18n::t('users.save_failed'));
@@ -177,10 +158,7 @@ final class AdminUserController extends BaseAdminController
 
     public function editSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardSuperAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))
-        ) {
+        if (!$this->guardSuperAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -197,6 +175,7 @@ final class AdminUserController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('users.updated'));
             $redirect('admin/users');
+            return;
         }
 
         $this->flash->add('error', I18n::t('users.update_failed'));
@@ -220,17 +199,9 @@ final class AdminUserController extends BaseAdminController
 
     private function resolveListQuery(): array
     {
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        $status = (string)($_GET['status'] ?? 'all');
-        $status = in_array($status, ['all', 'active', 'suspended'], true) ? $status : 'all';
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
+        $status = $this->resolveStatusFilter(['all', 'active', 'suspended']);
         $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
 
         return [$page, $perPage, $status, $suspend, $query];
     }

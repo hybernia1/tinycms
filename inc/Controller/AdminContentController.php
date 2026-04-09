@@ -5,8 +5,6 @@ namespace App\Controller;
 
 use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;
-use App\Service\Feature\MediaService;
-use App\Service\Feature\UploadService;
 use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
@@ -23,8 +21,6 @@ final class AdminContentController extends BaseAdminController
         private PageView $pages,
         AuthService $authService,
         private ContentService $content,
-        private MediaService $media,
-        private UploadService $upload,
         private UserService $users,
         private TermService $terms,
         FlashService $flash,
@@ -57,59 +53,42 @@ final class AdminContentController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->content->statusCounts($availableStatuses);
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-                'status_counts' => $statusCounts,
-            ],
-        ]);
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
             return;
         }
 
         $item = $this->content->find($id);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
-        if (!$this->canDeleteContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+        if (!$this->canManageByAuthor($item)) {
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if (!$this->content->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('content.delete_failed')]], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('content.delete_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
+        $this->apiOk(['id' => $id]);
     }
 
     public function deleteSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -127,7 +106,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canDeleteContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
@@ -135,7 +114,7 @@ final class AdminContentController extends BaseAdminController
 
         if (!$this->content->delete($id)) {
             $this->flash->add('error', I18n::t('content.delete_failed'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/content', $id));
             return;
         }
 
@@ -160,15 +139,12 @@ final class AdminContentController extends BaseAdminController
 
     public function addSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->normalizeContentInput($_POST, $authorId), $authorId);
+        $result = $this->content->save($this->applyEditorAuthor($_POST, $authorId), $authorId);
 
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
@@ -176,7 +152,8 @@ final class AdminContentController extends BaseAdminController
                 $this->terms->syncContentTerms($newId, (string)($_POST['terms'] ?? ''));
             }
             $this->flash->add('success', I18n::t('content.created'));
-            $redirect($newId > 0 ? $this->editPath($newId) : 'admin/content');
+            $redirect($newId > 0 ? $this->buildEditPath('admin/content', $newId) : 'admin/content');
+            return;
         }
 
         $this->flash->add('error', I18n::t('content.save_failed'));
@@ -199,7 +176,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
@@ -214,10 +191,7 @@ final class AdminContentController extends BaseAdminController
 
     public function editSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -236,19 +210,20 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->normalizeContentInput($_POST, $authorId), $authorId, $id);
+        $result = $this->content->save($this->applyEditorAuthor($_POST, $authorId), $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
             $this->flash->add('success', I18n::t('content.updated'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/content', $id));
+            return;
         }
 
         $this->flash->add('error', I18n::t('content.update_failed'));
@@ -258,54 +233,48 @@ final class AdminContentController extends BaseAdminController
 
     public function statusApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
         $mode = (string)($_POST['mode'] ?? 'draft');
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
             return;
         }
 
         $item = $this->content->find($id);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
-        if (!$this->canManageContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+        if (!$this->canManageByAuthor($item)) {
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if ($mode === 'publish') {
             if (!$this->content->setStatus($id, 'published')) {
-                $this->respondJson(['ok' => false, 'error' => ['code' => 'PUBLISH_FAILED', 'message' => 'Obsah už byl publikovaný nebo není dostupný.']], 422);
+                $this->apiError('PUBLISH_FAILED', I18n::t('content.publish_failed'));
                 return;
             }
 
-            $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'status' => 'published']]);
+            $this->apiOk(['id' => $id, 'status' => 'published']);
             return;
         }
 
         if (!$this->content->setStatus($id, 'draft')) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DRAFT_FAILED', 'message' => 'Obsah už byl v draftu nebo není dostupný.']], 422);
+            $this->apiError('DRAFT_FAILED', I18n::t('content.draft_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'status' => 'draft']]);
+        $this->apiOk(['id' => $id, 'status' => 'draft']);
     }
 
     public function draftInitApiV1(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -320,34 +289,22 @@ final class AdminContentController extends BaseAdminController
         ];
         $result = $this->content->save($payload, $authorId);
         if (($result['success'] ?? false) !== true) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'CREATE_FAILED', 'message' => I18n::t('content.draft_create_failed')],
-            ], 422);
+            $this->apiError('CREATE_FAILED', I18n::t('content.draft_create_failed'));
             return;
         }
 
         $id = (int)($result['id'] ?? 0);
         if ($id <= 0) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.draft_invalid_id')],
-            ], 422);
+            $this->apiError('INVALID_ID', I18n::t('content.draft_invalid_id'));
             return;
         }
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => ['id' => $id, 'created_new' => true],
-        ]);
+        $this->apiOk(['id' => $id, 'created_new' => true]);
     }
 
     public function autosaveApiV1(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -355,28 +312,19 @@ final class AdminContentController extends BaseAdminController
         $name = trim((string)($_POST['name'] ?? ''));
         $body = trim((string)($_POST['body'] ?? ''));
         if ($id <= 0 && $name === '' && $body === '') {
-            $this->respondJson([
-                'ok' => true,
-                'data' => ['id' => 0, 'skipped' => true, 'reason' => 'empty'],
-            ]);
+            $this->apiOk(['id' => 0, 'skipped' => true, 'reason' => 'empty']);
             return;
         }
 
         if ($id > 0) {
             $item = $this->content->find($id);
             if ($item === null) {
-                $this->respondJson([
-                    'ok' => false,
-                    'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')],
-                ], 404);
+                $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
                 return;
             }
 
-            if (!$this->canManageContent($item)) {
-                $this->respondJson([
-                    'ok' => false,
-                    'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')],
-                ], 403);
+            if (!$this->canManageByAuthor($item)) {
+                $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
                 return;
             }
         }
@@ -387,10 +335,7 @@ final class AdminContentController extends BaseAdminController
         $result = $this->content->save($payload, $authorId, $isCreate ? null : $id);
 
         if (($result['success'] ?? false) !== true) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('content.autosave_failed'), 'errors' => $result['errors'] ?? []],
-            ], 422);
+            $this->apiError('SAVE_FAILED', I18n::t('content.autosave_failed'), 422, ['errors' => $result['errors'] ?? []]);
             return;
         }
 
@@ -399,13 +344,10 @@ final class AdminContentController extends BaseAdminController
             $this->terms->syncContentTerms($savedId, (string)$_POST['terms']);
         }
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => [
-                'id' => $savedId,
-                'created_new' => $isCreate,
-                'updated' => date('Y-m-d H:i:s'),
-            ],
+        $this->apiOk([
+            'id' => $savedId,
+            'created_new' => $isCreate,
+            'updated' => date('Y-m-d H:i:s'),
         ]);
     }
 
@@ -417,427 +359,17 @@ final class AdminContentController extends BaseAdminController
 
         $url = trim((string)($_GET['url'] ?? ''));
         if ($url === '' || !$this->isValidExternalUrl($url)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_URL', 'message' => I18n::t('common.invalid_data')]], 422);
+            $this->apiError('INVALID_URL', I18n::t('common.invalid_data'));
             return;
         }
 
         $title = $this->fetchRemoteTitle($url);
         if ($title === '') {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'TITLE_NOT_FOUND', 'message' => I18n::t('content.link_title_not_found')]], 404);
+            $this->apiError('TITLE_NOT_FOUND', I18n::t('content.link_title_not_found'), 404);
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['title' => $title]]);
-    }
-
-    public function thumbnailUploadSubmit(callable $redirect): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
-            return;
-        }
-
-        $id = (int)($_GET['id'] ?? 0);
-        $item = $this->content->find($id);
-
-        if ($item === null) {
-            $this->flash->add('error', I18n::t('content.not_found'));
-            $redirect('admin/content');
-            return;
-        }
-
-        if (!$this->canDeleteContent($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
-            $redirect('admin/content');
-            return;
-        }
-
-        $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
-        if (($upload['success'] ?? false) !== true) {
-            $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
-            $redirect($this->editPath($id));
-            return;
-        }
-
-        $author = (int)($this->authService->auth()->id() ?? 0);
-        $data = (array)($upload['data'] ?? []);
-        $mediaId = $this->media->create(
-            $author > 0 ? $author : null,
-            (string)($data['name'] ?? ''),
-            (string)($data['path'] ?? ''),
-            (string)($data['path_webp'] ?? '')
-        );
-
-        if ($mediaId <= 0 || !$this->content->setThumbnail($id, $mediaId)) {
-            if ($mediaId > 0) {
-                $this->media->delete($mediaId);
-            }
-            $this->upload->deleteMediaFiles($data);
-            $this->flash->add('error', I18n::t('content.thumbnail_save_failed'));
-            $redirect($this->editPath($id));
-            return;
-        }
-
-        $this->flash->add('success', I18n::t('content.thumbnail_uploaded'));
-        $redirect($this->editPath($id));
-    }
-
-    public function thumbnailDetachApiV1(callable $redirect, int $id): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
-            return;
-        }
-
-        $item = $this->content->find($id);
-        if ($id <= 0 || $item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canManageContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        if (!$this->content->setThumbnail($id, null)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DETACH_FAILED', 'message' => I18n::t('content.thumbnail_detach_failed')]], 422);
-            return;
-        }
-
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
-    }
-
-    public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
-            return;
-        }
-
-        $content = $this->content->find($contentId);
-        if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        $media = $this->media->find($mediaId);
-        if ($mediaId <= 0 || $media === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canManageMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        if (!$this->content->setThumbnail($contentId, $mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SELECT_FAILED', 'message' => I18n::t('content.thumbnail_select_failed')]], 422);
-            return;
-        }
-
-        $this->respondJson([
-            'ok' => true,
-            'data' => [
-                'content_id' => $contentId,
-                'media_id' => $mediaId,
-                'media' => $this->mapLibraryItem($media),
-            ],
-        ]);
-    }
-
-    public function thumbnailDeleteSubmit(callable $redirect): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
-            return;
-        }
-
-        $id = (int)($_POST['id'] ?? 0);
-        $item = $this->content->find($id);
-
-        if ($item === null) {
-            $this->flash->add('error', I18n::t('content.not_found'));
-            $redirect('admin/content');
-            return;
-        }
-
-        if (!$this->canDeleteContent($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
-            $redirect('admin/content');
-            return;
-        }
-
-        $thumbnailId = (int)($item['thumbnail'] ?? 0);
-        if ($thumbnailId <= 0) {
-            $this->flash->add('info', I18n::t('content.thumbnail_missing'));
-            $redirect($this->editPath($id));
-            return;
-        }
-
-        $media = $this->media->find($thumbnailId);
-        if ($media === null || !$this->media->delete($thumbnailId)) {
-            $this->flash->add('error', I18n::t('content.thumbnail_delete_failed'));
-            $redirect($this->editPath($id));
-            return;
-        }
-
-        $this->upload->deleteMediaFiles($media);
-        $this->flash->add('success', I18n::t('content.thumbnail_deleted'));
-        $redirect($this->editPath($id));
-    }
-
-    public function mediaLibraryApiV1(callable $redirect, int $contentId): void
-    {
-        if (!$this->guardAdmin($redirect, false)) {
-            return;
-        }
-
-        $content = $this->content->find($contentId);
-        if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        $query = trim((string)($_GET['q'] ?? ''));
-        $currentMediaId = (int)($_GET['current_media_id'] ?? 0);
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
-
-        $pagination = $this->media->paginate($page, $perPage, $query);
-        $items = array_map(fn(array $item): array => $this->mapLibraryItem($item), (array)($pagination['data'] ?? []));
-        if ($currentMediaId > 0) {
-            $currentItem = $this->media->find($currentMediaId);
-            if ($currentItem !== null && $this->matchesLibraryQuery($currentItem, $query)) {
-                $items = array_values(array_filter($items, static fn(array $row): bool => (int)($row['id'] ?? 0) !== $currentMediaId));
-                array_unshift($items, $this->mapLibraryItem($currentItem));
-            }
-        }
-
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'query' => $query,
-            ],
-        ]);
-    }
-
-    public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
-            return;
-        }
-
-        $item = $this->content->find($contentId);
-        if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canDeleteContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        if ($mediaId <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_MEDIA_ID', 'message' => I18n::t('media.not_found')]], 422);
-            return;
-        }
-
-        $media = $this->media->find($mediaId);
-        if ($media !== null && !$this->canDeleteMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        if ($media === null || !$this->media->delete($mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed')]], 422);
-            return;
-        }
-
-        if ((int)($item['thumbnail'] ?? 0) === $mediaId) {
-            $this->content->setThumbnail($contentId, null);
-        }
-
-        $this->upload->deleteMediaFiles($media);
-        $this->respondJson(['ok' => true, 'data' => ['id' => $mediaId, 'content_id' => $contentId]]);
-    }
-
-    public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
-            return;
-        }
-
-        $content = $this->content->find($contentId);
-        if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
-        if (($upload['success'] ?? false) !== true) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'UPLOAD_FAILED', 'message' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed'))]], 422);
-            return;
-        }
-
-        $author = (int)($this->authService->auth()->id() ?? 0);
-        $data = (array)($upload['data'] ?? []);
-        $mediaId = $this->media->create(
-            $author > 0 ? $author : null,
-            (string)($data['name'] ?? ''),
-            (string)($data['path'] ?? ''),
-            (string)($data['path_webp'] ?? '')
-        );
-
-        if ($mediaId <= 0) {
-            $this->upload->deleteMediaFiles($data);
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('media.save_failed')]], 422);
-            return;
-        }
-
-        $media = $this->media->find($mediaId);
-        $previewPath = $media !== null ? $this->resolvePreviewPath($media) : (string)($data['path'] ?? '');
-        $this->respondJson([
-            'ok' => true,
-            'data' => [
-                'id' => $mediaId,
-                'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
-                'preview_path' => $previewPath,
-                'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
-                'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
-                'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
-                'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
-            ],
-        ]);
-    }
-
-    public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
-            return;
-        }
-
-        $name = trim((string)($_POST['name'] ?? ''));
-        $content = $this->content->find($contentId);
-        if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        if ($mediaId <= 0 || $name === '') {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data')]], 422);
-            return;
-        }
-
-        $media = $this->media->find($mediaId);
-        if ($media === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canManageMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        $result = $this->media->save([
-            'name' => $name,
-            'path' => (string)($media['path'] ?? ''),
-            'path_webp' => (string)($media['path_webp'] ?? ''),
-            'author' => (string)($media['author'] ?? ''),
-        ], $mediaId);
-
-        if (($result['success'] ?? false) !== true) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'RENAME_FAILED', 'message' => (string)($result['errors']['name'] ?? I18n::t('media.rename_failed'))]], 422);
-            return;
-        }
-
-        $this->respondJson(['ok' => true, 'data' => ['id' => $mediaId, 'name' => $name]]);
-    }
-
-    public function attachmentAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
-    {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
-            return;
-        }
-
-        if ($contentId <= 0 || $mediaId <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data')]], 422);
-            return;
-        }
-
-        $content = $this->content->find($contentId);
-        if ($content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
-            return;
-        }
-
-        if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
-            return;
-        }
-
-        if (!$this->content->attachMedia($contentId, $mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'ATTACH_FAILED', 'message' => I18n::t('content.attachment_attach_failed')]], 422);
-            return;
-        }
-
-        $this->respondJson(['ok' => true, 'data' => ['content_id' => $contentId, 'media_id' => $mediaId]]);
-    }
-
-    private function editPath(int $id): string
-    {
-        return 'admin/content/edit?id=' . $id;
+        $this->apiOk(['title' => $title]);
     }
 
     private function isValidExternalUrl(string $url): bool
@@ -935,99 +467,13 @@ final class AdminContentController extends BaseAdminController
         ];
     }
 
-    private function normalizeContentInput(array $input, int $authorId): array
-    {
-        if (!$this->isEditor()) {
-            return $input;
-        }
-
-        $input['author'] = $authorId > 0 ? (string)$authorId : '';
-        return $input;
-    }
-
     private function resolveListQuery(): array
     {
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        $status = trim((string)($_GET['status'] ?? 'all'));
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
-
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
         $availableStatuses = $this->content->statuses();
-        if ($status !== 'all' && !in_array($status, $availableStatuses, true)) {
-            $status = 'all';
-        }
+        $status = $this->resolveStatusFilter(array_merge(['all'], $availableStatuses));
 
         return [$page, $perPage, $status, $query, $availableStatuses];
-    }
-
-    private function resolvePreviewPath(array $item): string
-    {
-        $previewPath = trim((string)($item['path_webp'] ?? ''));
-        if ($previewPath !== '') {
-            return (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $previewPath) ?? $previewPath);
-        }
-        return trim((string)($item['path'] ?? ''));
-    }
-
-    private function thumbnailSuffix(): string
-    {
-        $suffix = '_100x100.webp';
-        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
-            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
-            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
-                $suffix = (string)$firstVariant['suffix'];
-            }
-        }
-        return $suffix;
-    }
-
-    private function canDeleteContent(array $item): bool
-    {
-        return $this->canManageContent($item);
-    }
-
-    private function canDeleteMedia(array $item): bool
-    {
-        if (!$this->isEditor()) {
-            return true;
-        }
-
-        return (int)($item['author'] ?? 0) === $this->currentUserId();
-    }
-
-    private function canManageMedia(array $item): bool
-    {
-        return $this->canDeleteMedia($item);
-    }
-
-    private function canManageContent(array $item): bool
-    {
-        if (!$this->isEditor()) {
-            return true;
-        }
-
-        return (int)($item['author'] ?? 0) === $this->currentUserId();
-    }
-
-    private function mapLibraryItem(array $item): array
-    {
-        $createdAt = (string)($item['created'] ?? '');
-        return [
-            'id' => (int)($item['id'] ?? 0),
-            'name' => (string)($item['name'] ?? ''),
-            'can_edit' => $this->canManageMedia($item),
-            'can_delete' => $this->canDeleteMedia($item),
-            'preview_path' => $this->resolvePreviewPath($item),
-            'path' => (string)($item['path'] ?? ''),
-            'webp_path' => (string)($item['path_webp'] ?? ''),
-            'created' => $createdAt,
-            'created_label' => $this->formatDateTime($createdAt),
-        ];
     }
 
     private function mapListItem(array $row): array
@@ -1037,46 +483,14 @@ final class AdminContentController extends BaseAdminController
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
-            'can_edit' => $this->canManageContent($row),
-            'can_delete' => $this->canDeleteContent($row),
+            'can_edit' => $this->canManageByAuthor($row),
+            'can_delete' => $this->canManageByAuthor($row),
             'author_name' => (string)($row['author_name'] ?? '—'),
             'status' => (string)($row['status'] ?? 'draft'),
             'created' => $createdAt,
             'created_label' => $this->formatDateTime($createdAt),
             'is_planned' => $createdStamp !== false && $createdStamp > time(),
         ];
-    }
-
-    private function formatDateTime(string $value): string
-    {
-        $stamp = $value !== '' ? strtotime($value) : false;
-        if ($stamp === false) {
-            return '';
-        }
-
-        return date(APP_DATETIME_FORMAT, $stamp);
-    }
-
-    private function matchesLibraryQuery(array $item, string $query): bool
-    {
-        $needle = mb_strtolower(trim($query));
-        if ($needle === '') {
-            return true;
-        }
-
-        $haystacks = [
-            mb_strtolower((string)($item['name'] ?? '')),
-            mb_strtolower((string)($item['path'] ?? '')),
-            mb_strtolower((string)($item['path_webp'] ?? '')),
-        ];
-
-        foreach ($haystacks as $haystack) {
-            if ($haystack !== '' && mb_strpos($haystack, $needle) !== false) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function resolveSelectedTerms(array $item, ?int $contentId): array

@@ -7,6 +7,7 @@ use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
+use App\Service\Support\PaginationConfig;
 
 abstract class BaseAdminController
 {
@@ -66,6 +67,18 @@ abstract class BaseAdminController
         return false;
     }
 
+    protected function guardAdminCsrf(callable $redirect, string $redirectPath, string $message, bool $flashDenied = false): bool
+    {
+        return $this->guardAdmin($redirect, $flashDenied)
+            && $this->guardCsrf($redirect, $redirectPath, $message);
+    }
+
+    protected function guardSuperAdminCsrf(callable $redirect, string $redirectPath, string $message, bool $flashDenied = true): bool
+    {
+        return $this->guardSuperAdmin($redirect, $flashDenied)
+            && $this->guardCsrf($redirect, $redirectPath, $message);
+    }
+
     protected function storeFormState(string $sessionKey, string $mode, ?int $id, array $data, array $errors): void
     {
         $this->ensureSession();
@@ -94,30 +107,39 @@ abstract class BaseAdminController
         return $state;
     }
 
-    protected function wantsJson(): bool
-    {
-        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
-        return str_contains($accept, 'application/json');
-    }
-
-    protected function jsonError(string $message, int $statusCode = 422): void
-    {
-        $this->respondJson([
-            'success' => false,
-            'message' => $message,
-        ], $statusCode);
-    }
-
-    protected function jsonSuccess(array $payload = [], int $statusCode = 200): void
-    {
-        $this->respondJson(array_merge(['success' => true], $payload), $statusCode);
-    }
-
     protected function respondJson(array $payload, int $statusCode = 200): void
     {
         header('Content-Type: application/json; charset=utf-8');
         http_response_code($statusCode);
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
+
+    protected function apiOk(array $data = [], array $meta = [], int $statusCode = 200): void
+    {
+        $payload = ['ok' => true];
+        if ($data !== []) {
+            $payload['data'] = $data;
+        }
+        if ($meta !== []) {
+            $payload['meta'] = $meta;
+        }
+        $this->respondJson($payload, $statusCode);
+    }
+
+    protected function apiError(string $code, string $message, int $statusCode = 422, array $details = []): void
+    {
+        $error = [
+            'code' => $code,
+            'message' => $message,
+        ];
+        if ($details !== []) {
+            $error = array_merge($error, $details);
+        }
+
+        $this->respondJson([
+            'ok' => false,
+            'error' => $error,
+        ], $statusCode);
     }
 
     protected function currentUserId(): int
@@ -128,6 +150,100 @@ abstract class BaseAdminController
     protected function isEditor(): bool
     {
         return (string)($this->authService->auth()->role() ?? '') === 'editor';
+    }
+
+    protected function canManageByAuthor(array $item, string $authorKey = 'author'): bool
+    {
+        if (!$this->isEditor()) {
+            return true;
+        }
+
+        return (int)($item[$authorKey] ?? 0) === $this->currentUserId();
+    }
+
+    protected function formatDateTime(string $value): string
+    {
+        $stamp = $value !== '' ? strtotime($value) : false;
+        if ($stamp === false) {
+            return '';
+        }
+
+        return date(APP_DATETIME_FORMAT, $stamp);
+    }
+
+    protected function hasUpload(string $field): bool
+    {
+        return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    }
+
+    protected function applyEditorAuthor(array $input, int $authorId, string $key = 'author'): array
+    {
+        if (!$this->isEditor()) {
+            return $input;
+        }
+
+        $input[$key] = $authorId > 0 ? (string)$authorId : '';
+        return $input;
+    }
+
+    protected function resolvePaginationQuery(): array
+    {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $defaultPerPage = PaginationConfig::perPage();
+        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        $query = trim((string)($_GET['q'] ?? ''));
+
+        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+            $perPage = $defaultPerPage;
+        }
+
+        return [$page, $perPage, $query];
+    }
+
+    protected function resolveStatusFilter(array $allowed, string $default = 'all', string $param = 'status'): string
+    {
+        $status = trim((string)($_GET[$param] ?? $default));
+        return in_array($status, $allowed, true) ? $status : $default;
+    }
+
+    protected function buildListMeta(array $pagination, int $perPage, string $status, string $query, array $statusCounts): array
+    {
+        return [
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'status' => $status,
+            'query' => $query,
+            'status_counts' => $statusCounts,
+        ];
+    }
+
+    protected function buildEditPath(string $basePath, int $id): string
+    {
+        return $basePath . '/edit?id=' . $id;
+    }
+
+    protected function resolvePreviewPath(array $item): string
+    {
+        $pathWebp = trim((string)($item['path_webp'] ?? ''));
+        if ($pathWebp !== '') {
+            return (string)(preg_replace('/\\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
+        }
+
+        return trim((string)($item['path'] ?? ''));
+    }
+
+    protected function thumbnailSuffix(): string
+    {
+        $suffix = '_100x100.webp';
+        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
+            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
+            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
+                $suffix = (string)$firstVariant['suffix'];
+            }
+        }
+
+        return $suffix;
     }
 
     private function ensureSession(): void

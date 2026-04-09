@@ -50,18 +50,7 @@ final class AdminMediaController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->media->statusCounts();
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-                'status_counts' => $statusCounts,
-            ],
-        ]);
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function addForm(callable $redirect): void
@@ -77,10 +66,7 @@ final class AdminMediaController extends BaseAdminController
 
     public function addSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -107,12 +93,13 @@ final class AdminMediaController extends BaseAdminController
             'path_webp' => (string)($uploadData['path_webp'] ?? ''),
             'author' => trim((string)($_POST['author'] ?? '')) !== '' ? (string)$_POST['author'] : ($authorId > 0 ? (string)$authorId : ''),
         ]);
-        $result = $this->media->save($this->normalizeMediaInput($input, $authorId));
+        $result = $this->media->save($this->applyEditorAuthor($input, $authorId));
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.created'));
             $newId = (int)($result['id'] ?? 0);
-            $redirect($newId > 0 ? $this->editPath($newId) : 'admin/media');
+            $redirect($newId > 0 ? $this->buildEditPath('admin/media', $newId) : 'admin/media');
+            return;
         }
 
         $this->upload->deleteMediaFiles($uploadData);
@@ -136,7 +123,7 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageMedia($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
@@ -150,10 +137,7 @@ final class AdminMediaController extends BaseAdminController
 
     public function editSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -171,7 +155,7 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageMedia($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
@@ -183,73 +167,53 @@ final class AdminMediaController extends BaseAdminController
         ]);
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->media->save($this->normalizeMediaInput($input, $authorId), $id);
+        $result = $this->media->save($this->applyEditorAuthor($input, $authorId), $id);
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.updated'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/media', $id));
+            return;
         }
 
         $this->flash->add('error', I18n::t('media.update_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect($this->editPath($id));
+        $redirect($this->buildEditPath('admin/media', $id));
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('media.invalid_id')],
-            ], 422);
+            $this->apiError('INVALID_ID', I18n::t('media.invalid_id'));
             return;
         }
 
         $item = $this->media->find($id);
         if ($item === null) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('media.not_found')],
-            ], 404);
+            $this->apiError('NOT_FOUND', I18n::t('media.not_found'), 404);
             return;
         }
 
-        if (!$this->canDeleteMedia($item)) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')],
-            ], 403);
+        if (!$this->canManageByAuthor($item)) {
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if (!$this->media->delete($id)) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed')],
-            ], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('media.delete_failed'));
             return;
         }
 
         $this->upload->deleteMediaFiles($item);
-        $this->respondJson([
-            'ok' => true,
-            'data' => ['id' => $id],
-        ]);
+        $this->apiOk(['id' => $id]);
     }
 
     public function deleteSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -267,7 +231,7 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canDeleteMedia($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
@@ -278,118 +242,42 @@ final class AdminMediaController extends BaseAdminController
 
         if (!$this->media->delete($id)) {
             $this->flash->add('error', I18n::t('media.delete_failed'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/media', $id));
             return;
         }
 
         $this->upload->deleteMediaFiles($item);
         $this->flash->add('success', I18n::t('media.deleted'));
-        $redirect($nextId !== null ? $this->editPath($nextId) : 'admin/media');
-    }
-
-    private function editPath(int $id): string
-    {
-        return 'admin/media/edit?id=' . $id;
+        $redirect($nextId !== null ? $this->buildEditPath('admin/media', $nextId) : 'admin/media');
     }
 
     private function resolveListQuery(): array
     {
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        $status = (string)($_GET['status'] ?? 'all');
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
-
-        if (!in_array($status, ['all', 'unassigned'], true)) {
-            $status = 'all';
-        }
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
+        $status = $this->resolveStatusFilter(['all', 'unassigned']);
 
         return [$page, $perPage, $status, $query];
     }
 
-    private function hasUpload(string $field): bool
-    {
-        return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
-    }
-
-    private function normalizeMediaInput(array $input, int $authorId): array
-    {
-        if (!$this->isEditor()) {
-            return $input;
-        }
-
-        $input['author'] = $authorId > 0 ? (string)$authorId : '';
-        return $input;
-    }
-
-    private function canDeleteMedia(array $item): bool
-    {
-        return $this->canManageMedia($item);
-    }
-
-    private function canManageMedia(array $item): bool
-    {
-        if (!$this->isEditor()) {
-            return true;
-        }
-
-        return (int)($item['author'] ?? 0) === $this->currentUserId();
-    }
-
     private function mapListItem(array $row): array
     {
+        $previewPath = $this->resolvePreviewPath($row);
+        if ($previewPath !== '' && !str_starts_with($previewPath, '/')) {
+            $previewPath = '/' . ltrim($previewPath, '/');
+        }
+
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
-            'can_edit' => $this->canManageMedia($row),
-            'can_delete' => $this->canDeleteMedia($row),
+            'can_edit' => $this->canManageByAuthor($row),
+            'can_delete' => $this->canManageByAuthor($row),
             'path' => (string)($row['path'] ?? ''),
             'path_webp' => (string)($row['path_webp'] ?? ''),
-            'preview_path' => $this->resolvePreviewPath($row),
+            'preview_path' => $previewPath,
             'author_name' => (string)($row['author_name'] ?? '—'),
             'created' => (string)($row['created'] ?? ''),
             'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
         ];
-    }
-
-    private function formatDateTime(string $value): string
-    {
-        $stamp = $value !== '' ? strtotime($value) : false;
-        if ($stamp === false) {
-            return '';
-        }
-
-        return date(APP_DATETIME_FORMAT, $stamp);
-    }
-
-    private function resolvePreviewPath(array $row): string
-    {
-        $pathWebp = trim((string)($row['path_webp'] ?? ''));
-        if ($pathWebp !== '') {
-            $preview = (string)(preg_replace('/\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
-            return str_starts_with($preview, '/') ? $preview : '/' . ltrim($preview, '/');
-        }
-        $path = trim((string)($row['path'] ?? ''));
-        if ($path === '') {
-            return '';
-        }
-        return str_starts_with($path, '/') ? $path : '/' . ltrim($path, '/');
-    }
-
-    private function thumbnailSuffix(): string
-    {
-        $suffix = '_100x100.webp';
-        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
-            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
-            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
-                $suffix = (string)$firstVariant['suffix'];
-            }
-        }
-        return $suffix;
     }
 
 }

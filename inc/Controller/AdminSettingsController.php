@@ -38,10 +38,7 @@ final class AdminSettingsController extends BaseAdminController
 
     public function submit(callable $redirect): void
     {
-        if (
-            !$this->guardSuperAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/settings', I18n::t('common.csrf_expired'))
-        ) {
+        if (!$this->guardSuperAdminCsrf($redirect, 'admin/settings', I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -60,11 +57,7 @@ final class AdminSettingsController extends BaseAdminController
         I18n::setTheme((string)($this->settings->resolved()['theme'] ?? 'default'));
         $this->flash->add('success', I18n::t('settings.saved'));
         $redirect('admin/settings');
-    }
-
-    private function hasUpload(string $field): bool
-    {
-        return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+        return;
     }
 
     private function handleSiteImageUpload(string $field, string $settingKey, array &$input, array $resolved, callable $uploader, callable $redirect): bool

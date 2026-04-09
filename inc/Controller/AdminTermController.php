@@ -48,18 +48,7 @@ final class AdminTermController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->terms->statusCounts();
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-                'status_counts' => $statusCounts,
-            ],
-        ]);
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function suggest(callable $redirect): void
@@ -69,12 +58,8 @@ final class AdminTermController extends BaseAdminController
         }
 
         $query = trim((string)($_GET['q'] ?? ''));
-        $this->respondJson([
-            'ok' => true,
-            'data' => $this->terms->search($query, 15),
-            'meta' => [
-                'query' => $query,
-            ],
+        $this->apiOk($this->terms->search($query, 15), [
+            'query' => $query,
         ]);
     }
 
@@ -91,10 +76,7 @@ final class AdminTermController extends BaseAdminController
 
     public function addSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -102,7 +84,7 @@ final class AdminTermController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
             $this->flash->add('success', I18n::t('terms.created'));
-            $redirect($newId > 0 ? $this->editPath($newId) : 'admin/terms');
+            $redirect($newId > 0 ? $this->buildEditPath('admin/terms', $newId) : 'admin/terms');
             return;
         }
 
@@ -132,10 +114,7 @@ final class AdminTermController extends BaseAdminController
 
     public function editSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -149,40 +128,32 @@ final class AdminTermController extends BaseAdminController
         $result = $this->terms->save($_POST, $id);
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('terms.updated'));
-            $redirect($this->editPath($id));
+            $redirect($this->buildEditPath('admin/terms', $id));
             return;
         }
 
         $this->flash->add('error', I18n::t('terms.update_failed'));
         $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect($this->editPath($id));
+        $redirect($this->buildEditPath('admin/terms', $id));
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('terms.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('terms.invalid_id'));
             return;
         }
 
         if (!$this->terms->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('terms.delete_failed')]], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('terms.delete_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
-    }
-
-    private function editPath(int $id): string
-    {
-        return 'admin/terms/edit?id=' . $id;
+        $this->apiOk(['id' => $id]);
     }
 
     private function mapListItem(array $row): array
@@ -195,31 +166,10 @@ final class AdminTermController extends BaseAdminController
         ];
     }
 
-    private function formatDateTime(string $value): string
-    {
-        $stamp = $value !== '' ? strtotime($value) : false;
-        if ($stamp === false) {
-            return '';
-        }
-
-        return date(APP_DATETIME_FORMAT, $stamp);
-    }
-
     private function resolveListQuery(): array
     {
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        $status = trim((string)($_GET['status'] ?? 'all'));
-        $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
-
-        if (!in_array($status, ['all', 'unassigned'], true)) {
-            $status = 'all';
-        }
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
+        $status = $this->resolveStatusFilter(['all', 'unassigned']);
 
         return [$page, $perPage, $status, $query];
     }
