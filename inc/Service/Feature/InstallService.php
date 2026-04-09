@@ -54,17 +54,6 @@ final class InstallService
         ];
     }
 
-    public function canConnect(array $db): ?string
-    {
-        try {
-            $pdo = $this->connect($db);
-            $pdo->query('SELECT 1');
-            return null;
-        } catch (PDOException $e) {
-            return I18n::t('install.db_connect_failed');
-        }
-    }
-
     public function canInstallOnPrefix(array $db): ?string
     {
         try {

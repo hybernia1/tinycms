@@ -59,15 +59,6 @@ final class InstallController
             $redirect('install/db');
         }
 
-        $error = $this->installService->canConnect($result['values']);
-
-        if ($error !== null) {
-            $_SESSION['install']['errors_db'] = ['db' => $error];
-            $_SESSION['install']['db'] = $result['values'];
-            $_SESSION['install']['db_valid'] = false;
-            $redirect('install/db');
-        }
-
         $prefixError = $this->installService->canInstallOnPrefix($result['values']);
 
         if ($prefixError !== null) {
