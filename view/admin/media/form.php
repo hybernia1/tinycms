@@ -17,7 +17,10 @@ $massPerPage = max(1, (int)($massPagination['per_page'] ?? \App\Service\Support\
 $massTotalPages = max(1, (int)($massPagination['total_pages'] ?? 1));
 $massAllowedPerPage = \App\Service\Support\PaginationConfig::allowed();
 $massIdsQuery = implode(',', array_map(static fn($id): int => (int)$id, $massIds));
-$isMassEdit = $massIds !== [];
+$massSource = (string)($massData['source'] ?? ($massIds !== [] ? 'ids' : 'upload'));
+$massStatus = (string)($massData['status'] ?? 'all');
+$massQuery = (string)($massData['query'] ?? '');
+$isMassEdit = in_array($massSource, ['ids', 'page'], true);
 $thumbSuffix = '_100x100.webp';
 if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
     $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
@@ -59,9 +62,12 @@ if ($isMass):
         <form id="media-mass-result-form" method="post" action="<?= htmlspecialchars($url('admin/media/mass'), ENT_QUOTES, 'UTF-8') ?>">
             <?= $csrfField() ?>
             <input type="hidden" name="mass_rename" value="1">
+            <input type="hidden" name="mass_source" value="<?= htmlspecialchars($massSource, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="uploaded_ids" value="<?= htmlspecialchars(implode(',', array_map(static fn($id): int => (int)$id, $massIds)), ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="page" value="<?= $massPage ?>">
             <input type="hidden" name="per_page" value="<?= $massPerPage ?>">
+            <input type="hidden" name="status" value="<?= htmlspecialchars($massStatus, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="q" value="<?= htmlspecialchars($massQuery, ENT_QUOTES, 'UTF-8') ?>">
             <div class="table-responsive">
                 <table class="table">
                     <thead>
@@ -110,8 +116,24 @@ if ($isMass):
                 <?php
                 $prevPage = max(1, $massPage - 1);
                 $nextPage = min($massTotalPages, $massPage + 1);
-                $prevUrl = $url('admin/media/mass?id=' . urlencode($massIdsQuery) . '&page=' . $prevPage . '&per_page=' . $massPerPage);
-                $nextUrl = $url('admin/media/mass?id=' . urlencode($massIdsQuery) . '&page=' . $nextPage . '&per_page=' . $massPerPage);
+                $baseParams = [
+                    'page' => (string)$massPage,
+                    'per_page' => (string)$massPerPage,
+                ];
+                if ($massSource === 'ids') {
+                    $baseParams['id'] = $massIdsQuery;
+                } else {
+                    $baseParams['status'] = $massStatus;
+                    if ($massQuery !== '') {
+                        $baseParams['q'] = $massQuery;
+                    }
+                }
+                $prevParams = $baseParams;
+                $nextParams = $baseParams;
+                $prevParams['page'] = (string)$prevPage;
+                $nextParams['page'] = (string)$nextPage;
+                $prevUrl = $url('admin/media/mass?' . http_build_query($prevParams));
+                $nextUrl = $url('admin/media/mass?' . http_build_query($nextParams));
                 ?>
                 <div class="pagination">
                     <a class="pagination-link<?= $massPage <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($prevUrl, ENT_QUOTES, 'UTF-8') ?>"<?= $massPage <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
@@ -121,8 +143,13 @@ if ($isMass):
                 <div></div>
             <?php endif; ?>
             <form method="get" class="d-flex gap-2 align-center">
-                <input type="hidden" name="id" value="<?= htmlspecialchars($massIdsQuery, ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="page" value="1">
+                <?php if ($massSource === 'ids'): ?>
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($massIdsQuery, ENT_QUOTES, 'UTF-8') ?>">
+                <?php else: ?>
+                    <input type="hidden" name="status" value="<?= htmlspecialchars($massStatus, ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="q" value="<?= htmlspecialchars($massQuery, ENT_QUOTES, 'UTF-8') ?>">
+                <?php endif; ?>
                 <select name="per_page">
                     <?php foreach ($massAllowedPerPage as $option): ?>
                         <option value="<?= (int)$option ?>" <?= (int)$option === $massPerPage ? 'selected' : '' ?>><?= (int)$option ?></option>

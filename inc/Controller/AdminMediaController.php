@@ -129,17 +129,44 @@ final class AdminMediaController extends BaseAdminController
         }
 
         $uploadedIds = $this->parseUploadedIds((string)($_GET['id'] ?? ''));
-        $defaultPerPage = PaginationConfig::perPage();
-        $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
+        $source = 'upload';
+        $pagination = ['page' => 1, 'per_page' => PaginationConfig::perPage(), 'total_pages' => 1, 'total' => 0];
+        $items = [];
+        $status = 'all';
+        $query = '';
+
+        if ($uploadedIds !== []) {
+            $source = 'ids';
+            $defaultPerPage = PaginationConfig::perPage();
+            $page = max(1, (int)($_GET['page'] ?? 1));
+            $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+            if (!in_array($perPage, PaginationConfig::allowed(), true)) {
+                $perPage = $defaultPerPage;
+            }
+            $pagination = $this->paginateMassIds($uploadedIds, $page, $perPage);
+            $items = $this->resolveMassItems((array)($pagination['ids'] ?? []));
+        } elseif (isset($_GET['page']) || isset($_GET['per_page']) || isset($_GET['status']) || isset($_GET['q'])) {
+            $source = 'page';
+            [$page, $perPage, $status, $query] = $this->resolveListQuery();
+            $pageList = $this->media->paginate($page, $perPage, $query, $status);
+            $rawItems = array_values((array)($pageList['data'] ?? []));
+            $ids = array_values(array_filter(array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $rawItems), static fn(int $id): bool => $id > 0));
+            $items = $this->resolveMassItems($ids);
+            $pagination = [
+                'page' => (int)($pageList['page'] ?? 1),
+                'per_page' => (int)($pageList['per_page'] ?? $perPage),
+                'total_pages' => (int)($pageList['total_pages'] ?? 1),
+                'total' => (int)($pageList['total'] ?? 0),
+            ];
         }
-        $pagination = $this->paginateMassIds($uploadedIds, $page, $perPage);
+
         $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], [
             'ids' => $uploadedIds,
-            'items' => $this->resolveMassItems((array)($pagination['ids'] ?? [])),
+            'items' => $items,
             'pagination' => $pagination,
+            'source' => $source,
+            'status' => $status,
+            'query' => $query,
         ]);
     }
 
@@ -153,14 +180,14 @@ final class AdminMediaController extends BaseAdminController
         }
 
         $uploadedIds = $this->parseUploadedIds((string)($_POST['uploaded_ids'] ?? ''));
+        $source = (string)($_POST['mass_source'] ?? 'ids');
+        $page = max(1, (int)($_POST['page'] ?? 1));
+        $perPage = (int)($_POST['per_page'] ?? PaginationConfig::perPage());
+        $status = (string)($_POST['status'] ?? 'all');
+        $query = trim((string)($_POST['q'] ?? ''));
         if (isset($_POST['mass_rename'])) {
             $this->handleMassRename($uploadedIds);
-            $this->redirectMass(
-                $redirect,
-                $uploadedIds,
-                max(1, (int)($_POST['page'] ?? 1)),
-                (int)($_POST['per_page'] ?? PaginationConfig::perPage())
-            );
+            $this->redirectMass($redirect, $uploadedIds, $page, $perPage, $source, $status, $query);
             return;
         }
 
@@ -206,7 +233,7 @@ final class AdminMediaController extends BaseAdminController
             $this->flash->add('success', I18n::t('media.mass_uploaded'));
         }
 
-        $this->redirectMass($redirect, $uploadedIds, 1, PaginationConfig::perPage());
+        $this->redirectMass($redirect, $uploadedIds, 1, PaginationConfig::perPage(), 'ids');
     }
 
     private function handleMassRename(array $uploadedIds): void
@@ -480,8 +507,25 @@ final class AdminMediaController extends BaseAdminController
         return $items;
     }
 
-    private function redirectMass(callable $redirect, array $ids, int $page = 1, int $perPage = 0): void
+    private function redirectMass(callable $redirect, array $ids, int $page = 1, int $perPage = 0, string $source = 'ids', string $status = 'all', string $query = ''): void
     {
+        if ($source === 'page') {
+            $queryParams = [
+                'page' => (string)max(1, $page),
+            ];
+            if (in_array($perPage, PaginationConfig::allowed(), true)) {
+                $queryParams['per_page'] = (string)$perPage;
+            }
+            if (in_array($status, ['all', 'unassigned'], true)) {
+                $queryParams['status'] = $status;
+            }
+            if ($query !== '') {
+                $queryParams['q'] = $query;
+            }
+            $redirect('admin/media/mass?' . http_build_query($queryParams));
+            return;
+        }
+
         $filteredIds = array_values(array_unique(array_filter($ids, static fn(int $id): bool => $id > 0)));
         if ($filteredIds === []) {
             $redirect('admin/media/mass');

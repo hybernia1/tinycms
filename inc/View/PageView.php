@@ -314,7 +314,8 @@ final class PageView
 
     public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = [], array $navigation = [], array $mass = []): void
     {
-        $isMassEdit = $mode === 'add_mass' && ((array)($mass['ids'] ?? [])) !== [];
+        $massSource = (string)($mass['source'] ?? '');
+        $isMassEdit = $mode === 'add_mass' && ($massSource === 'ids' || $massSource === 'page' || ((array)($mass['ids'] ?? [])) !== []);
         $this->renderAdmin('admin/media/form', [
             'mode' => $mode,
             'item' => $item,
