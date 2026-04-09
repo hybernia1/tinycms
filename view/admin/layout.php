@@ -5,6 +5,7 @@ $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
+$isMediaMass = str_ends_with($currentPath, 'admin/media/mass');
 $isMediaEdit = str_ends_with($currentPath, 'admin/media/edit');
 $isTermsList = str_ends_with($currentPath, 'admin/terms');
 $isUsersEdit = str_ends_with($currentPath, 'admin/users/edit');
@@ -243,11 +244,17 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_content'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isMediaList): ?>
-            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>">
-                <?= $icon('add') ?>
-                <span><?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?></span>
-            </a>
+            <?php elseif ($isMediaList || $isMediaMass): ?>
+            <details class="header-dropdown">
+                <summary class="btn btn-primary">
+                    <?= $icon('add') ?>
+                    <span><?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?></span>
+                </summary>
+                <div class="header-dropdown-menu">
+                    <a class="header-dropdown-link" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('media.single_upload'), ENT_QUOTES, 'UTF-8') ?></a>
+                    <a class="header-dropdown-link" href="<?= htmlspecialchars($url('admin/media/mass'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('media.mass_upload'), ENT_QUOTES, 'UTF-8') ?></a>
+                </div>
+            </details>
             <?php elseif ($isTermsList || $isTermsEdit): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>

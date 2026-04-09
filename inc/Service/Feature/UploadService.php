@@ -109,6 +109,17 @@ final class UploadService
             return ['success' => false, 'error' => I18n::t('upload.thumbnail_create_failed')];
         }
 
+        if (!$this->hasAllVariants($webpRel)) {
+            foreach ($createdThumbs as $createdThumb) {
+                @unlink($createdThumb);
+            }
+            if ($fileAbs !== $webpAbs) {
+                @unlink($fileAbs);
+            }
+            @unlink($webpAbs);
+            return ['success' => false, 'error' => I18n::t('upload.thumbnail_create_failed')];
+        }
+
         return [
             'success' => true,
             'data' => [
@@ -329,6 +340,18 @@ final class UploadService
         }
 
         return $resized;
+    }
+
+    private function hasAllVariants(string $webpRel): bool
+    {
+        foreach ($this->thumbVariants() as $variant) {
+            $thumbRel = $this->thumbnailPath($webpRel, (string)$variant['suffix']);
+            if (!is_file($this->rootPath . '/' . $thumbRel)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function thumbnailPath(string $webpPath, string $suffix): string

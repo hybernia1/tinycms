@@ -180,6 +180,14 @@ $router->post('admin/media/add', static function () use ($adminMedia, $redirect)
     $adminMedia->addSubmit($redirect);
 });
 
+$router->get('admin/media/mass', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->massForm($redirect);
+});
+
+$router->post('admin/media/mass', static function () use ($adminMedia, $redirect): void {
+    $adminMedia->massSubmit($redirect);
+});
+
 $router->get('admin/media/edit', static function () use ($adminMedia, $redirect): void {
     $adminMedia->editForm($redirect);
 });

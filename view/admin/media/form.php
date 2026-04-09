@@ -11,16 +11,19 @@ $isMass = $mode === 'add_mass';
 $massData = is_array($mass ?? null) ? $mass : [];
 $massItems = is_array($massData['items'] ?? null) ? $massData['items'] : [];
 $massIds = is_array($massData['ids'] ?? null) ? $massData['ids'] : [];
+$thumbSuffix = '_100x100.webp';
+if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
+    $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
+    if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
+        $thumbSuffix = (string)$firstVariant['suffix'];
+    }
+}
 $fileMeta = null;
 if ($isMass):
 ?>
 <div class="card p-5">
-    <div class="d-flex gap-2 mb-4">
-        <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('media.single_upload'), ENT_QUOTES, 'UTF-8') ?></a>
-        <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/media/add?mode=mass'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('media.mass_upload'), ENT_QUOTES, 'UTF-8') ?></a>
-    </div>
     <p class="text-muted mb-3"><?= htmlspecialchars($t('media.mass_info'), ENT_QUOTES, 'UTF-8') ?></p>
-    <form method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/media/add?mode=mass'), ENT_QUOTES, 'UTF-8') ?>">
+    <form method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/media/mass'), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></label>
@@ -35,7 +38,7 @@ if ($isMass):
 <?php if ($massItems !== []): ?>
     <div class="card p-5 mt-3">
         <h3 class="mb-3"><?= htmlspecialchars($t('media.mass_result'), ENT_QUOTES, 'UTF-8') ?></h3>
-        <form method="post" action="<?= htmlspecialchars($url('admin/media/add?mode=mass'), ENT_QUOTES, 'UTF-8') ?>">
+        <form method="post" action="<?= htmlspecialchars($url('admin/media/mass'), ENT_QUOTES, 'UTF-8') ?>">
             <?= $csrfField() ?>
             <input type="hidden" name="mass_rename" value="1">
             <input type="hidden" name="uploaded_ids" value="<?= htmlspecialchars(implode(',', array_map(static fn($id): int => (int)$id, $massIds)), ENT_QUOTES, 'UTF-8') ?>">
@@ -43,18 +46,31 @@ if ($isMass):
                 <table class="table">
                     <thead>
                     <tr>
+                        <th><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></th>
                         <th><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></th>
-                        <th><?= htmlspecialchars($t('media.path'), ENT_QUOTES, 'UTF-8') ?></th>
-                        <th><?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?></th>
                     </tr>
                     </thead>
                     <tbody>
                     <?php foreach ($massItems as $massItem): ?>
-                        <?php $massId = (int)($massItem['id'] ?? 0); ?>
+                        <?php
+                        $massId = (int)($massItem['id'] ?? 0);
+                        $massPreviewPath = trim((string)($massItem['path_webp'] ?? ''));
+                        if ($massPreviewPath !== '') {
+                            $massPreviewPath = (string)(preg_replace('/\.webp$/i', $thumbSuffix, $massPreviewPath) ?? $massPreviewPath);
+                        } else {
+                            $massPreviewPath = trim((string)($massItem['path'] ?? ''));
+                        }
+                        $massPreviewUrl = $massPreviewPath !== '' ? $url($massPreviewPath) : '';
+                        ?>
                         <tr>
+                            <td>
+                                <div class="media-list-thumb<?= $massPreviewUrl === '' ? ' media-list-thumb-empty' : '' ?>">
+                                    <?php if ($massPreviewUrl !== ''): ?>
+                                        <img src="<?= htmlspecialchars($massPreviewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($massItem['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                                    <?php endif; ?>
+                                </div>
+                            </td>
                             <td><input type="text" name="mass_name[<?= $massId ?>]" value="<?= htmlspecialchars((string)($massItem['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"></td>
-                            <td><?= htmlspecialchars((string)($massItem['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/edit?id=' . $massId), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('admin.edit_media'), ENT_QUOTES, 'UTF-8') ?></a></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
@@ -97,12 +113,6 @@ if ($mode === 'edit') {
 ?>
 <form class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
-    <?php if ($mode === 'add'): ?>
-        <div class="d-flex gap-2 mb-3">
-            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('media.single_upload'), ENT_QUOTES, 'UTF-8') ?></a>
-            <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/add?mode=mass'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('media.mass_upload'), ENT_QUOTES, 'UTF-8') ?></a>
-        </div>
-    <?php endif; ?>
     <div class="content-editor-layout">
         <div class="card p-5">
             <div class="mb-3">

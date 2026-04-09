@@ -71,11 +71,6 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if ($this->isMassMode()) {
-            $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], []);
-            return;
-        }
-
         $fallback = ['id' => null, 'name' => '', 'path' => '', 'path_webp' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
         $this->pages->adminMediaForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->media->authorOptions(), []);
@@ -87,11 +82,6 @@ final class AdminMediaController extends BaseAdminController
             !$this->guardAdmin($redirect, false)
             || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
         ) {
-            return;
-        }
-
-        if ($this->isMassMode()) {
-            $this->addMassSubmit();
             return;
         }
 
@@ -132,8 +122,24 @@ final class AdminMediaController extends BaseAdminController
         $redirect('admin/media/add');
     }
 
-    private function addMassSubmit(): void
+    public function massForm(callable $redirect): void
     {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        $this->pages->adminMediaForm('add_mass', ['id' => null], [], [], [], [], []);
+    }
+
+    public function massSubmit(callable $redirect): void
+    {
+        if (
+            !$this->guardAdmin($redirect, false)
+            || !$this->guardCsrf($redirect, 'admin/media/mass', I18n::t('common.invalid_csrf'))
+        ) {
+            return;
+        }
+
         $uploadedIds = $this->parseUploadedIds((string)($_POST['uploaded_ids'] ?? ''));
         if (isset($_POST['mass_rename'])) {
             $this->handleMassRename($uploadedIds);
@@ -165,7 +171,7 @@ final class AdminMediaController extends BaseAdminController
                 'name' => (string)($uploadData['name'] ?? ''),
                 'path' => (string)($uploadData['path'] ?? ''),
                 'path_webp' => (string)($uploadData['path_webp'] ?? ''),
-                'author' => '',
+                'author' => (string)($this->currentUserId() > 0 ? $this->currentUserId() : ''),
             ]);
 
             if (($saved['success'] ?? false) !== true || (int)($saved['id'] ?? 0) <= 0) {
@@ -417,11 +423,6 @@ final class AdminMediaController extends BaseAdminController
     private function hasUpload(string $field): bool
     {
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
-    }
-
-    private function isMassMode(): bool
-    {
-        return trim((string)($_GET['mode'] ?? '')) === 'mass';
     }
 
     private function normalizeMultiUploadFiles(mixed $input): array
