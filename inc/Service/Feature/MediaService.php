@@ -137,11 +137,14 @@ final class MediaService
         $contentTable = Table::name('content');
         $attachmentsTable = Table::name('attachments');
         $sql = implode("\n", [
-            'SELECT DISTINCT c.id, c.name, c.status, c.created, c.updated',
+            'SELECT c.id, c.name, c.created,',
+            'MAX(CASE WHEN c.thumbnail = :media THEN 1 ELSE 0 END) AS used_as_thumbnail,',
+            'MAX(CASE WHEN a.media = :media THEN 1 ELSE 0 END) AS used_in_body',
             "FROM $contentTable c",
             "LEFT JOIN $attachmentsTable a ON a.content = c.id",
             'WHERE c.thumbnail = :media OR a.media = :media',
-            'ORDER BY COALESCE(c.updated, c.created) DESC',
+            'GROUP BY c.id, c.name, c.created',
+            'ORDER BY COALESCE(MAX(c.updated), c.created) DESC',
         ]);
 
         $stmt = Connection::get()->prepare($sql);
