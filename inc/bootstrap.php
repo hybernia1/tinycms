@@ -5,6 +5,7 @@ require_once dirname(__DIR__) . '/autoload.php';
 
 use App\Controller\AdminController;
 use App\Controller\AdminContentController;
+use App\Controller\AdminContentMediaApiController;
 use App\Controller\AdminMediaController;
 use App\Controller\AdminSettingsController;
 use App\Controller\AdminTermController;
@@ -98,6 +99,7 @@ $front = new FrontController($pageView, $authService, $csrf, $settingsService, $
 $admin = new AdminController($pageView, $authService);
 $adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
 $adminContent = new AdminContentController($pageView, $authService, $contentService, $mediaService, $uploadService, $userService, $termService, $flash, $csrf);
+$adminContentMediaApi = new AdminContentMediaApiController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
 $adminMedia = new AdminMediaController($pageView, $authService, $mediaService, $uploadService, $flash, $csrf);
 $adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $uploadService, $flash, $csrf);
 $adminTerms = new AdminTermController($pageView, $authService, $termService, $flash, $csrf);

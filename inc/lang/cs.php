@@ -225,6 +225,8 @@ return [
         'deleted' => 'Obsah smazán.',
         'published' => 'Obsah publikován.',
         'switched_to_draft' => 'Obsah přepnut do draftu.',
+        'publish_failed' => 'Obsah už byl publikovaný nebo není dostupný.',
+        'draft_failed' => 'Obsah už byl v draftu nebo není dostupný.',
         'untitled' => '(bez názvu)',
         'draft_create_failed' => 'Draft se nepodařilo vytvořit.',
         'draft_required' => 'Nejdřív se musí vytvořit draft.',

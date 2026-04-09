@@ -225,6 +225,8 @@ return [
         'deleted' => 'Content deleted.',
         'published' => 'Content published.',
         'switched_to_draft' => 'Content switched to draft.',
+        'publish_failed' => 'Content is already published or not available.',
+        'draft_failed' => 'Content is already draft or not available.',
         'untitled' => '(untitled)',
         'draft_create_failed' => 'Could not create draft.',
         'draft_required' => 'Draft must be created first.',
