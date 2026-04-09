@@ -19,7 +19,6 @@ $searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage,
 $perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('common.name')],
-    ['label' => $t('common.description'), 'class' => 'mobile-hide'],
     ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
 ];
 $listAllowedPerPage = $allowedPerPage;
@@ -36,7 +35,6 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
             <a href="<?= htmlspecialchars($url('admin/terms/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
             <div class="text-muted small"><?= htmlspecialchars($formatDateTime((string)($row['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
         </td>
-        <td class="mobile-hide"><?= htmlspecialchars((string)($row['body'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
         <td class="table-col-actions">
             <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('terms.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('terms.delete'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('delete') ?>

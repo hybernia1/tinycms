@@ -96,7 +96,6 @@ final class SchemaDefinition
             "CREATE TABLE IF NOT EXISTS $terms (
                 id INT NOT NULL AUTO_INCREMENT,
                 name VARCHAR(255) NOT NULL,
-                body TEXT,
                 created DATETIME DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (id)

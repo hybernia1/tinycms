@@ -32,7 +32,6 @@ final class TermService
         return $this->query->paginate('terms', [
             'id',
             'name',
-            'body',
             'created',
             'updated',
         ], [], [
@@ -42,7 +41,7 @@ final class TermService
             'orderByAllowed' => ['id', 'name', 'created', 'updated'],
             'orderDir' => 'DESC',
             'search' => $search,
-            'searchColumns' => ['name', 'body'],
+            'searchColumns' => ['name'],
         ]);
     }
 
@@ -66,14 +65,13 @@ final class TermService
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('terms', ['id', 'name', 'body', 'created', 'updated'], ['id' => $id]);
+        $rows = $this->query->select('terms', ['id', 'name', 'created', 'updated'], ['id' => $id]);
         return $rows[0] ?? null;
     }
 
     public function save(array $input, ?int $id = null): array
     {
         $name = trim((string)($input['name'] ?? ''));
-        $body = trim((string)($input['body'] ?? ''));
         $errors = [];
 
         if ($name === '') {
@@ -102,7 +100,6 @@ final class TermService
 
         $payload = [
             'name' => $name,
-            'body' => $body === '' ? null : $body,
             'updated' => date('Y-m-d H:i:s'),
         ];
 
@@ -334,7 +331,7 @@ final class TermService
         $params = [];
         $searchSql = '';
         if ($search !== '') {
-            $searchSql = ' AND (t.name LIKE :search OR t.body LIKE :search)';
+            $searchSql = ' AND t.name LIKE :search';
             $params['search'] = '%' . $search . '%';
         }
 
@@ -355,7 +352,7 @@ final class TermService
         $offset = ($page - 1) * $perPage;
 
         $sql = implode("\n", [
-            'SELECT t.id, t.name, t.body, t.created, t.updated',
+            'SELECT t.id, t.name, t.created, t.updated',
             $baseSql,
             'ORDER BY t.id DESC',
             'LIMIT :limit OFFSET :offset',
