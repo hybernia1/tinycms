@@ -11,6 +11,12 @@ $isMass = $mode === 'add_mass';
 $massData = is_array($mass ?? null) ? $mass : [];
 $massItems = is_array($massData['items'] ?? null) ? $massData['items'] : [];
 $massIds = is_array($massData['ids'] ?? null) ? $massData['ids'] : [];
+$massPagination = is_array($massData['pagination'] ?? null) ? $massData['pagination'] : [];
+$massPage = max(1, (int)($massPagination['page'] ?? 1));
+$massPerPage = max(1, (int)($massPagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage()));
+$massTotalPages = max(1, (int)($massPagination['total_pages'] ?? 1));
+$massAllowedPerPage = \App\Service\Support\PaginationConfig::allowed();
+$massIdsQuery = implode(',', array_map(static fn($id): int => (int)$id, $massIds));
 $isMassEdit = $massIds !== [];
 $thumbSuffix = '_100x100.webp';
 if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
@@ -54,6 +60,8 @@ if ($isMass):
             <?= $csrfField() ?>
             <input type="hidden" name="mass_rename" value="1">
             <input type="hidden" name="uploaded_ids" value="<?= htmlspecialchars(implode(',', array_map(static fn($id): int => (int)$id, $massIds)), ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="page" value="<?= $massPage ?>">
+            <input type="hidden" name="per_page" value="<?= $massPerPage ?>">
             <div class="table-responsive">
                 <table class="table">
                     <thead>
@@ -97,6 +105,32 @@ if ($isMass):
             </div>
             <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('media.mass_save_names'), ENT_QUOTES, 'UTF-8') ?></button>
         </form>
+        <div class="d-flex justify-between align-center mt-4">
+            <?php if ($massTotalPages > 1): ?>
+                <?php
+                $prevPage = max(1, $massPage - 1);
+                $nextPage = min($massTotalPages, $massPage + 1);
+                $prevUrl = $url('admin/media/mass?id=' . urlencode($massIdsQuery) . '&page=' . $prevPage . '&per_page=' . $massPerPage);
+                $nextUrl = $url('admin/media/mass?id=' . urlencode($massIdsQuery) . '&page=' . $nextPage . '&per_page=' . $massPerPage);
+                ?>
+                <div class="pagination">
+                    <a class="pagination-link<?= $massPage <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($prevUrl, ENT_QUOTES, 'UTF-8') ?>"<?= $massPage <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
+                    <a class="pagination-link<?= $massPage >= $massTotalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($nextUrl, ENT_QUOTES, 'UTF-8') ?>"<?= $massPage >= $massTotalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
+                </div>
+            <?php else: ?>
+                <div></div>
+            <?php endif; ?>
+            <form method="get" class="d-flex gap-2 align-center">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($massIdsQuery, ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="page" value="1">
+                <select name="per_page">
+                    <?php foreach ($massAllowedPerPage as $option): ?>
+                        <option value="<?= (int)$option ?>" <?= (int)$option === $massPerPage ? 'selected' : '' ?>><?= (int)$option ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button class="btn btn-light" type="submit"><?= htmlspecialchars($t('common.apply'), ENT_QUOTES, 'UTF-8') ?></button>
+            </form>
+        </div>
     </div>
     <script>
         (() => {
