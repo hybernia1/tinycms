@@ -29,8 +29,6 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editForm'],
     ['method' => 'POST', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editSubmit'],
     ['method' => 'POST', 'path' => 'admin/content/edit/delete', 'controller' => $adminContent, 'action' => 'deleteSubmit'],
-    ['method' => 'POST', 'path' => 'admin/content/thumbnail/upload', 'controller' => $adminContent, 'action' => 'thumbnailUploadSubmit'],
-    ['method' => 'POST', 'path' => 'admin/content/thumbnail/delete', 'controller' => $adminContent, 'action' => 'thumbnailDeleteSubmit'],
     ['method' => 'GET', 'path' => 'admin/api/v1/content/{contentId}/media', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryApiV1', 'params' => ['contentId' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/upload', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryUploadApiV1', 'params' => ['contentId' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/{mediaId}/delete', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryDeleteApiV1', 'params' => ['contentId' => 'int', 'mediaId' => 'int']],

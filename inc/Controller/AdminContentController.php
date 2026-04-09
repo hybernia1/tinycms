@@ -5,8 +5,6 @@ namespace App\Controller;
 
 use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;
-use App\Service\Feature\MediaService;
-use App\Service\Feature\UploadService;
 use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
@@ -23,8 +21,6 @@ final class AdminContentController extends BaseAdminController
         private PageView $pages,
         AuthService $authService,
         private ContentService $content,
-        private MediaService $media,
-        private UploadService $upload,
         private UserService $users,
         private TermService $terms,
         FlashService $flash,
@@ -374,98 +370,6 @@ final class AdminContentController extends BaseAdminController
         }
 
         $this->apiOk(['title' => $title]);
-    }
-
-    public function thumbnailUploadSubmit(callable $redirect): void
-    {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
-            return;
-        }
-
-        $id = (int)($_GET['id'] ?? 0);
-        $item = $this->content->find($id);
-
-        if ($item === null) {
-            $this->flash->add('error', I18n::t('content.not_found'));
-            $redirect('admin/content');
-            return;
-        }
-
-        if (!$this->canManageByAuthor($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
-            $redirect('admin/content');
-            return;
-        }
-
-        $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
-        if (($upload['success'] ?? false) !== true) {
-            $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
-            $redirect($this->buildEditPath('admin/content', $id));
-            return;
-        }
-
-        $author = (int)($this->authService->auth()->id() ?? 0);
-        $data = (array)($upload['data'] ?? []);
-        $mediaId = $this->media->create(
-            $author > 0 ? $author : null,
-            (string)($data['name'] ?? ''),
-            (string)($data['path'] ?? ''),
-            (string)($data['path_webp'] ?? '')
-        );
-
-        if ($mediaId <= 0 || !$this->content->setThumbnail($id, $mediaId)) {
-            if ($mediaId > 0) {
-                $this->media->delete($mediaId);
-            }
-            $this->upload->deleteMediaFiles($data);
-            $this->flash->add('error', I18n::t('content.thumbnail_save_failed'));
-            $redirect($this->buildEditPath('admin/content', $id));
-            return;
-        }
-
-        $this->flash->add('success', I18n::t('content.thumbnail_uploaded'));
-        $redirect($this->buildEditPath('admin/content', $id));
-    }
-
-
-    public function thumbnailDeleteSubmit(callable $redirect): void
-    {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
-            return;
-        }
-
-        $id = (int)($_POST['id'] ?? 0);
-        $item = $this->content->find($id);
-
-        if ($item === null) {
-            $this->flash->add('error', I18n::t('content.not_found'));
-            $redirect('admin/content');
-            return;
-        }
-
-        if (!$this->canManageByAuthor($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
-            $redirect('admin/content');
-            return;
-        }
-
-        $thumbnailId = (int)($item['thumbnail'] ?? 0);
-        if ($thumbnailId <= 0) {
-            $this->flash->add('info', I18n::t('content.thumbnail_missing'));
-            $redirect($this->buildEditPath('admin/content', $id));
-            return;
-        }
-
-        $media = $this->media->find($thumbnailId);
-        if ($media === null || !$this->media->delete($thumbnailId)) {
-            $this->flash->add('error', I18n::t('content.thumbnail_delete_failed'));
-            $redirect($this->buildEditPath('admin/content', $id));
-            return;
-        }
-
-        $this->upload->deleteMediaFiles($media);
-        $this->flash->add('success', I18n::t('content.thumbnail_deleted'));
-        $redirect($this->buildEditPath('admin/content', $id));
     }
 
     private function isValidExternalUrl(string $url): bool
