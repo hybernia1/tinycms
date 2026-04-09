@@ -1,5 +1,5 @@
 <?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
-<div class="card p-5">
+<div class="card p-4">
     <form method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <div class="mb-3">
