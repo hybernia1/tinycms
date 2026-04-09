@@ -31,9 +31,10 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
-        [$page, $perPage, $query] = $this->resolveListQuery();
-        $pagination = $this->terms->paginate($page, $perPage, $query);
-        $this->pages->adminTermList($pagination, PaginationConfig::allowed(), $query);
+        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        $pagination = $this->terms->paginate($page, $perPage, $query, $status);
+        $statusCounts = $this->terms->statusCounts();
+        $this->pages->adminTermList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void
@@ -42,9 +43,10 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
-        [$page, $perPage, $query] = $this->resolveListQuery();
-        $pagination = $this->terms->paginate($page, $perPage, $query);
+        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        $pagination = $this->terms->paginate($page, $perPage, $query, $status);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+        $statusCounts = $this->terms->statusCounts();
 
         $this->respondJson([
             'ok' => true,
@@ -53,7 +55,9 @@ final class AdminTermController extends BaseAdminController
                 'page' => (int)($pagination['page'] ?? 1),
                 'per_page' => (int)($pagination['per_page'] ?? $perPage),
                 'total_pages' => (int)($pagination['total_pages'] ?? 1),
+                'status' => $status,
                 'query' => $query,
+                'status_counts' => $statusCounts,
             ],
         ]);
     }
@@ -82,7 +86,7 @@ final class AdminTermController extends BaseAdminController
 
         $fallback = ['id' => null, 'name' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
-        $this->pages->adminTermForm('add', $state['data'] ?? $fallback, $state['errors'] ?? []);
+        $this->pages->adminTermForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], []);
     }
 
     public function addSubmit(callable $redirect): void
@@ -123,7 +127,7 @@ final class AdminTermController extends BaseAdminController
         }
 
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
-        $this->pages->adminTermForm('edit', $state['data'] ?? $item, $state['errors'] ?? []);
+        $this->pages->adminTermForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->terms->contentUsages($id));
     }
 
     public function editSubmit(callable $redirect): void
@@ -207,12 +211,17 @@ final class AdminTermController extends BaseAdminController
         $page = max(1, (int)($_GET['page'] ?? 1));
         $defaultPerPage = PaginationConfig::perPage();
         $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        $status = trim((string)($_GET['status'] ?? 'all'));
         $query = trim((string)($_GET['q'] ?? ''));
 
         if (!in_array($perPage, PaginationConfig::allowed(), true)) {
             $perPage = $defaultPerPage;
         }
 
-        return [$page, $perPage, $query];
+        if (!in_array($status, ['all', 'unassigned'], true)) {
+            $status = 'all';
+        }
+
+        return [$page, $perPage, $status, $query];
     }
 }

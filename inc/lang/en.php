@@ -147,6 +147,11 @@ return [
     ],
     'terms' => [
         'name_exists' => 'A tag with this name already exists.',
+        'used_in' => 'Used in',
+        'no_usage' => 'Tag is not used in any post.',
+        'status' => [
+            'unassigned' => 'Unassigned',
+        ],
         'search_placeholder' => 'Search tag',
         'delete' => 'Delete tag',
         'delete_confirm' => 'Do you really want to delete this tag?',

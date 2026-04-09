@@ -147,6 +147,11 @@ return [
     ],
     'terms' => [
         'name_exists' => 'Štítek s tímto názvem už existuje.',
+        'used_in' => 'Použito v',
+        'no_usage' => 'Štítek není použitý v žádném článku.',
+        'status' => [
+            'unassigned' => 'Nepřiřazené',
+        ],
         'search_placeholder' => 'Hledat štítek',
         'delete' => 'Smazat štítek',
         'delete_confirm' => 'Skutečně smazat tento štítek?',
