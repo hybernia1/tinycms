@@ -54,8 +54,6 @@ $requestPath = trim($requestPath, '/');
 
 $isInstalled = is_file(dirname(__DIR__) . '/config.php');
 
-require __DIR__ . '/routes/register.php';
-
 if (!$isInstalled) {
     $install = new InstallController($view, $csrf, new InstallService());
 
