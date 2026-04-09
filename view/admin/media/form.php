@@ -86,7 +86,8 @@ if ($mode === 'edit') {
                                             <?= htmlspecialchars((string)($usage['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
                                         </a>
                                     </td>
-                                    <td><?= htmlspecialchars((string)($usage['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                                    <?php $status = (string)($usage['status'] ?? ''); ?>
+                                    <td><?= htmlspecialchars($t('content.statuses.' . $status, $status), ENT_QUOTES, 'UTF-8') ?></td>
                                     <td><?= htmlspecialchars($formatDateTime((string)($usage['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></td>
                                     <td><?= htmlspecialchars($formatDateTime((string)($usage['updated'] ?? ''), '—'), ENT_QUOTES, 'UTF-8') ?></td>
                                 </tr>
