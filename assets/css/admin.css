@@ -69,15 +69,6 @@ body {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    transition: padding 0.2s ease-in-out;
-}
-
-.admin-nav-link > span {
-    white-space: nowrap;
-    overflow: hidden;
-    max-width: 12rem;
-    opacity: 1;
-    transition: max-width 0.2s ease-in-out, opacity 0.15s ease-in-out;
 }
 
 .admin-nav-link-icon {
@@ -126,11 +117,7 @@ body {
         padding-inline: var(--space-2);
     }
 
-    body.admin-sidebar-collapsed .admin-nav-link > span {
-        max-width: 0;
-        opacity: 0;
-    }
-
+    body.admin-sidebar-collapsed .admin-nav-link > span,
     body.admin-sidebar-collapsed .admin-user-meta {
         display: none;
     }
