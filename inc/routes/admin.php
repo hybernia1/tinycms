@@ -1,205 +1,63 @@
 <?php
 declare(strict_types=1);
 
-$router->get('admin/login', static function () use ($redirect): void {
-    $redirect('login');
-});
+register_routes($router, $redirect, [
+    ['method' => 'GET', 'path' => 'admin/login', 'handler' => static function () use ($redirect): void {
+        $redirect('login');
+    }],
+    ['method' => 'GET', 'path' => 'admin', 'controller' => $admin, 'action' => 'index'],
+    ['method' => 'GET', 'path' => 'admin/dashboard', 'controller' => $admin, 'action' => 'dashboard'],
 
-$router->get('admin', static function () use ($admin, $redirect): void {
-    $admin->index($redirect);
-});
+    ['method' => 'GET', 'path' => 'admin/users', 'controller' => $adminUsers, 'action' => 'list'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/users', 'controller' => $adminUsers, 'action' => 'listApiV1'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/users/{id}/delete', 'controller' => $adminUsers, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/users/{id}/suspend', 'controller' => $adminUsers, 'action' => 'suspendApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'GET', 'path' => 'admin/users/add', 'controller' => $adminUsers, 'action' => 'addForm'],
+    ['method' => 'POST', 'path' => 'admin/users/add', 'controller' => $adminUsers, 'action' => 'addSubmit'],
+    ['method' => 'GET', 'path' => 'admin/users/edit', 'controller' => $adminUsers, 'action' => 'editForm'],
+    ['method' => 'POST', 'path' => 'admin/users/edit', 'controller' => $adminUsers, 'action' => 'editSubmit'],
 
-$router->get('admin/dashboard', static function () use ($admin, $redirect): void {
-    $admin->dashboard($redirect);
-});
+    ['method' => 'GET', 'path' => 'admin/content', 'controller' => $adminContent, 'action' => 'list'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/content', 'controller' => $adminContent, 'action' => 'listApiV1'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/delete', 'controller' => $adminContent, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/status', 'controller' => $adminContent, 'action' => 'statusApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/draft/init', 'controller' => $adminContent, 'action' => 'draftInitApiV1'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/autosave', 'controller' => $adminContent, 'action' => 'autosaveApiV1'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/link-title', 'controller' => $adminContent, 'action' => 'linkTitleApiV1'],
+    ['method' => 'GET', 'path' => 'admin/content/add', 'controller' => $adminContent, 'action' => 'addForm'],
+    ['method' => 'POST', 'path' => 'admin/content/add', 'controller' => $adminContent, 'action' => 'addSubmit'],
+    ['method' => 'GET', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editForm'],
+    ['method' => 'POST', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editSubmit'],
+    ['method' => 'POST', 'path' => 'admin/content/edit/delete', 'controller' => $adminContent, 'action' => 'deleteSubmit'],
+    ['method' => 'POST', 'path' => 'admin/content/thumbnail/upload', 'controller' => $adminContent, 'action' => 'thumbnailUploadSubmit'],
+    ['method' => 'POST', 'path' => 'admin/content/thumbnail/delete', 'controller' => $adminContent, 'action' => 'thumbnailDeleteSubmit'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/content/{id}/media', 'controller' => $adminContent, 'action' => 'mediaLibraryApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/media/upload', 'controller' => $adminContent, 'action' => 'mediaLibraryUploadApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/media/{mediaId}/delete', 'controller' => $adminContent, 'action' => 'mediaLibraryDeleteApiV1', 'params' => ['id' => 'int', 'mediaId' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/media/{mediaId}/rename', 'controller' => $adminContent, 'action' => 'mediaLibraryRenameApiV1', 'params' => ['id' => 'int', 'mediaId' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/media/{mediaId}/attach', 'controller' => $adminContent, 'action' => 'attachmentAttachApiV1', 'params' => ['id' => 'int', 'mediaId' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/thumbnail/detach', 'controller' => $adminContent, 'action' => 'thumbnailDetachApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/thumbnail/{mediaId}/select', 'controller' => $adminContent, 'action' => 'thumbnailSelectApiV1', 'params' => ['id' => 'int', 'mediaId' => 'int']],
 
-$router->get('admin/users', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->list($redirect);
-});
+    ['method' => 'GET', 'path' => 'admin/terms', 'controller' => $adminTerms, 'action' => 'list'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/terms', 'controller' => $adminTerms, 'action' => 'listApiV1'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/terms/{id}/delete', 'controller' => $adminTerms, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'GET', 'path' => 'admin/api/v1/terms/suggest', 'controller' => $adminTerms, 'action' => 'suggest'],
+    ['method' => 'GET', 'path' => 'admin/terms/add', 'controller' => $adminTerms, 'action' => 'addForm'],
+    ['method' => 'POST', 'path' => 'admin/terms/add', 'controller' => $adminTerms, 'action' => 'addSubmit'],
+    ['method' => 'GET', 'path' => 'admin/terms/edit', 'controller' => $adminTerms, 'action' => 'editForm'],
+    ['method' => 'POST', 'path' => 'admin/terms/edit', 'controller' => $adminTerms, 'action' => 'editSubmit'],
 
-$router->get('admin/api/v1/users', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->listApiV1($redirect);
-});
+    ['method' => 'GET', 'path' => 'admin/media', 'controller' => $adminMedia, 'action' => 'list'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/media', 'controller' => $adminMedia, 'action' => 'listApiV1'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/media/{id}/delete', 'controller' => $adminMedia, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'GET', 'path' => 'admin/media/add', 'controller' => $adminMedia, 'action' => 'addForm'],
+    ['method' => 'POST', 'path' => 'admin/media/add', 'controller' => $adminMedia, 'action' => 'addSubmit'],
+    ['method' => 'GET', 'path' => 'admin/media/edit', 'controller' => $adminMedia, 'action' => 'editForm'],
+    ['method' => 'POST', 'path' => 'admin/media/edit', 'controller' => $adminMedia, 'action' => 'editSubmit'],
+    ['method' => 'POST', 'path' => 'admin/media/edit/delete', 'controller' => $adminMedia, 'action' => 'deleteSubmit'],
 
-$router->post('admin/api/v1/users/{id}/delete', static function (array $params) use ($adminUsers, $redirect): void {
-    $adminUsers->deleteApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->post('admin/api/v1/users/{id}/suspend', static function (array $params) use ($adminUsers, $redirect): void {
-    $adminUsers->suspendApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->get('admin/users/add', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->addForm($redirect);
-});
-
-$router->post('admin/users/add', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->addSubmit($redirect);
-});
-
-$router->get('admin/users/edit', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->editForm($redirect);
-});
-
-$router->post('admin/users/edit', static function () use ($adminUsers, $redirect): void {
-    $adminUsers->editSubmit($redirect);
-});
-
-$router->get('admin/content', static function () use ($adminContent, $redirect): void {
-    $adminContent->list($redirect);
-});
-
-$router->get('admin/api/v1/content', static function () use ($adminContent, $redirect): void {
-    $adminContent->listApiV1($redirect);
-});
-
-$router->post('admin/api/v1/content/{id}/delete', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->deleteApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->post('admin/api/v1/content/{id}/status', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->statusApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->post('admin/api/v1/content/draft/init', static function () use ($adminContent, $redirect): void {
-    $adminContent->draftInitApiV1($redirect);
-});
-
-$router->post('admin/api/v1/content/autosave', static function () use ($adminContent, $redirect): void {
-    $adminContent->autosaveApiV1($redirect);
-});
-
-$router->get('admin/api/v1/link-title', static function () use ($adminContent, $redirect): void {
-    $adminContent->linkTitleApiV1($redirect);
-});
-
-$router->get('admin/content/add', static function () use ($adminContent, $redirect): void {
-    $adminContent->addForm($redirect);
-});
-
-$router->post('admin/content/add', static function () use ($adminContent, $redirect): void {
-    $adminContent->addSubmit($redirect);
-});
-
-$router->get('admin/content/edit', static function () use ($adminContent, $redirect): void {
-    $adminContent->editForm($redirect);
-});
-
-$router->post('admin/content/edit', static function () use ($adminContent, $redirect): void {
-    $adminContent->editSubmit($redirect);
-});
-
-$router->post('admin/content/edit/delete', static function () use ($adminContent, $redirect): void {
-    $adminContent->deleteSubmit($redirect);
-});
-
-$router->post('admin/content/thumbnail/upload', static function () use ($adminContent, $redirect): void {
-    $adminContent->thumbnailUploadSubmit($redirect);
-});
-
-$router->post('admin/content/thumbnail/delete', static function () use ($adminContent, $redirect): void {
-    $adminContent->thumbnailDeleteSubmit($redirect);
-});
-
-$router->get('admin/api/v1/content/{id}/media', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->mediaLibraryApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->post('admin/api/v1/content/{id}/media/upload', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->mediaLibraryUploadApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->post('admin/api/v1/content/{id}/media/{mediaId}/delete', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->mediaLibraryDeleteApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
-});
-
-$router->post('admin/api/v1/content/{id}/media/{mediaId}/rename', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->mediaLibraryRenameApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
-});
-
-$router->post('admin/api/v1/content/{id}/media/{mediaId}/attach', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->attachmentAttachApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
-});
-
-$router->post('admin/api/v1/content/{id}/thumbnail/detach', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->thumbnailDetachApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->post('admin/api/v1/content/{id}/thumbnail/{mediaId}/select', static function (array $params) use ($adminContent, $redirect): void {
-    $adminContent->thumbnailSelectApiV1($redirect, (int)($params['id'] ?? 0), (int)($params['mediaId'] ?? 0));
-});
-
-$router->get('admin/terms', static function () use ($adminTerms, $redirect): void {
-    $adminTerms->list($redirect);
-});
-
-$router->get('admin/api/v1/terms', static function () use ($adminTerms, $redirect): void {
-    $adminTerms->listApiV1($redirect);
-});
-
-$router->post('admin/api/v1/terms/{id}/delete', static function (array $params) use ($adminTerms, $redirect): void {
-    $adminTerms->deleteApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->get('admin/api/v1/terms/suggest', static function () use ($adminTerms, $redirect): void {
-    $adminTerms->suggest($redirect);
-});
-
-$router->get('admin/terms/add', static function () use ($adminTerms, $redirect): void {
-    $adminTerms->addForm($redirect);
-});
-
-$router->post('admin/terms/add', static function () use ($adminTerms, $redirect): void {
-    $adminTerms->addSubmit($redirect);
-});
-
-$router->get('admin/terms/edit', static function () use ($adminTerms, $redirect): void {
-    $adminTerms->editForm($redirect);
-});
-
-$router->post('admin/terms/edit', static function () use ($adminTerms, $redirect): void {
-    $adminTerms->editSubmit($redirect);
-});
-$router->get('admin/media', static function () use ($adminMedia, $redirect): void {
-    $adminMedia->list($redirect);
-});
-
-$router->get('admin/api/v1/media', static function () use ($adminMedia, $redirect): void {
-    $adminMedia->listApiV1($redirect);
-});
-
-$router->post('admin/api/v1/media/{id}/delete', static function (array $params) use ($adminMedia, $redirect): void {
-    $adminMedia->deleteApiV1($redirect, (int)($params['id'] ?? 0));
-});
-
-$router->get('admin/media/add', static function () use ($adminMedia, $redirect): void {
-    $adminMedia->addForm($redirect);
-});
-
-$router->post('admin/media/add', static function () use ($adminMedia, $redirect): void {
-    $adminMedia->addSubmit($redirect);
-});
-
-$router->get('admin/media/edit', static function () use ($adminMedia, $redirect): void {
-    $adminMedia->editForm($redirect);
-});
-
-$router->post('admin/media/edit', static function () use ($adminMedia, $redirect): void {
-    $adminMedia->editSubmit($redirect);
-});
-
-$router->post('admin/media/edit/delete', static function () use ($adminMedia, $redirect): void {
-    $adminMedia->deleteSubmit($redirect);
-});
-
-$router->get('admin/settings', static function () use ($adminSettings, $redirect): void {
-    $adminSettings->form($redirect);
-});
-
-$router->post('admin/settings', static function () use ($adminSettings, $redirect): void {
-    $adminSettings->submit($redirect);
-});
-
-$router->get('admin/logout', static function () use ($admin, $redirect): void {
-    $admin->logout($redirect);
-});
+    ['method' => 'GET', 'path' => 'admin/settings', 'controller' => $adminSettings, 'action' => 'form'],
+    ['method' => 'POST', 'path' => 'admin/settings', 'controller' => $adminSettings, 'action' => 'submit'],
+    ['method' => 'GET', 'path' => 'admin/logout', 'controller' => $admin, 'action' => 'logout'],
+]);
