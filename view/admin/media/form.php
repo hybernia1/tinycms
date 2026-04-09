@@ -132,7 +132,7 @@ if ($isMass):
                     payload.append('_csrf', csrf);
                 }
 
-                const response = await fetch('<?= htmlspecialchars($url('admin/api/v1/media/'), ENT_QUOTES, 'UTF-8') ?>' + mediaId + '/delete', {
+                const response = await fetch('<?= htmlspecialchars($url('admin/api/v1/media'), ENT_QUOTES, 'UTF-8') ?>/' + mediaId + '/delete', {
                     method: 'POST',
                     body: payload,
                     headers: { Accept: 'application/json' },
