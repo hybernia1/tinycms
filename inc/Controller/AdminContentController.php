@@ -69,10 +69,7 @@ final class AdminContentController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -87,7 +84,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
@@ -102,10 +99,7 @@ final class AdminContentController extends BaseAdminController
 
     public function deleteSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -123,7 +117,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
@@ -156,10 +150,7 @@ final class AdminContentController extends BaseAdminController
 
     public function addSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -195,7 +186,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
@@ -210,10 +201,7 @@ final class AdminContentController extends BaseAdminController
 
     public function editSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -232,7 +220,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
@@ -254,10 +242,7 @@ final class AdminContentController extends BaseAdminController
 
     public function statusApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -273,7 +258,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
@@ -298,10 +283,7 @@ final class AdminContentController extends BaseAdminController
 
     public function draftInitApiV1(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -331,10 +313,7 @@ final class AdminContentController extends BaseAdminController
 
     public function autosaveApiV1(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -353,7 +332,7 @@ final class AdminContentController extends BaseAdminController
                 return;
             }
 
-            if (!$this->canManageContent($item)) {
+            if (!$this->canManageByAuthor($item)) {
                 $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
                 return;
             }
@@ -404,10 +383,7 @@ final class AdminContentController extends BaseAdminController
 
     public function thumbnailUploadSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -420,7 +396,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
@@ -459,10 +435,7 @@ final class AdminContentController extends BaseAdminController
 
     public function thumbnailDeleteSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -475,7 +448,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageContent($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
@@ -630,16 +603,6 @@ final class AdminContentController extends BaseAdminController
         return [$page, $perPage, $status, $query, $availableStatuses];
     }
 
-    private function canManageContent(array $item): bool
-    {
-        if (!$this->isEditor()) {
-            return true;
-        }
-
-        return (int)($item['author'] ?? 0) === $this->currentUserId();
-    }
-
-
     private function mapListItem(array $row): array
     {
         $createdAt = (string)($row['created'] ?? '');
@@ -647,24 +610,14 @@ final class AdminContentController extends BaseAdminController
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
-            'can_edit' => $this->canManageContent($row),
-            'can_delete' => $this->canManageContent($row),
+            'can_edit' => $this->canManageByAuthor($row),
+            'can_delete' => $this->canManageByAuthor($row),
             'author_name' => (string)($row['author_name'] ?? '—'),
             'status' => (string)($row['status'] ?? 'draft'),
             'created' => $createdAt,
             'created_label' => $this->formatDateTime($createdAt),
             'is_planned' => $createdStamp !== false && $createdStamp > time(),
         ];
-    }
-
-    private function formatDateTime(string $value): string
-    {
-        $stamp = $value !== '' ? strtotime($value) : false;
-        if ($stamp === false) {
-            return '';
-        }
-
-        return date(APP_DATETIME_FORMAT, $stamp);
     }
 
     private function resolveSelectedTerms(array $item, ?int $contentId): array

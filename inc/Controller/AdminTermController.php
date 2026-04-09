@@ -83,10 +83,7 @@ final class AdminTermController extends BaseAdminController
 
     public function addSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -124,10 +121,7 @@ final class AdminTermController extends BaseAdminController
 
     public function editSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -152,10 +146,7 @@ final class AdminTermController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -185,16 +176,6 @@ final class AdminTermController extends BaseAdminController
             'created' => (string)($row['created'] ?? ''),
             'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
         ];
-    }
-
-    private function formatDateTime(string $value): string
-    {
-        $stamp = $value !== '' ? strtotime($value) : false;
-        if ($stamp === false) {
-            return '';
-        }
-
-        return date(APP_DATETIME_FORMAT, $stamp);
     }
 
     private function resolveListQuery(): array

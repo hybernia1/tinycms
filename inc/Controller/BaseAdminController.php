@@ -66,6 +66,18 @@ abstract class BaseAdminController
         return false;
     }
 
+    protected function guardAdminCsrf(callable $redirect, string $redirectPath, string $message, bool $flashDenied = false): bool
+    {
+        return $this->guardAdmin($redirect, $flashDenied)
+            && $this->guardCsrf($redirect, $redirectPath, $message);
+    }
+
+    protected function guardSuperAdminCsrf(callable $redirect, string $redirectPath, string $message, bool $flashDenied = true): bool
+    {
+        return $this->guardSuperAdmin($redirect, $flashDenied)
+            && $this->guardCsrf($redirect, $redirectPath, $message);
+    }
+
     protected function storeFormState(string $sessionKey, string $mode, ?int $id, array $data, array $errors): void
     {
         $this->ensureSession();
@@ -137,6 +149,25 @@ abstract class BaseAdminController
     protected function isEditor(): bool
     {
         return (string)($this->authService->auth()->role() ?? '') === 'editor';
+    }
+
+    protected function canManageByAuthor(array $item, string $authorKey = 'author'): bool
+    {
+        if (!$this->isEditor()) {
+            return true;
+        }
+
+        return (int)($item[$authorKey] ?? 0) === $this->currentUserId();
+    }
+
+    protected function formatDateTime(string $value): string
+    {
+        $stamp = $value !== '' ? strtotime($value) : false;
+        if ($stamp === false) {
+            return '';
+        }
+
+        return date(APP_DATETIME_FORMAT, $stamp);
     }
 
     private function ensureSession(): void

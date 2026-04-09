@@ -73,10 +73,7 @@ final class AdminMediaController extends BaseAdminController
 
     public function addSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -132,7 +129,7 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageMedia($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
@@ -146,10 +143,7 @@ final class AdminMediaController extends BaseAdminController
 
     public function editSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -167,7 +161,7 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageMedia($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
@@ -193,10 +187,7 @@ final class AdminMediaController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -211,7 +202,7 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canDeleteMedia($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
@@ -227,10 +218,7 @@ final class AdminMediaController extends BaseAdminController
 
     public function deleteSubmit(callable $redirect): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -248,7 +236,7 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canDeleteMedia($item)) {
+        if (!$this->canManageByAuthor($item)) {
             $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
@@ -307,27 +295,13 @@ final class AdminMediaController extends BaseAdminController
         return $input;
     }
 
-    private function canDeleteMedia(array $item): bool
-    {
-        return $this->canManageMedia($item);
-    }
-
-    private function canManageMedia(array $item): bool
-    {
-        if (!$this->isEditor()) {
-            return true;
-        }
-
-        return (int)($item['author'] ?? 0) === $this->currentUserId();
-    }
-
     private function mapListItem(array $row): array
     {
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
-            'can_edit' => $this->canManageMedia($row),
-            'can_delete' => $this->canDeleteMedia($row),
+            'can_edit' => $this->canManageByAuthor($row),
+            'can_delete' => $this->canManageByAuthor($row),
             'path' => (string)($row['path'] ?? ''),
             'path_webp' => (string)($row['path_webp'] ?? ''),
             'preview_path' => $this->resolvePreviewPath($row),
@@ -335,16 +309,6 @@ final class AdminMediaController extends BaseAdminController
             'created' => (string)($row['created'] ?? ''),
             'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
         ];
-    }
-
-    private function formatDateTime(string $value): string
-    {
-        $stamp = $value !== '' ? strtotime($value) : false;
-        if ($stamp === false) {
-            return '';
-        }
-
-        return date(APP_DATETIME_FORMAT, $stamp);
     }
 
     private function resolvePreviewPath(array $row): string

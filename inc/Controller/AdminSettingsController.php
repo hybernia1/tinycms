@@ -38,10 +38,7 @@ final class AdminSettingsController extends BaseAdminController
 
     public function submit(callable $redirect): void
     {
-        if (
-            !$this->guardSuperAdmin($redirect)
-            || !$this->guardCsrf($redirect, 'admin/settings', I18n::t('common.csrf_expired'))
-        ) {
+        if (!$this->guardSuperAdminCsrf($redirect, 'admin/settings', I18n::t('common.csrf_expired'))) {
             return;
         }
 

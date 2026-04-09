@@ -27,10 +27,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function thumbnailDetachApiV1(callable $redirect, int $id): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -49,10 +46,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -117,10 +111,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -135,7 +126,7 @@ final class AdminContentMediaApiController extends BaseAdminController
         }
 
         $media = $this->media->find($mediaId);
-        if ($media !== null && !$this->canDeleteMedia($media)) {
+        if ($media !== null && !$this->canManageByAuthor($media)) {
             $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
@@ -155,10 +146,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -202,10 +190,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -241,10 +226,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function attachmentAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (
-            !$this->guardAdmin($redirect, false)
-            || !$this->guardCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'))
-        ) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
         }
 
@@ -273,7 +255,7 @@ final class AdminContentMediaApiController extends BaseAdminController
             return null;
         }
 
-        if (!$this->canManageContent($content)) {
+        if (!$this->canManageByAuthor($content)) {
             $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return null;
         }
@@ -289,7 +271,7 @@ final class AdminContentMediaApiController extends BaseAdminController
             return null;
         }
 
-        if (!$this->canManageContent($content)) {
+        if (!$this->canManageByAuthor($content)) {
             $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return null;
         }
@@ -305,30 +287,12 @@ final class AdminContentMediaApiController extends BaseAdminController
             return null;
         }
 
-        if (!$this->canDeleteMedia($media)) {
+        if (!$this->canManageByAuthor($media)) {
             $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return null;
         }
 
         return $media;
-    }
-
-    private function canManageContent(array $item): bool
-    {
-        if (!$this->isEditor()) {
-            return true;
-        }
-
-        return (int)($item['author'] ?? 0) === $this->currentUserId();
-    }
-
-    private function canDeleteMedia(array $item): bool
-    {
-        if (!$this->isEditor()) {
-            return true;
-        }
-
-        return (int)($item['author'] ?? 0) === $this->currentUserId();
     }
 
     private function mapLibraryItem(array $item): array
@@ -337,8 +301,8 @@ final class AdminContentMediaApiController extends BaseAdminController
         return [
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
-            'can_edit' => $this->canDeleteMedia($item),
-            'can_delete' => $this->canDeleteMedia($item),
+            'can_edit' => $this->canManageByAuthor($item),
+            'can_delete' => $this->canManageByAuthor($item),
             'preview_path' => $this->resolvePreviewPath($item),
             'path' => (string)($item['path'] ?? ''),
             'webp_path' => (string)($item['path_webp'] ?? ''),
@@ -392,13 +356,4 @@ final class AdminContentMediaApiController extends BaseAdminController
         return false;
     }
 
-    private function formatDateTime(string $value): string
-    {
-        $stamp = $value !== '' ? strtotime($value) : false;
-        if ($stamp === false) {
-            return '';
-        }
-
-        return date(APP_DATETIME_FORMAT, $stamp);
-    }
 }
