@@ -50,17 +50,13 @@ final class AdminMediaController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->media->statusCounts();
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-                'status_counts' => $statusCounts,
-            ],
+        $this->apiOk($items, [
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'status' => $status,
+            'query' => $query,
+            'status_counts' => $statusCounts,
         ]);
     }
 
@@ -205,43 +201,28 @@ final class AdminMediaController extends BaseAdminController
         }
 
         if ($id <= 0) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('media.invalid_id')],
-            ], 422);
+            $this->apiError('INVALID_ID', I18n::t('media.invalid_id'));
             return;
         }
 
         $item = $this->media->find($id);
         if ($item === null) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('media.not_found')],
-            ], 404);
+            $this->apiError('NOT_FOUND', I18n::t('media.not_found'), 404);
             return;
         }
 
         if (!$this->canDeleteMedia($item)) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')],
-            ], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if (!$this->media->delete($id)) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed')],
-            ], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('media.delete_failed'));
             return;
         }
 
         $this->upload->deleteMediaFiles($item);
-        $this->respondJson([
-            'ok' => true,
-            'data' => ['id' => $id],
-        ]);
+        $this->apiOk(['id' => $id]);
     }
 
     public function deleteSubmit(callable $redirect): void

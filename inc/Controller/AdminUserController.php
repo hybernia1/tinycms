@@ -49,17 +49,13 @@ final class AdminUserController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->users->statusCounts();
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-                'status_counts' => $statusCounts,
-            ],
+        $this->apiOk($items, [
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'status' => $status,
+            'query' => $query,
+            'status_counts' => $statusCounts,
         ]);
     }
 
@@ -73,16 +69,16 @@ final class AdminUserController extends BaseAdminController
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('users.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
             return;
         }
 
         if (!$this->users->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('users.delete_failed')]], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('users.delete_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
+        $this->apiOk(['id' => $id]);
     }
 
     public function suspendApiV1(callable $redirect, int $id): void
@@ -96,26 +92,26 @@ final class AdminUserController extends BaseAdminController
 
         $mode = (string)($_POST['mode'] ?? 'suspend');
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('users.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
             return;
         }
 
         if ($mode === 'unsuspend') {
             if (!$this->users->unsuspend($id)) {
-                $this->respondJson(['ok' => false, 'error' => ['code' => 'UNSUSPEND_FAILED', 'message' => I18n::t('users.unsuspend_failed')]], 422);
+                $this->apiError('UNSUSPEND_FAILED', I18n::t('users.unsuspend_failed'));
                 return;
             }
 
-            $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'suspend' => 0]]);
+            $this->apiOk(['id' => $id, 'suspend' => 0]);
             return;
         }
 
         if (!$this->users->suspend($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SUSPEND_FAILED', 'message' => I18n::t('users.suspend_failed')]], 422);
+            $this->apiError('SUSPEND_FAILED', I18n::t('users.suspend_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'suspend' => 1]]);
+        $this->apiOk(['id' => $id, 'suspend' => 1]);
     }
 
     public function addForm(callable $redirect): void

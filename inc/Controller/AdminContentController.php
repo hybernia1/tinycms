@@ -57,17 +57,13 @@ final class AdminContentController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->content->statusCounts($availableStatuses);
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-                'status_counts' => $statusCounts,
-            ],
+        $this->apiOk($items, [
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'status' => $status,
+            'query' => $query,
+            'status_counts' => $statusCounts,
         ]);
     }
 
@@ -81,27 +77,27 @@ final class AdminContentController extends BaseAdminController
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
             return;
         }
 
         $item = $this->content->find($id);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canDeleteContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if (!$this->content->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('content.delete_failed')]], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('content.delete_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
+        $this->apiOk(['id' => $id]);
     }
 
     public function deleteSubmit(callable $redirect): void
@@ -267,37 +263,37 @@ final class AdminContentController extends BaseAdminController
 
         $mode = (string)($_POST['mode'] ?? 'draft');
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
             return;
         }
 
         $item = $this->content->find($id);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canManageContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if ($mode === 'publish') {
             if (!$this->content->setStatus($id, 'published')) {
-                $this->respondJson(['ok' => false, 'error' => ['code' => 'PUBLISH_FAILED', 'message' => 'Obsah už byl publikovaný nebo není dostupný.']], 422);
+                $this->apiError('PUBLISH_FAILED', 'Obsah už byl publikovaný nebo není dostupný.');
                 return;
             }
 
-            $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'status' => 'published']]);
+            $this->apiOk(['id' => $id, 'status' => 'published']);
             return;
         }
 
         if (!$this->content->setStatus($id, 'draft')) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DRAFT_FAILED', 'message' => 'Obsah už byl v draftu nebo není dostupný.']], 422);
+            $this->apiError('DRAFT_FAILED', 'Obsah už byl v draftu nebo není dostupný.');
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id, 'status' => 'draft']]);
+        $this->apiOk(['id' => $id, 'status' => 'draft']);
     }
 
     public function draftInitApiV1(callable $redirect): void
@@ -320,26 +316,17 @@ final class AdminContentController extends BaseAdminController
         ];
         $result = $this->content->save($payload, $authorId);
         if (($result['success'] ?? false) !== true) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'CREATE_FAILED', 'message' => I18n::t('content.draft_create_failed')],
-            ], 422);
+            $this->apiError('CREATE_FAILED', I18n::t('content.draft_create_failed'));
             return;
         }
 
         $id = (int)($result['id'] ?? 0);
         if ($id <= 0) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('content.draft_invalid_id')],
-            ], 422);
+            $this->apiError('INVALID_ID', I18n::t('content.draft_invalid_id'));
             return;
         }
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => ['id' => $id, 'created_new' => true],
-        ]);
+        $this->apiOk(['id' => $id, 'created_new' => true]);
     }
 
     public function autosaveApiV1(callable $redirect): void
@@ -355,28 +342,19 @@ final class AdminContentController extends BaseAdminController
         $name = trim((string)($_POST['name'] ?? ''));
         $body = trim((string)($_POST['body'] ?? ''));
         if ($id <= 0 && $name === '' && $body === '') {
-            $this->respondJson([
-                'ok' => true,
-                'data' => ['id' => 0, 'skipped' => true, 'reason' => 'empty'],
-            ]);
+            $this->apiOk(['id' => 0, 'skipped' => true, 'reason' => 'empty']);
             return;
         }
 
         if ($id > 0) {
             $item = $this->content->find($id);
             if ($item === null) {
-                $this->respondJson([
-                    'ok' => false,
-                    'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')],
-                ], 404);
+                $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
                 return;
             }
 
             if (!$this->canManageContent($item)) {
-                $this->respondJson([
-                    'ok' => false,
-                    'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')],
-                ], 403);
+                $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
                 return;
             }
         }
@@ -387,10 +365,7 @@ final class AdminContentController extends BaseAdminController
         $result = $this->content->save($payload, $authorId, $isCreate ? null : $id);
 
         if (($result['success'] ?? false) !== true) {
-            $this->respondJson([
-                'ok' => false,
-                'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('content.autosave_failed'), 'errors' => $result['errors'] ?? []],
-            ], 422);
+            $this->apiError('SAVE_FAILED', I18n::t('content.autosave_failed'), 422, ['errors' => $result['errors'] ?? []]);
             return;
         }
 
@@ -399,13 +374,10 @@ final class AdminContentController extends BaseAdminController
             $this->terms->syncContentTerms($savedId, (string)$_POST['terms']);
         }
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => [
-                'id' => $savedId,
-                'created_new' => $isCreate,
-                'updated' => date('Y-m-d H:i:s'),
-            ],
+        $this->apiOk([
+            'id' => $savedId,
+            'created_new' => $isCreate,
+            'updated' => date('Y-m-d H:i:s'),
         ]);
     }
 
@@ -417,17 +389,17 @@ final class AdminContentController extends BaseAdminController
 
         $url = trim((string)($_GET['url'] ?? ''));
         if ($url === '' || !$this->isValidExternalUrl($url)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_URL', 'message' => I18n::t('common.invalid_data')]], 422);
+            $this->apiError('INVALID_URL', I18n::t('common.invalid_data'));
             return;
         }
 
         $title = $this->fetchRemoteTitle($url);
         if ($title === '') {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'TITLE_NOT_FOUND', 'message' => I18n::t('content.link_title_not_found')]], 404);
+            $this->apiError('TITLE_NOT_FOUND', I18n::t('content.link_title_not_found'), 404);
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['title' => $title]]);
+        $this->apiOk(['title' => $title]);
     }
 
     public function thumbnailUploadSubmit(callable $redirect): void
@@ -495,21 +467,21 @@ final class AdminContentController extends BaseAdminController
 
         $item = $this->content->find($id);
         if ($id <= 0 || $item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canManageContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if (!$this->content->setThumbnail($id, null)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DETACH_FAILED', 'message' => I18n::t('content.thumbnail_detach_failed')]], 422);
+            $this->apiError('DETACH_FAILED', I18n::t('content.thumbnail_detach_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
+        $this->apiOk(['id' => $id]);
     }
 
     public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
@@ -523,38 +495,35 @@ final class AdminContentController extends BaseAdminController
 
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($mediaId <= 0 || $media === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found')]], 404);
+            $this->apiError('MEDIA_NOT_FOUND', I18n::t('media.not_found'), 404);
             return;
         }
 
         if (!$this->canManageMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if (!$this->content->setThumbnail($contentId, $mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SELECT_FAILED', 'message' => I18n::t('content.thumbnail_select_failed')]], 422);
+            $this->apiError('SELECT_FAILED', I18n::t('content.thumbnail_select_failed'));
             return;
         }
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => [
-                'content_id' => $contentId,
-                'media_id' => $mediaId,
-                'media' => $this->mapLibraryItem($media),
-            ],
+        $this->apiOk([
+            'content_id' => $contentId,
+            'media_id' => $mediaId,
+            'media' => $this->mapLibraryItem($media),
         ]);
     }
 
@@ -609,12 +578,12 @@ final class AdminContentController extends BaseAdminController
 
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
@@ -637,15 +606,11 @@ final class AdminContentController extends BaseAdminController
             }
         }
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'query' => $query,
-            ],
+        $this->apiOk($items, [
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'query' => $query,
         ]);
     }
 
@@ -660,28 +625,28 @@ final class AdminContentController extends BaseAdminController
 
         $item = $this->content->find($contentId);
         if ($item === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canDeleteContent($item)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if ($mediaId <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_MEDIA_ID', 'message' => I18n::t('media.not_found')]], 422);
+            $this->apiError('INVALID_MEDIA_ID', I18n::t('media.not_found'));
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($media !== null && !$this->canDeleteMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if ($media === null || !$this->media->delete($mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('media.delete_failed')]], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('media.delete_failed'));
             return;
         }
 
@@ -690,7 +655,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $this->upload->deleteMediaFiles($media);
-        $this->respondJson(['ok' => true, 'data' => ['id' => $mediaId, 'content_id' => $contentId]]);
+        $this->apiOk(['id' => $mediaId, 'content_id' => $contentId]);
     }
 
     public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
@@ -704,18 +669,18 @@ final class AdminContentController extends BaseAdminController
 
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         $upload = $this->upload->uploadImage($_FILES['thumbnail'] ?? []);
         if (($upload['success'] ?? false) !== true) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'UPLOAD_FAILED', 'message' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed'))]], 422);
+            $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
             return;
         }
 
@@ -730,23 +695,20 @@ final class AdminContentController extends BaseAdminController
 
         if ($mediaId <= 0) {
             $this->upload->deleteMediaFiles($data);
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'SAVE_FAILED', 'message' => I18n::t('media.save_failed')]], 422);
+            $this->apiError('SAVE_FAILED', I18n::t('media.save_failed'));
             return;
         }
 
         $media = $this->media->find($mediaId);
         $previewPath = $media !== null ? $this->resolvePreviewPath($media) : (string)($data['path'] ?? '');
-        $this->respondJson([
-            'ok' => true,
-            'data' => [
-                'id' => $mediaId,
-                'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
-                'preview_path' => $previewPath,
-                'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
-                'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
-                'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
-                'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
-            ],
+        $this->apiOk([
+            'id' => $mediaId,
+            'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
+            'preview_path' => $previewPath,
+            'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
+            'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
+            'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
+            'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
         ]);
     }
 
@@ -762,28 +724,28 @@ final class AdminContentController extends BaseAdminController
         $name = trim((string)($_POST['name'] ?? ''));
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if ($mediaId <= 0 || $name === '') {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data')]], 422);
+            $this->apiError('INVALID_DATA', I18n::t('common.invalid_data'));
             return;
         }
 
         $media = $this->media->find($mediaId);
         if ($media === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'MEDIA_NOT_FOUND', 'message' => I18n::t('media.not_found')]], 404);
+            $this->apiError('MEDIA_NOT_FOUND', I18n::t('media.not_found'), 404);
             return;
         }
 
         if (!$this->canManageMedia($media)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
@@ -795,11 +757,11 @@ final class AdminContentController extends BaseAdminController
         ], $mediaId);
 
         if (($result['success'] ?? false) !== true) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'RENAME_FAILED', 'message' => (string)($result['errors']['name'] ?? I18n::t('media.rename_failed'))]], 422);
+            $this->apiError('RENAME_FAILED', (string)($result['errors']['name'] ?? I18n::t('media.rename_failed')));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $mediaId, 'name' => $name]]);
+        $this->apiOk(['id' => $mediaId, 'name' => $name]);
     }
 
     public function attachmentAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
@@ -812,27 +774,27 @@ final class AdminContentController extends BaseAdminController
         }
 
         if ($contentId <= 0 || $mediaId <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_DATA', 'message' => I18n::t('common.invalid_data')]], 422);
+            $this->apiError('INVALID_DATA', I18n::t('common.invalid_data'));
             return;
         }
 
         $content = $this->content->find($contentId);
         if ($content === null) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => I18n::t('content.not_found')]], 404);
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
         if (!$this->canManageContent($content)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'FORBIDDEN', 'message' => I18n::t('admin.access_denied')]], 403);
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
         if (!$this->content->attachMedia($contentId, $mediaId)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'ATTACH_FAILED', 'message' => I18n::t('content.attachment_attach_failed')]], 422);
+            $this->apiError('ATTACH_FAILED', I18n::t('content.attachment_attach_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['content_id' => $contentId, 'media_id' => $mediaId]]);
+        $this->apiOk(['content_id' => $contentId, 'media_id' => $mediaId]);
     }
 
     private function editPath(int $id): string

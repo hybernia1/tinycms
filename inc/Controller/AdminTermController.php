@@ -48,17 +48,13 @@ final class AdminTermController extends BaseAdminController
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->terms->statusCounts();
 
-        $this->respondJson([
-            'ok' => true,
-            'data' => $items,
-            'meta' => [
-                'page' => (int)($pagination['page'] ?? 1),
-                'per_page' => (int)($pagination['per_page'] ?? $perPage),
-                'total_pages' => (int)($pagination['total_pages'] ?? 1),
-                'status' => $status,
-                'query' => $query,
-                'status_counts' => $statusCounts,
-            ],
+        $this->apiOk($items, [
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'status' => $status,
+            'query' => $query,
+            'status_counts' => $statusCounts,
         ]);
     }
 
@@ -69,12 +65,8 @@ final class AdminTermController extends BaseAdminController
         }
 
         $query = trim((string)($_GET['q'] ?? ''));
-        $this->respondJson([
-            'ok' => true,
-            'data' => $this->terms->search($query, 15),
-            'meta' => [
-                'query' => $query,
-            ],
+        $this->apiOk($this->terms->search($query, 15), [
+            'query' => $query,
         ]);
     }
 
@@ -168,16 +160,16 @@ final class AdminTermController extends BaseAdminController
         }
 
         if ($id <= 0) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'INVALID_ID', 'message' => I18n::t('terms.invalid_id')]], 422);
+            $this->apiError('INVALID_ID', I18n::t('terms.invalid_id'));
             return;
         }
 
         if (!$this->terms->delete($id)) {
-            $this->respondJson(['ok' => false, 'error' => ['code' => 'DELETE_FAILED', 'message' => I18n::t('terms.delete_failed')]], 422);
+            $this->apiError('DELETE_FAILED', I18n::t('terms.delete_failed'));
             return;
         }
 
-        $this->respondJson(['ok' => true, 'data' => ['id' => $id]]);
+        $this->apiOk(['id' => $id]);
     }
 
     private function editPath(int $id): string

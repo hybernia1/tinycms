@@ -94,30 +94,39 @@ abstract class BaseAdminController
         return $state;
     }
 
-    protected function wantsJson(): bool
-    {
-        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
-        return str_contains($accept, 'application/json');
-    }
-
-    protected function jsonError(string $message, int $statusCode = 422): void
-    {
-        $this->respondJson([
-            'success' => false,
-            'message' => $message,
-        ], $statusCode);
-    }
-
-    protected function jsonSuccess(array $payload = [], int $statusCode = 200): void
-    {
-        $this->respondJson(array_merge(['success' => true], $payload), $statusCode);
-    }
-
     protected function respondJson(array $payload, int $statusCode = 200): void
     {
         header('Content-Type: application/json; charset=utf-8');
         http_response_code($statusCode);
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
+
+    protected function apiOk(array $data = [], array $meta = [], int $statusCode = 200): void
+    {
+        $payload = ['ok' => true];
+        if ($data !== []) {
+            $payload['data'] = $data;
+        }
+        if ($meta !== []) {
+            $payload['meta'] = $meta;
+        }
+        $this->respondJson($payload, $statusCode);
+    }
+
+    protected function apiError(string $code, string $message, int $statusCode = 422, array $details = []): void
+    {
+        $error = [
+            'code' => $code,
+            'message' => $message,
+        ];
+        if ($details !== []) {
+            $error = array_merge($error, $details);
+        }
+
+        $this->respondJson([
+            'ok' => false,
+            'error' => $error,
+        ], $statusCode);
     }
 
     protected function currentUserId(): int
