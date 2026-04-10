@@ -592,6 +592,27 @@
         var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode', 'Focus mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
         var linkModal = createLinkModal();
+        var modalApi = window.tinycmsModal || null;
+
+        function isLinkModalOpen() {
+            return linkModal.classList.contains('is-open');
+        }
+
+        function openLinkDialog() {
+            if (modalApi && typeof modalApi.open === 'function') {
+                modalApi.open(linkModal);
+            } else {
+                linkModal.classList.add('is-open');
+            }
+        }
+
+        function closeLinkDialog() {
+            if (modalApi && typeof modalApi.close === 'function') {
+                modalApi.close(linkModal);
+            } else {
+                linkModal.classList.remove('is-open');
+            }
+        }
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
         linkTools.setAttribute('contenteditable', 'false');
@@ -857,7 +878,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('is-open');
+            openLinkDialog();
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -924,7 +945,7 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('is-open');
+            closeLinkDialog();
         }
 
         function closeMenus() {
@@ -933,7 +954,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            linkModal.classList.remove('is-open');
+            closeLinkDialog();
             hideLinkTools();
             activeLink = null;
         }
@@ -1109,7 +1130,7 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                if (linkModal.classList.contains('is-open')) {
+                if (isLinkModalOpen()) {
                     closeMenus();
                 } else {
                     openLinkModal();
@@ -1350,7 +1371,7 @@
             }
 
             hideLinkTools();
-            if (!linkModal.classList.contains('is-open')) {
+            if (!isLinkModalOpen()) {
                 activeLink = null;
             }
 
@@ -1594,7 +1615,7 @@
         textarea.style.display = 'none';
         textarea.parentNode.insertBefore(wrapper, textarea);
         wrapper.appendChild(toolbar);
-        document.body.appendChild(linkModal);
+        wrapper.appendChild(linkModal);
         wrapper.appendChild(linkTools);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);
