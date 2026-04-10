@@ -627,6 +627,15 @@
         var mediaRange = null;
         var linkPasteSeq = 0;
         var draftInitPromise = null;
+        var modalService = window.tinycmsModal || null;
+        var linkModalName = editorId + '-link-modal';
+
+        function isLinkModalOpen() {
+            if (modalService) {
+                return modalService.isOpen(linkModalName);
+            }
+            return linkModal.classList.contains('is-open');
+        }
 
         function absoluteMediaUrl(path) {
             var value = String(path || '').trim();
@@ -857,7 +866,11 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('is-open');
+            if (modalService) {
+                modalService.open(linkModalName);
+            } else {
+                linkModal.classList.add('is-open');
+            }
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -924,7 +937,11 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('is-open');
+            if (modalService) {
+                modalService.close(linkModalName);
+            } else {
+                linkModal.classList.remove('is-open');
+            }
         }
 
         function closeMenus() {
@@ -933,7 +950,11 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            linkModal.classList.remove('is-open');
+            if (modalService) {
+                modalService.close(linkModalName);
+            } else {
+                linkModal.classList.remove('is-open');
+            }
             hideLinkTools();
             activeLink = null;
         }
@@ -1109,7 +1130,7 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                if (linkModal.classList.contains('is-open')) {
+                if (isLinkModalOpen()) {
                     closeMenus();
                 } else {
                     openLinkModal();
@@ -1350,7 +1371,7 @@
             }
 
             hideLinkTools();
-            if (!linkModal.classList.contains('is-open')) {
+            if (!isLinkModalOpen()) {
                 activeLink = null;
             }
 
@@ -1595,6 +1616,18 @@
         textarea.parentNode.insertBefore(wrapper, textarea);
         wrapper.appendChild(toolbar);
         document.body.appendChild(linkModal);
+        if (modalService) {
+            modalService.register(linkModalName, {
+                element: linkModal,
+                closeOnBackdrop: true,
+                onOpen: function () {
+                    linkModal.classList.add('is-open');
+                },
+                onClose: function () {
+                    linkModal.classList.remove('is-open');
+                },
+            });
+        }
         wrapper.appendChild(linkTools);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);

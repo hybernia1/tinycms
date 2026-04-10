@@ -84,8 +84,7 @@ const initListApi = (config) => {
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
     const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`);
-    const deleteCancel = deleteModal?.querySelector(`[data-${config.name}-delete-cancel]`);
-    const deleteConfirm = deleteModal?.querySelector(`[data-${config.name}-delete-confirm]`);
+    const modalService = window.tinycmsModal || null;
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
         : [];
@@ -114,9 +113,18 @@ const initListApi = (config) => {
         };
     }
 
-    let pendingDeleteId = 0;
     let searchTimer = null;
     let fetchController = null;
+
+    const deleteModalName = `${config.name}-list-delete`;
+    if (deleteModal && modalService) {
+        modalService.register(deleteModalName, {
+            element: deleteModal,
+            closeSelector: `[data-${config.name}-delete-cancel]`,
+            confirmSelector: `[data-${config.name}-delete-confirm]`,
+            closeOnBackdrop: true,
+        });
+    }
 
     const setPagination = (page, totalPages) => {
         if (!prevLink || !nextLink) {
@@ -311,46 +319,31 @@ const initListApi = (config) => {
         const delOpen = event.target.closest(`[data-${config.name}-delete-open]`);
         if (delOpen) {
             event.preventDefault();
-            pendingDeleteId = Number(delOpen.getAttribute(`data-${config.name}-delete-open`) || '0');
-            if (deleteModal) {
-                deleteModal.classList.add('open');
-            }
-        }
-    });
-
-    if (deleteCancel) {
-        deleteCancel.addEventListener('click', () => {
-            pendingDeleteId = 0;
-            if (deleteModal) {
-                deleteModal.classList.remove('open');
-            }
-        });
-    }
-
-    if (deleteConfirm) {
-        deleteConfirm.addEventListener('click', async () => {
-            if (pendingDeleteId <= 0) {
+            const deleteId = Number(delOpen.getAttribute(`data-${config.name}-delete-open`) || '0');
+            if (deleteId <= 0) {
                 return;
             }
-
-            deleteConfirm.disabled = true;
+            let approved = true;
+            if (deleteModal && modalService) {
+                approved = await modalService.confirm(deleteModalName);
+            } else if (deleteModal) {
+                approved = window.confirm(t('common.confirm', 'Confirm'));
+            }
+            if (!approved) {
+                return;
+            }
             const deletePath = typeof config.deletePath === 'function'
-                ? config.deletePath(endpointBase, pendingDeleteId)
+                ? config.deletePath(endpointBase, deleteId)
                 : `${endpointBase}/delete`;
-            const result = await postAction(deletePath, { id: pendingDeleteId });
-            deleteConfirm.disabled = false;
+            const result = await postAction(deletePath, { id: deleteId });
             if (result.success === true) {
-                pendingDeleteId = 0;
-                if (deleteModal) {
-                    deleteModal.classList.remove('open');
-                }
                 if (config.messages?.deleteSuccess) {
                     pushFlash('success', config.messages.deleteSuccess);
                 }
                 await fetchList();
             }
-        });
-    }
+        }
+    });
 
     if (perPageField) {
         perPageField.addEventListener('change', async () => {

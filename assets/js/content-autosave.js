@@ -32,6 +32,7 @@
         var bypassLeaveWarning = false;
         var pendingNavigation = '';
         var pendingReload = false;
+        var modalService = window.tinycmsModal || null;
         var editLayoutApplied = false;
         var appRoot = '';
         if (autosaveEndpoint.indexOf('/admin/api/v1/content/autosave') >= 0) {
@@ -227,21 +228,40 @@
             return document.querySelector('[data-content-leave-modal]');
         }
 
+        var leaveModalName = 'content-leave-modal';
+        var leaveModalElement = leaveModal();
+        if (leaveModalElement && modalService) {
+            modalService.register(leaveModalName, {
+                element: leaveModalElement,
+                closeSelector: '[data-content-leave-cancel]',
+                confirmSelector: '[data-content-leave-confirm]',
+                closeOnBackdrop: true,
+            });
+        }
+
         function closeLeaveModal() {
-            var modal = leaveModal();
-            if (modal) {
-                modal.classList.remove('open');
+            if (leaveModalElement && modalService) {
+                modalService.close(leaveModalName);
+            } else {
+                var modal = leaveModal();
+                if (modal) {
+                    modal.classList.remove('open');
+                }
             }
             pendingNavigation = '';
             pendingReload = false;
         }
 
         function openLeaveModal() {
-            var modal = leaveModal();
-            if (!modal) {
-                return;
+            if (leaveModalElement && modalService) {
+                modalService.open(leaveModalName);
+            } else {
+                var modal = leaveModal();
+                if (!modal) {
+                    return;
+                }
+                modal.classList.add('open');
             }
-            modal.classList.add('open');
         }
 
         function shouldGuardLink(link) {
