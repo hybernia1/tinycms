@@ -35,7 +35,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
             </div>
             <div class="mb-3">
-                <label>Excerpt</label>
+                <label><?= htmlspecialchars($t('content.excerpt'), ENT_QUOTES, 'UTF-8') ?></label>
                 <textarea name="excerpt" rows="3"><?= htmlspecialchars((string)($item['excerpt'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
                 <?php if (!empty($errors['excerpt'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['excerpt'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
             </div>
