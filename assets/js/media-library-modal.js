@@ -1,9 +1,7 @@
 const modal = document.getElementById('media-library-modal') || document.querySelector('[data-media-library-modal]');
-const i18n = window.tinycmsI18n || {};
-const t = (path, fallback = '') => {
-    const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
-    return typeof value === 'string' && value !== '' ? value : fallback;
-};
+const t = (window.tinycmsI18nHelper && typeof window.tinycmsI18nHelper.t === 'function')
+    ? window.tinycmsI18nHelper.t
+    : ((path, fallback = '') => fallback);
 const iconSprite = (() => {
     const iconUse = document.querySelector('svg use[href*="#icon-"]');
     return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
@@ -33,7 +31,6 @@ if (modal && openTrigger) {
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
     const deleteMediaIdField = document.querySelector('[data-media-library-delete-media-id]');
     const deleteForm = document.getElementById('media-library-delete-form');
-    const deleteConfirmButton = document.querySelector('[data-media-library-delete-confirm]');
     const deleteConfirmModal = document.getElementById('media-library-delete-modal');
     const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
     const detailNameInput = modal.querySelector('[data-media-library-detail-name-input]');
@@ -668,9 +665,13 @@ if (modal && openTrigger) {
         });
     }
 
-    if (deleteConfirmButton && deleteForm && deleteMediaIdField) {
-        deleteConfirmButton.addEventListener('click', async () => {
-            if (!selectedMedia) {
+    if (deleteButton && deleteForm && deleteMediaIdField) {
+        deleteButton.addEventListener('click', async () => {
+            if (!selectedMedia || !deleteConfirmModal) {
+                return;
+            }
+            const approved = await modalService.confirm('media-library-delete-modal');
+            if (!approved || !selectedMedia) {
                 return;
             }
 
@@ -697,9 +698,6 @@ if (modal && openTrigger) {
             selectedMedia = null;
             renderSelected();
             await load().catch(() => null);
-            if (deleteConfirmModal) {
-                modalService.close('media-library-delete-modal');
-            }
             setStatus(t('media.deleted', 'Media deleted.'));
         });
     }

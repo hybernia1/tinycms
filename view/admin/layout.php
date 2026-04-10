@@ -155,6 +155,7 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
             ],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     </script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/i18n.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/flash.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/loader.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/modal.js'), ENT_QUOTES, 'UTF-8') ?>"></script>

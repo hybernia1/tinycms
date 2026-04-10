@@ -1,9 +1,7 @@
 (() => {
-const i18n = window.tinycmsI18n || {};
-const t = (path, fallback = '') => {
-    const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
-    return typeof value === 'string' && value !== '' ? value : fallback;
-};
+const t = (window.tinycmsI18nHelper && typeof window.tinycmsI18nHelper.t === 'function')
+    ? window.tinycmsI18nHelper.t
+    : ((path, fallback = '') => fallback);
 
 const esc = (value) => String(value || '')
     .replace(/&/g, '&amp;')

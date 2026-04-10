@@ -3,8 +3,12 @@ $modalId = (string)($modalId ?? '');
 $modalAttrs = is_array($modalAttrs ?? null) ? $modalAttrs : [];
 $modalText = (string)($modalText ?? '');
 $modalHasTextData = (bool)($modalHasTextData ?? false);
-$modalCloseAttrs = is_array($modalCloseAttrs ?? null) ? $modalCloseAttrs : ['data-modal-close' => null];
-$modalConfirmAttrs = is_array($modalConfirmAttrs ?? null) ? $modalConfirmAttrs : ['data-modal-confirm' => null];
+$modalCloseAttrs = is_array($modalCloseAttrs ?? null)
+    ? array_merge(['data-modal-close' => null], $modalCloseAttrs)
+    : ['data-modal-close' => null];
+$modalConfirmAttrs = is_array($modalConfirmAttrs ?? null)
+    ? array_merge(['data-modal-confirm' => null], $modalConfirmAttrs)
+    : ['data-modal-confirm' => null];
 $modalCloseLabel = (string)($modalCloseLabel ?? $t('common.cancel'));
 $modalConfirmLabel = (string)($modalConfirmLabel ?? $t('common.confirm'));
 

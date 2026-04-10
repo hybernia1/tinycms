@@ -178,7 +178,7 @@ $modalAttrs = [];
 $modalText = $t('content.delete_image_confirm');
 $modalHasTextData = true;
 $modalCloseAttrs = ['data-modal-close' => null];
-$modalConfirmAttrs = ['data-media-library-delete-confirm' => null];
+$modalConfirmAttrs = ['data-modal-confirm' => null];
 require __DIR__ . '/../partials/modal.php';
 ?>
 <?php

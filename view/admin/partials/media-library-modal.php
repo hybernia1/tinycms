@@ -1,8 +1,8 @@
-<div class="media-library-modal" id="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
+<div class="media-library-modal" id="media-library-modal" data-modal data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
             <strong>Media library</strong>
-            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="<?= htmlspecialchars($t('common.close'), ENT_QUOTES, 'UTF-8') ?>">
+            <button class="btn btn-light btn-icon" type="button" data-modal-close data-media-library-close aria-label="<?= htmlspecialchars($t('common.close'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('cancel') ?>
             </button>
         </div>
@@ -26,10 +26,6 @@
                         class="btn btn-danger"
                         type="button"
                         data-media-library-delete-open
-                        data-modal-open
-                        data-modal-target="#media-library-delete-modal"
-                        data-type="<?= htmlspecialchars($t('content.image'), ENT_QUOTES, 'UTF-8') ?>"
-                        data-form-id="media-library-delete-form"
                         disabled
                     >
                         <?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?>
