@@ -106,17 +106,19 @@ foreach ($listRootAttrs as $attr => $value) {
     </div>
 
     <?php
-    $modalId = $listName . '-delete-modal';
-    $modalAttrs = [
-        'data-' . $listName . '-delete-modal' => null,
-    ];
-    $modalText = $deleteConfirmText;
-    $modalHasTextData = false;
-    $modalCloseAttrs = [
-        'data-' . $listName . '-delete-cancel' => null,
-    ];
-    $modalConfirmAttrs = [
-        'data-' . $listName . '-delete-confirm' => null,
+    $modal = [
+        'id' => $listName . '-delete-modal',
+        'attrs' => [
+            'data-' . $listName . '-delete-modal' => null,
+        ],
+        'text' => $deleteConfirmText,
+        'has_text_data' => false,
+        'close_attrs' => [
+            'data-' . $listName . '-delete-cancel' => null,
+        ],
+        'confirm_attrs' => [
+            'data-' . $listName . '-delete-confirm' => null,
+        ],
     ];
     require __DIR__ . '/modal.php';
     ?>

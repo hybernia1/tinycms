@@ -173,33 +173,32 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
 <?php
-$modalId = 'media-library-delete-modal';
-$modalAttrs = [];
-$modalText = $t('content.delete_image_confirm');
-$modalHasTextData = true;
-$modalCloseAttrs = ['data-modal-close' => null];
-$modalConfirmAttrs = ['data-modal-confirm' => null];
+$modal = [
+    'id' => 'media-library-delete-modal',
+    'text' => $t('content.delete_image_confirm'),
+    'has_text_data' => true,
+];
 require __DIR__ . '/../partials/modal.php';
 ?>
 <?php
-$modalId = 'content-leave-modal';
-$modalAttrs = ['data-content-leave-modal' => null];
-$modalText = $t('content.leave_page_confirm');
-$modalHasTextData = false;
-$modalCloseAttrs = ['data-content-leave-cancel' => null];
-$modalConfirmAttrs = ['data-content-leave-confirm' => null];
+$modal = [
+    'id' => 'content-leave-modal',
+    'attrs' => ['data-content-leave-modal' => null],
+    'text' => $t('content.leave_page_confirm'),
+    'close_attrs' => ['data-content-leave-cancel' => null],
+    'confirm_attrs' => ['data-content-leave-confirm' => null],
+];
 require __DIR__ . '/../partials/modal.php';
 ?>
 <?php if ($mode === 'edit'): ?>
 <?php
-$modalId = 'content-delete-modal';
-$modalAttrs = [];
-$modalText = $t('content.delete_confirm');
-$modalHasTextData = true;
-$modalCloseAttrs = ['data-modal-close' => null];
-$modalConfirmAttrs = [
-    'data-modal-confirm' => null,
-    'data-form-id' => 'content-delete-form',
+$modal = [
+    'id' => 'content-delete-modal',
+    'text' => $t('content.delete_confirm'),
+    'has_text_data' => true,
+    'confirm_attrs' => [
+        'data-form-id' => 'content-delete-form',
+    ],
 ];
 require __DIR__ . '/../partials/modal.php';
 ?>

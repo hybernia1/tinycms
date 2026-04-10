@@ -184,14 +184,13 @@ if ($mode === 'edit') {
         <?= $csrfField() ?>
     </form>
     <?php
-    $modalId = 'media-delete-modal';
-    $modalAttrs = [];
-    $modalText = $t('media.delete_confirm');
-    $modalHasTextData = true;
-    $modalCloseAttrs = ['data-modal-close' => null];
-    $modalConfirmAttrs = [
-        'data-modal-confirm' => null,
-        'data-form-id' => 'media-delete-form',
+    $modal = [
+        'id' => 'media-delete-modal',
+        'text' => $t('media.delete_confirm'),
+        'has_text_data' => true,
+        'confirm_attrs' => [
+            'data-form-id' => 'media-delete-form',
+        ],
     ];
     require __DIR__ . '/../partials/modal.php';
     ?>
