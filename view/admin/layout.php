@@ -228,7 +228,7 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                 <strong data-admin-page-title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <?php if ($isMediaEdit): ?>
-            <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="#media-editor-form" data-save-action-delete-trigger="[data-media-delete-trigger]">
+            <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="#media-editor-form">
                 <div class="admin-header-action-split">
                     <button class="btn btn-primary admin-header-action-main" type="button" data-save-action-primary>
                         <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
@@ -244,7 +244,7 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                         </button>
                     </div>
                     <div class="admin-header-action-group admin-header-action-group-danger">
-                        <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete>
+                        <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete data-modal-open data-modal-target="#media-delete-modal">
                             <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
                             <?= $icon('delete') ?>
                         </button>
