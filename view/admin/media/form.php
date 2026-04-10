@@ -139,13 +139,10 @@ if ($mode === 'edit') {
                         </div>
                     <?php endif; ?>
                 </div>
-                <div class="content-box-footer d-flex gap-2">
-                    <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back'), ENT_QUOTES, 'UTF-8') ?></a>
-                    <?php if ($mode === 'edit'): ?>
-                        <button class="d-none" type="button" data-media-delete-trigger data-modal-open data-modal-target="#media-delete-modal"></button>
-                    <?php endif; ?>
-                </div>
             </div>
+            <?php if ($mode === 'edit'): ?>
+                <button class="d-none" type="button" data-media-delete-trigger data-modal-open data-modal-target="#media-delete-modal"></button>
+            <?php endif; ?>
             <?php if ($mode === 'edit' && $fileMeta !== null): ?>
                 <div class="card">
                     <div class="content-box-header"><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></div>
