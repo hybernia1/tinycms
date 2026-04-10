@@ -10,7 +10,7 @@ const getModal = (trigger) => {
     if (target) {
         return document.querySelector(target);
     }
-    return document.querySelector('[data-modal]');
+    return null;
 };
 
 const closeModal = (modal) => {

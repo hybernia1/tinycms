@@ -26,8 +26,6 @@
                         class="btn btn-danger"
                         type="button"
                         data-media-library-delete-open
-                        data-type="<?= htmlspecialchars($t('content.image'), ENT_QUOTES, 'UTF-8') ?>"
-                        data-form-id="media-library-delete-form"
                         disabled
                     >
                         <?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?>
