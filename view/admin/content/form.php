@@ -238,32 +238,35 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
-<div class="modal-overlay" data-modal id="media-library-delete-modal">
-    <div class="modal">
-        <p data-modal-text><?= htmlspecialchars($t('content.delete_image_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
-        </div>
-    </div>
-</div>
-<div class="modal-overlay" data-content-leave-modal>
-    <div class="modal">
-        <p><?= htmlspecialchars($t('content.leave_page_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-content-leave-cancel><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-content-leave-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
-        </div>
-    </div>
-</div>
+<?php
+$modalId = 'media-library-delete-modal';
+$modalAttrs = [];
+$modalText = $t('content.delete_image_confirm');
+$modalHasTextData = true;
+$modalCloseAttrs = ['data-modal-close' => null];
+$modalConfirmAttrs = ['data-media-library-delete-confirm' => null];
+require __DIR__ . '/../partials/modal.php';
+?>
+<?php
+$modalId = 'content-leave-modal';
+$modalAttrs = ['data-content-leave-modal' => null];
+$modalText = $t('content.leave_page_confirm');
+$modalHasTextData = false;
+$modalCloseAttrs = ['data-content-leave-cancel' => null];
+$modalConfirmAttrs = ['data-content-leave-confirm' => null];
+require __DIR__ . '/../partials/modal.php';
+?>
 <?php if ($mode === 'edit'): ?>
-<div class="modal-overlay" data-modal id="content-delete-modal">
-    <div class="modal">
-        <p data-modal-text><?= htmlspecialchars($t('content.delete_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="content-delete-form"><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
-        </div>
-    </div>
-</div>
+<?php
+$modalId = 'content-delete-modal';
+$modalAttrs = [];
+$modalText = $t('content.delete_confirm');
+$modalHasTextData = true;
+$modalCloseAttrs = ['data-modal-close' => null];
+$modalConfirmAttrs = [
+    'data-modal-confirm' => null,
+    'data-form-id' => 'content-delete-form',
+];
+require __DIR__ . '/../partials/modal.php';
+?>
 <?php endif; ?>
