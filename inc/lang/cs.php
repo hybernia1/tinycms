@@ -228,6 +228,7 @@ return [
         'publish_failed' => 'Obsah už byl publikovaný nebo není dostupný.',
         'draft_failed' => 'Obsah už byl v draftu nebo není dostupný.',
         'untitled' => '(bez názvu)',
+        'autosave_draft_name' => '(Draft #%d)',
         'draft_create_failed' => 'Draft se nepodařilo vytvořit.',
         'draft_required' => 'Nejdřív se musí vytvořit draft.',
         'draft_invalid_id' => 'Draft nemá platné ID.',
