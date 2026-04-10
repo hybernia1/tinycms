@@ -42,34 +42,52 @@ const hoistModalsToBody = () => {
 
 hoistModalsToBody();
 
-const openModal = (trigger) => {
-    const modal = getModal(trigger);
+const applyModalState = (modal, trigger, options = {}) => {
     if (!modal) {
         return;
     }
 
-    const type = trigger?.getAttribute ? (trigger.getAttribute('data-type') || t('modal.default_type', 'item')) : t('modal.default_type', 'item');
-    const formId = trigger?.getAttribute ? (trigger.getAttribute('data-form-id') || '') : '';
+    const typeFromTrigger = trigger?.getAttribute ? (trigger.getAttribute('data-type') || '') : '';
+    const type = options.type || typeFromTrigger || t('modal.default_type', 'item');
+    const formIdFromTrigger = trigger?.getAttribute ? (trigger.getAttribute('data-form-id') || '') : '';
+    const formId = options.formId || formIdFromTrigger;
     const text = modal.querySelector('[data-modal-text]');
     const confirm = modal.querySelector('[data-modal-confirm]');
 
-    if (text && trigger?.hasAttribute && trigger.hasAttribute('data-type')) {
-        text.textContent = t('modal.confirm_delete_type', 'Do you really want to delete this %s?').replace('%s', type);
+    if (text) {
+        if (typeof options.text === 'string') {
+            text.textContent = options.text;
+        } else if (typeFromTrigger !== '') {
+            text.textContent = t('modal.confirm_delete_type', 'Do you really want to delete this %s?').replace('%s', type);
+        }
     }
 
-    if (confirm && formId) {
+    if (confirm && formId !== '') {
         confirm.setAttribute('data-form-id', formId);
     }
+};
 
+const openModal = (target, options = {}) => {
+    const modal = getModal(target);
+    if (!modal) {
+        return;
+    }
+    applyModalState(modal, target, options);
     modal.classList.add('open');
 };
 
 const modalApi = window.tinycmsModal && typeof window.tinycmsModal === 'object' ? window.tinycmsModal : {};
 if (typeof modalApi.open !== 'function') {
-    modalApi.open = (target) => openModal(target);
+    modalApi.open = (target, options = {}) => openModal(target, options);
 }
 if (typeof modalApi.close !== 'function') {
     modalApi.close = (target) => closeModal(getModal(target));
+}
+if (typeof modalApi.update !== 'function') {
+    modalApi.update = (target, options = {}) => {
+        const modal = getModal(target);
+        applyModalState(modal, target, options);
+    };
 }
 window.tinycmsModal = modalApi;
 
