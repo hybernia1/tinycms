@@ -74,7 +74,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
         <td class="mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
         <td class="table-col-actions">
             <?php if ($canManage): ?>
-                <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
+                <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" data-modal-open data-modal-target="#media-delete-modal" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
                     <?= $icon('delete') ?>
                     <span class="sr-only"><?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?></span>
                 </button>

@@ -54,7 +54,7 @@ $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField): s
                         <span class="sr-only"><?= htmlspecialchars($isSuspended ? $t('users.unsuspend') : $t('users.suspend'), ENT_QUOTES, 'UTF-8') ?></span>
                     </button>
                 </form>
-                <button class="btn btn-light btn-icon" type="button" data-users-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('users.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('users.delete'), ENT_QUOTES, 'UTF-8') ?>">
+                <button class="btn btn-light btn-icon" type="button" data-users-delete-open="<?= $id ?>" data-modal-open data-modal-target="#users-delete-modal" aria-label="<?= htmlspecialchars($t('users.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('users.delete'), ENT_QUOTES, 'UTF-8') ?>">
                     <?= $icon('delete') ?>
                     <span class="sr-only"><?= htmlspecialchars($t('users.delete'), ENT_QUOTES, 'UTF-8') ?></span>
                 </button>
