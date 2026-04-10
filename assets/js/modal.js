@@ -51,6 +51,11 @@ const openModal = (trigger) => {
     modal.classList.add('open');
 };
 
+window.tinycmsModal = {
+    open: (trigger) => openModal(trigger),
+    close: (modal) => closeModal(typeof modal === 'string' ? document.querySelector(modal) : modal),
+};
+
 document.addEventListener('click', (event) => {
     const openTrigger = event.target.closest('[data-modal-open]');
     if (openTrigger) {
@@ -62,6 +67,12 @@ document.addEventListener('click', (event) => {
     const closeTrigger = event.target.closest('[data-modal-close]');
     if (closeTrigger) {
         closeModal(closeTrigger.closest('[data-modal]'));
+        return;
+    }
+
+    const modal = event.target.closest('[data-modal]');
+    if (modal && event.target === modal) {
+        closeModal(modal);
         return;
     }
 

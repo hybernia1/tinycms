@@ -99,6 +99,7 @@ const initListApi = (config) => {
     });
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
     const loader = window.tinycmsLoader || null;
+    const modalApi = window.tinycmsModal || null;
 
     const defaultPerPage = Number(perPageField?.value || perPageField?.querySelector('option')?.value || '10') || 10;
 
@@ -320,7 +321,11 @@ const initListApi = (config) => {
         deleteCancel.addEventListener('click', () => {
             pendingDeleteId = 0;
             if (deleteModal) {
-                deleteModal.classList.remove('open');
+                if (modalApi) {
+                    modalApi.close(deleteModal);
+                } else {
+                    deleteModal.classList.remove('open');
+                }
             }
         });
     }
@@ -340,7 +345,11 @@ const initListApi = (config) => {
             if (result.success === true) {
                 pendingDeleteId = 0;
                 if (deleteModal) {
-                    deleteModal.classList.remove('open');
+                    if (modalApi) {
+                        modalApi.close(deleteModal);
+                    } else {
+                        deleteModal.classList.remove('open');
+                    }
                 }
                 if (config.messages?.deleteSuccess) {
                     pushFlash('success', config.messages.deleteSuccess);
