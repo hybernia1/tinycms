@@ -194,12 +194,14 @@ final class PageView
         };
 
         $layout = match ($mode) {
-            'image' => 'front/svg/layout',
-            'document', 'text' => 'front/plain/layout',
+            'document', 'text', 'image' => 'front/plain/layout',
             default => 'front/layout',
         };
 
         $payload = ['notFoundMode' => $mode, 'pageTitle' => '404'];
+        if ($mode === 'image') {
+            $payload['contentType'] = 'image/svg+xml; charset=utf-8';
+        }
         $this->view->render($layout, 'front/errors/404', $payload);
     }
 
