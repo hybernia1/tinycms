@@ -37,6 +37,17 @@ const resolveEntry = (target) => {
     return { name, entry: registry.get(name) };
 };
 
+const findOpenModalFromTarget = (target) => {
+    let node = target instanceof Element ? target : null;
+    while (node && node !== document.body) {
+        if (node.classList.contains('open') && getNameByElement(node) !== '') {
+            return node;
+        }
+        node = node.parentElement;
+    }
+    return null;
+};
+
 const applyTriggerPayload = (modal, trigger) => {
     if (!modal || !trigger) {
         return;
@@ -164,7 +175,7 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    const openedModal = event.target.closest('.open[data-modal], .open[data-content-leave-modal], .open[data-media-library-modal]');
+    const openedModal = findOpenModalFromTarget(event.target);
     if (!openedModal) {
         return;
     }
