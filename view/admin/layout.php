@@ -354,9 +354,9 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                 </label>
             </div>
             <div class="wysiwyg-link-actions">
-                <button type="button" class="btn btn-light" data-role="link-cancel"><?= htmlspecialchars($t('editor.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button type="button" class="btn btn-light" data-role="link-cancel"><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
                 <button type="button" class="btn btn-light" data-role="link-remove"><?= htmlspecialchars($t('editor.remove_link'), ENT_QUOTES, 'UTF-8') ?></button>
-                <button type="button" class="btn btn-primary" data-role="link-apply"><?= htmlspecialchars($t('editor.save'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button type="button" class="btn btn-primary" data-role="link-apply"><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></button>
             </div>
         </div>
     </div>
