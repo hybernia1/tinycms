@@ -11,6 +11,9 @@
         const toggleButton = menu.querySelector('[data-save-action-toggle]');
         const options = menu.querySelector('.admin-header-action-options');
         const submitButtons = menu.querySelectorAll('[data-save-action-submit]');
+        const deleteButton = menu.querySelector('[data-save-action-delete]');
+        const deleteTriggerSelector = String(menu.getAttribute('data-save-action-delete-trigger') || '').trim();
+        const deleteTrigger = deleteTriggerSelector !== '' ? document.querySelector(deleteTriggerSelector) : null;
 
         if (!primaryButton || !toggleButton || !options) {
             return;
@@ -62,6 +65,13 @@
                 form.requestSubmit();
             });
         });
+
+        if (deleteButton && deleteTrigger) {
+            deleteButton.addEventListener('click', () => {
+                close();
+                deleteTrigger.click();
+            });
+        }
 
         close();
     });

@@ -166,7 +166,6 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
     <script defer src="<?= htmlspecialchars($url('assets/js/tag-picker.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/content-autosave.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/content-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/media-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/save-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
@@ -229,31 +228,29 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                 <strong data-admin-page-title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <?php if ($isMediaEdit || $isMediaAdd): ?>
-            <div class="d-flex align-center gap-2">
-                <div class="admin-header-action-menu" data-media-action-menu>
-                    <div class="admin-header-action-split">
-                        <button class="btn btn-primary admin-header-action-main" type="button" data-media-action-primary>
+            <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="#media-editor-form"<?= $isMediaEdit ? ' data-save-action-delete-trigger="[data-media-delete-trigger]"' : '' ?>>
+                <div class="admin-header-action-split">
+                    <button class="btn btn-primary admin-header-action-main" type="button" data-save-action-primary>
+                        <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                    </button>
+                    <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-save-action-toggle aria-expanded="false" aria-label="<?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?>">
+                        <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                    </button>
+                </div>
+                <div class="admin-header-action-options" hidden>
+                    <div class="admin-header-action-group">
+                        <button class="btn btn-light admin-header-action-option" type="button" data-save-action-submit>
                             <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
                         </button>
-                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-media-action-toggle aria-expanded="false" aria-label="<?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?>">
-                            <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                    </div>
+                    <?php if ($isMediaEdit): ?>
+                    <div class="admin-header-action-group admin-header-action-group-danger">
+                        <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete>
+                            <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <?= $icon('delete') ?>
                         </button>
                     </div>
-                    <div class="admin-header-action-options" hidden>
-                        <div class="admin-header-action-group">
-                            <button class="btn btn-light admin-header-action-option" type="button" data-media-action-submit>
-                                <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
-                            </button>
-                        </div>
-                        <?php if ($isMediaEdit): ?>
-                        <div class="admin-header-action-group admin-header-action-group-danger">
-                            <button class="btn btn-danger admin-header-action-option" type="button" data-media-action-delete>
-                                <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
-                                <?= $icon('delete') ?>
-                            </button>
-                        </div>
-                        <?php endif; ?>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php elseif ($isUsersEdit || $isUsersAdd): ?>
