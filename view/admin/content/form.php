@@ -221,8 +221,9 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                             <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?></span>
                             <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= $icon('loader') ?></span>
                         </label>
-                        <input id="content-thumbnail-upload" type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                        <input id="content-thumbnail-upload" type="file" name="thumbnail" accept="<?= htmlspecialchars((string)($imageUploadAccept ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
                     </div>
+                    <small class="text-muted d-block mt-2"><?= htmlspecialchars(sprintf($t('common.allowed_upload_types'), (string)($imageUploadTypesLabel ?? '')), ENT_QUOTES, 'UTF-8') ?></small>
                 </form>
                 <div class="media-library-grid" data-media-library-grid></div>
                 <div class="pagination pagination-centered">

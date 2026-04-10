@@ -29,6 +29,7 @@ return [
         'invalid_csrf' => 'Invalid CSRF token.',
         'invalid_data' => 'Invalid data.',
         'upload_add_files' => 'Add files',
+        'allowed_upload_types' => 'Allowed types: %s',
         'loading' => 'Loading...',
     ],
     'install' => [

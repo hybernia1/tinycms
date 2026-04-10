@@ -9,6 +9,7 @@ use App\Service\Support\I18n;
 final class UploadService
 {
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    private const SITE_IMAGE_EXTENSIONS = ['png', 'ico', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
     private const MAX_WEBP_WIDTH = 1024;
     private const DEFAULT_THUMB_VARIANTS = [
         ['suffix' => '_100x100.webp', 'mode' => 'crop', 'width' => 100, 'height' => 100],
@@ -153,6 +154,26 @@ final class UploadService
         return $this->uploadSiteImage($file, 'logo');
     }
 
+    public static function imageAccept(): string
+    {
+        return self::buildAccept(self::ALLOWED_EXTENSIONS, self::MIME_TO_EXTENSION);
+    }
+
+    public static function imageExtensionsLabel(): string
+    {
+        return self::buildExtensionsLabel(self::ALLOWED_EXTENSIONS);
+    }
+
+    public static function siteImageAccept(): string
+    {
+        return self::buildAccept(self::SITE_IMAGE_EXTENSIONS, self::SITE_IMAGE_MIME_TO_EXTENSION);
+    }
+
+    public static function siteImageExtensionsLabel(): string
+    {
+        return self::buildExtensionsLabel(self::SITE_IMAGE_EXTENSIONS);
+    }
+
     public function deleteRelativeFile(string $path): void
     {
         $trimmedPath = trim($path);
@@ -210,6 +231,43 @@ final class UploadService
         $mime = (string)finfo_file($finfo, $path);
         finfo_close($finfo);
         return $mime;
+    }
+
+    private static function buildAccept(array $extensions, array $mimeToExtension): string
+    {
+        $result = [];
+
+        foreach ($extensions as $extension) {
+            $normalized = strtolower(trim((string)$extension));
+            if ($normalized === '') {
+                continue;
+            }
+            $result[] = '.' . ltrim($normalized, '.');
+        }
+
+        foreach (array_keys($mimeToExtension) as $mime) {
+            $normalized = strtolower(trim((string)$mime));
+            if ($normalized === '') {
+                continue;
+            }
+            $result[] = $normalized;
+        }
+
+        return implode(',', array_values(array_unique($result)));
+    }
+
+    private static function buildExtensionsLabel(array $extensions): string
+    {
+        $result = [];
+        foreach ($extensions as $extension) {
+            $normalized = strtoupper(trim((string)$extension));
+            if ($normalized === '') {
+                continue;
+            }
+            $result[] = $normalized;
+        }
+
+        return implode(', ', array_values(array_unique($result)));
     }
 
     private function createWebp(string $sourcePath, string $destinationPath, string $mime, int $maxWidth): bool

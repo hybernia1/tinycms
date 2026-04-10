@@ -5,6 +5,7 @@ namespace App\View;
 
 use App\Service\Feature\ThemeService;
 use App\Service\Feature\SettingsService;
+use App\Service\Feature\UploadService;
 use App\Service\Support\I18n;
 
 final class PageView
@@ -330,7 +331,16 @@ final class PageView
 
     private function renderAdmin(string $template, array $data): void
     {
-        $this->view->render('admin/layout', $template, array_merge($data, $this->adminBranding()));
+        $this->view->render('admin/layout', $template, array_merge(
+            $data,
+            $this->adminBranding(),
+            [
+                'imageUploadAccept' => UploadService::imageAccept(),
+                'siteImageUploadAccept' => UploadService::siteImageAccept(),
+                'imageUploadTypesLabel' => UploadService::imageExtensionsLabel(),
+                'siteImageUploadTypesLabel' => UploadService::siteImageExtensionsLabel(),
+            ]
+        ));
     }
 
     private function adminBranding(): array
