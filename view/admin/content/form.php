@@ -240,7 +240,7 @@ require_once __DIR__ . '/../partials/modal-config.php';
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
 <?php
-$modal = adminConfirmModal(
+renderAdminConfirmModal(
     'media-library-delete-modal',
     $t('content.delete_image_confirm'),
     $t('common.cancel'),
@@ -250,9 +250,8 @@ $modal = adminConfirmModal(
     [],
     ['data-modal-text' => null]
 );
-require __DIR__ . '/../partials/modal.php';
 
-$modal = adminConfirmModal(
+renderAdminConfirmModal(
     'content-leave-modal',
     $t('content.leave_page_confirm'),
     $t('common.cancel'),
@@ -264,11 +263,10 @@ $modal = adminConfirmModal(
     ['data-content-leave-confirm' => null],
     ['data-content-leave-modal' => null]
 );
-require __DIR__ . '/../partials/modal.php';
 ?>
 <?php if ($mode === 'edit'): ?>
 <?php
-$modal = adminConfirmModal(
+renderAdminConfirmModal(
     'content-delete-modal',
     $t('content.delete_confirm'),
     $t('common.cancel'),
@@ -281,6 +279,5 @@ $modal = adminConfirmModal(
     [],
     ['data-modal-text' => null]
 );
-require __DIR__ . '/../partials/modal.php';
 ?>
 <?php endif; ?>

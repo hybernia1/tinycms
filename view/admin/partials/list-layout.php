@@ -108,7 +108,7 @@ foreach ($listRootAttrs as $attr => $value) {
     </div>
 
     <?php
-    $modal = adminConfirmModal(
+    renderAdminConfirmModal(
         $listName . '-delete-modal',
         $deleteConfirmText,
         $t('common.cancel'),
@@ -122,6 +122,5 @@ foreach ($listRootAttrs as $attr => $value) {
         ],
         ['data-' . $listName . '-delete-modal' => null]
     );
-    require __DIR__ . '/modal.php';
     ?>
 </div>

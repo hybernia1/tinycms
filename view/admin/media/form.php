@@ -185,7 +185,7 @@ require_once __DIR__ . '/../partials/modal-config.php';
         <?= $csrfField() ?>
     </form>
     <?php
-    $modal = adminConfirmModal(
+    renderAdminConfirmModal(
         'media-delete-modal',
         $t('media.delete_confirm'),
         $t('common.cancel'),
@@ -198,6 +198,5 @@ require_once __DIR__ . '/../partials/modal-config.php';
         [],
         ['data-modal-text' => null]
     );
-    require __DIR__ . '/../partials/modal.php';
     ?>
 <?php endif; ?>
