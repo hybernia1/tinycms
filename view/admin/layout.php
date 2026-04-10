@@ -311,10 +311,15 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                 </div>
             </div>
             <?php elseif ($isUsersList): ?>
-            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
-                <?= $icon('add') ?>
-                <span><?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?></span>
-            </a>
+            <div class="admin-header-action-split">
+                <a class="btn btn-primary admin-header-action-main" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('add') ?>
+                    <span><?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
+                <a class="btn btn-primary btn-icon admin-header-action-toggle" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                </a>
+            </div>
             <?php elseif ($isContentEdit || $isContentAdd): ?>
             <div class="admin-header-action-menu" data-content-action-menu>
                 <div class="admin-header-action-split">
@@ -347,20 +352,35 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                 </div>
             </div>
             <?php elseif ($isContentList): ?>
-            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/content/add'), ENT_QUOTES, 'UTF-8') ?>">
-                <?= $icon('add') ?>
-                <span><?= htmlspecialchars($t('admin.add_content'), ENT_QUOTES, 'UTF-8') ?></span>
-            </a>
+            <div class="admin-header-action-split">
+                <a class="btn btn-primary admin-header-action-main" href="<?= htmlspecialchars($url('admin/content/add'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('add') ?>
+                    <span><?= htmlspecialchars($t('admin.add_content'), ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
+                <a class="btn btn-primary btn-icon admin-header-action-toggle" href="<?= htmlspecialchars($url('admin/content/add'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.add_content'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                </a>
+            </div>
             <?php elseif ($isMediaList): ?>
-            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>">
-                <?= $icon('add') ?>
-                <span><?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?></span>
-            </a>
+            <div class="admin-header-action-split">
+                <a class="btn btn-primary admin-header-action-main" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('add') ?>
+                    <span><?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
+                <a class="btn btn-primary btn-icon admin-header-action-toggle" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                </a>
+            </div>
             <?php elseif ($isTermsList): ?>
-            <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>">
-                <?= $icon('add') ?>
-                <span><?= htmlspecialchars($t('admin.add_term'), ENT_QUOTES, 'UTF-8') ?></span>
-            </a>
+            <div class="admin-header-action-split">
+                <a class="btn btn-primary admin-header-action-main" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('add') ?>
+                    <span><?= htmlspecialchars($t('admin.add_term'), ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
+                <a class="btn btn-primary btn-icon admin-header-action-toggle" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.add_term'), ENT_QUOTES, 'UTF-8') ?>">
+                    <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                </a>
+            </div>
             <?php endif; ?>
         </div>
         <section class="admin-content p-2">
