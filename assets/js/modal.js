@@ -19,15 +19,30 @@ const closeModal = (modal) => {
     }
 };
 
-const hoistModalsToBody = () => {
-    document.querySelectorAll('[data-modal], [data-content-leave-modal], [data-media-library-modal]').forEach((modal) => {
-        if (modal.parentElement !== document.body) {
-            document.body.appendChild(modal);
-        }
-    });
+const openModalElement = (modal) => {
+    if (modal) {
+        modal.classList.add('open');
+    }
 };
 
-hoistModalsToBody();
+const resolveModal = (target) => {
+    if (!target) {
+        return null;
+    }
+    if (typeof target === 'string') {
+        return document.querySelector(target);
+    }
+    return target instanceof Element ? target : null;
+};
+
+window.tinycmsModal = {
+    open(target) {
+        openModalElement(resolveModal(target));
+    },
+    close(target) {
+        closeModal(resolveModal(target));
+    },
+};
 
 const openModal = (trigger) => {
     const modal = getModal(trigger);
@@ -48,7 +63,7 @@ const openModal = (trigger) => {
         confirm.setAttribute('data-form-id', formId);
     }
 
-    modal.classList.add('open');
+    openModalElement(modal);
 };
 
 document.addEventListener('click', (event) => {
