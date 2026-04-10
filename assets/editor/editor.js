@@ -493,6 +493,7 @@
     function createLinkModal() {
         var modal = document.createElement('div');
         modal.className = 'wysiwyg-link-modal';
+        modal.setAttribute('data-modal', '');
 
         var dialog = document.createElement('div');
         dialog.className = 'wysiwyg-link-dialog';
@@ -857,7 +858,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('is-open');
+            linkModal.classList.add('open');
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -924,7 +925,7 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('is-open');
+            linkModal.classList.remove('open');
         }
 
         function closeMenus() {
@@ -933,7 +934,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            linkModal.classList.remove('is-open');
+            linkModal.classList.remove('open');
             hideLinkTools();
             activeLink = null;
         }
@@ -1109,7 +1110,7 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                if (linkModal.classList.contains('is-open')) {
+                if (linkModal.classList.contains('open')) {
                     closeMenus();
                 } else {
                     openLinkModal();
@@ -1350,7 +1351,7 @@
             }
 
             hideLinkTools();
-            if (!linkModal.classList.contains('is-open')) {
+            if (!linkModal.classList.contains('open')) {
                 activeLink = null;
             }
 
