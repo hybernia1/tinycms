@@ -4,6 +4,7 @@ $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '
 $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
+$isContentAdd = str_ends_with($currentPath, 'admin/content/add');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
 $isMediaEdit = str_ends_with($currentPath, 'admin/media/edit');
 $isTermsList = str_ends_with($currentPath, 'admin/terms');
@@ -239,7 +240,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isContentEdit): ?>
+            <?php elseif ($isContentEdit || $isContentAdd): ?>
             <details class="admin-header-action-menu" data-content-action-menu>
                 <summary class="btn btn-primary">
                     <?= $icon('add') ?>
