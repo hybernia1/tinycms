@@ -524,6 +524,7 @@
         focus.classList.add('wysiwyg-btn-focus');
         var linkModal = createLinkModal();
         if (!linkModal) {
+            console.error('tinycms: missing #wysiwyg-link-modal-template');
             return;
         }
         var linkTools = document.createElement('div');

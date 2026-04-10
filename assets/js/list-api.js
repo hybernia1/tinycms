@@ -117,14 +117,6 @@ const initListApi = (config) => {
     let fetchController = null;
 
     const deleteModalName = deleteModal?.getAttribute('id') || `${config.name}-list-delete`;
-    if (deleteModal) {
-        modalService.register(deleteModalName, {
-            element: deleteModal,
-            closeSelector: `[data-${config.name}-delete-cancel]`,
-            confirmSelector: `[data-${config.name}-delete-confirm]`,
-            closeOnBackdrop: true,
-        });
-    }
 
     const setPagination = (page, totalPages) => {
         if (!prevLink || !nextLink) {

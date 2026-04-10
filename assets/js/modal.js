@@ -6,6 +6,8 @@ const t = (path, fallback = '') => {
 };
 
 const registry = new Map();
+const elementToName = new WeakMap();
+const openStack = [];
 
 const normalizeName = (name) => String(name || '').trim();
 const getNameByElement = (element) => {
@@ -17,7 +19,7 @@ const getNameByElement = (element) => {
             return name;
         }
     }
-    return '';
+    return elementToName.get(element) || '';
 };
 
 const resolveEntry = (target) => {
@@ -71,6 +73,14 @@ const closeModal = (target, reason = 'close') => {
     }
     const { entry, name } = resolved;
     entry.element.classList.remove('open');
+    if (entry.opener && typeof entry.opener.focus === 'function') {
+        entry.opener.focus();
+    }
+    const stackIndex = openStack.lastIndexOf(entry.element);
+    if (stackIndex >= 0) {
+        openStack.splice(stackIndex, 1);
+    }
+    document.body.classList.toggle('modal-open', openStack.length > 0);
     if (typeof entry.onClose === 'function') {
         entry.onClose(reason);
     }
@@ -110,7 +120,9 @@ const registerModal = (name, options = {}) => {
         onOpen: options.onOpen || null,
         onClose: options.onClose || null,
         pendingResolve: null,
+        opener: null,
     });
+    elementToName.set(element, modalName);
 };
 
 const openModal = (target, payload = {}) => {
@@ -119,7 +131,12 @@ const openModal = (target, payload = {}) => {
         return null;
     }
     const { entry, name } = resolved;
+    entry.opener = payload?.opener instanceof Element ? payload.opener : entry.opener;
     entry.element.classList.add('open');
+    if (!openStack.includes(entry.element)) {
+        openStack.push(entry.element);
+    }
+    document.body.classList.add('modal-open');
     if (typeof entry.onOpen === 'function') {
         entry.onOpen(payload);
     }
@@ -171,7 +188,7 @@ document.addEventListener('click', (event) => {
         }
         applyTriggerPayload(modal, openTrigger);
         const modalName = modal.getAttribute('id') || getNameByElement(modal) || '';
-        openModal(modalName !== '' ? modalName : modal);
+        openModal(modalName !== '' ? modalName : modal, { opener: openTrigger });
         return;
     }
 

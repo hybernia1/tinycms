@@ -676,6 +676,10 @@ input[type='week']::-webkit-calendar-picker-indicator {
     z-index: var(--admin-z-modal, 170);
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
 .modal-overlay.open {
     display: flex;
 }

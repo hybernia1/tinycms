@@ -230,14 +230,6 @@
 
         var leaveModalName = 'content-leave-modal';
         var leaveModalElement = leaveModal();
-        if (leaveModalElement) {
-            modalService.register(leaveModalName, {
-                element: leaveModalElement,
-                closeSelector: '[data-content-leave-cancel]',
-                confirmSelector: '[data-content-leave-confirm]',
-                closeOnBackdrop: true,
-            });
-        }
 
         function closeLeaveModal() {
             if (leaveModalElement) {

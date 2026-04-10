@@ -62,20 +62,6 @@ if (modal && openTrigger) {
     let selectedMedia = null;
     let searchTimer = null;
 
-    modalService.register('media-library-modal', {
-        element: modal,
-        closeSelector: '[data-media-library-close]',
-        closeOnBackdrop: true,
-    });
-    if (deleteConfirmModal) {
-        modalService.register('media-library-delete-modal', {
-            element: deleteConfirmModal,
-            closeSelector: '[data-modal-close]',
-            confirmSelector: '[data-modal-confirm]',
-            closeOnBackdrop: true,
-        });
-    }
-
     const normalizePayload = (payload) => {
         if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
             return {

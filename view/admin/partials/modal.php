@@ -14,14 +14,15 @@ if ($modalId !== '') {
 if (!array_key_exists('data-modal', $modalAttrs)) {
     $modalAttrs['data-modal'] = null;
 }
+$modalTitleId = $modalId !== '' ? $modalId . '-title' : '';
 ?>
 <div class="modal-overlay"
 <?php foreach ($modalAttrs as $attr => $value): ?>
     <?= htmlspecialchars((string)$attr, ENT_QUOTES, 'UTF-8') ?><?= $value === null ? '' : '="' . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '"' ?>
 <?php endforeach; ?>
 >
-    <div class="modal">
-        <p<?= $modalHasTextData ? ' data-modal-text' : '' ?>><?= htmlspecialchars($modalText, ENT_QUOTES, 'UTF-8') ?></p>
+    <div class="modal" role="dialog" aria-modal="true"<?= $modalTitleId !== '' ? ' aria-labelledby="' . htmlspecialchars($modalTitleId, ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+        <p<?= $modalHasTextData ? ' data-modal-text' : '' ?><?= $modalTitleId !== '' ? ' id="' . htmlspecialchars($modalTitleId, ENT_QUOTES, 'UTF-8') . '"' : '' ?>><?= htmlspecialchars($modalText, ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
             <button class="btn btn-light" type="button"
             <?php foreach ($modalCloseAttrs as $attr => $value): ?>
