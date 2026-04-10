@@ -1,5 +1,5 @@
 <div class="card p-4">
-    <form method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/settings'), ENT_QUOTES, 'UTF-8') ?>">
+    <form id="settings-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($url('admin/settings'), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
 
         <?php foreach ($fields as $fieldKey => $field):
@@ -45,6 +45,5 @@
             </div>
         <?php endforeach; ?>
 
-        <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('settings.save'), ENT_QUOTES, 'UTF-8') ?></button>
     </form>
 </div>
