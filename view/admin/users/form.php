@@ -1,6 +1,6 @@
 <?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-4">
-    <form method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+    <form id="users-editor-form" method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
@@ -40,7 +40,5 @@
                 <label><input type="checkbox" name="suspend" value="1" <?= ((int)($user['suspend'] ?? 0) === 1) ? 'checked' : '' ?>> <?= htmlspecialchars($t('users.suspend'), ENT_QUOTES, 'UTF-8') ?></label>
             <?php endif; ?>
         </div>
-        <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></button>
-        <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/users'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back'), ENT_QUOTES, 'UTF-8') ?></a>
     </form>
 </div>

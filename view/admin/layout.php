@@ -3,13 +3,18 @@ declare(strict_types=1);
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
+$isUsersAdd = str_ends_with($currentPath, 'admin/users/add');
 $isContentList = str_ends_with($currentPath, 'admin/content');
+$isContentAdd = str_ends_with($currentPath, 'admin/content/add');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
+$isMediaAdd = str_ends_with($currentPath, 'admin/media/add');
 $isMediaEdit = str_ends_with($currentPath, 'admin/media/edit');
 $isTermsList = str_ends_with($currentPath, 'admin/terms');
+$isTermsAdd = str_ends_with($currentPath, 'admin/terms/add');
 $isUsersEdit = str_ends_with($currentPath, 'admin/users/edit');
 $isContentEdit = str_ends_with($currentPath, 'admin/content/edit');
 $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
+$isSettings = str_ends_with($currentPath, 'admin/settings');
 ?>
 <!doctype html>
 <html lang="<?= htmlspecialchars((string)$lang, ENT_QUOTES, 'UTF-8') ?>">
@@ -32,6 +37,9 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 'delete' => $t('common.delete'),
                 'close_notice' => $t('admin.close_notice'),
                 'invalid_data' => $t('common.invalid_data'),
+            ],
+            'admin' => [
+                'edit_content' => $t('admin.edit_content'),
             ],
             'content' => [
                 'planned' => $t('content.planned'),
@@ -157,6 +165,8 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
     <script defer src="<?= htmlspecialchars($url('assets/js/list-api.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/tag-picker.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/content-autosave.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/content-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/save-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body>
@@ -215,30 +225,85 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                     <?= $icon('menu') ?>
                     <span class="sr-only"><?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?></span>
                 </button>
-                <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong data-admin-page-title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
-            <?php if ($isMediaEdit && isset($navigation) && is_array($navigation)): ?>
-            <?php $prevMediaId = (int)($navigation['prev'] ?? 0); $nextMediaId = (int)($navigation['next'] ?? 0); ?>
-            <div class="d-flex align-center gap-2">
-                <?php if ($prevMediaId > 0): ?>
-                <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/edit?id=' . $prevMediaId), ENT_QUOTES, 'UTF-8') ?>">
-                    <?= $icon('prev') ?>
-                    <span><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></span>
-                </a>
-                <?php endif; ?>
-                <?php if ($nextMediaId > 0): ?>
-                <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/edit?id=' . $nextMediaId), ENT_QUOTES, 'UTF-8') ?>">
-                    <span><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></span>
-                    <?= $icon('next') ?>
-                </a>
-                <?php endif; ?>
+            <?php if ($isMediaEdit): ?>
+            <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="#media-editor-form" data-save-action-delete-trigger="[data-media-delete-trigger]">
+                <div class="admin-header-action-split">
+                    <button class="btn btn-primary admin-header-action-main" type="button" data-save-action-primary>
+                        <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                    </button>
+                    <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-save-action-toggle aria-expanded="false" aria-label="<?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?>">
+                        <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                    </button>
+                </div>
+                <div class="admin-header-action-options" hidden>
+                    <div class="admin-header-action-group">
+                        <button class="btn btn-light admin-header-action-option" type="button" data-save-action-submit>
+                            <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                        </button>
+                    </div>
+                    <div class="admin-header-action-group admin-header-action-group-danger">
+                        <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete>
+                            <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <?= $icon('delete') ?>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <?php elseif ($isUsersList || $isUsersEdit): ?>
+            <?php elseif ($isMediaAdd): ?>
+            <button class="btn btn-primary" type="button" data-save-action-form-submit="#media-editor-form">
+                <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+            </button>
+            <?php elseif ($isUsersEdit || $isUsersAdd): ?>
+            <button class="btn btn-primary" type="button" data-save-action-form-submit="#users-editor-form">
+                <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+            </button>
+            <?php elseif ($isTermsEdit || $isTermsAdd): ?>
+            <button class="btn btn-primary" type="button" data-save-action-form-submit="#terms-editor-form">
+                <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+            </button>
+            <?php elseif ($isSettings): ?>
+            <button class="btn btn-primary" type="button" data-save-action-form-submit="#settings-form">
+                <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+            </button>
+            <?php elseif ($isUsersList): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isContentList || $isContentEdit): ?>
+            <?php elseif ($isContentEdit || $isContentAdd): ?>
+            <div class="admin-header-action-menu" data-content-action-menu>
+                <div class="admin-header-action-split">
+                    <button class="btn btn-primary admin-header-action-main" type="button" data-content-action-primary>
+                        <span data-content-action-label><?= htmlspecialchars($t('content.statuses.draft'), ENT_QUOTES, 'UTF-8') ?></span>
+                    </button>
+                    <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-content-action-toggle aria-expanded="false" aria-label="<?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?>">
+                        <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                    </button>
+                </div>
+                <div class="admin-header-action-options" hidden>
+                    <div class="admin-header-action-group">
+                        <button class="btn btn-light admin-header-action-option" type="button" data-content-action-submit="published">
+                            <span><?= htmlspecialchars($t('content.publish'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span data-content-action-check="published"><?= $icon('success') ?></span>
+                        </button>
+                        <button class="btn btn-light admin-header-action-option" type="button" data-content-action-submit="draft">
+                            <span><?= htmlspecialchars($t('content.statuses.draft'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span data-content-action-check="draft"><?= $icon('success') ?></span>
+                        </button>
+                    </div>
+                    <?php if ($isContentEdit): ?>
+                    <div class="admin-header-action-group admin-header-action-group-danger">
+                        <button class="btn btn-danger admin-header-action-option" type="button" data-content-action-delete>
+                            <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <?= $icon('delete') ?>
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php elseif ($isContentList): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/content/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_content'), ENT_QUOTES, 'UTF-8') ?></span>
@@ -248,7 +313,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isTermsList || $isTermsEdit): ?>
+            <?php elseif ($isTermsList): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_term'), ENT_QUOTES, 'UTF-8') ?></span>

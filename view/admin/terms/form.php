@@ -1,4 +1,4 @@
-<form method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/terms/add') : $url('admin/terms/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+<form id="terms-editor-form" method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/terms/add') : $url('admin/terms/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <div class="card p-4">
         <div class="mb-3">
@@ -35,9 +35,5 @@
                 </div>
             <?php endif; ?>
         <?php endif; ?>
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></button>
-            <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/terms'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back'), ENT_QUOTES, 'UTF-8') ?></a>
-        </div>
     </div>
 </form>
