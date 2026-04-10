@@ -55,7 +55,9 @@
         form.requestSubmit();
     });
 
-    toggleButton.addEventListener('click', () => {
+    toggleButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         if (options.hidden) {
             open();
             return;
@@ -63,12 +65,14 @@
         close();
     });
 
-    document.addEventListener('pointerdown', (event) => {
+    const handleOutside = (event) => {
         if (!menu.contains(event.target)) {
             close();
         }
-    });
+    };
 
+    document.addEventListener('click', handleOutside, true);
+    document.addEventListener('pointerdown', handleOutside, true);
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             close();
