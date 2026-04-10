@@ -1,24 +1,24 @@
 <?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-4">
-    <form id="users-editor-form" method="post" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+    <form id="users-editor-form" method="post" autocomplete="off" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
-            <input type="text" name="name" value="<?= htmlspecialchars((string)($user['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+            <input type="text" name="name" autocomplete="off" value="<?= htmlspecialchars((string)($user['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
             <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('common.email'), ENT_QUOTES, 'UTF-8') ?></label>
             <div class="field-with-icon">
                 <span class="field-overlay field-overlay-start field-icon" aria-hidden="true"><?= $icon('email') ?></span>
-                <input class="field-control-with-start-icon" type="email" name="email" value="<?= htmlspecialchars((string)($user['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+                <input class="field-control-with-start-icon" type="email" name="email" autocomplete="off" value="<?= htmlspecialchars((string)($user['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
             </div>
             <?php if (!empty($errors['email'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['email'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
         </div>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('common.password'), ENT_QUOTES, 'UTF-8') ?> <?= $mode === 'edit' ? '(' . htmlspecialchars($t('users.password_optional'), ENT_QUOTES, 'UTF-8') . ')' : '' ?></label>
             <div class="field-with-icon">
-                <input class="field-control-with-end-icon" type="password" name="password" data-password-input <?= $mode === 'add' ? 'required' : '' ?>>
+                <input class="field-control-with-end-icon" type="password" name="password" autocomplete="new-password" data-password-input <?= $mode === 'add' ? 'required' : '' ?>>
                 <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= htmlspecialchars($t('front.login.show_password'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('front.login.show_password'), ENT_QUOTES, 'UTF-8') ?>">
                     <?= $icon('show') ?>
                 </button>
