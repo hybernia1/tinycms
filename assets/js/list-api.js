@@ -20,7 +20,7 @@ const iconSprite = (() => {
 const icon = (name) => iconSprite !== ''
     ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${esc(iconSprite)}#icon-${esc(name)}"></use></svg>`
     : '';
-const deleteTriggerAttrs = (name) => `data-${name}-delete-open data-modal-open data-modal-target="#${name}-delete-modal"`;
+const deleteTriggerAttrs = (name, id) => `data-${name}-delete-open="${Number(id || 0)}" data-modal-open data-modal-target="#${name}-delete-modal"`;
 
 const normalizeListResponse = (payload) => {
     const meta = payload && typeof payload.meta === 'object' ? payload.meta : {};
@@ -413,7 +413,7 @@ initListApi({
                     </button>
                     ` : ''}
                     ${canDelete ? `
-                    <button class="btn btn-light btn-icon" type="button" ${deleteTriggerAttrs('content')}="${Number(item.id || 0)}" aria-label="${esc(t('common.delete', 'Delete'))}" title="${esc(t('common.delete', 'Delete'))}">
+                    <button class="btn btn-light btn-icon" type="button" ${deleteTriggerAttrs('content', item.id)} aria-label="${esc(t('common.delete', 'Delete'))}" title="${esc(t('common.delete', 'Delete'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('common.delete', 'Delete'))}</span>
                     </button>
@@ -440,7 +440,7 @@ initListApi({
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                 </td>
                 <td class="table-col-actions">
-                    <button class="btn btn-light btn-icon" type="button" ${deleteTriggerAttrs('terms')}="${id}" aria-label="${esc(t('terms.delete', 'Delete tag'))}" title="${esc(t('terms.delete', 'Delete tag'))}">
+                    <button class="btn btn-light btn-icon" type="button" ${deleteTriggerAttrs('terms', id)} aria-label="${esc(t('terms.delete', 'Delete tag'))}" title="${esc(t('terms.delete', 'Delete tag'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('terms.delete', 'Delete tag'))}</span>
                     </button>
@@ -483,7 +483,7 @@ initListApi({
                 <td class="mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
                     ${canDelete ? `
-                    <button class="btn btn-light btn-icon" type="button" ${deleteTriggerAttrs('media')}="${id}" aria-label="${esc(t('media.delete', 'Delete media'))}" title="${esc(t('media.delete', 'Delete media'))}">
+                    <button class="btn btn-light btn-icon" type="button" ${deleteTriggerAttrs('media', id)} aria-label="${esc(t('media.delete', 'Delete media'))}" title="${esc(t('media.delete', 'Delete media'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('media.delete', 'Delete media'))}</span>
                     </button>
@@ -527,7 +527,7 @@ initListApi({
                         ${icon(isSuspended ? 'show' : 'hide')}
                         <span class="sr-only">${esc(toggleLabel)}</span>
                     </button>
-                    <button class="btn btn-light btn-icon" type="button" ${deleteTriggerAttrs('users')}="${id}" aria-label="${esc(t('users.delete', 'Delete user'))}" title="${esc(t('users.delete', 'Delete user'))}">
+                    <button class="btn btn-light btn-icon" type="button" ${deleteTriggerAttrs('users', id)} aria-label="${esc(t('users.delete', 'Delete user'))}" title="${esc(t('users.delete', 'Delete user'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('users.delete', 'Delete user'))}</span>
                     </button>`}
