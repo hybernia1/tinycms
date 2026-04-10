@@ -491,6 +491,14 @@
     }
 
     function createLinkModal() {
+        var template = document.getElementById('wysiwyg-link-modal-template');
+        if (template && template.content) {
+            var cloned = template.content.firstElementChild ? template.content.firstElementChild.cloneNode(true) : null;
+            if (cloned) {
+                return cloned;
+            }
+        }
+
         var modal = document.createElement('div');
         modal.className = 'wysiwyg-link-modal';
 

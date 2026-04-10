@@ -335,5 +335,29 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
         </section>
     </main>
 </div>
+<template id="wysiwyg-link-modal-template">
+    <div class="wysiwyg-link-modal" data-wysiwyg-link-modal-template>
+        <div class="wysiwyg-link-dialog">
+            <h3 class="wysiwyg-link-title"><?= htmlspecialchars($t('editor.insert_link'), ENT_QUOTES, 'UTF-8') ?></h3>
+            <input type="url" class="wysiwyg-link-input" placeholder="https://" data-role="link-input">
+            <input type="text" class="wysiwyg-link-input" placeholder="<?= htmlspecialchars($t('editor.link_text'), ENT_QUOTES, 'UTF-8') ?>" data-role="link-text-input">
+            <div class="wysiwyg-link-options">
+                <label class="wysiwyg-link-option">
+                    <input type="checkbox" data-role="link-target-blank">
+                    <?= htmlspecialchars($t('editor.open_new_window'), ENT_QUOTES, 'UTF-8') ?>
+                </label>
+                <label class="wysiwyg-link-option">
+                    <input type="checkbox" data-role="link-nofollow">
+                    <?= htmlspecialchars($t('editor.add_nofollow'), ENT_QUOTES, 'UTF-8') ?>
+                </label>
+            </div>
+            <div class="wysiwyg-link-actions">
+                <button type="button" class="btn btn-light" data-role="link-cancel"><?= htmlspecialchars($t('editor.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button type="button" class="btn btn-light" data-role="link-remove"><?= htmlspecialchars($t('editor.remove_link'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button type="button" class="btn btn-primary" data-role="link-apply"><?= htmlspecialchars($t('editor.save'), ENT_QUOTES, 'UTF-8') ?></button>
+            </div>
+        </div>
+    </div>
+</template>
 </body>
 </html>
