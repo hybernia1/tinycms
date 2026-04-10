@@ -1,11 +1,11 @@
 <?php
 $modalConfig = is_array($modal ?? null) ? $modal : [];
-$modalId = (string)($modalConfig['id'] ?? ($modalId ?? ''));
-$modalAttrs = is_array($modalConfig['attrs'] ?? null) ? $modalConfig['attrs'] : (is_array($modalAttrs ?? null) ? $modalAttrs : []);
-$modalText = (string)($modalConfig['text'] ?? ($modalText ?? ''));
-$modalTextAttrs = is_array($modalConfig['text_attrs'] ?? null) ? $modalConfig['text_attrs'] : (is_array($modalTextAttrs ?? null) ? $modalTextAttrs : []);
-$modalActions = is_array($modalConfig['actions'] ?? null) ? $modalConfig['actions'] : (is_array($modalActions ?? null) ? $modalActions : []);
-$modalDialogAttrs = is_array($modalConfig['dialog_attrs'] ?? null) ? $modalConfig['dialog_attrs'] : (is_array($modalDialogAttrs ?? null) ? $modalDialogAttrs : []);
+$modalId = (string)($modalConfig['id'] ?? '');
+$modalAttrs = is_array($modalConfig['attrs'] ?? null) ? $modalConfig['attrs'] : [];
+$modalText = (string)($modalConfig['text'] ?? '');
+$modalTextAttrs = is_array($modalConfig['text_attrs'] ?? null) ? $modalConfig['text_attrs'] : [];
+$modalActions = is_array($modalConfig['actions'] ?? null) ? $modalConfig['actions'] : [];
+$modalDialogAttrs = is_array($modalConfig['dialog_attrs'] ?? null) ? $modalConfig['dialog_attrs'] : [];
 $dialogAttrs = ['role' => 'dialog', 'aria-modal' => 'true'];
 foreach ($modalDialogAttrs as $attr => $value) {
     $dialogAttrs[(string)$attr] = $value;
