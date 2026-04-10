@@ -342,7 +342,7 @@ final class AdminContentController extends BaseAdminController
 
         $savedId = (int)($result['id'] ?? 0);
         if ($isCreate && $nameMissing && $savedId > 0) {
-            $payload['name'] = 'Draft #' . $savedId;
+            $payload['name'] = $this->resolveAutosaveDraftName($savedId);
             $this->content->save($payload, $authorId, $savedId);
         }
         if ($savedId > 0 && isset($_POST['terms'])) {
@@ -452,7 +452,7 @@ final class AdminContentController extends BaseAdminController
     {
         $name = trim((string)($input['name'] ?? ''));
         if ($name === '') {
-            $name = $id > 0 ? 'Draft #' . $id : I18n::t('content.untitled');
+            $name = $id > 0 ? $this->resolveAutosaveDraftName($id) : I18n::t('content.untitled');
         }
 
         $author = trim((string)($input['author'] ?? ''));
@@ -470,6 +470,11 @@ final class AdminContentController extends BaseAdminController
             'author' => $author,
             'created' => (string)($input['created'] ?? ''),
         ];
+    }
+
+    private function resolveAutosaveDraftName(int $id): string
+    {
+        return sprintf(I18n::t('content.autosave_draft_name'), $id);
     }
 
     private function resolveListQuery(): array
