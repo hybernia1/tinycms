@@ -492,87 +492,10 @@
 
     function createLinkModal() {
         var template = document.getElementById('wysiwyg-link-modal-template');
-        if (template && template.content) {
-            var cloned = template.content.firstElementChild ? template.content.firstElementChild.cloneNode(true) : null;
-            if (cloned) {
-                return cloned;
-            }
+        if (!template || !template.content || !template.content.firstElementChild) {
+            return null;
         }
-
-        var modal = document.createElement('div');
-        modal.className = 'wysiwyg-link-modal';
-
-        var dialog = document.createElement('div');
-        dialog.className = 'wysiwyg-link-dialog';
-
-        var title = document.createElement('h3');
-        title.className = 'wysiwyg-link-title';
-        title.textContent = '' + t('editor.insert_link', 'Insert link') + '';
-
-        var input = document.createElement('input');
-        input.type = 'url';
-        input.placeholder = 'https://';
-        input.className = 'wysiwyg-link-input';
-        input.setAttribute('data-role', 'link-input');
-
-        var textInput = document.createElement('input');
-        textInput.type = 'text';
-        textInput.placeholder = t('editor.link_text', 'Link text');
-        textInput.className = 'wysiwyg-link-input';
-        textInput.setAttribute('data-role', 'link-text-input');
-
-        var options = document.createElement('div');
-        options.className = 'wysiwyg-link-options';
-
-        var targetOption = document.createElement('label');
-        targetOption.className = 'wysiwyg-link-option';
-        var targetInput = document.createElement('input');
-        targetInput.type = 'checkbox';
-        targetInput.setAttribute('data-role', 'link-target-blank');
-        targetOption.appendChild(targetInput);
-        targetOption.appendChild(document.createTextNode(' ' + t('editor.open_new_window', 'Open in new window')));
-
-        var nofollowOption = document.createElement('label');
-        nofollowOption.className = 'wysiwyg-link-option';
-        var nofollowInput = document.createElement('input');
-        nofollowInput.type = 'checkbox';
-        nofollowInput.setAttribute('data-role', 'link-nofollow');
-        nofollowOption.appendChild(nofollowInput);
-        nofollowOption.appendChild(document.createTextNode(' ' + t('editor.add_nofollow', 'Add nofollow')));
-
-        var actions = document.createElement('div');
-        actions.className = 'wysiwyg-link-actions';
-
-        var cancel = document.createElement('button');
-        cancel.type = 'button';
-        cancel.className = 'btn btn-light';
-        cancel.setAttribute('data-role', 'link-cancel');
-        cancel.textContent = '' + t('editor.cancel', 'Cancel') + '';
-
-        var remove = document.createElement('button');
-        remove.type = 'button';
-        remove.className = 'btn btn-light';
-        remove.setAttribute('data-role', 'link-remove');
-        remove.textContent = t('editor.remove_link', 'Remove link');
-
-        var confirm = document.createElement('button');
-        confirm.type = 'button';
-        confirm.className = 'btn btn-primary';
-        confirm.setAttribute('data-role', 'link-apply');
-        confirm.textContent = '' + t('editor.save', 'Save') + '';
-
-        actions.appendChild(cancel);
-        actions.appendChild(remove);
-        actions.appendChild(confirm);
-        options.appendChild(targetOption);
-        options.appendChild(nofollowOption);
-        dialog.appendChild(title);
-        dialog.appendChild(input);
-        dialog.appendChild(textInput);
-        dialog.appendChild(options);
-        dialog.appendChild(actions);
-        modal.appendChild(dialog);
-        return modal;
+        return template.content.firstElementChild.cloneNode(true);
     }
 
     function init(textarea) {
@@ -600,6 +523,9 @@
         var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode', 'Focus mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
         var linkModal = createLinkModal();
+        if (!linkModal) {
+            return;
+        }
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
         linkTools.setAttribute('contenteditable', 'false');
@@ -635,14 +561,11 @@
         var mediaRange = null;
         var linkPasteSeq = 0;
         var draftInitPromise = null;
-        var modalService = window.tinycmsModal || null;
+        var modalService = window.tinycmsModal;
         var linkModalName = editorId + '-link-modal';
 
         function isLinkModalOpen() {
-            if (modalService) {
-                return modalService.isOpen(linkModalName);
-            }
-            return linkModal.classList.contains('is-open');
+            return modalService.isOpen(linkModalName);
         }
 
         function absoluteMediaUrl(path) {
@@ -874,11 +797,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            if (modalService) {
-                modalService.open(linkModalName);
-            } else {
-                linkModal.classList.add('is-open');
-            }
+            modalService.open(linkModalName);
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -945,11 +864,7 @@
                 }
                 wrapper.classList.remove(className);
             });
-            if (modalService) {
-                modalService.close(linkModalName);
-            } else {
-                linkModal.classList.remove('is-open');
-            }
+            modalService.close(linkModalName);
         }
 
         function closeMenus() {
@@ -958,11 +873,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            if (modalService) {
-                modalService.close(linkModalName);
-            } else {
-                linkModal.classList.remove('is-open');
-            }
+            modalService.close(linkModalName);
             hideLinkTools();
             activeLink = null;
         }
@@ -1624,18 +1535,16 @@
         textarea.parentNode.insertBefore(wrapper, textarea);
         wrapper.appendChild(toolbar);
         document.body.appendChild(linkModal);
-        if (modalService) {
-            modalService.register(linkModalName, {
-                element: linkModal,
-                closeOnBackdrop: true,
-                onOpen: function () {
-                    linkModal.classList.add('is-open');
-                },
-                onClose: function () {
-                    linkModal.classList.remove('is-open');
-                },
-            });
-        }
+        modalService.register(linkModalName, {
+            element: linkModal,
+            closeOnBackdrop: true,
+            onOpen: function () {
+                linkModal.classList.add('is-open');
+            },
+            onClose: function () {
+                linkModal.classList.remove('is-open');
+            },
+        });
         wrapper.appendChild(linkTools);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);

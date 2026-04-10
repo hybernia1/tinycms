@@ -32,7 +32,7 @@
         var bypassLeaveWarning = false;
         var pendingNavigation = '';
         var pendingReload = false;
-        var modalService = window.tinycmsModal || null;
+        var modalService = window.tinycmsModal;
         var editLayoutApplied = false;
         var appRoot = '';
         if (autosaveEndpoint.indexOf('/admin/api/v1/content/autosave') >= 0) {
@@ -230,7 +230,7 @@
 
         var leaveModalName = 'content-leave-modal';
         var leaveModalElement = leaveModal();
-        if (leaveModalElement && modalService) {
+        if (leaveModalElement) {
             modalService.register(leaveModalName, {
                 element: leaveModalElement,
                 closeSelector: '[data-content-leave-cancel]',
@@ -240,27 +240,16 @@
         }
 
         function closeLeaveModal() {
-            if (leaveModalElement && modalService) {
+            if (leaveModalElement) {
                 modalService.close(leaveModalName);
-            } else {
-                var modal = leaveModal();
-                if (modal) {
-                    modal.classList.remove('open');
-                }
             }
             pendingNavigation = '';
             pendingReload = false;
         }
 
         function openLeaveModal() {
-            if (leaveModalElement && modalService) {
+            if (leaveModalElement) {
                 modalService.open(leaveModalName);
-            } else {
-                var modal = leaveModal();
-                if (!modal) {
-                    return;
-                }
-                modal.classList.add('open');
             }
         }
 

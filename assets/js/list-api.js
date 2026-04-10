@@ -84,7 +84,7 @@ const initListApi = (config) => {
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
     const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`);
-    const modalService = window.tinycmsModal || null;
+    const modalService = window.tinycmsModal;
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
         : [];
@@ -117,7 +117,7 @@ const initListApi = (config) => {
     let fetchController = null;
 
     const deleteModalName = deleteModal?.getAttribute('id') || `${config.name}-list-delete`;
-    if (deleteModal && modalService) {
+    if (deleteModal) {
         modalService.register(deleteModalName, {
             element: deleteModal,
             closeSelector: `[data-${config.name}-delete-cancel]`,
@@ -324,10 +324,8 @@ const initListApi = (config) => {
                 return;
             }
             let approved = true;
-            if (deleteModal && modalService) {
+            if (deleteModal) {
                 approved = await modalService.confirm(deleteModalName);
-            } else if (deleteModal) {
-                approved = window.confirm(t('common.confirm', 'Confirm'));
             }
             if (!approved) {
                 return;

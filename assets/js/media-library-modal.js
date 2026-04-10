@@ -17,12 +17,11 @@ const openTrigger = Array.prototype.find.call(
 ) || null;
 
 if (modal && openTrigger) {
-    const modalService = window.tinycmsModal || null;
+    const modalService = window.tinycmsModal;
     const loader = window.tinycmsLoader || null;
     const grid = modal.querySelector('[data-media-library-grid]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
     const nextButton = modal.querySelector('[data-media-library-next]');
-    const closeButtons = modal.querySelectorAll('[data-media-library-close]');
     const searchForm = modal.querySelector('[data-media-library-search]');
     const uploadForm = modal.querySelector('[data-media-library-upload-form]');
     const uploadField = modal.querySelector('[data-media-library-upload-field]');
@@ -63,20 +62,18 @@ if (modal && openTrigger) {
     let selectedMedia = null;
     let searchTimer = null;
 
-    if (modalService) {
-        modalService.register('media-library-modal', {
-            element: modal,
-            closeSelector: '[data-media-library-close]',
+    modalService.register('media-library-modal', {
+        element: modal,
+        closeSelector: '[data-media-library-close]',
+        closeOnBackdrop: true,
+    });
+    if (deleteConfirmModal) {
+        modalService.register('media-library-delete-modal', {
+            element: deleteConfirmModal,
+            closeSelector: '[data-modal-close]',
+            confirmSelector: '[data-modal-confirm]',
             closeOnBackdrop: true,
         });
-        if (deleteConfirmModal) {
-            modalService.register('media-library-delete-modal', {
-                element: deleteConfirmModal,
-                closeSelector: '[data-modal-close]',
-                confirmSelector: '[data-modal-confirm]',
-                closeOnBackdrop: true,
-            });
-        }
     }
 
     const normalizePayload = (payload) => {
@@ -419,11 +416,7 @@ if (modal && openTrigger) {
 
     const open = (detail) => {
         setContext(detail || {});
-        if (modalService) {
-            modalService.open('media-library-modal');
-        } else {
-            modal.classList.add('open');
-        }
+        modalService.open('media-library-modal');
         if (searchTimer) {
             clearTimeout(searchTimer);
             searchTimer = null;
@@ -449,11 +442,7 @@ if (modal && openTrigger) {
     });
 
     const close = () => {
-        if (modalService) {
-            modalService.close('media-library-modal');
-            return;
-        }
-        modal.classList.remove('open');
+        modalService.close('media-library-modal');
     };
 
     if (openTrigger) {
@@ -483,15 +472,6 @@ if (modal && openTrigger) {
         }
         open(detail);
     });
-    if (!modalService) {
-        closeButtons.forEach((button) => button.addEventListener('click', close));
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                close();
-            }
-        });
-    }
-
     if (prevButton) {
         prevButton.addEventListener('click', (event) => {
             event.preventDefault();
@@ -731,10 +711,8 @@ if (modal && openTrigger) {
             selectedMedia = null;
             renderSelected();
             await load().catch(() => null);
-            if (deleteConfirmModal && modalService) {
+            if (deleteConfirmModal) {
                 modalService.close('media-library-delete-modal');
-            } else if (deleteConfirmModal) {
-                deleteConfirmModal.classList.remove('open');
             }
             setStatus(t('media.deleted', 'Media deleted.'));
         });
