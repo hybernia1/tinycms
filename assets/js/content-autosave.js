@@ -32,8 +32,16 @@
         var bypassLeaveWarning = false;
         var pendingNavigation = '';
         var pendingReload = false;
-        function getModalApi() {
-            return window.tinycmsModal;
+        function openModal(node) {
+            if (node && window.tinycmsModal && typeof window.tinycmsModal.open === 'function') {
+                window.tinycmsModal.open(node);
+            }
+        }
+
+        function closeModal(node) {
+            if (node && window.tinycmsModal && typeof window.tinycmsModal.close === 'function') {
+                window.tinycmsModal.close(node);
+            }
         }
         var editLayoutApplied = false;
         var appRoot = '';
@@ -232,23 +240,17 @@
 
         function closeLeaveModal() {
             var modal = leaveModal();
-            var modalApi = getModalApi();
-            if (modal && modalApi && typeof modalApi.close === 'function') {
-                modalApi.close(modal);
-            }
+            closeModal(modal);
             pendingNavigation = '';
             pendingReload = false;
         }
 
         function openLeaveModal() {
             var modal = leaveModal();
-            var modalApi = getModalApi();
             if (!modal) {
                 return;
             }
-            if (modalApi && typeof modalApi.open === 'function') {
-                modalApi.open(modal);
-            }
+            openModal(modal);
         }
 
         function shouldGuardLink(link) {

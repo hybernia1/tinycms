@@ -99,7 +99,11 @@ const initListApi = (config) => {
     });
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
     const loader = window.tinycmsLoader || null;
-    const getModalApi = () => window.tinycmsModal;
+    const closeModal = (node) => {
+        if (node && window.tinycmsModal && typeof window.tinycmsModal.close === 'function') {
+            window.tinycmsModal.close(node);
+        }
+    };
 
     const defaultPerPage = Number(perPageField?.value || perPageField?.querySelector('option')?.value || '10') || 10;
 
@@ -321,10 +325,7 @@ const initListApi = (config) => {
         deleteCancel.addEventListener('click', () => {
             pendingDeleteId = 0;
             if (deleteModal) {
-                const modalApi = getModalApi();
-                if (modalApi && typeof modalApi.close === 'function') {
-                    modalApi.close(deleteModal);
-                }
+                closeModal(deleteModal);
             }
         });
     }
@@ -344,10 +345,7 @@ const initListApi = (config) => {
             if (result.success === true) {
                 pendingDeleteId = 0;
                 if (deleteModal) {
-                    const modalApi = getModalApi();
-                    if (modalApi && typeof modalApi.close === 'function') {
-                        modalApi.close(deleteModal);
-                    }
+                    closeModal(deleteModal);
                 }
                 if (config.messages?.deleteSuccess) {
                     pushFlash('success', config.messages.deleteSuccess);

@@ -628,21 +628,15 @@
         var mediaRange = null;
         var linkPasteSeq = 0;
         var draftInitPromise = null;
-        function getModalApi() {
-            return window.tinycmsModal;
-        }
-
         function openLinkOverlay() {
-            var modalApi = getModalApi();
-            if (modalApi && typeof modalApi.open === 'function') {
-                modalApi.open(linkModal);
+            if (window.tinycmsModal && typeof window.tinycmsModal.open === 'function') {
+                window.tinycmsModal.open(linkModal);
             }
         }
 
         function closeLinkOverlay() {
-            var modalApi = getModalApi();
-            if (modalApi && typeof modalApi.close === 'function') {
-                modalApi.close(linkModal);
+            if (window.tinycmsModal && typeof window.tinycmsModal.close === 'function') {
+                window.tinycmsModal.close(linkModal);
             }
         }
 

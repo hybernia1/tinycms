@@ -18,7 +18,16 @@ const openTrigger = Array.prototype.find.call(
 
 if (modal && openTrigger) {
     const loader = window.tinycmsLoader || null;
-    const getModalApi = () => window.tinycmsModal;
+    const openModal = (node) => {
+        if (node && window.tinycmsModal && typeof window.tinycmsModal.open === 'function') {
+            window.tinycmsModal.open(node);
+        }
+    };
+    const closeModal = (node) => {
+        if (node && window.tinycmsModal && typeof window.tinycmsModal.close === 'function') {
+            window.tinycmsModal.close(node);
+        }
+    };
     const grid = modal.querySelector('[data-media-library-grid]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
     const nextButton = modal.querySelector('[data-media-library-next]');
@@ -403,10 +412,7 @@ if (modal && openTrigger) {
 
     const open = (detail) => {
         setContext(detail || {});
-        const modalApi = getModalApi();
-        if (modalApi && typeof modalApi.open === 'function') {
-            modalApi.open(modal);
-        }
+        openModal(modal);
         if (searchTimer) {
             clearTimeout(searchTimer);
             searchTimer = null;
@@ -432,10 +438,7 @@ if (modal && openTrigger) {
     });
 
     const close = () => {
-        const modalApi = getModalApi();
-        if (modalApi && typeof modalApi.close === 'function') {
-            modalApi.close(modal);
-        }
+        closeModal(modal);
     };
 
     if (openTrigger) {
@@ -707,10 +710,7 @@ if (modal && openTrigger) {
             renderSelected();
             await load().catch(() => null);
             if (deleteConfirmModal) {
-                const modalApi = getModalApi();
-                if (modalApi && typeof modalApi.close === 'function') {
-                    modalApi.close(deleteConfirmModal);
-                }
+                closeModal(deleteConfirmModal);
             }
             setStatus(t('media.deleted', 'Media deleted.'));
         });
