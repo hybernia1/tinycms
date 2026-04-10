@@ -86,12 +86,12 @@
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
-<div class="modal-overlay" data-modal id="media-library-delete-modal">
-    <div class="modal">
-        <p data-modal-text><?= htmlspecialchars($t('content.delete_image_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
-        </div>
-    </div>
-</div>
+<?php
+$confirmModalId = 'media-library-delete-modal';
+$confirmModalDataAttr = 'data-modal';
+$confirmText = $t('content.delete_image_confirm');
+$confirmCancelAttr = 'data-modal-close';
+$confirmButtonAttr = 'data-media-library-delete-confirm';
+$confirmFormId = '';
+require __DIR__ . '/confirm-modal.php';
+?>

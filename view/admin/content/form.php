@@ -149,5 +149,13 @@ $currentUserId = (int)($authUser['id'] ?? 0);
 <?php require __DIR__ . '/../modals/media-library-modal.php'; ?>
 <?php require __DIR__ . '/../modals/content-leave-modal.php'; ?>
 <?php if ($mode === 'edit'): ?>
-<?php require __DIR__ . '/../modals/content-delete-modal.php'; ?>
+<?php
+$confirmModalId = 'content-delete-modal';
+$confirmModalDataAttr = 'data-modal';
+$confirmText = $t('content.delete_confirm');
+$confirmCancelAttr = 'data-modal-close';
+$confirmButtonAttr = 'data-modal-confirm';
+$confirmFormId = 'content-delete-form';
+require __DIR__ . '/../modals/confirm-modal.php';
+?>
 <?php endif; ?>

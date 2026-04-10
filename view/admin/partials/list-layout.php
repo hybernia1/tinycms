@@ -105,5 +105,13 @@ foreach ($listRootAttrs as $attr => $value) {
         </div>
     </div>
 
-    <?php require __DIR__ . '/../modals/list-delete-modal.php'; ?>
+    <?php
+    $confirmModalId = '';
+    $confirmModalDataAttr = 'data-' . $listName . '-delete-modal';
+    $confirmText = $deleteConfirmText;
+    $confirmCancelAttr = 'data-' . $listName . '-delete-cancel';
+    $confirmButtonAttr = 'data-' . $listName . '-delete-confirm';
+    $confirmFormId = '';
+    require __DIR__ . '/../modals/confirm-modal.php';
+    ?>
 </div>

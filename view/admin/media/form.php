@@ -183,5 +183,13 @@ if ($mode === 'edit') {
     <form id="media-delete-form" method="post" action="<?= htmlspecialchars($url('admin/media/edit/delete?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
     </form>
-    <?php require __DIR__ . '/../modals/media-delete-modal.php'; ?>
+    <?php
+    $confirmModalId = 'media-delete-modal';
+    $confirmModalDataAttr = 'data-modal';
+    $confirmText = $t('media.delete_confirm');
+    $confirmCancelAttr = 'data-modal-close';
+    $confirmButtonAttr = 'data-modal-confirm';
+    $confirmFormId = 'media-delete-form';
+    require __DIR__ . '/../modals/confirm-modal.php';
+    ?>
 <?php endif; ?>
