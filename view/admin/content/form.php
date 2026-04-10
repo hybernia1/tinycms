@@ -16,6 +16,7 @@ $isEditor = (string)($authUser['role'] ?? '') === 'editor';
 $currentUserId = (int)($authUser['id'] ?? 0);
 ?>
 <form
+    id="content-editor-form"
     class="content-editor-form"
     method="post"
     enctype="multipart/form-data"
@@ -38,11 +39,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                 <textarea name="excerpt" rows="3"><?= htmlspecialchars((string)($item['excerpt'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
                 <?php if (!empty($errors['excerpt'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['excerpt'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
             </div>
-            <div class="mb-3">
-                <label><?= htmlspecialchars($t('content.publish_date'), ENT_QUOTES, 'UTF-8') ?></label>
-                <input type="datetime-local" name="created" value="<?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>">
-                <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['created'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
-            </div>
             <input type="hidden" name="status" value="<?= htmlspecialchars((string)($item['status'] ?? 'draft'), ENT_QUOTES, 'UTF-8') ?>" data-content-status-hidden>
             <div class="m-0">
                 <label><?= htmlspecialchars($t('content.body'), ENT_QUOTES, 'UTF-8') ?></label>
@@ -58,6 +54,20 @@ $currentUserId = (int)($authUser['id'] ?? 0);
             </div>
         </div>
         <aside class="content-editor-sidebar">
+            <div class="card">
+                <div class="content-box-header"><?= htmlspecialchars($t('content.publication'), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="p-3">
+                    <div class="mb-3">
+                        <label><?= htmlspecialchars($t('content.status'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <div><?= htmlspecialchars($t('content.statuses.' . (string)($item['status'] ?? 'draft'), (string)($item['status'] ?? 'draft')), ENT_QUOTES, 'UTF-8') ?></div>
+                    </div>
+                    <div class="m-0">
+                        <label><?= htmlspecialchars($t('content.publish_date'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <input type="datetime-local" name="created" value="<?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>">
+                        <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['created'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                    </div>
+                </div>
+            </div>
             <?php if ($isEditor): ?>
                 <input type="hidden" name="author" value="<?= $currentUserId > 0 ? $currentUserId : '' ?>">
             <?php else: ?>
@@ -131,19 +141,9 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         </aside>
     </div>
     <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
-    <div class="content-action-menu" data-content-action-menu>
-        <button class="btn btn-primary btn-icon content-action-menu-toggle" type="button" data-content-action-toggle aria-expanded="false" aria-controls="content-action-options">
-            <?= $icon('add') ?>
-            <span><?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?></span>
-        </button>
-        <div class="content-action-menu-options" id="content-action-options" hidden>
-            <button class="btn btn-light" type="submit" name="action_status" value="published" data-content-action-submit="published"><?= htmlspecialchars($t('content.publish'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-light" type="submit" name="action_status" value="draft" data-content-action-submit="draft"><?= htmlspecialchars($t('content.statuses.draft'), ENT_QUOTES, 'UTF-8') ?></button>
-            <?php if ($mode === 'edit'): ?>
-                <button class="btn btn-danger" type="button" data-modal-open data-modal-target="#content-delete-modal"><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></button>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php if ($mode === 'edit'): ?>
+        <button class="d-none" type="button" data-content-delete-trigger data-modal-open data-modal-target="#content-delete-modal"></button>
+    <?php endif; ?>
 </form>
 <?php if ($mode === 'edit'): ?>
 <form id="content-delete-form" method="post" action="<?= htmlspecialchars($url('admin/content/edit/delete?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">

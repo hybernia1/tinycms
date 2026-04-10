@@ -1,16 +1,24 @@
 (() => {
     const menu = document.querySelector('[data-content-action-menu]');
-    if (!menu) {
+    const form = document.querySelector('#content-editor-form');
+    if (!menu || !form) {
         return;
     }
 
     const toggle = menu.querySelector('[data-content-action-toggle]');
-    const options = menu.querySelector('.content-action-menu-options');
-    const statusField = document.querySelector('[data-content-status-hidden]');
+    const options = menu.querySelector('.admin-header-action-options');
+    const statusField = form.querySelector('[data-content-status-hidden]');
     const submits = menu.querySelectorAll('[data-content-action-submit]');
+    const deleteButton = menu.querySelector('[data-content-action-delete]');
+    const deleteTrigger = document.querySelector('[data-content-delete-trigger]');
+    const contentId = Number((form.querySelector('[data-content-id-hidden]') || {}).value || 0);
 
     if (!toggle || !options) {
         return;
+    }
+
+    if (deleteButton && contentId <= 0) {
+        deleteButton.hidden = true;
     }
 
     const close = () => {
@@ -36,6 +44,14 @@
                 statusField.value = button.getAttribute('data-content-action-submit') || 'draft';
             }
             close();
+            form.requestSubmit();
         });
     });
+
+    if (deleteButton && deleteTrigger) {
+        deleteButton.addEventListener('click', () => {
+            close();
+            deleteTrigger.click();
+        });
+    }
 })();
