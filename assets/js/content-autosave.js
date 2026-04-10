@@ -32,6 +32,7 @@
         var bypassLeaveWarning = false;
         var pendingNavigation = '';
         var pendingReload = false;
+        var modalApi = window.tinycmsModal || null;
         var editLayoutApplied = false;
         var appRoot = '';
         if (autosaveEndpoint.indexOf('/admin/api/v1/content/autosave') >= 0) {
@@ -230,7 +231,11 @@
         function closeLeaveModal() {
             var modal = leaveModal();
             if (modal) {
-                modal.classList.remove('open');
+                if (modalApi) {
+                    modalApi.close(modal);
+                } else {
+                    modal.classList.remove('open');
+                }
             }
             pendingNavigation = '';
             pendingReload = false;
@@ -241,7 +246,11 @@
             if (!modal) {
                 return;
             }
-            modal.classList.add('open');
+            if (modalApi) {
+                modalApi.open(modal);
+            } else {
+                modal.classList.add('open');
+            }
         }
 
         function shouldGuardLink(link) {

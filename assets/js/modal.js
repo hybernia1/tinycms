@@ -5,12 +5,25 @@ const t = (path, fallback = '') => {
     return typeof value === 'string' && value !== '' ? value : fallback;
 };
 
-const getModal = (trigger) => {
+const getModalFromTrigger = (trigger) => {
     const target = trigger?.getAttribute('data-modal-target') || '';
     if (target) {
         return document.querySelector(target);
     }
     return document.querySelector('[data-modal]');
+};
+
+const getModal = (value) => {
+    if (!value) {
+        return null;
+    }
+    if (typeof value === 'string') {
+        return document.querySelector(value);
+    }
+    if (value instanceof Element && value.matches('[data-modal]')) {
+        return value;
+    }
+    return getModalFromTrigger(value);
 };
 
 const closeModal = (modal) => {
@@ -35,12 +48,12 @@ const openModal = (trigger) => {
         return;
     }
 
-    const type = trigger.getAttribute('data-type') || t('modal.default_type', 'item');
-    const formId = trigger.getAttribute('data-form-id') || '';
+    const type = trigger?.getAttribute ? (trigger.getAttribute('data-type') || t('modal.default_type', 'item')) : t('modal.default_type', 'item');
+    const formId = trigger?.getAttribute ? (trigger.getAttribute('data-form-id') || '') : '';
     const text = modal.querySelector('[data-modal-text]');
     const confirm = modal.querySelector('[data-modal-confirm]');
 
-    if (text && trigger.hasAttribute('data-type')) {
+    if (text && trigger?.hasAttribute && trigger.hasAttribute('data-type')) {
         text.textContent = t('modal.confirm_delete_type', 'Do you really want to delete this %s?').replace('%s', type);
     }
 
@@ -52,8 +65,8 @@ const openModal = (trigger) => {
 };
 
 window.tinycmsModal = {
-    open: (trigger) => openModal(trigger),
-    close: (modal) => closeModal(typeof modal === 'string' ? document.querySelector(modal) : modal),
+    open: (target) => openModal(target),
+    close: (target) => closeModal(getModal(target)),
 };
 
 document.addEventListener('click', (event) => {
