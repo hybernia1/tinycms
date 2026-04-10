@@ -29,6 +29,7 @@ return [
         'invalid_csrf' => 'Neplatný CSRF token.',
         'invalid_data' => 'Neplatná data.',
         'upload_add_files' => 'Přidat soubory',
+        'allowed_upload_types' => 'Povolené typy: %s',
         'loading' => 'Načítám...',
     ],
     'install' => [
