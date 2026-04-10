@@ -184,12 +184,16 @@ if ($mode === 'edit') {
         <?= $csrfField() ?>
     </form>
     <?php
-    $confirmModalId = 'media-delete-modal';
-    $confirmModalDataAttr = 'data-modal';
-    $confirmText = $t('media.delete_confirm');
-    $confirmCancelAttr = 'data-modal-close';
-    $confirmButtonAttr = 'data-modal-confirm';
-    $confirmFormId = 'media-delete-form';
+    $confirmModal = [
+        'id' => 'media-delete-modal',
+        'text' => $t('media.delete_confirm'),
+        'overlay_attrs' => ['data-modal' => true],
+        'cancel_attrs' => ['data-modal-close' => true],
+        'confirm_attrs' => [
+            'data-modal-confirm' => true,
+            'data-form-id' => 'media-delete-form',
+        ],
+    ];
     require __DIR__ . '/../modals/confirm-modal.php';
     ?>
 <?php endif; ?>

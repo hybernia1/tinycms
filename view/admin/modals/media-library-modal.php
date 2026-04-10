@@ -87,11 +87,12 @@
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
 <?php
-$confirmModalId = 'media-library-delete-modal';
-$confirmModalDataAttr = 'data-modal';
-$confirmText = $t('content.delete_image_confirm');
-$confirmCancelAttr = 'data-modal-close';
-$confirmButtonAttr = 'data-media-library-delete-confirm';
-$confirmFormId = '';
+$confirmModal = [
+    'id' => 'media-library-delete-modal',
+    'text' => $t('content.delete_image_confirm'),
+    'overlay_attrs' => ['data-modal' => true],
+    'cancel_attrs' => ['data-modal-close' => true],
+    'confirm_attrs' => ['data-media-library-delete-confirm' => true],
+];
 require __DIR__ . '/confirm-modal.php';
 ?>

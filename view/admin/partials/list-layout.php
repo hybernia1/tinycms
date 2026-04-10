@@ -106,12 +106,13 @@ foreach ($listRootAttrs as $attr => $value) {
     </div>
 
     <?php
-    $confirmModalId = '';
-    $confirmModalDataAttr = 'data-' . $listName . '-delete-modal';
-    $confirmText = $deleteConfirmText;
-    $confirmCancelAttr = 'data-' . $listName . '-delete-cancel';
-    $confirmButtonAttr = 'data-' . $listName . '-delete-confirm';
-    $confirmFormId = '';
+    $confirmModal = [
+        'id' => '',
+        'text' => $deleteConfirmText,
+        'overlay_attrs' => ['data-' . $listName . '-delete-modal' => true],
+        'cancel_attrs' => ['data-' . $listName . '-delete-cancel' => true],
+        'confirm_attrs' => ['data-' . $listName . '-delete-confirm' => true],
+    ];
     require __DIR__ . '/../modals/confirm-modal.php';
     ?>
 </div>

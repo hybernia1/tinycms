@@ -150,12 +150,16 @@ $currentUserId = (int)($authUser['id'] ?? 0);
 <?php require __DIR__ . '/../modals/content-leave-modal.php'; ?>
 <?php if ($mode === 'edit'): ?>
 <?php
-$confirmModalId = 'content-delete-modal';
-$confirmModalDataAttr = 'data-modal';
-$confirmText = $t('content.delete_confirm');
-$confirmCancelAttr = 'data-modal-close';
-$confirmButtonAttr = 'data-modal-confirm';
-$confirmFormId = 'content-delete-form';
+$confirmModal = [
+    'id' => 'content-delete-modal',
+    'text' => $t('content.delete_confirm'),
+    'overlay_attrs' => ['data-modal' => true],
+    'cancel_attrs' => ['data-modal-close' => true],
+    'confirm_attrs' => [
+        'data-modal-confirm' => true,
+        'data-form-id' => 'content-delete-form',
+    ],
+];
 require __DIR__ . '/../modals/confirm-modal.php';
 ?>
 <?php endif; ?>
