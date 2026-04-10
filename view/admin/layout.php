@@ -226,21 +226,6 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
             </div>
             <?php if ($isMediaEdit || $isMediaAdd): ?>
             <div class="d-flex align-center gap-2">
-                <?php if ($isMediaEdit && isset($navigation) && is_array($navigation)): ?>
-                <?php $prevMediaId = (int)($navigation['prev'] ?? 0); $nextMediaId = (int)($navigation['next'] ?? 0); ?>
-                <?php if ($prevMediaId > 0): ?>
-                <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/edit?id=' . $prevMediaId), ENT_QUOTES, 'UTF-8') ?>">
-                    <?= $icon('prev') ?>
-                    <span><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></span>
-                </a>
-                <?php endif; ?>
-                <?php if ($nextMediaId > 0): ?>
-                <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/edit?id=' . $nextMediaId), ENT_QUOTES, 'UTF-8') ?>">
-                    <span><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></span>
-                    <?= $icon('next') ?>
-                </a>
-                <?php endif; ?>
-                <?php endif; ?>
                 <div class="admin-header-action-menu" data-media-action-menu>
                     <div class="admin-header-action-split">
                         <button class="btn btn-primary admin-header-action-main" type="button" data-media-action-primary>
