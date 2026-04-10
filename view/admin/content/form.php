@@ -57,10 +57,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
             <div class="card">
                 <div class="content-box-header"><?= htmlspecialchars($t('content.publication'), ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="p-3">
-                    <div class="mb-3">
-                        <label><?= htmlspecialchars($t('content.status'), ENT_QUOTES, 'UTF-8') ?></label>
-                        <div><?= htmlspecialchars($t('content.statuses.' . (string)($item['status'] ?? 'draft'), (string)($item['status'] ?? 'draft')), ENT_QUOTES, 'UTF-8') ?></div>
-                    </div>
                     <div class="m-0">
                         <label><?= htmlspecialchars($t('content.publish_date'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="datetime-local" name="created" value="<?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?>">

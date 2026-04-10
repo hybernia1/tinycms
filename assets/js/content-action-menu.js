@@ -26,14 +26,21 @@
         toggle.setAttribute('aria-expanded', 'false');
     };
 
-    toggle.addEventListener('click', () => {
+    toggle.addEventListener('click', (event) => {
+        event.preventDefault();
         const willOpen = options.hidden;
         options.hidden = !willOpen;
         toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
     });
 
-    document.addEventListener('click', (event) => {
+    document.addEventListener('pointerdown', (event) => {
         if (!menu.contains(event.target)) {
+            close();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
             close();
         }
     });
