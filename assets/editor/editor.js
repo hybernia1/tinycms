@@ -511,7 +511,7 @@
         var bold = createIconButton('w-bold', 'bold', ''+ t('editor.bold', 'Bold') + '');
         var italic = createIconButton('w-italic', 'italic', ''+ t('editor.italic', 'Italic') + '');
         var quote = createIconButton('w-quote', 'formatBlock:blockquote', t('editor.quote', 'Quote'));
-        var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
+        var link = createIconButton('w-link', 'toggleLinkPanel', t('editor.insert_link', 'Link'));
         var clear = createIconButton('w-clear', 'removeFormat', ''+ t('editor.clear', 'Clear') + '');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
@@ -530,7 +530,7 @@
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
         linkTools.setAttribute('contenteditable', 'false');
-        linkTools.appendChild(createLinkToolButton('w-link-edit', 'link-inline-edit', 'Upravit odkaz'));
+        linkTools.appendChild(createLinkToolButton('w-link-edit', 'link-inline-edit', t('editor.edit_link', 'Edit link')));
         linkTools.appendChild(createLinkToolButton('w-link-unlink', 'link-inline-remove', t('editor.unlink', 'Remove link')));
 
         toolbar.appendChild(headingGroup);

@@ -96,6 +96,7 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                 'list_numbered' => $t('editor.list_numbered'),
                 'alignment' => $t('editor.alignment'),
                 'insert_link' => $t('editor.insert_link'),
+                'edit_link' => $t('editor.edit_link'),
                 'open_new_window' => $t('editor.open_new_window'),
                 'add_nofollow' => $t('editor.add_nofollow'),
                 'clear' => $t('editor.clear'),

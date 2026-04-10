@@ -334,6 +334,7 @@ return [
         'list_numbered' => 'Číslování',
         'alignment' => 'Zarovnání',
         'insert_link' => 'Vložit odkaz',
+        'edit_link' => 'Upravit odkaz',
         'link_title' => 'Titulek odkazu',
         'open_new_window' => 'Otevřít v novém okně',
         'add_nofollow' => 'Přidat nofollow',

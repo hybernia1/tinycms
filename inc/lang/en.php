@@ -334,6 +334,7 @@ return [
         'list_numbered' => 'Numbered list',
         'alignment' => 'Alignment',
         'insert_link' => 'Insert link',
+        'edit_link' => 'Edit link',
         'link_title' => 'Link title',
         'open_new_window' => 'Open in new window',
         'add_nofollow' => 'Add nofollow',
