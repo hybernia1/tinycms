@@ -239,11 +239,11 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
 <?php
-$modalId = 'media-library-delete-modal';
-$modalAttrs = [];
-$modalText = $t('content.delete_image_confirm');
-$modalTextAttrs = ['data-modal-text' => null];
-$modalActions = [
+$modal = [
+    'id' => 'media-library-delete-modal',
+    'text' => $t('content.delete_image_confirm'),
+    'text_attrs' => ['data-modal-text' => null],
+    'actions' => [
     [
         'class' => 'btn btn-light',
         'label' => $t('common.cancel'),
@@ -254,14 +254,15 @@ $modalActions = [
         'label' => $t('common.confirm'),
         'attrs' => ['data-media-library-delete-confirm' => null],
     ],
+    ],
 ];
 require __DIR__ . '/../partials/modal.php';
 
-$modalId = 'content-leave-modal';
-$modalAttrs = ['data-content-leave-modal' => null];
-$modalText = $t('content.leave_page_confirm');
-$modalTextAttrs = [];
-$modalActions = [
+$modal = [
+    'id' => 'content-leave-modal',
+    'attrs' => ['data-content-leave-modal' => null],
+    'text' => $t('content.leave_page_confirm'),
+    'actions' => [
     [
         'class' => 'btn btn-light',
         'label' => $t('common.cancel'),
@@ -275,16 +276,17 @@ $modalActions = [
         'label' => $t('common.confirm'),
         'attrs' => ['data-content-leave-confirm' => null],
     ],
+    ],
 ];
 require __DIR__ . '/../partials/modal.php';
 ?>
 <?php if ($mode === 'edit'): ?>
 <?php
-$modalId = 'content-delete-modal';
-$modalAttrs = [];
-$modalText = $t('content.delete_confirm');
-$modalTextAttrs = ['data-modal-text' => null];
-$modalActions = [
+$modal = [
+    'id' => 'content-delete-modal',
+    'text' => $t('content.delete_confirm'),
+    'text_attrs' => ['data-modal-text' => null],
+    'actions' => [
     [
         'class' => 'btn btn-light',
         'label' => $t('common.cancel'),
@@ -297,6 +299,7 @@ $modalActions = [
             'data-modal-confirm' => null,
             'data-form-id' => 'content-delete-form',
         ],
+    ],
     ],
 ];
 require __DIR__ . '/../partials/modal.php';

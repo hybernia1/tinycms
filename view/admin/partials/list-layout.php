@@ -106,24 +106,25 @@ foreach ($listRootAttrs as $attr => $value) {
     </div>
 
     <?php
-    $modalId = $listName . '-delete-modal';
-    $modalAttrs = ['data-' . $listName . '-delete-modal' => null];
-    $modalText = $deleteConfirmText;
-    $modalTextAttrs = [];
-    $modalActions = [
-        [
-            'class' => 'btn btn-light',
-            'label' => $t('common.cancel'),
-            'attrs' => [
-                'data-modal-close' => null,
-                'data-' . $listName . '-delete-cancel' => null,
+    $modal = [
+        'id' => $listName . '-delete-modal',
+        'attrs' => ['data-' . $listName . '-delete-modal' => null],
+        'text' => $deleteConfirmText,
+        'actions' => [
+            [
+                'class' => 'btn btn-light',
+                'label' => $t('common.cancel'),
+                'attrs' => [
+                    'data-modal-close' => null,
+                    'data-' . $listName . '-delete-cancel' => null,
+                ],
             ],
-        ],
-        [
-            'class' => 'btn btn-primary',
-            'label' => $t('common.confirm'),
-            'attrs' => [
-                'data-' . $listName . '-delete-confirm' => null,
+            [
+                'class' => 'btn btn-primary',
+                'label' => $t('common.confirm'),
+                'attrs' => [
+                    'data-' . $listName . '-delete-confirm' => null,
+                ],
             ],
         ],
     ];
