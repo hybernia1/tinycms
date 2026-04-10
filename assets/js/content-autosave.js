@@ -105,9 +105,6 @@
 
             if (editUrlBase !== '') {
                 form.action = editUrlBase + value;
-                if (window.location.search.indexOf('id=') === -1) {
-                    window.history.replaceState({}, '', editUrlBase + value);
-                }
             }
         }
 
