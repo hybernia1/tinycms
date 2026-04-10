@@ -144,7 +144,8 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->applyEditorAuthor($_POST, $authorId), $authorId);
+        $input = $this->resolveSubmitInput($_POST);
+        $result = $this->content->save($this->applyEditorAuthor($input, $authorId), $authorId);
 
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
@@ -157,7 +158,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $this->flash->add('error', I18n::t('content.save_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
+        $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $input, $result['errors'] ?? []);
         $redirect('admin/content/add');
     }
 
@@ -217,7 +218,8 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->applyEditorAuthor($_POST, $authorId), $authorId, $id);
+        $input = $this->resolveSubmitInput($_POST);
+        $result = $this->content->save($this->applyEditorAuthor($input, $authorId), $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
@@ -227,7 +229,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $this->flash->add('error', I18n::t('content.update_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
+        $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($input, ['id' => $id]), $result['errors'] ?? []);
         $redirect('admin/content/edit?id=' . $id);
     }
 
@@ -533,6 +535,17 @@ final class AdminContentController extends BaseAdminController
         }
 
         return array_values($terms);
+    }
+
+    private function resolveSubmitInput(array $input): array
+    {
+        $status = trim((string)($input['action_status'] ?? ''));
+        if ($status === 'draft' || $status === 'published') {
+            $input['status'] = $status;
+        }
+
+        unset($input['action_status']);
+        return $input;
     }
 
 }
