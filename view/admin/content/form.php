@@ -146,7 +146,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <?= $csrfField() ?>
 </form>
 <?php endif; ?>
-<div class="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
+<div class="media-library-modal" data-modal id="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
             <strong>Media library</strong>
@@ -247,11 +247,11 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         </div>
     </div>
 </div>
-<div class="modal-overlay" data-content-leave-modal>
+<div class="modal-overlay" data-modal id="content-leave-modal" data-content-leave-modal>
     <div class="modal">
         <p><?= htmlspecialchars($t('content.leave_page_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-content-leave-cancel><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button class="btn btn-light" type="button" data-modal-close data-content-leave-cancel><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
             <button class="btn btn-primary" type="button" data-content-leave-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>

@@ -403,7 +403,11 @@ if (modal && openTrigger) {
 
     const open = (detail) => {
         setContext(detail || {});
-        modal.classList.add('open');
+        if (modalApi) {
+            modalApi.open(modal);
+        } else {
+            modal.classList.add('open');
+        }
         if (searchTimer) {
             clearTimeout(searchTimer);
             searchTimer = null;
@@ -429,7 +433,11 @@ if (modal && openTrigger) {
     });
 
     const close = () => {
-        modal.classList.remove('open');
+        if (modalApi) {
+            modalApi.close(modal);
+        } else {
+            modal.classList.remove('open');
+        }
     };
 
     if (openTrigger) {
@@ -460,11 +468,6 @@ if (modal && openTrigger) {
         open(detail);
     });
     closeButtons.forEach((button) => button.addEventListener('click', close));
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            close();
-        }
-    });
 
     if (prevButton) {
         prevButton.addEventListener('click', (event) => {
