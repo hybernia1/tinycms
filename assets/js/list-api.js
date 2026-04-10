@@ -83,7 +83,7 @@ const initListApi = (config) => {
     const body = root.querySelector(`[data-${config.name}-list-body]`);
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
-    const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`);
+    const deleteModal = document.querySelector(`[data-${config.name}-delete-modal]`) || root.querySelector(`[data-${config.name}-delete-modal]`);
     const modalService = window.tinycmsModal;
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
