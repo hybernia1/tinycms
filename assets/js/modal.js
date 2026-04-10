@@ -64,10 +64,14 @@ const openModal = (trigger) => {
     modal.classList.add('open');
 };
 
-window.tinycmsModal = {
-    open: (target) => openModal(target),
-    close: (target) => closeModal(getModal(target)),
-};
+const modalApi = window.tinycmsModal && typeof window.tinycmsModal === 'object' ? window.tinycmsModal : {};
+if (typeof modalApi.open !== 'function') {
+    modalApi.open = (target) => openModal(target);
+}
+if (typeof modalApi.close !== 'function') {
+    modalApi.close = (target) => closeModal(getModal(target));
+}
+window.tinycmsModal = modalApi;
 
 document.addEventListener('click', (event) => {
     const openTrigger = event.target.closest('[data-modal-open]');

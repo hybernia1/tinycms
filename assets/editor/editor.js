@@ -628,9 +628,12 @@
         var mediaRange = null;
         var linkPasteSeq = 0;
         var draftInitPromise = null;
-        var modalApi = window.tinycmsModal || null;
+        function getModalApi() {
+            return window.tinycmsModal && typeof window.tinycmsModal === 'object' ? window.tinycmsModal : null;
+        }
 
         function openLinkOverlay() {
+            var modalApi = getModalApi();
             if (modalApi) {
                 modalApi.open(linkModal);
                 return;
@@ -639,6 +642,7 @@
         }
 
         function closeLinkOverlay() {
+            var modalApi = getModalApi();
             if (modalApi) {
                 modalApi.close(linkModal);
                 return;
