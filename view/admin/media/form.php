@@ -34,6 +34,7 @@ if ($mode === 'edit') {
         ];
     }
 }
+require_once __DIR__ . '/../partials/modal-config.php';
 ?>
 <form id="media-editor-form" class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
@@ -184,26 +185,19 @@ if ($mode === 'edit') {
         <?= $csrfField() ?>
     </form>
     <?php
-    $modal = [
-        'id' => 'media-delete-modal',
-        'text' => $t('media.delete_confirm'),
-        'text_attrs' => ['data-modal-text' => null],
-        'actions' => [
+    $modal = adminConfirmModal(
+        'media-delete-modal',
+        $t('media.delete_confirm'),
+        $t('common.cancel'),
+        $t('common.confirm'),
+        ['data-modal-close' => null],
         [
-            'class' => 'btn btn-light',
-            'label' => $t('common.cancel'),
-            'attrs' => ['data-modal-close' => null],
+            'data-modal-confirm' => null,
+            'data-form-id' => 'media-delete-form',
         ],
-        [
-            'class' => 'btn btn-primary',
-            'label' => $t('common.confirm'),
-            'attrs' => [
-                'data-modal-confirm' => null,
-                'data-form-id' => 'media-delete-form',
-            ],
-        ],
-        ],
-    ];
+        [],
+        ['data-modal-text' => null]
+    );
     require __DIR__ . '/../partials/modal.php';
     ?>
 <?php endif; ?>

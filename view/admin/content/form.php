@@ -14,6 +14,7 @@ $contentId = (int)($item['id'] ?? 0);
 $authUser = $_SESSION['auth'] ?? [];
 $isEditor = (string)($authUser['role'] ?? '') === 'editor';
 $currentUserId = (int)($authUser['id'] ?? 0);
+require_once __DIR__ . '/../partials/modal-config.php';
 ?>
 <form
     id="content-editor-form"
@@ -239,69 +240,47 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
 <?php
-$modal = [
-    'id' => 'media-library-delete-modal',
-    'text' => $t('content.delete_image_confirm'),
-    'text_attrs' => ['data-modal-text' => null],
-    'actions' => [
-    [
-        'class' => 'btn btn-light',
-        'label' => $t('common.cancel'),
-        'attrs' => ['data-modal-close' => null],
-    ],
-    [
-        'class' => 'btn btn-primary',
-        'label' => $t('common.confirm'),
-        'attrs' => ['data-media-library-delete-confirm' => null],
-    ],
-    ],
-];
+$modal = adminConfirmModal(
+    'media-library-delete-modal',
+    $t('content.delete_image_confirm'),
+    $t('common.cancel'),
+    $t('common.confirm'),
+    ['data-modal-close' => null],
+    ['data-media-library-delete-confirm' => null],
+    [],
+    ['data-modal-text' => null]
+);
 require __DIR__ . '/../partials/modal.php';
 
-$modal = [
-    'id' => 'content-leave-modal',
-    'attrs' => ['data-content-leave-modal' => null],
-    'text' => $t('content.leave_page_confirm'),
-    'actions' => [
+$modal = adminConfirmModal(
+    'content-leave-modal',
+    $t('content.leave_page_confirm'),
+    $t('common.cancel'),
+    $t('common.confirm'),
     [
-        'class' => 'btn btn-light',
-        'label' => $t('common.cancel'),
-        'attrs' => [
-            'data-modal-close' => null,
-            'data-content-leave-cancel' => null,
-        ],
+        'data-modal-close' => null,
+        'data-content-leave-cancel' => null,
     ],
-    [
-        'class' => 'btn btn-primary',
-        'label' => $t('common.confirm'),
-        'attrs' => ['data-content-leave-confirm' => null],
-    ],
-    ],
-];
+    ['data-content-leave-confirm' => null],
+    ['data-content-leave-modal' => null]
+);
 require __DIR__ . '/../partials/modal.php';
 ?>
 <?php if ($mode === 'edit'): ?>
 <?php
-$modal = [
-    'id' => 'content-delete-modal',
-    'text' => $t('content.delete_confirm'),
-    'text_attrs' => ['data-modal-text' => null],
-    'actions' => [
+$modal = adminConfirmModal(
+    'content-delete-modal',
+    $t('content.delete_confirm'),
+    $t('common.cancel'),
+    $t('common.confirm'),
+    ['data-modal-close' => null],
     [
-        'class' => 'btn btn-light',
-        'label' => $t('common.cancel'),
-        'attrs' => ['data-modal-close' => null],
+        'data-modal-confirm' => null,
+        'data-form-id' => 'content-delete-form',
     ],
-    [
-        'class' => 'btn btn-primary',
-        'label' => $t('common.confirm'),
-        'attrs' => [
-            'data-modal-confirm' => null,
-            'data-form-id' => 'content-delete-form',
-        ],
-    ],
-    ],
-];
+    [],
+    ['data-modal-text' => null]
+);
 require __DIR__ . '/../partials/modal.php';
 ?>
 <?php endif; ?>

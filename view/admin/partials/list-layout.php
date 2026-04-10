@@ -22,6 +22,8 @@ $rowRenderer = is_callable($rowRenderer ?? null) ? $rowRenderer : null;
 $deleteConfirmText = (string)($deleteConfirmText ?? '');
 $csrfMarkup = (string)($csrfMarkup ?? '');
 
+require_once __DIR__ . '/modal-config.php';
+
 $rootAttrs = [
     'data-' . $listName . '-list' => null,
     'data-endpoint' => $listEndpoint,
@@ -106,28 +108,20 @@ foreach ($listRootAttrs as $attr => $value) {
     </div>
 
     <?php
-    $modal = [
-        'id' => $listName . '-delete-modal',
-        'attrs' => ['data-' . $listName . '-delete-modal' => null],
-        'text' => $deleteConfirmText,
-        'actions' => [
-            [
-                'class' => 'btn btn-light',
-                'label' => $t('common.cancel'),
-                'attrs' => [
-                    'data-modal-close' => null,
-                    'data-' . $listName . '-delete-cancel' => null,
-                ],
-            ],
-            [
-                'class' => 'btn btn-primary',
-                'label' => $t('common.confirm'),
-                'attrs' => [
-                    'data-' . $listName . '-delete-confirm' => null,
-                ],
-            ],
+    $modal = adminConfirmModal(
+        $listName . '-delete-modal',
+        $deleteConfirmText,
+        $t('common.cancel'),
+        $t('common.confirm'),
+        [
+            'data-modal-close' => null,
+            'data-' . $listName . '-delete-cancel' => null,
         ],
-    ];
+        [
+            'data-' . $listName . '-delete-confirm' => null,
+        ],
+        ['data-' . $listName . '-delete-modal' => null]
+    );
     require __DIR__ . '/modal.php';
     ?>
 </div>
