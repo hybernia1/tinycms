@@ -592,26 +592,18 @@
         var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode', 'Focus mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
         var linkModal = createLinkModal();
-        var modalApi = window.tinycmsModal || null;
+        var modalApi = window.tinycmsModal;
 
         function isLinkModalOpen() {
             return linkModal.classList.contains('is-open');
         }
 
         function openLinkDialog() {
-            if (modalApi && typeof modalApi.open === 'function') {
-                modalApi.open(linkModal);
-            } else {
-                linkModal.classList.add('is-open');
-            }
+            modalApi.open(linkModal);
         }
 
         function closeLinkDialog() {
-            if (modalApi && typeof modalApi.close === 'function') {
-                modalApi.close(linkModal);
-            } else {
-                linkModal.classList.remove('is-open');
-            }
+            modalApi.close(linkModal);
         }
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
