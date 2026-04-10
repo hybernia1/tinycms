@@ -1,4 +1,19 @@
 (() => {
+    const submitButtons = document.querySelectorAll('[data-save-action-form-submit]');
+    submitButtons.forEach((button) => {
+        const formSelector = String(button.getAttribute('data-save-action-form-submit') || '').trim();
+        if (formSelector === '') {
+            return;
+        }
+
+        button.addEventListener('click', () => {
+            const form = document.querySelector(formSelector);
+            if (form) {
+                form.requestSubmit();
+            }
+        });
+    });
+
     const menus = document.querySelectorAll('[data-save-action-menu]');
     menus.forEach((menu) => {
         const formSelector = String(menu.getAttribute('data-save-action-form') || '').trim();
