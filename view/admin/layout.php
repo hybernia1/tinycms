@@ -245,9 +245,9 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
             </a>
             <?php elseif ($isContentEdit || $isContentAdd): ?>
             <details class="admin-header-action-menu" data-content-action-menu>
-                <summary class="btn btn-primary">
-                    <?= $icon('add') ?>
-                    <span><?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?></span>
+                <summary class="btn btn-primary" data-content-action-summary>
+                    <span data-content-action-label><?= htmlspecialchars($t('content.statuses.draft'), ENT_QUOTES, 'UTF-8') ?></span>
+                    <?= $icon('next', 'icon content-action-summary-arrow') ?>
                 </summary>
                 <div class="admin-header-action-options">
                     <button class="btn btn-light" type="button" data-content-action-submit="published"><?= htmlspecialchars($t('content.publish'), ENT_QUOTES, 'UTF-8') ?></button>

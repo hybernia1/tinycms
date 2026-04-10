@@ -268,6 +268,14 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     display: none;
 }
 
+.content-action-summary-arrow {
+    transition: transform .2s ease;
+}
+
+.admin-header-action-menu[open] .content-action-summary-arrow {
+    transform: rotate(90deg);
+}
+
 .admin-header-action-options .btn {
     justify-content: flex-start;
 }
