@@ -1,4 +1,4 @@
-const modal = document.querySelector('[data-media-library-modal]');
+const modal = document.getElementById('media-library-modal') || document.querySelector('[data-media-library-modal]');
 const i18n = window.tinycmsI18n || {};
 const t = (path, fallback = '') => {
     const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);

@@ -146,7 +146,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <?= $csrfField() ?>
 </form>
 <?php endif; ?>
-<div class="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
+<div class="media-library-modal" id="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
             <strong>Media library</strong>

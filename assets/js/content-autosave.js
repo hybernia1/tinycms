@@ -225,7 +225,7 @@
         }
 
         function leaveModal() {
-            return document.querySelector('[data-content-leave-modal]');
+            return document.getElementById('content-leave-modal') || document.querySelector('[data-content-leave-modal]');
         }
 
         var leaveModalName = 'content-leave-modal';

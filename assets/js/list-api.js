@@ -116,7 +116,7 @@ const initListApi = (config) => {
     let searchTimer = null;
     let fetchController = null;
 
-    const deleteModalName = `${config.name}-list-delete`;
+    const deleteModalName = deleteModal?.getAttribute('id') || `${config.name}-list-delete`;
     if (deleteModal && modalService) {
         modalService.register(deleteModalName, {
             element: deleteModal,
