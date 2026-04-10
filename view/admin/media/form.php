@@ -140,9 +140,6 @@ if ($mode === 'edit') {
                     <?php endif; ?>
                 </div>
             </div>
-            <?php if ($mode === 'edit'): ?>
-                <button class="d-none" type="button" data-media-delete-trigger data-modal-open data-modal-target="#media-delete-modal"></button>
-            <?php endif; ?>
             <?php if ($mode === 'edit' && $fileMeta !== null): ?>
                 <div class="card">
                     <div class="content-box-header"><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></div>

@@ -81,9 +81,13 @@
             });
         });
 
-        if (deleteButton && deleteTrigger) {
-            deleteButton.addEventListener('click', () => {
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (event) => {
                 close();
+                if (!deleteTrigger) {
+                    return;
+                }
+                event.preventDefault();
                 deleteTrigger.click();
             });
         }
