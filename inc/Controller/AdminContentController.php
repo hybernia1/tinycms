@@ -330,7 +330,8 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $payload = $this->resolveAutosavePayload($_POST, $authorId);
+        $nameMissing = trim((string)($_POST['name'] ?? '')) === '';
+        $payload = $this->resolveAutosavePayload($_POST, $authorId, $id);
         $isCreate = $id <= 0;
         $result = $this->content->save($payload, $authorId, $isCreate ? null : $id);
 
@@ -340,6 +341,10 @@ final class AdminContentController extends BaseAdminController
         }
 
         $savedId = (int)($result['id'] ?? 0);
+        if ($isCreate && $nameMissing && $savedId > 0) {
+            $payload['name'] = 'Draft #' . $savedId;
+            $this->content->save($payload, $authorId, $savedId);
+        }
         if ($savedId > 0 && isset($_POST['terms'])) {
             $this->terms->syncContentTerms($savedId, (string)$_POST['terms']);
         }
@@ -443,11 +448,11 @@ final class AdminContentController extends BaseAdminController
         return preg_replace('/\s+/', ' ', $clean) ?? '';
     }
 
-    private function resolveAutosavePayload(array $input, int $authorId): array
+    private function resolveAutosavePayload(array $input, int $authorId, int $id = 0): array
     {
         $name = trim((string)($input['name'] ?? ''));
-        if ($name === '' && trim((string)($input['body'] ?? '')) !== '') {
-            $name = I18n::t('content.untitled');
+        if ($name === '') {
+            $name = $id > 0 ? 'Draft #' . $id : I18n::t('content.untitled');
         }
 
         $author = trim((string)($input['author'] ?? ''));
