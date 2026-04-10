@@ -6,6 +6,7 @@ $isUsersList = str_ends_with($currentPath, 'admin/users');
 $isContentList = str_ends_with($currentPath, 'admin/content');
 $isContentAdd = str_ends_with($currentPath, 'admin/content/add');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
+$isMediaAdd = str_ends_with($currentPath, 'admin/media/add');
 $isMediaEdit = str_ends_with($currentPath, 'admin/media/edit');
 $isTermsList = str_ends_with($currentPath, 'admin/terms');
 $isUsersEdit = str_ends_with($currentPath, 'admin/users/edit');
@@ -162,6 +163,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
     <script defer src="<?= htmlspecialchars($url('assets/js/tag-picker.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/content-autosave.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/content-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/media-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body>
@@ -222,9 +224,10 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 </button>
                 <strong data-admin-page-title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
-            <?php if ($isMediaEdit && isset($navigation) && is_array($navigation)): ?>
-            <?php $prevMediaId = (int)($navigation['prev'] ?? 0); $nextMediaId = (int)($navigation['next'] ?? 0); ?>
+            <?php if ($isMediaEdit || $isMediaAdd): ?>
             <div class="d-flex align-center gap-2">
+                <?php if ($isMediaEdit && isset($navigation) && is_array($navigation)): ?>
+                <?php $prevMediaId = (int)($navigation['prev'] ?? 0); $nextMediaId = (int)($navigation['next'] ?? 0); ?>
                 <?php if ($prevMediaId > 0): ?>
                 <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media/edit?id=' . $prevMediaId), ENT_QUOTES, 'UTF-8') ?>">
                     <?= $icon('prev') ?>
@@ -237,6 +240,32 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                     <?= $icon('next') ?>
                 </a>
                 <?php endif; ?>
+                <?php endif; ?>
+                <div class="admin-header-action-menu" data-media-action-menu>
+                    <div class="admin-header-action-split">
+                        <button class="btn btn-primary admin-header-action-main" type="button" data-media-action-primary>
+                            <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                        </button>
+                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-media-action-toggle aria-expanded="false" aria-label="<?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?>">
+                            <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                        </button>
+                    </div>
+                    <div class="admin-header-action-options" hidden>
+                        <div class="admin-header-action-group">
+                            <button class="btn btn-light admin-header-action-option" type="button" data-media-action-submit>
+                                <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                            </button>
+                        </div>
+                        <?php if ($isMediaEdit): ?>
+                        <div class="admin-header-action-group admin-header-action-group-danger">
+                            <button class="btn btn-danger admin-header-action-option" type="button" data-media-action-delete>
+                                <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <?= $icon('delete') ?>
+                            </button>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
             <?php elseif ($isUsersList || $isUsersEdit): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">

@@ -35,7 +35,7 @@ if ($mode === 'edit') {
     }
 }
 ?>
-<form class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+<form id="media-editor-form" class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <div class="content-editor-layout">
         <div class="card p-4">
@@ -140,10 +140,9 @@ if ($mode === 'edit') {
                     <?php endif; ?>
                 </div>
                 <div class="content-box-footer d-flex gap-2">
-                    <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></button>
                     <a class="btn btn-light" href="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.back'), ENT_QUOTES, 'UTF-8') ?></a>
                     <?php if ($mode === 'edit'): ?>
-                        <button class="btn btn-light" type="button" data-modal-open data-modal-target="#media-delete-modal"><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></button>
+                        <button class="d-none" type="button" data-media-delete-trigger data-modal-open data-modal-target="#media-delete-modal"></button>
                     <?php endif; ?>
                 </div>
             </div>
