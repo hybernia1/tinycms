@@ -299,6 +299,13 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
+        $payload['name'] = $this->resolveAutosaveDraftName($id);
+        $renameResult = $this->content->save($payload, $authorId, $id);
+        if (($renameResult['success'] ?? false) !== true) {
+            $this->apiError('CREATE_FAILED', I18n::t('content.draft_create_failed'));
+            return;
+        }
+
         $this->apiOk(['id' => $id, 'created_new' => true]);
     }
 
@@ -330,7 +337,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $payload = $this->resolveAutosavePayload($_POST, $authorId);
+        $payload = $this->resolveAutosavePayload($_POST, $authorId, $id);
         $isCreate = $id <= 0;
         $result = $this->content->save($payload, $authorId, $isCreate ? null : $id);
 
@@ -443,11 +450,11 @@ final class AdminContentController extends BaseAdminController
         return preg_replace('/\s+/', ' ', $clean) ?? '';
     }
 
-    private function resolveAutosavePayload(array $input, int $authorId): array
+    private function resolveAutosavePayload(array $input, int $authorId, int $id = 0): array
     {
         $name = trim((string)($input['name'] ?? ''));
-        if ($name === '' && trim((string)($input['body'] ?? '')) !== '') {
-            $name = I18n::t('content.untitled');
+        if ($name === '') {
+            $name = $id > 0 ? $this->resolveAutosaveDraftName($id) : I18n::t('content.untitled');
         }
 
         $author = trim((string)($input['author'] ?? ''));
@@ -465,6 +472,11 @@ final class AdminContentController extends BaseAdminController
             'author' => $author,
             'created' => (string)($input['created'] ?? ''),
         ];
+    }
+
+    private function resolveAutosaveDraftName(int $id): string
+    {
+        return sprintf(I18n::t('content.autosave_draft_name'), $id);
     }
 
     private function resolveListQuery(): array
