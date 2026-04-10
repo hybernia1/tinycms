@@ -3,6 +3,7 @@ declare(strict_types=1);
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 $authUser = $_SESSION['auth'] ?? null;
 $isUsersList = str_ends_with($currentPath, 'admin/users');
+$isUsersAdd = str_ends_with($currentPath, 'admin/users/add');
 $isContentList = str_ends_with($currentPath, 'admin/content');
 $isContentAdd = str_ends_with($currentPath, 'admin/content/add');
 $isMediaList = str_ends_with($currentPath, 'admin/media');
@@ -164,6 +165,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
     <script defer src="<?= htmlspecialchars($url('assets/js/content-autosave.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/content-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/media-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/users-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body>
@@ -252,7 +254,25 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                     </div>
                 </div>
             </div>
-            <?php elseif ($isUsersList || $isUsersEdit): ?>
+            <?php elseif ($isUsersEdit || $isUsersAdd): ?>
+            <div class="admin-header-action-menu" data-users-action-menu>
+                <div class="admin-header-action-split">
+                    <button class="btn btn-primary admin-header-action-main" type="button" data-users-action-primary>
+                        <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                    </button>
+                    <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-users-action-toggle aria-expanded="false" aria-label="<?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?>">
+                        <?= $icon('next', 'icon content-action-summary-arrow') ?>
+                    </button>
+                </div>
+                <div class="admin-header-action-options" hidden>
+                    <div class="admin-header-action-group">
+                        <button class="btn btn-light admin-header-action-option" type="button" data-users-action-submit>
+                            <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <?php elseif ($isUsersList): ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?></span>
