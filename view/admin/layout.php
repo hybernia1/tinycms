@@ -34,6 +34,9 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                 'close_notice' => $t('admin.close_notice'),
                 'invalid_data' => $t('common.invalid_data'),
             ],
+            'admin' => [
+                'edit_content' => $t('admin.edit_content'),
+            ],
             'content' => [
                 'planned' => $t('content.planned'),
                 'switch_to_draft' => $t('content.switch_to_draft'),
@@ -217,7 +220,7 @@ $isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
                     <?= $icon('menu') ?>
                     <span class="sr-only"><?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?></span>
                 </button>
-                <strong><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong data-admin-page-title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
             <?php if ($isMediaEdit && isset($navigation) && is_array($navigation)): ?>
             <?php $prevMediaId = (int)($navigation['prev'] ?? 0); $nextMediaId = (int)($navigation['next'] ?? 0); ?>
