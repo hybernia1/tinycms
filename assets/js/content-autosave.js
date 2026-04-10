@@ -32,9 +32,29 @@
         var bypassLeaveWarning = false;
         var pendingNavigation = '';
         var pendingReload = false;
+        var editLayoutApplied = false;
         var appRoot = '';
         if (autosaveEndpoint.indexOf('/admin/api/v1/content/autosave') >= 0) {
             appRoot = autosaveEndpoint.replace(/\/admin\/api\/v1\/content\/autosave.*$/, '');
+        }
+
+        function applyEditLayoutContext() {
+            if (editLayoutApplied) {
+                return;
+            }
+            editLayoutApplied = true;
+            var editLabel = window.tinycmsI18n?.admin?.edit_content || '';
+            if (editLabel === '') {
+                return;
+            }
+
+            var titleNode = document.querySelector('[data-admin-page-title]');
+            if (titleNode) {
+                titleNode.textContent = editLabel;
+            }
+
+            var titleSuffix = document.title.indexOf(' | ') >= 0 ? document.title.split(' | ').slice(1).join(' | ') : '';
+            document.title = titleSuffix !== '' ? editLabel + ' | ' + titleSuffix : editLabel;
         }
 
         function contentApi(path) {
@@ -107,6 +127,7 @@
                 form.action = editUrlBase + value;
                 if (window.location.search.indexOf('id=') === -1) {
                     window.history.replaceState({}, '', editUrlBase + value);
+                    applyEditLayoutContext();
                 }
             }
         }
