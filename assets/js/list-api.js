@@ -99,7 +99,7 @@ const initListApi = (config) => {
     });
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
     const loader = window.tinycmsLoader || null;
-    const getModalApi = () => (window.tinycmsModal && typeof window.tinycmsModal === 'object' ? window.tinycmsModal : null);
+    const getModalApi = () => window.tinycmsModal;
 
     const defaultPerPage = Number(perPageField?.value || perPageField?.querySelector('option')?.value || '10') || 10;
 
@@ -322,10 +322,8 @@ const initListApi = (config) => {
             pendingDeleteId = 0;
             if (deleteModal) {
                 const modalApi = getModalApi();
-                if (modalApi) {
+                if (modalApi && typeof modalApi.close === 'function') {
                     modalApi.close(deleteModal);
-                } else {
-                    deleteModal.classList.remove('open');
                 }
             }
         });
@@ -347,10 +345,8 @@ const initListApi = (config) => {
                 pendingDeleteId = 0;
                 if (deleteModal) {
                     const modalApi = getModalApi();
-                    if (modalApi) {
+                    if (modalApi && typeof modalApi.close === 'function') {
                         modalApi.close(deleteModal);
-                    } else {
-                        deleteModal.classList.remove('open');
                     }
                 }
                 if (config.messages?.deleteSuccess) {

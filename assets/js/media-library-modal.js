@@ -18,7 +18,7 @@ const openTrigger = Array.prototype.find.call(
 
 if (modal && openTrigger) {
     const loader = window.tinycmsLoader || null;
-    const getModalApi = () => (window.tinycmsModal && typeof window.tinycmsModal === 'object' ? window.tinycmsModal : null);
+    const getModalApi = () => window.tinycmsModal;
     const grid = modal.querySelector('[data-media-library-grid]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
     const nextButton = modal.querySelector('[data-media-library-next]');
@@ -404,10 +404,8 @@ if (modal && openTrigger) {
     const open = (detail) => {
         setContext(detail || {});
         const modalApi = getModalApi();
-        if (modalApi) {
+        if (modalApi && typeof modalApi.open === 'function') {
             modalApi.open(modal);
-        } else {
-            modal.classList.add('open');
         }
         if (searchTimer) {
             clearTimeout(searchTimer);
@@ -435,10 +433,8 @@ if (modal && openTrigger) {
 
     const close = () => {
         const modalApi = getModalApi();
-        if (modalApi) {
+        if (modalApi && typeof modalApi.close === 'function') {
             modalApi.close(modal);
-        } else {
-            modal.classList.remove('open');
         }
     };
 
@@ -712,10 +708,8 @@ if (modal && openTrigger) {
             await load().catch(() => null);
             if (deleteConfirmModal) {
                 const modalApi = getModalApi();
-                if (modalApi) {
+                if (modalApi && typeof modalApi.close === 'function') {
                     modalApi.close(deleteConfirmModal);
-                } else {
-                    deleteConfirmModal.classList.remove('open');
                 }
             }
             setStatus(t('media.deleted', 'Media deleted.'));

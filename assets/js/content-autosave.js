@@ -33,7 +33,7 @@
         var pendingNavigation = '';
         var pendingReload = false;
         function getModalApi() {
-            return window.tinycmsModal && typeof window.tinycmsModal === 'object' ? window.tinycmsModal : null;
+            return window.tinycmsModal;
         }
         var editLayoutApplied = false;
         var appRoot = '';
@@ -233,12 +233,8 @@
         function closeLeaveModal() {
             var modal = leaveModal();
             var modalApi = getModalApi();
-            if (modal) {
-                if (modalApi) {
-                    modalApi.close(modal);
-                } else {
-                    modal.classList.remove('open');
-                }
+            if (modal && modalApi && typeof modalApi.close === 'function') {
+                modalApi.close(modal);
             }
             pendingNavigation = '';
             pendingReload = false;
@@ -250,10 +246,8 @@
             if (!modal) {
                 return;
             }
-            if (modalApi) {
+            if (modalApi && typeof modalApi.open === 'function') {
                 modalApi.open(modal);
-            } else {
-                modal.classList.add('open');
             }
         }
 
