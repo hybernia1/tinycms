@@ -171,14 +171,23 @@ final class UserService
 
     public function statusCounts(): array
     {
-        $all = $this->query->count('users');
-        $suspended = $this->query->count('users', ['suspend' => 1]);
-
-        return [
-            'all' => $all,
-            'active' => max(0, $all - $suspended),
-            'suspended' => $suspended,
+        $rows = $this->query->select('users', ['suspend']);
+        $counts = [
+            'all' => count($rows),
+            'active' => 0,
+            'suspended' => 0,
         ];
+
+        foreach ($rows as $row) {
+            if ((int)($row['suspend'] ?? 0) === 1) {
+                $counts['suspended']++;
+                continue;
+            }
+
+            $counts['active']++;
+        }
+
+        return $counts;
     }
 
 }

@@ -199,15 +199,19 @@ final class ContentService
 
     public function statusCounts(array $statuses = []): array
     {
-        $counts = ['all' => $this->query->count('content')];
+        $rows = $this->query->select('content', ['status']);
+        $counts = ['all' => count($rows)];
 
-        foreach ($this->query->countBy('content', 'status') as $value => $count) {
-            $value = trim((string)$value);
+        foreach ($rows as $row) {
+            $value = trim((string)($row['status'] ?? ''));
             if ($value === '') {
                 continue;
             }
 
-            $counts[$value] = $count;
+            if (!isset($counts[$value])) {
+                $counts[$value] = 0;
+            }
+            $counts[$value]++;
         }
 
         foreach ($statuses as $status) {

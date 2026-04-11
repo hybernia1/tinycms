@@ -41,32 +41,6 @@ class Query
         return $this->first($table, ['*'], $where) !== null;
     }
 
-    public function count(string $table, array $where = []): int
-    {
-        $table = $this->resolveTable($table);
-        [$whereSql, $params] = $this->buildWhere($where);
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $table$whereSql");
-        $stmt->execute($params);
-        return (int)$stmt->fetchColumn();
-    }
-
-    public function countBy(string $table, string $column, array $where = []): array
-    {
-        $table = $this->resolveTable($table);
-        $this->assertIdentifier($column, 'column');
-        [$whereSql, $params] = $this->buildWhere($where);
-        $stmt = $this->pdo->prepare("SELECT $column AS value, COUNT(*) AS total FROM $table$whereSql GROUP BY $column");
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $counts = [];
-
-        foreach ($rows as $row) {
-            $counts[(string)($row['value'] ?? '')] = (int)($row['total'] ?? 0);
-        }
-
-        return $counts;
-    }
-
     public function paginate(string $table, array $columns = ['*'], array $where = [], array $options = []): array
     {
         $table = $this->resolveTable($table);
