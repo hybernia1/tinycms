@@ -9,16 +9,16 @@ use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 use App\Service\Feature\UserService;
-use App\View\PageView;
+use App\View\AdminPageView;
 
 final class AdminUserController extends BaseAdminController
 {
     private const FORM_STATE_KEY = 'admin_users_form_state';
 
-    private PageView $pages;
+    private AdminPageView $pages;
     private UserService $users;
 
-    public function __construct(PageView $pages, AuthService $authService, UserService $users, FlashService $flash, CsrfService $csrf)
+    public function __construct(AdminPageView $pages, AuthService $authService, UserService $users, FlashService $flash, CsrfService $csrf)
     {
         parent::__construct($authService, $flash, $csrf);
         $this->pages = $pages;
@@ -35,7 +35,7 @@ final class AdminUserController extends BaseAdminController
 
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
         $statusCounts = $this->users->statusCounts();
-        $this->pages->adminUsersList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
+        $this->pages->usersList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void
@@ -115,7 +115,7 @@ final class AdminUserController extends BaseAdminController
             'suspend' => 0,
         ];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add');
-        $this->pages->adminUsersForm('add', $state['data'] ?? $fallback, $state['errors'] ?? []);
+        $this->pages->usersForm('add', $state['data'] ?? $fallback, $state['errors'] ?? []);
     }
 
     public function addSubmit(callable $redirect): void
@@ -153,7 +153,7 @@ final class AdminUserController extends BaseAdminController
         }
 
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
-        $this->pages->adminUsersForm('edit', $state['data'] ?? $user, $state['errors'] ?? []);
+        $this->pages->usersForm('edit', $state['data'] ?? $user, $state['errors'] ?? []);
     }
 
     public function editSubmit(callable $redirect): void

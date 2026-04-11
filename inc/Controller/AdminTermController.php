@@ -9,14 +9,14 @@ use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
-use App\View\PageView;
+use App\View\AdminPageView;
 
 final class AdminTermController extends BaseAdminController
 {
     private const FORM_STATE_KEY = 'admin_term_form_state';
 
     public function __construct(
-        private PageView $pages,
+        private AdminPageView $pages,
         AuthService $authService,
         private TermService $terms,
         FlashService $flash,
@@ -34,7 +34,7 @@ final class AdminTermController extends BaseAdminController
         [$page, $perPage, $status, $query] = $this->resolveListQuery();
         $pagination = $this->terms->paginate($page, $perPage, $query, $status);
         $statusCounts = $this->terms->statusCounts();
-        $this->pages->adminTermList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
+        $this->pages->termList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void
@@ -71,7 +71,7 @@ final class AdminTermController extends BaseAdminController
 
         $fallback = ['id' => null, 'name' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
-        $this->pages->adminTermForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], []);
+        $this->pages->termForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], []);
     }
 
     public function addSubmit(callable $redirect): void
@@ -109,7 +109,7 @@ final class AdminTermController extends BaseAdminController
         }
 
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
-        $this->pages->adminTermForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->terms->contentUsages($id));
+        $this->pages->termForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->terms->contentUsages($id));
     }
 
     public function editSubmit(callable $redirect): void

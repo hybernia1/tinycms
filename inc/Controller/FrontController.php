@@ -11,11 +11,11 @@ use App\Service\Feature\SettingsService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 use App\Service\Support\SluggerService;
-use App\View\PageView;
+use App\View\FrontPageView;
 
 final class FrontController
 {
-    private PageView $pages;
+    private FrontPageView $pages;
     private AuthService $authService;
     private CsrfService $csrf;
     private SettingsService $settings;
@@ -23,7 +23,7 @@ final class FrontController
     private TermService $termService;
     private SluggerService $slugger;
 
-    public function __construct(PageView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings, ContentService $contentService, TermService $termService, SluggerService $slugger)
+    public function __construct(FrontPageView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings, ContentService $contentService, TermService $termService, SluggerService $slugger)
     {
         $this->pages = $pages;
         $this->authService = $authService;

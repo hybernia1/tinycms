@@ -9,15 +9,15 @@ use App\Service\Support\FlashService;
 use App\Service\Feature\SettingsService;
 use App\Service\Feature\UploadService;
 use App\Service\Support\I18n;
-use App\View\PageView;
+use App\View\AdminPageView;
 
 final class AdminSettingsController extends BaseAdminController
 {
-    private PageView $pages;
+    private AdminPageView $pages;
     private SettingsService $settings;
     private UploadService $upload;
 
-    public function __construct(PageView $pages, AuthService $authService, SettingsService $settings, UploadService $upload, FlashService $flash, CsrfService $csrf)
+    public function __construct(AdminPageView $pages, AuthService $authService, SettingsService $settings, UploadService $upload, FlashService $flash, CsrfService $csrf)
     {
         parent::__construct($authService, $flash, $csrf);
         $this->pages = $pages;
@@ -33,7 +33,7 @@ final class AdminSettingsController extends BaseAdminController
 
         $fields = $this->settings->fields();
         $values = array_replace($this->settings->defaults(), $this->settings->values());
-        $this->pages->adminSettingsForm($fields, $values);
+        $this->pages->settingsForm($fields, $values);
     }
 
     public function submit(callable $redirect): void

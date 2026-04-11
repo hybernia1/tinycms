@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\Feature\AuthService;
-use App\View\PageView;
+use App\View\AdminPageView;
 
 final class AdminController
 {
-    private PageView $pages;
+    private AdminPageView $pages;
     private AuthService $authService;
 
-    public function __construct(PageView $pages, AuthService $authService)
+    public function __construct(AdminPageView $pages, AuthService $authService)
     {
         $this->pages = $pages;
         $this->authService = $authService;
@@ -39,7 +39,7 @@ final class AdminController
             return;
         }
 
-        $this->pages->adminDashboard($this->authService->auth()->user());
+        $this->pages->dashboard($this->authService->auth()->user());
     }
 
     public function logout(callable $redirect): void

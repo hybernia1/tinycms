@@ -83,15 +83,7 @@ final class View
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
         $renderFrontHead = fn(array $options = []): string => $this->metaHead->render($options);
 
-        $isAdminLayout = str_starts_with($layout, 'admin/');
-
-        if ($isAdminLayout && !isset($data['adminMenu'])) {
-            $data['adminMenu'] = [
-                ['label' => I18n::t('admin.menu.dashboard'), 'url' => $url('admin/dashboard'), 'icon' => 'dashboard'],
-                ['label' => I18n::t('admin.menu.users'), 'url' => $url('admin/users'), 'icon' => 'users'],
-                ['label' => I18n::t('admin.menu.settings'), 'url' => $url('admin/settings'), 'icon' => 'settings'],
-            ];
-        } elseif ($isAdminLayout && isset($data['adminMenu']) && is_array($data['adminMenu'])) {
+        if (isset($data['adminMenu']) && is_array($data['adminMenu'])) {
             $data['adminMenu'] = array_map(static function (array $item) use ($url): array {
                 $path = (string)($item['url'] ?? '');
                 return [

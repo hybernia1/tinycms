@@ -10,14 +10,14 @@ use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
-use App\View\PageView;
+use App\View\AdminPageView;
 
 final class AdminMediaController extends BaseAdminController
 {
     private const FORM_STATE_KEY = 'admin_media_form_state';
 
     public function __construct(
-        private PageView $pages,
+        private AdminPageView $pages,
         AuthService $authService,
         private MediaService $media,
         private UploadService $upload,
@@ -36,7 +36,7 @@ final class AdminMediaController extends BaseAdminController
         [$page, $perPage, $status, $query] = $this->resolveListQuery();
         $pagination = $this->media->paginate($page, $perPage, $query, $status);
         $statusCounts = $this->media->statusCounts();
-        $this->pages->adminMediaList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
+        $this->pages->mediaList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void
@@ -61,7 +61,7 @@ final class AdminMediaController extends BaseAdminController
 
         $fallback = ['id' => null, 'name' => '', 'path' => '', 'path_webp' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
-        $this->pages->adminMediaForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->media->authorOptions(), []);
+        $this->pages->mediaForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->media->authorOptions(), []);
     }
 
     public function addSubmit(callable $redirect): void
@@ -132,7 +132,7 @@ final class AdminMediaController extends BaseAdminController
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $authorFilter = $this->isEditor() ? $this->currentUserId() : null;
         $navigation = $this->media->editNavigation($id, $authorFilter > 0 ? $authorFilter : null);
-        $this->pages->adminMediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
+        $this->pages->mediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
     }
 
     public function editSubmit(callable $redirect): void

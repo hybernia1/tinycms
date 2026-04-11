@@ -11,14 +11,14 @@ use App\Service\Support\FlashService;
 use App\Service\Feature\UserService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
-use App\View\PageView;
+use App\View\AdminPageView;
 
 final class AdminContentController extends BaseAdminController
 {
     private const FORM_STATE_KEY = 'admin_content_form_state';
 
     public function __construct(
-        private PageView $pages,
+        private AdminPageView $pages,
         AuthService $authService,
         private ContentService $content,
         private UserService $users,
@@ -39,7 +39,7 @@ final class AdminContentController extends BaseAdminController
 
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
         $statusCounts = $this->content->statusCounts($availableStatuses);
-        $this->pages->adminContentList($pagination, PaginationConfig::allowed(), $status, $query, $availableStatuses, $statusCounts);
+        $this->pages->contentList($pagination, PaginationConfig::allowed(), $status, $query, $availableStatuses, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void
@@ -134,7 +134,7 @@ final class AdminContentController extends BaseAdminController
         $statuses = $this->content->statuses();
         $item = $state['data'] ?? $fallback;
         $selectedTerms = $this->resolveSelectedTerms($item, null);
-        $this->pages->adminContentForm('add', $item, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
+        $this->pages->contentForm('add', $item, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
     }
 
     public function addSubmit(callable $redirect): void
@@ -186,7 +186,7 @@ final class AdminContentController extends BaseAdminController
         $statuses = $this->content->statuses();
         $formItem = $state['data'] ?? $item;
         $selectedTerms = $this->resolveSelectedTerms($formItem, $id);
-        $this->pages->adminContentForm('edit', $formItem, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
+        $this->pages->contentForm('edit', $formItem, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
     }
 
     public function editSubmit(callable $redirect): void
