@@ -225,6 +225,7 @@ final class PageView
             'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.users'),
+            'headerAction' => $this->linkHeaderAction('admin/users/add', I18n::t('admin.add_user')),
         ]);
     }
 
@@ -235,6 +236,7 @@ final class PageView
             'values' => $values,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.settings'),
+            'headerAction' => $this->submitHeaderAction('#settings-form'),
         ]);
     }
 
@@ -246,6 +248,7 @@ final class PageView
             'errors' => $errors,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_user') : I18n::t('admin.edit_user'),
+            'headerAction' => $this->submitHeaderAction('#users-editor-form'),
         ]);
     }
 
@@ -260,6 +263,7 @@ final class PageView
             'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.content'),
+            'headerAction' => $this->linkHeaderAction('admin/content/add', I18n::t('admin.add_content')),
         ]);
     }
 
@@ -274,6 +278,7 @@ final class PageView
             'selectedTerms' => $selectedTerms,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_content') : I18n::t('admin.edit_content'),
+            'headerAction' => $this->contentMenuHeaderAction($mode === 'edit'),
         ]);
     }
 
@@ -287,6 +292,7 @@ final class PageView
             'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.terms'),
+            'headerAction' => $this->linkHeaderAction('admin/terms/add', I18n::t('admin.add_term')),
         ]);
     }
 
@@ -299,6 +305,7 @@ final class PageView
             'usages' => $usages,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_term') : I18n::t('admin.edit_term'),
+            'headerAction' => $this->submitHeaderAction('#terms-editor-form'),
         ]);
     }
 
@@ -312,6 +319,7 @@ final class PageView
             'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.media'),
+            'headerAction' => $this->linkHeaderAction('admin/media/add', I18n::t('admin.add_media')),
         ]);
     }
 
@@ -326,7 +334,33 @@ final class PageView
             'navigation' => $navigation,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media') : I18n::t('admin.edit_media'),
+            'headerAction' => $mode === 'edit'
+                ? $this->saveMenuHeaderAction('#media-editor-form', '#media-delete-modal')
+                : $this->submitHeaderAction('#media-editor-form'),
         ]);
+    }
+
+    private function submitHeaderAction(string $formSelector): array
+    {
+        return ['type' => 'submit', 'form' => $formSelector, 'label' => I18n::t('common.save')];
+    }
+
+    private function linkHeaderAction(string $href, string $label): array
+    {
+        return ['type' => 'link', 'href' => $href, 'label' => $label, 'icon' => 'add'];
+    }
+
+    private function saveMenuHeaderAction(string $formSelector, string $deleteModalTarget): array
+    {
+        return ['type' => 'save-menu', 'form' => $formSelector, 'delete_modal_target' => $deleteModalTarget];
+    }
+
+    private function contentMenuHeaderAction(bool $canDelete): array
+    {
+        return [
+            'type' => 'content-menu',
+            'delete_modal_target' => $canDelete ? '#content-delete-modal' : '',
+        ];
     }
 
     private function renderAdmin(string $template, array $data): void

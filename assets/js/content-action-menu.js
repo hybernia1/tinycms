@@ -13,15 +13,9 @@
     const submits = menu.querySelectorAll('[data-content-action-submit]');
     const checks = menu.querySelectorAll('[data-content-action-check]');
     const deleteButton = menu.querySelector('[data-content-action-delete]');
-    const deleteTrigger = document.querySelector('[data-content-delete-trigger]');
-    const contentId = Number((form.querySelector('[data-content-id-hidden]') || {}).value || 0);
 
     if (!primaryButton || !toggleButton || !options) {
         return;
-    }
-
-    if (deleteButton && contentId <= 0) {
-        deleteButton.hidden = true;
     }
 
     const resolveStatusLabel = (value) => {
@@ -92,10 +86,9 @@
         });
     });
 
-    if (deleteButton && deleteTrigger) {
+    if (deleteButton) {
         deleteButton.addEventListener('click', () => {
             close();
-            deleteTrigger.click();
         });
     }
 

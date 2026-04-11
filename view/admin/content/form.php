@@ -137,9 +137,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
         </aside>
     </div>
     <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
-    <?php if ($mode === 'edit'): ?>
-        <button class="d-none" type="button" data-content-delete-trigger data-modal-open data-modal-target="#content-delete-modal"></button>
-    <?php endif; ?>
 </form>
 <?php if ($mode === 'edit'): ?>
 <form id="content-delete-form" method="post" action="<?= htmlspecialchars($url('admin/content/edit/delete?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
