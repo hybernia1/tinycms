@@ -227,14 +227,15 @@ final class TermService
             $termsTable = Table::name('terms');
             $contentTermsTable = Table::name('content_terms');
             $selectStmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-            $insertStmt = $this->pdo->prepare("INSERT INTO $termsTable (name) VALUES (:name)");
+            $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $termsTable (name) VALUES (:name)");
 
             foreach ($names as $name) {
                 $selectStmt->execute(['name' => $name]);
                 $id = (int)$selectStmt->fetchColumn();
                 if ($id <= 0) {
                     $insertStmt->execute(['name' => $name]);
-                    $id = (int)$this->pdo->lastInsertId();
+                    $selectStmt->execute(['name' => $name]);
+                    $id = (int)$selectStmt->fetchColumn();
                 }
                 if ($id > 0) {
                     $termIds[] = $id;

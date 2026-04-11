@@ -64,13 +64,13 @@ final class MediaService
     {
         $mediaTable = Table::name('media');
         $contentTable = Table::name('content');
-        $attachmentsTable = Table::name('attachments');
+        $contentMediaTable = Table::name('content_media');
 
         $all = (int)(Connection::get()->query("SELECT COUNT(*) FROM $mediaTable")->fetchColumn() ?: 0);
         $unassignedSql = implode("\n", [
             "SELECT COUNT(*) FROM $mediaTable m",
             "WHERE NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
-            "AND NOT EXISTS (SELECT 1 FROM $attachmentsTable a WHERE a.media = m.id)",
+            "AND NOT EXISTS (SELECT 1 FROM $contentMediaTable a WHERE a.media = m.id)",
         ]);
         $unassigned = (int)(Connection::get()->query($unassignedSql)->fetchColumn() ?: 0);
 
@@ -158,13 +158,13 @@ final class MediaService
         }
 
         $contentTable = Table::name('content');
-        $attachmentsTable = Table::name('attachments');
+        $contentMediaTable = Table::name('content_media');
         $sql = implode("\n", [
             'SELECT c.id, c.name, c.created,',
             'MAX(CASE WHEN c.thumbnail = :media THEN 1 ELSE 0 END) AS used_as_thumbnail,',
             'MAX(CASE WHEN a.media = :media THEN 1 ELSE 0 END) AS used_in_body',
             "FROM $contentTable c",
-            "LEFT JOIN $attachmentsTable a ON a.content = c.id",
+            "LEFT JOIN $contentMediaTable a ON a.content = c.id",
             'WHERE c.thumbnail = :media OR a.media = :media',
             'GROUP BY c.id, c.name, c.created',
             'ORDER BY COALESCE(MAX(c.updated), c.created) DESC',
@@ -251,7 +251,7 @@ final class MediaService
         $mediaTable = Table::name('media');
         $usersTable = Table::name('users');
         $contentTable = Table::name('content');
-        $attachmentsTable = Table::name('attachments');
+        $contentMediaTable = Table::name('content_media');
 
         $params = [];
         $searchSql = '';
@@ -263,7 +263,7 @@ final class MediaService
         $baseSql = implode("\n", [
             "FROM $mediaTable m",
             "WHERE NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
-            "AND NOT EXISTS (SELECT 1 FROM $attachmentsTable a WHERE a.media = m.id)",
+            "AND NOT EXISTS (SELECT 1 FROM $contentMediaTable a WHERE a.media = m.id)",
         ]) . $searchSql;
 
         $countStmt = Connection::get()->prepare("SELECT COUNT(*) $baseSql");

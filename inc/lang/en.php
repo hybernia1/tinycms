@@ -241,7 +241,7 @@ return [
         'thumbnail_missing' => 'Content has no assigned thumbnail.',
         'thumbnail_delete_failed' => 'Could not delete thumbnail.',
         'thumbnail_deleted' => 'Thumbnail was removed from database and disk.',
-        'attachment_attach_failed' => 'Could not save attachment.',
+        'media_attach_failed' => 'Could not attach media.',
         'link_title_not_found' => 'Link title not found.',
         'body' => 'Content',
         'publication' => 'Publication',

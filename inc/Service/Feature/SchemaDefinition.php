@@ -40,15 +40,15 @@ final class SchemaDefinition
         $content = $prefix . 'content';
         $terms = $prefix . 'terms';
         $contentTerms = $prefix . 'content_terms';
-        $attachments = $prefix . 'attachments';
+        $contentMedia = $prefix . 'content_media';
         $settings = $prefix . 'settings';
         $fkMediaAuthorUser = self::constraintName($prefix, 'fk_media_author_user');
         $fkContentAuthorUser = self::constraintName($prefix, 'fk_content_author_user');
         $fkContentThumbnailMedia = self::constraintName($prefix, 'fk_content_thumbnail_media');
         $fkContentTermsContent = self::constraintName($prefix, 'fk_content_terms_content');
         $fkContentTermsTerm = self::constraintName($prefix, 'fk_content_terms_term');
-        $fkAttachmentsContent = self::constraintName($prefix, 'fk_attachments_content');
-        $fkAttachmentsMedia = self::constraintName($prefix, 'fk_attachments_media');
+        $fkContentMediaContent = self::constraintName($prefix, 'fk_content_media_content');
+        $fkContentMediaMedia = self::constraintName($prefix, 'fk_content_media_media');
 
         return [
             "CREATE TABLE IF NOT EXISTS $users (
@@ -86,6 +86,7 @@ final class SchemaDefinition
                 name VARCHAR(255) DEFAULT NULL,
                 thumbnail INT DEFAULT NULL,
                 PRIMARY KEY (id),
+                KEY idx_content_status_created_id (status, created, id),
                 KEY idx_content_status (status),
                 KEY idx_content_created (created),
                 KEY idx_content_author (author),
@@ -98,29 +99,24 @@ final class SchemaDefinition
                 name VARCHAR(255) NOT NULL,
                 created DATETIME DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                PRIMARY KEY (id)
+                PRIMARY KEY (id),
+                UNIQUE KEY uq_terms_name (name)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS $contentTerms (
-                id INT NOT NULL AUTO_INCREMENT,
-                content INT DEFAULT NULL,
-                term INT DEFAULT NULL,
-                PRIMARY KEY (id),
-                UNIQUE KEY uq_content_terms_content_term (content, term),
-                KEY idx_content_terms_content (content),
+                content INT NOT NULL,
+                term INT NOT NULL,
+                PRIMARY KEY (content, term),
                 KEY idx_content_terms_term (term),
                 CONSTRAINT $fkContentTermsContent FOREIGN KEY (content) REFERENCES $content (id) ON DELETE CASCADE,
                 CONSTRAINT $fkContentTermsTerm FOREIGN KEY (term) REFERENCES $terms (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
-            "CREATE TABLE IF NOT EXISTS $attachments (
-                id INT NOT NULL AUTO_INCREMENT,
+            "CREATE TABLE IF NOT EXISTS $contentMedia (
                 media INT NOT NULL,
                 content INT NOT NULL,
-                PRIMARY KEY (id),
-                UNIQUE KEY uq_attachments_content_media (content, media),
-                KEY idx_attachments_media (media),
-                KEY idx_attachments_content (content),
-                CONSTRAINT $fkAttachmentsContent FOREIGN KEY (content) REFERENCES $content (id) ON DELETE CASCADE,
-                CONSTRAINT $fkAttachmentsMedia FOREIGN KEY (media) REFERENCES $media (id) ON DELETE CASCADE
+                PRIMARY KEY (content, media),
+                KEY idx_content_media_media (media),
+                CONSTRAINT $fkContentMediaContent FOREIGN KEY (content) REFERENCES $content (id) ON DELETE CASCADE,
+                CONSTRAINT $fkContentMediaMedia FOREIGN KEY (media) REFERENCES $media (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS $settings (
                 key_name VARCHAR(100) NOT NULL,

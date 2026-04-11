@@ -33,7 +33,7 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/upload', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryUploadApiV1', 'params' => ['contentId' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/{mediaId}/delete', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryDeleteApiV1', 'params' => ['contentId' => 'int', 'mediaId' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/{mediaId}/rename', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryRenameApiV1', 'params' => ['contentId' => 'int', 'mediaId' => 'int']],
-    ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/{mediaId}/attach', 'controller' => $adminContentMediaApi, 'action' => 'attachmentAttachApiV1', 'params' => ['contentId' => 'int', 'mediaId' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/{mediaId}/attach', 'controller' => $adminContentMediaApi, 'action' => 'mediaAttachApiV1', 'params' => ['contentId' => 'int', 'mediaId' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/thumbnail/detach', 'controller' => $adminContentMediaApi, 'action' => 'thumbnailDetachApiV1', 'params' => ['contentId' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/thumbnail/{mediaId}/select', 'controller' => $adminContentMediaApi, 'action' => 'thumbnailSelectApiV1', 'params' => ['contentId' => 'int', 'mediaId' => 'int']],
 

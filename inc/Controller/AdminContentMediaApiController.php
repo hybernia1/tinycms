@@ -212,7 +212,7 @@ final class AdminContentMediaApiController extends BaseAdminController
         $this->apiOk(['id' => $mediaId, 'name' => $name]);
     }
 
-    public function attachmentAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
+    public function mediaAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
         if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
             return;
@@ -232,7 +232,7 @@ final class AdminContentMediaApiController extends BaseAdminController
         }
 
         if (!$this->content->attachMedia($contentId, $mediaId)) {
-            $this->apiError('ATTACH_FAILED', I18n::t('content.attachment_attach_failed'));
+            $this->apiError('ATTACH_FAILED', I18n::t('content.media_attach_failed'));
             return;
         }
 
