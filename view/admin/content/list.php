@@ -1,11 +1,12 @@
 <?php
-$listItems = $pagination['data'] ?? [];
-$listPage = (int)($pagination['page'] ?? 1);
-$listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
-$listTotalPages = (int)($pagination['total_pages'] ?? 1);
-$statusCurrent = (string)($status ?? 'all');
-$listQuery = (string)($query ?? '');
-$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
+$listState = \App\View\Admin\ListConfigFactory::state($pagination, $status ?? 'all', $query ?? '', $statusCounts ?? []);
+$listItems = $listState['items'];
+$listPage = $listState['page'];
+$listPerPage = $listState['perPage'];
+$listTotalPages = $listState['totalPages'];
+$statusCurrent = $listState['statusCurrent'];
+$listQuery = $listState['query'];
+$statusCounts = $listState['statusCounts'];
 $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];
 foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue)) . ' (' . (int)($statusCounts[$statusValue] ?? 0) . ')';

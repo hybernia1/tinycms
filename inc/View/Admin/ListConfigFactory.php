@@ -7,6 +7,20 @@ use App\Service\Support\PaginationConfig;
 
 final class ListConfigFactory
 {
+
+    public static function state(array $pagination, mixed $status, mixed $query, mixed $statusCounts): array
+    {
+        return [
+            'items' => is_array($pagination['data'] ?? null) ? $pagination['data'] : [],
+            'page' => (int)($pagination['page'] ?? 1),
+            'perPage' => (int)($pagination['per_page'] ?? PaginationConfig::perPage()),
+            'totalPages' => (int)($pagination['total_pages'] ?? 1),
+            'statusCurrent' => (string)($status ?? 'all'),
+            'query' => (string)($query ?? ''),
+            'statusCounts' => is_array($statusCounts) ? $statusCounts : [],
+        ];
+    }
+
     public static function build(array $input): array
     {
         $statusCurrent = (string)($input['statusCurrent'] ?? 'all');
