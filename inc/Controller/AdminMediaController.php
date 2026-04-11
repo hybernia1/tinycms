@@ -237,9 +237,6 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        $authorFilter = $this->isEditor() ? $this->currentUserId() : null;
-        $nextId = $this->media->nextIdAfterDelete($id, $authorFilter > 0 ? $authorFilter : null);
-
         if (!$this->media->delete($id)) {
             $this->flash->add('error', I18n::t('media.delete_failed'));
             $redirect($this->buildEditPath('admin/media', $id));
@@ -248,7 +245,7 @@ final class AdminMediaController extends BaseAdminController
 
         $this->upload->deleteMediaFiles($item);
         $this->flash->add('success', I18n::t('media.deleted'));
-        $redirect($nextId !== null ? $this->buildEditPath('admin/media', $nextId) : 'admin/media');
+        $redirect('admin/media');
     }
 
     private function resolveListQuery(): array
