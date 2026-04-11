@@ -8,7 +8,6 @@ use App\Service\Feature\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
-use App\Service\Support\PaginationConfig;
 use App\View\AdminView;
 
 final class AdminTermController extends BaseAdminController
@@ -34,7 +33,7 @@ final class AdminTermController extends BaseAdminController
         [$page, $perPage, $status, $query] = $this->resolveListQuery();
         $pagination = $this->terms->paginate($page, $perPage, $query, $status);
         $statusCounts = $this->terms->statusCounts();
-        $this->pages->adminTermList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
+        $this->pages->adminTermList($pagination, $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void

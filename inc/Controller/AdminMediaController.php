@@ -9,7 +9,6 @@ use App\Service\Feature\UploadService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
-use App\Service\Support\PaginationConfig;
 use App\View\AdminView;
 
 final class AdminMediaController extends BaseAdminController
@@ -36,7 +35,7 @@ final class AdminMediaController extends BaseAdminController
         [$page, $perPage, $status, $query] = $this->resolveListQuery();
         $pagination = $this->media->paginate($page, $perPage, $query, $status);
         $statusCounts = $this->media->statusCounts();
-        $this->pages->adminMediaList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
+        $this->pages->adminMediaList($pagination, $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void

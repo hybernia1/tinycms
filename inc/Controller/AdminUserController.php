@@ -7,7 +7,6 @@ use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
-use App\Service\Support\PaginationConfig;
 use App\Service\Feature\UserService;
 use App\View\AdminView;
 
@@ -35,7 +34,7 @@ final class AdminUserController extends BaseAdminController
 
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
         $statusCounts = $this->users->statusCounts();
-        $this->pages->adminUsersList($pagination, PaginationConfig::allowed(), $status, $query, $statusCounts);
+        $this->pages->adminUsersList($pagination, $status, $query, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void

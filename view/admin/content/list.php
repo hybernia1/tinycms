@@ -1,32 +1,12 @@
 <?php
-$listItems = $pagination['data'] ?? [];
-$listPage = (int)($pagination['page'] ?? 1);
-$listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
-$listTotalPages = (int)($pagination['total_pages'] ?? 1);
-$statusCurrent = (string)($status ?? 'all');
-$listQuery = (string)($query ?? '');
+$list = is_array($listBase ?? null) ? $listBase : [];
+$statusCurrent = (string)($list['statusCurrent'] ?? 'all');
+$listQuery = (string)($list['query'] ?? '');
 $statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
 $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];
 foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue)) . ' (' . (int)($statusCounts[$statusValue] ?? 0) . ')';
 }
-$csrfMarkup = $csrfField();
-$listName = 'content';
-$listEndpoint = $url('admin/api/v1/content');
-$listEditBase = $url('admin/content/edit?id=');
-$searchPlaceholder = $t('content.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
-$listColumns = [
-    ['label' => $t('common.name')],
-    ['label' => $t('common.author'), 'class' => 'mobile-hide'],
-    ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
-];
-$listAllowedPerPage = $allowedPerPage;
-$statusEnabled = true;
-$deleteConfirmText = $t('content.delete_confirm');
-$statusUrl = static fn(string $targetStatus): string => $url('admin/content?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
-$paginationUrl = static fn(int $targetPage): string => $url('admin/content?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
 $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $csrfField): string {
     $id = (int)($row['id'] ?? 0);
     $createdAtRaw = (string)($row['created'] ?? '');
@@ -67,5 +47,14 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     <?php
     return (string)ob_get_clean();
 };
+$list['statusLinks'] = $statusLinks;
+$list['searchPlaceholder'] = $t('content.search_placeholder');
+$list['columns'] = [
+    ['label' => $t('common.name')],
+    ['label' => $t('common.author'), 'class' => 'mobile-hide'],
+    ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
+];
+$list['deleteConfirmText'] = $t('content.delete_confirm');
+$list['rowRenderer'] = $rowRenderer;
 
 require __DIR__ . '/../partials/list-layout.php';

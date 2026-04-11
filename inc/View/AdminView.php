@@ -6,6 +6,7 @@ namespace App\View;
 use App\Service\Feature\SettingsService;
 use App\Service\Feature\UploadService;
 use App\Service\Support\I18n;
+use App\Service\Support\PaginationConfig;
 
 final class AdminView
 {
@@ -26,13 +27,10 @@ final class AdminView
         ]);
     }
 
-    public function adminUsersList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
+    public function adminUsersList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/users/list', [
-            'pagination' => $pagination,
-            'allowedPerPage' => $allowedPerPage,
-            'status' => $status,
-            'query' => $query,
+            'listBase' => $this->adminListBase('users', $pagination, $status, $query),
             'statusCounts' => $statusCounts,
             'pageTitle' => I18n::t('admin.menu.users'),
             'headerAction' => $this->linkHeaderAction('admin/users/add', I18n::t('admin.add_user')),
@@ -60,13 +58,10 @@ final class AdminView
         ]);
     }
 
-    public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $availableStatuses, array $statusCounts): void
+    public function adminContentList(array $pagination, string $status, string $query, array $availableStatuses, array $statusCounts): void
     {
         $this->renderAdmin('admin/content/list', [
-            'pagination' => $pagination,
-            'allowedPerPage' => $allowedPerPage,
-            'status' => $status,
-            'query' => $query,
+            'listBase' => $this->adminListBase('content', $pagination, $status, $query),
             'availableStatuses' => $availableStatuses,
             'statusCounts' => $statusCounts,
             'pageTitle' => I18n::t('admin.menu.content'),
@@ -88,13 +83,10 @@ final class AdminView
         ]);
     }
 
-    public function adminTermList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
+    public function adminTermList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/terms/list', [
-            'pagination' => $pagination,
-            'allowedPerPage' => $allowedPerPage,
-            'status' => $status,
-            'query' => $query,
+            'listBase' => $this->adminListBase('terms', $pagination, $status, $query),
             'statusCounts' => $statusCounts,
             'pageTitle' => I18n::t('admin.menu.terms'),
             'headerAction' => $this->linkHeaderAction('admin/terms/add', I18n::t('admin.add_term')),
@@ -113,17 +105,29 @@ final class AdminView
         ]);
     }
 
-    public function adminMediaList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
+    public function adminMediaList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/media/list', [
-            'pagination' => $pagination,
-            'allowedPerPage' => $allowedPerPage,
-            'status' => $status,
-            'query' => $query,
+            'listBase' => $this->adminListBase('media', $pagination, $status, $query),
             'statusCounts' => $statusCounts,
             'pageTitle' => I18n::t('admin.menu.media'),
             'headerAction' => $this->linkHeaderAction('admin/media/add', I18n::t('admin.add_media')),
         ]);
+    }
+
+    private function adminListBase(string $entity, array $pagination, string $status, string $query): array
+    {
+        $perPage = (int)($pagination['per_page'] ?? PaginationConfig::perPage());
+        return [
+            'entity' => $entity,
+            'items' => $pagination['data'] ?? [],
+            'page' => (int)($pagination['page'] ?? 1),
+            'perPage' => $perPage,
+            'totalPages' => (int)($pagination['total_pages'] ?? 1),
+            'statusCurrent' => $status !== '' ? $status : 'all',
+            'query' => $query,
+            'allowedPerPage' => PaginationConfig::allowed(),
+        ];
     }
 
     public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = [], array $navigation = []): void
