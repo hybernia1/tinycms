@@ -18,9 +18,11 @@ $statusUrl = is_callable($statusUrl ?? null) ? $statusUrl : null;
 $paginationUrl = is_callable($paginationUrl ?? null) ? $paginationUrl : null;
 $rowRenderer = is_callable($rowRenderer ?? null) ? $rowRenderer : null;
 $deleteConfirmText = (string)($deleteConfirmText ?? '');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
-$csrfMarkup = $csrfField();
+$defaultSearchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
+$defaultPerPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
+$searchHidden = array_merge($defaultSearchHidden, is_array($searchHidden ?? null) ? $searchHidden : []);
+$perPageHidden = array_merge($defaultPerPageHidden, is_array($perPageHidden ?? null) ? $perPageHidden : []);
+$csrfMarkup = (string)($csrfMarkup ?? (is_callable($csrfField ?? null) ? $csrfField() : ''));
 
 $rootAttrs = [
     'data-' . $listName . '-list' => null,
