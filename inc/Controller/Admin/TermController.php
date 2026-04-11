@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
 use App\Service\Feature\AuthService;
 use App\Service\Feature\TermService;
@@ -11,7 +11,7 @@ use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 use App\View\PageView;
 
-final class AdminTermController extends BaseAdminController
+final class TermController extends BaseController
 {
     private const FORM_STATE_KEY = 'admin_term_form_state';
 

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Front;
 
 use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
 use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
@@ -11,7 +11,7 @@ use App\Service\Feature\UploadService;
 use App\Service\Support\I18n;
 use App\View\PageView;
 
-final class AdminSettingsController extends BaseAdminController
+final class SettingsController extends BaseController
 {
     private PageView $pages;
     private SettingsService $settings;

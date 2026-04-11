@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/autoload.php';
 
-use App\Controller\AdminController;
-use App\Controller\AdminContentController;
-use App\Controller\AdminContentMediaApiController;
-use App\Controller\AdminMediaController;
-use App\Controller\AdminSettingsController;
-use App\Controller\AdminTermController;
-use App\Controller\AdminUserController;
-use App\Controller\FrontController;
-use App\Controller\InstallController;
+use App\Controller\Admin\ContentController;
+use App\Controller\Admin\ContentMediaApiController;
+use App\Controller\Admin\DashboardController;
+use App\Controller\Admin\MediaController;
+use App\Controller\Admin\SettingsController;
+use App\Controller\Admin\TermController;
+use App\Controller\Admin\UserController;
+use App\Controller\Front\FrontController;
+use App\Controller\Front\InstallController;
 use App\Service\Auth\Auth;
 use App\Service\Feature\AuthService;
 use App\Service\Feature\ContentService;
@@ -96,13 +96,13 @@ I18n::setTheme($themeService->resolveTheme((string)($resolvedSettings['theme'] ?
 $termService = new TermService();
 $pageView = new PageView($view, $themeService, $settingsService);
 $front = new FrontController($pageView, $authService, $csrf, $settingsService, $contentService, $termService, $slugger);
-$admin = new AdminController($pageView, $authService);
-$adminUsers = new AdminUserController($pageView, $authService, $userService, $flash, $csrf);
-$adminContent = new AdminContentController($pageView, $authService, $contentService, $userService, $termService, $flash, $csrf);
-$adminContentMediaApi = new AdminContentMediaApiController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
-$adminMedia = new AdminMediaController($pageView, $authService, $mediaService, $uploadService, $flash, $csrf);
-$adminSettings = new AdminSettingsController($pageView, $authService, $settingsService, $uploadService, $flash, $csrf);
-$adminTerms = new AdminTermController($pageView, $authService, $termService, $flash, $csrf);
+$admin = new DashboardController($pageView, $authService);
+$adminUsers = new UserController($pageView, $authService, $userService, $flash, $csrf);
+$adminContent = new ContentController($pageView, $authService, $contentService, $userService, $termService, $flash, $csrf);
+$adminContentMediaApi = new ContentMediaApiController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
+$adminMedia = new MediaController($pageView, $authService, $mediaService, $uploadService, $flash, $csrf);
+$adminSettings = new SettingsController($pageView, $authService, $settingsService, $uploadService, $flash, $csrf);
+$adminTerms = new TermController($pageView, $authService, $termService, $flash, $csrf);
 
 require __DIR__ . '/routes/front.php';
 require __DIR__ . '/routes/admin.php';

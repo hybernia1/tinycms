@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
 use App\Service\Feature\AuthService;
 use App\View\PageView;
 
-final class AdminController
+final class DashboardController
 {
     private PageView $pages;
     private AuthService $authService;

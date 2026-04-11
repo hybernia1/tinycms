@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
 use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
@@ -11,7 +11,7 @@ use App\Service\Support\PaginationConfig;
 use App\Service\Feature\UserService;
 use App\View\PageView;
 
-final class AdminUserController extends BaseAdminController
+final class UserController extends BaseController
 {
     private const FORM_STATE_KEY = 'admin_users_form_state';
 

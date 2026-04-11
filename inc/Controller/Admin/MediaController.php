@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
 use App\Service\Feature\AuthService;
 use App\Service\Feature\MediaService;
@@ -12,7 +12,7 @@ use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 use App\View\PageView;
 
-final class AdminMediaController extends BaseAdminController
+final class MediaController extends BaseController
 {
     private const FORM_STATE_KEY = 'admin_media_form_state';
 

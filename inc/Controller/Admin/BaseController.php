@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
 use App\Service\Feature\AuthService;
 use App\Service\Support\CsrfService;
@@ -9,7 +9,7 @@ use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 
-abstract class BaseAdminController
+abstract class BaseController
 {
     public function __construct(
         protected AuthService $authService,
