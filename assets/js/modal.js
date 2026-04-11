@@ -164,8 +164,11 @@ document.addEventListener('click', (event) => {
     const openTrigger = event.target.closest('[data-modal-open]');
     if (openTrigger) {
         event.preventDefault();
-        const target = openTrigger.getAttribute('data-modal-target') || '';
-        const modal = target ? document.querySelector(target) : document.querySelector('[data-modal]');
+        const target = (openTrigger.getAttribute('data-modal-target') || '').trim();
+        if (target === '') {
+            return;
+        }
+        const modal = document.querySelector(target);
         if (!modal) {
             return;
         }
