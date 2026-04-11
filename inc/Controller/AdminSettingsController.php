@@ -9,15 +9,15 @@ use App\Service\Support\FlashService;
 use App\Service\Feature\SettingsService;
 use App\Service\Feature\UploadService;
 use App\Service\Support\I18n;
-use App\View\PageView;
+use App\View\AdminView;
 
 final class AdminSettingsController extends BaseAdminController
 {
-    private PageView $pages;
+    private AdminView $pages;
     private SettingsService $settings;
     private UploadService $upload;
 
-    public function __construct(PageView $pages, AuthService $authService, SettingsService $settings, UploadService $upload, FlashService $flash, CsrfService $csrf)
+    public function __construct(AdminView $pages, AuthService $authService, SettingsService $settings, UploadService $upload, FlashService $flash, CsrfService $csrf)
     {
         parent::__construct($authService, $flash, $csrf);
         $this->pages = $pages;
