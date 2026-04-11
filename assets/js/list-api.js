@@ -100,6 +100,9 @@ const initListApi = (config) => {
     const loader = window.tinycmsLoader || null;
 
     const defaultPerPage = Number(perPageField?.value || perPageField?.querySelector('option')?.value || '10') || 10;
+    if (deleteModal && deleteModal.parentElement !== document.body) {
+        document.body.appendChild(deleteModal);
+    }
 
     let state = {
         page: 1,
