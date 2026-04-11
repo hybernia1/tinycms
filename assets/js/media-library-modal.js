@@ -612,10 +612,6 @@ if (modal && openTrigger) {
             const selectedCard = grid ? grid.querySelector('.media-library-card.selected') : null;
             if (selectedCard) {
                 selectedCard.dataset.mediaName = value;
-                const label = selectedCard.querySelector('span');
-                if (label) {
-                    label.textContent = value;
-                }
             }
 
             setStatus(t('media.rename_saved', 'Name saved.'));
