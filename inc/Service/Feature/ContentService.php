@@ -236,8 +236,8 @@ final class ContentService
             return false;
         }
 
-        $attachmentsTable = Table::name('attachments');
-        $stmt = $this->pdo->prepare("INSERT IGNORE INTO $attachmentsTable (content, media) VALUES (:content, :media)");
+        $contentMediaTable = Table::name('content_media');
+        $stmt = $this->pdo->prepare("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)");
         return $stmt->execute([
             'content' => $contentId,
             'media' => $mediaId,
@@ -252,8 +252,8 @@ final class ContentService
 
         $mediaIds = $this->extractMediaIdsFromBody($body);
         if ($mediaIds === []) {
-            $attachmentsTable = Table::name('attachments');
-            $stmt = $this->pdo->prepare("DELETE FROM $attachmentsTable WHERE content = :content");
+            $contentMediaTable = Table::name('content_media');
+            $stmt = $this->pdo->prepare("DELETE FROM $contentMediaTable WHERE content = :content");
             $stmt->execute(['content' => $contentId]);
             return;
         }
@@ -266,15 +266,15 @@ final class ContentService
             $params[$key] = $mediaId;
         }
 
-        $attachmentsTable = Table::name('attachments');
+        $contentMediaTable = Table::name('content_media');
         $deleteSql = sprintf(
-            "DELETE FROM $attachmentsTable WHERE content = :content AND media NOT IN (%s)",
+            "DELETE FROM $contentMediaTable WHERE content = :content AND media NOT IN (%s)",
             implode(', ', $placeholders),
         );
         $deleteStmt = $this->pdo->prepare($deleteSql);
         $deleteStmt->execute($params);
 
-        $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $attachmentsTable (content, media) VALUES (:content, :media)");
+        $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)");
         foreach ($mediaIds as $mediaId) {
             $insertStmt->execute([
                 'content' => $contentId,

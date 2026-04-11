@@ -40,15 +40,15 @@ final class SchemaDefinition
         $content = $prefix . 'content';
         $terms = $prefix . 'terms';
         $contentTerms = $prefix . 'content_terms';
-        $attachments = $prefix . 'attachments';
+        $contentMedia = $prefix . 'content_media';
         $settings = $prefix . 'settings';
         $fkMediaAuthorUser = self::constraintName($prefix, 'fk_media_author_user');
         $fkContentAuthorUser = self::constraintName($prefix, 'fk_content_author_user');
         $fkContentThumbnailMedia = self::constraintName($prefix, 'fk_content_thumbnail_media');
         $fkContentTermsContent = self::constraintName($prefix, 'fk_content_terms_content');
         $fkContentTermsTerm = self::constraintName($prefix, 'fk_content_terms_term');
-        $fkAttachmentsContent = self::constraintName($prefix, 'fk_attachments_content');
-        $fkAttachmentsMedia = self::constraintName($prefix, 'fk_attachments_media');
+        $fkContentMediaContent = self::constraintName($prefix, 'fk_content_media_content');
+        $fkContentMediaMedia = self::constraintName($prefix, 'fk_content_media_media');
 
         return [
             "CREATE TABLE IF NOT EXISTS $users (
@@ -111,16 +111,16 @@ final class SchemaDefinition
                 CONSTRAINT $fkContentTermsContent FOREIGN KEY (content) REFERENCES $content (id) ON DELETE CASCADE,
                 CONSTRAINT $fkContentTermsTerm FOREIGN KEY (term) REFERENCES $terms (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
-            "CREATE TABLE IF NOT EXISTS $attachments (
+            "CREATE TABLE IF NOT EXISTS $contentMedia (
                 id INT NOT NULL AUTO_INCREMENT,
                 media INT NOT NULL,
                 content INT NOT NULL,
                 PRIMARY KEY (id),
-                UNIQUE KEY uq_attachments_content_media (content, media),
-                KEY idx_attachments_media (media),
-                KEY idx_attachments_content (content),
-                CONSTRAINT $fkAttachmentsContent FOREIGN KEY (content) REFERENCES $content (id) ON DELETE CASCADE,
-                CONSTRAINT $fkAttachmentsMedia FOREIGN KEY (media) REFERENCES $media (id) ON DELETE CASCADE
+                UNIQUE KEY uq_content_media_content_media (content, media),
+                KEY idx_content_media_media (media),
+                KEY idx_content_media_content (content),
+                CONSTRAINT $fkContentMediaContent FOREIGN KEY (content) REFERENCES $content (id) ON DELETE CASCADE,
+                CONSTRAINT $fkContentMediaMedia FOREIGN KEY (media) REFERENCES $media (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS $settings (
                 key_name VARCHAR(100) NOT NULL,

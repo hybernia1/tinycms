@@ -241,7 +241,7 @@ return [
         'thumbnail_missing' => 'Obsah nemá přiřazený náhled.',
         'thumbnail_delete_failed' => 'Náhled se nepodařilo smazat.',
         'thumbnail_deleted' => 'Náhled byl odstraněn z databáze i disku.',
-        'attachment_attach_failed' => 'Přílohu se nepodařilo uložit.',
+        'media_attach_failed' => 'Přílohu se nepodařilo uložit.',
         'link_title_not_found' => 'Titulek odkazu nebyl nalezen.',
         'body' => 'Obsah',
         'publication' => 'Publikace',
