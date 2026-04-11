@@ -21,6 +21,17 @@ final class TemplateFactory
         ];
     }
 
+
+    public static function fieldError(array $errors, string $key): string
+    {
+        $message = trim((string)($errors[$key] ?? ''));
+        if ($message == '') {
+            return '';
+        }
+
+        return '<small class="text-danger">' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</small>';
+    }
+
     public static function listConfig(array $input): array
     {
         $statusCurrent = (string)($input['statusCurrent'] ?? 'all');

@@ -42,7 +42,7 @@ if ($mode === 'edit') {
             <div class="mb-3">
                 <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
                 <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
-                <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                <?= \App\View\Admin\TemplateFactory::fieldError($errors, 'name') ?>
             </div>
 
             <?php if ($mode === 'add'): ?>
@@ -57,7 +57,7 @@ if ($mode === 'edit') {
                         <input id="media-file-upload" type="file" name="file" accept="<?= htmlspecialchars((string)($imageUploadAccept ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
                     </div>
                     <small class="text-muted d-block mt-2"><?= htmlspecialchars(sprintf($t('common.allowed_upload_types'), (string)($imageUploadTypesLabel ?? '')), ENT_QUOTES, 'UTF-8') ?></small>
-                    <?php if (!empty($errors['file'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['file'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                    <?= \App\View\Admin\TemplateFactory::fieldError($errors, 'file') ?>
                 </div>
             <?php endif; ?>
 
@@ -135,7 +135,7 @@ if ($mode === 'edit') {
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-                            <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                            <?= \App\View\Admin\TemplateFactory::fieldError($errors, 'author') ?>
                         </div>
                     <?php endif; ?>
                 </div>
