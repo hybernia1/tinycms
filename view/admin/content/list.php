@@ -10,13 +10,10 @@ $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ??
 foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue)) . ' (' . (int)($statusCounts[$statusValue] ?? 0) . ')';
 }
-$csrfMarkup = $csrfField();
 $listName = 'content';
 $listEndpoint = $url('admin/api/v1/content');
 $listEditBase = $url('admin/content/edit?id=');
 $searchPlaceholder = $t('content.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('common.name')],
     ['label' => $t('common.author'), 'class' => 'mobile-hide'],

@@ -10,13 +10,10 @@ $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('terms.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
 ];
-$csrfMarkup = $csrfField();
 $listName = 'terms';
 $listEndpoint = $url('admin/api/v1/terms');
 $listEditBase = $url('admin/terms/edit?id=');
 $searchPlaceholder = $t('terms.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('common.name')],
     ['label' => $t('common.actions'), 'class' => 'table-col-actions'],

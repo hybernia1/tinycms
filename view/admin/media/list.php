@@ -10,14 +10,11 @@ $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
 ];
-$csrfMarkup = $csrfField();
 $listName = 'media';
 $listEndpoint = $url('admin/api/v1/media');
 $listEditBase = $url('admin/media/edit?id=');
 $listRootAttrs = [];
 $searchPlaceholder = $t('media.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('admin.menu.media')],
     ['label' => $t('common.author'), 'class' => 'mobile-hide'],

@@ -5,8 +5,6 @@ $listEndpoint = (string)($listEndpoint ?? '');
 $listEditBase = (string)($listEditBase ?? '');
 $listRootAttrs = is_array($listRootAttrs ?? null) ? $listRootAttrs : [];
 $searchPlaceholder = (string)($searchPlaceholder ?? '');
-$searchHidden = is_array($searchHidden ?? null) ? $searchHidden : [];
-$perPageHidden = is_array($perPageHidden ?? null) ? $perPageHidden : [];
 $listColumns = is_array($listColumns ?? null) ? $listColumns : [];
 $listAllowedPerPage = is_array($listAllowedPerPage ?? null) ? $listAllowedPerPage : [];
 $listPage = (int)($listPage ?? 1);
@@ -20,7 +18,9 @@ $statusUrl = is_callable($statusUrl ?? null) ? $statusUrl : null;
 $paginationUrl = is_callable($paginationUrl ?? null) ? $paginationUrl : null;
 $rowRenderer = is_callable($rowRenderer ?? null) ? $rowRenderer : null;
 $deleteConfirmText = (string)($deleteConfirmText ?? '');
-$csrfMarkup = (string)($csrfMarkup ?? '');
+$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
+$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
+$csrfMarkup = $csrfField();
 
 $rootAttrs = [
     'data-' . $listName . '-list' => null,

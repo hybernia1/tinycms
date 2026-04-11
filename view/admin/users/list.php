@@ -11,13 +11,10 @@ $statusLinks = [
     'active' => $t('users.status.active') . ' (' . (int)($statusCounts['active'] ?? 0) . ')',
     'suspended' => $t('users.status.suspended') . ' (' . (int)($statusCounts['suspended'] ?? 0) . ')',
 ];
-$csrfMarkup = $csrfField();
 $listName = 'users';
 $listEndpoint = $url('admin/api/v1/users');
 $listEditBase = $url('admin/users/edit?id=');
 $searchPlaceholder = $t('users.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
 $listColumns = [
     ['label' => $t('users.user')],
     ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
