@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../partials/list-config.php';
 $listItems = $pagination['data'] ?? [];
 $listPage = (int)($pagination['page'] ?? 1);
 $listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
@@ -31,40 +32,27 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     return (string)ob_get_clean();
 };
 
-$listConfig = [
-    'meta' => [
-        'name' => 'terms',
-        'endpoint' => $url('admin/api/v1/terms'),
-        'editBase' => $url('admin/terms/edit?id='),
-        'csrfMarkup' => $csrfField(),
+$listConfig = adminListBuildConfig([
+    'name' => 'terms',
+    'endpoint' => $url('admin/api/v1/terms'),
+    'editBase' => $url('admin/terms/edit?id='),
+    'csrfMarkup' => $csrfField(),
+    'statusCurrent' => $statusCurrent,
+    'statusLinks' => $statusLinks,
+    'statusUrl' => static fn(string $targetStatus): string => $url('admin/terms?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1'),
+    'searchPlaceholder' => $t('terms.search_placeholder'),
+    'query' => $listQuery,
+    'columns' => [
+        ['label' => $t('common.name')],
+        ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
     ],
-    'filters' => [
-        'statusEnabled' => true,
-        'statusLinks' => $statusLinks,
-        'statusCurrent' => $statusCurrent,
-        'statusUrl' => static fn(string $targetStatus): string => $url('admin/terms?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1'),
-        'searchPlaceholder' => $t('terms.search_placeholder'),
-        'searchHidden' => ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'],
-        'query' => $listQuery,
-    ],
-    'table' => [
-        'columns' => [
-            ['label' => $t('common.name')],
-            ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
-        ],
-        'rowRenderer' => $rowRenderer,
-    ],
-    'pagination' => [
-        'page' => $listPage,
-        'perPage' => $listPerPage,
-        'totalPages' => $listTotalPages,
-        'allowedPerPage' => $allowedPerPage,
-        'perPageHidden' => ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'],
-        'url' => static fn(int $targetPage): string => $url('admin/terms?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery)),
-    ],
-    'actions' => [
-        'deleteConfirmText' => $t('terms.delete_confirm'),
-    ],
-];
+    'rowRenderer' => $rowRenderer,
+    'page' => $listPage,
+    'perPage' => $listPerPage,
+    'totalPages' => $listTotalPages,
+    'allowedPerPage' => $allowedPerPage,
+    'paginationUrl' => static fn(int $targetPage): string => $url('admin/terms?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery)),
+    'deleteConfirmText' => $t('terms.delete_confirm'),
+]);
 
 require __DIR__ . '/../partials/list-layout.php';
