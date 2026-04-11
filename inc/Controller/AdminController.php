@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\Feature\AuthService;
-use App\View\PageView;
+use App\View\AdminView;
 
 final class AdminController
 {
-    private PageView $pages;
+    private AdminView $pages;
     private AuthService $authService;
 
-    public function __construct(PageView $pages, AuthService $authService)
+    public function __construct(AdminView $pages, AuthService $authService)
     {
         $this->pages = $pages;
         $this->authService = $authService;

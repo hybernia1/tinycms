@@ -9,14 +9,14 @@ use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
-use App\View\PageView;
+use App\View\AdminView;
 
 final class AdminTermController extends BaseAdminController
 {
     private const FORM_STATE_KEY = 'admin_term_form_state';
 
     public function __construct(
-        private PageView $pages,
+        private AdminView $pages,
         AuthService $authService,
         private TermService $terms,
         FlashService $flash,
