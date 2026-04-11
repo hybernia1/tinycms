@@ -30,7 +30,7 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        $item = $this->requireManageableContent($id);
+        $item = $this->requireExistingContent($id);
         if ($item === null) {
             return;
         }
@@ -49,12 +49,12 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        $content = $this->requireManageableContent($contentId);
+        $content = $this->requireExistingContent($contentId);
         if ($content === null) {
             return;
         }
 
-        $media = $this->requireManageableMedia($mediaId);
+        $media = $this->requireExistingMedia($mediaId);
         if ($media === null) {
             return;
         }
@@ -77,7 +77,7 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        if ($this->requireManageableContent($contentId) === null) {
+        if ($this->requireExistingContent($contentId) === null) {
             return;
         }
 
@@ -108,7 +108,7 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        $item = $this->requireManageableContent($contentId);
+        $item = $this->requireExistingContent($contentId);
         if ($item === null) {
             return;
         }
@@ -138,7 +138,7 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        if ($this->requireManageableContent($contentId) === null) {
+        if ($this->requireExistingContent($contentId) === null) {
             return;
         }
 
@@ -188,11 +188,11 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        if ($this->requireManageableContent($contentId) === null) {
+        if ($this->requireExistingContent($contentId) === null) {
             return;
         }
 
-        $media = $this->requireManageableMedia($mediaId);
+        $media = $this->requireExistingMedia($mediaId);
         if ($media === null) {
             return;
         }
@@ -223,11 +223,11 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        if ($this->requireManageableContent($contentId) === null) {
+        if ($this->requireExistingContent($contentId) === null) {
             return;
         }
 
-        if ($this->requireManageableMedia($mediaId) === null) {
+        if ($this->requireExistingMedia($mediaId) === null) {
             return;
         }
 
@@ -239,7 +239,7 @@ final class AdminContentMediaApiController extends BaseAdminController
         $this->apiOk(['content_id' => $contentId, 'media_id' => $mediaId]);
     }
 
-    private function requireManageableContent(int $contentId): ?array
+    private function requireExistingContent(int $contentId): ?array
     {
         $content = $this->content->find($contentId);
         if ($contentId <= 0 || $content === null) {
@@ -250,7 +250,7 @@ final class AdminContentMediaApiController extends BaseAdminController
         return $content;
     }
 
-    private function requireManageableMedia(int $mediaId): ?array
+    private function requireExistingMedia(int $mediaId): ?array
     {
         $media = $this->media->find($mediaId);
         if ($mediaId <= 0 || $media === null) {

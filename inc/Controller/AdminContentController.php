@@ -67,8 +67,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $item = $this->content->find($id);
-        if ($item === null) {
+        if ($this->content->find($id) === null) {
             $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
@@ -94,8 +93,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $item = $this->content->find($id);
-        if ($item === null) {
+        if ($this->content->find($id) === null) {
             $this->flash->add('error', I18n::t('content.not_found'));
             $redirect('admin/content');
             return;
@@ -186,8 +184,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $item = $this->content->find($id);
-        if ($item === null) {
+        if ($this->content->find($id) === null) {
             $this->flash->add('error', I18n::t('content.not_found'));
             $redirect('admin/content');
             return;
@@ -220,8 +217,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $item = $this->content->find($id);
-        if ($item === null) {
+        if ($this->content->find($id) === null) {
             $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
@@ -296,12 +292,10 @@ final class AdminContentController extends BaseAdminController
         }
 
         if ($id > 0) {
-            $item = $this->content->find($id);
-            if ($item === null) {
+            if ($this->content->find($id) === null) {
                 $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
                 return;
             }
-
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
