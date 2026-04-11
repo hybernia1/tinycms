@@ -20,8 +20,7 @@ class Query
 
     public function select(string $table, array $columns = ['*'], array $where = []): array
     {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
+        $table = $this->resolveTable($table);
         $cols = $this->buildColumns($columns);
         [$whereSql, $params] = $this->buildWhere($where);
         $sql = "SELECT $cols FROM $table$whereSql";
@@ -44,8 +43,7 @@ class Query
 
     public function count(string $table, array $where = []): int
     {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
+        $table = $this->resolveTable($table);
         [$whereSql, $params] = $this->buildWhere($where);
         $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $table$whereSql");
         $stmt->execute($params);
@@ -54,8 +52,7 @@ class Query
 
     public function countBy(string $table, string $column, array $where = []): array
     {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
+        $table = $this->resolveTable($table);
         $this->assertIdentifier($column, 'column');
         [$whereSql, $params] = $this->buildWhere($where);
         $stmt = $this->pdo->prepare("SELECT $column AS value, COUNT(*) AS total FROM $table$whereSql GROUP BY $column");
@@ -72,8 +69,7 @@ class Query
 
     public function paginate(string $table, array $columns = ['*'], array $where = [], array $options = []): array
     {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
+        $table = $this->resolveTable($table);
         $cols = $this->buildColumns($columns);
         $page = max(1, (int)($options['page'] ?? 1));
         $perPage = max(1, (int)($options['perPage'] ?? 10));
@@ -132,8 +128,7 @@ class Query
 
     public function insert(string $table, array $data): int
     {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
+        $table = $this->resolveTable($table);
         if ($data === []) {
             throw new InvalidArgumentException(I18n::t('errors.db.insert_data_empty'));
         }
@@ -156,8 +151,7 @@ class Query
 
     public function update(string $table, array $data, array $where): int
     {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
+        $table = $this->resolveTable($table);
         if ($data === []) {
             throw new InvalidArgumentException(I18n::t('errors.db.update_data_empty'));
         }
@@ -192,8 +186,7 @@ class Query
 
     public function delete(string $table, array $where): int
     {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
+        $table = $this->resolveTable($table);
         if ($where === []) {
             throw new InvalidArgumentException(I18n::t('errors.db.delete_conditions_empty'));
         }
@@ -209,8 +202,7 @@ class Query
 
     public function deleteIn(string $table, string $column, array $values): int
     {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
+        $table = $this->resolveTable($table);
         $this->assertIdentifier($column, 'column');
         $ids = array_values(array_unique(array_filter(array_map('intval', $values), fn(int $v): bool => $v > 0)));
 
@@ -312,6 +304,13 @@ class Query
         }
 
         return $normalized;
+    }
+
+    private function resolveTable(string $table): string
+    {
+        $resolved = Table::name($table);
+        $this->assertIdentifier($resolved, 'table');
+        return $resolved;
     }
 
     private function assertIdentifier(string $value, string $context): void
