@@ -1,6 +1,6 @@
 <?php
-$list = is_array($listBase ?? null) ? $listBase : [];
-$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
+$list = $listBase ?? [];
+$statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];
 foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue)) . ' (' . (int)($statusCounts[$statusValue] ?? 0) . ')';

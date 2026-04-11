@@ -1,6 +1,6 @@
 <?php
-$list = is_array($listBase ?? null) ? $listBase : [];
-$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
+$list = $listBase ?? [];
+$statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
