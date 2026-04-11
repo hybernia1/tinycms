@@ -150,7 +150,7 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="media-library-detail-meta">
                     <div>
                         <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 media-library-name-row">
                             <input type="text" value="" data-media-library-detail-name-input>
                             <button class="btn btn-light" type="button" data-media-library-rename disabled><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></button>
                         </div>
@@ -158,7 +158,7 @@ $contentId = (int)($item['id'] ?? 0);
                     <div><strong><?= htmlspecialchars($t('common.created'), ENT_QUOTES, 'UTF-8') ?>:</strong> <span data-media-library-detail-created>—</span></div>
                 </div>
                 <small class="text-muted" data-media-library-status></small>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 media-library-actions">
                     <button class="btn btn-primary" type="button" data-media-library-choose disabled><?= htmlspecialchars($t('content.choose'), ENT_QUOTES, 'UTF-8') ?></button>
                     <button
                         class="btn btn-danger"

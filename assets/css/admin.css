@@ -363,8 +363,8 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 .media-library-modal-dialog {
-    max-width: 960px;
-    max-height: calc(100% - var(--space-5) * 2);
+    width: min(1080px, 100%);
+    max-height: calc(100vh - var(--space-4) * 2);
     margin: 0 auto;
     background: var(--color-surface);
     border: 1px solid var(--color-border-soft);
@@ -372,13 +372,14 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     flex-direction: column;
     gap: var(--space-3);
     padding: var(--space-3);
-    overflow: auto;
+    overflow: hidden;
 }
 
 .media-library-modal-layout {
     display: grid;
-    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
     gap: var(--space-3);
+    min-height: 0;
 }
 
 .media-library-detail {
@@ -387,11 +388,14 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+    min-height: 0;
+    overflow: auto;
 }
 
 .media-library-detail-preview {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    max-height: min(40vh, 360px);
+    aspect-ratio: 4 / 3;
     border: 1px solid var(--color-border-soft);
     display: flex;
     align-items: center;
@@ -421,12 +425,31 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+    min-height: 0;
+    overflow: auto;
 }
 
 .media-library-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+
+.media-library-name-row {
+    align-items: stretch;
+}
+
+.media-library-name-row input {
+    min-width: 0;
+}
+
+.media-library-actions {
+    flex-wrap: wrap;
+}
+
+.media-library-actions .btn {
+    flex: 1 1 140px;
 }
 
 .media-library-search,
@@ -589,8 +612,30 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 @media (max-width: 900px) {
+    .media-library-modal {
+        padding: var(--space-2);
+    }
+
+    .media-library-modal-dialog {
+        max-height: calc(100vh - var(--space-2) * 2);
+        padding: var(--space-2);
+        gap: var(--space-2);
+    }
+
     .media-library-modal-layout {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .media-library-list {
+        order: 1;
+    }
+
+    .media-library-detail {
+        order: 2;
+    }
+
+    .media-library-detail-preview {
+        max-height: min(28vh, 220px);
     }
 }
 
