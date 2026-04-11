@@ -1,5 +1,5 @@
 <?php
-$listState = \App\View\Admin\ListConfigFactory::state($pagination, $status ?? 'all', $query ?? '', $statusCounts ?? []);
+$listState = \App\View\Admin\TemplateFactory::listState($pagination, $status ?? 'all', $query ?? '', $statusCounts ?? []);
 $listItems = $listState['items'];
 $listPage = $listState['page'];
 $listPerPage = $listState['perPage'];
@@ -69,7 +69,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     return (string)ob_get_clean();
 };
 
-$listConfig = \App\View\Admin\ListConfigFactory::build([
+$listConfig = \App\View\Admin\TemplateFactory::listConfig([
     'name' => 'media',
     'endpoint' => $url('admin/api/v1/media'),
     'editBase' => $url('admin/media/edit?id='),

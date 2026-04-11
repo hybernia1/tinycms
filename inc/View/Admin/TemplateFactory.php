@@ -5,10 +5,10 @@ namespace App\View\Admin;
 
 use App\Service\Support\PaginationConfig;
 
-final class ListConfigFactory
+final class TemplateFactory
 {
 
-    public static function state(array $pagination, mixed $status, mixed $query, mixed $statusCounts): array
+    public static function listState(array $pagination, mixed $status, mixed $query, mixed $statusCounts): array
     {
         return [
             'items' => is_array($pagination['data'] ?? null) ? $pagination['data'] : [],
@@ -21,7 +21,7 @@ final class ListConfigFactory
         ];
     }
 
-    public static function build(array $input): array
+    public static function listConfig(array $input): array
     {
         $statusCurrent = (string)($input['statusCurrent'] ?? 'all');
         $perPage = (int)($input['perPage'] ?? PaginationConfig::perPage());
