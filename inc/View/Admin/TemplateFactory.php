@@ -7,6 +7,8 @@ use App\Service\Support\PaginationConfig;
 
 final class TemplateFactory
 {
+    private const ADMIN_ONLY_PATHS = ['admin/users', 'admin/settings'];
+
     public static function adminPageType(string $currentPath): string
     {
         return match (true) {
@@ -39,6 +41,27 @@ final class TemplateFactory
             'query' => (string)($query ?? ''),
             'statusCounts' => is_array($statusCounts) ? $statusCounts : [],
         ];
+    }
+
+    public static function adminNavItems(array $items, mixed $authUser, string $currentPath): array
+    {
+        $resolved = [];
+        $role = is_array($authUser) ? (string)($authUser['role'] ?? '') : '';
+
+        foreach ($items as $item) {
+            $entry = is_array($item) ? $item : [];
+            $itemUrl = (string)($entry['url'] ?? '');
+            $itemPath = trim(parse_url($itemUrl, PHP_URL_PATH) ?? '', '/');
+
+            if ($role !== 'admin' && in_array($itemPath, self::ADMIN_ONLY_PATHS, true)) {
+                continue;
+            }
+
+            $entry['active'] = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
+            $resolved[] = $entry;
+        }
+
+        return $resolved;
     }
 
 

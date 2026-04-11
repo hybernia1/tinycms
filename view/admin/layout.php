@@ -3,6 +3,7 @@ declare(strict_types=1);
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 $authUser = $_SESSION['auth'] ?? null;
 $pageType = \App\View\Admin\TemplateFactory::adminPageType($currentPath);
+$navItems = \App\View\Admin\TemplateFactory::adminNavItems($adminMenu, $authUser, $currentPath);
 $isContentEdit = $pageType === 'content_edit';
 ?>
 <!doctype html>
@@ -173,16 +174,8 @@ $isContentEdit = $pageType === 'content_edit';
             <img src="<?= htmlspecialchars($url('assets/svg/logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
         </a>
         <nav class="admin-nav">
-            <?php foreach ($adminMenu as $item):
-                $role = (string)($authUser['role'] ?? '');
-                $itemUrl = (string)($item['url'] ?? '');
-                $itemPath = trim(parse_url($itemUrl, PHP_URL_PATH) ?? '', '/');
-                if ($role !== 'admin' && in_array($itemPath, ['admin/users', 'admin/settings'], true)) {
-                    continue;
-                }
-                $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
-            ?>
-            <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= htmlspecialchars((string)$item['url'], ENT_QUOTES, 'UTF-8') ?>">
+            <?php foreach ($navItems as $item): ?>
+            <a class="admin-nav-link<?= ($item['active'] ?? false) ? ' active' : '' ?>" href="<?= htmlspecialchars((string)$item['url'], ENT_QUOTES, 'UTF-8') ?>">
                 <?php if (!empty($item['icon'])): ?>
                 <?= $icon((string)$item['icon'], 'icon admin-nav-link-icon') ?>
                 <?php endif; ?>
