@@ -5,3 +5,5 @@
 3. Nepřidávej dokumentace.
 4. Nevytvářej velké monolitické soubory.
 5. Žádné legacy kody, vždy smaž to co již není uživáno, je například nahrazeno
+6. Aplikace je vývoji, čili není třeba zachovávat zpětnou kompatibilitu
+   
