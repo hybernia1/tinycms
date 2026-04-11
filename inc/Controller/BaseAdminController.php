@@ -8,6 +8,7 @@ use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
+use App\Service\Support\ThumbnailVariants;
 
 abstract class BaseAdminController
 {
@@ -227,23 +228,10 @@ abstract class BaseAdminController
     {
         $pathWebp = trim((string)($item['path_webp'] ?? ''));
         if ($pathWebp !== '') {
-            return (string)(preg_replace('/\\.webp$/i', $this->thumbnailSuffix(), $pathWebp) ?? $pathWebp);
+            return ThumbnailVariants::thumbnailPath($pathWebp);
         }
 
         return trim((string)($item['path'] ?? ''));
-    }
-
-    protected function thumbnailSuffix(): string
-    {
-        $suffix = '_100x100.webp';
-        if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
-            $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
-            if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
-                $suffix = (string)$firstVariant['suffix'];
-            }
-        }
-
-        return $suffix;
     }
 
     private function ensureSession(): void

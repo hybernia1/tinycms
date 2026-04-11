@@ -458,13 +458,11 @@ initListApi({
     withStatus: true,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: { deleteSuccess: t('media.deleted', 'Media deleted.') },
-    getContext: (root) => ({ thumbSuffix: root.getAttribute('data-thumb-suffix') || '_100x100.webp' }),
-    rowHtml: (item, { editBase, context }) => {
-        const thumbSuffix = context.thumbSuffix || '_100x100.webp';
+    rowHtml: (item, { editBase }) => {
         const id = Number(item.id || 0);
         const preview = String(item.preview_path || '');
         const webp = String(item.path_webp || '');
-        const img = preview !== '' ? preview : (webp !== '' ? webp.replace(/\.webp$/i, thumbSuffix) : String(item.path || ''));
+        const img = preview !== '' ? preview : (webp !== '' ? webp : String(item.path || ''));
         const canEdit = item.can_edit === true;
         const canDelete = item.can_delete === true;
 

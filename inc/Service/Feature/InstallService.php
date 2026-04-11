@@ -211,7 +211,6 @@ final class InstallService
             . "const DB_PASS = " . var_export((string)$db['db_pass'], true) . ";\n\n"
             . "const DB_PREFIX = " . var_export($prefix, true) . ";\n\n"
             . "const MEDIA_THUMB_VARIANTS = [\n"
-            . "    ['suffix' => '_100x100.webp', 'mode' => 'crop', 'width' => 100, 'height' => 100],\n"
             . "    ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],\n"
             . "];\n";
 

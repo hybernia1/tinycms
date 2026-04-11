@@ -5,16 +5,13 @@ namespace App\Service\Feature;
 
 use App\Service\Support\SluggerService;
 use App\Service\Support\I18n;
+use App\Service\Support\ThumbnailVariants;
 
 final class UploadService
 {
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     private const SITE_IMAGE_EXTENSIONS = ['png', 'ico', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
     private const MAX_WEBP_WIDTH = 1024;
-    private const DEFAULT_THUMB_VARIANTS = [
-        ['suffix' => '_100x100.webp', 'mode' => 'crop', 'width' => 100, 'height' => 100],
-        ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],
-    ];
     private const MIME_TO_EXTENSION = [
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
@@ -391,36 +388,11 @@ final class UploadService
 
     private function thumbnailPath(string $webpPath, string $suffix): string
     {
-        return (string)(preg_replace('/\.webp$/i', $suffix, $webpPath) ?? $webpPath);
+        return ThumbnailVariants::thumbnailPath($webpPath, $suffix);
     }
 
     private function thumbVariants(): array
     {
-        $raw = defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS) ? MEDIA_THUMB_VARIANTS : self::DEFAULT_THUMB_VARIANTS;
-        $variants = [];
-
-        foreach ($raw as $item) {
-            if (!is_array($item)) {
-                continue;
-            }
-
-            $suffix = trim((string)($item['suffix'] ?? ''));
-            $mode = trim((string)($item['mode'] ?? 'crop'));
-            $width = (int)($item['width'] ?? 0);
-            $height = (int)($item['height'] ?? 0);
-
-            if ($suffix === '' || !str_ends_with(strtolower($suffix), '.webp') || $width <= 0) {
-                continue;
-            }
-
-            if ($mode === 'fit') {
-                $variants[] = ['suffix' => $suffix, 'mode' => 'fit', 'width' => $width, 'height' => 0];
-                continue;
-            }
-
-            $variants[] = ['suffix' => $suffix, 'mode' => 'crop', 'width' => $width, 'height' => $height > 0 ? $height : $width];
-        }
-
-        return $variants === [] ? self::DEFAULT_THUMB_VARIANTS : $variants;
+        return ThumbnailVariants::variants();
     }
 }
