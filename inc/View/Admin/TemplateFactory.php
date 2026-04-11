@@ -7,6 +7,26 @@ use App\Service\Support\PaginationConfig;
 
 final class TemplateFactory
 {
+    public static function adminPageType(string $currentPath): string
+    {
+        return match (true) {
+            str_ends_with($currentPath, 'admin/users/add') => 'users_add',
+            str_ends_with($currentPath, 'admin/users/edit') => 'users_edit',
+            str_ends_with($currentPath, 'admin/users') => 'users_list',
+            str_ends_with($currentPath, 'admin/content/add') => 'content_add',
+            str_ends_with($currentPath, 'admin/content/edit') => 'content_edit',
+            str_ends_with($currentPath, 'admin/content') => 'content_list',
+            str_ends_with($currentPath, 'admin/media/add') => 'media_add',
+            str_ends_with($currentPath, 'admin/media/edit') => 'media_edit',
+            str_ends_with($currentPath, 'admin/media') => 'media_list',
+            str_ends_with($currentPath, 'admin/terms/add') => 'terms_add',
+            str_ends_with($currentPath, 'admin/terms/edit') => 'terms_edit',
+            str_ends_with($currentPath, 'admin/terms') => 'terms_list',
+            str_ends_with($currentPath, 'admin/settings') => 'settings',
+            default => 'other',
+        };
+    }
+
 
     public static function listState(array $pagination, mixed $status, mixed $query, mixed $statusCounts): array
     {

@@ -2,19 +2,8 @@
 declare(strict_types=1);
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 $authUser = $_SESSION['auth'] ?? null;
-$isUsersList = str_ends_with($currentPath, 'admin/users');
-$isUsersAdd = str_ends_with($currentPath, 'admin/users/add');
-$isContentList = str_ends_with($currentPath, 'admin/content');
-$isContentAdd = str_ends_with($currentPath, 'admin/content/add');
-$isMediaList = str_ends_with($currentPath, 'admin/media');
-$isMediaAdd = str_ends_with($currentPath, 'admin/media/add');
-$isMediaEdit = str_ends_with($currentPath, 'admin/media/edit');
-$isTermsList = str_ends_with($currentPath, 'admin/terms');
-$isTermsAdd = str_ends_with($currentPath, 'admin/terms/add');
-$isUsersEdit = str_ends_with($currentPath, 'admin/users/edit');
-$isContentEdit = str_ends_with($currentPath, 'admin/content/edit');
-$isTermsEdit = str_ends_with($currentPath, 'admin/terms/edit');
-$isSettings = str_ends_with($currentPath, 'admin/settings');
+$pageType = \App\View\Admin\TemplateFactory::adminPageType($currentPath);
+$isContentEdit = $pageType === 'content_edit';
 ?>
 <!doctype html>
 <html lang="<?= htmlspecialchars((string)$lang, ENT_QUOTES, 'UTF-8') ?>">
@@ -227,7 +216,7 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                 </button>
                 <strong data-admin-page-title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
             </div>
-            <?php if ($isMediaEdit): ?>
+            <?php switch ($pageType): case 'media_edit': ?>
             <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="#media-editor-form">
                 <div class="admin-header-action-split">
                     <button class="btn btn-primary admin-header-action-main" type="button" data-save-action-primary>
@@ -251,28 +240,28 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                     </div>
                 </div>
             </div>
-            <?php elseif ($isMediaAdd): ?>
+            <?php break; case 'media_add': ?>
             <button class="btn btn-primary" type="button" data-save-action-form-submit="#media-editor-form">
                 <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
             </button>
-            <?php elseif ($isUsersEdit || $isUsersAdd): ?>
+            <?php break; case 'users_edit': case 'users_add': ?>
             <button class="btn btn-primary" type="button" data-save-action-form-submit="#users-editor-form">
                 <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
             </button>
-            <?php elseif ($isTermsEdit || $isTermsAdd): ?>
+            <?php break; case 'terms_edit': case 'terms_add': ?>
             <button class="btn btn-primary" type="button" data-save-action-form-submit="#terms-editor-form">
                 <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
             </button>
-            <?php elseif ($isSettings): ?>
+            <?php break; case 'settings': ?>
             <button class="btn btn-primary" type="button" data-save-action-form-submit="#settings-form">
                 <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
             </button>
-            <?php elseif ($isUsersList): ?>
+            <?php break; case 'users_list': ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/users/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_user'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isContentEdit || $isContentAdd): ?>
+            <?php break; case 'content_edit': case 'content_add': ?>
             <div class="admin-header-action-menu" data-content-action-menu>
                 <div class="admin-header-action-split">
                     <button class="btn btn-primary admin-header-action-main" type="button" data-content-action-primary>
@@ -303,22 +292,22 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                     <?php endif; ?>
                 </div>
             </div>
-            <?php elseif ($isContentList): ?>
+            <?php break; case 'content_list': ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/content/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_content'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isMediaList): ?>
+            <?php break; case 'media_list': ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/media/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_media'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php elseif ($isTermsList): ?>
+            <?php break; case 'terms_list': ?>
             <a class="btn btn-primary" href="<?= htmlspecialchars($url('admin/terms/add'), ENT_QUOTES, 'UTF-8') ?>">
                 <?= $icon('add') ?>
                 <span><?= htmlspecialchars($t('admin.add_term'), ENT_QUOTES, 'UTF-8') ?></span>
             </a>
-            <?php endif; ?>
+            <?php break; endswitch; ?>
         </div>
         <section class="admin-content p-2">
             <?php foreach ($flashes as $flash): ?>
