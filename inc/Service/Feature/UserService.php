@@ -62,7 +62,6 @@ final class UserService
 
         return $this->query->update('users', [
             'suspend' => 1,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['ID' => $id]) > 0;
     }
 
@@ -76,7 +75,6 @@ final class UserService
 
         return $this->query->update('users', [
             'suspend' => 0,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['ID' => $id]) > 0;
     }
 
@@ -95,10 +93,6 @@ final class UserService
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors['email'] = I18n::t('validation.email_invalid');
-        }
-
-        if (!in_array($role, ['admin', 'editor'], true)) {
-            $errors['role'] = I18n::t('validation.role_invalid');
         }
 
         if ($id === null && $password === '') {
@@ -141,13 +135,11 @@ final class UserService
             $suspend = 0;
         }
 
-        $now = date('Y-m-d H:i:s');
         $payload = [
             'name' => $name,
             'email' => $email,
             'role' => $role,
             'suspend' => $suspend,
-            'updated' => $now,
         ];
 
         if ($password !== '') {
@@ -156,7 +148,6 @@ final class UserService
 
         try {
             if ($id === null) {
-                $payload['created'] = $now;
                 $newId = $this->query->insert('users', $payload);
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }
