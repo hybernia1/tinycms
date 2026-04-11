@@ -28,8 +28,5 @@ declare(strict_types=1);
     <?php endforeach; ?>
 </div>
 <?= $content ?>
-<footer class="container py-4 text-muted">
-    <?= htmlspecialchars((string)($siteFooter ?? '© TinyCMS'), ENT_QUOTES, 'UTF-8') ?>
-</footer>
 </body>
 </html>

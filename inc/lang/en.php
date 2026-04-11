@@ -272,7 +272,6 @@ return [
             'app_lang' => 'Application language',
             'theme' => 'Theme',
             'sitename' => 'Site name',
-            'sitefooter' => 'Site footer',
             'siteauthor' => 'Site author',
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',

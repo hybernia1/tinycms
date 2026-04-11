@@ -351,7 +351,6 @@ final class FrontController
         $settings = $this->settings->resolved();
         return [
             'name' => (string)($settings['sitename'] ?? 'TinyCMS'),
-            'footer' => (string)($settings['sitefooter'] ?? '© TinyCMS'),
             'author' => (string)($settings['siteauthor'] ?? 'Admin'),
             'theme' => (string)($settings['theme'] ?? 'default'),
             'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
