@@ -81,8 +81,8 @@ const initListApi = (config) => {
     const body = root.querySelector(`[data-${config.name}-list-body]`);
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
-    const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`) || document.querySelector(`[data-${config.name}-delete-modal]`);
     const modalService = window.tinycmsModal;
+    const deleteConfirmText = root.getAttribute('data-delete-confirm-text') || '';
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
         : [];
@@ -113,8 +113,6 @@ const initListApi = (config) => {
 
     let searchTimer = null;
     let fetchController = null;
-
-    const deleteModalName = deleteModal?.getAttribute('id') || `${config.name}-list-delete`;
 
     const setPagination = (page, totalPages) => {
         if (!prevLink || !nextLink) {
@@ -314,8 +312,8 @@ const initListApi = (config) => {
                 return;
             }
             let approved = true;
-            if (deleteModal) {
-                approved = await modalService.confirm(deleteModalName);
+            if (modalService && typeof modalService.confirm === 'function') {
+                approved = await modalService.confirm('confirm-modal', { text: deleteConfirmText });
             }
             if (!approved) {
                 return;

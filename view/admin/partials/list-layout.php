@@ -26,6 +26,7 @@ $rootAttrs = [
     'data-' . $listName . '-list' => null,
     'data-endpoint' => $listEndpoint,
     'data-edit-base' => $listEditBase,
+    'data-delete-confirm-text' => $deleteConfirmText,
 ];
 foreach ($listRootAttrs as $attr => $value) {
     $rootAttrs[(string)$attr] = $value;
@@ -104,22 +105,4 @@ foreach ($listRootAttrs as $attr => $value) {
             </form>
         </div>
     </div>
-
-    <?php
-    $modal = [
-        'id' => $listName . '-delete-modal',
-        'attrs' => [
-            'data-' . $listName . '-delete-modal' => null,
-        ],
-        'text' => $deleteConfirmText,
-        'has_text_data' => false,
-        'close_attrs' => [
-            'data-' . $listName . '-delete-cancel' => null,
-        ],
-        'confirm_attrs' => [
-            'data-' . $listName . '-delete-confirm' => null,
-        ],
-    ];
-    require __DIR__ . '/modal.php';
-    ?>
 </div>

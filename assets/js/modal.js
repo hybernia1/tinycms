@@ -48,15 +48,18 @@ const findOpenModalFromTarget = (target) => {
     return null;
 };
 
-const applyTriggerPayload = (modal, trigger) => {
-    if (!modal || !trigger) {
+const applyModalPayload = (modal, payload = {}) => {
+    if (!modal) {
         return;
     }
-    const type = trigger.getAttribute('data-type') || t('modal.default_type', 'item');
-    const formId = trigger.getAttribute('data-form-id') || '';
+    const type = String(payload.type || '').trim();
+    const formId = String(payload.formId || '').trim();
+    const textValue = String(payload.text || '').trim();
     const text = modal.querySelector('[data-modal-text]');
     const confirm = modal.querySelector('[data-modal-confirm]');
-    if (text && trigger.hasAttribute('data-type')) {
+    if (text && textValue !== '') {
+        text.textContent = textValue;
+    } else if (text && type !== '') {
         text.textContent = t('modal.confirm_delete_type', 'Do you really want to delete this %s?').replace('%s', type);
     }
     if (confirm && formId) {
@@ -120,6 +123,7 @@ const openModal = (target, payload = {}) => {
     }
     const { entry, name } = resolved;
     entry.opener = payload?.opener instanceof Element ? payload.opener : entry.opener;
+    applyModalPayload(entry.element, payload);
     entry.element.classList.add('open');
     if (!openStack.includes(entry.element)) {
         openStack.push(entry.element);
@@ -172,7 +176,11 @@ document.addEventListener('click', (event) => {
         if (!modal) {
             return;
         }
-        applyTriggerPayload(modal, openTrigger);
+        applyModalPayload(modal, {
+            type: openTrigger.getAttribute('data-type') || '',
+            formId: openTrigger.getAttribute('data-form-id') || '',
+            text: openTrigger.getAttribute('data-modal-text') || '',
+        });
         const modalName = modal.getAttribute('id') || getNameByElement(modal) || '';
         openModal(modalName !== '' ? modalName : modal, { opener: openTrigger });
         return;

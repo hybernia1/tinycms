@@ -248,7 +248,7 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
                         </button>
                     </div>
                     <div class="admin-header-action-group admin-header-action-group-danger">
-                        <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete data-modal-open data-modal-target="#media-delete-modal">
+                        <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete data-modal-open data-modal-target="#confirm-modal" data-modal-text="<?= htmlspecialchars($t('media.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>" data-form-id="media-delete-form">
                             <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
                             <?= $icon('delete') ?>
                         </button>
@@ -339,6 +339,14 @@ $isSettings = str_ends_with($currentPath, 'admin/settings');
         </section>
     </main>
 </div>
+<?php
+$modal = [
+    'id' => 'confirm-modal',
+    'text' => '',
+    'has_text_data' => true,
+];
+require __DIR__ . '/partials/modal.php';
+?>
 <template id="wysiwyg-link-modal-template">
     <div class="wysiwyg-link-modal" data-wysiwyg-link-modal-template>
         <div class="wysiwyg-link-dialog">

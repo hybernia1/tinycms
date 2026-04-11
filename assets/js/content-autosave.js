@@ -33,6 +33,9 @@
         var pendingNavigation = '';
         var pendingReload = false;
         var modalService = window.tinycmsModal;
+        var t = (window.tinycmsI18nHelper && typeof window.tinycmsI18nHelper.t === 'function')
+            ? window.tinycmsI18nHelper.t
+            : function (path, fallback) { return fallback || ''; };
         var editLayoutApplied = false;
         var appRoot = '';
         if (autosaveEndpoint.indexOf('/admin/api/v1/content/autosave') >= 0) {
@@ -224,25 +227,27 @@
             return signature(serializePayload()) !== lastSent;
         }
 
-        function leaveModal() {
-            return document.getElementById('content-leave-modal') || document.querySelector('[data-content-leave-modal]');
+        function confirmLeave() {
+            if (!modalService || typeof modalService.confirm !== 'function') {
+                return Promise.resolve(false);
+            }
+            return modalService.confirm('confirm-modal', {
+                text: t('content.leave_page_confirm', 'Do you really want to leave this page?'),
+            });
         }
 
-        var leaveModalName = 'content-leave-modal';
-        var leaveModalElement = leaveModal();
-
-        function closeLeaveModal() {
-            if (leaveModalElement) {
-                modalService.close(leaveModalName);
+        function proceedLeave() {
+            bypassLeaveWarning = true;
+            if (pendingReload) {
+                window.location.reload();
+                return;
+            }
+            if (pendingNavigation !== '') {
+                window.location.href = pendingNavigation;
+                return;
             }
             pendingNavigation = '';
             pendingReload = false;
-        }
-
-        function openLeaveModal() {
-            if (leaveModalElement) {
-                modalService.open(leaveModalName);
-            }
         }
 
         function shouldGuardLink(link) {
@@ -277,33 +282,16 @@
             event.preventDefault();
             pendingNavigation = '';
             pendingReload = true;
-            openLeaveModal();
+            confirmLeave().then(function (approved) {
+                if (!approved) {
+                    pendingReload = false;
+                    return;
+                }
+                proceedLeave();
+            });
         });
 
         document.addEventListener('click', function (event) {
-            var cancelLeave = event.target.closest('[data-content-leave-cancel]');
-            if (cancelLeave) {
-                event.preventDefault();
-                closeLeaveModal();
-                return;
-            }
-
-            var confirmLeave = event.target.closest('[data-content-leave-confirm]');
-            if (confirmLeave) {
-                event.preventDefault();
-                bypassLeaveWarning = true;
-                if (pendingReload) {
-                    window.location.reload();
-                    return;
-                }
-                if (pendingNavigation !== '') {
-                    window.location.href = pendingNavigation;
-                    return;
-                }
-                closeLeaveModal();
-                return;
-            }
-
             if (bypassLeaveWarning || !hasUnsavedChanges()) {
                 return;
             }
@@ -316,7 +304,13 @@
             event.preventDefault();
             pendingNavigation = String(link.href || '');
             pendingReload = false;
-            openLeaveModal();
+            confirmLeave().then(function (approved) {
+                if (!approved) {
+                    pendingNavigation = '';
+                    return;
+                }
+                proceedLeave();
+            });
         });
 
         document.addEventListener('tinycms:content-ensure-draft', function () {

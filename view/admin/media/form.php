@@ -183,15 +183,4 @@ if ($mode === 'edit') {
     <form id="media-delete-form" method="post" action="<?= htmlspecialchars($url('admin/media/edit/delete?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
     </form>
-    <?php
-    $modal = [
-        'id' => 'media-delete-modal',
-        'text' => $t('media.delete_confirm'),
-        'has_text_data' => true,
-        'confirm_attrs' => [
-            'data-form-id' => 'media-delete-form',
-        ],
-    ];
-    require __DIR__ . '/../partials/modal.php';
-    ?>
 <?php endif; ?>

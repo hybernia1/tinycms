@@ -138,7 +138,7 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     </div>
     <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     <?php if ($mode === 'edit'): ?>
-        <button class="d-none" type="button" data-content-delete-trigger data-modal-open data-modal-target="#content-delete-modal"></button>
+        <button class="d-none" type="button" data-content-delete-trigger data-modal-open data-modal-target="#confirm-modal" data-modal-text="<?= htmlspecialchars($t('content.delete_confirm'), ENT_QUOTES, 'UTF-8') ?>" data-form-id="content-delete-form"></button>
     <?php endif; ?>
 </form>
 <?php if ($mode === 'edit'): ?>
@@ -172,34 +172,3 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
-<?php
-$modal = [
-    'id' => 'media-library-delete-modal',
-    'text' => $t('content.delete_image_confirm'),
-    'has_text_data' => true,
-];
-require __DIR__ . '/../partials/modal.php';
-?>
-<?php
-$modal = [
-    'id' => 'content-leave-modal',
-    'attrs' => ['data-content-leave-modal' => null],
-    'text' => $t('content.leave_page_confirm'),
-    'close_attrs' => ['data-content-leave-cancel' => null],
-    'confirm_attrs' => ['data-content-leave-confirm' => null],
-];
-require __DIR__ . '/../partials/modal.php';
-?>
-<?php if ($mode === 'edit'): ?>
-<?php
-$modal = [
-    'id' => 'content-delete-modal',
-    'text' => $t('content.delete_confirm'),
-    'has_text_data' => true,
-    'confirm_attrs' => [
-        'data-form-id' => 'content-delete-form',
-    ],
-];
-require __DIR__ . '/../partials/modal.php';
-?>
-<?php endif; ?>

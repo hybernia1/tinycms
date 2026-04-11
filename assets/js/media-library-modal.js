@@ -31,7 +31,6 @@ if (modal && openTrigger) {
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
     const deleteMediaIdField = document.querySelector('[data-media-library-delete-media-id]');
     const deleteForm = document.getElementById('media-library-delete-form');
-    const deleteConfirmModal = document.getElementById('media-library-delete-modal');
     const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
     const detailNameInput = modal.querySelector('[data-media-library-detail-name-input]');
     const detailCreated = modal.querySelector('[data-media-library-detail-created]');
@@ -667,10 +666,12 @@ if (modal && openTrigger) {
 
     if (deleteButton && deleteForm && deleteMediaIdField) {
         deleteButton.addEventListener('click', async () => {
-            if (!selectedMedia || !deleteConfirmModal) {
+            if (!selectedMedia) {
                 return;
             }
-            const approved = await modalService.confirm('media-library-delete-modal');
+            const approved = await modalService.confirm('confirm-modal', {
+                text: t('content.delete_image_confirm', 'Do you really want to delete this image?'),
+            });
             if (!approved || !selectedMedia) {
                 return;
             }
