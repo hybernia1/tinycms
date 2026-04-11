@@ -144,7 +144,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->applyEditorAuthor($_POST, $authorId), $authorId);
+        $result = $this->content->save($this->normalizeAuthorInput($_POST), $authorId);
 
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
@@ -217,7 +217,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->applyEditorAuthor($_POST, $authorId), $authorId, $id);
+        $result = $this->content->save($this->normalizeAuthorInput($_POST), $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
@@ -468,9 +468,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $author = trim((string)($input['author'] ?? ''));
-        if ($this->isEditor()) {
-            $author = $authorId > 0 ? (string)$authorId : '';
-        } elseif ($author === '' && $authorId > 0) {
+        if ($author === '' && $authorId > 0) {
             $author = (string)$authorId;
         }
 

@@ -148,18 +148,9 @@ abstract class BaseAdminController
         return (int)($this->authService->auth()->id() ?? 0);
     }
 
-    protected function isEditor(): bool
-    {
-        return (string)($this->authService->auth()->role() ?? '') === 'editor';
-    }
-
     protected function canManageByAuthor(array $item, string $authorKey = 'author'): bool
     {
-        if (!$this->isEditor()) {
-            return true;
-        }
-
-        return (int)($item[$authorKey] ?? 0) === $this->currentUserId();
+        return true;
     }
 
     protected function formatDateTime(string $value): string
@@ -177,13 +168,8 @@ abstract class BaseAdminController
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
     }
 
-    protected function applyEditorAuthor(array $input, int $authorId, string $key = 'author'): array
+    protected function normalizeAuthorInput(array $input): array
     {
-        if (!$this->isEditor()) {
-            return $input;
-        }
-
-        $input[$key] = $authorId > 0 ? (string)$authorId : '';
         return $input;
     }
 

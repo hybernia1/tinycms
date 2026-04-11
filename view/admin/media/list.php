@@ -10,9 +10,6 @@ $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
 ];
-$authUser = $_SESSION['auth'] ?? [];
-$isEditor = (string)($authUser['role'] ?? '') === 'editor';
-$currentUserId = (int)($authUser['id'] ?? 0);
 $csrfMarkup = $csrfField();
 $listName = 'media';
 $listEndpoint = $url('admin/api/v1/media');
@@ -31,7 +28,7 @@ $statusEnabled = true;
 $deleteConfirmText = $t('media.delete_confirm');
 $statusUrl = static fn(string $targetStatus): string => $url('admin/media?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
 $paginationUrl = static fn(int $targetPage): string => $url('admin/media?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
-$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $isEditor, $currentUserId): string {
+$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t): string {
     $id = (int)($row['id'] ?? 0);
     $previewPath = trim((string)($row['preview_path'] ?? ''));
     if ($previewPath === '') {
@@ -41,7 +38,6 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
         $previewPath = trim((string)($row['path'] ?? ''));
     }
     $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
-    $canManage = !$isEditor || (int)($row['author'] ?? 0) === $currentUserId;
     ob_start();
     ?>
     <tr>
@@ -55,11 +51,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
                     <div class="media-list-thumb media-list-thumb-empty"></div>
                 <?php endif; ?>
                 <div>
-                    <?php if ($canManage): ?>
-                        <a href="<?= htmlspecialchars($url('admin/media/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-                    <?php else: ?>
-                        <span><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
-                    <?php endif; ?>
+                    <a href="<?= htmlspecialchars($url('admin/media/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
                     <div class="text-muted small"><?= htmlspecialchars((string)($row['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                     <div class="text-muted small"><?= htmlspecialchars($formatDateTime((string)($row['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
                 </div>
@@ -67,12 +59,10 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
         </td>
         <td class="mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
         <td class="table-col-actions">
-            <?php if ($canManage): ?>
-                <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
-                    <?= $icon('delete') ?>
-                    <span class="sr-only"><?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?></span>
-                </button>
-            <?php endif; ?>
+            <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
+                <?= $icon('delete') ?>
+                <span class="sr-only"><?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+            </button>
         </td>
     </tr>
     <?php

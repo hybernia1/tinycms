@@ -57,7 +57,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 'unsuspended' => $t('users.unsuspended'),
                 'status_suspended_single' => $t('users.status.suspended_single'),
                 'roles' => [
-                    'editor' => $t('users.roles.editor'),
+                    'user' => $t('users.roles.user'),
                     'admin' => $t('users.roles.admin'),
                 ],
                 'delete' => $t('users.delete'),

@@ -56,6 +56,6 @@ final class AuthService
 
     public function canAccessAdmin(): bool
     {
-        return $this->auth->check() && in_array((string)$this->auth->role(), ['admin', 'editor'], true);
+        return $this->auth->check() && (string)$this->auth->role() === 'admin';
     }
 }

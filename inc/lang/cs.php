@@ -142,7 +142,7 @@ return [
             'suspended_single' => 'Suspendován',
         ],
         'roles' => [
-            'editor' => 'Redaktor',
+            'user' => 'Uživatel',
             'admin' => 'Administrátor',
         ],
     ],
@@ -306,7 +306,7 @@ return [
     'validation' => [
         'name_required' => 'Název je povinný.',
         'email_invalid' => 'E-mail není validní.',
-        'role_invalid' => 'Role musí být admin nebo editor.',
+        'role_invalid' => 'Role musí být admin nebo user.',
         'password_required_new_user' => 'Heslo je povinné pro nového uživatele.',
         'email_already_used' => 'E-mail je už použit.',
         'author_invalid' => 'Autor není validní.',

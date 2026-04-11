@@ -12,7 +12,7 @@ final class SchemaDefinition
                 'email' => ['max' => 255, 'nullable' => true],
                 'password' => ['max' => 255, 'nullable' => false],
                 'name' => ['max' => 255, 'nullable' => true],
-                'role' => ['max' => 50, 'nullable' => false, 'allowed' => ['admin', 'editor']],
+                'role' => ['max' => 50, 'nullable' => false, 'allowed' => ['admin', 'user']],
             ],
             'media' => [
                 'path' => ['max' => 500, 'nullable' => true],
@@ -58,7 +58,7 @@ final class SchemaDefinition
                 name VARCHAR(255) DEFAULT NULL,
                 created DATETIME NOT NULL DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                role VARCHAR(50) NOT NULL DEFAULT 'editor',
+                role VARCHAR(50) NOT NULL DEFAULT 'user',
                 suspend TINYINT(1) NOT NULL DEFAULT 0,
                 PRIMARY KEY (id),
                 UNIQUE KEY uq_users_email (email)
