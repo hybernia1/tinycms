@@ -1,26 +1,38 @@
 <?php
+$config = is_array($listConfig ?? null) ? $listConfig : [];
+
 $items = is_array($listItems ?? null) ? $listItems : [];
-$listName = (string)($listName ?? 'list');
-$listEndpoint = (string)($listEndpoint ?? '');
-$listEditBase = (string)($listEditBase ?? '');
-$listRootAttrs = is_array($listRootAttrs ?? null) ? $listRootAttrs : [];
-$searchPlaceholder = (string)($searchPlaceholder ?? '');
-$searchHidden = is_array($searchHidden ?? null) ? $searchHidden : [];
-$perPageHidden = is_array($perPageHidden ?? null) ? $perPageHidden : [];
-$listColumns = is_array($listColumns ?? null) ? $listColumns : [];
-$listAllowedPerPage = is_array($listAllowedPerPage ?? null) ? $listAllowedPerPage : [];
-$listPage = (int)($listPage ?? 1);
-$listPerPage = (int)($listPerPage ?? \App\Service\Support\PaginationConfig::perPage());
-$listTotalPages = (int)($listTotalPages ?? 1);
-$listQuery = (string)($listQuery ?? '');
-$statusEnabled = (bool)($statusEnabled ?? false);
-$statusLinks = is_array($statusLinks ?? null) ? $statusLinks : [];
-$statusCurrent = (string)($statusCurrent ?? 'all');
-$statusUrl = is_callable($statusUrl ?? null) ? $statusUrl : null;
-$paginationUrl = is_callable($paginationUrl ?? null) ? $paginationUrl : null;
-$rowRenderer = is_callable($rowRenderer ?? null) ? $rowRenderer : null;
-$deleteConfirmText = (string)($deleteConfirmText ?? '');
-$csrfMarkup = (string)($csrfMarkup ?? '');
+$meta = is_array($config['meta'] ?? null) ? $config['meta'] : [];
+$filters = is_array($config['filters'] ?? null) ? $config['filters'] : [];
+$table = is_array($config['table'] ?? null) ? $config['table'] : [];
+$pagination = is_array($config['pagination'] ?? null) ? $config['pagination'] : [];
+$actions = is_array($config['actions'] ?? null) ? $config['actions'] : [];
+
+$listName = (string)($meta['name'] ?? 'list');
+$listEndpoint = (string)($meta['endpoint'] ?? '');
+$listEditBase = (string)($meta['editBase'] ?? '');
+$listRootAttrs = is_array($meta['rootAttrs'] ?? null) ? $meta['rootAttrs'] : [];
+$csrfMarkup = (string)($meta['csrfMarkup'] ?? '');
+
+$statusEnabled = (bool)($filters['statusEnabled'] ?? false);
+$statusLinks = is_array($filters['statusLinks'] ?? null) ? $filters['statusLinks'] : [];
+$statusCurrent = (string)($filters['statusCurrent'] ?? 'all');
+$statusUrl = is_callable($filters['statusUrl'] ?? null) ? $filters['statusUrl'] : null;
+$searchPlaceholder = (string)($filters['searchPlaceholder'] ?? '');
+$searchHidden = is_array($filters['searchHidden'] ?? null) ? $filters['searchHidden'] : [];
+$listQuery = (string)($filters['query'] ?? '');
+
+$listColumns = is_array($table['columns'] ?? null) ? $table['columns'] : [];
+$rowRenderer = is_callable($table['rowRenderer'] ?? null) ? $table['rowRenderer'] : null;
+
+$listPage = (int)($pagination['page'] ?? 1);
+$listPerPage = (int)($pagination['perPage'] ?? \App\Service\Support\PaginationConfig::perPage());
+$listTotalPages = (int)($pagination['totalPages'] ?? 1);
+$listAllowedPerPage = is_array($pagination['allowedPerPage'] ?? null) ? $pagination['allowedPerPage'] : [];
+$perPageHidden = is_array($pagination['perPageHidden'] ?? null) ? $pagination['perPageHidden'] : [];
+$paginationUrl = is_callable($pagination['url'] ?? null) ? $pagination['url'] : null;
+
+$deleteConfirmText = (string)($actions['deleteConfirmText'] ?? '');
 
 $rootAttrs = [
     'data-' . $listName . '-list' => null,

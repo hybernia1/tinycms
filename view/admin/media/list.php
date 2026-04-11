@@ -20,24 +20,7 @@ if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
 $authUser = $_SESSION['auth'] ?? [];
 $isEditor = (string)($authUser['role'] ?? '') === 'editor';
 $currentUserId = (int)($authUser['id'] ?? 0);
-$csrfMarkup = $csrfField();
-$listName = 'media';
-$listEndpoint = $url('admin/api/v1/media');
-$listEditBase = $url('admin/media/edit?id=');
-$listRootAttrs = ['data-thumb-suffix' => $thumbSuffix];
-$searchPlaceholder = $t('media.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
-$listColumns = [
-    ['label' => $t('admin.menu.media')],
-    ['label' => $t('common.author'), 'class' => 'mobile-hide'],
-    ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
-];
-$listAllowedPerPage = $allowedPerPage;
-$statusEnabled = true;
-$deleteConfirmText = $t('media.delete_confirm');
-$statusUrl = static fn(string $targetStatus): string => $url('admin/media?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
-$paginationUrl = static fn(int $targetPage): string => $url('admin/media?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
+
 $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $isEditor, $currentUserId, $thumbSuffix): string {
     $id = (int)($row['id'] ?? 0);
     $previewPath = trim((string)($row['path_webp'] ?? ''));
@@ -84,5 +67,43 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     <?php
     return (string)ob_get_clean();
 };
+
+$listConfig = [
+    'meta' => [
+        'name' => 'media',
+        'endpoint' => $url('admin/api/v1/media'),
+        'editBase' => $url('admin/media/edit?id='),
+        'rootAttrs' => ['data-thumb-suffix' => $thumbSuffix],
+        'csrfMarkup' => $csrfField(),
+    ],
+    'filters' => [
+        'statusEnabled' => true,
+        'statusLinks' => $statusLinks,
+        'statusCurrent' => $statusCurrent,
+        'statusUrl' => static fn(string $targetStatus): string => $url('admin/media?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1'),
+        'searchPlaceholder' => $t('media.search_placeholder'),
+        'searchHidden' => ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'],
+        'query' => $listQuery,
+    ],
+    'table' => [
+        'columns' => [
+            ['label' => $t('admin.menu.media')],
+            ['label' => $t('common.author'), 'class' => 'mobile-hide'],
+            ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
+        ],
+        'rowRenderer' => $rowRenderer,
+    ],
+    'pagination' => [
+        'page' => $listPage,
+        'perPage' => $listPerPage,
+        'totalPages' => $listTotalPages,
+        'allowedPerPage' => $allowedPerPage,
+        'perPageHidden' => ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'],
+        'url' => static fn(int $targetPage): string => $url('admin/media?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery)),
+    ],
+    'actions' => [
+        'deleteConfirmText' => $t('media.delete_confirm'),
+    ],
+];
 
 require __DIR__ . '/../partials/list-layout.php';

@@ -13,23 +13,7 @@ foreach ($availableStatuses as $statusValue) {
 $authUser = $_SESSION['auth'] ?? [];
 $isEditor = (string)($authUser['role'] ?? '') === 'editor';
 $currentUserId = (int)($authUser['id'] ?? 0);
-$csrfMarkup = $csrfField();
-$listName = 'content';
-$listEndpoint = $url('admin/api/v1/content');
-$listEditBase = $url('admin/content/edit?id=');
-$searchPlaceholder = $t('content.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
-$listColumns = [
-    ['label' => $t('common.name')],
-    ['label' => $t('common.author'), 'class' => 'mobile-hide'],
-    ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
-];
-$listAllowedPerPage = $allowedPerPage;
-$statusEnabled = true;
-$deleteConfirmText = $t('content.delete_confirm');
-$statusUrl = static fn(string $targetStatus): string => $url('admin/content?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
-$paginationUrl = static fn(int $targetPage): string => $url('admin/content?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
+
 $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $isEditor, $currentUserId, $csrfField): string {
     $id = (int)($row['id'] ?? 0);
     $createdAtRaw = (string)($row['created'] ?? '');
@@ -77,5 +61,42 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     <?php
     return (string)ob_get_clean();
 };
+
+$listConfig = [
+    'meta' => [
+        'name' => 'content',
+        'endpoint' => $url('admin/api/v1/content'),
+        'editBase' => $url('admin/content/edit?id='),
+        'csrfMarkup' => $csrfField(),
+    ],
+    'filters' => [
+        'statusEnabled' => true,
+        'statusLinks' => $statusLinks,
+        'statusCurrent' => $statusCurrent,
+        'statusUrl' => static fn(string $targetStatus): string => $url('admin/content?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1'),
+        'searchPlaceholder' => $t('content.search_placeholder'),
+        'searchHidden' => ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'],
+        'query' => $listQuery,
+    ],
+    'table' => [
+        'columns' => [
+            ['label' => $t('common.name')],
+            ['label' => $t('common.author'), 'class' => 'mobile-hide'],
+            ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
+        ],
+        'rowRenderer' => $rowRenderer,
+    ],
+    'pagination' => [
+        'page' => $listPage,
+        'perPage' => $listPerPage,
+        'totalPages' => $listTotalPages,
+        'allowedPerPage' => $allowedPerPage,
+        'perPageHidden' => ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'],
+        'url' => static fn(int $targetPage): string => $url('admin/content?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery)),
+    ],
+    'actions' => [
+        'deleteConfirmText' => $t('content.delete_confirm'),
+    ],
+];
 
 require __DIR__ . '/../partials/list-layout.php';

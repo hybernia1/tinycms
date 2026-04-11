@@ -11,22 +11,7 @@ $statusLinks = [
     'active' => $t('users.status.active') . ' (' . (int)($statusCounts['active'] ?? 0) . ')',
     'suspended' => $t('users.status.suspended') . ' (' . (int)($statusCounts['suspended'] ?? 0) . ')',
 ];
-$csrfMarkup = $csrfField();
-$listName = 'users';
-$listEndpoint = $url('admin/api/v1/users');
-$listEditBase = $url('admin/users/edit?id=');
-$searchPlaceholder = $t('users.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
-$listColumns = [
-    ['label' => $t('users.user')],
-    ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
-];
-$listAllowedPerPage = $allowedPerPage;
-$statusEnabled = true;
-$deleteConfirmText = $t('users.delete_confirm');
-$statusUrl = static fn(string $targetStatus): string => $url('admin/users?status=' . $targetStatus . '&per_page=' . $listPerPage . '&page=1');
-$paginationUrl = static fn(int $targetPage): string => $url('admin/users?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . $statusCurrent . '&q=' . urlencode($listQuery));
+
 $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField): string {
     $id = (int)($row['ID'] ?? 0);
     $isAdmin = (string)($row['role'] ?? '') === 'admin';
@@ -64,5 +49,41 @@ $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField): s
     <?php
     return (string)ob_get_clean();
 };
+
+$listConfig = [
+    'meta' => [
+        'name' => 'users',
+        'endpoint' => $url('admin/api/v1/users'),
+        'editBase' => $url('admin/users/edit?id='),
+        'csrfMarkup' => $csrfField(),
+    ],
+    'filters' => [
+        'statusEnabled' => true,
+        'statusLinks' => $statusLinks,
+        'statusCurrent' => $statusCurrent,
+        'statusUrl' => static fn(string $targetStatus): string => $url('admin/users?status=' . $targetStatus . '&per_page=' . $listPerPage . '&page=1'),
+        'searchPlaceholder' => $t('users.search_placeholder'),
+        'searchHidden' => ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'],
+        'query' => $listQuery,
+    ],
+    'table' => [
+        'columns' => [
+            ['label' => $t('users.user')],
+            ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
+        ],
+        'rowRenderer' => $rowRenderer,
+    ],
+    'pagination' => [
+        'page' => $listPage,
+        'perPage' => $listPerPage,
+        'totalPages' => $listTotalPages,
+        'allowedPerPage' => $allowedPerPage,
+        'perPageHidden' => ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'],
+        'url' => static fn(int $targetPage): string => $url('admin/users?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . $statusCurrent . '&q=' . urlencode($listQuery)),
+    ],
+    'actions' => [
+        'deleteConfirmText' => $t('users.delete_confirm'),
+    ],
+];
 
 require __DIR__ . '/../partials/list-layout.php';
