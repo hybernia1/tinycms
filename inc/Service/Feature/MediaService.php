@@ -23,12 +23,13 @@ final class MediaService
 
     public function create(?int $author, string $name, string $path, ?string $pathWebp): int
     {
-        return $this->query->insert('media', [
+        $result = $this->save([
             'author' => $author,
             'name' => $name,
             'path' => $path,
             'path_webp' => $pathWebp,
         ]);
+        return $result['success'] === true ? (int)($result['id'] ?? 0) : 0;
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $search = '', string $status = 'all'): array
@@ -139,7 +140,6 @@ final class MediaService
 
         try {
             if ($id === null) {
-                $payload['created'] = date('Y-m-d H:i:s');
                 $newId = $this->query->insert('media', $payload);
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }

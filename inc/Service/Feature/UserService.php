@@ -95,10 +95,6 @@ final class UserService
             $errors['email'] = I18n::t('validation.email_invalid');
         }
 
-        if (!in_array($role, ['admin', 'editor'], true)) {
-            $errors['role'] = I18n::t('validation.role_invalid');
-        }
-
         if ($id === null && $password === '') {
             $errors['password'] = I18n::t('validation.password_required_new_user');
         }
@@ -139,7 +135,6 @@ final class UserService
             $suspend = 0;
         }
 
-        $now = date('Y-m-d H:i:s');
         $payload = [
             'name' => $name,
             'email' => $email,
@@ -153,7 +148,6 @@ final class UserService
 
         try {
             if ($id === null) {
-                $payload['created'] = $now;
                 $newId = $this->query->insert('users', $payload);
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }

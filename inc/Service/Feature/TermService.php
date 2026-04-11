@@ -104,7 +104,6 @@ final class TermService
 
         try {
             if ($id === null) {
-                $payload['created'] = date('Y-m-d H:i:s');
                 $newId = $this->query->insert('terms', $payload);
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }
@@ -228,7 +227,7 @@ final class TermService
             $termsTable = Table::name('terms');
             $contentTermsTable = Table::name('content_terms');
             $selectStmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-            $insertStmt = $this->pdo->prepare("INSERT INTO $termsTable (name, created) VALUES (:name, NOW())");
+            $insertStmt = $this->pdo->prepare("INSERT INTO $termsTable (name) VALUES (:name)");
 
             foreach ($names as $name) {
                 $selectStmt->execute(['name' => $name]);
