@@ -1,10 +1,6 @@
 <?php
-$listItems = $pagination['data'] ?? [];
-$listPage = (int)($pagination['page'] ?? 1);
-$listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
-$listTotalPages = (int)($pagination['total_pages'] ?? 1);
-$statusCurrent = (string)($status ?? 'all');
-$listQuery = (string)($query ?? '');
+$listState = \App\View\AdminListState::basic((array)($pagination ?? []), (string)($status ?? 'all'), (string)($query ?? ''));
+extract($listState, EXTR_SKIP);
 $statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
 $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];
 foreach ($availableStatuses as $statusValue) {
