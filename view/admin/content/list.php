@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../partials/list-config.php';
+require_once __DIR__ . '/../config.php';
 $listItems = $pagination['data'] ?? [];
 $listPage = (int)($pagination['page'] ?? 1);
 $listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
