@@ -83,7 +83,8 @@ const initListApi = (config) => {
     const body = root.querySelector(`[data-${config.name}-list-body]`);
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
-    const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`);
+    const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`)
+        || document.querySelector(`[data-${config.name}-delete-modal]`);
     const deleteCancel = deleteModal?.querySelector(`[data-${config.name}-delete-cancel]`);
     const deleteConfirm = deleteModal?.querySelector(`[data-${config.name}-delete-confirm]`);
     const filterLinks = config.withStatus
@@ -100,6 +101,9 @@ const initListApi = (config) => {
     const loader = window.tinycmsLoader || null;
 
     const defaultPerPage = Number(perPageField?.value || perPageField?.querySelector('option')?.value || '10') || 10;
+    if (deleteModal && deleteModal.parentElement !== document.body) {
+        document.body.appendChild(deleteModal);
+    }
 
     let state = {
         page: 1,
