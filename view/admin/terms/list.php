@@ -1,12 +1,12 @@
 <?php
-$listModel = ($list ?? null) instanceof \App\View\Admin\AdminListViewModel ? $list : null;
-$listItems = $listModel?->items ?? (array)($pagination['data'] ?? []);
-$listPage = $listModel?->page ?? (int)($pagination['page'] ?? 1);
-$listPerPage = $listModel?->perPage ?? (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
-$listTotalPages = $listModel?->totalPages ?? (int)($pagination['total_pages'] ?? 1);
-$statusCurrent = $listModel?->status ?? (string)($status ?? 'all');
-$listQuery = $listModel?->query ?? (string)($query ?? '');
-$statusCounts = $listModel?->statusCounts ?? (is_array($statusCounts ?? null) ? $statusCounts : []);
+$listModel = is_array($list ?? null) ? $list : [];
+$listItems = (array)($listModel['items'] ?? ($pagination['data'] ?? []));
+$listPage = max(1, (int)($listModel['page'] ?? ($pagination['page'] ?? 1)));
+$listPerPage = (int)($listModel['perPage'] ?? ($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage()));
+$listTotalPages = max(1, (int)($listModel['totalPages'] ?? ($pagination['total_pages'] ?? 1)));
+$statusCurrent = (string)($listModel['status'] ?? ($status ?? 'all'));
+$listQuery = (string)($listModel['query'] ?? ($query ?? ''));
+$statusCounts = is_array($listModel['statusCounts'] ?? null) ? $listModel['statusCounts'] : (is_array($statusCounts ?? null) ? $statusCounts : []);
 $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('terms.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
@@ -19,7 +19,7 @@ $listColumns = [
     ['label' => $t('common.name')],
     ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
 ];
-$listAllowedPerPage = $listModel?->allowedPerPage ?? ($allowedPerPage ?? []);
+$listAllowedPerPage = is_array($listModel['allowedPerPage'] ?? null) ? $listModel['allowedPerPage'] : ($allowedPerPage ?? []);
 $statusEnabled = true;
 $deleteConfirmText = $t('terms.delete_confirm');
 $statusUrl = static fn(string $targetStatus): string => $url('admin/terms?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');

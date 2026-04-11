@@ -7,7 +7,8 @@ use App\Service\Feature\ThemeService;
 use App\Service\Feature\SettingsService;
 use App\Service\Feature\UploadService;
 use App\Service\Support\I18n;
-use App\View\Admin\AdminListViewModel;
+use App\Service\Support\PaginationConfig;
+use App\View\Admin\AdminViewModel;
 
 final class PageView
 {
@@ -219,7 +220,7 @@ final class PageView
     public function adminUsersList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/users/list', [
-            'list' => AdminListViewModel::fromRaw($pagination, $allowedPerPage, $status, $query, $statusCounts),
+            'list' => $this->buildListPayload($pagination, $allowedPerPage, $status, $query, $statusCounts),
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.users'),
             'headerAction' => $this->linkHeaderAction('admin/users/add', I18n::t('admin.add_user')),
@@ -252,7 +253,7 @@ final class PageView
     public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $availableStatuses, array $statusCounts): void
     {
         $this->renderAdmin('admin/content/list', [
-            'list' => AdminListViewModel::fromRaw($pagination, $allowedPerPage, $status, $query, $statusCounts),
+            'list' => $this->buildListPayload($pagination, $allowedPerPage, $status, $query, $statusCounts),
             'availableStatuses' => $availableStatuses,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.content'),
@@ -278,7 +279,7 @@ final class PageView
     public function adminTermList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/terms/list', [
-            'list' => AdminListViewModel::fromRaw($pagination, $allowedPerPage, $status, $query, $statusCounts),
+            'list' => $this->buildListPayload($pagination, $allowedPerPage, $status, $query, $statusCounts),
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.terms'),
             'headerAction' => $this->linkHeaderAction('admin/terms/add', I18n::t('admin.add_term')),
@@ -301,7 +302,7 @@ final class PageView
     public function adminMediaList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/media/list', [
-            'list' => AdminListViewModel::fromRaw($pagination, $allowedPerPage, $status, $query, $statusCounts),
+            'list' => $this->buildListPayload($pagination, $allowedPerPage, $status, $query, $statusCounts),
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.media'),
             'headerAction' => $this->linkHeaderAction('admin/media/add', I18n::t('admin.add_media')),
@@ -350,16 +351,35 @@ final class PageView
 
     private function renderAdmin(string $template, array $data): void
     {
+        $admin = AdminViewModel::fromArray($data);
         $this->view->render('admin/layout', $template, array_merge(
-            $data,
+            $admin->payload,
             $this->adminBranding(),
             [
+                'admin' => $admin,
+                'adminMenu' => $admin->adminMenu,
+                'pageTitle' => $admin->pageTitle,
+                'headerAction' => $admin->headerAction,
                 'imageUploadAccept' => UploadService::imageAccept(),
                 'siteImageUploadAccept' => UploadService::siteImageAccept(),
                 'imageUploadTypesLabel' => UploadService::imageExtensionsLabel(),
                 'siteImageUploadTypesLabel' => UploadService::siteImageExtensionsLabel(),
             ]
         ));
+    }
+
+    private function buildListPayload(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): array
+    {
+        return [
+            'items' => (array)($pagination['data'] ?? []),
+            'page' => max(1, (int)($pagination['page'] ?? 1)),
+            'perPage' => (int)($pagination['per_page'] ?? PaginationConfig::perPage()),
+            'totalPages' => max(1, (int)($pagination['total_pages'] ?? 1)),
+            'status' => $status !== '' ? $status : 'all',
+            'query' => $query,
+            'allowedPerPage' => $allowedPerPage,
+            'statusCounts' => $statusCounts,
+        ];
     }
 
     private function adminBranding(): array
