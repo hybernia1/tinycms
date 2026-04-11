@@ -11,9 +11,6 @@ if ($thumbnailPath === '') {
 }
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
-$authUser = $_SESSION['auth'] ?? [];
-$isEditor = (string)($authUser['role'] ?? '') === 'editor';
-$currentUserId = (int)($authUser['id'] ?? 0);
 ?>
 <form
     id="content-editor-form"
@@ -64,9 +61,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                     </div>
                 </div>
             </div>
-            <?php if ($isEditor): ?>
-                <input type="hidden" name="author" value="<?= $currentUserId > 0 ? $currentUserId : '' ?>">
-            <?php else: ?>
                 <div class="card">
                     <div class="content-box-header"><?= htmlspecialchars($t('common.author'), ENT_QUOTES, 'UTF-8') ?></div>
                     <div class="p-3">
@@ -82,7 +76,6 @@ $currentUserId = (int)($authUser['id'] ?? 0);
                         <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
                     </div>
                 </div>
-            <?php endif; ?>
 
             <div class="card">
                 <div class="content-box-header"><?= htmlspecialchars($t('admin.menu.terms'), ENT_QUOTES, 'UTF-8') ?></div>

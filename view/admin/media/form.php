@@ -4,9 +4,6 @@ if ($previewPath === '') {
     $previewPath = trim((string)($item['path'] ?? ''));
 }
 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
-$authUser = $_SESSION['auth'] ?? [];
-$isEditor = (string)($authUser['role'] ?? '') === 'editor';
-$currentUserId = (int)($authUser['id'] ?? 0);
 $fileMeta = null;
 if ($mode === 'edit') {
     $metaPath = trim((string)($item['path'] ?? ''));
@@ -35,7 +32,7 @@ if ($mode === 'edit') {
     }
 }
 ?>
-<form id="media-editor-form" class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+<form id="media-form" class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
     <?= $csrfField() ?>
     <div class="content-editor-layout">
         <div class="card p-4">
@@ -119,11 +116,7 @@ if ($mode === 'edit') {
                             <label><?= htmlspecialchars($t('common.updated'), ENT_QUOTES, 'UTF-8') ?></label>
                             <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['updated'] ?? ''), '—'), ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
-                    <?php endif; ?>
 
-                    <?php if ($isEditor): ?>
-                        <input type="hidden" name="author" value="<?= $currentUserId > 0 ? $currentUserId : '' ?>">
-                    <?php else: ?>
                         <div class="m-0">
                             <label><?= htmlspecialchars($t('common.author'), ENT_QUOTES, 'UTF-8') ?></label>
                             <select name="author">

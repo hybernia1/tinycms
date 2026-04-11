@@ -18,6 +18,7 @@ final class UserService
     {
         $this->query = new Query(Connection::get());
         $this->columnLimitValidator = new SchemaConstraintValidator();
+        $this->query->update('users', ['role' => 'user'], ['role' => 'editor']);
     }
 
     public function paginate(int $page = 1, int $perPage = 10, ?int $suspend = null, string $search = ''): array
@@ -82,7 +83,7 @@ final class UserService
     {
         $name = trim((string)($input['name'] ?? ''));
         $email = mb_strtolower(trim((string)($input['email'] ?? '')));
-        $role = trim((string)($input['role'] ?? 'editor'));
+        $role = trim((string)($input['role'] ?? 'user'));
         $suspend = (int)($input['suspend'] ?? 0) === 1 ? 1 : 0;
         $password = (string)($input['password'] ?? '');
         $errors = [];

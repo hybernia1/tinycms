@@ -1,6 +1,6 @@
 <?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-4">
-    <form id="users-editor-form" method="post" autocomplete="off" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+    <form id="users-form" method="post" autocomplete="off" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
@@ -28,7 +28,7 @@
         <div class="mb-3">
             <label><?= htmlspecialchars($t('users.role'), ENT_QUOTES, 'UTF-8') ?></label>
             <select name="role">
-                <option value="editor" <?= (($user['role'] ?? 'editor') === 'editor') ? 'selected' : '' ?>><?= htmlspecialchars($t('users.roles.editor'), ENT_QUOTES, 'UTF-8') ?></option>
+                <option value="user" <?= (($user['role'] ?? 'user') === 'user') ? 'selected' : '' ?>><?= htmlspecialchars($t('users.roles.user'), ENT_QUOTES, 'UTF-8') ?></option>
                 <option value="admin" <?= (($user['role'] ?? '') === 'admin') ? 'selected' : '' ?>><?= htmlspecialchars($t('users.roles.admin'), ENT_QUOTES, 'UTF-8') ?></option>
             </select>
             <?php if (!empty($errors['role'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['role'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
