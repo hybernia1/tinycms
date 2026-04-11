@@ -16,8 +16,8 @@ $listColumns = is_array($list['columns'] ?? null) ? $list['columns'] : [];
 $listAllowedPerPage = is_array($list['allowedPerPage'] ?? null) ? $list['allowedPerPage'] : \App\Service\Support\PaginationConfig::allowed();
 $listPage = (int)($list['page'] ?? 1);
 $listTotalPages = (int)($list['totalPages'] ?? 1);
-$statusEnabled = (bool)($list['statusEnabled'] ?? false);
 $statusLinks = is_array($list['statusLinks'] ?? null) ? $list['statusLinks'] : [];
+$statusEnabled = (bool)($list['statusEnabled'] ?? $statusLinks !== []);
 $statusUrl = is_callable($list['statusUrl'] ?? null)
     ? $list['statusUrl']
     : static fn(string $targetStatus): string => $url('admin/' . $entity . '?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
