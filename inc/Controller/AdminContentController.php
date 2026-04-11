@@ -10,7 +10,6 @@ use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Feature\UserService;
 use App\Service\Support\I18n;
-use App\Service\Support\PaginationConfig;
 use App\View\AdminView;
 
 final class AdminContentController extends BaseAdminController
@@ -39,7 +38,7 @@ final class AdminContentController extends BaseAdminController
 
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
         $statusCounts = $this->content->statusCounts($availableStatuses);
-        $this->pages->adminContentList($pagination, PaginationConfig::allowed(), $status, $query, $availableStatuses, $statusCounts);
+        $this->pages->adminContentList($pagination, $status, $query, $availableStatuses, $statusCounts);
     }
 
     public function listApiV1(callable $redirect): void

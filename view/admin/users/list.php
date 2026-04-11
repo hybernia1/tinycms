@@ -1,32 +1,11 @@
 <?php
-$listItems = $pagination['data'] ?? [];
-$listPage = (int)($pagination['page'] ?? 1);
-$listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
-$listTotalPages = (int)($pagination['total_pages'] ?? 1);
-$statusCurrent = (string)($status ?? 'all');
-$listQuery = (string)($query ?? '');
-$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
+$list = $listBase ?? [];
+$statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = [
     'all' => $t('users.status.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'active' => $t('users.status.active') . ' (' . (int)($statusCounts['active'] ?? 0) . ')',
     'suspended' => $t('users.status.suspended') . ' (' . (int)($statusCounts['suspended'] ?? 0) . ')',
 ];
-$csrfMarkup = $csrfField();
-$listName = 'users';
-$listEndpoint = $url('admin/api/v1/users');
-$listEditBase = $url('admin/users/edit?id=');
-$searchPlaceholder = $t('users.search_placeholder');
-$searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
-$perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
-$listColumns = [
-    ['label' => $t('users.user')],
-    ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
-];
-$listAllowedPerPage = $allowedPerPage;
-$statusEnabled = true;
-$deleteConfirmText = $t('users.delete_confirm');
-$statusUrl = static fn(string $targetStatus): string => $url('admin/users?status=' . $targetStatus . '&per_page=' . $listPerPage . '&page=1');
-$paginationUrl = static fn(int $targetPage): string => $url('admin/users?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . $statusCurrent . '&q=' . urlencode($listQuery));
 $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField): string {
     $id = (int)($row['ID'] ?? 0);
     $isAdmin = (string)($row['role'] ?? '') === 'admin';
@@ -64,5 +43,13 @@ $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField): s
     <?php
     return (string)ob_get_clean();
 };
+$list['statusLinks'] = $statusLinks;
+$list['searchPlaceholder'] = $t('users.search_placeholder');
+$list['columns'] = [
+    ['label' => $t('users.user')],
+    ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
+];
+$list['deleteConfirmText'] = $t('users.delete_confirm');
+$list['rowRenderer'] = $rowRenderer;
 
 require __DIR__ . '/../partials/list-layout.php';

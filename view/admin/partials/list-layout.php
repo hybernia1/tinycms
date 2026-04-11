@@ -1,26 +1,32 @@
 <?php
-$items = is_array($listItems ?? null) ? $listItems : [];
-$listName = (string)($listName ?? 'list');
-$listEndpoint = (string)($listEndpoint ?? '');
-$listEditBase = (string)($listEditBase ?? '');
-$listRootAttrs = is_array($listRootAttrs ?? null) ? $listRootAttrs : [];
-$searchPlaceholder = (string)($searchPlaceholder ?? '');
-$searchHidden = is_array($searchHidden ?? null) ? $searchHidden : [];
-$perPageHidden = is_array($perPageHidden ?? null) ? $perPageHidden : [];
-$listColumns = is_array($listColumns ?? null) ? $listColumns : [];
-$listAllowedPerPage = is_array($listAllowedPerPage ?? null) ? $listAllowedPerPage : [];
-$listPage = (int)($listPage ?? 1);
-$listPerPage = (int)($listPerPage ?? \App\Service\Support\PaginationConfig::perPage());
-$listTotalPages = (int)($listTotalPages ?? 1);
-$listQuery = (string)($listQuery ?? '');
-$statusEnabled = (bool)($statusEnabled ?? false);
-$statusLinks = is_array($statusLinks ?? null) ? $statusLinks : [];
-$statusCurrent = (string)($statusCurrent ?? 'all');
-$statusUrl = is_callable($statusUrl ?? null) ? $statusUrl : null;
-$paginationUrl = is_callable($paginationUrl ?? null) ? $paginationUrl : null;
-$rowRenderer = is_callable($rowRenderer ?? null) ? $rowRenderer : null;
-$deleteConfirmText = (string)($deleteConfirmText ?? '');
-$csrfMarkup = (string)($csrfMarkup ?? '');
+$list = is_array($list ?? null) ? $list : [];
+$items = is_array($list['items'] ?? null) ? $list['items'] : [];
+$entity = (string)($list['entity'] ?? '');
+$listName = (string)($list['name'] ?? $entity);
+$listPerPage = (int)($list['perPage'] ?? \App\Service\Support\PaginationConfig::perPage());
+$statusCurrent = (string)($list['statusCurrent'] ?? 'all');
+$listQuery = (string)($list['query'] ?? '');
+$listEndpoint = (string)($list['endpoint'] ?? ($entity !== '' ? $url('admin/api/v1/' . $entity) : ''));
+$listEditBase = (string)($list['editBase'] ?? ($entity !== '' ? $url('admin/' . $entity . '/edit?id=') : ''));
+$listRootAttrs = is_array($list['rootAttrs'] ?? null) ? $list['rootAttrs'] : [];
+$searchPlaceholder = (string)($list['searchPlaceholder'] ?? '');
+$searchHidden = is_array($list['searchHidden'] ?? null) ? $list['searchHidden'] : ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
+$perPageHidden = is_array($list['perPageHidden'] ?? null) ? $list['perPageHidden'] : ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
+$listColumns = is_array($list['columns'] ?? null) ? $list['columns'] : [];
+$listAllowedPerPage = is_array($list['allowedPerPage'] ?? null) ? $list['allowedPerPage'] : \App\Service\Support\PaginationConfig::allowed();
+$listPage = (int)($list['page'] ?? 1);
+$listTotalPages = (int)($list['totalPages'] ?? 1);
+$statusLinks = is_array($list['statusLinks'] ?? null) ? $list['statusLinks'] : [];
+$statusEnabled = (bool)($list['statusEnabled'] ?? $statusLinks !== []);
+$statusUrl = is_callable($list['statusUrl'] ?? null)
+    ? $list['statusUrl']
+    : static fn(string $targetStatus): string => $url('admin/' . $entity . '?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
+$paginationUrl = is_callable($list['paginationUrl'] ?? null)
+    ? $list['paginationUrl']
+    : static fn(int $targetPage): string => $url('admin/' . $entity . '?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
+$rowRenderer = is_callable($list['rowRenderer'] ?? null) ? $list['rowRenderer'] : null;
+$deleteConfirmText = (string)($list['deleteConfirmText'] ?? '');
+$csrfMarkup = (string)($list['csrfMarkup'] ?? $csrfField());
 
 $rootAttrs = [
     'data-' . $listName . '-list' => null,
