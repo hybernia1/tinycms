@@ -201,7 +201,7 @@ if (modal && openTrigger) {
 
         grid.innerHTML = '';
         items.forEach((item) => {
-            const name = String(item.name || t('media.untitled', 'Untitled'));
+            const name = String(item.name || '');
             const previewPath = String(item.preview_path || '');
             const button = document.createElement('button');
             button.className = 'media-library-card';
@@ -252,7 +252,7 @@ if (modal && openTrigger) {
 
         selectedMedia = {
             id: mediaId,
-            name: target.dataset.mediaName || t('media.untitled', 'Untitled'),
+            name: target.dataset.mediaName || '',
             path: target.dataset.mediaPath || '',
             webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
@@ -589,10 +589,6 @@ if (modal && openTrigger) {
             }
 
             const value = detailNameInput.value.trim();
-            if (value === '') {
-                setStatus(t('media.name_required', 'Name cannot be empty.'));
-                return;
-            }
 
             renameName.value = value;
             const renameAction = resolveAction(renameForm, selectedMedia.id);
@@ -612,10 +608,6 @@ if (modal && openTrigger) {
             const selectedCard = grid ? grid.querySelector('.media-library-card.selected') : null;
             if (selectedCard) {
                 selectedCard.dataset.mediaName = value;
-                const label = selectedCard.querySelector('span');
-                if (label) {
-                    label.textContent = value;
-                }
             }
 
             setStatus(t('media.rename_saved', 'Name saved.'));

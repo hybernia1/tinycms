@@ -50,6 +50,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 'deleted' => $t('media.deleted'),
                 'delete' => $t('media.delete'),
                 'no_preview' => $t('media.no_preview'),
+                'rename_saved' => $t('media.rename_saved'),
             ],
             'users' => [
                 'deleted' => $t('users.deleted'),
