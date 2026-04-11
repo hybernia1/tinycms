@@ -185,7 +185,7 @@ final class InstallService
                 return I18n::t('install.email_exists_other_role');
             }
 
-            $insert = $pdo->prepare("INSERT INTO $users (name, email, password, role, suspend, created, updated) VALUES (:name, :email, :password, :role, :suspend, :created, :updated)");
+            $insert = $pdo->prepare("INSERT INTO $users (name, email, password, role, suspend, created) VALUES (:name, :email, :password, :role, :suspend, :created)");
             $now = date('Y-m-d H:i:s');
             $insert->execute([
                 'name' => (string)$admin['name'],
@@ -194,7 +194,6 @@ final class InstallService
                 'role' => 'admin',
                 'suspend' => 0,
                 'created' => $now,
-                'updated' => $now,
             ]);
 
             return null;

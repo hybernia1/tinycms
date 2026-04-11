@@ -144,7 +144,6 @@ final class MediaService
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }
 
-            $payload['updated'] = date('Y-m-d H:i:s');
             $updated = $this->query->update('media', $payload, ['id' => $id]);
             return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
         } catch (InvalidArgumentException $e) {

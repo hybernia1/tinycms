@@ -88,7 +88,6 @@ final class ContentService
 
         return $this->query->update('content', [
             'status' => $status,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['id' => $id]) > 0;
     }
 
@@ -106,7 +105,6 @@ final class ContentService
 
         return $this->query->update('content', [
             'thumbnail' => $thumbnailId,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['id' => $id]) >= 0;
     }
 
@@ -163,7 +161,6 @@ final class ContentService
             'excerpt' => $excerpt === '' ? null : mb_substr($excerpt, 0, 500),
             'body' => $body,
             'author' => $author,
-            'updated' => $now,
         ];
 
         try {

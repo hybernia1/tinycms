@@ -62,7 +62,6 @@ final class UserService
 
         return $this->query->update('users', [
             'suspend' => 1,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['ID' => $id]) > 0;
     }
 
@@ -76,7 +75,6 @@ final class UserService
 
         return $this->query->update('users', [
             'suspend' => 0,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['ID' => $id]) > 0;
     }
 
@@ -147,7 +145,6 @@ final class UserService
             'email' => $email,
             'role' => $role,
             'suspend' => $suspend,
-            'updated' => $now,
         ];
 
         if ($password !== '') {

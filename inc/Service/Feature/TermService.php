@@ -100,7 +100,6 @@ final class TermService
 
         $payload = [
             'name' => $name,
-            'updated' => date('Y-m-d H:i:s'),
         ];
 
         try {
@@ -229,7 +228,7 @@ final class TermService
             $termsTable = Table::name('terms');
             $contentTermsTable = Table::name('content_terms');
             $selectStmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-            $insertStmt = $this->pdo->prepare("INSERT INTO $termsTable (name, created, updated) VALUES (:name, NOW(), NOW())");
+            $insertStmt = $this->pdo->prepare("INSERT INTO $termsTable (name, created) VALUES (:name, NOW())");
 
             foreach ($names as $name) {
                 $selectStmt->execute(['name' => $name]);
