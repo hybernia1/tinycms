@@ -153,8 +153,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= htmlspecialchars($url('assets/js/list-api.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/tag-picker.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/js/content-autosave.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/content-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/save-action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= htmlspecialchars($url('assets/js/action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
 <body>
