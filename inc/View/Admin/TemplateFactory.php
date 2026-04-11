@@ -52,6 +52,39 @@ final class TemplateFactory
         return '<small class="text-danger">' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</small>';
     }
 
+    public static function confirmModal(array $config): string
+    {
+        $modalAttrs = ['class' => 'modal-overlay'];
+        if (($config['withDataModal'] ?? true) === true) {
+            $modalAttrs['data-modal'] = null;
+        }
+        if (!empty($config['id'])) {
+            $modalAttrs['id'] = (string)$config['id'];
+        }
+        foreach ((array)($config['modalAttrs'] ?? []) as $key => $value) {
+            $modalAttrs[(string)$key] = $value;
+        }
+
+        $paragraphAttrs = ['data-modal-text' => null];
+        foreach ((array)($config['textAttrs'] ?? []) as $key => $value) {
+            $paragraphAttrs[(string)$key] = $value;
+        }
+
+        $cancelLabel = (string)($config['cancelLabel'] ?? '');
+        $confirmLabel = (string)($config['confirmLabel'] ?? '');
+        $text = (string)($config['text'] ?? '');
+
+        return '<div' . self::attrs($modalAttrs) . '><div class="modal"><p' . self::attrs($paragraphAttrs) . '>'
+            . htmlspecialchars($text, ENT_QUOTES, 'UTF-8')
+            . '</p><div class="modal-actions"><button class="btn btn-light" type="button"'
+            . self::attrs((array)($config['cancelAttrs'] ?? []))
+            . '>' . htmlspecialchars($cancelLabel, ENT_QUOTES, 'UTF-8')
+            . '</button><button class="btn btn-primary" type="button"'
+            . self::attrs((array)($config['confirmAttrs'] ?? []))
+            . '>' . htmlspecialchars($confirmLabel, ENT_QUOTES, 'UTF-8')
+            . '</button></div></div></div>';
+    }
+
     public static function listConfig(array $input): array
     {
         $statusCurrent = (string)($input['statusCurrent'] ?? 'all');
@@ -91,5 +124,18 @@ final class TemplateFactory
                 'deleteConfirmText' => (string)($input['deleteConfirmText'] ?? ''),
             ],
         ];
+    }
+
+    private static function attrs(array $attrs): string
+    {
+        $compiled = '';
+        foreach ($attrs as $key => $value) {
+            $compiled .= ' ' . htmlspecialchars((string)$key, ENT_QUOTES, 'UTF-8');
+            if ($value !== null) {
+                $compiled .= '="' . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '"';
+            }
+        }
+
+        return $compiled;
     }
 }

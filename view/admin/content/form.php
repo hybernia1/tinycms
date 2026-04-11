@@ -238,15 +238,14 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     <input type="hidden" name="content_id" value="<?= $contentId ?>">
     <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
 </form>
-<div class="modal-overlay" data-modal id="media-library-delete-modal">
-    <div class="modal">
-        <p data-modal-text><?= htmlspecialchars($t('content.delete_image_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-media-library-delete-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
-        </div>
-    </div>
-</div>
+<?= \App\View\Admin\TemplateFactory::confirmModal([
+    'id' => 'media-library-delete-modal',
+    'text' => $t('content.delete_image_confirm'),
+    'cancelLabel' => $t('common.cancel'),
+    'confirmLabel' => $t('common.confirm'),
+    'cancelAttrs' => ['data-modal-close' => null],
+    'confirmAttrs' => ['data-media-library-delete-confirm' => null],
+]) ?>
 <div class="modal-overlay" data-content-leave-modal>
     <div class="modal">
         <p><?= htmlspecialchars($t('content.leave_page_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
@@ -257,13 +256,12 @@ $currentUserId = (int)($authUser['id'] ?? 0);
     </div>
 </div>
 <?php if ($mode === 'edit'): ?>
-<div class="modal-overlay" data-modal id="content-delete-modal">
-    <div class="modal">
-        <p data-modal-text><?= htmlspecialchars($t('content.delete_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="content-delete-form"><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
-        </div>
-    </div>
-</div>
+<?= \App\View\Admin\TemplateFactory::confirmModal([
+    'id' => 'content-delete-modal',
+    'text' => $t('content.delete_confirm'),
+    'cancelLabel' => $t('common.cancel'),
+    'confirmLabel' => $t('common.confirm'),
+    'cancelAttrs' => ['data-modal-close' => null],
+    'confirmAttrs' => ['data-modal-confirm' => null, 'data-form-id' => 'content-delete-form'],
+]) ?>
 <?php endif; ?>
