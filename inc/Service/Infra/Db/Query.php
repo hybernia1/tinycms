@@ -6,7 +6,6 @@ namespace App\Service\Infra\Db;
 use InvalidArgumentException;
 use PDO;
 use PDOException;
-use App\Service\Support\I18n;
 use App\Service\Infra\Db\Table;
 
 class Query
@@ -94,7 +93,7 @@ class Query
         $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         if ($data === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.insert_data_empty'));
+            throw new InvalidArgumentException('Insert data cannot be empty.');
         }
 
         $data = $this->normalizeDataKeys($data);
@@ -107,7 +106,7 @@ class Query
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($data);
         } catch (PDOException $e) {
-            throw $this->translatedDbError($e);
+            throw new InvalidArgumentException($this->databaseErrorMessage($e), 0, $e);
         }
 
         return (int)$this->pdo->lastInsertId();
@@ -118,11 +117,11 @@ class Query
         $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         if ($data === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.update_data_empty'));
+            throw new InvalidArgumentException('Update data cannot be empty.');
         }
 
         if ($where === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.update_conditions_empty'));
+            throw new InvalidArgumentException('Update conditions cannot be empty.');
         }
 
         $data = $this->normalizeDataKeys($data);
@@ -145,7 +144,7 @@ class Query
             $stmt->execute($data);
             return $stmt->rowCount();
         } catch (PDOException $e) {
-            throw $this->translatedDbError($e);
+            throw new InvalidArgumentException($this->databaseErrorMessage($e), 0, $e);
         }
     }
 
@@ -154,7 +153,7 @@ class Query
         $table = Table::name($table);
         $this->assertIdentifier($table, 'table');
         if ($where === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.delete_conditions_empty'));
+            throw new InvalidArgumentException('Delete conditions cannot be empty.');
         }
 
         [$whereSql, $params] = $this->buildWhere($where);
@@ -239,7 +238,7 @@ class Query
         $filtered = array_values(array_unique($filtered));
 
         if ($filtered === []) {
-            throw new InvalidArgumentException(I18n::t('errors.db.columns_empty'));
+            throw new InvalidArgumentException('Columns cannot be empty.');
         }
 
         return implode(', ', $filtered);
@@ -287,27 +286,12 @@ class Query
         return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $value) === 1;
     }
 
-    private function translatedDbError(PDOException $e): InvalidArgumentException
+    private function databaseErrorMessage(PDOException $e): string
     {
-        $sqlState = (string)($e->errorInfo[0] ?? "");
-        $driverCode = (int)($e->errorInfo[1] ?? 0);
-
-        if ($sqlState === "22001" || $driverCode === 1406) {
-            return new InvalidArgumentException(I18n::t('errors.db.value_too_long'), 0, $e);
+        if (defined('APP_DEBUG') && APP_DEBUG === true) {
+            return $e->getMessage();
         }
 
-        if ($driverCode === 1048 || $driverCode === 1364) {
-            return new InvalidArgumentException(I18n::t('errors.db.required_value_missing'), 0, $e);
-        }
-
-        if ($driverCode === 1062) {
-            return new InvalidArgumentException(I18n::t('errors.db.unique_violation'), 0, $e);
-        }
-
-        if ($driverCode === 1452) {
-            return new InvalidArgumentException(I18n::t('errors.db.invalid_foreign_key'), 0, $e);
-        }
-
-        return new InvalidArgumentException(I18n::t('errors.db.operation_failed'), 0, $e);
+        return 'Database operation failed.';
     }
 }
