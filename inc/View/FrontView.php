@@ -189,7 +189,6 @@ final class FrontView
             'themeName' => $themeName !== '' ? $themeName : $this->resolveThemeFromSite($site),
             'siteName' => (string)($site['name'] ?? 'TinyCMS'),
             'siteAuthor' => (string)($site['author'] ?? 'Admin'),
-            'siteFooter' => (string)($site['footer'] ?? '© TinyCMS'),
             'siteFavicon' => (string)($site['favicon'] ?? ''),
             'siteLogo' => (string)($site['logo'] ?? ''),
         ];

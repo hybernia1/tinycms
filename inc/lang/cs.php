@@ -272,7 +272,6 @@ return [
             'app_lang' => 'Jazyk aplikace',
             'theme' => 'Šablona',
             'sitename' => 'Název webu',
-            'sitefooter' => 'Patička webu',
             'siteauthor' => 'Autor webu',
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',

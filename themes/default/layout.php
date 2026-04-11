@@ -64,8 +64,5 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
 <main id="main-content">
 <?= $content ?>
 </main>
-<footer class="container py-4 text-muted">
-    <?= htmlspecialchars((string)($siteFooter ?? '© TinyCMS'), ENT_QUOTES, 'UTF-8') ?>
-</footer>
 </body>
 </html>
