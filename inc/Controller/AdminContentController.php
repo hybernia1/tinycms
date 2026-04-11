@@ -73,11 +73,6 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageByAuthor($item)) {
-            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
-            return;
-        }
-
         if (!$this->content->delete($id)) {
             $this->apiError('DELETE_FAILED', I18n::t('content.delete_failed'));
             return;
@@ -102,12 +97,6 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($id);
         if ($item === null) {
             $this->flash->add('error', I18n::t('content.not_found'));
-            $redirect('admin/content');
-            return;
-        }
-
-        if (!$this->canManageByAuthor($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
         }
@@ -144,7 +133,7 @@ final class AdminContentController extends BaseAdminController
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->normalizeAuthorInput($_POST), $authorId);
+        $result = $this->content->save($_POST, $authorId);
 
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
@@ -172,12 +161,6 @@ final class AdminContentController extends BaseAdminController
 
         if ($item === null) {
             $this->flash->add('info', I18n::t('content.not_found'));
-            $redirect('admin/content');
-            return;
-        }
-
-        if (!$this->canManageByAuthor($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/content');
             return;
         }
@@ -210,14 +193,8 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageByAuthor($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
-            $redirect('admin/content');
-            return;
-        }
-
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($this->normalizeAuthorInput($_POST), $authorId, $id);
+        $result = $this->content->save($_POST, $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
@@ -246,11 +223,6 @@ final class AdminContentController extends BaseAdminController
         $item = $this->content->find($id);
         if ($item === null) {
             $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
-            return;
-        }
-
-        if (!$this->canManageByAuthor($item)) {
-            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return;
         }
 
@@ -330,10 +302,6 @@ final class AdminContentController extends BaseAdminController
                 return;
             }
 
-            if (!$this->canManageByAuthor($item)) {
-                $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
-                return;
-            }
         }
 
         $authorId = (int)($this->authService->auth()->id() ?? 0);
@@ -503,8 +471,8 @@ final class AdminContentController extends BaseAdminController
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
-            'can_edit' => $this->canManageByAuthor($row),
-            'can_delete' => $this->canManageByAuthor($row),
+            'can_edit' => true,
+            'can_delete' => true,
             'author_name' => (string)($row['author_name'] ?? '—'),
             'status' => (string)($row['status'] ?? 'draft'),
             'created' => $createdAt,

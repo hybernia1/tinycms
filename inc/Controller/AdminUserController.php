@@ -27,7 +27,7 @@ final class AdminUserController extends BaseAdminController
 
     public function list(callable $redirect): void
     {
-        if (!$this->guardSuperAdmin($redirect)) {
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
@@ -40,7 +40,7 @@ final class AdminUserController extends BaseAdminController
 
     public function listApiV1(callable $redirect): void
     {
-        if (!$this->guardSuperAdmin($redirect)) {
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
@@ -54,7 +54,7 @@ final class AdminUserController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardSuperAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -73,7 +73,7 @@ final class AdminUserController extends BaseAdminController
 
     public function suspendApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardSuperAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -103,7 +103,7 @@ final class AdminUserController extends BaseAdminController
 
     public function addForm(callable $redirect): void
     {
-        if (!$this->guardSuperAdmin($redirect)) {
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
@@ -120,7 +120,7 @@ final class AdminUserController extends BaseAdminController
 
     public function addSubmit(callable $redirect): void
     {
-        if (!$this->guardSuperAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -139,7 +139,7 @@ final class AdminUserController extends BaseAdminController
 
     public function editForm(callable $redirect): void
     {
-        if (!$this->guardSuperAdmin($redirect)) {
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
@@ -158,7 +158,7 @@ final class AdminUserController extends BaseAdminController
 
     public function editSubmit(callable $redirect): void
     {
-        if (!$this->guardSuperAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
             return;
         }
 

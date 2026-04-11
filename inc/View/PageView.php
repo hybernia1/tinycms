@@ -248,7 +248,7 @@ final class PageView
             'errors' => $errors,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_user') : I18n::t('admin.edit_user'),
-            'headerAction' => $this->submitHeaderAction('#users-editor-form'),
+            'headerAction' => $this->submitHeaderAction('#users-form'),
         ]);
     }
 
@@ -305,7 +305,7 @@ final class PageView
             'usages' => $usages,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_term') : I18n::t('admin.edit_term'),
-            'headerAction' => $this->submitHeaderAction('#terms-editor-form'),
+            'headerAction' => $this->submitHeaderAction('#terms-form'),
         ]);
     }
 
@@ -335,8 +335,8 @@ final class PageView
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media') : I18n::t('admin.edit_media'),
             'headerAction' => $mode === 'edit'
-                ? $this->saveMenuHeaderAction('#media-editor-form', '#media-delete-modal')
-                : $this->submitHeaderAction('#media-editor-form'),
+                ? $this->saveMenuHeaderAction('#media-form', '#media-delete-modal')
+                : $this->submitHeaderAction('#media-form'),
         ]);
     }
 

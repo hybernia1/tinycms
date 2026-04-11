@@ -93,7 +93,7 @@ final class AdminMediaController extends BaseAdminController
             'path_webp' => (string)($uploadData['path_webp'] ?? ''),
             'author' => trim((string)($_POST['author'] ?? '')) !== '' ? (string)$_POST['author'] : ($authorId > 0 ? (string)$authorId : ''),
         ]);
-        $result = $this->media->save($this->normalizeAuthorInput($input));
+        $result = $this->media->save($input);
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.created'));
@@ -123,12 +123,6 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageByAuthor($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
-            $redirect('admin/media');
-            return;
-        }
-
         $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $navigation = $this->media->editNavigation($id);
         $this->pages->adminMediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
@@ -154,18 +148,12 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageByAuthor($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
-            $redirect('admin/media');
-            return;
-        }
-
         $input = array_merge($_POST, [
             'path' => (string)($item['path'] ?? ''),
             'path_webp' => (string)($item['path_webp'] ?? ''),
         ]);
 
-        $result = $this->media->save($this->normalizeAuthorInput($input), $id);
+        $result = $this->media->save($input, $id);
 
         if (($result['success'] ?? false) === true) {
             $this->flash->add('success', I18n::t('media.updated'));
@@ -195,11 +183,6 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        if (!$this->canManageByAuthor($item)) {
-            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
-            return;
-        }
-
         if (!$this->media->delete($id)) {
             $this->apiError('DELETE_FAILED', I18n::t('media.delete_failed'));
             return;
@@ -225,12 +208,6 @@ final class AdminMediaController extends BaseAdminController
         $item = $this->media->find($id);
         if ($item === null) {
             $this->flash->add('error', I18n::t('media.not_found'));
-            $redirect('admin/media');
-            return;
-        }
-
-        if (!$this->canManageByAuthor($item)) {
-            $this->flash->add('error', I18n::t('admin.access_denied'));
             $redirect('admin/media');
             return;
         }
@@ -264,8 +241,8 @@ final class AdminMediaController extends BaseAdminController
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
-            'can_edit' => $this->canManageByAuthor($row),
-            'can_delete' => $this->canManageByAuthor($row),
+            'can_edit' => true,
+            'can_delete' => true,
             'path' => (string)($row['path'] ?? ''),
             'path_webp' => (string)($row['path_webp'] ?? ''),
             'preview_path' => $previewPath,

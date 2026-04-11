@@ -88,7 +88,7 @@ final class AdminContentMediaApiController extends BaseAdminController
         $items = array_map(fn(array $item): array => $this->mapLibraryItem($item), (array)($pagination['data'] ?? []));
         if ($currentMediaId > 0) {
             $currentItem = $this->media->find($currentMediaId);
-            if ($currentItem !== null && $this->canManageByAuthor($currentItem) && $this->matchesLibraryQuery($currentItem, $query)) {
+            if ($currentItem !== null && $this->matchesLibraryQuery($currentItem, $query)) {
                 $items = array_values(array_filter($items, static fn(array $row): bool => (int)($row['id'] ?? 0) !== $currentMediaId));
                 array_unshift($items, $this->mapLibraryItem($currentItem));
             }
@@ -119,11 +119,6 @@ final class AdminContentMediaApiController extends BaseAdminController
         }
 
         $media = $this->media->find($mediaId);
-        if ($media !== null && !$this->canManageByAuthor($media)) {
-            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
-            return;
-        }
-
         if ($media === null || !$this->media->delete($mediaId)) {
             $this->apiError('DELETE_FAILED', I18n::t('media.delete_failed'));
             return;
@@ -252,11 +247,6 @@ final class AdminContentMediaApiController extends BaseAdminController
             return null;
         }
 
-        if (!$this->canManageByAuthor($content)) {
-            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
-            return null;
-        }
-
         return $content;
     }
 
@@ -265,11 +255,6 @@ final class AdminContentMediaApiController extends BaseAdminController
         $media = $this->media->find($mediaId);
         if ($mediaId <= 0 || $media === null) {
             $this->apiError('MEDIA_NOT_FOUND', I18n::t('media.not_found'), 404);
-            return null;
-        }
-
-        if (!$this->canManageByAuthor($media)) {
-            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
             return null;
         }
 
@@ -282,8 +267,8 @@ final class AdminContentMediaApiController extends BaseAdminController
         return [
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
-            'can_edit' => $this->canManageByAuthor($item),
-            'can_delete' => $this->canManageByAuthor($item),
+            'can_edit' => true,
+            'can_delete' => true,
             'preview_path' => $this->resolvePreviewPath($item),
             'path' => (string)($item['path'] ?? ''),
             'webp_path' => (string)($item['path_webp'] ?? ''),

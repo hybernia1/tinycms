@@ -1,6 +1,6 @@
 <?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-4">
-    <form id="users-editor-form" method="post" autocomplete="off" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+    <form id="users-form" method="post" autocomplete="off" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
         <?= $csrfField() ?>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>

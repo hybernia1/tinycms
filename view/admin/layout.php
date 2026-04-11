@@ -172,12 +172,8 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
         </a>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
-                $role = (string)($authUser['role'] ?? '');
                 $itemUrl = (string)($item['url'] ?? '');
                 $itemPath = trim(parse_url($itemUrl, PHP_URL_PATH) ?? '', '/');
-                if ($role !== 'admin' && in_array($itemPath, ['admin/users', 'admin/settings'], true)) {
-                    continue;
-                }
                 $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
             ?>
             <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= htmlspecialchars((string)$item['url'], ENT_QUOTES, 'UTF-8') ?>">

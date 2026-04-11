@@ -38,25 +38,6 @@ abstract class BaseAdminController
         return true;
     }
 
-    protected function guardSuperAdmin(callable $redirect, bool $flashDenied = true): bool
-    {
-        if (!$this->authService->auth()->check()) {
-            $redirect('login');
-            return false;
-        }
-
-        if (!$this->authService->auth()->isAdmin()) {
-            if ($flashDenied) {
-                $this->flash->add('info', I18n::t('admin.access_denied'));
-            }
-
-            $redirect('admin/dashboard');
-            return false;
-        }
-
-        return true;
-    }
-
     protected function guardCsrf(callable $redirect, string $redirectPath, string $message): bool
     {
         if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
@@ -71,12 +52,6 @@ abstract class BaseAdminController
     protected function guardAdminCsrf(callable $redirect, string $redirectPath, string $message, bool $flashDenied = false): bool
     {
         return $this->guardAdmin($redirect, $flashDenied)
-            && $this->guardCsrf($redirect, $redirectPath, $message);
-    }
-
-    protected function guardSuperAdminCsrf(callable $redirect, string $redirectPath, string $message, bool $flashDenied = true): bool
-    {
-        return $this->guardSuperAdmin($redirect, $flashDenied)
             && $this->guardCsrf($redirect, $redirectPath, $message);
     }
 
@@ -143,16 +118,6 @@ abstract class BaseAdminController
         ], $statusCode);
     }
 
-    protected function currentUserId(): int
-    {
-        return (int)($this->authService->auth()->id() ?? 0);
-    }
-
-    protected function canManageByAuthor(array $item, string $authorKey = 'author'): bool
-    {
-        return true;
-    }
-
     protected function formatDateTime(string $value): string
     {
         $stamp = $value !== '' ? strtotime($value) : false;
@@ -166,11 +131,6 @@ abstract class BaseAdminController
     protected function hasUpload(string $field): bool
     {
         return isset($_FILES[$field]) && (int)($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
-    }
-
-    protected function normalizeAuthorInput(array $input): array
-    {
-        return $input;
     }
 
     protected function resolvePaginationQuery(): array
