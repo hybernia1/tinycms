@@ -92,16 +92,6 @@ const closeModal = (target, reason = 'close') => {
     }
 };
 
-const hoistModalsToBody = () => {
-    document.querySelectorAll('[data-modal], [data-content-leave-modal], [data-media-library-modal]').forEach((modal) => {
-        if (modal.parentElement !== document.body) {
-            document.body.appendChild(modal);
-        }
-    });
-};
-
-hoistModalsToBody();
-
 const registerModal = (name, options = {}) => {
     const modalName = normalizeName(name);
     const element = options.element instanceof Element
