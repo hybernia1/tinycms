@@ -1,7 +1,5 @@
 <?php
 $list = is_array($listBase ?? null) ? $listBase : [];
-$statusCurrent = (string)($list['statusCurrent'] ?? 'all');
-$listQuery = (string)($list['query'] ?? '');
 $statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
 $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];
 foreach ($availableStatuses as $statusValue) {
