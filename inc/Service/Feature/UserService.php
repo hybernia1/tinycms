@@ -28,7 +28,6 @@ final class UserService
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'ID',
-            'orderByAllowed' => ['ID', 'name', 'email', 'role', 'suspend', 'created'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name', 'email'],
@@ -37,8 +36,7 @@ final class UserService
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $id]);
-        return $rows[0] ?? null;
+        return $this->query->first('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $id]);
     }
 
     public function delete(int $id): bool
@@ -62,7 +60,6 @@ final class UserService
 
         return $this->query->update('users', [
             'suspend' => 1,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['ID' => $id]) > 0;
     }
 
@@ -76,7 +73,6 @@ final class UserService
 
         return $this->query->update('users', [
             'suspend' => 0,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['ID' => $id]) > 0;
     }
 
@@ -127,9 +123,9 @@ final class UserService
             }
         }
 
-        $existing = $this->query->select('users', ['ID'], ['email' => $email]);
+        $existing = $this->query->first('users', ['ID'], ['email' => $email]);
 
-        if (!empty($existing) && (int)$existing[0]['ID'] !== ($id ?? 0)) {
+        if ($existing !== null && (int)$existing['ID'] !== ($id ?? 0)) {
             $errors['email'] = I18n::t('validation.email_already_used');
         }
 
@@ -141,13 +137,11 @@ final class UserService
             $suspend = 0;
         }
 
-        $now = date('Y-m-d H:i:s');
         $payload = [
             'name' => $name,
             'email' => $email,
             'role' => $role,
             'suspend' => $suspend,
-            'updated' => $now,
         ];
 
         if ($password !== '') {
@@ -156,7 +150,6 @@ final class UserService
 
         try {
             if ($id === null) {
-                $payload['created'] = $now;
                 $newId = $this->query->insert('users', $payload);
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }

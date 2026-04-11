@@ -32,6 +32,16 @@ class Query
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function first(string $table, array $columns = ['*'], array $where = []): ?array
+    {
+        return $this->select($table, $columns, $where)[0] ?? null;
+    }
+
+    public function exists(string $table, array $where = []): bool
+    {
+        return $this->first($table, ['*'], $where) !== null;
+    }
+
     public function paginate(string $table, array $columns = ['*'], array $where = [], array $options = []): array
     {
         $table = Table::name($table);
@@ -41,6 +51,9 @@ class Query
         $perPage = max(1, (int)($options['perPage'] ?? 10));
         $orderBy = (string)($options['orderBy'] ?? 'ID');
         $orderByAllowed = $this->filterIdentifiers((array)($options['orderByAllowed'] ?? []));
+        if ($orderByAllowed === []) {
+            $orderByAllowed = $this->filterIdentifiers($columns);
+        }
         $orderDir = strtoupper((string)($options['orderDir'] ?? 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
         $search = trim((string)($options['search'] ?? ''));
         $searchColumns = (array)($options['searchColumns'] ?? []);

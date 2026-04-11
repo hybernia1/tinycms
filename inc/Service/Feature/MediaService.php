@@ -52,7 +52,6 @@ final class MediaService
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'path', 'path_webp', 'author', 'created', 'updated'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name', 'path', 'path_webp'],
@@ -81,8 +80,7 @@ final class MediaService
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('media', ['id', 'author', 'name', 'path', 'path_webp', 'created', 'updated'], ['id' => $id]);
-        return $rows[0] ?? null;
+        return $this->query->first('media', ['id', 'author', 'name', 'path', 'path_webp', 'created', 'updated'], ['id' => $id]);
     }
 
     public function delete(int $id): bool
@@ -139,12 +137,10 @@ final class MediaService
 
         try {
             if ($id === null) {
-                $payload['created'] = date('Y-m-d H:i:s');
                 $newId = $this->query->insert('media', $payload);
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }
 
-            $payload['updated'] = date('Y-m-d H:i:s');
             $updated = $this->query->update('media', $payload, ['id' => $id]);
             return ['success' => $updated >= 0, 'id' => $id, 'errors' => []];
         } catch (InvalidArgumentException $e) {
@@ -239,8 +235,7 @@ final class MediaService
             return null;
         }
 
-        $rows = $this->query->select('users', ['ID'], ['ID' => $authorId]);
-        return $rows === [] ? null : $authorId;
+        return $this->query->exists('users', ['ID' => $authorId]) ? $authorId : null;
     }
 
     private function paginateUnassigned(int $page, int $perPage, string $search): array
@@ -301,4 +296,5 @@ final class MediaService
             'per_page' => $perPage,
         ];
     }
+
 }

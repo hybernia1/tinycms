@@ -9,12 +9,15 @@ use App\Service\Infra\Db\Query;
 class Auth
 {
     private bool $synced = false;
+    private Query $query;
 
     public function __construct()
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
+
+        $this->query = new Query(Connection::get());
     }
 
     public function check(): bool
@@ -82,15 +85,14 @@ class Auth
         }
 
         $userId = (int)$_SESSION['auth']['id'];
-        $rows = (new Query(Connection::get()))->select('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $userId]);
+        $user = $this->query->first('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $userId]);
 
-        if (empty($rows) || (int)($rows[0]['suspend'] ?? 0) === 1) {
+        if ($user === null || (int)($user['suspend'] ?? 0) === 1) {
             unset($_SESSION['auth']);
             $this->synced = true;
             return;
         }
 
-        $user = $rows[0];
         $_SESSION['auth'] = [
             'id' => (int)$user['ID'],
             'name' => (string)$user['name'],

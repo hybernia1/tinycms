@@ -38,7 +38,6 @@ final class TermService
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'created', 'updated'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name'],
@@ -65,8 +64,7 @@ final class TermService
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('terms', ['id', 'name', 'created', 'updated'], ['id' => $id]);
-        return $rows[0] ?? null;
+        return $this->query->first('terms', ['id', 'name', 'created', 'updated'], ['id' => $id]);
     }
 
     public function save(array $input, ?int $id = null): array
@@ -100,12 +98,10 @@ final class TermService
 
         $payload = [
             'name' => $name,
-            'updated' => date('Y-m-d H:i:s'),
         ];
 
         try {
             if ($id === null) {
-                $payload['created'] = date('Y-m-d H:i:s');
                 $newId = $this->query->insert('terms', $payload);
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }
@@ -134,7 +130,6 @@ final class TermService
                 'page' => 1,
                 'perPage' => min($limit, 50),
                 'orderBy' => 'name',
-                'orderByAllowed' => ['name'],
                 'orderDir' => 'ASC',
             ]);
             return array_map(static fn(array $item): array => [
@@ -229,7 +224,7 @@ final class TermService
             $termsTable = Table::name('terms');
             $contentTermsTable = Table::name('content_terms');
             $selectStmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-            $insertStmt = $this->pdo->prepare("INSERT INTO $termsTable (name, created, updated) VALUES (:name, NOW(), NOW())");
+            $insertStmt = $this->pdo->prepare("INSERT INTO $termsTable (name) VALUES (:name)");
 
             foreach ($names as $name) {
                 $selectStmt->execute(['name' => $name]);
@@ -374,4 +369,5 @@ final class TermService
             'per_page' => $perPage,
         ];
     }
+
 }

@@ -45,7 +45,6 @@ final class ContentService
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'status', 'author', 'created', 'updated'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name', 'excerpt', 'body'],
@@ -56,7 +55,7 @@ final class ContentService
     {
         $contentTable = Table::name('content');
         $mediaTable = Table::name('media');
-        $rows = $this->query->select('content', [
+        return $this->query->first('content', [
             'id',
             'name',
             'status',
@@ -70,7 +69,6 @@ final class ContentService
             'created',
             'updated',
         ], ['id' => $id]);
-        return $rows[0] ?? null;
     }
 
     public function delete(int $id): bool
@@ -88,7 +86,6 @@ final class ContentService
 
         return $this->query->update('content', [
             'status' => $status,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['id' => $id]) > 0;
     }
 
@@ -106,7 +103,6 @@ final class ContentService
 
         return $this->query->update('content', [
             'thumbnail' => $thumbnailId,
-            'updated' => date('Y-m-d H:i:s'),
         ], ['id' => $id]) >= 0;
     }
 
@@ -156,19 +152,19 @@ final class ContentService
             return ['success' => false, 'errors' => $errors];
         }
 
-        $now = date('Y-m-d H:i:s');
         $payload = [
             'name' => $name,
             'status' => $status,
             'excerpt' => $excerpt === '' ? null : mb_substr($excerpt, 0, 500),
             'body' => $body,
             'author' => $author,
-            'updated' => $now,
         ];
 
         try {
             if ($id === null) {
-                $payload['created'] = $created ?? $now;
+                if ($created !== null) {
+                    $payload['created'] = $created;
+                }
                 $newId = $this->query->insert('content', $payload);
                 if ($newId > 0) {
                     $this->syncAttachments($newId, $body);
@@ -234,7 +230,7 @@ final class ContentService
             return false;
         }
 
-        $mediaExists = $this->query->select('media', ['id'], ['id' => $mediaId]) !== [];
+        $mediaExists = $this->query->exists('media', ['id' => $mediaId]);
         if (!$mediaExists) {
             return false;
         }
@@ -534,8 +530,7 @@ final class ContentService
             return null;
         }
 
-        $rows = $this->query->select('users', ['ID'], ['ID' => $authorId]);
-        return $rows === [] ? null : $authorId;
+        return $this->query->exists('users', ['ID' => $authorId]) ? $authorId : null;
     }
 
     private function resolveDateTime(string $value): ?string
@@ -559,4 +554,5 @@ final class ContentService
         $timestamp = strtotime($clean);
         return $timestamp === false ? null : date('Y-m-d H:i:s', $timestamp);
     }
+
 }
