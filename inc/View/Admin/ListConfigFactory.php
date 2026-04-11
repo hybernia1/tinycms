@@ -1,10 +1,16 @@
 <?php
+declare(strict_types=1);
 
-if (!function_exists('adminListBuildConfig')) {
-    function adminListBuildConfig(array $input): array
+namespace App\View\Admin;
+
+use App\Service\Support\PaginationConfig;
+
+final class ListConfigFactory
+{
+    public static function build(array $input): array
     {
         $statusCurrent = (string)($input['statusCurrent'] ?? 'all');
-        $perPage = (int)($input['perPage'] ?? \App\Service\Support\PaginationConfig::perPage());
+        $perPage = (int)($input['perPage'] ?? PaginationConfig::perPage());
         $query = (string)($input['query'] ?? '');
 
         return [

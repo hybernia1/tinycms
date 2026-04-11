@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../config.php';
 $listItems = $pagination['data'] ?? [];
 $listPage = (int)($pagination['page'] ?? 1);
 $listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
@@ -32,7 +31,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     return (string)ob_get_clean();
 };
 
-$listConfig = adminListBuildConfig([
+$listConfig = \App\View\Admin\ListConfigFactory::build([
     'name' => 'terms',
     'endpoint' => $url('admin/api/v1/terms'),
     'editBase' => $url('admin/terms/edit?id='),
