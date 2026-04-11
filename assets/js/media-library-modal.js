@@ -164,7 +164,7 @@ if (modal && openTrigger) {
             return;
         }
 
-        const imagePath = absoluteUrl(media.preview_path || media.webp_path || media.path || '');
+        const imagePath = absoluteUrl(media.webp_path || media.preview_path || media.path || '');
         if (imagePath === '') {
             return;
         }
