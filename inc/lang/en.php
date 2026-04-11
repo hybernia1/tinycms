@@ -228,7 +228,7 @@ return [
         'switched_to_draft' => 'Content switched to draft.',
         'publish_failed' => 'Content is already published or not available.',
         'draft_failed' => 'Content is already draft or not available.',
-        'autosave_draft_name' => '(Draft #%d)',
+        'autosave_draft_name' => 'Automatically created draft',
         'draft_create_failed' => 'Could not create draft.',
         'draft_required' => 'Draft must be created first.',
         'draft_invalid_id' => 'Draft has invalid ID.',
