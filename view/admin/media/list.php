@@ -10,13 +10,6 @@ $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
 ];
-$thumbSuffix = '_100x100.webp';
-if (defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS)) {
-    $firstVariant = MEDIA_THUMB_VARIANTS[0] ?? null;
-    if (is_array($firstVariant) && !empty($firstVariant['suffix'])) {
-        $thumbSuffix = (string)$firstVariant['suffix'];
-    }
-}
 $authUser = $_SESSION['auth'] ?? [];
 $isEditor = (string)($authUser['role'] ?? '') === 'editor';
 $currentUserId = (int)($authUser['id'] ?? 0);
@@ -24,7 +17,7 @@ $csrfMarkup = $csrfField();
 $listName = 'media';
 $listEndpoint = $url('admin/api/v1/media');
 $listEditBase = $url('admin/media/edit?id=');
-$listRootAttrs = ['data-thumb-suffix' => $thumbSuffix];
+$listRootAttrs = [];
 $searchPlaceholder = $t('media.search_placeholder');
 $searchHidden = ['status' => $statusCurrent, 'per_page' => (string)$listPerPage, 'page' => '1'];
 $perPageHidden = ['status' => $statusCurrent, 'q' => $listQuery, 'page' => '1'];
@@ -38,12 +31,13 @@ $statusEnabled = true;
 $deleteConfirmText = $t('media.delete_confirm');
 $statusUrl = static fn(string $targetStatus): string => $url('admin/media?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
 $paginationUrl = static fn(int $targetPage): string => $url('admin/media?page=' . $targetPage . '&per_page=' . $listPerPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
-$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $isEditor, $currentUserId, $thumbSuffix): string {
+$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $isEditor, $currentUserId): string {
     $id = (int)($row['id'] ?? 0);
-    $previewPath = trim((string)($row['path_webp'] ?? ''));
-    if ($previewPath !== '') {
-        $previewPath = (string)(preg_replace('/\.webp$/i', $thumbSuffix, $previewPath) ?? $previewPath);
-    } else {
+    $previewPath = trim((string)($row['preview_path'] ?? ''));
+    if ($previewPath === '') {
+        $previewPath = trim((string)($row['path_webp'] ?? ''));
+    }
+    if ($previewPath === '') {
         $previewPath = trim((string)($row['path'] ?? ''));
     }
     $previewUrl = $previewPath !== '' ? $url($previewPath) : '';

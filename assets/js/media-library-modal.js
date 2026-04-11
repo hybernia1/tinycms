@@ -164,7 +164,7 @@ if (modal && openTrigger) {
             return;
         }
 
-        const imagePath = absoluteUrl(media.preview_path || media.webp_path || media.path || '');
+        const imagePath = absoluteUrl(media.webp_path || media.preview_path || media.path || '');
         if (imagePath === '') {
             return;
         }
@@ -271,9 +271,12 @@ if (modal && openTrigger) {
     const renderSelected = () => {
         if (detailPreview) {
             detailPreview.innerHTML = '';
-            if (selectedMedia && selectedMedia.previewPath !== '') {
+            const detailImagePath = selectedMedia
+                ? (selectedMedia.webpPath || selectedMedia.previewPath || selectedMedia.path || '')
+                : '';
+            if (selectedMedia && detailImagePath !== '') {
                 const image = document.createElement('img');
-                image.src = absoluteUrl(selectedMedia.previewPath);
+                image.src = absoluteUrl(detailImagePath);
                 image.alt = selectedMedia.name;
                 detailPreview.appendChild(image);
             } else {

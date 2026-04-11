@@ -11,6 +11,7 @@ use App\Service\Feature\SettingsService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 use App\Service\Support\SluggerService;
+use App\Service\Support\ThumbnailVariants;
 use App\View\PageView;
 
 final class FrontController
@@ -325,7 +326,7 @@ final class FrontController
         ];
 
         foreach ($this->thumbSuffixes() as $suffix => $width) {
-            $variant = (string)(preg_replace('/\.webp$/i', $suffix, $webpPath) ?? '');
+            $variant = ThumbnailVariants::thumbnailPath($webpPath, $suffix);
             if ($variant !== '') {
                 $sources[] = ['path' => $variant, 'width' => $width];
             }
@@ -337,31 +338,7 @@ final class FrontController
 
     private function thumbSuffixes(): array
     {
-        $raw = defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS) ? MEDIA_THUMB_VARIANTS : [];
-        $suffixes = [];
-
-        foreach ($raw as $variant) {
-            if (!is_array($variant)) {
-                continue;
-            }
-
-            $suffix = trim((string)($variant['suffix'] ?? ''));
-            $width = (int)($variant['width'] ?? 0);
-            if ($suffix === '' || $width <= 0 || !str_ends_with(strtolower($suffix), '.webp')) {
-                continue;
-            }
-
-            $suffixes[$suffix] = $width;
-        }
-
-        if ($suffixes === []) {
-            return [
-                '_100x100.webp' => 100,
-                '_w768.webp' => 768,
-            ];
-        }
-
-        return $suffixes;
+        return ThumbnailVariants::suffixWidthMap();
     }
 
     private function currentTheme(): string
