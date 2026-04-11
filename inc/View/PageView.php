@@ -7,6 +7,7 @@ use App\Service\Feature\ThemeService;
 use App\Service\Feature\SettingsService;
 use App\Service\Feature\UploadService;
 use App\Service\Support\I18n;
+use App\View\Admin\AdminListViewModel;
 
 final class PageView
 {
@@ -218,11 +219,7 @@ final class PageView
     public function adminUsersList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/users/list', [
-            'pagination' => $pagination,
-            'allowedPerPage' => $allowedPerPage,
-            'status' => $status,
-            'query' => $query,
-            'statusCounts' => $statusCounts,
+            'list' => AdminListViewModel::fromRaw($pagination, $allowedPerPage, $status, $query, $statusCounts),
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.users'),
             'headerAction' => $this->linkHeaderAction('admin/users/add', I18n::t('admin.add_user')),
@@ -255,12 +252,8 @@ final class PageView
     public function adminContentList(array $pagination, array $allowedPerPage, string $status, string $query, array $availableStatuses, array $statusCounts): void
     {
         $this->renderAdmin('admin/content/list', [
-            'pagination' => $pagination,
-            'allowedPerPage' => $allowedPerPage,
-            'status' => $status,
-            'query' => $query,
+            'list' => AdminListViewModel::fromRaw($pagination, $allowedPerPage, $status, $query, $statusCounts),
             'availableStatuses' => $availableStatuses,
-            'statusCounts' => $statusCounts,
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.content'),
             'headerAction' => $this->linkHeaderAction('admin/content/add', I18n::t('admin.add_content')),
@@ -285,11 +278,7 @@ final class PageView
     public function adminTermList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/terms/list', [
-            'pagination' => $pagination,
-            'allowedPerPage' => $allowedPerPage,
-            'status' => $status,
-            'query' => $query,
-            'statusCounts' => $statusCounts,
+            'list' => AdminListViewModel::fromRaw($pagination, $allowedPerPage, $status, $query, $statusCounts),
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.terms'),
             'headerAction' => $this->linkHeaderAction('admin/terms/add', I18n::t('admin.add_term')),
@@ -312,11 +301,7 @@ final class PageView
     public function adminMediaList(array $pagination, array $allowedPerPage, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/media/list', [
-            'pagination' => $pagination,
-            'allowedPerPage' => $allowedPerPage,
-            'status' => $status,
-            'query' => $query,
-            'statusCounts' => $statusCounts,
+            'list' => AdminListViewModel::fromRaw($pagination, $allowedPerPage, $status, $query, $statusCounts),
             'adminMenu' => $this->adminMenu(),
             'pageTitle' => I18n::t('admin.menu.media'),
             'headerAction' => $this->linkHeaderAction('admin/media/add', I18n::t('admin.add_media')),

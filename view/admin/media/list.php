@@ -1,11 +1,12 @@
 <?php
-$listItems = $pagination['data'] ?? [];
-$listPage = (int)($pagination['page'] ?? 1);
-$listPerPage = (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
-$listTotalPages = (int)($pagination['total_pages'] ?? 1);
-$statusCurrent = (string)($status ?? 'all');
-$listQuery = (string)($query ?? '');
-$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
+$listModel = ($list ?? null) instanceof \App\View\Admin\AdminListViewModel ? $list : null;
+$listItems = $listModel?->items ?? (array)($pagination['data'] ?? []);
+$listPage = $listModel?->page ?? (int)($pagination['page'] ?? 1);
+$listPerPage = $listModel?->perPage ?? (int)($pagination['per_page'] ?? \App\Service\Support\PaginationConfig::perPage());
+$listTotalPages = $listModel?->totalPages ?? (int)($pagination['total_pages'] ?? 1);
+$statusCurrent = $listModel?->status ?? (string)($status ?? 'all');
+$listQuery = $listModel?->query ?? (string)($query ?? '');
+$statusCounts = $listModel?->statusCounts ?? (is_array($statusCounts ?? null) ? $statusCounts : []);
 $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
@@ -20,7 +21,7 @@ $listColumns = [
     ['label' => $t('common.author'), 'class' => 'mobile-hide'],
     ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
 ];
-$listAllowedPerPage = $allowedPerPage;
+$listAllowedPerPage = $listModel?->allowedPerPage ?? ($allowedPerPage ?? []);
 $statusEnabled = true;
 $deleteConfirmText = $t('media.delete_confirm');
 $statusUrl = static fn(string $targetStatus): string => $url('admin/media?status=' . urlencode($targetStatus) . '&per_page=' . $listPerPage . '&page=1');
