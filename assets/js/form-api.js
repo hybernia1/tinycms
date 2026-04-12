@@ -22,9 +22,14 @@
             return;
         }
 
-        const redirect = String(payload?.data?.redirect || form.getAttribute('data-redirect-url') || '').trim();
+        const payloadRedirect = String(payload?.data?.redirect || '').trim();
+        const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();
+        const redirect = payloadRedirect !== '' ? payloadRedirect : fallbackRedirect;
         if (redirect !== '') {
-            window.location.href = redirect;
+            const target = /^https?:\/\//i.test(redirect) || redirect.startsWith('/')
+                ? redirect
+                : '/' + redirect.replace(/^\/+/, '');
+            window.location.href = target;
             return;
         }
 
