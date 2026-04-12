@@ -24,7 +24,6 @@ final class MetaHead
             'og_image' => $metaOgImage !== '' ? $absoluteUrl($metaOgImage) : ($siteLogo !== '' ? $absoluteUrl($siteLogo) : ''),
             'site_name' => (string)($data['siteName'] ?? 'TinyCMS'),
             'author' => (string)($data['siteAuthor'] ?? ''),
-            'theme_color' => (string)($data['metaThemeColor'] ?? '#2563eb'),
             'favicon' => (string)($data['siteFavicon'] ?? '') !== '' ? $absoluteUrl((string)$data['siteFavicon']) : '',
             'logo' => $siteLogo !== '' ? $absoluteUrl($siteLogo) : '',
             'structured_data' => $data['metaStructuredData'] ?? null,
@@ -49,7 +48,6 @@ final class MetaHead
         $modifiedTime = $this->isoDate((string)($meta['modified_time'] ?? ''));
         $siteName = $this->clean((string)($meta['site_name'] ?? ''));
         $author = $this->clean((string)($meta['author'] ?? ''));
-        $themeColor = $this->clean((string)($meta['theme_color'] ?? ''));
         $favicon = $this->clean((string)($meta['favicon'] ?? ''));
         $logo = $this->clean((string)($meta['logo'] ?? ''));
         $alternateLinks = $this->alternateLinks($meta['alternate_links'] ?? []);
@@ -106,9 +104,6 @@ final class MetaHead
             $parts[] = '<meta name="author" content="' . $this->esc($author) . '">';
         }
 
-        if ($themeColor !== '') {
-            $parts[] = '<meta name="theme-color" content="' . $this->esc($themeColor) . '">';
-        }
         if ($favicon !== '') {
             $parts[] = '<link rel="icon" href="' . $this->esc($favicon) . '"' . $this->faviconTypeAttr($favicon) . '>';
         }
