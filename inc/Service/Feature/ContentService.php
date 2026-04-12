@@ -9,6 +9,7 @@ use App\Service\Infra\Db\SchemaConstraintValidator;
 use App\Service\Infra\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
+use PDOException;
 
 final class ContentService
 {
@@ -28,6 +29,20 @@ final class ContentService
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
+    {
+        $search = trim($search);
+        if ($search === '') {
+            return $this->paginateDefault($page, $perPage, $status, $search);
+        }
+
+        try {
+            return $this->paginateWithBodyTextSearch($page, $perPage, $status, $search);
+        } catch (PDOException) {
+            return $this->paginateDefault($page, $perPage, $status, $search);
+        }
+    }
+
+    private function paginateDefault(int $page, int $perPage, string $status, string $search): array
     {
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
@@ -54,6 +69,60 @@ final class ContentService
             'search' => $search,
             'searchColumns' => ['name', 'excerpt', 'body'],
         ]);
+    }
+
+    private function paginateWithBodyTextSearch(int $page, int $perPage, string $status, string $search): array
+    {
+        $safePerPage = max(1, $perPage);
+        $safePage = max(1, $page);
+        $contentTable = Table::name('content');
+        $usersTable = Table::name('users');
+        $searchLike = '%' . $search . '%';
+        $bodyTextExpr = $this->bodyTextSql('c.body');
+        $statusWhereSql = $status === 'all' ? '' : 'c.status = :status AND ';
+        $params = ['search' => $searchLike];
+        if ($status !== 'all') {
+            $params['status'] = $status;
+        }
+
+        $countStmt = $this->pdo->prepare(
+            "SELECT COUNT(*) FROM $contentTable c
+             WHERE {$statusWhereSql}(c.name LIKE :search OR c.excerpt LIKE :search OR $bodyTextExpr LIKE :search)"
+        );
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetchColumn();
+        $totalPages = max(1, (int)ceil($total / $safePerPage));
+        $currentPage = min($safePage, $totalPages);
+        $offset = ($currentPage - 1) * $safePerPage;
+
+        $stmt = $this->pdo->prepare(
+            "SELECT c.id, c.name, c.status, c.author,
+                    (SELECT name FROM $usersTable WHERE $usersTable.id = c.author LIMIT 1) AS author_name,
+                    c.created, c.updated
+             FROM $contentTable c
+             WHERE {$statusWhereSql}(c.name LIKE :search OR c.excerpt LIKE :search OR $bodyTextExpr LIKE :search)
+             ORDER BY c.id DESC
+             LIMIT :limit OFFSET :offset"
+        );
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value);
+        }
+        $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'total' => $total,
+            'total_pages' => $totalPages,
+            'page' => $currentPage,
+            'per_page' => $safePerPage,
+        ];
+    }
+
+    private function bodyTextSql(string $column): string
+    {
+        return "TRIM(REGEXP_REPLACE(COALESCE($column, ''), '<[^>]*>', ' '))";
     }
 
     public function find(int $id): ?array
