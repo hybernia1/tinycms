@@ -27,6 +27,8 @@
         var thumbnailTrigger = document.querySelector('[data-media-library-open]');
         var headerDeleteGroup = document.querySelector('[data-content-delete-group]');
         var headerDeleteButton = document.querySelector('[data-content-action-delete]');
+        var firstDraftAutosaveDelay = 30000;
+        var autosaveDelay = 1200;
         var saveTimer = null;
         var saving = false;
         var pending = false;
@@ -229,9 +231,10 @@
             if (saveTimer) {
                 clearTimeout(saveTimer);
             }
+            var delay = contentId() > 0 ? autosaveDelay : firstDraftAutosaveDelay;
             saveTimer = window.setTimeout(function () {
                 runAutosave().catch(function () { return null; });
-            }, 1200);
+            }, delay);
         }
 
         function hasUnsavedChanges() {
