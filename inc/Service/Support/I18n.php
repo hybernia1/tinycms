@@ -83,6 +83,26 @@ final class I18n
         return $locales !== [] ? $locales : [self::DEFAULT_LOCALE];
     }
 
+    public static function subset(array $paths): array
+    {
+        $result = [];
+        foreach ($paths as $path) {
+            $key = trim((string)$path);
+            if ($key === '') {
+                continue;
+            }
+
+            $value = self::value($key);
+            if ($value === null) {
+                continue;
+            }
+
+            self::setByPath($result, $key, $value);
+        }
+
+        return $result;
+    }
+
     public static function languageLabel(string $locale): string
     {
         $normalized = self::normalizeLocale($locale);
@@ -138,6 +158,41 @@ final class I18n
         }
 
         return $current;
+    }
+
+    private static function value(string $key): mixed
+    {
+        $locale = self::locale();
+        $catalogue = self::loadCatalogue($locale);
+        $value = self::getByPath($catalogue, $key);
+        if ($value !== null) {
+            return $value;
+        }
+
+        if ($locale === self::DEFAULT_LOCALE) {
+            return null;
+        }
+
+        return self::getByPath(self::loadCatalogue(self::DEFAULT_LOCALE), $key);
+    }
+
+    private static function setByPath(array &$target, string $path, mixed $value): void
+    {
+        $segments = explode('.', $path);
+        $last = array_pop($segments);
+        if ($last === null || $last === '') {
+            return;
+        }
+
+        $current = &$target;
+        foreach ($segments as $segment) {
+            if (!isset($current[$segment]) || !is_array($current[$segment])) {
+                $current[$segment] = [];
+            }
+            $current = &$current[$segment];
+        }
+
+        $current[$last] = $value;
     }
 
     private static function normalizeLocale(string $locale): string

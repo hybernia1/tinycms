@@ -1,11 +1,5 @@
 (function () {
-    var i18n = window.tinycmsI18n || {};
-    var t = function (path, fallback) {
-        var value = path.split('.').reduce(function (acc, key) {
-            return acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined;
-        }, i18n);
-        return typeof value === 'string' && value !== '' ? value : fallback;
-    };
+    var t = window.tinycms?.i18n?.t || function () { return ""; };
     var editorCounter = 0;
 
     function normalizeHtml(html) {
@@ -110,9 +104,9 @@
         var controls = document.createElement('div');
         controls.className = 'image-controls';
         controls.setAttribute('contenteditable', 'false');
-        controls.innerHTML = '<button type="button" class="btn btn-light btn-xs" data-image-align="left">' + t('editor.align_left', 'Left') + '</button>'
-            + '<button type="button" class="btn btn-light btn-xs" data-image-align="center">' + t('editor.align_center', 'Center') + '</button>'
-            + '<button type="button" class="btn btn-light btn-xs" data-image-align="right">' + t('editor.align_right', 'Right') + '</button>';
+        controls.innerHTML = '<button type="button" class="btn btn-light btn-xs" data-image-align="left">' + t('editor.align_left') + '</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-align="center">' + t('editor.align_center') + '</button>'
+            + '<button type="button" class="btn btn-light btn-xs" data-image-align="right">' + t('editor.align_right') + '</button>';
         return controls;
     }
 
@@ -439,18 +433,18 @@
         var group = document.createElement('div');
         group.className = 'wysiwyg-group wysiwyg-group-heading';
 
-        var toggle = createIconButton('w-heading', 'toggleHeadingMenu', t('editor.headings', 'Headings'));
+        var toggle = createIconButton('w-heading', 'toggleHeadingMenu', t('editor.headings'));
 
         var menu = document.createElement('div');
         menu.className = 'wysiwyg-menu wysiwyg-menu-heading';
 
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:p', t('editor.paragraph', 'Paragraph')));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h1', t('editor.heading_1', 'Heading 1')));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h2', t('editor.heading_2', 'Heading 2')));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h3', t('editor.heading_3', 'Heading 3')));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h4', t('editor.heading_4', 'Heading 4')));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h5', t('editor.heading_5', 'Heading 5')));
-        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h6', t('editor.heading_6', 'Heading 6')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:p', t('editor.paragraph')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h1', t('editor.heading_1')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h2', t('editor.heading_2')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h3', t('editor.heading_3')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h4', t('editor.heading_4')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h5', t('editor.heading_5')));
+        menu.appendChild(createMenuItem('w-heading', 'formatBlock:h6', t('editor.heading_6')));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -460,13 +454,13 @@
         var group = document.createElement('div');
         group.className = 'wysiwyg-group wysiwyg-group-list';
 
-        var toggle = createIconButton('w-ul', 'toggleListMenu', t('editor.lists', 'Lists'));
+        var toggle = createIconButton('w-ul', 'toggleListMenu', t('editor.lists'));
 
         var menu = document.createElement('div');
         menu.className = 'wysiwyg-menu wysiwyg-menu-list';
 
-        menu.appendChild(createMenuItem('w-ul', 'insertUnorderedList', ''+ t('editor.list_bulleted', 'Bulleted list') + ''));
-        menu.appendChild(createMenuItem('w-ol', 'insertOrderedList', ''+ t('editor.list_numbered', 'Numbered list') + ''));
+        menu.appendChild(createMenuItem('w-ul', 'insertUnorderedList', ''+ t('editor.list_bulleted') + ''));
+        menu.appendChild(createMenuItem('w-ol', 'insertOrderedList', ''+ t('editor.list_numbered') + ''));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -476,15 +470,15 @@
         var group = document.createElement('div');
         group.className = 'wysiwyg-group wysiwyg-group-align';
 
-        var toggle = createIconButton('w-align-left', 'toggleAlignMenu', ''+ t('editor.alignment', 'Alignment') + '');
+        var toggle = createIconButton('w-align-left', 'toggleAlignMenu', ''+ t('editor.alignment') + '');
 
         var menu = document.createElement('div');
         menu.className = 'wysiwyg-menu wysiwyg-menu-align';
 
-        menu.appendChild(createMenuItem('w-align-left', 'justifyLeft', '' + t('editor.align_left', 'Left') + ''));
-        menu.appendChild(createMenuItem('w-align-center', 'justifyCenter', ''+ t('editor.align_center', 'Center') + ''));
-        menu.appendChild(createMenuItem('w-align-right', 'justifyRight', '' + t('editor.align_right', 'Right') + ''));
-        menu.appendChild(createMenuItem('w-align-justify', 'justifyFull', t('editor.align_justify', 'Justify')));
+        menu.appendChild(createMenuItem('w-align-left', 'justifyLeft', '' + t('editor.align_left') + ''));
+        menu.appendChild(createMenuItem('w-align-center', 'justifyCenter', ''+ t('editor.align_center') + ''));
+        menu.appendChild(createMenuItem('w-align-right', 'justifyRight', '' + t('editor.align_right') + ''));
+        menu.appendChild(createMenuItem('w-align-justify', 'justifyFull', t('editor.align_justify')));
         group.appendChild(toggle);
         group.appendChild(menu);
         return group;
@@ -499,7 +493,7 @@
 
         var title = document.createElement('h3');
         title.className = 'wysiwyg-link-title';
-        title.textContent = '' + t('editor.insert_link', 'Insert link') + '';
+        title.textContent = '' + t('editor.insert_link') + '';
 
         var input = document.createElement('input');
         input.type = 'url';
@@ -509,7 +503,7 @@
 
         var textInput = document.createElement('input');
         textInput.type = 'text';
-        textInput.placeholder = t('editor.link_text', 'Link text');
+        textInput.placeholder = t('editor.link_text');
         textInput.className = 'wysiwyg-link-input';
         textInput.setAttribute('data-role', 'link-text-input');
 
@@ -522,7 +516,7 @@
         targetInput.type = 'checkbox';
         targetInput.setAttribute('data-role', 'link-target-blank');
         targetOption.appendChild(targetInput);
-        targetOption.appendChild(document.createTextNode(' ' + t('editor.open_new_window', 'Open in new window')));
+        targetOption.appendChild(document.createTextNode(' ' + t('editor.open_new_window')));
 
         var nofollowOption = document.createElement('label');
         nofollowOption.className = 'wysiwyg-link-option';
@@ -530,7 +524,7 @@
         nofollowInput.type = 'checkbox';
         nofollowInput.setAttribute('data-role', 'link-nofollow');
         nofollowOption.appendChild(nofollowInput);
-        nofollowOption.appendChild(document.createTextNode(' ' + t('editor.add_nofollow', 'Add nofollow')));
+        nofollowOption.appendChild(document.createTextNode(' ' + t('editor.add_nofollow')));
 
         var actions = document.createElement('div');
         actions.className = 'wysiwyg-link-actions';
@@ -539,19 +533,19 @@
         cancel.type = 'button';
         cancel.className = 'btn btn-light';
         cancel.setAttribute('data-role', 'link-cancel');
-        cancel.textContent = '' + t('editor.cancel', 'Cancel') + '';
+        cancel.textContent = '' + t('editor.cancel') + '';
 
         var remove = document.createElement('button');
         remove.type = 'button';
         remove.className = 'btn btn-light';
         remove.setAttribute('data-role', 'link-remove');
-        remove.textContent = t('editor.remove_link', 'Remove link');
+        remove.textContent = t('editor.remove_link');
 
         var confirm = document.createElement('button');
         confirm.type = 'button';
         confirm.className = 'btn btn-primary';
         confirm.setAttribute('data-role', 'link-apply');
-        confirm.textContent = '' + t('editor.save', 'Save') + '';
+        confirm.textContent = '' + t('editor.save') + '';
 
         actions.appendChild(cancel);
         actions.appendChild(remove);
@@ -577,26 +571,26 @@
         toolbar.className = 'wysiwyg-toolbar';
 
         var headingGroup = createHeadingGroup();
-        var bold = createIconButton('w-bold', 'bold', ''+ t('editor.bold', 'Bold') + '');
-        var italic = createIconButton('w-italic', 'italic', ''+ t('editor.italic', 'Italic') + '');
-        var quote = createIconButton('w-quote', 'formatBlock:blockquote', t('editor.quote', 'Quote'));
+        var bold = createIconButton('w-bold', 'bold', ''+ t('editor.bold') + '');
+        var italic = createIconButton('w-italic', 'italic', ''+ t('editor.italic') + '');
+        var quote = createIconButton('w-quote', 'formatBlock:blockquote', t('editor.quote'));
         var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
-        var clear = createIconButton('w-clear', 'removeFormat', ''+ t('editor.clear', 'Clear') + '');
+        var clear = createIconButton('w-clear', 'removeFormat', ''+ t('editor.clear') + '');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
-        var media = createIconButton('w-image', 'openMediaLibrary', ''+ t('editor.insert_image', 'Insert image') + '');
-        var pagebreak = createIconButton('w-pagebreak', 'insertPagebreak', ''+ t('editor.page_break', 'Page break') + '');
+        var media = createIconButton('w-image', 'openMediaLibrary', ''+ t('editor.insert_image') + '');
+        var pagebreak = createIconButton('w-pagebreak', 'insertPagebreak', ''+ t('editor.page_break') + '');
         var alignGroup = createAlignGroup();
-        var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', t('editor.text_color', 'Text color'), 'text');
-        var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', ''+ t('editor.background_color', 'Background color') + '', 'background');
-        var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode', 'Focus mode') + '');
+        var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', t('editor.text_color'), 'text');
+        var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', ''+ t('editor.background_color') + '', 'background');
+        var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
         var linkModal = createLinkModal();
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
         linkTools.setAttribute('contenteditable', 'false');
         linkTools.appendChild(createLinkToolButton('w-link-edit', 'link-inline-edit', 'Upravit odkaz'));
-        linkTools.appendChild(createLinkToolButton('w-link-unlink', 'link-inline-remove', t('editor.unlink', 'Remove link')));
+        linkTools.appendChild(createLinkToolButton('w-link-unlink', 'link-inline-remove', t('editor.unlink')));
 
         toolbar.appendChild(headingGroup);
         toolbar.appendChild(bold);
@@ -618,7 +612,7 @@
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
         editor.contentEditable = 'true';
-        editor.dataset.placeholder = '' + t('editor.placeholder', 'Start writing content…') + '';
+        editor.dataset.placeholder = '' + t('editor.placeholder') + '';
         editor.innerHTML = textarea.value.trim();
 
         var linkRange = null;
@@ -880,7 +874,7 @@
             document.body.classList.toggle('admin-focus-mode', enabled);
             focus.classList.toggle('is-active', enabled);
             focus.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-            var label = enabled ? '' + t('editor.focus_mode_exit', 'Exit focus mode') + '' : ''+ t('editor.focus_mode', 'Focus mode') + '';
+            var label = enabled ? '' + t('editor.focus_mode_exit') + '' : ''+ t('editor.focus_mode') + '';
             focus.title = label;
             focus.setAttribute('aria-label', label);
         }

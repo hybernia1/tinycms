@@ -173,6 +173,7 @@ final class AdminView
             $this->adminBranding(),
             [
                 'adminMenu' => $this->adminMenu(),
+                'adminI18n' => $this->adminI18n(),
                 'imageUploadAccept' => UploadService::imageAccept(),
                 'siteImageUploadAccept' => UploadService::siteImageAccept(),
                 'imageUploadTypesLabel' => UploadService::imageExtensionsLabel(),
@@ -189,6 +190,23 @@ final class AdminView
             'siteFavicon' => (string)($settings['favicon'] ?? ''),
             'siteLogo' => (string)($settings['logo'] ?? ''),
         ];
+    }
+
+    private function adminI18n(): array
+    {
+        $payload = I18n::subset([
+            'common',
+            'admin',
+            'content',
+            'terms',
+            'media',
+            'users',
+            'editor',
+            'datetime',
+            'modal',
+            'auth',
+        ]);
+        return $payload;
     }
 
     private function adminMenu(): array

@@ -1,9 +1,5 @@
 (() => {
-const i18n = window.tinycmsI18n || {};
-const t = (path, fallback = '') => {
-    const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
-    return typeof value === 'string' && value !== '' ? value : fallback;
-};
+const t = window.tinycms?.i18n?.t || (() => '');
 
 const getModal = (trigger) => {
     const target = trigger?.getAttribute('data-modal-target') || '';
@@ -35,13 +31,13 @@ const openModal = (trigger) => {
         return;
     }
 
-    const type = trigger.getAttribute('data-type') || t('modal.default_type', 'item');
+    const type = trigger.getAttribute('data-type') || t('modal.default_type');
     const formId = trigger.getAttribute('data-form-id') || '';
     const text = modal.querySelector('[data-modal-text]');
     const confirm = modal.querySelector('[data-modal-confirm]');
 
     if (text && trigger.hasAttribute('data-type')) {
-        text.textContent = t('modal.confirm_delete_type', 'Do you really want to delete this %s?').replace('%s', type);
+        text.textContent = t('modal.confirm_delete_type').replace('%s', type);
     }
 
     if (confirm && formId) {
