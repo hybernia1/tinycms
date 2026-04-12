@@ -191,37 +191,6 @@ final class AdminMediaController extends BaseAdminController
         $this->apiOk(['id' => $id]);
     }
 
-    public function deleteSubmit(callable $redirect): void
-    {
-        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
-            return;
-        }
-
-        $id = (int)($_GET['id'] ?? 0);
-        if ($id <= 0) {
-            $this->flash->add('error', I18n::t('media.invalid_id'));
-            $redirect('admin/media');
-            return;
-        }
-
-        $item = $this->media->find($id);
-        if ($item === null) {
-            $this->flash->add('error', I18n::t('media.not_found'));
-            $redirect('admin/media');
-            return;
-        }
-
-        if (!$this->media->delete($id)) {
-            $this->flash->add('error', I18n::t('media.delete_failed'));
-            $redirect($this->buildEditPath('admin/media', $id));
-            return;
-        }
-
-        $this->upload->deleteMediaFiles($item);
-        $this->flash->add('success', I18n::t('media.deleted'));
-        $redirect('admin/media');
-    }
-
     private function resolveListQuery(): array
     {
         [$page, $perPage, $query] = $this->resolvePaginationQuery();

@@ -173,7 +173,13 @@ if ($mode === 'edit') {
 </form>
 
 <?php if ($mode === 'edit'): ?>
-    <form id="media-delete-form" method="post" action="<?= htmlspecialchars($url('admin/media/edit/delete?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+    <form
+        id="media-delete-form"
+        method="post"
+        action="<?= htmlspecialchars($url('admin/api/v1/media/' . (int)($item['id'] ?? 0) . '/delete'), ENT_QUOTES, 'UTF-8') ?>"
+        data-api-submit
+        data-redirect-url="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"
+    >
         <?= $csrfField() ?>
     </form>
     <div class="modal-overlay" data-modal id="media-delete-modal">

@@ -132,7 +132,13 @@ $contentId = (int)($item['id'] ?? 0);
     <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
 </form>
 <?php if ($mode === 'edit'): ?>
-<form id="content-delete-form" method="post" action="<?= htmlspecialchars($url('admin/content/edit/delete?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
+<form
+    id="content-delete-form"
+    method="post"
+    action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/delete'), ENT_QUOTES, 'UTF-8') ?>"
+    data-api-submit
+    data-redirect-url="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"
+>
     <?= $csrfField() ?>
 </form>
 <?php endif; ?>

@@ -15,6 +15,31 @@ const closeModal = (modal) => {
     }
 };
 
+const submitApiForm = async (form) => {
+    const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        credentials: 'same-origin',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    });
+
+    const payload = await response.json().catch(() => null);
+    if (!response.ok || payload?.ok !== true) {
+        return false;
+    }
+
+    const redirectUrl = String(form.getAttribute('data-redirect-url') || '').trim();
+    if (redirectUrl !== '') {
+        window.location.href = redirectUrl;
+        return true;
+    }
+
+    window.location.reload();
+    return true;
+};
+
 const hoistModalsToBody = () => {
     document.querySelectorAll('[data-modal], [data-content-leave-modal], [data-media-library-modal]').forEach((modal) => {
         if (modal.parentElement !== document.body) {
@@ -47,7 +72,7 @@ const openModal = (trigger) => {
     modal.classList.add('open');
 };
 
-document.addEventListener('click', (event) => {
+document.addEventListener('click', async (event) => {
     const openTrigger = event.target.closest('[data-modal-open]');
     if (openTrigger) {
         event.preventDefault();
@@ -70,6 +95,13 @@ document.addEventListener('click', (event) => {
     const form = formId ? document.getElementById(formId) : null;
 
     if (form) {
+        if (form.hasAttribute('data-api-submit')) {
+            const success = await submitApiForm(form);
+            if (success) {
+                closeModal(confirmTrigger.closest('[data-modal]'));
+            }
+            return;
+        }
         form.submit();
     }
 

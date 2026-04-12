@@ -79,35 +79,6 @@ final class AdminContentController extends BaseAdminController
         $this->apiOk(['id' => $id]);
     }
 
-    public function deleteSubmit(callable $redirect): void
-    {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
-            return;
-        }
-
-        $id = (int)($_GET['id'] ?? 0);
-        if ($id <= 0) {
-            $this->flash->add('error', I18n::t('content.invalid_id'));
-            $redirect('admin/content');
-            return;
-        }
-
-        if ($this->content->find($id) === null) {
-            $this->flash->add('error', I18n::t('content.not_found'));
-            $redirect('admin/content');
-            return;
-        }
-
-        if (!$this->content->delete($id)) {
-            $this->flash->add('error', I18n::t('content.delete_failed'));
-            $redirect($this->buildEditPath('admin/content', $id));
-            return;
-        }
-
-        $this->flash->add('success', I18n::t('content.deleted'));
-        $redirect('admin/content');
-    }
-
     public function addForm(callable $redirect): void
     {
         if (!$this->guardAdmin($redirect, false)) {

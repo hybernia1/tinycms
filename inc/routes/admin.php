@@ -28,7 +28,6 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/content/add', 'controller' => $adminContent, 'action' => 'addSubmit'],
     ['method' => 'GET', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editForm'],
     ['method' => 'POST', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editSubmit'],
-    ['method' => 'POST', 'path' => 'admin/content/edit/delete', 'controller' => $adminContent, 'action' => 'deleteSubmit'],
     ['method' => 'GET', 'path' => 'admin/api/v1/content/{contentId}/media', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryApiV1', 'params' => ['contentId' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/upload', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryUploadApiV1', 'params' => ['contentId' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/media/{mediaId}/delete', 'controller' => $adminContentMediaApi, 'action' => 'mediaLibraryDeleteApiV1', 'params' => ['contentId' => 'int', 'mediaId' => 'int']],
@@ -53,7 +52,6 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/media/add', 'controller' => $adminMedia, 'action' => 'addSubmit'],
     ['method' => 'GET', 'path' => 'admin/media/edit', 'controller' => $adminMedia, 'action' => 'editForm'],
     ['method' => 'POST', 'path' => 'admin/media/edit', 'controller' => $adminMedia, 'action' => 'editSubmit'],
-    ['method' => 'POST', 'path' => 'admin/media/edit/delete', 'controller' => $adminMedia, 'action' => 'deleteSubmit'],
 
     ['method' => 'GET', 'path' => 'admin/settings', 'controller' => $adminSettings, 'action' => 'form'],
     ['method' => 'POST', 'path' => 'admin/settings', 'controller' => $adminSettings, 'action' => 'submit'],
