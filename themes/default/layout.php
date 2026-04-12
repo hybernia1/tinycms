@@ -28,11 +28,6 @@ $themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js
             <nav class="site-nav">
                 <a href="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('front.home.published_posts'), ENT_QUOTES, 'UTF-8') ?></a>
                 <a href="<?= htmlspecialchars($url('search'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('front.search.title'), ENT_QUOTES, 'UTF-8') ?></a>
-                <?php if (!empty($user) && (string)($user['role'] ?? '') === 'admin'): ?>
-                    <a href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('admin.menu.dashboard'), ENT_QUOTES, 'UTF-8') ?></a>
-                <?php else: ?>
-                    <a href="<?= htmlspecialchars($url('login'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('front.login.title'), ENT_QUOTES, 'UTF-8') ?></a>
-                <?php endif; ?>
             </nav>
         </aside>
         <main id="main-content" class="site-main">

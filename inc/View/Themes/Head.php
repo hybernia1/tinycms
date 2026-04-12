@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\View\Themes;
 
-final class MetaHead
+final class Head
 {
     public function fromViewData(array $data, callable $absoluteUrl, array $overrides = []): array
     {

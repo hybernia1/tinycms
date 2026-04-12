@@ -5,18 +5,6 @@ namespace App\View\Themes;
 
 final class ThemeHelper
 {
-    private MetaHead $metaHead;
-
-    public function __construct(?MetaHead $metaHead = null)
-    {
-        $this->metaHead = $metaHead ?? new MetaHead();
-    }
-
-    public function metaHead(array $data, callable $absoluteUrl, array $overrides = []): string
-    {
-        return $this->metaHead->render($this->metaHead->fromViewData($data, $absoluteUrl, $overrides));
-    }
-
     public function renderPicture(array $thumbnail, string $alt, callable $url, array $options = []): string
     {
         $webp = trim((string)($thumbnail['webp'] ?? ''));
