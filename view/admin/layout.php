@@ -141,20 +141,22 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                                 <span data-content-action-check="draft"><?= $icon('success') ?></span>
                             </button>
                         </div>
-                        <?php if (!empty($headerAction['delete_modal_target'])): ?>
-                            <div class="admin-header-action-group admin-header-action-group-danger">
-                                <button
-                                    class="btn btn-danger admin-header-action-option"
-                                    type="button"
-                                    data-content-action-delete
-                                    data-modal-open
-                                    data-modal-target="<?= htmlspecialchars((string)$headerAction['delete_modal_target'], ENT_QUOTES, 'UTF-8') ?>"
-                                >
-                                    <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
-                                    <?= $icon('delete') ?>
-                                </button>
-                            </div>
-                        <?php endif; ?>
+                        <div
+                            class="admin-header-action-group admin-header-action-group-danger"
+                            data-content-delete-group
+                            <?= empty($headerAction['delete_modal_target']) ? 'hidden' : '' ?>
+                        >
+                            <button
+                                class="btn btn-danger admin-header-action-option"
+                                type="button"
+                                data-content-action-delete
+                                data-modal-open
+                                data-modal-target="<?= htmlspecialchars((string)($headerAction['delete_modal_target'] ?? '#content-delete-modal'), ENT_QUOTES, 'UTF-8') ?>"
+                            >
+                                <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <?= $icon('delete') ?>
+                            </button>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>

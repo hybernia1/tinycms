@@ -25,6 +25,8 @@
         var idInput = form.querySelector('[data-content-id-hidden]');
         var bodyTextarea = form.querySelector('textarea[name="body"]');
         var thumbnailTrigger = document.querySelector('[data-media-library-open]');
+        var headerDeleteGroup = document.querySelector('[data-content-delete-group]');
+        var headerDeleteButton = document.querySelector('[data-content-action-delete]');
         var saveTimer = null;
         var saving = false;
         var pending = false;
@@ -121,6 +123,17 @@
             if (selectForm) {
                 selectForm.action = contentApi('/admin/api/v1/content/' + value + '/thumbnail/0/select');
                 selectForm.setAttribute('data-action-template', contentApi('/admin/api/v1/content/' + value + '/thumbnail/{mediaId}/select'));
+            }
+
+            var contentDeleteForm = document.getElementById('content-delete-form');
+            if (contentDeleteForm) {
+                contentDeleteForm.action = contentApi('/admin/api/v1/content/' + value + '/delete');
+            }
+            if (headerDeleteButton) {
+                headerDeleteButton.setAttribute('data-modal-target', '#content-delete-modal');
+            }
+            if (headerDeleteGroup) {
+                headerDeleteGroup.hidden = false;
             }
 
             if (editUrlBase !== '') {
