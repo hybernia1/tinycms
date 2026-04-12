@@ -8,6 +8,8 @@ use App\Service\Infra\Router\Router;
 use App\Service\Support\CsrfService;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\I18n;
+use App\View\Themes\Head;
+use App\View\Themes\ThemeHelper;
 
 final class View
 {
@@ -16,7 +18,8 @@ final class View
     private FlashService $flash;
     private CsrfService $csrf;
     private DateTimeFormatter $dateTimeFormatter;
-    private MetaHead $metaHead;
+    private Head $head;
+    private ThemeHelper $themeHelper;
 
     public function __construct(string $rootPath, Router $router, FlashService $flash, CsrfService $csrf, DateTimeFormatter $dateTimeFormatter)
     {
@@ -25,7 +28,8 @@ final class View
         $this->flash = $flash;
         $this->csrf = $csrf;
         $this->dateTimeFormatter = $dateTimeFormatter;
-        $this->metaHead = new MetaHead();
+        $this->head = new Head();
+        $this->themeHelper = new ThemeHelper();
     }
 
     public function render(string $layout, string $template, array $data = []): void
@@ -81,7 +85,9 @@ final class View
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
-        $renderFrontHead = fn(array $options = []): string => $this->metaHead->render($options);
+        $metaHead = fn(array $overrides = []): string => $this->head->render($this->head->fromViewData($data, $absoluteUrl, $overrides));
+        $renderPicture = fn(array $thumbnail, string $alt, array $options = []): string => $this->themeHelper->renderPicture($thumbnail, $alt, $url, $options);
+        $themePaginationHelper = fn(array $pager, string $basePath, array $query = []): array => $this->themeHelper->pagination($pager, $basePath, $url, $query);
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -104,7 +110,9 @@ final class View
         $data['formatInputDateTime'] = $formatInputDateTime;
         $data['absoluteUrl'] = $absoluteUrl;
         $data['t'] = $t;
-        $data['renderFrontHead'] = $renderFrontHead;
+        $data['metaHead'] = $metaHead;
+        $data['renderPicture'] = $renderPicture;
+        $data['themePagination'] = $themePaginationHelper;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);

@@ -38,9 +38,12 @@ final class FrontController
     public function home(): void
     {
         $site = $this->siteData();
-        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), $this->contentService->listPublished(PaginationConfig::perPage()));
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = PaginationConfig::perPage();
+        $pagination = $this->contentService->paginatePublished($page, $perPage);
+        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
 
-        $this->pages->home($this->authService->auth()->user(), $site, $posts);
+        $this->pages->home($site, $posts, $pagination);
     }
 
     public function entry(array $params, callable $redirect): void

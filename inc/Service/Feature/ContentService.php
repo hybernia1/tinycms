@@ -359,6 +359,41 @@ final class ContentService
         return $items;
     }
 
+    public function paginatePublished(int $page = 1, int $perPage = 10): array
+    {
+        $contentTable = Table::name('content');
+        $mediaTable = Table::name('media');
+
+        $countStmt = $this->pdo->prepare(
+            "SELECT COUNT(*) FROM $contentTable c WHERE c.status = :status AND c.created <= NOW()"
+        );
+        $countStmt->execute(['status' => 'published']);
+        $total = (int)$countStmt->fetchColumn();
+        ['per_page' => $safePerPage, 'page' => $currentPage, 'total_pages' => $totalPages, 'offset' => $offset] = $this->resolvePagination($total, $page, $perPage);
+
+        $stmt = $this->pdo->prepare(
+            "SELECT c.id, c.name, c.excerpt, c.created,
+                    (SELECT path FROM $mediaTable WHERE $mediaTable.id = c.thumbnail LIMIT 1) AS thumbnail_path,
+                    (SELECT path_webp FROM $mediaTable WHERE $mediaTable.id = c.thumbnail LIMIT 1) AS thumbnail_path_webp
+             FROM $contentTable c
+             WHERE c.status = :status AND c.created <= NOW()
+             ORDER BY c.created DESC, c.id DESC
+             LIMIT :limit OFFSET :offset"
+        );
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'page' => $currentPage,
+            'per_page' => $safePerPage,
+            'total' => $total,
+            'total_pages' => $totalPages,
+        ];
+    }
+
     public function listPublishedFeed(int $limit = 50): array
     {
         $safeLimit = $limit > 0 ? $limit : 50;
@@ -406,10 +441,6 @@ final class ContentService
             return ['data' => [], 'page' => 1, 'per_page' => $perPage, 'total' => 0, 'total_pages' => 1];
         }
 
-        $safePerPage = $perPage > 0 ? $perPage : 10;
-        $safePage = $page > 0 ? $page : 1;
-        $offset = ($safePage - 1) * $safePerPage;
-
         $contentTable = Table::name('content');
         $contentTermsTable = Table::name('content_terms');
         $mediaTable = Table::name('media');
@@ -418,9 +449,7 @@ final class ContentService
         );
         $countStmt->execute(['term' => $termId, 'status' => 'published']);
         $total = (int)$countStmt->fetchColumn();
-        $totalPages = max(1, (int)ceil($total / $safePerPage));
-        $currentPage = min($safePage, $totalPages);
-        $offset = ($currentPage - 1) * $safePerPage;
+        ['per_page' => $safePerPage, 'page' => $currentPage, 'total_pages' => $totalPages, 'offset' => $offset] = $this->resolvePagination($total, $page, $perPage);
 
         $stmt = $this->pdo->prepare(
             "SELECT DISTINCT c.id, c.name, c.excerpt, c.created,
@@ -454,10 +483,6 @@ final class ContentService
             return ['data' => [], 'page' => 1, 'per_page' => $perPage, 'total' => 0, 'total_pages' => 1];
         }
 
-        $safePerPage = $perPage > 0 ? $perPage : 10;
-        $safePage = $page > 0 ? $page : 1;
-        $offset = ($safePage - 1) * $safePerPage;
-
         $contentTable = Table::name('content');
         $mediaTable = Table::name('media');
         $countStmt = $this->pdo->prepare(
@@ -467,9 +492,7 @@ final class ContentService
         );
         $countStmt->execute(['status' => 'published', 'search' => '%' . $needle . '%']);
         $total = (int)$countStmt->fetchColumn();
-        $totalPages = max(1, (int)ceil($total / $safePerPage));
-        $currentPage = min($safePage, $totalPages);
-        $offset = ($currentPage - 1) * $safePerPage;
+        ['per_page' => $safePerPage, 'page' => $currentPage, 'total_pages' => $totalPages, 'offset' => $offset] = $this->resolvePagination($total, $page, $perPage);
 
         $stmt = $this->pdo->prepare(
             "SELECT c.id, c.name, c.excerpt, c.created,
@@ -530,6 +553,21 @@ final class ContentService
         }
 
         return $item;
+    }
+
+    private function resolvePagination(int $total, int $page, int $perPage): array
+    {
+        $safePerPage = $perPage > 0 ? $perPage : 10;
+        $safePage = $page > 0 ? $page : 1;
+        $totalPages = max(1, (int)ceil($total / $safePerPage));
+        $currentPage = min($safePage, $totalPages);
+
+        return [
+            'per_page' => $safePerPage,
+            'page' => $currentPage,
+            'total_pages' => $totalPages,
+            'offset' => ($currentPage - 1) * $safePerPage,
+        ];
     }
 
     private static function isPublishedVisible(array $item, ?int $now = null): bool

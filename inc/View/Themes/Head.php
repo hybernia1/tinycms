@@ -1,10 +1,39 @@
 <?php
 declare(strict_types=1);
 
-namespace App\View;
+namespace App\View\Themes;
 
-final class MetaHead
+final class Head
 {
+    public function fromViewData(array $data, callable $absoluteUrl, array $overrides = []): array
+    {
+        $metaPath = trim((string)($data['metaPath'] ?? ''));
+        $shortlinkPath = trim((string)($data['shortlinkPath'] ?? ''));
+        $metaOgImage = trim((string)($data['metaOgImage'] ?? ''));
+        $siteLogo = trim((string)($data['siteLogo'] ?? ''));
+        $searchUrlTemplate = isset($data['metaSearchUrlTemplate']) ? (string)$data['metaSearchUrlTemplate'] : '';
+
+        return array_merge([
+            'title' => (string)($data['metaTitle'] ?? $data['pageTitle'] ?? 'TinyCMS'),
+            'description' => (string)($data['metaDescription'] ?? ''),
+            'keywords' => (array)($data['metaKeywords'] ?? []),
+            'robots' => (string)($data['metaRobots'] ?? 'index,follow'),
+            'url' => $metaPath !== '' ? $absoluteUrl($metaPath) : '',
+            'shortlink' => $shortlinkPath !== '' ? $absoluteUrl($shortlinkPath) : '',
+            'og_type' => (string)($data['metaOgType'] ?? 'website'),
+            'og_image' => $metaOgImage !== '' ? $absoluteUrl($metaOgImage) : ($siteLogo !== '' ? $absoluteUrl($siteLogo) : ''),
+            'site_name' => (string)($data['siteName'] ?? 'TinyCMS'),
+            'author' => (string)($data['siteAuthor'] ?? ''),
+            'favicon' => (string)($data['siteFavicon'] ?? '') !== '' ? $absoluteUrl((string)$data['siteFavicon']) : '',
+            'logo' => $siteLogo !== '' ? $absoluteUrl($siteLogo) : '',
+            'structured_data' => $data['metaStructuredData'] ?? null,
+            'published_time' => (string)($data['metaPublishedTime'] ?? ''),
+            'modified_time' => (string)($data['metaModifiedTime'] ?? ''),
+            'search_url_template' => $searchUrlTemplate !== '' ? $absoluteUrl($searchUrlTemplate) : '',
+            'alternate_links' => $this->resolveAlternateLinks($data['metaAlternateLinks'] ?? [], $absoluteUrl),
+        ], $overrides);
+    }
+
     public function render(array $meta): string
     {
         $title = $this->clean((string)($meta['title'] ?? 'TinyCMS'));
@@ -19,7 +48,6 @@ final class MetaHead
         $modifiedTime = $this->isoDate((string)($meta['modified_time'] ?? ''));
         $siteName = $this->clean((string)($meta['site_name'] ?? ''));
         $author = $this->clean((string)($meta['author'] ?? ''));
-        $themeColor = $this->clean((string)($meta['theme_color'] ?? ''));
         $favicon = $this->clean((string)($meta['favicon'] ?? ''));
         $logo = $this->clean((string)($meta['logo'] ?? ''));
         $alternateLinks = $this->alternateLinks($meta['alternate_links'] ?? []);
@@ -76,9 +104,6 @@ final class MetaHead
             $parts[] = '<meta name="author" content="' . $this->esc($author) . '">';
         }
 
-        if ($themeColor !== '') {
-            $parts[] = '<meta name="theme-color" content="' . $this->esc($themeColor) . '">';
-        }
         if ($favicon !== '') {
             $parts[] = '<link rel="icon" href="' . $this->esc($favicon) . '"' . $this->faviconTypeAttr($favicon) . '>';
         }
@@ -95,6 +120,30 @@ final class MetaHead
         }
 
         return implode("\n", $parts);
+    }
+
+    private function resolveAlternateLinks(mixed $links, callable $absoluteUrl): array
+    {
+        if (!is_array($links)) {
+            return [];
+        }
+
+        $alternateLinks = [];
+        foreach ($links as $link) {
+            if (!is_array($link)) {
+                continue;
+            }
+
+            $href = trim((string)($link['href'] ?? ''));
+            if ($href === '') {
+                continue;
+            }
+
+            $link['href'] = $absoluteUrl($href);
+            $alternateLinks[] = $link;
+        }
+
+        return $alternateLinks;
     }
 
     private function alternateLinks(mixed $raw): array

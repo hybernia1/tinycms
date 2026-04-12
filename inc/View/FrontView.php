@@ -17,14 +17,14 @@ final class FrontView
         $this->themes = $themes;
     }
 
-    public function home(?array $user, array $site, array $posts = []): void
+    public function home(array $site, array $posts = [], array $pagination = []): void
     {
         $theme = $this->resolveThemeFromSite($site);
-        $siteData = $this->frontSiteData($site);
+        $siteData = $this->frontSiteData($site, $theme);
         $siteName = (string)$siteData['siteName'];
         $this->view->renderTheme($theme, 'index', array_merge($siteData, [
-            'user' => $user,
             'posts' => $posts,
+            'pagination' => $pagination,
             'pageTitle' => $siteName,
             'metaTitle' => (string)($site['meta_title'] ?? $siteName),
             'metaDescription' => (string)($site['meta_description'] ?? ''),

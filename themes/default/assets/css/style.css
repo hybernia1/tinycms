@@ -1,8 +1,124 @@
 .theme-default {
-    --theme-border: #e5e7eb;
+    --theme-bg: #f3f4f6;
+    --theme-surface: #ffffff;
+    --theme-border: #d1d5db;
     --theme-text: #111827;
     --theme-muted: #6b7280;
-    --theme-bg-soft: #f8fafc;
+    --theme-link: #2563eb;
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--theme-bg);
+    color: var(--theme-text);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.site-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.site-header {
+    margin-bottom: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    background: var(--theme-surface);
+}
+
+.site-brand {
+    color: var(--theme-text);
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+}
+
+.site-brand-logo {
+    display: block;
+    max-height: 44px;
+    width: auto;
+}
+
+.site-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 1rem;
+}
+
+.site-sidebar,
+.site-main,
+.theme-panel,
+.theme-post-card,
+.theme-detail {
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    background: var(--theme-surface);
+}
+
+.site-sidebar {
+    padding: 1rem;
+    height: fit-content;
+}
+
+.site-search {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.site-search input,
+.theme-inline-search input {
+    width: 100%;
+    border: 1px solid var(--theme-border);
+    border-radius: 8px;
+    padding: 0.6rem 0.7rem;
+    font: inherit;
+}
+
+.site-search button,
+.theme-inline-search button,
+.theme-link-button {
+    border: 0;
+    border-radius: 8px;
+    background: var(--theme-link);
+    color: #fff;
+    text-decoration: none;
+    padding: 0.6rem 0.9rem;
+    font: inherit;
+    cursor: pointer;
+}
+
+.site-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.site-nav a,
+.theme-post-more,
+.theme-content a,
+.theme-pagination a {
+    color: var(--theme-link);
+    text-decoration: none;
+}
+
+.site-main {
+    padding: 1rem;
+}
+
+.theme-page {
+    display: grid;
+    gap: 1rem;
+}
+
+.theme-panel,
+.theme-detail {
+    padding: 1rem;
 }
 
 .theme-muted {
@@ -10,20 +126,14 @@
 }
 
 .theme-section-title {
-    margin: 0 0 1rem;
+    margin: 0;
 }
 
 .theme-post-grid {
+    margin-top: 1rem;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-}
-
-.theme-post-card {
-    border: 1px solid var(--theme-border);
-    border-radius: 10px;
-    overflow: hidden;
-    background: #fff;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.9rem;
 }
 
 .theme-post-link {
@@ -35,10 +145,11 @@
 .theme-post-thumb {
     display: block;
     aspect-ratio: 16 / 9;
-    background: var(--theme-bg-soft);
+    background: #e5e7eb;
 }
 
-.theme-post-thumb img {
+.theme-post-thumb img,
+.theme-detail-thumb img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -46,55 +157,50 @@
 }
 
 .theme-post-content {
-    padding: 1rem;
+    padding: 0.9rem;
 }
 
 .theme-post-content h3 {
-    margin: 0 0 0.4rem;
-    color: var(--theme-text);
+    margin: 0 0 0.45rem;
 }
 
 .theme-post-date {
     margin: 0 0 0.6rem;
     color: var(--theme-muted);
-    font-size: 0.92rem;
+    font-size: 0.9rem;
 }
 
-.theme-post-excerpt {
+.theme-post-excerpt,
+.theme-excerpt {
     margin: 0;
-    color: var(--theme-text);
 }
 
 .theme-post-more {
     display: inline-block;
-    margin-top: 0.8rem;
-    color: #2563eb;
+    margin-top: 0.65rem;
     font-weight: 600;
 }
 
 .theme-detail-thumb {
     display: block;
-    margin: 0;
+    margin: 0 0 1rem;
 }
 
 .theme-detail-thumb img {
-    width: 100%;
     height: auto;
     border-radius: 10px;
-    display: block;
 }
 
 .theme-excerpt {
-    margin: 0 0 1rem;
-    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+    padding: 0.8rem;
     border-left: 3px solid #93c5fd;
     background: #eff6ff;
 }
 
 .theme-content {
-    color: var(--theme-text);
     line-height: 1.7;
-    word-wrap: break-word;
+    word-break: break-word;
 }
 
 .theme-content p,
@@ -126,24 +232,17 @@
 
 .theme-content .block.block-image.align-left {
     float: left;
-    margin-right: auto;
-    margin-left: 0;
-    margin-bottom: 1rem;
-    margin-right: 1rem;
+    margin: 0 1rem 1rem 0;
 }
 
 .theme-content .block.block-image.align-center {
-    float: none;
     margin-left: auto;
     margin-right: auto;
 }
 
 .theme-content .block.block-image.align-right {
     float: right;
-    margin-left: auto;
-    margin-right: 0;
-    margin-bottom: 1rem;
-    margin-left: 1rem;
+    margin: 0 0 1rem 1rem;
 }
 
 .theme-content blockquote {
@@ -154,12 +253,12 @@
 
 .theme-content ul,
 .theme-content ol {
-    padding-left: 1.25rem;
+    padding-left: 1.2rem;
 }
 
 .theme-content pre,
 .theme-content code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
 }
 
 .theme-content pre {
@@ -182,20 +281,16 @@
     text-align: left;
 }
 
-.theme-content a {
-    color: #2563eb;
-}
-
 .theme-content hr {
     border: 0;
     border-top: 1px solid var(--theme-border);
 }
 
-
 .theme-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.45rem;
+    margin-bottom: 1rem;
 }
 
 .theme-tag {
@@ -208,6 +303,40 @@
     font-size: 0.85rem;
 }
 
-.theme-tag:hover {
-    background: #e0e7ff;
+.theme-inline-search {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.theme-pagination {
+    display: flex;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .site-shell {
+        padding: 0.75rem;
+    }
+
+    .site-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .site-sidebar {
+        order: 2;
+    }
+
+    .site-main {
+        order: 1;
+    }
+
+    .site-search,
+    .theme-inline-search {
+        flex-direction: column;
+    }
+
+    .theme-post-grid {
+        grid-template-columns: 1fr;
+    }
 }
