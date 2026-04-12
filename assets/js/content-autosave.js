@@ -23,6 +23,7 @@
         var draftInitEndpoint = form.dataset.draftInitEndpoint || '';
         var editUrlBase = form.dataset.editUrlBase || '';
         var idInput = form.querySelector('[data-content-id-hidden]');
+        var nameInput = form.querySelector('input[name="name"]');
         var bodyTextarea = form.querySelector('textarea[name="body"]');
         var thumbnailTrigger = document.querySelector('[data-media-library-open]');
         var saveTimer = null;
@@ -134,6 +135,19 @@
             }
         }
 
+
+        function syncDraftName(name) {
+            if (!nameInput) {
+                return;
+            }
+            var current = String(nameInput.value || '').trim();
+            var next = String(name || '').trim();
+            if (current !== '' || next === '') {
+                return;
+            }
+            nameInput.value = next;
+        }
+
         function serializePayload() {
             var data = new FormData(form);
             if (contentId() > 0) {
@@ -174,6 +188,7 @@
             }
 
             setContentId(id);
+            syncDraftName(normalized.data?.name || '');
             return id;
         }
 
@@ -204,6 +219,7 @@
                 if (id > 0) {
                     setContentId(id);
                 }
+                syncDraftName(normalized.data?.name || '');
             }
 
             saving = false;

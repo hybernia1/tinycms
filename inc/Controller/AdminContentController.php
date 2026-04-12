@@ -232,7 +232,7 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $this->apiOk(['id' => $id, 'created_new' => true]);
+        $this->apiOk(['id' => $id, 'created_new' => true, 'name' => $payload['name']]);
     }
 
     public function autosaveApiV1(callable $redirect): void
@@ -275,6 +275,7 @@ final class AdminContentController extends BaseAdminController
         $this->apiOk([
             'id' => $savedId,
             'created_new' => $isCreate,
+            'name' => (string)($payload['name'] ?? ''),
             'updated' => date('Y-m-d H:i:s'),
         ]);
     }
