@@ -183,8 +183,9 @@ a:focus-visible {
 }
 
 .auth-logo img {
-    width: 44px;
+    width: auto;
     height: 44px;
+    max-width: 220px;
     display: block;
 }
 
