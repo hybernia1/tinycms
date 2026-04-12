@@ -518,7 +518,7 @@ initListApi({
                     <div class="text-muted small">${esc(item.email)}</div>
                     <div class="d-flex gap-2 mt-2">
                         <span class="badge text-bg-primary">${esc(t(`users.roles.${String(item.role || '')}`, String(item.role || '')))}</span>
-                        ${isSuspended ? `<span class="badge text-bg-warning">${esc(t('users.status_suspended_single'))}</span>` : ''}
+                        ${isSuspended ? `<span class="badge text-bg-warning">${esc(t('users.status.suspended_single'))}</span>` : ''}
                     </div>
                 </td>
                 <td class="table-col-actions">
