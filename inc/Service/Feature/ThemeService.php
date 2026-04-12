@@ -47,6 +47,17 @@ final class ThemeService
         return in_array('default', $available, true) ? 'default' : (string)($available[0] ?? 'default');
     }
 
+    public function hasTemplate(string $theme, string $template): bool
+    {
+        $resolvedTheme = $this->resolveTheme($theme);
+        $name = trim($template);
+        if ($name === '' || preg_match('/^[a-z0-9\-_\/]+$/i', $name) !== 1) {
+            return false;
+        }
+
+        return is_file($this->rootPath . '/themes/' . $resolvedTheme . '/' . ltrim($name, '/') . '.php');
+    }
+
     private function isValidTheme(string $name): bool
     {
         if ($name === '' || $name !== $this->normalizeTheme($name)) {

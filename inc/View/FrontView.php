@@ -151,7 +151,7 @@ final class FrontView
         ]);
     }
 
-    public function notFound(string $requestUri = ''): void
+    public function notFound(string $requestUri = '', string $theme = 'default', array $site = []): void
     {
         http_response_code(404);
 
@@ -166,16 +166,26 @@ final class FrontView
             default => 'html',
         };
 
-        $layout = match ($mode) {
-            'document', 'text', 'image' => 'front/plain/layout',
-            default => 'front/layout',
-        };
-
-        $payload = ['notFoundMode' => $mode, 'pageTitle' => '404'];
+        $payload = [
+            'notFoundMode' => $mode,
+            'requestPath' => $path,
+            'pageTitle' => '404',
+        ];
         if ($mode === 'image') {
             $payload['contentType'] = 'image/svg+xml; charset=utf-8';
         }
-        $this->view->render($layout, 'front/errors/404', $payload);
+
+        if ($mode === 'html') {
+            $resolvedTheme = $this->themes->resolveTheme($theme);
+            if ($this->themes->hasTemplate($resolvedTheme, '404')) {
+                $this->view->renderTheme($resolvedTheme, '404', array_merge($this->frontSiteData($site, $resolvedTheme), $payload));
+                return;
+            }
+            $this->view->render('front/layout', 'front/errors/404', $payload);
+            return;
+        }
+
+        $this->view->render('front/plain/layout', 'front/errors/404', $payload);
     }
 
     private function resolveThemeFromSite(array $site): string
