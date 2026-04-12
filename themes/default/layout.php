@@ -54,11 +54,7 @@ $searchValue = trim((string)($query ?? ''));
 <header class="theme-header">
     <div class="theme-shell theme-header-inner">
         <a class="theme-brand" href="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>">
-            <?php if ((string)($siteLogo ?? '') !== ''): ?>
-                <img src="<?= htmlspecialchars($url((string)$siteLogo), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($siteName ?? 'TinyCMS'), ENT_QUOTES, 'UTF-8') ?>">
-            <?php else: ?>
-                <span><?= htmlspecialchars((string)($siteName ?? 'TinyCMS'), ENT_QUOTES, 'UTF-8') ?></span>
-            <?php endif; ?>
+            <?= $website_logo() ?>
         </a>
         <form method="get" action="<?= htmlspecialchars($url('search'), ENT_QUOTES, 'UTF-8') ?>" class="theme-search-form">
             <input type="search" name="q" value="<?= htmlspecialchars($searchValue, ENT_QUOTES, 'UTF-8') ?>" placeholder="<?= htmlspecialchars($t('front.search.placeholder'), ENT_QUOTES, 'UTF-8') ?>" required>
@@ -84,7 +80,7 @@ $searchValue = trim((string)($query ?? ''));
     </section>
     <aside class="theme-sidebar">
         <div class="theme-panel">
-            <h2><?= htmlspecialchars((string)($siteName ?? 'TinyCMS'), ENT_QUOTES, 'UTF-8') ?></h2>
+            <h2><?= htmlspecialchars($website_title(), ENT_QUOTES, 'UTF-8') ?></h2>
             <p><?= htmlspecialchars($t('front.home.tagline'), ENT_QUOTES, 'UTF-8') ?></p>
         </div>
     </aside>

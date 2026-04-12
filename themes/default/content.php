@@ -11,30 +11,14 @@
         </div>
     <?php endif; ?>
 
-    <?php
-    $thumb = (array)($item['thumbnail'] ?? []);
-    $thumbWebp = trim((string)($thumb['webp'] ?? ''));
-    $thumbPath = trim((string)($thumb['path'] ?? ''));
-    $thumbSources = (array)($thumb['webp_sources'] ?? []);
-    ?>
-    <?php if ($thumbWebp !== '' || $thumbPath !== ''): ?>
+    <?php $thumb = (array)($item['thumbnail'] ?? []); ?>
+    <?php $thumbSrc = $website_thumbnail($thumb); ?>
+    <?php if ($thumbSrc !== ''): ?>
         <picture class="theme-detail-thumb">
-            <?php if ($thumbWebp !== ''): ?>
-                <?php
-                $srcsetParts = [];
-                foreach ($thumbSources as $source) {
-                    $sourcePath = trim((string)($source['path'] ?? ''));
-                    $sourceWidth = (int)($source['width'] ?? 0);
-                    if ($sourcePath === '' || $sourceWidth <= 0) {
-                        continue;
-                    }
-                    $srcsetParts[] = $url($sourcePath) . ' ' . $sourceWidth . 'w';
-                }
-                $srcset = $srcsetParts !== [] ? implode(', ', $srcsetParts) : $url($thumbWebp);
-                ?>
-                <source type="image/webp" srcset="<?= htmlspecialchars($srcset, ENT_QUOTES, 'UTF-8') ?>" sizes="(max-width: 900px) 100vw, 900px">
+            <?php if ((string)($thumb['webp'] ?? '') !== ''): ?>
+                <source type="image/webp" srcset="<?= htmlspecialchars($website_thumbnail_srcset($thumb), ENT_QUOTES, 'UTF-8') ?>" sizes="(max-width: 900px) 100vw, 900px">
             <?php endif; ?>
-            <img src="<?= htmlspecialchars($url($thumbPath !== '' ? $thumbPath : $thumbWebp), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" loading="eager" fetchpriority="high" decoding="async">
+            <img src="<?= htmlspecialchars($thumbSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" loading="eager" fetchpriority="high" decoding="async">
         </picture>
     <?php endif; ?>
 

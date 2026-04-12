@@ -29,6 +29,7 @@ use App\Service\Support\I18n;
 use App\Service\Support\SluggerService;
 use App\Service\Feature\UserService;
 use App\View\AdminView;
+use App\View\FrontThemeMapper;
 use App\View\FrontView;
 use App\View\View;
 
@@ -96,8 +97,9 @@ I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
 I18n::setTheme($themeService->resolveTheme((string)($resolvedSettings['theme'] ?? 'default')));
 $termService = new TermService();
 $frontView = new FrontView($view, $themeService);
+$frontThemeMapper = new FrontThemeMapper($slugger);
 $adminView = new AdminView($view, $settingsService);
-$front = new FrontController($frontView, $authService, $csrf, $settingsService, $contentService, $termService, $slugger);
+$front = new FrontController($frontView, $authService, $csrf, $settingsService, $contentService, $termService, $slugger, $frontThemeMapper);
 $admin = new AdminController($adminView, $authService);
 $adminUsers = new AdminUserController($adminView, $authService, $userService, $flash, $csrf);
 $adminContent = new AdminContentController($adminView, $authService, $contentService, $userService, $termService, $flash, $csrf);

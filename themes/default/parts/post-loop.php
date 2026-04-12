@@ -11,31 +11,17 @@ $loopTitle = (string)($loopTitle ?? $t('front.home.published_posts'));
             <?php foreach ($posts as $post): ?>
                 <?php
                 $postThumb = (array)($post['thumbnail'] ?? []);
-                $thumbWebp = trim((string)($postThumb['webp'] ?? ''));
-                $thumbPath = trim((string)($postThumb['path'] ?? ''));
-                $thumbSources = (array)($postThumb['webp_sources'] ?? []);
+                $thumbSrc = $website_thumbnail($postThumb, '640');
                 $postName = (string)($post['name'] ?? '');
                 ?>
                 <article class="theme-post-card">
                     <a class="theme-post-link" href="<?= htmlspecialchars($url((string)($post['url'] ?? '')), ENT_QUOTES, 'UTF-8') ?>">
-                        <?php if ($thumbWebp !== '' || $thumbPath !== ''): ?>
+                        <?php if ($thumbSrc !== ''): ?>
                             <picture class="theme-post-thumb">
-                                <?php if ($thumbWebp !== ''): ?>
-                                    <?php
-                                    $srcsetParts = [];
-                                    foreach ($thumbSources as $source) {
-                                        $sourcePath = trim((string)($source['path'] ?? ''));
-                                        $sourceWidth = (int)($source['width'] ?? 0);
-                                        if ($sourcePath === '' || $sourceWidth <= 0) {
-                                            continue;
-                                        }
-                                        $srcsetParts[] = $url($sourcePath) . ' ' . $sourceWidth . 'w';
-                                    }
-                                    $srcset = $srcsetParts !== [] ? implode(', ', $srcsetParts) : $url($thumbWebp);
-                                    ?>
-                                    <source type="image/webp" srcset="<?= htmlspecialchars($srcset, ENT_QUOTES, 'UTF-8') ?>" sizes="(max-width: 900px) 100vw, 33vw">
+                                <?php if ((string)($postThumb['webp'] ?? '') !== ''): ?>
+                                    <source type="image/webp" srcset="<?= htmlspecialchars($website_thumbnail_srcset($postThumb), ENT_QUOTES, 'UTF-8') ?>" sizes="(max-width: 900px) 100vw, 33vw">
                                 <?php endif; ?>
-                                <img src="<?= htmlspecialchars($url($thumbPath !== '' ? $thumbPath : $thumbWebp), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($postName, ENT_QUOTES, 'UTF-8') ?>" loading="lazy" decoding="async">
+                                <img src="<?= htmlspecialchars($thumbSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($postName, ENT_QUOTES, 'UTF-8') ?>" loading="lazy" decoding="async">
                             </picture>
                         <?php endif; ?>
                         <div class="theme-post-content">

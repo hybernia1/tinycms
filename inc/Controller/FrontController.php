@@ -11,7 +11,7 @@ use App\Service\Feature\SettingsService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 use App\Service\Support\SluggerService;
-use App\Service\Support\ThumbnailVariants;
+use App\View\FrontThemeMapper;
 use App\View\FrontView;
 
 final class FrontController
@@ -23,8 +23,9 @@ final class FrontController
     private ContentService $contentService;
     private TermService $termService;
     private SluggerService $slugger;
+    private FrontThemeMapper $themeMapper;
 
-    public function __construct(FrontView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings, ContentService $contentService, TermService $termService, SluggerService $slugger)
+    public function __construct(FrontView $pages, AuthService $authService, CsrfService $csrf, SettingsService $settings, ContentService $contentService, TermService $termService, SluggerService $slugger, FrontThemeMapper $themeMapper)
     {
         $this->pages = $pages;
         $this->authService = $authService;
@@ -33,6 +34,7 @@ final class FrontController
         $this->contentService = $contentService;
         $this->termService = $termService;
         $this->slugger = $slugger;
+        $this->themeMapper = $themeMapper;
     }
 
     public function home(): void
@@ -40,7 +42,7 @@ final class FrontController
         $site = $this->siteData();
         $page = (int)($_GET['page'] ?? 1);
         $pagination = $this->contentService->paginatePublished($page, PaginationConfig::perPage());
-        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
+        $posts = array_map(fn(array $item): array => $this->themeMapper->toPublicListItem($item), (array)($pagination['data'] ?? []));
 
         $this->pages->home($this->authService->auth()->user(), $site, $posts, $pagination);
     }
@@ -89,7 +91,7 @@ final class FrontController
 
         $page = (int)($_GET['page'] ?? 1);
         $pagination = $this->contentService->paginatePublishedByTerm((int)($term['id'] ?? 0), $page, PaginationConfig::perPage());
-        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
+        $posts = array_map(fn(array $item): array => $this->themeMapper->toPublicListItem($item), (array)($pagination['data'] ?? []));
 
         $this->pages->termArchive([
             'id' => (int)($term['id'] ?? 0),
@@ -103,7 +105,7 @@ final class FrontController
         $query = trim((string)($_GET['q'] ?? ''));
         $page = (int)($_GET['page'] ?? 1);
         $pagination = $this->contentService->paginatePublishedSearch($query, $page, PaginationConfig::perPage());
-        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
+        $posts = array_map(fn(array $item): array => $this->themeMapper->toPublicListItem($item), (array)($pagination['data'] ?? []));
         $site = $this->siteData();
 
         $this->pages->search($posts, $pagination, $query, $this->currentTheme(), $site);
@@ -165,7 +167,7 @@ final class FrontController
         }
 
         $terms = $this->termService->listByContent((int)($item['id'] ?? 0));
-        $this->pages->contentDetail($this->toDetailItem($item, $slug, $terms), $this->currentTheme(), $this->siteData());
+        $this->pages->contentDetail($this->themeMapper->toDetailItem($item, $slug, $terms), $this->currentTheme(), $this->siteData());
     }
 
     public function loginForm(callable $redirect): void
@@ -220,36 +222,6 @@ final class FrontController
         exit;
     }
 
-    private function toPublicListItem(array $item): array
-    {
-        $id = (int)($item['id'] ?? 0);
-        $slug = $this->slugger->slug((string)($item['name'] ?? ''), $id);
-
-        return [
-            'id' => $id,
-            'name' => (string)($item['name'] ?? ''),
-            'excerpt' => $this->plainExcerpt((string)($item['excerpt'] ?? '')),
-            'created' => (string)($item['created'] ?? ''),
-            'slug' => $slug,
-            'url' => $slug,
-            'thumbnail' => $this->thumbnailData($item),
-        ];
-    }
-
-    private function toDetailItem(array $item, string $slug, array $terms): array
-    {
-        return [
-            'slug' => $slug,
-            'id' => (int)($item['id'] ?? 0),
-            'name' => (string)($item['name'] ?? ''),
-            'excerpt' => $this->plainExcerpt((string)($item['excerpt'] ?? '')),
-            'body' => (string)($item['body'] ?? ''),
-            'created' => (string)($item['created'] ?? ''),
-            'thumbnail' => $this->thumbnailData($item),
-            'terms' => $this->toPublicTerms($terms),
-        ];
-    }
-
     private function toRssItem(array $item): array
     {
         $id = (int)($item['id'] ?? 0);
@@ -270,77 +242,6 @@ final class FrontController
             'pubDate' => $pubDate,
             'description' => $description,
         ];
-    }
-
-
-
-
-    private function toPublicTerms(array $terms): array
-    {
-        $result = [];
-        foreach ($terms as $term) {
-            $id = (int)($term['id'] ?? 0);
-            $name = trim((string)($term['name'] ?? ''));
-            if ($id <= 0 || $name === '') {
-                continue;
-            }
-
-            $result[] = [
-                'id' => $id,
-                'name' => $name,
-                'slug' => $this->slugger->slug($name, $id),
-            ];
-        }
-
-        return $result;
-    }
-
-    private function plainExcerpt(string $excerpt): string
-    {
-        $plain = trim(strip_tags($excerpt));
-        return preg_replace('/\s+/u', ' ', $plain) ?? '';
-    }
-
-    private function thumbnailData(array $item): array
-    {
-        $path = trim((string)($item['thumbnail_path'] ?? ''));
-        $webp = trim((string)($item['thumbnail_path_webp'] ?? ''));
-
-        if ($path === '' && $webp === '') {
-            return [];
-        }
-
-        return [
-            'path' => $path,
-            'webp' => $webp,
-            'webp_sources' => $this->buildWebpSources($webp),
-        ];
-    }
-
-    private function buildWebpSources(string $webpPath): array
-    {
-        if ($webpPath === '') {
-            return [];
-        }
-
-        $sources = [
-            ['path' => $webpPath, 'width' => 1024],
-        ];
-
-        foreach ($this->thumbSuffixes() as $suffix => $width) {
-            $variant = ThumbnailVariants::thumbnailPath($webpPath, $suffix);
-            if ($variant !== '') {
-                $sources[] = ['path' => $variant, 'width' => $width];
-            }
-        }
-
-        usort($sources, static fn(array $a, array $b): int => ((int)$a['width']) <=> ((int)$b['width']));
-        return $sources;
-    }
-
-    private function thumbSuffixes(): array
-    {
-        return ThumbnailVariants::suffixWidthMap();
     }
 
     private function currentTheme(): string

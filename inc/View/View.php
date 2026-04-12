@@ -82,6 +82,67 @@ final class View
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
         $renderFrontHead = fn(array $options = []): string => $this->metaHead->render($options);
+        $website_title = static fn(): string => trim((string)($data['siteName'] ?? 'TinyCMS'));
+        $website_logo = static function () use ($data, $url, $website_title): string {
+            $title = htmlspecialchars($website_title(), ENT_QUOTES, 'UTF-8');
+            $logoPath = trim((string)($data['siteLogo'] ?? ''));
+            if ($logoPath === '') {
+                return '<span>' . $title . '</span>';
+            }
+
+            $logoUrl = htmlspecialchars($url($logoPath), ENT_QUOTES, 'UTF-8');
+            return '<img src="' . $logoUrl . '" alt="' . $title . '">';
+        };
+        $website_thumbnail = static function (array $thumb = [], string $size = 'original') use ($url): string {
+            $path = trim((string)($thumb['path'] ?? ''));
+            $webp = trim((string)($thumb['webp'] ?? ''));
+            $sources = array_values(array_filter((array)($thumb['webp_sources'] ?? []), static fn($source): bool => is_array($source) && trim((string)($source['path'] ?? '')) !== '' && (int)($source['width'] ?? 0) > 0));
+
+            if ($size === 'original' || $sources === []) {
+                $resolved = $path !== '' ? $path : $webp;
+                return $resolved !== '' ? $url($resolved) : '';
+            }
+
+            preg_match('/\d+/', $size, $match);
+            $target = (int)($match[0] ?? 0);
+            if ($target <= 0) {
+                $resolved = $path !== '' ? $path : $webp;
+                return $resolved !== '' ? $url($resolved) : '';
+            }
+
+            usort($sources, static fn(array $a, array $b): int => ((int)($a['width'] ?? 0)) <=> ((int)($b['width'] ?? 0)));
+            $selected = null;
+            foreach ($sources as $source) {
+                if ((int)($source['width'] ?? 0) >= $target) {
+                    $selected = trim((string)($source['path'] ?? ''));
+                    break;
+                }
+            }
+            if ($selected === null) {
+                $last = $sources[count($sources) - 1] ?? [];
+                $selected = trim((string)($last['path'] ?? ''));
+            }
+
+            return $selected !== '' ? $url($selected) : '';
+        };
+        $website_thumbnail_srcset = static function (array $thumb = []) use ($url): string {
+            $parts = [];
+            foreach ((array)($thumb['webp_sources'] ?? []) as $source) {
+                $sourcePath = trim((string)($source['path'] ?? ''));
+                $sourceWidth = (int)($source['width'] ?? 0);
+                if ($sourcePath === '' || $sourceWidth <= 0) {
+                    continue;
+                }
+                $parts[] = $url($sourcePath) . ' ' . $sourceWidth . 'w';
+            }
+
+            if ($parts !== []) {
+                return implode(', ', $parts);
+            }
+
+            $fallback = trim((string)($thumb['webp'] ?? ''));
+            return $fallback !== '' ? $url($fallback) : '';
+        };
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -111,6 +172,10 @@ final class View
         $data['absoluteUrl'] = $absoluteUrl;
         $data['t'] = $t;
         $data['renderFrontHead'] = $renderFrontHead;
+        $data['website_title'] = $website_title;
+        $data['website_logo'] = $website_logo;
+        $data['website_thumbnail'] = $website_thumbnail;
+        $data['website_thumbnail_srcset'] = $website_thumbnail_srcset;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
