@@ -87,7 +87,7 @@ final class View
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
         $metaHead = fn(array $overrides = []): string => $this->head->render($this->head->fromViewData($data, $absoluteUrl, $overrides));
         $renderPicture = fn(array $thumbnail, string $alt, array $options = []): string => $this->themeHelper->renderPicture($thumbnail, $alt, $url, $options);
-        $pagination = fn(array $pager, string $basePath, array $query = []): array => $this->themeHelper->pagination($pager, $basePath, $url, $query);
+        $themePaginationHelper = fn(array $pager, string $basePath, array $query = []): array => $this->themeHelper->pagination($pager, $basePath, $url, $query);
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -112,7 +112,7 @@ final class View
         $data['t'] = $t;
         $data['metaHead'] = $metaHead;
         $data['renderPicture'] = $renderPicture;
-        $data['themePagination'] = $pagination;
+        $data['themePagination'] = $themePaginationHelper;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
