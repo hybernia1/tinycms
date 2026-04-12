@@ -225,6 +225,11 @@ return [
         'delete_failed' => 'Could not delete content.',
         'not_found' => 'Content not found.',
         'deleted' => 'Content deleted.',
+        'moved_to_trash' => 'Content moved to trash.',
+        'restored' => 'Content restored from trash.',
+        'restore' => 'Restore',
+        'restore_failed' => 'Could not restore content.',
+        'status_change_forbidden_in_trash' => 'Content in trash cannot be published or switched to draft.',
         'published' => 'Content published.',
         'switched_to_draft' => 'Content switched to draft.',
         'publish_failed' => 'Content is already published or not available.',
@@ -264,6 +269,7 @@ return [
         'statuses' => [
             'draft' => 'Draft',
             'published' => 'Published',
+            'trash' => 'Trash',
         ],
     ],
     'settings' => [

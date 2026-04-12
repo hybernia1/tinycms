@@ -492,6 +492,28 @@ const initListApi = (config) => {
             }
         }
 
+        if (config.restore) {
+            const restore = event.target.closest(`[data-${config.name}-restore]`);
+            if (restore) {
+                event.preventDefault();
+                const id = Number(restore.getAttribute(`data-${config.name}-restore`) || '0');
+                if (id > 0) {
+                    if (typeof config.restorePath !== 'function') {
+                        return;
+                    }
+                    const restorePath = config.restorePath(endpointBase, id);
+                    const result = await postAction(restorePath, { id });
+                    if (result.success === true) {
+                        if (config.messages?.restoreSuccess) {
+                            pushFlash('success', result.message || config.messages.restoreSuccess);
+                        }
+                        await fetchList();
+                    }
+                }
+                return;
+            }
+        }
+
         const delOpen = event.target.closest(`[data-${config.name}-delete-open]`);
         if (delOpen) {
             event.preventDefault();
@@ -529,7 +551,7 @@ const initListApi = (config) => {
                     deleteModal.classList.remove('open');
                 }
                 if (config.messages?.deleteSuccess) {
-                    pushFlash('success', config.messages.deleteSuccess);
+                    pushFlash('success', result.message || config.messages.deleteSuccess);
                 }
                 await fetchList();
             }
@@ -569,20 +591,24 @@ initListApi({
     name: 'content',
     rootSelector: '[data-content-list]',
     withStatus: true,
+    restore: true,
     toggle: { defaultMode: 'draft' },
     togglePath: (endpointBase, id) => `${endpointBase}/${id}/status`,
+    restorePath: (endpointBase, id) => `${endpointBase}/${id}/restore`,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: {
-        deleteSuccess: t('content.deleted'),
+        deleteSuccess: t('content.moved_to_trash'),
+        restoreSuccess: t('content.restored'),
         toggleSuccess: (mode) => mode === 'publish' ? t('content.published') : t('content.switched_to_draft'),
     },
     rowHtml: (item, { editBase }) => {
         const status = String(item.status || 'draft');
         const isPublished = status === 'published';
-        const statusIcon = status === 'published' ? 'success' : (status === 'draft' ? 'concept' : '');
+        const statusIcon = status === 'published' ? 'success' : (status === 'draft' ? 'concept' : 'warning');
         const toggleLabel = isPublished ? t('content.switch_to_draft') : t('content.publish');
         const canEdit = item.can_edit === true;
         const canDelete = item.can_delete === true;
+        const canRestore = item.can_restore === true;
 
         return `
             <tr>
@@ -602,6 +628,12 @@ initListApi({
                     <button class="btn btn-light btn-icon" type="button" data-content-toggle="${Number(item.id || 0)}" data-content-mode="${isPublished ? 'draft' : 'publish'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
                         ${icon(isPublished ? 'hide' : 'show')}
                         <span class="sr-only">${esc(toggleLabel)}</span>
+                    </button>
+                    ` : ''}
+                    ${canRestore ? `
+                    <button class="btn btn-light btn-icon" type="button" data-content-restore="${Number(item.id || 0)}" aria-label="${esc(t('content.restore'))}" title="${esc(t('content.restore'))}">
+                        ${icon('show')}
+                        <span class="sr-only">${esc(t('content.restore'))}</span>
                     </button>
                     ` : ''}
                     ${canDelete ? `
