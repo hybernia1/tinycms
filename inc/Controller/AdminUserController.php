@@ -125,6 +125,7 @@ final class AdminUserController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->apiOk([
                 'redirect' => 'admin/users',
+                'message' => I18n::t('users.created'),
             ]);
             return;
         }
@@ -168,6 +169,7 @@ final class AdminUserController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->apiOk([
                 'redirect' => 'admin/users',
+                'message' => I18n::t('users.updated'),
             ]);
             return;
         }

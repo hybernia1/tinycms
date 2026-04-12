@@ -91,6 +91,7 @@ final class AdminMediaController extends BaseAdminController
             $newId = (int)($result['id'] ?? 0);
             $this->apiOk([
                 'redirect' => $newId > 0 ? $this->buildEditPath('admin/media', $newId) : 'admin/media',
+                'message' => I18n::t('media.created'),
             ]);
             return;
         }
@@ -147,6 +148,7 @@ final class AdminMediaController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->apiOk([
                 'redirect' => $this->buildEditPath('admin/media', $id),
+                'message' => I18n::t('media.updated'),
             ]);
             return;
         }

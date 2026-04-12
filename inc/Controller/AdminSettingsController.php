@@ -57,6 +57,7 @@ final class AdminSettingsController extends BaseAdminController
         I18n::setTheme((string)($this->settings->resolved()['theme'] ?? 'default'));
         $this->apiOk([
             'redirect' => 'admin/settings',
+            'message' => I18n::t('settings.saved'),
         ]);
     }
 

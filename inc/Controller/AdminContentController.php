@@ -107,6 +107,7 @@ final class AdminContentController extends BaseAdminController
             }
             $this->apiOk([
                 'redirect' => $newId > 0 ? $this->buildEditPath('admin/content', $newId) : 'admin/content',
+                'message' => I18n::t('content.created'),
             ]);
             return;
         }
@@ -160,6 +161,7 @@ final class AdminContentController extends BaseAdminController
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
             $this->apiOk([
                 'redirect' => $this->buildEditPath('admin/content', $id),
+                'message' => I18n::t('content.updated'),
             ]);
             return;
         }

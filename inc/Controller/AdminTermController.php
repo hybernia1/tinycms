@@ -81,6 +81,7 @@ final class AdminTermController extends BaseAdminController
             $newId = (int)($result['id'] ?? 0);
             $this->apiOk([
                 'redirect' => $newId > 0 ? $this->buildEditPath('admin/terms', $newId) : 'admin/terms',
+                'message' => I18n::t('terms.created'),
             ]);
             return;
         }
@@ -123,6 +124,7 @@ final class AdminTermController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->apiOk([
                 'redirect' => $this->buildEditPath('admin/terms', $id),
+                'message' => I18n::t('terms.updated'),
             ]);
             return;
         }

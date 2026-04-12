@@ -1,8 +1,12 @@
 (() => {
+    const pushFlash = window.tinycms?.api?.pushFlash || (() => {});
+    const storeFlash = window.tinycms?.api?.storeFlash || (() => {});
+    const t = window.tinycms?.i18n?.t || (() => '');
+
     const showError = (message) => {
         const text = String(message || '').trim();
         if (text !== '') {
-            window.alert(text);
+            pushFlash('error', text);
         }
     };
 
@@ -26,6 +30,15 @@
         const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();
         const redirect = payloadRedirect !== '' ? payloadRedirect : fallbackRedirect;
         if (redirect !== '') {
+            const successMessage = String(payload?.data?.message || '').trim();
+            if (successMessage !== '') {
+                storeFlash('success', successMessage);
+            } else {
+                const fallbackMessage = t('common.saved', '');
+                if (fallbackMessage !== '') {
+                    storeFlash('success', fallbackMessage);
+                }
+            }
             const target = /^https?:\/\//i.test(redirect) || redirect.startsWith('/')
                 ? redirect
                 : '/' + redirect.replace(/^\/+/, '');
