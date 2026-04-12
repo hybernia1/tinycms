@@ -160,7 +160,6 @@ final class AdminContentController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
             $this->apiOk([
-                'redirect' => $this->buildEditPath('admin/content', $id),
                 'message' => I18n::t('content.updated'),
             ]);
             return;

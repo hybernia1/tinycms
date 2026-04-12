@@ -19,7 +19,7 @@ $contentId = (int)($item['id'] ?? 0);
     enctype="multipart/form-data"
     action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/content/add') : $url('admin/api/v1/content/' . (int)($item['id'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
     data-api-submit
-    data-redirect-url="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"
+    <?= $mode === 'add' ? 'data-redirect-url="' . htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') . '"' : 'data-stay-on-page' ?>
     data-autosave-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/autosave'), ENT_QUOTES, 'UTF-8') ?>"
     data-draft-init-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/draft/init'), ENT_QUOTES, 'UTF-8') ?>"
     data-edit-url-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>"

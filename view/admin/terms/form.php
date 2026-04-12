@@ -3,7 +3,7 @@
     method="post"
     action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/terms/add') : $url('admin/api/v1/terms/' . (int)($item['id'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
     data-api-submit
-    data-redirect-url="<?= htmlspecialchars($url('admin/terms'), ENT_QUOTES, 'UTF-8') ?>"
+    <?= $mode === 'add' ? 'data-redirect-url="' . htmlspecialchars($url('admin/terms'), ENT_QUOTES, 'UTF-8') . '"' : 'data-stay-on-page' ?>
 >
     <?= $csrfField() ?>
     <div class="card p-4">

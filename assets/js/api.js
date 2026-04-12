@@ -113,8 +113,8 @@
         const payloadRedirect = String(payload?.data?.redirect || '').trim();
         const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();
         const redirect = payloadRedirect !== '' ? payloadRedirect : fallbackRedirect;
+        const successMessage = String(payload?.data?.message || '').trim();
         if (redirect !== '') {
-            const successMessage = String(payload?.data?.message || '').trim();
             if (successMessage !== '') {
                 storeFlash('success', successMessage);
             } else {
@@ -127,6 +127,14 @@
                 ? redirect
                 : '/' + redirect.replace(/^\/+/, '');
             window.location.href = target;
+            return;
+        }
+
+        if (successMessage !== '') {
+            pushFlash('success', successMessage);
+        }
+
+        if (form.hasAttribute('data-stay-on-page')) {
             return;
         }
 

@@ -123,7 +123,6 @@ final class AdminTermController extends BaseAdminController
         $result = $this->terms->save($_POST, $id);
         if (($result['success'] ?? false) === true) {
             $this->apiOk([
-                'redirect' => $this->buildEditPath('admin/terms', $id),
                 'message' => I18n::t('terms.updated'),
             ]);
             return;

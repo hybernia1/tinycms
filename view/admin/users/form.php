@@ -6,7 +6,7 @@
         autocomplete="off"
         action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/users/add') : $url('admin/api/v1/users/' . (int)($user['ID'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
         data-api-submit
-        data-redirect-url="<?= htmlspecialchars($url('admin/users'), ENT_QUOTES, 'UTF-8') ?>"
+        <?= $mode === 'add' ? 'data-redirect-url="' . htmlspecialchars($url('admin/users'), ENT_QUOTES, 'UTF-8') . '"' : 'data-stay-on-page' ?>
     >
         <?= $csrfField() ?>
         <div class="mb-3">
