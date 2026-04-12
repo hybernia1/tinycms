@@ -33,40 +33,32 @@ final class SluggerService
 
     private function normalize(string $value): string
     {
-        $clean = trim(mb_strtolower($value));
+        $clean = trim($value);
 
         if ($clean === '') {
             return '';
         }
 
-        $clean = strtr($clean, [
-            'á' => 'a',
-            'ä' => 'a',
-            'č' => 'c',
-            'ď' => 'd',
-            'é' => 'e',
-            'ě' => 'e',
-            'í' => 'i',
-            'ľ' => 'l',
-            'ĺ' => 'l',
-            'ň' => 'n',
-            'ó' => 'o',
-            'ô' => 'o',
-            'ö' => 'o',
-            'ř' => 'r',
-            'š' => 's',
-            'ť' => 't',
-            'ú' => 'u',
-            'ů' => 'u',
-            'ü' => 'u',
-            'ý' => 'y',
-            'ž' => 'z',
-        ]);
-
-        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $clean);
-        $ascii = $ascii === false ? $clean : $ascii;
+        $ascii = $this->toAscii($clean);
+        $ascii = mb_strtolower($ascii);
         $ascii = preg_replace('/[^a-z0-9]+/i', '-', $ascii) ?? '';
 
         return trim($ascii, '-');
+    }
+
+    private function toAscii(string $value): string
+    {
+        if (class_exists(\Transliterator::class)) {
+            $transliterator = \Transliterator::create('Any-Latin; Latin-ASCII');
+            if ($transliterator instanceof \Transliterator) {
+                $converted = $transliterator->transliterate($value);
+                if (is_string($converted) && $converted !== '') {
+                    return $converted;
+                }
+            }
+        }
+
+        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
+        return is_string($ascii) && $ascii !== '' ? $ascii : $value;
     }
 }
