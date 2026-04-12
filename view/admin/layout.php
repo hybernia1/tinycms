@@ -10,9 +10,6 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?> | <?= htmlspecialchars($t('admin.title_suffix'), ENT_QUOTES, 'UTF-8') ?></title>
-    <?php if (!empty($siteLogo)): ?>
-        <meta property="og:image" content="<?= htmlspecialchars($url((string)$siteLogo), ENT_QUOTES, 'UTF-8') ?>">
-    <?php endif; ?>
     <?php if (!empty($siteFavicon)): ?>
         <link rel="icon" href="<?= htmlspecialchars($url((string)$siteFavicon), ENT_QUOTES, 'UTF-8') ?>">
     <?php endif; ?>
