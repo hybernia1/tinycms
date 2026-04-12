@@ -17,7 +17,7 @@ final class FrontView
         $this->themes = $themes;
     }
 
-    public function home(?array $user, array $site, array $posts = []): void
+    public function home(?array $user, array $site, array $posts = [], array $pagination = []): void
     {
         $theme = $this->resolveThemeFromSite($site);
         $siteData = $this->frontSiteData($site);
@@ -25,6 +25,7 @@ final class FrontView
         $this->view->renderTheme($theme, 'index', array_merge($siteData, [
             'user' => $user,
             'posts' => $posts,
+            'pagination' => $pagination,
             'pageTitle' => $siteName,
             'metaTitle' => (string)($site['meta_title'] ?? $siteName),
             'metaDescription' => (string)($site['meta_description'] ?? ''),

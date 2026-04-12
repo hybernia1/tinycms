@@ -2,7 +2,7 @@
 $posts = is_array($posts ?? null) ? $posts : [];
 $loopTitle = (string)($loopTitle ?? $t('front.home.published_posts'));
 ?>
-<div class="theme-post-loop">
+<section class="theme-post-loop">
     <h2 class="theme-section-title"><?= htmlspecialchars($loopTitle, ENT_QUOTES, 'UTF-8') ?></h2>
     <?php if ($posts === []): ?>
         <p class="theme-muted"><?= htmlspecialchars((string)($emptyMessage ?? $t('front.home.no_posts')), ENT_QUOTES, 'UTF-8') ?></p>
@@ -51,4 +51,4 @@ $loopTitle = (string)($loopTitle ?? $t('front.home.published_posts'));
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-</div>
+</section>
