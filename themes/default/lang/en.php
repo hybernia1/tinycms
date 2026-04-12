@@ -31,5 +31,8 @@ return [
         'feed' => [
             'title' => 'RSS feed',
         ],
+        'not_found' => [
+            'page' => 'Page not found.',
+        ],
     ],
 ];

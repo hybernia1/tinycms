@@ -31,5 +31,8 @@ return [
         'feed' => [
             'title' => 'RSS kanál',
         ],
+        'not_found' => [
+            'page' => 'Stránka nebyla nalezena.',
+        ],
     ],
 ];
