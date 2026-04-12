@@ -32,7 +32,9 @@ return [
             'title' => 'RSS feed',
         ],
         'not_found' => [
+            'title' => '404 Not Found',
             'page' => 'Page not found.',
+            'back_home' => 'Back to home',
         ],
     ],
 ];

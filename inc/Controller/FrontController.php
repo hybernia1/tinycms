@@ -214,7 +214,7 @@ final class FrontController
 
     private function notFound(): void
     {
-        $this->pages->notFound($this->currentTheme(), $this->siteData());
+        $this->pages->notFound((string)($_SERVER['REQUEST_URI'] ?? '/'), $this->currentTheme(), $this->siteData());
         exit;
     }
 

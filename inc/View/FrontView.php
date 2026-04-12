@@ -151,13 +151,22 @@ final class FrontView
         ]);
     }
 
-    public function notFound(string $theme = 'default', array $site = []): void
+    public function notFound(string $requestUri = '', string $theme = 'default', array $site = []): void
     {
         http_response_code(404);
+        $path = trim((string)(parse_url($requestUri !== '' ? $requestUri : (string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? ''), '/');
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'avif'], true)) {
+            $this->view->render('front/plain/layout', 'front/errors/404', [
+                'contentType' => 'image/svg+xml; charset=utf-8',
+            ]);
+            return;
+        }
+
         $resolvedTheme = $this->themes->resolveTheme($theme);
         $this->view->renderTheme($resolvedTheme, '404', array_merge($this->frontSiteData($site, $resolvedTheme), [
             'pageTitle' => '404',
-            'metaTitle' => '404',
+            'metaTitle' => I18n::t('front.not_found.title'),
             'metaDescription' => I18n::t('front.not_found.page'),
             'metaRobots' => 'noindex,follow',
             'metaOgType' => 'website',
