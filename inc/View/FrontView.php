@@ -166,26 +166,30 @@ final class FrontView
             default => 'html',
         };
 
-        $payload = [
-            'notFoundMode' => $mode,
-            'requestPath' => $path,
-            'pageTitle' => '404',
-        ];
-        if ($mode === 'image') {
-            $payload['contentType'] = 'image/svg+xml; charset=utf-8';
-        }
-
         if ($mode === 'html') {
             $resolvedTheme = $this->themes->resolveTheme($theme);
             if ($this->themes->hasTemplate($resolvedTheme, '404')) {
-                $this->view->renderTheme($resolvedTheme, '404', array_merge($this->frontSiteData($site, $resolvedTheme), $payload));
+                $this->view->renderTheme($resolvedTheme, '404', array_merge($this->frontSiteData($site, $resolvedTheme), [
+                    'requestPath' => $path,
+                    'pageTitle' => '404',
+                ]));
                 return;
             }
-            $this->view->render('front/layout', 'front/errors/404', $payload);
+            $this->view->render('front/layout', 'front/plain/404', ['contentType' => 'text/html; charset=utf-8']);
             return;
         }
 
-        $this->view->render('front/plain/layout', 'front/errors/404', $payload);
+        if ($mode === 'image') {
+            $this->view->render('front/plain/layout', 'front/plain/404-image', ['contentType' => 'image/svg+xml; charset=utf-8']);
+            return;
+        }
+
+        if ($mode === 'document') {
+            $this->view->render('front/plain/layout', 'front/plain/404-document');
+            return;
+        }
+
+        $this->view->render('front/plain/layout', 'front/plain/404');
     }
 
     private function resolveThemeFromSite(array $site): string
