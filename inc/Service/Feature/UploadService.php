@@ -47,8 +47,56 @@ final class UploadService
         }
 
         $originalName = trim((string)($file['name'] ?? ''));
+        return $this->storeImageFromPath(
+            $tmpPath,
+            $originalName,
+            null,
+            static fn(string $source, string $destination): bool => move_uploaded_file($source, $destination)
+        );
+    }
+
+    public function uploadImageFromUrl(string $url): array
+    {
+        $payload = $this->fetchRemoteFile($url);
+        $body = (string)($payload['body'] ?? '');
+        if ($body === '') {
+            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed')];
+        }
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'tinycms-url-');
+        if ($tmpPath === false || @file_put_contents($tmpPath, $body) === false) {
+            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed')];
+        }
+
+        $result = $this->storeImageFromPath(
+            $tmpPath,
+            (string)($payload['filename'] ?? 'remote-image'),
+            (string)($payload['mime'] ?? ''),
+            static function (string $source, string $destination): bool {
+                if (@rename($source, $destination)) {
+                    return true;
+                }
+
+                if (!@copy($source, $destination)) {
+                    return false;
+                }
+
+                @unlink($source);
+                return true;
+            }
+        );
+
+        if (is_file($tmpPath)) {
+            @unlink($tmpPath);
+        }
+
+        return $result;
+    }
+
+    private function storeImageFromPath(string $tmpPath, string $originalName, ?string $mimeHint, callable $move): array
+    {
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-        $mime = $this->detectMime($tmpPath);
+        $mime = $mimeHint !== null && $mimeHint !== '' ? $mimeHint : $this->detectMime($tmpPath);
 
         if (!isset(self::MIME_TO_EXTENSION[$mime])) {
             return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type')];
@@ -74,7 +122,7 @@ final class UploadService
         $fileRel = $subdir . '/' . $slug . '.' . $extension;
         $fileAbs = $this->rootPath . '/' . $fileRel;
 
-        if (!move_uploaded_file($tmpPath, $fileAbs)) {
+        if (!$move($tmpPath, $fileAbs)) {
             return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed')];
         }
 
@@ -114,6 +162,69 @@ final class UploadService
                 'path' => $fileRel,
                 'path_webp' => $webpRel,
             ],
+        ];
+    }
+
+    private function fetchRemoteFile(string $url): array
+    {
+        if (function_exists('curl_init')) {
+            $curl = curl_init($url);
+            if ($curl !== false) {
+                curl_setopt_array($curl, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_MAXREDIRS => 3,
+                    CURLOPT_TIMEOUT => 8,
+                    CURLOPT_CONNECTTIMEOUT => 4,
+                    CURLOPT_USERAGENT => 'TinyCMS/1.0',
+                    CURLOPT_HTTPHEADER => ['Accept: image/*'],
+                    CURLOPT_HEADER => true,
+                ]);
+                $response = curl_exec($curl);
+                $status = (int)curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+                $headerSize = (int)curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+                $contentType = (string)curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+                curl_close($curl);
+                if (is_string($response) && $response !== '' && $status >= 200 && $status < 300) {
+                    $body = substr($response, $headerSize, 8000000);
+                    if ($body !== '') {
+                        return [
+                            'body' => $body,
+                            'mime' => trim(explode(';', $contentType)[0] ?? ''),
+                            'filename' => basename((string)parse_url($url, PHP_URL_PATH)),
+                        ];
+                    }
+                }
+            }
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 8,
+                'header' => "User-Agent: TinyCMS/1.0\r\nAccept: image/*\r\n",
+            ],
+        ]);
+        $response = @file_get_contents($url, false, $context);
+        if (!is_string($response) || $response === '') {
+            return [];
+        }
+
+        $mime = '';
+        if (isset($http_response_header) && is_array($http_response_header)) {
+            foreach ($http_response_header as $headerLine) {
+                if (stripos($headerLine, 'Content-Type:') !== 0) {
+                    continue;
+                }
+                $mime = trim(explode(';', trim(substr($headerLine, 13)))[0] ?? '');
+                break;
+            }
+        }
+
+        return [
+            'body' => substr($response, 0, 8000000),
+            'mime' => $mime,
+            'filename' => basename((string)parse_url($url, PHP_URL_PATH)),
         ];
     }
 

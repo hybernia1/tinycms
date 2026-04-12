@@ -46,7 +46,7 @@ $contentId = (int)($item['id'] ?? 0);
                     data-content-id="<?= $contentId ?>"
                     data-media-library-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/media'), ENT_QUOTES, 'UTF-8') ?>"
                     data-media-base-url="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"
-                    data-link-title-endpoint="<?= htmlspecialchars($url('admin/api/v1/link-title'), ENT_QUOTES, 'UTF-8') ?>"
+                    data-link-title-endpoint="<?= htmlspecialchars($url('admin/api/v1/fetch?action=link_title'), ENT_QUOTES, 'UTF-8') ?>"
                 ><?= htmlspecialchars((string)($item['body'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
         </div>

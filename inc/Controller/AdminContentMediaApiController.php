@@ -148,32 +148,70 @@ final class AdminContentMediaApiController extends BaseAdminController
             return;
         }
 
-        $author = (int)($this->authService->auth()->id() ?? 0);
-        $data = (array)($upload['data'] ?? []);
-        $mediaId = $this->media->create(
-            $author > 0 ? $author : null,
-            (string)($data['name'] ?? ''),
-            (string)($data['path'] ?? ''),
-            (string)($data['path_webp'] ?? '')
-        );
-
-        if ($mediaId <= 0) {
-            $this->upload->deleteMediaFiles($data);
-            $this->apiError('SAVE_FAILED', I18n::t('media.save_failed'));
+        $saved = $this->createMediaFromUpload($upload);
+        if ($saved === null) {
             return;
         }
 
-        $media = $this->media->find($mediaId);
-        $previewPath = $media !== null ? $this->resolvePreviewPath($media) : (string)($data['path'] ?? '');
-        $this->apiOk([
-            'id' => $mediaId,
-            'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
-            'preview_path' => $previewPath,
-            'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
-            'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
-            'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
-            'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
-        ]);
+        $this->apiOk($saved);
+    }
+
+    public function fetchApiV1(callable $redirect): void
+    {
+        $action = trim((string)($_REQUEST['action'] ?? ''));
+        if ($action === 'link_title') {
+            if (!$this->guardAdmin($redirect, false)) {
+                return;
+            }
+
+            $url = trim((string)($_GET['url'] ?? ''));
+            if ($url === '' || !$this->isValidExternalUrl($url)) {
+                $this->apiError('INVALID_URL', I18n::t('common.invalid_data'));
+                return;
+            }
+
+            $title = $this->fetchRemoteTitle($url);
+            if ($title === '') {
+                $this->apiError('TITLE_NOT_FOUND', I18n::t('content.link_title_not_found'), 404);
+                return;
+            }
+
+            $this->apiOk(['title' => $title]);
+            return;
+        }
+
+        if ($action === 'media_upload') {
+            if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+                return;
+            }
+
+            $contentId = (int)($_POST['content_id'] ?? 0);
+            if ($this->requireExistingContent($contentId) === null) {
+                return;
+            }
+
+            $url = trim((string)($_POST['url'] ?? ''));
+            if ($url === '' || !$this->isValidExternalUrl($url)) {
+                $this->apiError('INVALID_URL', I18n::t('common.invalid_data'));
+                return;
+            }
+
+            $upload = $this->upload->uploadImageFromUrl($url);
+            if (($upload['success'] ?? false) !== true) {
+                $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
+                return;
+            }
+
+            $saved = $this->createMediaFromUpload($upload);
+            if ($saved === null) {
+                return;
+            }
+
+            $this->apiOk($saved);
+            return;
+        }
+
+        $this->apiError('INVALID_ACTION', I18n::t('common.invalid_data'));
     }
 
     public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
@@ -297,6 +335,106 @@ final class AdminContentMediaApiController extends BaseAdminController
         }
 
         return false;
+    }
+
+    private function createMediaFromUpload(array $upload): ?array
+    {
+        $author = (int)($this->authService->auth()->id() ?? 0);
+        $data = (array)($upload['data'] ?? []);
+        $mediaId = $this->media->create(
+            $author > 0 ? $author : null,
+            (string)($data['name'] ?? ''),
+            (string)($data['path'] ?? ''),
+            (string)($data['path_webp'] ?? '')
+        );
+        if ($mediaId <= 0) {
+            $this->upload->deleteMediaFiles($data);
+            $this->apiError('SAVE_FAILED', I18n::t('media.save_failed'));
+            return null;
+        }
+
+        $media = $this->media->find($mediaId);
+        $created = (string)($media['created'] ?? date('Y-m-d H:i:s'));
+        return [
+            'id' => $mediaId,
+            'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
+            'preview_path' => $media !== null ? $this->resolvePreviewPath($media) : (string)($data['path'] ?? ''),
+            'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
+            'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
+            'created' => $created,
+            'created_label' => $this->formatDateTime($created),
+        ];
+    }
+
+    private function isValidExternalUrl(string $url): bool
+    {
+        if (!preg_match('#^https?://#i', $url)) {
+            return false;
+        }
+
+        $parts = parse_url($url);
+        $host = strtolower((string)($parts['host'] ?? ''));
+        if ($host === '' || $host === 'localhost') {
+            return false;
+        }
+
+        return filter_var($url, FILTER_VALIDATE_URL) !== false;
+    }
+
+    private function fetchRemoteTitle(string $url): string
+    {
+        $html = $this->fetchRemoteHtml($url);
+        if ($html === '') {
+            return '';
+        }
+
+        if (preg_match('/<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $match) === 1) {
+            return $this->sanitizeRemoteTitle($match[1]);
+        }
+
+        if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $match) === 1) {
+            return $this->sanitizeRemoteTitle($match[1]);
+        }
+
+        return '';
+    }
+
+    private function fetchRemoteHtml(string $url): string
+    {
+        if (function_exists('curl_init')) {
+            $curl = curl_init($url);
+            if ($curl !== false) {
+                curl_setopt_array($curl, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_MAXREDIRS => 3,
+                    CURLOPT_TIMEOUT => 4,
+                    CURLOPT_CONNECTTIMEOUT => 2,
+                    CURLOPT_USERAGENT => 'TinyCMS/1.0',
+                ]);
+                $result = curl_exec($curl);
+                curl_close($curl);
+                if (is_string($result) && $result !== '') {
+                    return mb_substr($result, 0, 120000);
+                }
+            }
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 4,
+                'header' => "User-Agent: TinyCMS/1.0\r\n",
+            ],
+        ]);
+        $result = @file_get_contents($url, false, $context);
+        return is_string($result) ? mb_substr($result, 0, 120000) : '';
+    }
+
+    private function sanitizeRemoteTitle(string $value): string
+    {
+        $clean = trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return preg_replace('/\s+/', ' ', $clean) ?? '';
     }
 
 }

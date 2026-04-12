@@ -1535,7 +1535,9 @@
                 if (!endpoint) {
                     return;
                 }
-                fetch(endpoint + '?url=' + encodeURIComponent(pastedUrl), {
+                var requestUrl = new URL(endpoint, window.location.origin);
+                requestUrl.searchParams.set('url', pastedUrl);
+                fetch(requestUrl.toString(), {
                     credentials: 'same-origin',
                     headers: {
                         'Accept': 'application/json'
