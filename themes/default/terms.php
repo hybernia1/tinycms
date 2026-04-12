@@ -8,18 +8,18 @@
     $emptyMessage = $t('front.term.no_posts');
     require __DIR__ . '/parts/post-loop.php';
 
-    $currentPage = (int)($pagination['page'] ?? 1);
     $totalPages = (int)($pagination['total_pages'] ?? 1);
     $termSlug = (string)($term['slug'] ?? '');
+    $pager = $themePagination($pagination, 'term/' . $termSlug);
     ?>
 
     <?php if ($totalPages > 1): ?>
         <nav class="theme-pagination">
-            <?php if ($currentPage > 1): ?>
-                <a href="<?= htmlspecialchars($url('term/' . $termSlug . ($currentPage - 1 > 1 ? '?page=' . ($currentPage - 1) : '')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></a>
+            <?php if ($pager['previous'] !== ''): ?>
+                <a href="<?= htmlspecialchars((string)$pager['previous'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></a>
             <?php endif; ?>
-            <?php if ($currentPage < $totalPages): ?>
-                <a href="<?= htmlspecialchars($url('term/' . $termSlug . '?page=' . ($currentPage + 1)), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></a>
+            <?php if ($pager['next'] !== ''): ?>
+                <a href="<?= htmlspecialchars((string)$pager['next'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></a>
             <?php endif; ?>
         </nav>
     <?php endif; ?>
