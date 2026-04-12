@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 
+if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 80100) {
+    http_response_code(503);
+    header('Content-Type: text/plain; charset=UTF-8');
+    echo 'TinyCMS requires PHP 8.1 or newer.';
+    exit;
+}
+
 require_once __DIR__ . '/autoload.php';
 
 use App\Service\Support\ErrorHandler;
