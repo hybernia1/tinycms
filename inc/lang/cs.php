@@ -217,6 +217,8 @@ return [
         'switch_to_draft' => 'Přepnout do draftu',
         'publish' => 'Publikovat',
         'delete_confirm' => 'Skutečně smazat tento obsah?',
+        'delete_confirm_move_to_trash' => 'Přesunout tento obsah do koše?',
+        'delete_confirm_hard_delete' => 'Trvale smazat tento obsah?',
         'invalid_id' => 'Neplatné ID obsahu.',
         'created' => 'Obsah vytvořen.',
         'updated' => 'Obsah upraven.',

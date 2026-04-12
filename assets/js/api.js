@@ -267,6 +267,7 @@ const initListApi = (config) => {
         || document.querySelector(`[data-${config.name}-delete-modal]`);
     const deleteCancel = deleteModal?.querySelector(`[data-${config.name}-delete-cancel]`);
     const deleteConfirm = deleteModal?.querySelector(`[data-${config.name}-delete-confirm]`);
+    const deleteModalText = deleteModal?.querySelector('p');
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
         : [];
@@ -299,6 +300,7 @@ const initListApi = (config) => {
     }
 
     let pendingDeleteId = 0;
+    let pendingDeleteMode = 'soft';
     let searchTimer = null;
     let fetchController = null;
 
@@ -518,6 +520,12 @@ const initListApi = (config) => {
         if (delOpen) {
             event.preventDefault();
             pendingDeleteId = Number(delOpen.getAttribute(`data-${config.name}-delete-open`) || '0');
+            pendingDeleteMode = delOpen.getAttribute(`data-${config.name}-delete-mode`) === 'hard' ? 'hard' : 'soft';
+            if (deleteModalText && config.messages?.deleteConfirm) {
+                deleteModalText.textContent = pendingDeleteMode === 'hard'
+                    ? config.messages.deleteConfirm.hard
+                    : config.messages.deleteConfirm.soft;
+            }
             if (deleteModal) {
                 deleteModal.classList.add('open');
             }
@@ -527,6 +535,7 @@ const initListApi = (config) => {
     if (deleteCancel) {
         deleteCancel.addEventListener('click', () => {
             pendingDeleteId = 0;
+            pendingDeleteMode = 'soft';
             if (deleteModal) {
                 deleteModal.classList.remove('open');
             }
@@ -547,6 +556,7 @@ const initListApi = (config) => {
             deleteConfirm.disabled = false;
             if (result.success === true) {
                 pendingDeleteId = 0;
+                pendingDeleteMode = 'soft';
                 if (deleteModal) {
                     deleteModal.classList.remove('open');
                 }
@@ -598,6 +608,10 @@ initListApi({
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
     messages: {
         deleteSuccess: t('content.moved_to_trash'),
+        deleteConfirm: {
+            soft: t('content.delete_confirm_move_to_trash'),
+            hard: t('content.delete_confirm_hard_delete'),
+        },
         restoreSuccess: t('content.restored'),
         toggleSuccess: (mode) => mode === 'publish' ? t('content.published') : t('content.switched_to_draft'),
     },
@@ -632,12 +646,12 @@ initListApi({
                     ` : ''}
                     ${canRestore ? `
                     <button class="btn btn-light btn-icon" type="button" data-content-restore="${Number(item.id || 0)}" aria-label="${esc(t('content.restore'))}" title="${esc(t('content.restore'))}">
-                        ${icon('show')}
+                        ${icon('restore')}
                         <span class="sr-only">${esc(t('content.restore'))}</span>
                     </button>
                     ` : ''}
                     ${canDelete ? `
-                    <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}" aria-label="${esc(t('common.delete'))}" title="${esc(t('common.delete'))}">
+                    <button class="btn btn-light btn-icon" type="button" data-content-delete-open="${Number(item.id || 0)}" data-content-delete-mode="${canRestore ? 'hard' : 'soft'}" aria-label="${esc(t('common.delete'))}" title="${esc(t('common.delete'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('common.delete'))}</span>
                     </button>

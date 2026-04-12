@@ -217,6 +217,8 @@ return [
         'switch_to_draft' => 'Switch to draft',
         'publish' => 'Publish',
         'delete_confirm' => 'Do you really want to delete this content?',
+        'delete_confirm_move_to_trash' => 'Move this content to trash?',
+        'delete_confirm_hard_delete' => 'Permanently delete this content?',
         'invalid_id' => 'Invalid content ID.',
         'created' => 'Content created.',
         'updated' => 'Content updated.',
