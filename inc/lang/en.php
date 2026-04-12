@@ -31,6 +31,7 @@ return [
         'upload_add_files' => 'Add files',
         'allowed_upload_types' => 'Allowed types: %s',
         'loading' => 'Loading...',
+        'close_notice' => 'Close notification',
     ],
     'install' => [
         'title' => 'Installation',
@@ -289,6 +290,7 @@ return [
         'account_blocked' => 'This account is blocked.',
         'wrong_password' => 'Wrong password.',
         'login_success' => 'Login successful.',
+        'show_password' => 'Show password',
         'hide_password' => 'Hide password',
         'login_failed' => 'Login failed.',
         'name_required' => 'Name is required.',

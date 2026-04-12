@@ -1,5 +1,5 @@
 const modal = document.querySelector('[data-media-library-modal]');
-const t = window.tinycmsT || ((path, fallback = '') => fallback);
+const t = window.tinycms?.i18n?.t || (() => '');
 const iconSprite = (() => {
     const iconUse = document.querySelector('svg use[href*="#icon-"]');
     return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';

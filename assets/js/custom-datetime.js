@@ -1,6 +1,6 @@
 (() => {
-    const t = window.tinycmsT || ((path, fallback = '') => fallback);
-    const ta = window.tinycmsTA || ((path, fallback = []) => fallback);
+    const t = window.tinycms?.i18n?.t || (() => '');
+    const ta = window.tinycms?.i18n?.ta || (() => []);
 
     const root = document.body;
     if (!root) {

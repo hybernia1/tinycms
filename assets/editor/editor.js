@@ -1,5 +1,5 @@
 (function () {
-    var t = window.tinycmsT || function (path, fallback) { return fallback; };
+    var t = window.tinycms?.i18n?.t || function () { return ""; };
     var editorCounter = 0;
 
     function normalizeHtml(html) {

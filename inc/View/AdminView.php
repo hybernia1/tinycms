@@ -206,17 +206,6 @@ final class AdminView
             'modal',
             'auth',
         ]);
-
-        if (!isset($payload['common']) || !is_array($payload['common'])) {
-            $payload['common'] = [];
-        }
-        $payload['common']['close_notice'] = I18n::t('admin.close_notice');
-
-        if (!isset($payload['auth']) || !is_array($payload['auth'])) {
-            $payload['auth'] = [];
-        }
-        $payload['auth']['show_password'] = I18n::t('front.login.show_password');
-
         return $payload;
     }
 

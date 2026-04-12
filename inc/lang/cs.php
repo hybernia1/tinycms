@@ -31,6 +31,7 @@ return [
         'upload_add_files' => 'Přidat soubory',
         'allowed_upload_types' => 'Povolené typy: %s',
         'loading' => 'Načítám...',
+        'close_notice' => 'Zavřít notifikaci',
     ],
     'install' => [
         'title' => 'Instalace',
@@ -289,6 +290,7 @@ return [
         'account_blocked' => 'Tento účet je blokovaný.',
         'wrong_password' => 'Nesprávné heslo.',
         'login_success' => 'Přihlášení proběhlo úspěšně.',
+        'show_password' => 'Zobrazit heslo',
         'hide_password' => 'Skrýt heslo',
         'login_failed' => 'Přihlášení selhalo.',
         'name_required' => 'Jméno je povinné.',

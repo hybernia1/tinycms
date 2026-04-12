@@ -1,5 +1,5 @@
 (() => {
-const t = window.tinycmsT || ((path, fallback = '') => fallback);
+const t = window.tinycms?.i18n?.t || (() => '');
 
 const getModal = (trigger) => {
     const target = trigger?.getAttribute('data-modal-target') || '';
