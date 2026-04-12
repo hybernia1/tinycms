@@ -1,13 +1,6 @@
 (() => {
-    const i18n = window.tinycmsI18n || {};
-    const t = (path, fallback = '') => {
-        const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
-        return typeof value === 'string' && value !== '' ? value : fallback;
-    };
-    const ta = (path, fallback = []) => {
-        const value = path.split('.').reduce((acc, key) => (acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined), i18n);
-        return Array.isArray(value) && value.length ? value : fallback;
-    };
+    const t = window.tinycmsT || ((path, fallback = '') => fallback);
+    const ta = window.tinycmsTA || ((path, fallback = []) => fallback);
 
     const root = document.body;
     if (!root) {

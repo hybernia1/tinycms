@@ -1,11 +1,5 @@
 (function () {
-    var i18n = window.tinycmsI18n || {};
-    var t = function (path, fallback) {
-        var value = path.split('.').reduce(function (acc, key) {
-            return acc && Object.prototype.hasOwnProperty.call(acc, key) ? acc[key] : undefined;
-        }, i18n);
-        return typeof value === 'string' && value !== '' ? value : fallback;
-    };
+    var t = window.tinycmsT || function (path, fallback) { return fallback; };
     var editorCounter = 0;
 
     function normalizeHtml(html) {
