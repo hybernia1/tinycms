@@ -217,6 +217,13 @@ final class AdminView
         }
         $payload['auth']['show_password'] = I18n::t('front.login.show_password');
 
+        if (!isset($payload['editor']) || !is_array($payload['editor'])) {
+            $payload['editor'] = [];
+        }
+        $payload['editor']['cancel'] = I18n::t('common.cancel');
+        $payload['editor']['save'] = I18n::t('common.save');
+        $payload['editor']['link_text'] = I18n::t('editor.link_title');
+
         return $payload;
     }
 

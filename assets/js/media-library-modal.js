@@ -149,7 +149,7 @@ if (modal && openTrigger) {
 
     const setTriggerEmpty = () => {
         openTrigger.classList.add('empty');
-        openTrigger.innerHTML = `<span>${t('content.choose_image', 'Choose image')}</span>`;
+        openTrigger.innerHTML = `<span>${t('content.choose_image')}</span>`;
         if (detachWrap) {
             detachWrap.remove();
         }
@@ -191,13 +191,13 @@ if (modal && openTrigger) {
         }
 
         if (!Array.isArray(items) || items.length === 0) {
-            grid.innerHTML = `<p class="text-muted m-0">${t('media.no_results', 'No results.')}</p>`;
+            grid.innerHTML = `<p class="text-muted m-0">${t('media.no_results')}</p>`;
             return;
         }
 
         grid.innerHTML = '';
         items.forEach((item) => {
-            const name = String(item.name || t('media.untitled', 'Untitled'));
+            const name = String(item.name || t('media.untitled'));
             const previewPath = String(item.preview_path || '');
             const button = document.createElement('button');
             button.className = 'media-library-card';
@@ -248,7 +248,7 @@ if (modal && openTrigger) {
 
         selectedMedia = {
             id: mediaId,
-            name: target.dataset.mediaName || t('media.untitled', 'Untitled'),
+            name: target.dataset.mediaName || t('media.untitled'),
             path: target.dataset.mediaPath || '',
             webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
@@ -276,7 +276,7 @@ if (modal && openTrigger) {
                 image.alt = selectedMedia.name;
                 detailPreview.appendChild(image);
             } else {
-                detailPreview.textContent = t('media.no_preview', 'No preview');
+                detailPreview.textContent = t('media.no_preview');
             }
         }
 
@@ -346,7 +346,7 @@ if (modal && openTrigger) {
         }
 
         if (grid) {
-            grid.innerHTML = `<p class="text-muted m-0">${t('common.loading', 'Loading...')}</p>`;
+            grid.innerHTML = `<p class="text-muted m-0">${t('common.loading')}</p>`;
             if (loader) {
                 loader.set(grid, true);
             }
@@ -412,7 +412,7 @@ if (modal && openTrigger) {
         renderSelected();
         load().catch(() => {
             if (grid) {
-                grid.innerHTML = `<p class="text-danger m-0">${t('media.library_load_failed', 'Failed to load media library.')}</p>`;
+                grid.innerHTML = `<p class="text-danger m-0">${t('media.library_load_failed')}</p>`;
             }
         });
     };
@@ -529,7 +529,7 @@ if (modal && openTrigger) {
             if (mode === 'editor') {
                 const imageUrl = absoluteUrl(selectedMedia.webpPath || selectedMedia.path || selectedMedia.previewPath || '');
                 if (imageUrl === '') {
-                    setStatus(t('media.invalid_url', 'Image has no valid URL.'));
+                    setStatus(t('media.invalid_url'));
                     return;
                 }
                 const attachForm = document.querySelector('[data-media-library-attach-form]');
@@ -568,7 +568,7 @@ if (modal && openTrigger) {
             });
             const data = normalizePayload(await response.json().catch(() => ({})));
             if (!response.ok || !data.success) {
-                setStatus(data.message || t('media.assign_failed', 'Failed to assign preview.'));
+                setStatus(data.message || t('media.assign_failed'));
                 return;
             }
             if (data.data && data.data.media) {
@@ -586,7 +586,7 @@ if (modal && openTrigger) {
 
             const value = detailNameInput.value.trim();
             if (value === '') {
-                setStatus(t('media.name_required', 'Name cannot be empty.'));
+                setStatus(t('media.name_required'));
                 return;
             }
 
@@ -600,7 +600,7 @@ if (modal && openTrigger) {
             const data = normalizePayload(await response.json());
 
             if (!response.ok || !data.success) {
-                setStatus(data.message || t('media.rename_failed', 'Failed to save name.'));
+                setStatus(data.message || t('media.rename_failed'));
                 return;
             }
 
@@ -610,7 +610,7 @@ if (modal && openTrigger) {
                 selectedCard.dataset.mediaName = value;
             }
 
-            setStatus(t('media.rename_saved', 'Name saved.'));
+            setStatus(t('media.rename_saved'));
         });
     }
 
@@ -625,7 +625,7 @@ if (modal && openTrigger) {
             if (contentId <= 0) {
                 contentId = await waitForDraftId();
                 if (contentId <= 0) {
-                    setStatus(t('content.draft_required', 'Draft must be created first.'));
+                    setStatus(t('content.draft_required'));
                     uploadInput.value = '';
                     uploadInput.dispatchEvent(new Event('change'));
                     return;
@@ -657,7 +657,7 @@ if (modal && openTrigger) {
             }
 
             if (!response.ok || !data.success) {
-                setStatus(data.message || t('media.upload_failed', 'Upload failed.'));
+                setStatus(data.message || t('media.upload_failed'));
                 return;
             }
 
@@ -666,7 +666,7 @@ if (modal && openTrigger) {
 
             page = 1;
             await load().catch(() => null);
-            setStatus(t('media.uploaded', 'File uploaded.'));
+            setStatus(t('media.uploaded'));
         });
     }
 
@@ -687,7 +687,7 @@ if (modal && openTrigger) {
             const data = normalizePayload(await response.json().catch(() => ({})));
 
             if (!response.ok || !data.success) {
-                setStatus(data.message || t('media.delete_failed', 'Delete failed.'));
+                setStatus(data.message || t('media.delete_failed'));
                 return;
             }
 
@@ -702,7 +702,7 @@ if (modal && openTrigger) {
             if (deleteConfirmModal) {
                 deleteConfirmModal.classList.remove('open');
             }
-            setStatus(t('media.deleted', 'Media deleted.'));
+            setStatus(t('media.deleted'));
         });
     }
 
@@ -716,13 +716,13 @@ if (modal && openTrigger) {
             const data = normalizePayload(await response.json().catch(() => ({})));
 
             if (!response.ok || !data.success) {
-                setStatus(data.message || t('media.detach_failed', 'Detach failed.'));
+                setStatus(data.message || t('media.detach_failed'));
                 return;
             }
 
             currentMediaId = 0;
             setTriggerEmpty();
-            setStatus(t('media.detached', 'Preview detached.'));
+            setStatus(t('media.detached'));
         });
     }
 }

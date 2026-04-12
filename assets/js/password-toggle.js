@@ -23,7 +23,7 @@ document.addEventListener('click', (event) => {
     icon.setAttribute('href', nextIcon);
     icon.setAttribute('xlink:href', nextIcon);
 
-    const label = show ? t('auth.hide_password', 'Hide password') : t('auth.show_password', 'Show password');
+    const label = show ? t('auth.hide_password') : t('auth.show_password');
     button.setAttribute('aria-label', label);
     button.setAttribute('title', label);
 });

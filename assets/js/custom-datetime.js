@@ -48,7 +48,7 @@
 
     const formatLabel = (date) => {
         if (!date) {
-            return t('datetime.pick_date_time', 'Pick date and time');
+            return t('datetime.pick_date_time');
         }
 
         return new Intl.DateTimeFormat(locale, {
@@ -121,9 +121,9 @@
         const header = document.createElement('div');
         header.className = 'custom-datetime-header';
 
-        const prev = createIconButton('prev', t('datetime.prev_month', 'Previous month'));
+        const prev = createIconButton('prev', t('datetime.prev_month'));
         const title = document.createElement('strong');
-        const next = createIconButton('next', t('datetime.next_month', 'Next month'));
+        const next = createIconButton('next', t('datetime.next_month'));
 
         header.appendChild(prev);
         header.appendChild(title);
@@ -173,12 +173,12 @@
         const todayButton = document.createElement('button');
         todayButton.type = 'button';
         todayButton.className = 'btn btn-light';
-        todayButton.textContent = t('datetime.today', 'Today');
+        todayButton.textContent = t('datetime.today');
 
         const clearButton = document.createElement('button');
         clearButton.type = 'button';
         clearButton.className = 'btn btn-light';
-        clearButton.textContent = t('datetime.clear', 'Clear');
+        clearButton.textContent = t('datetime.clear');
 
         const okButton = document.createElement('button');
         okButton.type = 'button';
