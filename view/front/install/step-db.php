@@ -4,6 +4,29 @@
             <div class="card p-5">
                 <h1 class="m-0 mb-2"><?= htmlspecialchars($t('install.title'), ENT_QUOTES, 'UTF-8') ?></h1>
                 <p class="text-muted mt-2 mb-4"><?= htmlspecialchars(sprintf($t('install.step'), 2, $t('install.database')), ENT_QUOTES, 'UTF-8') ?></p>
+                <?php $requirements = is_array($requirements ?? null) ? $requirements : ['required' => [], 'recommended' => [], 'hasBlockingErrors' => false]; ?>
+                <div class="mb-4">
+                    <h2 class="h5 m-0 mb-2"><?= htmlspecialchars($t('install.requirements_title'), ENT_QUOTES, 'UTF-8') ?></h2>
+                    <p class="text-muted mb-2"><?= htmlspecialchars($t('install.requirements_required_label'), ENT_QUOTES, 'UTF-8') ?></p>
+                    <ul class="m-0 mb-3">
+                        <?php foreach ((array)$requirements['required'] as $check): ?>
+                        <li class="<?= ($check['ok'] ?? false) ? 'text-success' : 'text-danger' ?>">
+                            <?= htmlspecialchars($t('install.requirement.' . (string)($check['key'] ?? ''), (string)($check['key'] ?? '')), ENT_QUOTES, 'UTF-8') ?>
+                            <?php if (($check['key'] ?? '') === 'php_version'): ?>
+                                (<?= htmlspecialchars((string)($check['current'] ?? ''), ENT_QUOTES, 'UTF-8') ?> / <?= htmlspecialchars((string)($check['target'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)
+                            <?php endif; ?>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <p class="text-muted mb-2"><?= htmlspecialchars($t('install.requirements_recommended_label'), ENT_QUOTES, 'UTF-8') ?></p>
+                    <ul class="m-0">
+                        <?php foreach ((array)$requirements['recommended'] as $check): ?>
+                        <li class="<?= ($check['ok'] ?? false) ? 'text-success' : 'text-warning' ?>">
+                            <?= htmlspecialchars($t('install.requirement.' . (string)($check['key'] ?? ''), (string)($check['key'] ?? '')), ENT_QUOTES, 'UTF-8') ?>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
                 <?php if ($message !== ''): ?>
                 <p class="mb-3 text-danger"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
                 <?php endif; ?>

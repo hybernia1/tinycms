@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\Feature\InstallService;
+use App\Service\Feature\InstallRequirementsService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\I18n;
 use App\View\View;
@@ -13,12 +14,14 @@ final class InstallController
     private View $view;
     private CsrfService $csrf;
     private InstallService $installService;
+    private InstallRequirementsService $requirementsService;
 
-    public function __construct(View $view, CsrfService $csrf, InstallService $installService)
+    public function __construct(View $view, CsrfService $csrf, InstallService $installService, ?InstallRequirementsService $requirementsService = null)
     {
         $this->view = $view;
         $this->csrf = $csrf;
         $this->installService = $installService;
+        $this->requirementsService = $requirementsService ?? new InstallRequirementsService();
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -29,12 +32,14 @@ final class InstallController
     {
         $state = $_SESSION['install'] ?? [];
         $this->applyInstallLocale($state);
+        $requirements = $this->requirementsService->evaluate(dirname(__DIR__, 2));
 
         $this->view->render('front/layout', 'front/install/step-db', [
             'pageTitle' => I18n::t('install.page_database'),
             'errors' => (array)($state['errors_db'] ?? []),
             'old' => (array)($state['db'] ?? ['db_host' => '127.0.0.1', 'db_name' => '', 'db_user' => '', 'db_pass' => '', 'db_prefix' => 'tiny_']),
             'message' => (string)($state['message'] ?? ''),
+            'requirements' => $requirements,
         ]);
 
         unset($_SESSION['install']['errors_db'], $_SESSION['install']['message']);
@@ -43,6 +48,13 @@ final class InstallController
     public function submitDb(callable $redirect): void
     {
         $this->applyInstallLocale($_SESSION['install'] ?? []);
+        $requirements = $this->requirementsService->evaluate(dirname(__DIR__, 2));
+
+        if (($requirements['hasBlockingErrors'] ?? false) === true) {
+            $_SESSION['install']['message'] = I18n::t('install.requirements_blocking');
+            $_SESSION['install']['db_valid'] = false;
+            $redirect('install/db');
+        }
 
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
             $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
