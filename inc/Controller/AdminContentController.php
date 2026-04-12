@@ -14,8 +14,6 @@ use App\View\AdminView;
 
 final class AdminContentController extends BaseAdminController
 {
-    private const FORM_STATE_KEY = 'admin_content_form_state';
-
     public function __construct(
         private AdminView $pages,
         AuthService $authService,
@@ -87,16 +85,15 @@ final class AdminContentController extends BaseAdminController
 
         $fallback = ['id' => null, 'name' => '', 'status' => 'draft', 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $fallback['author'] = (int)($this->authService->auth()->id() ?? 0);
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
         $statuses = $this->content->statuses();
-        $item = $state['data'] ?? $fallback;
+        $item = $fallback;
         $selectedTerms = $this->resolveSelectedTerms($item, null);
-        $this->pages->adminContentForm('add', $item, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
+        $this->pages->adminContentForm('add', $item, [], $statuses, $this->users->authorOptions(), $selectedTerms);
     }
 
-    public function addSubmit(callable $redirect): void
+    public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -108,14 +105,15 @@ final class AdminContentController extends BaseAdminController
             if ($newId > 0) {
                 $this->terms->syncContentTerms($newId, (string)($_POST['terms'] ?? ''));
             }
-            $this->flash->add('success', I18n::t('content.created'));
-            $redirect($newId > 0 ? $this->buildEditPath('admin/content', $newId) : 'admin/content');
+            $this->apiOk([
+                'redirect' => $newId > 0 ? $this->buildEditPath('admin/content', $newId) : 'admin/content',
+            ]);
             return;
         }
 
-        $this->flash->add('error', I18n::t('content.save_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
-        $redirect('admin/content/add');
+        $this->apiError('SAVE_FAILED', I18n::t('content.save_failed'), 422, [
+            'errors' => $result['errors'] ?? [],
+        ]);
     }
 
     public function editForm(callable $redirect): void
@@ -133,30 +131,25 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $statuses = $this->content->statuses();
-        $formItem = $state['data'] ?? $item;
+        $formItem = $item;
         $selectedTerms = $this->resolveSelectedTerms($formItem, $id);
-        $this->pages->adminContentForm('edit', $formItem, $state['errors'] ?? [], $statuses, $this->users->authorOptions(), $selectedTerms);
+        $this->pages->adminContentForm('edit', $formItem, [], $statuses, $this->users->authorOptions(), $selectedTerms);
     }
 
-    public function editSubmit(callable $redirect): void
+    public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
-        $id = (int)($_GET['id'] ?? 0);
-
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('content.invalid_id'));
-            $redirect('admin/content');
+            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
             return;
         }
 
         if ($this->content->find($id) === null) {
-            $this->flash->add('error', I18n::t('content.not_found'));
-            $redirect('admin/content');
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
@@ -165,14 +158,15 @@ final class AdminContentController extends BaseAdminController
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
-            $this->flash->add('success', I18n::t('content.updated'));
-            $redirect($this->buildEditPath('admin/content', $id));
+            $this->apiOk([
+                'redirect' => $this->buildEditPath('admin/content', $id),
+            ]);
             return;
         }
 
-        $this->flash->add('error', I18n::t('content.update_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect('admin/content/edit?id=' . $id);
+        $this->apiError('UPDATE_FAILED', I18n::t('content.update_failed'), 422, [
+            'errors' => $result['errors'] ?? [],
+        ]);
     }
 
     public function statusApiV1(callable $redirect, int $id): void

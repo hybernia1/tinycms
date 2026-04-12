@@ -17,7 +17,9 @@ $contentId = (int)($item['id'] ?? 0);
     class="content-editor-form"
     method="post"
     enctype="multipart/form-data"
-    action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>"
+    action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/content/add') : $url('admin/api/v1/content/' . (int)($item['id'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
+    data-api-submit
+    data-redirect-url="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"
     data-autosave-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/autosave'), ENT_QUOTES, 'UTF-8') ?>"
     data-draft-init-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/draft/init'), ENT_QUOTES, 'UTF-8') ?>"
     data-edit-url-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>"

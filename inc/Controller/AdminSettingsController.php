@@ -36,31 +36,31 @@ final class AdminSettingsController extends BaseAdminController
         $this->pages->adminSettingsForm($fields, $values);
     }
 
-    public function submit(callable $redirect): void
+    public function submitApiV1(callable $redirect): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/settings', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
             return;
         }
 
         $input = (array)($_POST['settings'] ?? []);
         $resolved = $this->settings->resolved();
 
-        if (!$this->handleSiteImageUpload('favicon_file', 'favicon', $input, $resolved, fn(array $file): array => $this->upload->uploadFavicon($file), $redirect)) {
+        if (!$this->handleSiteImageUploadApi('favicon_file', 'favicon', $input, $resolved, fn(array $file): array => $this->upload->uploadFavicon($file))) {
             return;
         }
-        if (!$this->handleSiteImageUpload('logo_file', 'logo', $input, $resolved, fn(array $file): array => $this->upload->uploadLogo($file), $redirect)) {
+        if (!$this->handleSiteImageUploadApi('logo_file', 'logo', $input, $resolved, fn(array $file): array => $this->upload->uploadLogo($file))) {
             return;
         }
 
         $this->settings->save($input);
         I18n::setLocale((string)($input['app_lang'] ?? APP_LANG));
         I18n::setTheme((string)($this->settings->resolved()['theme'] ?? 'default'));
-        $this->flash->add('success', I18n::t('settings.saved'));
-        $redirect('admin/settings');
-        return;
+        $this->apiOk([
+            'redirect' => 'admin/settings',
+        ]);
     }
 
-    private function handleSiteImageUpload(string $field, string $settingKey, array &$input, array $resolved, callable $uploader, callable $redirect): bool
+    private function handleSiteImageUploadApi(string $field, string $settingKey, array &$input, array $resolved, callable $uploader): bool
     {
         if (!$this->hasUpload($field)) {
             return true;
@@ -68,8 +68,7 @@ final class AdminSettingsController extends BaseAdminController
 
         $upload = $uploader((array)($_FILES[$field] ?? []));
         if (($upload['success'] ?? false) !== true) {
-            $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
-            $redirect('admin/settings');
+            $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')), 422);
             return false;
         }
 
@@ -86,4 +85,5 @@ final class AdminSettingsController extends BaseAdminController
 
         return true;
     }
+
 }

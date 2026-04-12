@@ -55,32 +55,36 @@ abstract class BaseAdminController
             && $this->guardCsrf($redirect, $redirectPath, $message);
     }
 
-    protected function storeFormState(string $sessionKey, string $mode, ?int $id, array $data, array $errors): void
+    protected function guardApiAdmin(bool $flashDenied = false): bool
     {
-        $this->ensureSession();
-        $_SESSION[$sessionKey] = [
-            'mode' => $mode,
-            'id' => $id,
-            'data' => $data,
-            'errors' => $errors,
-        ];
+        if (!$this->authService->auth()->check()) {
+            $this->apiError('UNAUTHENTICATED', I18n::t('admin.access_denied'), 401);
+            return false;
+        }
+
+        if (!$this->authService->canAccessAdmin()) {
+            if ($flashDenied) {
+                $this->flash->add('info', I18n::t('admin.access_denied'));
+            }
+            $this->apiError('FORBIDDEN', I18n::t('admin.access_denied'), 403);
+            return false;
+        }
+
+        return true;
     }
 
-    protected function consumeFormState(string $sessionKey, string $mode, ?int $id = null): ?array
+    protected function guardApiAdminCsrf(string $message, bool $flashDenied = false): bool
     {
-        $this->ensureSession();
-        $state = $_SESSION[$sessionKey] ?? null;
-        unset($_SESSION[$sessionKey]);
-
-        if (!is_array($state)) {
-            return null;
+        if (!$this->guardApiAdmin($flashDenied)) {
+            return false;
         }
 
-        if (($state['mode'] ?? null) !== $mode || ($state['id'] ?? null) !== $id) {
-            return null;
+        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            return true;
         }
 
-        return $state;
+        $this->apiError('INVALID_CSRF', $message, 419);
+        return false;
     }
 
     protected function respondJson(array $payload, int $statusCode = 200): void
@@ -180,10 +184,4 @@ abstract class BaseAdminController
         return trim((string)($item['path'] ?? ''));
     }
 
-    private function ensureSession(): void
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-    }
 }

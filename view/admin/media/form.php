@@ -32,7 +32,15 @@ if ($mode === 'edit') {
     }
 }
 ?>
-<form id="media-form" class="content-editor-form" method="post" enctype="multipart/form-data" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/media/add') : $url('admin/media/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+<form
+    id="media-form"
+    class="content-editor-form"
+    method="post"
+    enctype="multipart/form-data"
+    action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/media/add') : $url('admin/api/v1/media/' . (int)($item['id'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
+    data-api-submit
+    data-redirect-url="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"
+>
     <?= $csrfField() ?>
     <div class="content-editor-layout">
         <div class="card p-4">
