@@ -204,7 +204,7 @@ final class InstallService
     {
         $normalizedLang = strtolower(trim($lang));
         $prefix = $this->normalizePrefix((string)($db['db_prefix'] ?? ''));
-        $content = "<?php\ndeclare(strict_types=1);\n\ndefine('INC_DIR', 'inc/');\n\nconst APP_DEBUG = false;\nconst APP_LANG = " . var_export($normalizedLang, true) . ";\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\n\n"
+        $content = "<?php\ndeclare(strict_types=1);\n\ndefine('INC_DIR', 'inc/');\n\nconst APP_DEBUG = false;\nconst APP_VERSION = '0.9.0';\nconst APP_LANG = " . var_export($normalizedLang, true) . ";\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\n\n"
             . "const DB_HOST = " . var_export((string)$db['db_host'], true) . ";\n"
             . "const DB_NAME = " . var_export((string)$db['db_name'], true) . ";\n"
             . "const DB_USER = " . var_export((string)$db['db_user'], true) . ";\n"

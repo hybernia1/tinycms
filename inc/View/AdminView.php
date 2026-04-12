@@ -189,7 +189,13 @@ final class AdminView
             'siteName' => (string)($settings['sitename'] ?? 'TinyCMS'),
             'siteFavicon' => (string)($settings['favicon'] ?? ''),
             'siteLogo' => (string)($settings['logo'] ?? ''),
+            'appVersion' => $this->appVersion(),
         ];
+    }
+
+    private function appVersion(): string
+    {
+        return defined('APP_VERSION') ? (string)APP_VERSION : '0.9.0';
     }
 
     private function adminI18n(): array
