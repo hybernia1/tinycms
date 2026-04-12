@@ -4,23 +4,24 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\Feature\AuthService;
+use App\Service\Support\CsrfService;
+use App\Service\Support\FlashService;
 use App\View\AdminView;
 
-final class AdminController
+final class AdminController extends BaseAdminController
 {
-    private AdminView $pages;
-    private AuthService $authService;
-
-    public function __construct(AdminView $pages, AuthService $authService)
-    {
-        $this->pages = $pages;
-        $this->authService = $authService;
+    public function __construct(
+        private AdminView $pages,
+        AuthService $authService,
+        FlashService $flash,
+        CsrfService $csrf
+    ) {
+        parent::__construct($authService, $flash, $csrf);
     }
 
     public function index(callable $redirect): void
     {
-        if (!$this->authService->auth()->check()) {
-            $redirect('login');
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
@@ -29,13 +30,7 @@ final class AdminController
 
     public function dashboard(callable $redirect): void
     {
-        if (!$this->authService->auth()->check()) {
-            $redirect('login');
-            return;
-        }
-
-        if (!$this->authService->canAccessAdmin()) {
-            $redirect('');
+        if (!$this->guardAdmin($redirect)) {
             return;
         }
 
