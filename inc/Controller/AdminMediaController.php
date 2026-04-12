@@ -90,7 +90,7 @@ final class AdminMediaController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
             $this->apiOk([
-                'redirect' => $newId > 0 ? $this->buildEditPath('admin/media', $newId) : 'admin/media',
+                'redirect' => $newId > 0 ? $this->buildEditPath('admin/media', $newId) : $this->buildPath('admin/media'),
                 'message' => I18n::t('media.created'),
             ]);
             return;
@@ -160,7 +160,7 @@ final class AdminMediaController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 

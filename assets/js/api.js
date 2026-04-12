@@ -75,7 +75,14 @@
     consumeStoredFlash();
 
     window.tinycms = window.tinycms || {};
+    window.tinycms.api = window.tinycms.api || {};
+    window.tinycms.api.flash = {
+        push: pushFlash,
+        store: storeFlash,
+        consume: consumeStoredFlash,
+    };
     window.tinycms.api = {
+        ...window.tinycms.api,
         esc,
         icon,
         pushFlash,
@@ -94,6 +101,59 @@
         }
     };
 
+    const escapeSelector = (value) => {
+        if (window.CSS && typeof window.CSS.escape === 'function') {
+            return window.CSS.escape(value);
+        }
+        return String(value).replace(/["\\]/g, '\\$&');
+    };
+
+    const clearFieldErrors = (form) => {
+        form.querySelectorAll('.api-field-error').forEach((node) => node.remove());
+        form.querySelectorAll('[aria-invalid="true"]').forEach((node) => node.removeAttribute('aria-invalid'));
+    };
+
+    const findField = (form, name) => {
+        const normalized = String(name || '').trim();
+        if (normalized === '') {
+            return null;
+        }
+
+        const direct = form.querySelector(`[name="${escapeSelector(normalized)}"]`);
+        if (direct) {
+            return direct;
+        }
+
+        if (!normalized.includes('[')) {
+            const bracketed = form.querySelector(`[name="settings[${escapeSelector(normalized)}]"]`);
+            if (bracketed) {
+                return bracketed;
+            }
+        }
+
+        return null;
+    };
+
+    const applyFieldErrors = (form, errors) => {
+        if (!errors || typeof errors !== 'object') {
+            return;
+        }
+
+        Object.entries(errors).forEach(([name, message]) => {
+            const field = findField(form, name);
+            const text = String(message || '').trim();
+            if (!field || text === '') {
+                return;
+            }
+
+            field.setAttribute('aria-invalid', 'true');
+            const error = document.createElement('small');
+            error.className = 'text-danger api-field-error';
+            error.textContent = text;
+            field.insertAdjacentElement('afterend', error);
+        });
+    };
+
     const submitApiForm = async (form) => {
         const response = await fetch(form.action, {
             method: (form.method || 'POST').toUpperCase(),
@@ -106,9 +166,13 @@
 
         const payload = await response.json().catch(() => null);
         if (!response.ok || payload?.ok !== true) {
+            clearFieldErrors(form);
+            applyFieldErrors(form, payload?.error?.errors || {});
             showError(payload?.error?.message || '');
             return;
         }
+
+        clearFieldErrors(form);
 
         const payloadRedirect = String(payload?.data?.redirect || '').trim();
         const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();
@@ -150,6 +214,13 @@
         event.preventDefault();
         submitApiForm(form);
     });
+
+    window.tinycms = window.tinycms || {};
+    window.tinycms.api = window.tinycms.api || {};
+    window.tinycms.api.form = {
+        submit: submitApiForm,
+        init: () => {},
+    };
 })();
 (() => {
 const t = window.tinycms?.i18n?.t || (() => '');
@@ -486,6 +557,12 @@ const initListApi = (config) => {
             }, 1000);
         });
     }
+};
+
+window.tinycms = window.tinycms || {};
+window.tinycms.api = window.tinycms.api || {};
+window.tinycms.api.list = {
+    init: initListApi,
 };
 
 initListApi({

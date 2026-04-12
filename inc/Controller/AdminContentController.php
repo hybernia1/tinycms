@@ -55,7 +55,7 @@ final class AdminContentController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -106,7 +106,7 @@ final class AdminContentController extends BaseAdminController
                 $this->terms->syncContentTerms($newId, (string)($_POST['terms'] ?? ''));
             }
             $this->apiOk([
-                'redirect' => $newId > 0 ? $this->buildEditPath('admin/content', $newId) : 'admin/content',
+                'redirect' => $newId > 0 ? $this->buildEditPath('admin/content', $newId) : $this->buildPath('admin/content'),
                 'message' => I18n::t('content.created'),
             ]);
             return;
@@ -172,7 +172,7 @@ final class AdminContentController extends BaseAdminController
 
     public function statusApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -207,7 +207,7 @@ final class AdminContentController extends BaseAdminController
 
     public function draftInitApiV1(callable $redirect): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -237,7 +237,7 @@ final class AdminContentController extends BaseAdminController
 
     public function autosaveApiV1(callable $redirect): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 

@@ -5,7 +5,7 @@
         enctype="multipart/form-data"
         action="<?= htmlspecialchars($url('admin/api/v1/settings'), ENT_QUOTES, 'UTF-8') ?>"
         data-api-submit
-        data-stay-on-page
+        data-redirect-url="<?= htmlspecialchars($url('admin/settings'), ENT_QUOTES, 'UTF-8') ?>"
     >
         <?= $csrfField() ?>
 

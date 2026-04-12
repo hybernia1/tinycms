@@ -171,7 +171,17 @@ abstract class BaseAdminController
 
     protected function buildEditPath(string $basePath, int $id): string
     {
-        return $basePath . '/edit?id=' . $id;
+        return $this->buildPath($basePath . '/edit?id=' . $id);
+    }
+
+    protected function buildPath(string $path): string
+    {
+        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+        $baseDir = trim(dirname($scriptName), '/.');
+        $basePath = $baseDir === '' ? '' : '/' . $baseDir;
+        $normalized = '/' . ltrim($path, '/');
+
+        return $basePath . $normalized;
     }
 
     protected function resolvePreviewPath(array $item): string

@@ -51,7 +51,7 @@ final class AdminUserController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -70,7 +70,7 @@ final class AdminUserController extends BaseAdminController
 
     public function suspendApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -124,7 +124,7 @@ final class AdminUserController extends BaseAdminController
 
         if (($result['success'] ?? false) === true) {
             $this->apiOk([
-                'redirect' => 'admin/users',
+                'redirect' => $this->buildPath('admin/users'),
                 'message' => I18n::t('users.created'),
             ]);
             return;

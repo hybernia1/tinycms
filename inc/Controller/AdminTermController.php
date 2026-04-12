@@ -80,7 +80,7 @@ final class AdminTermController extends BaseAdminController
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
             $this->apiOk([
-                'redirect' => $newId > 0 ? $this->buildEditPath('admin/terms', $newId) : 'admin/terms',
+                'redirect' => $newId > 0 ? $this->buildEditPath('admin/terms', $newId) : $this->buildPath('admin/terms'),
                 'message' => I18n::t('terms.created'),
             ]);
             return;
@@ -135,7 +135,7 @@ final class AdminTermController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
