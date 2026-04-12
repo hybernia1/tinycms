@@ -70,6 +70,11 @@ document.addEventListener('click', (event) => {
     const form = formId ? document.getElementById(formId) : null;
 
     if (form) {
+        if (form.hasAttribute('data-api-submit')) {
+            closeModal(confirmTrigger.closest('[data-modal]'));
+            form.requestSubmit();
+            return;
+        }
         form.submit();
     }
 

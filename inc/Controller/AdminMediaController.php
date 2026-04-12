@@ -13,8 +13,6 @@ use App\View\AdminView;
 
 final class AdminMediaController extends BaseAdminController
 {
-    private const FORM_STATE_KEY = 'admin_media_form_state';
-
     public function __construct(
         private AdminView $pages,
         AuthService $authService,
@@ -59,28 +57,23 @@ final class AdminMediaController extends BaseAdminController
         }
 
         $fallback = ['id' => null, 'name' => '', 'path' => '', 'path_webp' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
-        $this->pages->adminMediaForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], $this->media->authorOptions(), []);
+        $this->pages->adminMediaForm('add', $fallback, [], $this->media->authorOptions(), []);
     }
 
-    public function addSubmit(callable $redirect): void
+    public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
         if (!$this->hasUpload('file')) {
-            $this->flash->add('error', I18n::t('media.upload_file_required'));
-            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => I18n::t('media.file_required')]);
-            $redirect('admin/media/add');
+            $this->apiError('FILE_REQUIRED', I18n::t('media.file_required'));
             return;
         }
 
         $upload = $this->upload->uploadImage($_FILES['file'] ?? []);
         if (($upload['success'] ?? false) !== true) {
-            $this->flash->add('error', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
-            $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, ['file' => (string)($upload['error'] ?? I18n::t('upload.file_upload_failed'))]);
-            $redirect('admin/media/add');
+            $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')));
             return;
         }
 
@@ -95,16 +88,18 @@ final class AdminMediaController extends BaseAdminController
         $result = $this->media->save($input);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', I18n::t('media.created'));
             $newId = (int)($result['id'] ?? 0);
-            $redirect($newId > 0 ? $this->buildEditPath('admin/media', $newId) : 'admin/media');
+            $this->apiOk([
+                'redirect' => $newId > 0 ? $this->buildEditPath('admin/media', $newId) : $this->buildPath('admin/media'),
+                'message' => I18n::t('media.created'),
+            ]);
             return;
         }
 
         $this->upload->deleteMediaFiles($uploadData);
-        $this->flash->add('error', I18n::t('media.save_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
-        $redirect('admin/media/add');
+        $this->apiError('SAVE_FAILED', I18n::t('media.save_failed'), 422, [
+            'errors' => $result['errors'] ?? [],
+        ]);
     }
 
     public function editForm(callable $redirect): void
@@ -122,28 +117,24 @@ final class AdminMediaController extends BaseAdminController
             return;
         }
 
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
         $navigation = $this->media->editNavigation($id);
-        $this->pages->adminMediaForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
+        $this->pages->adminMediaForm('edit', $item, [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
     }
 
-    public function editSubmit(callable $redirect): void
+    public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
-        $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('media.invalid_id'));
-            $redirect('admin/media');
+            $this->apiError('INVALID_ID', I18n::t('media.invalid_id'));
             return;
         }
 
         $item = $this->media->find($id);
         if ($item === null) {
-            $this->flash->add('error', I18n::t('media.not_found'));
-            $redirect('admin/media');
+            $this->apiError('NOT_FOUND', I18n::t('media.not_found'), 404);
             return;
         }
 
@@ -155,19 +146,21 @@ final class AdminMediaController extends BaseAdminController
         $result = $this->media->save($input, $id);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', I18n::t('media.updated'));
-            $redirect($this->buildEditPath('admin/media', $id));
+            $this->apiOk([
+                'redirect' => $this->buildEditPath('admin/media', $id),
+                'message' => I18n::t('media.updated'),
+            ]);
             return;
         }
 
-        $this->flash->add('error', I18n::t('media.update_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect($this->buildEditPath('admin/media', $id));
+        $this->apiError('UPDATE_FAILED', I18n::t('media.update_failed'), 422, [
+            'errors' => $result['errors'] ?? [],
+        ]);
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -189,37 +182,6 @@ final class AdminMediaController extends BaseAdminController
 
         $this->upload->deleteMediaFiles($item);
         $this->apiOk(['id' => $id]);
-    }
-
-    public function deleteSubmit(callable $redirect): void
-    {
-        if (!$this->guardAdminCsrf($redirect, 'admin/media', I18n::t('common.invalid_csrf'), false)) {
-            return;
-        }
-
-        $id = (int)($_GET['id'] ?? 0);
-        if ($id <= 0) {
-            $this->flash->add('error', I18n::t('media.invalid_id'));
-            $redirect('admin/media');
-            return;
-        }
-
-        $item = $this->media->find($id);
-        if ($item === null) {
-            $this->flash->add('error', I18n::t('media.not_found'));
-            $redirect('admin/media');
-            return;
-        }
-
-        if (!$this->media->delete($id)) {
-            $this->flash->add('error', I18n::t('media.delete_failed'));
-            $redirect($this->buildEditPath('admin/media', $id));
-            return;
-        }
-
-        $this->upload->deleteMediaFiles($item);
-        $this->flash->add('success', I18n::t('media.deleted'));
-        $redirect('admin/media');
     }
 
     private function resolveListQuery(): array

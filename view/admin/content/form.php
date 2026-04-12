@@ -17,7 +17,9 @@ $contentId = (int)($item['id'] ?? 0);
     class="content-editor-form"
     method="post"
     enctype="multipart/form-data"
-    action="<?= htmlspecialchars($mode === 'add' ? $url('admin/content/add') : $url('admin/content/edit?id=' . (int)($item['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>"
+    action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/content/add') : $url('admin/api/v1/content/' . (int)($item['id'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
+    data-api-submit
+    <?= $mode === 'add' ? 'data-redirect-url="' . htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') . '"' : 'data-stay-on-page' ?>
     data-autosave-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/autosave'), ENT_QUOTES, 'UTF-8') ?>"
     data-draft-init-endpoint="<?= htmlspecialchars($url('admin/api/v1/content/draft/init'), ENT_QUOTES, 'UTF-8') ?>"
     data-edit-url-base="<?= htmlspecialchars($url('admin/content/edit?id='), ENT_QUOTES, 'UTF-8') ?>"
@@ -132,7 +134,13 @@ $contentId = (int)($item['id'] ?? 0);
     <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
 </form>
 <?php if ($mode === 'edit'): ?>
-<form id="content-delete-form" method="post" action="<?= htmlspecialchars($url('admin/content/edit/delete?id=' . $contentId), ENT_QUOTES, 'UTF-8') ?>">
+<form
+    id="content-delete-form"
+    method="post"
+    action="<?= htmlspecialchars($url('admin/api/v1/content/' . $contentId . '/delete'), ENT_QUOTES, 'UTF-8') ?>"
+    data-api-submit
+    data-redirect-url="<?= htmlspecialchars($url('admin/content'), ENT_QUOTES, 'UTF-8') ?>"
+>
     <?= $csrfField() ?>
 </form>
 <?php endif; ?>

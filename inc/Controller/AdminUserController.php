@@ -12,8 +12,6 @@ use App\View\AdminView;
 
 final class AdminUserController extends BaseAdminController
 {
-    private const FORM_STATE_KEY = 'admin_users_form_state';
-
     private AdminView $pages;
     private UserService $users;
 
@@ -53,7 +51,7 @@ final class AdminUserController extends BaseAdminController
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -72,7 +70,7 @@ final class AdminUserController extends BaseAdminController
 
     public function suspendApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
             return;
         }
 
@@ -113,27 +111,28 @@ final class AdminUserController extends BaseAdminController
             'role' => 'user',
             'suspend' => 0,
         ];
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add');
-        $this->pages->adminUsersForm('add', $state['data'] ?? $fallback, $state['errors'] ?? []);
+        $this->pages->adminUsersForm('add', $fallback, []);
     }
 
-    public function addSubmit(callable $redirect): void
+    public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
             return;
         }
 
         $result = $this->users->save($_POST);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', I18n::t('users.created'));
-            $redirect('admin/users');
+            $this->apiOk([
+                'redirect' => $this->buildPath('admin/users'),
+                'message' => I18n::t('users.created'),
+            ]);
             return;
         }
 
-        $this->flash->add('error', I18n::t('users.save_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
-        $redirect('admin/users/add');
+        $this->apiError('SAVE_FAILED', I18n::t('users.save_failed'), 422, [
+            'errors' => $result['errors'] ?? [],
+        ]);
     }
 
     public function editForm(callable $redirect): void
@@ -151,36 +150,32 @@ final class AdminUserController extends BaseAdminController
             return;
         }
 
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
-        $this->pages->adminUsersForm('edit', $state['data'] ?? $user, $state['errors'] ?? []);
+        $this->pages->adminUsersForm('edit', $user, []);
     }
 
-    public function editSubmit(callable $redirect): void
+    public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/users', I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
             return;
         }
 
-        $id = (int)($_GET['id'] ?? 0);
-
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('users.invalid_id'));
-            $redirect('admin/users');
+            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
             return;
         }
 
         $result = $this->users->save($_POST, $id);
 
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', I18n::t('users.updated'));
-            $redirect('admin/users');
+            $this->apiOk([
+                'message' => I18n::t('users.updated'),
+            ]);
             return;
         }
 
-        $this->flash->add('error', I18n::t('users.update_failed'));
-        $data = array_merge($_POST, ['ID' => $id]);
-        $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, $data, $result['errors'] ?? []);
-        $redirect('admin/users/edit?id=' . $id);
+        $this->apiError('UPDATE_FAILED', I18n::t('users.update_failed'), 422, [
+            'errors' => $result['errors'] ?? [],
+        ]);
     }
 
     private function mapListItem(array $row): array

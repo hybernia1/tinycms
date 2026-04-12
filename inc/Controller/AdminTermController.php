@@ -12,8 +12,6 @@ use App\View\AdminView;
 
 final class AdminTermController extends BaseAdminController
 {
-    private const FORM_STATE_KEY = 'admin_term_form_state';
-
     public function __construct(
         private AdminView $pages,
         AuthService $authService,
@@ -69,27 +67,28 @@ final class AdminTermController extends BaseAdminController
         }
 
         $fallback = ['id' => null, 'name' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'add', null);
-        $this->pages->adminTermForm('add', $state['data'] ?? $fallback, $state['errors'] ?? [], []);
+        $this->pages->adminTermForm('add', $fallback, [], []);
     }
 
-    public function addSubmit(callable $redirect): void
+    public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
         $result = $this->terms->save($_POST);
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
-            $this->flash->add('success', I18n::t('terms.created'));
-            $redirect($newId > 0 ? $this->buildEditPath('admin/terms', $newId) : 'admin/terms');
+            $this->apiOk([
+                'redirect' => $newId > 0 ? $this->buildEditPath('admin/terms', $newId) : $this->buildPath('admin/terms'),
+                'message' => I18n::t('terms.created'),
+            ]);
             return;
         }
 
-        $this->flash->add('error', I18n::t('terms.save_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'add', null, $_POST, $result['errors'] ?? []);
-        $redirect('admin/terms/add');
+        $this->apiError('SAVE_FAILED', I18n::t('terms.save_failed'), 422, [
+            'errors' => $result['errors'] ?? [],
+        ]);
     }
 
     public function editForm(callable $redirect): void
@@ -107,38 +106,36 @@ final class AdminTermController extends BaseAdminController
             return;
         }
 
-        $state = $this->consumeFormState(self::FORM_STATE_KEY, 'edit', $id);
-        $this->pages->adminTermForm('edit', $state['data'] ?? $item, $state['errors'] ?? [], $this->terms->contentUsages($id));
+        $this->pages->adminTermForm('edit', $item, [], $this->terms->contentUsages($id));
     }
 
-    public function editSubmit(callable $redirect): void
+    public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
-        $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->flash->add('error', I18n::t('terms.invalid_id'));
-            $redirect('admin/terms');
+            $this->apiError('INVALID_ID', I18n::t('terms.invalid_id'));
             return;
         }
 
         $result = $this->terms->save($_POST, $id);
         if (($result['success'] ?? false) === true) {
-            $this->flash->add('success', I18n::t('terms.updated'));
-            $redirect($this->buildEditPath('admin/terms', $id));
+            $this->apiOk([
+                'message' => I18n::t('terms.updated'),
+            ]);
             return;
         }
 
-        $this->flash->add('error', I18n::t('terms.update_failed'));
-        $this->storeFormState(self::FORM_STATE_KEY, 'edit', $id, array_merge($_POST, ['id' => $id]), $result['errors'] ?? []);
-        $redirect($this->buildEditPath('admin/terms', $id));
+        $this->apiError('UPDATE_FAILED', I18n::t('terms.update_failed'), 422, [
+            'errors' => $result['errors'] ?? [],
+        ]);
     }
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/terms', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 

@@ -26,7 +26,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function thumbnailDetachApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -45,7 +45,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -73,7 +73,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function mediaLibraryApiV1(callable $redirect, int $contentId): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
@@ -104,7 +104,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -134,7 +134,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -178,7 +178,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -214,7 +214,7 @@ final class AdminContentMediaApiController extends BaseAdminController
 
     public function mediaAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardAdminCsrf($redirect, 'admin/content', I18n::t('common.invalid_csrf'), false)) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 

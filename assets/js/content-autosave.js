@@ -124,7 +124,9 @@
             }
 
             if (editUrlBase !== '') {
-                form.action = editUrlBase + value;
+                form.action = contentApi('/admin/api/v1/content/' + value + '/edit');
+                form.removeAttribute('data-redirect-url');
+                form.setAttribute('data-stay-on-page', '');
                 if (window.location.search.indexOf('id=') === -1) {
                     window.history.replaceState({}, '', editUrlBase + value);
                     applyEditLayoutContext();

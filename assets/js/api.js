@@ -1,21 +1,232 @@
 (() => {
-const t = window.tinycms?.i18n?.t || (() => '');
+    const t = window.tinycms?.i18n?.t || (() => '');
 
-const esc = (value) => String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    const esc = (value) => String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 
-const iconSprite = (() => {
-    const iconUse = document.querySelector('svg use[href*="#icon-"]');
-    return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
+    const iconSprite = (() => {
+        const iconUse = document.querySelector('svg use[href*="#icon-"]');
+        return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
+    })();
+
+    const icon = (name) => iconSprite !== ''
+        ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${esc(iconSprite)}#icon-${esc(name)}"></use></svg>`
+        : '';
+
+    const pushFlash = (type, message) => {
+        const text = String(message || '').trim();
+        if (text === '') {
+            return;
+        }
+
+        const container = document.querySelector('.admin-content');
+        if (!container) {
+            return;
+        }
+
+        container.querySelectorAll('.flash').forEach((node) => node.remove());
+
+        const flashType = ['success', 'error', 'warning', 'info'].includes(type) ? type : 'warning';
+        const flash = document.createElement('div');
+        const uiType = flashType === 'info' ? 'warning' : flashType;
+        const flashIcon = uiType === 'success' ? 'success' : (uiType === 'error' ? 'error' : 'warning');
+        flash.className = `flash flash-${uiType}`;
+        flash.innerHTML = `
+            <span class="d-flex align-center gap-2">${icon(flashIcon)}<span>${esc(text)}</span></span>
+            <button type="button" data-flash-close aria-label="${esc(t('common.close_notice'))}" title="${esc(t('common.close_notice'))}">
+                ${icon('cancel')}
+            </button>
+        `;
+        container.prepend(flash);
+    };
+
+    const storeFlash = (type, message) => {
+        const text = String(message || '').trim();
+        if (text === '') {
+            return;
+        }
+
+        try {
+            window.sessionStorage.setItem('tinycms:flash', JSON.stringify({
+                type,
+                message: text,
+            }));
+        } catch (_) {
+        }
+    };
+
+    const consumeStoredFlash = () => {
+        try {
+            const raw = window.sessionStorage.getItem('tinycms:flash');
+            if (!raw) {
+                return;
+            }
+            window.sessionStorage.removeItem('tinycms:flash');
+            const payload = JSON.parse(raw);
+            pushFlash((payload && payload.type) || 'success', (payload && payload.message) || '');
+        } catch (_) {
+        }
+    };
+
+    consumeStoredFlash();
+
+    window.tinycms = window.tinycms || {};
+    window.tinycms.api = window.tinycms.api || {};
+    window.tinycms.api.flash = {
+        push: pushFlash,
+        store: storeFlash,
+        consume: consumeStoredFlash,
+    };
+    window.tinycms.api = {
+        ...window.tinycms.api,
+        esc,
+        icon,
+        pushFlash,
+        storeFlash,
+    };
 })();
+(() => {
+    const pushFlash = window.tinycms?.api?.pushFlash || (() => {});
+    const storeFlash = window.tinycms?.api?.storeFlash || (() => {});
+    const t = window.tinycms?.i18n?.t || (() => '');
 
-const icon = (name) => iconSprite !== ''
-    ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${esc(iconSprite)}#icon-${esc(name)}"></use></svg>`
-    : '';
+    const showError = (message) => {
+        const text = String(message || '').trim();
+        if (text !== '') {
+            pushFlash('error', text);
+        }
+    };
+
+    const escapeSelector = (value) => {
+        if (window.CSS && typeof window.CSS.escape === 'function') {
+            return window.CSS.escape(value);
+        }
+        return String(value).replace(/["\\]/g, '\\$&');
+    };
+
+    const clearFieldErrors = (form) => {
+        form.querySelectorAll('.api-field-error').forEach((node) => node.remove());
+        form.querySelectorAll('[aria-invalid="true"]').forEach((node) => node.removeAttribute('aria-invalid'));
+    };
+
+    const findField = (form, name) => {
+        const normalized = String(name || '').trim();
+        if (normalized === '') {
+            return null;
+        }
+
+        const direct = form.querySelector(`[name="${escapeSelector(normalized)}"]`);
+        if (direct) {
+            return direct;
+        }
+
+        if (!normalized.includes('[')) {
+            const bracketed = form.querySelector(`[name="settings[${escapeSelector(normalized)}]"]`);
+            if (bracketed) {
+                return bracketed;
+            }
+        }
+
+        return null;
+    };
+
+    const applyFieldErrors = (form, errors) => {
+        if (!errors || typeof errors !== 'object') {
+            return;
+        }
+
+        Object.entries(errors).forEach(([name, message]) => {
+            const field = findField(form, name);
+            const text = String(message || '').trim();
+            if (!field || text === '') {
+                return;
+            }
+
+            field.setAttribute('aria-invalid', 'true');
+            const error = document.createElement('small');
+            error.className = 'text-danger api-field-error';
+            error.textContent = text;
+            field.insertAdjacentElement('afterend', error);
+        });
+    };
+
+    const submitApiForm = async (form) => {
+        const response = await fetch(form.action, {
+            method: (form.method || 'POST').toUpperCase(),
+            body: new FormData(form),
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || payload?.ok !== true) {
+            clearFieldErrors(form);
+            applyFieldErrors(form, payload?.error?.errors || {});
+            showError(payload?.error?.message || '');
+            return;
+        }
+
+        clearFieldErrors(form);
+
+        const payloadRedirect = String(payload?.data?.redirect || '').trim();
+        const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();
+        const redirect = payloadRedirect !== '' ? payloadRedirect : fallbackRedirect;
+        const successMessage = String(payload?.data?.message || '').trim();
+        if (redirect !== '') {
+            if (successMessage !== '') {
+                storeFlash('success', successMessage);
+            } else {
+                const fallbackMessage = t('common.saved', '');
+                if (fallbackMessage !== '') {
+                    storeFlash('success', fallbackMessage);
+                }
+            }
+            const target = /^https?:\/\//i.test(redirect) || redirect.startsWith('/')
+                ? redirect
+                : '/' + redirect.replace(/^\/+/, '');
+            window.location.href = target;
+            return;
+        }
+
+        if (successMessage !== '') {
+            pushFlash('success', successMessage);
+        }
+
+        if (form.hasAttribute('data-stay-on-page')) {
+            return;
+        }
+
+        window.location.reload();
+    };
+
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || !form.hasAttribute('data-api-submit')) {
+            return;
+        }
+
+        event.preventDefault();
+        submitApiForm(form);
+    });
+
+    window.tinycms = window.tinycms || {};
+    window.tinycms.api = window.tinycms.api || {};
+    window.tinycms.api.form = {
+        submit: submitApiForm,
+        init: () => {},
+    };
+})();
+(() => {
+const t = window.tinycms?.i18n?.t || (() => '');
+const esc = window.tinycms?.api?.esc || ((value) => String(value || ''));
+const icon = window.tinycms?.api?.icon || (() => '');
+const pushFlash = window.tinycms?.api?.pushFlash || (() => {});
 
 const normalizeListResponse = (payload) => {
     const meta = payload && typeof payload.meta === 'object' ? payload.meta : {};
@@ -35,33 +246,6 @@ const normalizeActionResponse = (response, payload) => {
         data: payload?.data && typeof payload.data === 'object' ? payload.data : {},
         statusOk: response.ok,
     };
-};
-
-const pushFlash = (type, message) => {
-    const text = String(message || '').trim();
-    if (text === '') {
-        return;
-    }
-
-    const container = document.querySelector('.admin-content');
-    if (!container) {
-        return;
-    }
-
-    container.querySelectorAll('.flash').forEach((node) => node.remove());
-
-    const flashType = ['success', 'error', 'warning', 'info'].includes(type) ? type : 'warning';
-    const flash = document.createElement('div');
-    const uiType = flashType === 'info' ? 'warning' : flashType;
-    const flashIcon = uiType === 'success' ? 'success' : (uiType === 'error' ? 'error' : 'warning');
-    flash.className = `flash flash-${uiType}`;
-    flash.innerHTML = `
-        <span class="d-flex align-center gap-2">${icon(flashIcon)}<span>${esc(text)}</span></span>
-        <button type="button" data-flash-close aria-label="${esc(t('common.close_notice'))}" title="${esc(t('common.close_notice'))}">
-            ${icon('cancel')}
-        </button>
-    `;
-    container.prepend(flash);
 };
 
 const initListApi = (config) => {
@@ -373,6 +557,12 @@ const initListApi = (config) => {
             }, 1000);
         });
     }
+};
+
+window.tinycms = window.tinycms || {};
+window.tinycms.api = window.tinycms.api || {};
+window.tinycms.api.list = {
+    init: initListApi,
 };
 
 initListApi({

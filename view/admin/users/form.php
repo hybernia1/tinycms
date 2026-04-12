@@ -1,6 +1,13 @@
 <?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-4">
-    <form id="users-form" method="post" autocomplete="off" action="<?= htmlspecialchars($mode === 'add' ? $url('admin/users/add') : $url('admin/users/edit?id=' . (int)($user['ID'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
+    <form
+        id="users-form"
+        method="post"
+        autocomplete="off"
+        action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/users/add') : $url('admin/api/v1/users/' . (int)($user['ID'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
+        data-api-submit
+        <?= $mode === 'add' ? 'data-redirect-url="' . htmlspecialchars($url('admin/users'), ENT_QUOTES, 'UTF-8') . '"' : 'data-stay-on-page' ?>
+    >
         <?= $csrfField() ?>
         <div class="mb-3">
             <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
