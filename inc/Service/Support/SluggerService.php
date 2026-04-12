@@ -33,13 +33,32 @@ final class SluggerService
 
     private function normalize(string $value): string
     {
-        $clean = trim(mb_strtolower($value));
+        $clean = trim($value);
 
         if ($clean === '') {
             return '';
         }
 
-        $clean = strtr($clean, [
+        $ascii = $this->toAscii($clean);
+        $ascii = mb_strtolower($ascii);
+        $ascii = preg_replace('/[^a-z0-9]+/i', '-', $ascii) ?? '';
+
+        return trim($ascii, '-');
+    }
+
+    private function toAscii(string $value): string
+    {
+        if (class_exists(\Transliterator::class)) {
+            $transliterator = \Transliterator::create('Any-Latin; Latin-ASCII');
+            if ($transliterator instanceof \Transliterator) {
+                $converted = $transliterator->transliterate($value);
+                if (is_string($converted) && $converted !== '') {
+                    return $converted;
+                }
+            }
+        }
+
+        $clean = strtr(mb_strtolower($value), [
             'á' => 'a',
             'ä' => 'a',
             'č' => 'c',
@@ -64,9 +83,6 @@ final class SluggerService
         ]);
 
         $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $clean);
-        $ascii = $ascii === false ? $clean : $ascii;
-        $ascii = preg_replace('/[^a-z0-9]+/i', '-', $ascii) ?? '';
-
-        return trim($ascii, '-');
+        return $ascii === false ? $clean : $ascii;
     }
 }
