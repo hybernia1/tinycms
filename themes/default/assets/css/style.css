@@ -34,6 +34,14 @@
     text-decoration: none;
     font-size: 1.3rem;
     font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+}
+
+.site-brand-logo {
+    display: block;
+    max-height: 44px;
+    width: auto;
 }
 
 .site-layout {
