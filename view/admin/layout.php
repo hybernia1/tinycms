@@ -175,6 +175,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
             <?= $content ?>
         </section>
     </main>
+    <div class="admin-version-corner">TinyCMS <?= htmlspecialchars((string)($appVersion ?? '0.9.0'), ENT_QUOTES, 'UTF-8') ?></div>
 </div>
 </body>
 </html>

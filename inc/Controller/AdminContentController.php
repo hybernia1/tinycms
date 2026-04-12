@@ -383,7 +383,7 @@ final class AdminContentController extends BaseAdminController
                     CURLOPT_MAXREDIRS => 3,
                     CURLOPT_TIMEOUT => 4,
                     CURLOPT_CONNECTTIMEOUT => 2,
-                    CURLOPT_USERAGENT => 'TinyCMS/1.0',
+                    CURLOPT_USERAGENT => $this->userAgent(),
                 ]);
                 $result = curl_exec($curl);
                 curl_close($curl);
@@ -397,11 +397,17 @@ final class AdminContentController extends BaseAdminController
             'http' => [
                 'method' => 'GET',
                 'timeout' => 4,
-                'header' => "User-Agent: TinyCMS/1.0\r\n",
+                'header' => "User-Agent: {$this->userAgent()}\r\n",
             ],
         ]);
         $result = @file_get_contents($url, false, $context);
         return is_string($result) ? mb_substr($result, 0, 120000) : '';
+    }
+
+    private function userAgent(): string
+    {
+        $version = defined('APP_VERSION') ? (string)APP_VERSION : '0.9.0';
+        return 'TinyCMS/' . $version;
     }
 
     private function sanitizeRemoteTitle(string $value): string

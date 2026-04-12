@@ -169,6 +169,20 @@ body {
     font-weight: 600;
 }
 
+.admin-version-corner {
+    position: fixed;
+    right: var(--space-3);
+    bottom: var(--space-2);
+    z-index: var(--admin-z-header);
+    font-size: 0.75rem;
+    color: var(--color-text-soft);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    padding: 0.125rem 0.5rem;
+    pointer-events: none;
+}
+
 .content-editor-layout {
     display: grid;
     gap: var(--space-3);
