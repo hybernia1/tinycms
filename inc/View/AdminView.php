@@ -187,7 +187,7 @@ final class AdminView
         $settings = $this->settings->resolved();
         return [
             'siteName' => (string)($settings['sitename'] ?? 'TinyCMS'),
-            'siteFavicon' => (string)($settings['favicon'] ?? ''),
+            'siteFavicon' => (string)($settings['favicon'] ?? '') !== '' ? (string)$settings['favicon'] : 'assets/svg/logo.svg',
             'siteLogo' => (string)($settings['logo'] ?? ''),
             'appVersion' => $this->appVersion(),
         ];

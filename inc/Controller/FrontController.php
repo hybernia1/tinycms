@@ -355,7 +355,7 @@ final class FrontController
             'theme' => (string)($settings['theme'] ?? 'default'),
             'meta_title' => (string)($settings['meta_title'] ?? $settings['sitename'] ?? 'TinyCMS'),
             'meta_description' => (string)($settings['meta_description'] ?? ''),
-            'favicon' => (string)($settings['favicon'] ?? ''),
+            'favicon' => (string)($settings['favicon'] ?? '') !== '' ? (string)$settings['favicon'] : 'assets/svg/logo.svg',
             'logo' => (string)($settings['logo'] ?? ''),
         ];
     }
