@@ -25,6 +25,10 @@
         var idInput = form.querySelector('[data-content-id-hidden]');
         var bodyTextarea = form.querySelector('textarea[name="body"]');
         var thumbnailTrigger = document.querySelector('[data-media-library-open]');
+        var headerDeleteGroup = document.querySelector('[data-content-delete-group]');
+        var headerDeleteButton = document.querySelector('[data-content-action-delete]');
+        var firstDraftAutosaveDelay = 30000;
+        var autosaveDelay = 1200;
         var saveTimer = null;
         var saving = false;
         var pending = false;
@@ -123,6 +127,17 @@
                 selectForm.setAttribute('data-action-template', contentApi('/admin/api/v1/content/' + value + '/thumbnail/{mediaId}/select'));
             }
 
+            var contentDeleteForm = document.getElementById('content-delete-form');
+            if (contentDeleteForm) {
+                contentDeleteForm.action = contentApi('/admin/api/v1/content/' + value + '/delete');
+            }
+            if (headerDeleteButton) {
+                headerDeleteButton.setAttribute('data-modal-target', '#content-delete-modal');
+            }
+            if (headerDeleteGroup) {
+                headerDeleteGroup.hidden = false;
+            }
+
             if (editUrlBase !== '') {
                 form.action = contentApi('/admin/api/v1/content/' + value + '/edit');
                 form.removeAttribute('data-redirect-url');
@@ -216,9 +231,10 @@
             if (saveTimer) {
                 clearTimeout(saveTimer);
             }
+            var delay = contentId() > 0 ? autosaveDelay : firstDraftAutosaveDelay;
             saveTimer = window.setTimeout(function () {
                 runAutosave().catch(function () { return null; });
-            }, 1200);
+            }, delay);
         }
 
         function hasUnsavedChanges() {

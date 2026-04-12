@@ -133,7 +133,6 @@ $contentId = (int)($item['id'] ?? 0);
     </div>
     <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['status'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
 </form>
-<?php if ($mode === 'edit'): ?>
 <form
     id="content-delete-form"
     method="post"
@@ -143,7 +142,6 @@ $contentId = (int)($item['id'] ?? 0);
 >
     <?= $csrfField() ?>
 </form>
-<?php endif; ?>
 <div class="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
     <div class="media-library-modal-dialog">
         <div class="media-library-modal-header">
@@ -254,7 +252,6 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
     </div>
 </div>
-<?php if ($mode === 'edit'): ?>
 <div class="modal-overlay" data-modal id="content-delete-modal">
     <div class="modal">
         <p data-modal-text><?= htmlspecialchars($t('content.delete_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
@@ -264,4 +261,3 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
     </div>
 </div>
-<?php endif; ?>
