@@ -82,6 +82,7 @@ final class View
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
         $renderFrontHead = fn(array $options = []): string => $this->metaHead->render($options);
+        $metaHead = fn(array $overrides = []): string => $this->metaHead->render($this->metaHead->fromViewData($data, $absoluteUrl, $overrides));
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -105,6 +106,7 @@ final class View
         $data['absoluteUrl'] = $absoluteUrl;
         $data['t'] = $t;
         $data['renderFrontHead'] = $renderFrontHead;
+        $data['metaHead'] = $metaHead;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
