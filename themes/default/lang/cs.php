@@ -31,5 +31,10 @@ return [
         'feed' => [
             'title' => 'RSS kanál',
         ],
+        'not_found' => [
+            'title' => '404 Nenalezeno',
+            'page' => 'Stránka nebyla nalezena.',
+            'back_home' => 'Zpět na úvod',
+        ],
     ],
 ];

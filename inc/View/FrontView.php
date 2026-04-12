@@ -151,31 +151,26 @@ final class FrontView
         ]);
     }
 
-    public function notFound(string $requestUri = ''): void
+    public function notFound(string $requestUri = '', string $theme = 'default', array $site = []): void
     {
         http_response_code(404);
-
         $path = trim((string)(parse_url($requestUri !== '' ? $requestUri : (string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? ''), '/');
         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
-
-        $mode = match (true) {
-            in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'avif'], true) => 'image',
-            $ext === 'xml' || str_contains($accept, 'xml') => 'document',
-            $ext === 'txt' || str_contains($accept, 'text/plain') => 'text',
-            default => 'html',
-        };
-
-        $layout = match ($mode) {
-            'document', 'text', 'image' => 'front/plain/layout',
-            default => 'front/layout',
-        };
-
-        $payload = ['notFoundMode' => $mode, 'pageTitle' => '404'];
-        if ($mode === 'image') {
-            $payload['contentType'] = 'image/svg+xml; charset=utf-8';
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'avif'], true)) {
+            $this->view->render('front/plain/layout', 'front/errors/404', [
+                'contentType' => 'image/svg+xml; charset=utf-8',
+            ]);
+            return;
         }
-        $this->view->render($layout, 'front/errors/404', $payload);
+
+        $resolvedTheme = $this->themes->resolveTheme($theme);
+        $this->view->renderTheme($resolvedTheme, '404', array_merge($this->frontSiteData($site, $resolvedTheme), [
+            'pageTitle' => '404',
+            'metaTitle' => I18n::t('front.not_found.title'),
+            'metaDescription' => I18n::t('front.not_found.page'),
+            'metaRobots' => 'noindex,follow',
+            'metaOgType' => 'website',
+        ]));
     }
 
     private function resolveThemeFromSite(array $site): string
