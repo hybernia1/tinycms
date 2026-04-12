@@ -217,6 +217,8 @@ return [
         'switch_to_draft' => 'Přepnout do draftu',
         'publish' => 'Publikovat',
         'delete_confirm' => 'Skutečně smazat tento obsah?',
+        'delete_confirm_move_to_trash' => 'Přesunout tento obsah do koše?',
+        'delete_confirm_hard_delete' => 'Trvale smazat tento obsah?',
         'invalid_id' => 'Neplatné ID obsahu.',
         'created' => 'Obsah vytvořen.',
         'updated' => 'Obsah upraven.',
@@ -225,6 +227,11 @@ return [
         'delete_failed' => 'Obsah se nepodařilo smazat.',
         'not_found' => 'Obsah nenalezen.',
         'deleted' => 'Obsah smazán.',
+        'moved_to_trash' => 'Obsah byl přesunut do koše.',
+        'restored' => 'Obsah byl obnoven z koše.',
+        'restore' => 'Obnovit',
+        'restore_failed' => 'Obsah se nepodařilo obnovit.',
+        'status_change_forbidden_in_trash' => 'Obsah v koši nelze publikovat ani přepnout do draftu.',
         'published' => 'Obsah publikován.',
         'switched_to_draft' => 'Obsah přepnut do draftu.',
         'publish_failed' => 'Obsah už byl publikovaný nebo není dostupný.',
@@ -264,6 +271,7 @@ return [
         'statuses' => [
             'draft' => 'Draft',
             'published' => 'Publikováno',
+            'trash' => 'Koš',
         ],
     ],
     'settings' => [

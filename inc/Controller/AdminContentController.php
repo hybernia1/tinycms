@@ -69,12 +69,45 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if (!$this->content->delete($id)) {
+        $action = $this->content->deleteByStatus($id);
+        if ($action === null) {
             $this->apiError('DELETE_FAILED', I18n::t('content.delete_failed'));
             return;
         }
 
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'action' => $action,
+            'message' => $action === 'soft_deleted' ? I18n::t('content.moved_to_trash') : I18n::t('content.deleted'),
+        ]);
+    }
+
+    public function restoreApiV1(callable $redirect, int $id): void
+    {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+            return;
+        }
+
+        if ($id <= 0) {
+            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+            return;
+        }
+
+        if ($this->content->find($id) === null) {
+            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+            return;
+        }
+
+        if (!$this->content->restore($id)) {
+            $this->apiError('RESTORE_FAILED', I18n::t('content.restore_failed'));
+            return;
+        }
+
+        $this->apiOk([
+            'id' => $id,
+            'status' => ContentService::STATUS_DRAFT,
+            'message' => I18n::t('content.restored'),
+        ]);
     }
 
     public function addForm(callable $redirect): void
@@ -182,8 +215,14 @@ final class AdminContentController extends BaseAdminController
             return;
         }
 
-        if ($this->content->find($id) === null) {
+        $item = $this->content->find($id);
+        if ($item === null) {
             $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+            return;
+        }
+
+        if ((string)($item['status'] ?? '') === ContentService::STATUS_TRASH) {
+            $this->apiError('INVALID_STATUS', I18n::t('content.status_change_forbidden_in_trash'));
             return;
         }
 
@@ -416,6 +455,7 @@ final class AdminContentController extends BaseAdminController
             'name' => (string)($row['name'] ?? ''),
             'can_edit' => true,
             'can_delete' => true,
+            'can_restore' => (string)($row['status'] ?? '') === ContentService::STATUS_TRASH,
             'author_name' => (string)($row['author_name'] ?? '—'),
             'status' => (string)($row['status'] ?? 'draft'),
             'created' => $createdAt,

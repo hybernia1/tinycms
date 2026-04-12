@@ -20,6 +20,7 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => 'admin/content', 'controller' => $adminContent, 'action' => 'list'],
     ['method' => 'GET', 'path' => 'admin/api/v1/content', 'controller' => $adminContent, 'action' => 'listApiV1'],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/delete', 'controller' => $adminContent, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/restore', 'controller' => $adminContent, 'action' => 'restoreApiV1', 'params' => ['id' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/status', 'controller' => $adminContent, 'action' => 'statusApiV1', 'params' => ['id' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/add', 'controller' => $adminContent, 'action' => 'addApiV1'],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/edit', 'controller' => $adminContent, 'action' => 'editApiV1', 'params' => ['id' => 'int']],

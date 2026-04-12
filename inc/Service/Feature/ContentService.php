@@ -12,6 +12,10 @@ use InvalidArgumentException;
 
 final class ContentService
 {
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_PUBLISHED = 'published';
+    public const STATUS_TRASH = 'trash';
+
     private Query $query;
     private \PDO $pdo;
     private SchemaConstraintValidator $schemaConstraintValidator;
@@ -76,6 +80,30 @@ final class ContentService
     public function delete(int $id): bool
     {
         return $this->query->delete('content', ['id' => $id]) > 0;
+    }
+
+    public function deleteByStatus(int $id): ?string
+    {
+        $item = $this->find($id);
+        if ($item === null) {
+            return null;
+        }
+
+        if ((string)($item['status'] ?? '') === self::STATUS_TRASH) {
+            return $this->delete($id) ? 'hard_deleted' : null;
+        }
+
+        return $this->setStatus($id, self::STATUS_TRASH) ? 'soft_deleted' : null;
+    }
+
+    public function restore(int $id): bool
+    {
+        $item = $this->find($id);
+        if ($item === null || (string)($item['status'] ?? '') !== self::STATUS_TRASH) {
+            return false;
+        }
+
+        return $this->setStatus($id, self::STATUS_DRAFT);
     }
 
     public function setStatus(int $id, string $status): bool
@@ -192,7 +220,7 @@ final class ContentService
     {
         $rows = $this->query->select('content', ['status']);
         $statuses = array_values(array_unique(array_filter(array_map(static fn(array $row): string => trim((string)($row['status'] ?? '')), $rows))));
-        $statuses = array_values(array_unique(array_merge(['draft', 'published'], $statuses)));
+        $statuses = array_values(array_unique(array_merge([self::STATUS_DRAFT, self::STATUS_PUBLISHED, self::STATUS_TRASH], $statuses)));
 
         sort($statuses);
         return $statuses;
