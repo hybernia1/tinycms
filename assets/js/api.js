@@ -617,6 +617,7 @@ initListApi({
     },
     rowHtml: (item, { editBase }) => {
         const status = String(item.status || 'draft');
+        const isTrash = status === 'trash';
         const isPublished = status === 'published';
         const statusIcon = status === 'published' ? 'success' : (status === 'draft' ? 'concept' : 'warning');
         const toggleLabel = isPublished ? t('content.switch_to_draft') : t('content.publish');
@@ -638,7 +639,7 @@ initListApi({
                 </td>
                 <td class="mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
-                    ${canEdit ? `
+                    ${canEdit && !isTrash ? `
                     <button class="btn btn-light btn-icon" type="button" data-content-toggle="${Number(item.id || 0)}" data-content-mode="${isPublished ? 'draft' : 'publish'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
                         ${icon(isPublished ? 'hide' : 'show')}
                         <span class="sr-only">${esc(toggleLabel)}</span>

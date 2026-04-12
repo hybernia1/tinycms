@@ -21,11 +21,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
             <?php $statusIcon = $statusValue === 'published' ? 'success' : ($statusValue === 'draft' ? 'concept' : 'warning'); ?>
             <span class="d-flex align-center gap-2">
                 <?php if ($statusIcon !== ''): ?><?= $icon($statusIcon) ?><?php endif; ?>
-                <?php if ($isTrash): ?>
-                    <span><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
-                <?php else: ?>
-                    <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-                <?php endif; ?>
+                <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
             </span>
             <div class="text-muted small"><?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?></div>
             <?php if ($isPlanned): ?><div class="mt-2"><span class="badge text-bg-warning"><?= htmlspecialchars($t('content.planned'), ENT_QUOTES, 'UTF-8') ?></span></div><?php endif; ?>

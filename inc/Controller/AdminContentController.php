@@ -453,7 +453,7 @@ final class AdminContentController extends BaseAdminController
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
-            'can_edit' => (string)($row['status'] ?? '') !== ContentService::STATUS_TRASH,
+            'can_edit' => true,
             'can_delete' => true,
             'can_restore' => (string)($row['status'] ?? '') === ContentService::STATUS_TRASH,
             'author_name' => (string)($row['author_name'] ?? '—'),
