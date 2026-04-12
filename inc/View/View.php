@@ -85,13 +85,7 @@ final class View
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
-        if ($isAdminLayout && !isset($data['adminMenu'])) {
-            $data['adminMenu'] = [
-                ['label' => I18n::t('admin.menu.dashboard'), 'url' => $url('admin/dashboard'), 'icon' => 'dashboard'],
-                ['label' => I18n::t('admin.menu.users'), 'url' => $url('admin/users'), 'icon' => 'users'],
-                ['label' => I18n::t('admin.menu.settings'), 'url' => $url('admin/settings'), 'icon' => 'settings'],
-            ];
-        } elseif ($isAdminLayout && isset($data['adminMenu']) && is_array($data['adminMenu'])) {
+        if ($isAdminLayout && is_array($data['adminMenu'] ?? null)) {
             $data['adminMenu'] = array_map(static function (array $item) use ($url): array {
                 $path = (string)($item['url'] ?? '');
                 return [
