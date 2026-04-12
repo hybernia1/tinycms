@@ -40,18 +40,8 @@ final class FrontController
         $site = $this->siteData();
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = PaginationConfig::perPage();
-        $all = $this->contentService->listPublished(0);
-        $total = count($all);
-        $totalPages = max(1, (int)ceil($total / $perPage));
-        $currentPage = min($page, $totalPages);
-        $offset = ($currentPage - 1) * $perPage;
-        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), array_slice($all, $offset, $perPage));
-        $pagination = [
-            'page' => $currentPage,
-            'per_page' => $perPage,
-            'total' => $total,
-            'total_pages' => $totalPages,
-        ];
+        $pagination = $this->contentService->paginatePublished($page, $perPage);
+        $posts = array_map(fn(array $item): array => $this->toPublicListItem($item), (array)($pagination['data'] ?? []));
 
         $this->pages->home($site, $posts, $pagination);
     }
