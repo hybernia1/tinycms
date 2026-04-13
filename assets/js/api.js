@@ -763,7 +763,7 @@ initListApi({
         const id = Number(item.id || 0);
         const isSuspended = item.is_suspended === true;
         const isAdmin = item.is_admin === true;
-        const statusIcon = isSuspended ? 'suspended' : (isAdmin ? 'admin' : 'user');
+        const statusIcon = isSuspended ? 'suspended' : (isAdmin ? 'admin' : 'users');
         const toggleLabel = isSuspended ? t('users.unsuspend') : t('users.suspend');
 
         return `

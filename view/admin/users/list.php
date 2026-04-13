@@ -10,7 +10,7 @@ $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField, $e
     $id = (int)($row['ID'] ?? 0);
     $isAdmin = (string)($row['role'] ?? '') === 'admin';
     $isSuspended = (int)($row['suspend'] ?? 0) === 1;
-    $statusIcon = $isSuspended ? 'suspended' : ($isAdmin ? 'admin' : 'user');
+    $statusIcon = $isSuspended ? 'suspended' : ($isAdmin ? 'admin' : 'users');
     ob_start();
     ?>
     <tr>
