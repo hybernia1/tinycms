@@ -1,6 +1,5 @@
 (() => {
     const t = window.tinycms?.i18n?.t || (() => '');
-    const ta = window.tinycms?.i18n?.ta || (() => []);
 
     const root = document.body;
     if (!root) {
@@ -12,11 +11,15 @@
         return;
     }
 
-    const weekdayLabels = ta('datetime.weekdays_short');
-    const monthLabels = ta('datetime.months');
-    if (weekdayLabels.length !== 7 || monthLabels.length !== 12) {
-        return;
-    }
+    const locale = String(document.documentElement?.lang || 'en');
+    const weekdayFormatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+    const monthFormatter = new Intl.DateTimeFormat(locale, { month: 'long' });
+    const weekdayLabels = Array.from({ length: 7 }, (_, index) => (
+        weekdayFormatter.format(new Date(Date.UTC(2021, 0, 4 + index)))
+    ));
+    const monthLabels = Array.from({ length: 12 }, (_, index) => (
+        monthFormatter.format(new Date(Date.UTC(2021, index, 1)))
+    ));
 
     root.classList.add('has-custom-datetime');
 
@@ -24,7 +27,6 @@
     const sampleIconUse = document.querySelector('svg.icon use');
     const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '';
     const iconHref = (name) => `${iconBase}#icon-${name}`;
-    const locale = String(document.documentElement?.lang || 'en');
 
     const parseValue = (value) => {
         if (!value || !value.includes('T')) {
