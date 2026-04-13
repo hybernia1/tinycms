@@ -12,6 +12,12 @@
         return;
     }
 
+    const weekdayLabels = ta('datetime.weekdays_short');
+    const monthLabels = ta('datetime.months');
+    if (weekdayLabels.length !== 7 || monthLabels.length !== 12) {
+        return;
+    }
+
     root.classList.add('has-custom-datetime');
 
     let opened = null;
@@ -19,8 +25,6 @@
     const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '';
     const iconHref = (name) => `${iconBase}#icon-${name}`;
     const locale = String(document.documentElement?.lang || 'en');
-    const weekdayLabels = ta('datetime.weekdays_short', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
-    const monthLabels = ta('datetime.months', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
 
     const parseValue = (value) => {
         if (!value || !value.includes('T')) {
