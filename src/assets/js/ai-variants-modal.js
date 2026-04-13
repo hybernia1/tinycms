@@ -36,8 +36,26 @@
     let selectedRange = null;
     let selectedHtml = '';
     let bodyEndpoint = '';
+    let lastEditorRange = null;
 
     const editor = form.querySelector('.wysiwyg-editor');
+
+    const rememberEditorSelection = () => {
+        if (!editor) {
+            return;
+        }
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+            return;
+        }
+        const range = selection.getRangeAt(0);
+        if (range.collapsed || !editor.contains(range.commonAncestorContainer)) {
+            return;
+        }
+        lastEditorRange = range.cloneRange();
+    };
+
+    document.addEventListener('selectionchange', rememberEditorSelection);
 
     const renderVariants = (target, items) => {
         variantsBox.innerHTML = items.map((item, index) => `
@@ -152,13 +170,19 @@
 
             if (target === 'body') {
                 const selection = window.getSelection();
-                if (!editor || !selection || selection.rangeCount === 0) {
-                    pushFlash('warning', t('content.ai_empty_source'));
-                    modal.classList.remove('open');
-                    return;
+                let range = null;
+                if (editor && selection && selection.rangeCount > 0) {
+                    const current = selection.getRangeAt(0);
+                    if (!current.collapsed && editor.contains(current.commonAncestorContainer)) {
+                        range = current;
+                    }
                 }
-                const range = selection.getRangeAt(0);
-                if (range.collapsed || !editor.contains(range.commonAncestorContainer)) {
+
+                if (!range && lastEditorRange) {
+                    range = lastEditorRange;
+                }
+
+                if (!editor || !range || range.collapsed || !editor.contains(range.commonAncestorContainer)) {
                     pushFlash('warning', t('content.ai_empty_source'));
                     modal.classList.remove('open');
                     return;
