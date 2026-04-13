@@ -13,13 +13,11 @@ use InvalidArgumentException;
 final class Term
 {
     private Query $query;
-    private \PDO $pdo;
     private SchemaConstraintValidator $schemaConstraintValidator;
 
     public function __construct()
     {
-        $this->pdo = Connection::get();
-        $this->query = new Query($this->pdo);
+        $this->query = new Query(Connection::get());
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
@@ -50,12 +48,12 @@ final class Term
         $termsTable = Table::name('terms');
         $contentTermsTable = Table::name('content_terms');
 
-        $all = (int)($this->pdo->query("SELECT COUNT(*) FROM $termsTable")->fetchColumn() ?: 0);
+        $all = (int)($this->query->fetchColumn("SELECT COUNT(*) FROM $termsTable") ?: 0);
         $unassignedSql = implode("\n", [
             "SELECT COUNT(*) FROM $termsTable t",
             "WHERE NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)",
         ]);
-        $unassigned = (int)($this->pdo->query($unassignedSql)->fetchColumn() ?: 0);
+        $unassigned = (int)($this->query->fetchColumn($unassignedSql) ?: 0);
 
         return [
             'all' => $all,
@@ -142,15 +140,15 @@ final class Term
         }
 
         $termsTable = Table::name('terms');
-        $stmt = $this->pdo->prepare("SELECT id, name FROM $termsTable WHERE name LIKE :search ORDER BY name ASC LIMIT :limit");
-        $stmt->bindValue(':search', '%' . $needle . '%');
-        $stmt->bindValue(':limit', min($limit, 50), \PDO::PARAM_INT);
-        $stmt->execute();
+        $rows = $this->query->fetchAll(
+            "SELECT id, name FROM $termsTable WHERE name LIKE :search ORDER BY name ASC LIMIT :limit",
+            ['search' => '%' . $needle . '%', 'limit' => min($limit, 50)]
+        );
 
         return array_map(static fn(array $item): array => [
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
-        ], $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        ], $rows);
     }
 
 
@@ -162,13 +160,15 @@ final class Term
 
         $termsTable = Table::name('terms');
         $contentTermsTable = Table::name('content_terms');
-        $stmt = $this->pdo->prepare("SELECT DISTINCT t.id, t.name FROM $termsTable t INNER JOIN $contentTermsTable ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC");
-        $stmt->execute(['content' => $contentId]);
+        $rows = $this->query->fetchAll(
+            "SELECT DISTINCT t.id, t.name FROM $termsTable t INNER JOIN $contentTermsTable ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC",
+            ['content' => $contentId]
+        );
 
         return array_map(static fn(array $row): array => [
             'id' => (int)($row['id'] ?? 0),
             'name' => trim((string)($row['name'] ?? '')),
-        ], $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        ], $rows);
     }
 
     public function namesByContent(int $contentId): array
@@ -179,9 +179,10 @@ final class Term
 
         $termsTable = Table::name('terms');
         $contentTermsTable = Table::name('content_terms');
-        $stmt = $this->pdo->prepare("SELECT DISTINCT t.name FROM $termsTable t INNER JOIN $contentTermsTable ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC");
-        $stmt->execute(['content' => $contentId]);
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $rows = $this->query->fetchAll(
+            "SELECT DISTINCT t.name FROM $termsTable t INNER JOIN $contentTermsTable ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC",
+            ['content' => $contentId]
+        );
 
         return array_values(array_filter(array_map(static fn(array $row): string => trim((string)($row['name'] ?? '')), $rows)));
     }
@@ -189,8 +190,7 @@ final class Term
     public function totalCount(): int
     {
         $termsTable = Table::name('terms');
-        $stmt = $this->pdo->query("SELECT COUNT(*) FROM $termsTable");
-        return (int)$stmt->fetchColumn();
+        return (int)$this->query->fetchColumn("SELECT COUNT(*) FROM $termsTable");
     }
 
     public function syncContentTerms(int $contentId, string $rawTerms): void
@@ -202,53 +202,42 @@ final class Term
         $names = $this->normalizeTerms($rawTerms);
         if ($names === []) {
             $contentTermsTable = Table::name('content_terms');
-            $stmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
-            $stmt->execute(['content' => $contentId]);
+            $this->query->execute("DELETE FROM $contentTermsTable WHERE content = :content", ['content' => $contentId]);
             return;
         }
 
-        $this->pdo->beginTransaction();
         try {
-            $termIds = [];
-            $termsTable = Table::name('terms');
-            $contentTermsTable = Table::name('content_terms');
-            $selectStmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-            $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $termsTable (name) VALUES (:name)");
+            $this->query->transaction(function () use ($names, $contentId): void {
+                $termIds = [];
+                $termsTable = Table::name('terms');
+                $contentTermsTable = Table::name('content_terms');
 
-            foreach ($names as $name) {
-                $selectStmt->execute(['name' => $name]);
-                $id = (int)$selectStmt->fetchColumn();
-                if ($id <= 0) {
-                    $insertStmt->execute(['name' => $name]);
-                    $selectStmt->execute(['name' => $name]);
-                    $id = (int)$selectStmt->fetchColumn();
+                foreach ($names as $name) {
+                    $id = (int)$this->query->fetchColumn("SELECT id FROM $termsTable WHERE name = :name LIMIT 1", ['name' => $name]);
+                    if ($id <= 0) {
+                        $this->query->execute("INSERT IGNORE INTO $termsTable (name) VALUES (:name)", ['name' => $name]);
+                        $id = (int)$this->query->fetchColumn("SELECT id FROM $termsTable WHERE name = :name LIMIT 1", ['name' => $name]);
+                    }
+                    if ($id > 0) {
+                        $termIds[] = $id;
+                    }
                 }
-                if ($id > 0) {
-                    $termIds[] = $id;
+
+                $termIds = array_values(array_unique($termIds));
+                if ($termIds === []) {
+                    $this->query->execute("DELETE FROM $contentTermsTable WHERE content = :content", ['content' => $contentId]);
+                    return;
                 }
-            }
 
-            $termIds = array_values(array_unique($termIds));
-            if ($termIds === []) {
-                $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
-                $deleteStmt->execute(['content' => $contentId]);
-                $this->pdo->commit();
-                return;
-            }
-
-            $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
-            $deleteStmt->execute(['content' => $contentId]);
-
-            $attachStmt = $this->pdo->prepare("INSERT IGNORE INTO $contentTermsTable (content, term) VALUES (:content, :term)");
-            foreach ($termIds as $termId) {
-                $attachStmt->execute(['content' => $contentId, 'term' => $termId]);
-            }
-
-            $this->pdo->commit();
+                $this->query->execute("DELETE FROM $contentTermsTable WHERE content = :content", ['content' => $contentId]);
+                foreach ($termIds as $termId) {
+                    $this->query->execute(
+                        "INSERT IGNORE INTO $contentTermsTable (content, term) VALUES (:content, :term)",
+                        ['content' => $contentId, 'term' => $termId]
+                    );
+                }
+            });
         } catch (\Throwable $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
         }
     }
 
@@ -260,17 +249,13 @@ final class Term
 
         $contentTable = Table::name('content');
         $contentTermsTable = Table::name('content_terms');
-        $stmt = $this->pdo->prepare(implode("\n", [
+        return $this->query->fetchAll(implode("\n", [
             'SELECT c.id, c.name, c.created',
             "FROM $contentTable c",
             "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
             'WHERE ct.term = :term',
             'ORDER BY COALESCE(c.updated, c.created) DESC',
-        ]));
-        $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        ]), ['term' => $termId]);
     }
 
     private function normalizeTerms(string $rawTerms): array
@@ -294,9 +279,7 @@ final class Term
     private function existsByName(string $name, ?int $excludeId = null): bool
     {
         $termsTable = Table::name('terms');
-        $stmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-        $stmt->execute(['name' => $name]);
-        $foundId = (int)$stmt->fetchColumn();
+        $foundId = (int)$this->query->fetchColumn("SELECT id FROM $termsTable WHERE name = :name LIMIT 1", ['name' => $name]);
 
         if ($foundId <= 0) {
             return false;
@@ -325,13 +308,7 @@ final class Term
             "WHERE NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)",
         ]) . $searchSql;
 
-        $countStmt = $this->pdo->prepare("SELECT COUNT(*) $baseSql");
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue(':' . $key, $value);
-        }
-        $countStmt->execute();
-
-        $total = (int)($countStmt->fetchColumn() ?: 0);
+        $total = (int)($this->query->fetchColumn("SELECT COUNT(*) $baseSql", $params) ?: 0);
         $totalPages = max(1, (int)ceil($total / $perPage));
         $page = min($page, $totalPages);
         $offset = ($page - 1) * $perPage;
@@ -343,16 +320,11 @@ final class Term
             'LIMIT :limit OFFSET :offset',
         ]);
 
-        $stmt = $this->pdo->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
         return [
-            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'data' => $this->query->fetchAll($sql, array_merge($params, [
+                'limit' => $perPage,
+                'offset' => $offset,
+            ])),
             'total' => $total,
             'total_pages' => $totalPages,
             'page' => $page,

@@ -186,6 +186,54 @@ class Query
         return $stmt->rowCount();
     }
 
+    public function fetchAll(string $sql, array $params = []): array
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $this->bindAll($stmt, $params);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function fetchOne(string $sql, array $params = []): ?array
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $this->bindAll($stmt, $params);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($row) ? $row : null;
+    }
+
+    public function fetchColumn(string $sql, array $params = []): mixed
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $this->bindAll($stmt, $params);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    public function execute(string $sql, array $params = []): int
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $this->bindAll($stmt, $params);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    public function transaction(callable $callback): mixed
+    {
+        $this->pdo->beginTransaction();
+        try {
+            $result = $callback($this);
+            $this->pdo->commit();
+            return $result;
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
     private function buildWhere(array $where): array
     {
         if ($where === []) {
@@ -309,5 +357,25 @@ class Query
         }
 
         return new InvalidArgumentException(I18n::t('errors.db.operation_failed'), 0, $e);
+    }
+
+    private function bindAll(\PDOStatement $stmt, array $params): void
+    {
+        foreach ($params as $key => $value) {
+            $param = is_string($key) ? ':' . ltrim($key, ':') : (int)$key + 1;
+            if (is_int($value)) {
+                $stmt->bindValue($param, $value, PDO::PARAM_INT);
+                continue;
+            }
+            if (is_bool($value)) {
+                $stmt->bindValue($param, $value, PDO::PARAM_BOOL);
+                continue;
+            }
+            if ($value === null) {
+                $stmt->bindValue($param, null, PDO::PARAM_NULL);
+                continue;
+            }
+            $stmt->bindValue($param, (string)$value, PDO::PARAM_STR);
+        }
     }
 }

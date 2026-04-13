@@ -66,13 +66,13 @@ final class Media
         $contentTable = Table::name('content');
         $contentMediaTable = Table::name('content_media');
 
-        $all = (int)(Connection::get()->query("SELECT COUNT(*) FROM $mediaTable")->fetchColumn() ?: 0);
+        $all = (int)($this->query->fetchColumn("SELECT COUNT(*) FROM $mediaTable") ?: 0);
         $unassignedSql = implode("\n", [
             "SELECT COUNT(*) FROM $mediaTable m",
             "WHERE NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
             "AND NOT EXISTS (SELECT 1 FROM $contentMediaTable a WHERE a.media = m.id)",
         ]);
-        $unassigned = (int)(Connection::get()->query($unassignedSql)->fetchColumn() ?: 0);
+        $unassigned = (int)($this->query->fetchColumn($unassignedSql) ?: 0);
 
         return [
             'all' => $all,
@@ -170,11 +170,7 @@ final class Media
             'ORDER BY COALESCE(MAX(c.updated), c.created) DESC',
         ]);
 
-        $stmt = Connection::get()->prepare($sql);
-        $stmt->bindValue(':media', $mediaId, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        return $this->query->fetchAll($sql, ['media' => $mediaId]);
     }
 
     public function authorOptions(): array
@@ -266,12 +262,7 @@ final class Media
             "AND NOT EXISTS (SELECT 1 FROM $contentMediaTable a WHERE a.media = m.id)",
         ]) . $searchSql;
 
-        $countStmt = Connection::get()->prepare("SELECT COUNT(*) $baseSql");
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue(':' . $key, $value);
-        }
-        $countStmt->execute();
-        $total = (int)($countStmt->fetchColumn() ?: 0);
+        $total = (int)($this->query->fetchColumn("SELECT COUNT(*) $baseSql", $params) ?: 0);
         $totalPages = max(1, (int)ceil($total / $perPage));
         $page = min($page, $totalPages);
         $offset = ($page - 1) * $perPage;
@@ -284,16 +275,11 @@ final class Media
             'ORDER BY m.id DESC',
             'LIMIT :limit OFFSET :offset',
         ]);
-        $stmt = Connection::get()->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
         return [
-            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'data' => $this->query->fetchAll($sql, array_merge($params, [
+                'limit' => $perPage,
+                'offset' => $offset,
+            ])),
             'total' => $total,
             'total_pages' => $totalPages,
             'page' => $page,

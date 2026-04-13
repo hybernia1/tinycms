@@ -17,13 +17,11 @@ final class Content
     public const STATUS_TRASH = 'trash';
 
     private Query $query;
-    private \PDO $pdo;
     private SchemaConstraintValidator $schemaConstraintValidator;
 
     public function __construct()
     {
-        $this->pdo = Connection::get();
-        $this->query = new Query($this->pdo);
+        $this->query = new Query(Connection::get());
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
@@ -265,11 +263,10 @@ final class Content
         }
 
         $contentMediaTable = Table::name('content_media');
-        $stmt = $this->pdo->prepare("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)");
-        return $stmt->execute([
+        return $this->query->execute("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)", [
             'content' => $contentId,
             'media' => $mediaId,
-        ]);
+        ]) >= 0;
     }
 
     private function syncAttachments(int $contentId, string $body): void
@@ -281,8 +278,7 @@ final class Content
         $mediaIds = $this->extractMediaIdsFromBody($body);
         if ($mediaIds === []) {
             $contentMediaTable = Table::name('content_media');
-            $stmt = $this->pdo->prepare("DELETE FROM $contentMediaTable WHERE content = :content");
-            $stmt->execute(['content' => $contentId]);
+            $this->query->execute("DELETE FROM $contentMediaTable WHERE content = :content", ['content' => $contentId]);
             return;
         }
 
@@ -299,12 +295,10 @@ final class Content
             "DELETE FROM $contentMediaTable WHERE content = :content AND media NOT IN (%s)",
             implode(', ', $placeholders),
         );
-        $deleteStmt = $this->pdo->prepare($deleteSql);
-        $deleteStmt->execute($params);
+        $this->query->execute($deleteSql, $params);
 
-        $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)");
         foreach ($mediaIds as $mediaId) {
-            $insertStmt->execute([
+            $this->query->execute("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)", [
                 'content' => $contentId,
                 'media' => $mediaId,
             ]);
@@ -327,9 +321,8 @@ final class Content
 
         $placeholders = implode(', ', array_fill(0, count($ids), '?'));
         $mediaTable = Table::name('media');
-        $stmt = $this->pdo->prepare("SELECT id FROM $mediaTable WHERE id IN ($placeholders)");
-        $stmt->execute($ids);
-        $existingIds = array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        $rows = $this->query->fetchAll("SELECT id FROM $mediaTable WHERE id IN ($placeholders)", $ids);
+        $existingIds = array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $rows);
         $allowed = array_fill_keys($existingIds, true);
 
         return array_values(array_filter($ids, static fn(int $id): bool => isset($allowed[$id])));
