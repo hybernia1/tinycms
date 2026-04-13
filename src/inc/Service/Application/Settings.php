@@ -36,6 +36,7 @@ final class Settings
             'meta_title' => ['label_key' => 'settings.fields.meta_title', 'type' => 'text', 'default' => 'TinyCMS'],
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
             'google_api_key' => ['label_key' => 'settings.fields.google_api_key', 'type' => 'password', 'default' => ''],
+            'google_api_model' => ['label_key' => 'settings.fields.google_api_model', 'type' => 'text', 'default' => 'gemma-3-27b-it'],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
             'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
         ];

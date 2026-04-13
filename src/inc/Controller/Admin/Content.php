@@ -350,6 +350,7 @@ final class Content extends BaseAdmin
         }
 
         $apiKey = trim((string)($this->settings->resolved()['google_api_key'] ?? ''));
+        $model = trim((string)($this->settings->resolved()['google_api_model'] ?? 'gemma-3-27b-it'));
         if ($apiKey === '') {
             $this->apiError('AI_NOT_CONFIGURED', I18n::t('content.ai_not_configured'), 422);
             return;
@@ -382,7 +383,7 @@ final class Content extends BaseAdmin
         }
 
         $prompt = $this->buildAiPrompt($target, $instruction, $source);
-        $result = $this->ai->generateWithGoogle($apiKey, $prompt);
+        $result = $this->ai->generateWithGoogle($apiKey, $prompt, $model);
         if (($result['success'] ?? false) !== true) {
             $this->apiError('AI_FAILED', I18n::t('content.ai_failed'), 422);
             return;

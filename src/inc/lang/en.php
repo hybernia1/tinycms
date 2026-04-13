@@ -286,6 +286,7 @@ return [
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
             'google_api_key' => 'Google API key',
+            'google_api_model' => 'Google API model',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
         ],
