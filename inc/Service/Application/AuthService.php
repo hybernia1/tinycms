@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service\Feature;
+namespace App\Service\Application;
 
 use App\Service\Auth\Auth;
 use App\Service\Auth\Login;
-use App\Service\Infra\Db\Connection;
-use App\Service\Infra\Db\Query;
+use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
 use App\Service\Support\I18n;
 
 final class AuthService

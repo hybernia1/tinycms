@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service\Infra\Db;
+namespace App\Service\Infrastructure\Db;
 
-use App\Service\Feature\SchemaDefinition;
+use App\Service\Application\SchemaDefinition;
 use App\Service\Support\I18n;
 
 final class SchemaConstraintValidator

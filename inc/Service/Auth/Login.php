@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service\Auth;
 
-use App\Service\Infra\Db\Query;
+use App\Service\Infrastructure\Db\Query;
 use App\Service\Support\I18n;
 
 class Login

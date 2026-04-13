@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use App\Service\Feature\SettingsService;
-use App\Service\Feature\UploadService;
+use App\Service\Application\SettingsService;
+use App\Service\Application\UploadService;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 

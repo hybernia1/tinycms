@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Install;
 
-use App\Service\Feature\InstallService;
+use App\Service\Application\InstallService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\I18n;
 use App\View\View;

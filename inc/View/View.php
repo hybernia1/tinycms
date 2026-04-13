@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Service\Support\FlashService;
-use App\Service\Infra\Router\Router;
+use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\CsrfService;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\I18n;

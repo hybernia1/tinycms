@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
-use App\Service\Feature\AuthService;
-use App\Service\Feature\ContentService;
-use App\Service\Feature\TermService;
+use App\Service\Application\AuthService;
+use App\Service\Application\ContentService;
+use App\Service\Application\TermService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
-use App\Service\Feature\UserService;
+use App\Service\Application\UserService;
 use App\Service\Support\I18n;
 use App\View\AdminView;
 
-final class AdminContentController extends BaseAdminController
+final class ContentController extends BaseAdminController
 {
     public function __construct(
         private AdminView $pages,

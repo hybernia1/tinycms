@@ -1,17 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin\Api;
+use App\Controller\Admin\BaseAdminController;
 
-use App\Service\Feature\AuthService;
-use App\Service\Feature\ContentService;
-use App\Service\Feature\MediaService;
-use App\Service\Feature\UploadService;
+use App\Service\Application\AuthService;
+use App\Service\Application\ContentService;
+use App\Service\Application\MediaService;
+use App\Service\Application\UploadService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
 
-final class AdminContentMediaApiController extends BaseAdminController
+final class ContentMediaController extends BaseAdminController
 {
     public function __construct(
         AuthService $authService,

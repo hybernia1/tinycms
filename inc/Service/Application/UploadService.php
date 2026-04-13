@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service\Feature;
+namespace App\Service\Application;
 
 use App\Service\Support\SluggerService;
 use App\Service\Support\I18n;

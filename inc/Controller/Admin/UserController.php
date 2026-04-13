@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
-use App\Service\Feature\AuthService;
+use App\Service\Application\AuthService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\FlashService;
 use App\Service\Support\I18n;
-use App\Service\Feature\UserService;
+use App\Service\Application\UserService;
 use App\View\AdminView;
 
-final class AdminUserController extends BaseAdminController
+final class UserController extends BaseAdminController
 {
     private AdminView $pages;
     private UserService $users;
