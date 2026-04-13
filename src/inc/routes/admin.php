@@ -26,6 +26,7 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/edit', 'controller' => $adminContent, 'action' => 'editApiV1', 'params' => ['id' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/draft/init', 'controller' => $adminContent, 'action' => 'draftInitApiV1'],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/autosave', 'controller' => $adminContent, 'action' => 'autosaveApiV1'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/ai/generate', 'controller' => $adminContent, 'action' => 'aiGenerateApiV1'],
     ['method' => 'GET', 'path' => 'admin/api/v1/link-title', 'controller' => $adminContent, 'action' => 'linkTitleApiV1'],
     ['method' => 'GET', 'path' => 'admin/content/add', 'controller' => $adminContent, 'action' => 'addForm'],
     ['method' => 'GET', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editForm'],

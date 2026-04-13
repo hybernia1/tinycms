@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Service\Application\Auth;
+use App\Service\Application\Ai as AiService;
 use App\Service\Application\Content as ContentService;
+use App\Service\Application\Settings as SettingsService;
 use App\Service\Application\Term as TermService;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
@@ -18,6 +20,8 @@ final class Content extends BaseAdmin
         private AdminView $pages,
         Auth $authService,
         private ContentService $content,
+        private AiService $ai,
+        private SettingsService $settings,
         private UserService $users,
         private TermService $terms,
         Flash $flash,
@@ -337,6 +341,46 @@ final class Content extends BaseAdmin
         }
 
         $this->apiOk(['title' => $title]);
+    }
+
+    public function aiGenerateApiV1(callable $redirect): void
+    {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+            return;
+        }
+
+        $apiKey = trim((string)($this->settings->resolved()['google_api_key'] ?? ''));
+        if ($apiKey === '') {
+            $this->apiError('AI_NOT_CONFIGURED', I18n::t('content.ai_not_configured'), 422);
+            return;
+        }
+
+        $instruction = trim((string)($_POST['instruction'] ?? ''));
+        $excerpt = trim((string)($_POST['excerpt'] ?? ''));
+        $body = trim((string)($_POST['body'] ?? ''));
+        $target = trim((string)($_POST['target'] ?? ''));
+        if ($instruction === '' || !in_array($target, ['excerpt', 'body'], true)) {
+            $this->apiError('INVALID_INPUT', I18n::t('common.invalid_data'));
+            return;
+        }
+
+        $source = $target === 'excerpt' ? $excerpt : $body;
+        if ($source === '') {
+            $this->apiError('EMPTY_SOURCE', I18n::t('content.ai_empty_source'));
+            return;
+        }
+
+        $prompt = "Instruction:\n{$instruction}\n\nTarget: {$target}\n\nSource text:\n{$source}";
+        $result = $this->ai->generateWithGoogle($apiKey, $prompt);
+        if (($result['success'] ?? false) !== true) {
+            $this->apiError('AI_FAILED', I18n::t('content.ai_failed'), 422);
+            return;
+        }
+
+        $this->apiOk([
+            'target' => $target,
+            'text' => (string)($result['text'] ?? ''),
+        ]);
     }
 
     private function isValidExternalUrl(string $url): bool

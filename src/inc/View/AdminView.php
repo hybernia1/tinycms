@@ -75,6 +75,7 @@ final class AdminView
 
     public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $authors, array $selectedTerms = []): void
     {
+        $hasAiProvider = trim((string)($this->settings->resolved()['google_api_key'] ?? '')) !== '';
         $this->renderAdmin('admin/content/form', [
             'mode' => $mode,
             'item' => $item,
@@ -82,6 +83,7 @@ final class AdminView
             'availableStatuses' => $availableStatuses,
             'authors' => $authors,
             'selectedTerms' => $selectedTerms,
+            'hasAiProvider' => $hasAiProvider,
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_content') : I18n::t('admin.edit_content'),
             'headerAction' => $this->contentMenuHeaderAction($mode === 'edit'),
         ]);

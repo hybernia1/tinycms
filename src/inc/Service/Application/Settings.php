@@ -35,6 +35,7 @@ final class Settings
             'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
             'meta_title' => ['label_key' => 'settings.fields.meta_title', 'type' => 'text', 'default' => 'TinyCMS'],
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
+            'google_api_key' => ['label_key' => 'settings.fields.google_api_key', 'type' => 'password', 'default' => ''],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
             'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
         ];

@@ -124,6 +124,25 @@ $contentId = (int)($item['id'] ?? 0);
                     </button>
                 </div>
             </div>
+            <?php if (!empty($hasAiProvider)): ?>
+            <div class="card">
+                <div class="content-box-header"><?= $e($t('content.ai_panel_title')) ?></div>
+                <div class="p-3 content-ai-panel" data-content-ai-panel data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
+                    <div class="mb-2">
+                        <label><?= $e($t('content.ai_target')) ?></label>
+                        <select data-content-ai-target>
+                            <option value="excerpt"><?= $e($t('content.ai_target_excerpt')) ?></option>
+                            <option value="body"><?= $e($t('content.ai_target_body')) ?></option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label><?= $e($t('content.ai_instruction')) ?></label>
+                        <textarea rows="3" data-content-ai-instruction placeholder="<?= $e($t('content.ai_instruction_placeholder')) ?>"></textarea>
+                    </div>
+                    <button class="btn btn-light" type="button" data-content-ai-generate><?= $e($t('content.ai_generate')) ?></button>
+                </div>
+            </div>
+            <?php endif; ?>
         </aside>
     </div>
     <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= $e((string)$errors['status']) ?></small><?php endif; ?>

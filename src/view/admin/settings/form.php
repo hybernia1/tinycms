@@ -47,7 +47,7 @@
                         </div>
                     <?php endif; ?>
                 <?php else: ?>
-                    <input type="text" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>">
+                    <input type="<?= $fieldType === 'password' ? 'password' : 'text' ?>" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>">
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
