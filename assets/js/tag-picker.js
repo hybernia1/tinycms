@@ -1,6 +1,7 @@
 const tagPickers = document.querySelectorAll('[data-tag-picker]');
 
 if (tagPickers.length) {
+    const requestJson = window.tinycms?.api?.http?.requestJson;
     tagPickers.forEach((picker) => {
         const chips = picker.querySelector('[data-tag-picker-chips]');
         const input = picker.querySelector('[data-tag-picker-input]');
@@ -78,7 +79,7 @@ if (tagPickers.length) {
         };
 
         const fetchSuggestions = async (query) => {
-            if (!endpoint) {
+            if (!endpoint || typeof requestJson !== 'function') {
                 renderSuggestions([]);
                 return;
             }
@@ -88,12 +89,12 @@ if (tagPickers.length) {
                 url.searchParams.set('q', query);
             }
 
-            const response = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
+            const { response, data } = await requestJson(url.toString(), {
+                headers: { Accept: 'application/json' },
+            });
             if (!response.ok) {
                 return;
             }
-
-            const data = await response.json().catch(() => ({}));
             const items = Array.isArray(data.data) ? data.data : [];
             const names = items
                 .map((item) => String(item.name || '').trim())
