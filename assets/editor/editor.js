@@ -1,5 +1,7 @@
 (function () {
     var t = window.tinycms?.i18n?.t || function () { return ""; };
+    var requestJson = window.tinycms?.api?.http?.requestJson;
+    var postForm = window.tinycms?.api?.http?.postForm;
     var editorCounter = 0;
 
     function normalizeHtml(html) {
@@ -694,11 +696,11 @@
             var form = textarea.closest('form');
             var endpoint = String(form && form.dataset ? form.dataset.draftInitEndpoint || '' : '').trim();
             var csrfInput = form ? form.querySelector('input[name="_csrf"]') : null;
-            if (!endpoint || !csrfInput) {
+            if (!endpoint || !csrfInput || typeof requestJson !== 'function') {
                 return Promise.resolve(0);
             }
 
-            draftInitPromise = fetch(endpoint, {
+            draftInitPromise = requestJson(endpoint, {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
@@ -706,10 +708,12 @@
                     'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
                 },
                 body: '_csrf=' + encodeURIComponent(csrfInput.value || '')
-            }).then(function (response) {
-                return response.ok ? response.json() : null;
-            }).then(function (payload) {
-                var newId = payload && payload.ok && payload.data ? Number(payload.data.id || 0) : 0;
+            }).then(function (result) {
+                var response = result && result.response ? result.response : null;
+                var normalized = result && result.data ? result.data : null;
+                var newId = response && response.ok && normalized && normalized.success && normalized.data
+                    ? Number(normalized.data.id || 0)
+                    : 0;
                 if (newId > 0) {
                     setContentIdEverywhere(newId);
                 }
@@ -767,25 +771,25 @@
                 data.append('_csrf', csrfInput.value || '');
                 data.append('content_id', String(contentId));
                 data.append('thumbnail', file, file.name || 'clipboard-image.png');
-                return fetch(endpoint + '/upload', {
-                    method: 'POST',
+                if (typeof postForm !== 'function') {
+                    return null;
+                }
+                return postForm(endpoint + '/upload', data, {
                     credentials: 'same-origin',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    body: data
                 });
-            }).then(function (response) {
-                return response && response.ok ? response.json() : null;
-            }).then(function (payload) {
-                if (!payload || !payload.ok || !payload.data) {
+            }).then(function (result) {
+                var response = result && result.response ? result.response : null;
+                var normalized = result && result.data ? result.data : null;
+                var media = response && response.ok && normalized && normalized.success && normalized.data
+                    ? normalized.data
+                    : null;
+                if (!media) {
                     if (loadingBlock && loadingBlock.parentNode) {
                         loadingBlock.remove();
                         persistEditorState(true);
                     }
                     return;
                 }
-                var media = payload.data;
                 var mediaId = Number(media.id || 0);
                 var imageUrl = absoluteMediaUrl(media.webp_path || media.path || media.preview_path || '');
                 if (mediaId <= 0 || !imageUrl) {
@@ -1532,21 +1536,21 @@
                 document.execCommand('insertHTML', false, '<a href="' + escapeHtml(pastedUrl) + '" data-paste-link-id="' + linkId + '">' + escapeHtml(pastedUrl) + '</a>');
                 persistEditorState(true);
                 var endpoint = (textarea.dataset.linkTitleEndpoint || '').trim();
-                if (!endpoint) {
+                if (!endpoint || typeof requestJson !== 'function') {
                     return;
                 }
-                fetch(endpoint + '?url=' + encodeURIComponent(pastedUrl), {
+                requestJson(endpoint + '?url=' + encodeURIComponent(pastedUrl), {
                     credentials: 'same-origin',
                     headers: {
                         'Accept': 'application/json'
                     }
-                }).then(function (response) {
-                    if (!response.ok) {
+                }).then(function (result) {
+                    if (!result || !result.response || !result.response.ok) {
                         return null;
                     }
-                    return response.json();
+                    return result.data;
                 }).then(function (payload) {
-                    var title = payload && payload.ok && payload.data ? String(payload.data.title || '').trim() : '';
+                    var title = payload && payload.success && payload.data ? String(payload.data.title || '').trim() : '';
                     if (!title) {
                         return;
                     }

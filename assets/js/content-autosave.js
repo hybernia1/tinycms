@@ -1,16 +1,7 @@
 (function () {
-    function normalizePayload(payload) {
-        if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
-            return {
-                success: payload.ok === true,
-                data: payload.data || {},
-            };
-        }
-
-        return {
-            success: payload?.success === true,
-            data: payload?.data || {},
-        };
+    var postForm = window.tinycms?.api?.http?.postForm;
+    if (typeof postForm !== 'function') {
+        return;
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -177,12 +168,9 @@
                 return 0;
             }
 
-            var response = await fetch(draftInitEndpoint, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: { Accept: 'application/json' },
-            });
-            var normalized = normalizePayload(await response.json().catch(function () { return {}; }));
+            var draftResult = await postForm(draftInitEndpoint, form);
+            var response = draftResult.response;
+            var normalized = draftResult.data;
             var id = Number(normalized.data?.id || 0);
             if (!response.ok || !normalized.success || id <= 0) {
                 return 0;
@@ -207,12 +195,9 @@
                 return;
             }
 
-            var response = await fetch(autosaveEndpoint, {
-                method: 'POST',
-                body: data,
-                headers: { Accept: 'application/json' },
-            });
-            var normalized = normalizePayload(await response.json().catch(function () { return {}; }));
+            var autosaveResult = await postForm(autosaveEndpoint, data);
+            var response = autosaveResult.response;
+            var normalized = autosaveResult.data;
             if (response.ok && normalized.success) {
                 lastSent = currentSignature;
                 var id = Number(normalized.data?.id || 0);

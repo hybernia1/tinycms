@@ -223,10 +223,59 @@
     };
 })();
 (() => {
+    const normalizePayload = (payload) => {
+        if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
+            return {
+                success: payload.ok === true,
+                message: String(payload.error?.message || ''),
+                data: payload.data,
+                meta: payload.meta || {},
+            };
+        }
+
+        return {
+            success: payload?.success === true || !Object.prototype.hasOwnProperty.call(payload || {}, 'success'),
+            message: String(payload?.message || ''),
+            data: payload,
+            meta: payload || {},
+        };
+    };
+
+    const requestJson = async (url, options = {}) => {
+        const response = await fetch(url, options);
+        const raw = await response.json().catch(() => ({}));
+        return { response, data: normalizePayload(raw), raw };
+    };
+
+    const postForm = async (url, formOrData, options = {}) => {
+        const body = formOrData instanceof FormData ? formOrData : new FormData(formOrData);
+        const requestOptions = {
+            ...options,
+            method: 'POST',
+            body,
+            headers: {
+                Accept: 'application/json',
+                ...(options.headers || {}),
+            },
+        };
+        return requestJson(url, requestOptions);
+    };
+
+    window.tinycms = window.tinycms || {};
+    window.tinycms.api = window.tinycms.api || {};
+    window.tinycms.api.http = {
+        normalizePayload,
+        requestJson,
+        postForm,
+    };
+})();
+(() => {
 const t = window.tinycms?.i18n?.t || (() => '');
 const esc = window.tinycms?.api?.esc || ((value) => String(value || ''));
 const icon = window.tinycms?.api?.icon || (() => '');
 const pushFlash = window.tinycms?.api?.pushFlash || (() => {});
+const requestJson = window.tinycms?.api?.http?.requestJson;
+const postForm = window.tinycms?.api?.http?.postForm;
 
 const normalizeListResponse = (payload) => {
     const meta = payload && typeof payload.meta === 'object' ? payload.meta : {};
@@ -238,16 +287,10 @@ const normalizeListResponse = (payload) => {
     };
 };
 
-const normalizeActionResponse = (response, payload) => {
-    return {
-        success: payload?.ok === true,
-        message: String(payload?.error?.message || ''),
-        data: payload?.data && typeof payload.data === 'object' ? payload.data : {},
-        statusOk: response.ok,
-    };
-};
-
 const initListApi = (config) => {
+    if (typeof requestJson !== 'function' || typeof postForm !== 'function') {
+        return;
+    }
     const root = document.querySelector(config.rootSelector);
     if (!root) {
         return;
@@ -366,7 +409,7 @@ const initListApi = (config) => {
                 url.searchParams.set('q', state.query);
             }
 
-            const response = await fetch(url.toString(), {
+            const responseResult = await requestJson(url.toString(), {
                 headers: { Accept: 'application/json' },
                 signal: fetchController.signal,
             }).catch((error) => {
@@ -375,15 +418,13 @@ const initListApi = (config) => {
                 }
                 throw error;
             });
-            if (!response) {
+            if (!responseResult || !responseResult.response) {
                 return;
             }
-            if (!response.ok) {
+            if (!responseResult.response.ok) {
                 return;
             }
-
-            const data = await response.json();
-            const normalized = normalizeListResponse(data);
+            const normalized = normalizeListResponse(responseResult.data);
             state.page = Math.max(1, normalized.page || 1);
             body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
             setPagination(state.page, normalized.totalPages);
@@ -404,24 +445,16 @@ const initListApi = (config) => {
 
         Object.entries(payload).forEach(([key, value]) => formData.append(key, String(value)));
 
-        const response = await fetch(path, {
-            method: 'POST',
-            body: formData,
-            headers: { Accept: 'application/json' },
-        });
-
+        const result = await postForm(path, formData);
+        const response = result.response;
+        const normalized = result.data;
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const normalizedError = normalizeActionResponse(response, errorData);
-            const message = normalizedError.message;
+            const message = normalized.message;
             if (message !== '') {
                 pushFlash('error', message);
             }
             return { success: false };
         }
-
-        const data = await response.json().catch(() => ({}));
-        const normalized = normalizeActionResponse(response, data);
         if (!normalized.success && normalized.message !== '') {
             pushFlash('error', normalized.message);
         }
@@ -429,7 +462,7 @@ const initListApi = (config) => {
         return {
             success: normalized.success,
             message: normalized.message,
-            ...normalized.data,
+            ...(normalized.data && typeof normalized.data === 'object' ? normalized.data : {}),
         };
     };
 

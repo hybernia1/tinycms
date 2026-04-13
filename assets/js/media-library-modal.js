@@ -58,23 +58,11 @@ if (modal && openTrigger) {
     let selectedMedia = null;
     let searchTimer = null;
 
-    const normalizePayload = (payload) => {
-        if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
-            return {
-                success: payload.ok === true,
-                message: String(payload.error?.message || ''),
-                data: payload.data,
-                meta: payload.meta || {},
-            };
-        }
-
-        return {
-            success: payload?.success === true || !Object.prototype.hasOwnProperty.call(payload || {}, 'success'),
-            message: String(payload?.message || ''),
-            data: payload,
-            meta: payload || {},
-        };
-    };
+    const requestJson = window.tinycms?.api?.http?.requestJson;
+    const postForm = window.tinycms?.api?.http?.postForm;
+    if (typeof requestJson !== 'function' || typeof postForm !== 'function') {
+        return;
+    }
 
     const resolveAction = (form, mediaId) => {
         const template = form?.getAttribute('data-action-template') || '';
@@ -363,12 +351,12 @@ if (modal && openTrigger) {
         }
 
         try {
-            const response = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
+            const { response, data: normalized, raw } = await requestJson(url.toString(), {
+                headers: { Accept: 'application/json' },
+            });
             if (!response.ok) {
                 throw new Error('load_failed');
             }
-            const raw = await response.json();
-            const normalized = normalizePayload(raw);
             const items = Array.isArray(normalized.data) ? normalized.data : (Array.isArray(raw.items) ? raw.items : []);
             const total = Number(normalized.meta.total_pages || raw.total_pages || 1);
             const current = Number(normalized.meta.page || raw.page || 1);
@@ -540,11 +528,7 @@ if (modal && openTrigger) {
                     body.set('content_id', String(contentId));
                     body.set('media_id', String(selectedMedia.id));
                     const attachAction = resolveAction(attachForm, selectedMedia.id);
-                    await fetch(attachAction, {
-                        method: 'POST',
-                        body,
-                        headers: { Accept: 'application/json' },
-                    }).catch(() => null);
+                    await postForm(attachAction, body).catch(() => null);
                 }
                 document.dispatchEvent(new CustomEvent('tinycms:media-library-selected', {
                     detail: {
@@ -561,12 +545,7 @@ if (modal && openTrigger) {
 
             mediaIdField.value = String(selectedMedia.id);
             const selectAction = resolveAction(selectForm, selectedMedia.id);
-            const response = await fetch(selectAction, {
-                method: 'POST',
-                body: new FormData(selectForm),
-                headers: { Accept: 'application/json' },
-            });
-            const data = normalizePayload(await response.json().catch(() => ({})));
+            const { response, data } = await postForm(selectAction, selectForm);
             if (!response.ok || !data.success) {
                 setStatus(data.message || t('media.assign_failed'));
                 return;
@@ -592,12 +571,7 @@ if (modal && openTrigger) {
 
             renameName.value = value;
             const renameAction = resolveAction(renameForm, selectedMedia.id);
-            const response = await fetch(renameAction, {
-                method: 'POST',
-                body: new FormData(renameForm),
-                headers: { Accept: 'application/json' },
-            });
-            const data = normalizePayload(await response.json());
+            const { response, data } = await postForm(renameAction, renameForm);
 
             if (!response.ok || !data.success) {
                 setStatus(data.message || t('media.rename_failed'));
@@ -641,12 +615,7 @@ if (modal && openTrigger) {
                 }
             }
 
-            const response = await fetch(uploadForm.action, {
-                method: 'POST',
-                body: new FormData(uploadForm),
-                headers: { Accept: 'application/json' },
-            });
-            const data = normalizePayload(await response.json().catch(() => ({})));
+            const { response, data } = await postForm(uploadForm.action, uploadForm);
 
             if (uploadField) {
                 if (loader) {
@@ -679,12 +648,7 @@ if (modal && openTrigger) {
             const formData = new FormData(deleteForm);
             formData.set('media_id', String(selectedMedia.id));
             const deleteAction = resolveAction(deleteForm, selectedMedia.id);
-            const response = await fetch(deleteAction, {
-                method: 'POST',
-                body: formData,
-                headers: { Accept: 'application/json' },
-            });
-            const data = normalizePayload(await response.json().catch(() => ({})));
+            const { response, data } = await postForm(deleteAction, formData);
 
             if (!response.ok || !data.success) {
                 setStatus(data.message || t('media.delete_failed'));
@@ -708,12 +672,7 @@ if (modal && openTrigger) {
 
     if (detachButton && detachForm) {
         detachButton.addEventListener('click', async () => {
-            const response = await fetch(detachForm.action, {
-                method: 'POST',
-                body: new FormData(detachForm),
-                headers: { Accept: 'application/json' },
-            });
-            const data = normalizePayload(await response.json().catch(() => ({})));
+            const { response, data } = await postForm(detachForm.action, detachForm);
 
             if (!response.ok || !data.success) {
                 setStatus(data.message || t('media.detach_failed'));
