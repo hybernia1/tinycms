@@ -25,6 +25,7 @@
 
     const applyBody = (value) => {
         bodyField.value = value;
+        bodyField.dispatchEvent(new Event('tinycms:editor-sync-from-textarea', { bubbles: true }));
         bodyField.dispatchEvent(new Event('input', { bubbles: true }));
     };
 
