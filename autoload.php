@@ -51,7 +51,31 @@ if (!defined('DB_PREFIX')) {
     define('DB_PREFIX', '');
 }
 
-spl_autoload_register(function (string $class): void {
+if (!function_exists('tinycms_resolve_inc_dir')) {
+    function tinycms_resolve_inc_dir(): string
+    {
+        $candidates = [];
+
+        if (defined('INC_DIR')) {
+            $candidates[] = trim((string)INC_DIR, '/') . '/';
+        }
+
+        $candidates[] = 'src/inc/';
+        $candidates[] = 'inc/';
+
+        foreach (array_values(array_unique($candidates)) as $candidate) {
+            if (is_dir(__DIR__ . '/' . $candidate)) {
+                return $candidate;
+            }
+        }
+
+        return $candidates[0];
+    }
+}
+
+$resolvedIncDir = tinycms_resolve_inc_dir();
+
+spl_autoload_register(function (string $class) use ($resolvedIncDir): void {
     $prefix = 'App\\';
 
     if (strncmp($prefix, $class, strlen($prefix)) !== 0) {
@@ -59,7 +83,7 @@ spl_autoload_register(function (string $class): void {
     }
 
     $relativeClass = str_replace('\\', '/', substr($class, strlen($prefix)));
-    $file = __DIR__ . '/' . INC_DIR . $relativeClass . '.php';
+    $file = __DIR__ . '/' . $resolvedIncDir . $relativeClass . '.php';
 
     if (is_file($file)) {
         require_once $file;
