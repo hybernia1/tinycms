@@ -5,6 +5,7 @@ namespace App\Service\Feature;
 
 use App\Service\Infra\Db\Connection;
 use App\Service\Infra\Db\Query;
+use App\Service\Support\I18n;
 
 final class SettingsService
 {
@@ -17,7 +18,19 @@ final class SettingsService
 
     public function fields(): array
     {
+        $locales = I18n::availableLocales();
+        $localeOptions = [];
+        foreach ($locales as $locale) {
+            $localeOptions[$locale] = I18n::languageLabel($locale);
+        }
+
         return [
+            'app_lang' => [
+                'label_key' => 'settings.fields.app_lang',
+                'type' => 'select',
+                'default' => (string)APP_LANG,
+                'options' => $localeOptions,
+            ],
             'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
             'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
             'meta_title' => ['label_key' => 'settings.fields.meta_title', 'type' => 'text', 'default' => 'TinyCMS'],

@@ -53,6 +53,7 @@ final class AdminSettingsController extends BaseAdminController
         }
 
         $this->settings->save($input);
+        I18n::setLocale((string)($this->settings->resolved()['app_lang'] ?? APP_LANG));
         $this->apiOk([
             'redirect' => $this->buildPath('admin/settings'),
             'message' => I18n::t('settings.saved'),

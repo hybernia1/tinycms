@@ -87,7 +87,7 @@ $mediaService = new MediaService();
 $slugger = new SluggerService();
 $uploadService = new UploadService(dirname(__DIR__), $slugger);
 $settingsService = new SettingsService();
-I18n::setLocale((string)APP_LANG);
+I18n::setLocale((string)($settingsService->resolved()['app_lang'] ?? APP_LANG));
 $termService = new TermService();
 $adminView = new AdminView($view, $settingsService);
 $admin = new AdminController($adminView, $authService, $flash, $csrf);
