@@ -636,7 +636,8 @@ initListApi({
         const status = String(item.status || 'draft');
         const isTrash = status === 'trash';
         const isPublished = status === 'published';
-        const statusIcon = status === 'published' ? 'success' : (status === 'draft' ? 'concept' : 'warning');
+        const isPlanned = item.is_planned === true;
+        const statusIcon = isPlanned ? 'calendar' : (status === 'published' ? 'success' : (status === 'draft' ? 'concept' : 'warning'));
         const toggleLabel = isPublished ? t('content.switch_to_draft') : t('content.publish');
         const canEdit = item.can_edit === true;
         const canDelete = item.can_delete === true;
@@ -652,7 +653,6 @@ initListApi({
         : `<span>${esc(item.name)}</span>`}
                     </span>
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
-                    ${item.is_planned ? `<div class="mt-2"><span class="badge text-bg-warning">${esc(t('content.planned'))}</span></div>` : ''}
                 </td>
                 <td class="mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
