@@ -12,7 +12,6 @@ return [
         'confirm' => 'Potvrdit',
         'next' => 'Další',
         'previous' => 'Předchozí',
-        'apply' => 'Použít',
         'close' => 'Zavřít',
         'delete' => 'Smazat',
         'all' => 'Vše',

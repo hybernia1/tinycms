@@ -106,7 +106,6 @@ foreach ($listRootAttrs as $attr => $value) {
                 <?php foreach ($perPageHidden as $name => $value): ?>
                     <input type="hidden" name="<?= htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8') ?>" value="<?= htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') ?>">
                 <?php endforeach; ?>
-                <button class="btn btn-light" type="submit"><?= htmlspecialchars($t('common.apply'), ENT_QUOTES, 'UTF-8') ?></button>
             </form>
         </div>
     </div>
