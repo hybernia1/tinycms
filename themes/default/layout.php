@@ -1,39 +1,68 @@
 <?php
 declare(strict_types=1);
+
+$activeTheme = trim((string)($themeName ?? 'default'));
+$themeCss = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/css/style.css' : 'themes/default/assets/css/style.css';
+$themeJs = $activeTheme !== '' ? 'themes/' . $activeTheme . '/assets/js/theme.js' : 'themes/default/assets/js/theme.js';
 ?>
 <!doctype html>
 <html lang="<?= htmlspecialchars((string)$lang, ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <?= $metaHead() ?>
-    <link rel="stylesheet" href="<?= htmlspecialchars($url('themes/default/assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
-    <script defer src="<?= htmlspecialchars($url('themes/default/assets/js/theme.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <?php
+    $metaPath = trim((string)($metaPath ?? ''));
+    $shortlinkPath = trim((string)($shortlinkPath ?? ''));
+    $alternateLinks = [];
+    foreach ((array)($metaAlternateLinks ?? []) as $link) {
+        if (!is_array($link)) {
+            continue;
+        }
+        $href = trim((string)($link['href'] ?? ''));
+        if ($href === '') {
+            continue;
+        }
+        $link['href'] = $absoluteUrl($href);
+        $alternateLinks[] = $link;
+    }
+    ?>
+    <?= $renderFrontHead([
+        'title' => (string)($metaTitle ?? $pageTitle ?? 'TinyCMS'),
+        'description' => (string)($metaDescription ?? ''),
+        'keywords' => (array)($metaKeywords ?? []),
+        'robots' => (string)($metaRobots ?? 'index,follow'),
+        'url' => $metaPath !== '' ? $absoluteUrl($metaPath) : '',
+        'shortlink' => $shortlinkPath !== '' ? $absoluteUrl($shortlinkPath) : '',
+        'og_type' => (string)($metaOgType ?? 'website'),
+        'og_image' => (string)($metaOgImage ?? '') !== ''
+            ? $absoluteUrl((string)$metaOgImage)
+            : ((string)($siteLogo ?? '') !== '' ? $absoluteUrl((string)$siteLogo) : ''),
+        'site_name' => (string)($siteName ?? 'TinyCMS'),
+        'author' => (string)($siteAuthor ?? ''),
+        'theme_color' => (string)($metaThemeColor ?? '#2563eb'),
+        'favicon' => (string)($siteFavicon ?? '') !== '' ? $absoluteUrl((string)$siteFavicon) : '',
+        'logo' => (string)($siteLogo ?? '') !== '' ? $absoluteUrl((string)$siteLogo) : '',
+        'structured_data' => $metaStructuredData ?? null,
+        'published_time' => (string)($metaPublishedTime ?? ''),
+        'modified_time' => (string)($metaModifiedTime ?? ''),
+        'search_url_template' => isset($metaSearchUrlTemplate) ? $absoluteUrl((string)$metaSearchUrlTemplate) : '',
+        'alternate_links' => $alternateLinks,
+    ]) ?>
+    <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars($url($themeCss), ENT_QUOTES, 'UTF-8') ?>">
+    <script defer src="<?= htmlspecialchars($url($themeJs), ENT_QUOTES, 'UTF-8') ?>"></script>
 </head>
-<body class="theme-default">
-<div class="site-shell">
-    <header class="site-header">
-        <a class="site-brand" href="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>">
-            <?php if ((string)($siteLogo ?? '') !== ''): ?>
-                <img class="site-brand-logo" src="<?= htmlspecialchars($url((string)$siteLogo), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($siteName ?? 'TinyCMS'), ENT_QUOTES, 'UTF-8') ?>">
-            <?php else: ?>
-                <?= htmlspecialchars((string)($siteName ?? 'TinyCMS'), ENT_QUOTES, 'UTF-8') ?>
-            <?php endif; ?>
-        </a>
-    </header>
-    <div class="site-layout">
-        <aside class="site-sidebar">
-            <form class="site-search" method="get" action="<?= htmlspecialchars($url('search'), ENT_QUOTES, 'UTF-8') ?>">
-                <input type="search" name="q" placeholder="<?= htmlspecialchars($t('front.search.placeholder'), ENT_QUOTES, 'UTF-8') ?>" required>
-                <button type="submit"><?= htmlspecialchars($t('front.search.submit'), ENT_QUOTES, 'UTF-8') ?></button>
-            </form>
-            <nav class="site-nav">
-                <a href="<?= htmlspecialchars($url(''), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('front.home.published_posts'), ENT_QUOTES, 'UTF-8') ?></a>
-                <a href="<?= htmlspecialchars($url('search'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('front.search.title'), ENT_QUOTES, 'UTF-8') ?></a>
-            </nav>
-        </aside>
-        <main id="main-content" class="site-main">
-            <?= $content ?>
-        </main>
+<body class="theme-<?= htmlspecialchars($activeTheme, ENT_QUOTES, 'UTF-8') ?>">
+<div class="container mt-4">
+    <?php foreach ($flashes as $flash): ?>
+    <div class="flash flash-<?= htmlspecialchars((string)($flash['type'] ?? 'info'), ENT_QUOTES, 'UTF-8') ?>">
+        <span><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+        <button type="button" data-flash-close aria-label="<?= htmlspecialchars($t('admin.close_notice'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.close_notice'), ENT_QUOTES, 'UTF-8') ?>">
+            <?= $icon('cancel') ?>
+        </button>
     </div>
+    <?php endforeach; ?>
 </div>
+<main id="main-content">
+<?= $content ?>
+</main>
 </body>
 </html>
