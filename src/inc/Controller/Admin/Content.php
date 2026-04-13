@@ -358,9 +358,7 @@ final class Content extends BaseAdmin
 
         $instruction = trim((string)($_POST['instruction'] ?? ''));
         $sourceInput = trim((string)($_POST['source'] ?? ''));
-        $excerpt = trim((string)($_POST['excerpt'] ?? ''));
-        $name = trim((string)($_POST['name'] ?? ''));
-        $terms = trim((string)($_POST['terms'] ?? ''));
+        $body = (string)($_POST['body'] ?? '');
         $count = max(1, min(3, (int)($_POST['count'] ?? 1)));
         $target = trim((string)($_POST['target'] ?? ''));
         if ($instruction === '' || !in_array($target, ['name', 'excerpt', 'terms'], true)) {
@@ -368,16 +366,8 @@ final class Content extends BaseAdmin
             return;
         }
 
-        $source = $sourceInput;
-        if ($source === '') {
-            if ($target === 'name') {
-                $source = $name;
-            } elseif ($target === 'excerpt') {
-                $source = $excerpt;
-            } else {
-                $source = $terms;
-            }
-        }
+        $source = $sourceInput !== '' ? $sourceInput : $body;
+        $source = $this->normalizeSourceText($source, 300);
         if ($source === '') {
             $this->apiError('EMPTY_SOURCE', I18n::t('content.ai_empty_source'));
             return;
@@ -444,6 +434,19 @@ final class Content extends BaseAdmin
         }
 
         return $variants;
+    }
+
+    private function normalizeSourceText(string $value, int $maxWords): string
+    {
+        $clean = trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if ($clean === '') {
+            return '';
+        }
+
+        $normalized = preg_replace('/\s+/', ' ', $clean) ?? $clean;
+        $words = preg_split('/\s+/', trim($normalized)) ?: [];
+        $slice = array_slice(array_filter($words, static fn($word): bool => $word !== ''), 0, max(1, $maxWords));
+        return trim(implode(' ', $slice));
     }
 
     private function isValidExternalUrl(string $url): bool
