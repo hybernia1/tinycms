@@ -26,7 +26,7 @@
             <label><?= htmlspecialchars($t('common.password'), ENT_QUOTES, 'UTF-8') ?> <?= $mode === 'edit' ? '(' . htmlspecialchars($t('users.password_optional'), ENT_QUOTES, 'UTF-8') . ')' : '' ?></label>
             <div class="field-with-icon">
                 <input class="field-control-with-end-icon" type="password" name="password" autocomplete="new-password" data-password-input <?= $mode === 'add' ? 'required' : '' ?>>
-                <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= htmlspecialchars($t('front.login.show_password'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('front.login.show_password'), ENT_QUOTES, 'UTF-8') ?>">
+                <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= htmlspecialchars($t('auth.show_password'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('auth.show_password'), ENT_QUOTES, 'UTF-8') ?>">
                     <?= $icon('show') ?>
                 </button>
             </div>
