@@ -140,7 +140,7 @@ final class Content
     {
         $name = trim((string)($input['name'] ?? ''));
         $status = trim((string)($input['status'] ?? 'draft'));
-        $excerpt = trim((string)($input['excerpt'] ?? ''));
+        $excerpt = $this->sanitizeExcerpt((string)($input['excerpt'] ?? ''));
         $body = trim((string)($input['body'] ?? ''));
         $author = $this->resolveAuthorId($input, $defaultAuthorId);
         $created = $this->resolveDateTime((string)($input['created'] ?? ''));
@@ -333,6 +333,12 @@ final class Content
         $allowed = array_fill_keys($existingIds, true);
 
         return array_values(array_filter($ids, static fn(int $id): bool => isset($allowed[$id])));
+    }
+
+    private function sanitizeExcerpt(string $excerpt): string
+    {
+        $clean = trim(html_entity_decode(strip_tags($excerpt), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return preg_replace('/\s+/', ' ', $clean) ?? '';
     }
 
     private function resolveAuthorId(array $input, int $defaultAuthorId): ?int
