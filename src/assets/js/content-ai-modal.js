@@ -30,6 +30,14 @@
         return words.slice(0, Math.max(1, limit)).join(' ');
     };
 
+    const normalizeTitle = (value) => {
+        const single = stripHtml(value).split('\n').map((line) => line.trim()).filter(Boolean)[0] || '';
+        return single
+            .replace(/^[-*•]\s*/, '')
+            .replace(/^["„“]+|["“”]+$/g, '')
+            .trim();
+    };
+
     const applyBody = (value) => {
         bodyField.value = value;
         bodyField.dispatchEvent(new Event('tinycms:editor-sync-from-textarea', { bubbles: true }));
@@ -42,6 +50,7 @@
         data.set('target', target);
         data.set('instruction', instruction);
         data.set('source', source);
+        data.set('name', String(nameField.value || ''));
         data.set('excerpt', String(excerptField.value || ''));
         data.set('body', String(bodyField.value || ''));
 
@@ -78,7 +87,8 @@
                 return;
             }
 
-            const generatedText = stripHtml(String(result?.data?.text || ''));
+            const rawText = String(result?.data?.text || '');
+            const generatedText = target === 'name' ? normalizeTitle(rawText) : stripHtml(rawText);
             if (!generatedText) {
                 pushFlash('warning', t('content.ai_failed'));
                 return;

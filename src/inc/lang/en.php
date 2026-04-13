@@ -328,8 +328,8 @@ return [
     ],
     'ai' => [
         'commands' => [
-            'title' => 'Create an SEO-friendly article title from this text (max 70 characters, plain text only): %s',
-            'excerpt' => 'Create a concise excerpt from this text (max 500 characters, plain text only): %s',
+            'title' => 'Create one SEO article title from this text. Return only final title, nothing else: %s',
+            'excerpt' => 'Create one excerpt from this text (max 500 chars). Return only final excerpt, nothing else: %s',
         ],
     ],
     'editor' => [

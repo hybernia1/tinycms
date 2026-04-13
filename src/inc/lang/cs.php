@@ -328,8 +328,8 @@ return [
     ],
     'ai' => [
         'commands' => [
-            'title' => 'Vymysli SEO poutavý titulek pro článek z tohoto textu (max 70 znaků, pouze prostý text): %s',
-            'excerpt' => 'Napiš perex z tohoto textu (max 500 znaků, pouze prostý text): %s',
+            'title' => 'Vytvoř jeden SEO titulek z tohoto textu. Vrať jen finální titulek bez omáčky: %s',
+            'excerpt' => 'Napiš jeden perex z tohoto textu (max 500 znaků). Vrať jen finální perex bez omáčky: %s',
         ],
     ],
     'editor' => [

@@ -381,7 +381,7 @@ final class Content extends BaseAdmin
             return;
         }
 
-        $prompt = "Instruction:\n{$instruction}\n\nTarget: {$target}\n\nSource text:\n{$source}";
+        $prompt = $this->buildAiPrompt($target, $instruction, $source);
         $result = $this->ai->generateWithGoogle($apiKey, $prompt);
         if (($result['success'] ?? false) !== true) {
             $this->apiError('AI_FAILED', I18n::t('content.ai_failed'), 422);
@@ -392,6 +392,28 @@ final class Content extends BaseAdmin
             'target' => $target,
             'text' => (string)($result['text'] ?? ''),
         ]);
+    }
+
+    private function buildAiPrompt(string $target, string $instruction, string $source): string
+    {
+        if ($target === 'name') {
+            return "Task: Generate one SEO title from provided source.\n"
+                . "Rules: Max 70 characters. Plain text only. No quotes. No list. No explanations. Return only final title.\n"
+                . "Localized instruction:\n{$instruction}\n\n"
+                . "Source:\n{$source}";
+        }
+
+        if ($target === 'excerpt') {
+            return "Task: Generate one excerpt from provided source.\n"
+                . "Rules: Max 500 characters. Plain text only. No list. No explanations. Return only final excerpt.\n"
+                . "Localized instruction:\n{$instruction}\n\n"
+                . "Source:\n{$source}";
+        }
+
+        return "Task: Rewrite or generate article body in HTML.\n"
+            . "Rules: Return only HTML fragment, no markdown fences, no explanations, no prefix/suffix text.\n"
+            . "User instruction:\n{$instruction}\n\n"
+            . "Source HTML:\n{$source}";
     }
 
     private function isValidExternalUrl(string $url): bool
