@@ -186,20 +186,6 @@ final class TermService
         return array_values(array_filter(array_map(static fn(array $row): string => trim((string)($row['name'] ?? '')), $rows)));
     }
 
-    public function sitemapPage(int $page = 1, int $perPage = 2000): array
-    {
-        $safePerPage = $perPage > 0 ? $perPage : 2000;
-        $safePage = $page > 0 ? $page : 1;
-        $offset = ($safePage - 1) * $safePerPage;
-        $termsTable = Table::name('terms');
-        $stmt = $this->pdo->prepare("SELECT id, name, updated, created FROM $termsTable ORDER BY id ASC LIMIT :limit OFFSET :offset");
-        $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
     public function totalCount(): int
     {
         $termsTable = Table::name('terms');

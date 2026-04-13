@@ -27,6 +27,13 @@ final class AdminView
         ]);
     }
 
+    public function adminLoginForm(array $state): void
+    {
+        $this->renderAdminAuth('admin/auth/login', array_merge($state, [
+            'pageTitle' => I18n::t('auth.login'),
+        ]));
+    }
+
     public function adminUsersList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/users/list', [
@@ -178,6 +185,17 @@ final class AdminView
                 'siteImageUploadAccept' => UploadService::siteImageAccept(),
                 'imageUploadTypesLabel' => UploadService::imageExtensionsLabel(),
                 'siteImageUploadTypesLabel' => UploadService::siteImageExtensionsLabel(),
+            ]
+        ));
+    }
+
+    private function renderAdminAuth(string $template, array $data): void
+    {
+        $this->view->render('admin/auth-layout', $template, array_merge(
+            $data,
+            $this->adminBranding(),
+            [
+                'adminI18n' => $this->adminI18n(),
             ]
         ));
     }

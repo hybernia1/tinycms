@@ -7,7 +7,6 @@ final class I18n
 {
     private const DEFAULT_LOCALE = 'en';
     private static ?string $locale = null;
-    private static ?string $theme = null;
     private static array $catalogues = [];
 
     public static function setLocale(string $locale): void
@@ -29,13 +28,6 @@ final class I18n
     public static function htmlLang(): string
     {
         return self::locale();
-    }
-
-    public static function setTheme(?string $theme): void
-    {
-        $normalized = self::normalizeLocale((string)$theme);
-        self::$theme = $normalized === '' ? null : $normalized;
-        self::$catalogues = [];
     }
 
     public static function t(string $key, ?string $fallback = null): string
@@ -116,7 +108,7 @@ final class I18n
 
     private static function loadCatalogue(string $locale): array
     {
-        $cacheKey = $locale . '|' . (self::$theme ?? '');
+        $cacheKey = $locale;
         if (isset(self::$catalogues[$cacheKey])) {
             return self::$catalogues[$cacheKey];
         }
@@ -127,16 +119,6 @@ final class I18n
             $base = require $baseFile;
             if (is_array($base)) {
                 $catalogue = $base;
-            }
-        }
-
-        if (self::$theme !== null) {
-            $themeFile = dirname(__DIR__, 3) . '/themes/' . self::$theme . '/lang/' . $locale . '.php';
-            if (is_file($themeFile)) {
-                $themeCatalogue = require $themeFile;
-                if (is_array($themeCatalogue)) {
-                    $catalogue = array_replace_recursive($catalogue, $themeCatalogue);
-                }
             }
         }
 

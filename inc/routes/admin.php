@@ -2,9 +2,9 @@
 declare(strict_types=1);
 
 register_routes($router, $redirect, [
-    ['method' => 'GET', 'path' => 'admin/login', 'handler' => static function () use ($redirect): void {
-        $redirect('login');
-    }],
+    ['method' => 'GET', 'path' => '', 'controller' => $admin, 'action' => 'index'],
+    ['method' => 'GET', 'path' => 'admin/login', 'controller' => $admin, 'action' => 'loginForm'],
+    ['method' => 'POST', 'path' => 'admin/login', 'controller' => $admin, 'action' => 'loginSubmit'],
     ['method' => 'GET', 'path' => 'admin', 'controller' => $admin, 'action' => 'index'],
     ['method' => 'GET', 'path' => 'admin/dashboard', 'controller' => $admin, 'action' => 'dashboard'],
 

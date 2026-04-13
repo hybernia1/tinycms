@@ -22,7 +22,7 @@ abstract class BaseAdminController
     protected function guardAdmin(callable $redirect, bool $flashDenied = true): bool
     {
         if (!$this->authService->auth()->check()) {
-            $redirect('login');
+            $redirect('admin/login');
             return false;
         }
 
@@ -31,7 +31,7 @@ abstract class BaseAdminController
                 $this->flash->add('info', I18n::t('admin.access_denied'));
             }
 
-            $redirect('');
+            $redirect('admin/login');
             return false;
         }
 

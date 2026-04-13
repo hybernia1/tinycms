@@ -283,6 +283,7 @@ return [
         ],
     ],
     'auth' => [
+        'login' => 'Přihlášení',
         'email_required' => 'E-mail je povinný.',
         'email_invalid_format' => 'E-mail není ve správném formátu.',
         'password_required' => 'Heslo je povinné.',
@@ -294,6 +295,7 @@ return [
         'login_success' => 'Přihlášení proběhlo úspěšně.',
         'show_password' => 'Zobrazit heslo',
         'hide_password' => 'Skrýt heslo',
+        'remember' => 'Zapamatovat si mě',
         'login_failed' => 'Přihlášení selhalo.',
         'name_required' => 'Jméno je povinné.',
         'name_min_3' => 'Jméno musí mít alespoň 3 znaky.',
