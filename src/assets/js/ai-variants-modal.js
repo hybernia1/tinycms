@@ -154,11 +154,13 @@
                 const selection = window.getSelection();
                 if (!editor || !selection || selection.rangeCount === 0) {
                     pushFlash('warning', t('content.ai_empty_source'));
+                    modal.classList.remove('open');
                     return;
                 }
                 const range = selection.getRangeAt(0);
                 if (range.collapsed || !editor.contains(range.commonAncestorContainer)) {
                     pushFlash('warning', t('content.ai_empty_source'));
+                    modal.classList.remove('open');
                     return;
                 }
                 const wrapper = document.createElement('div');
@@ -172,6 +174,7 @@
                 regenerateButton.hidden = true;
                 variantsBox.hidden = true;
                 bodyPreview.textContent = stripHtml(selectedHtml).slice(0, 220);
+                modal.classList.add('open');
                 return;
             }
 

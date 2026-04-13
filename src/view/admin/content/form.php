@@ -59,7 +59,7 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="d-flex align-center justify-between gap-2 mb-1">
                     <label><?= $e($t('content.body')) ?></label>
                     <?php if (!empty($hasAiProvider)): ?>
-                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="body" data-modal-open data-modal-target="#content-ai-modal" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
+                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="body" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
                             <?= $icon('wand') ?>
                             <span>AI</span>
                         </button>
