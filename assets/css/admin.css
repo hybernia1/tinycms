@@ -175,7 +175,6 @@ body {
     color: var(--color-text-soft);
     background: var(--color-surface);
     border: 1px solid var(--color-border-soft);
-    border-radius: var(--radius-sm);
     padding: 0.125rem 0.5rem;
     pointer-events: none;
 }
@@ -217,7 +216,6 @@ body.admin-focus-mode .content-editor-form > .content-editor-layout {
 
 body.admin-focus-mode .content-editor-form > .content-editor-layout > .card {
     border: 0;
-    border-radius: 0;
     box-shadow: none;
     padding: 0 !important;
 }
@@ -258,16 +256,12 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .admin-header-action-main {
     flex: 1 1 auto;
     min-width: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
 }
 
 .admin-header-action-toggle {
     width: 2.75rem;
     flex: 0 0 2.75rem;
     border-left: 1px solid rgba(255, 255, 255, 0.2);
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
 }
 
 .admin-header-action-options {
@@ -305,7 +299,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .admin-header-action-option {
     width: 100%;
     justify-content: space-between;
-    border-radius: 0;
 }
 
 .admin-header-action-option + .admin-header-action-option {
@@ -582,7 +575,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     right: 4px;
     width: 1.35rem;
     height: 1.35rem;
-    border-radius: 0;
     background: var(--primary);
     color: var(--color-inverse);
     display: none;
