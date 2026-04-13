@@ -327,8 +327,8 @@ return [
     ],
     'ai' => [
         'commands' => [
-            'title' => 'Vytvoř jeden SEO titulek z tohoto textu. Vrať jen finální titulek bez omáčky: %s',
-            'excerpt' => 'Napiš jeden perex z tohoto textu (max 500 znaků). Vrať jen finální perex bez omáčky: %s',
+            'title' => 'Vytvoř 3 SEO varianty titulku z tohoto textu. Vrať jeden titulek na řádek bez omáčky: %s',
+            'excerpt' => 'Vytvoř 3 varianty perexu z tohoto textu (max 500 znaků každá). Vrať jeden perex na řádek bez omáčky: %s',
             'terms' => 'Vytvoř 10 štítků z tohoto textu. Vrať jeden štítek na řádek, bez číslování a bez omáčky: %s',
         ],
     ],

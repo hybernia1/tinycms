@@ -327,8 +327,8 @@ return [
     ],
     'ai' => [
         'commands' => [
-            'title' => 'Create one SEO article title from this text. Return only final title, nothing else: %s',
-            'excerpt' => 'Create one excerpt from this text (max 500 chars). Return only final excerpt, nothing else: %s',
+            'title' => 'Create 3 SEO article title variants from this text. Return one title per line, nothing else: %s',
+            'excerpt' => 'Create 3 excerpt variants from this text (max 500 chars each). Return one excerpt per line, nothing else: %s',
             'terms' => 'Create 10 article tags from this text. Return one tag per line, no numbering, no explanations: %s',
         ],
     ],

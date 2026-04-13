@@ -396,15 +396,15 @@ final class Content extends BaseAdmin
     private function buildAiPrompt(string $target, string $instruction, string $source): string
     {
         if ($target === 'name') {
-            return "Task: You are writing a news article title.\n"
-                . "Rules: one final SEO title, max 70 characters, plain text only, no quotes, no list, no explanations.\n"
+            return "Task: Generate exactly three SEO title variants for a news article.\n"
+                . "Rules: each variant on separate line, max 70 characters, plain text only, no quotes, no numbering, no explanations.\n"
                 . "Localized instruction:\n{$instruction}\n\n"
                 . "Article source:\n{$source}";
         }
 
         if ($target === 'excerpt') {
-            return "Task: You are writing an excerpt for a news article.\n"
-                . "Rules: one final excerpt, max 500 characters, plain text only, no list, no explanations.\n"
+            return "Task: Generate exactly three excerpt variants for a news article.\n"
+                . "Rules: each variant on separate line, max 500 characters, plain text only, no numbering, no explanations.\n"
                 . "Localized instruction:\n{$instruction}\n\n"
                 . "Article source:\n{$source}";
         }
