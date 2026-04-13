@@ -10,18 +10,16 @@ $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField, $e
     $id = (int)($row['ID'] ?? 0);
     $isAdmin = (string)($row['role'] ?? '') === 'admin';
     $isSuspended = (int)($row['suspend'] ?? 0) === 1;
-    $roleValue = (string)($row['role'] ?? '');
-    $roleIcon = $isAdmin ? 'admin' : 'user';
+    $statusIcon = $isSuspended ? 'suspended' : ($isAdmin ? 'admin' : 'user');
     ob_start();
     ?>
     <tr>
         <td>
-            <a href="<?= $e($url('admin/users/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+            <span class="d-flex align-center gap-2">
+                <?= $icon($statusIcon) ?>
+                <a href="<?= $e($url('admin/users/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+            </span>
             <div class="text-muted small"><?= $e((string)($row['email'] ?? '')) ?></div>
-            <div class="d-flex gap-2 mt-2 text-muted small">
-                <span class="d-flex align-center gap-1"><?= $icon($roleIcon) ?><?= $e($t('users.roles.' . $roleValue, $roleValue)) ?></span>
-                <?php if ($isSuspended): ?><span class="d-flex align-center gap-1"><?= $icon('suspended') ?><?= $e($t('users.status.suspended_single')) ?></span><?php endif; ?>
-            </div>
         </td>
         <td class="table-col-actions">
             <?php if (!$isAdmin): ?>
