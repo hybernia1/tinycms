@@ -120,11 +120,6 @@ if ($mode === 'edit') {
                             <label><?= $e($t('common.created')) ?></label>
                             <div class="text-muted"><?= $e($formatDateTime((string)($item['created'] ?? ''))) ?></div>
                         </div>
-                        <div class="mb-3">
-                            <label><?= $e($t('common.updated')) ?></label>
-                            <div class="text-muted"><?= $e($formatDateTime((string)($item['updated'] ?? ''), '—')) ?></div>
-                        </div>
-
                         <div class="m-0">
                             <label><?= $e($t('common.author')) ?></label>
                             <select name="author">
