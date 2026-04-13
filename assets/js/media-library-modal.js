@@ -11,8 +11,10 @@ const openTrigger = Array.prototype.find.call(
     document.querySelectorAll('[data-media-library-open]'),
     (node) => node.getAttribute('data-media-library-mode') !== 'editor',
 ) || null;
+const requestJson = window.tinycms?.api?.http?.requestJson;
+const postForm = window.tinycms?.api?.http?.postForm;
 
-if (modal && openTrigger) {
+if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm === 'function') {
     const loader = window.tinycmsLoader || null;
     const grid = modal.querySelector('[data-media-library-grid]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
@@ -57,12 +59,6 @@ if (modal && openTrigger) {
         : 10;
     let selectedMedia = null;
     let searchTimer = null;
-
-    const requestJson = window.tinycms?.api?.http?.requestJson;
-    const postForm = window.tinycms?.api?.http?.postForm;
-    if (typeof requestJson !== 'function' || typeof postForm !== 'function') {
-        return;
-    }
 
     const resolveAction = (form, mediaId) => {
         const template = form?.getAttribute('data-action-template') || '';
