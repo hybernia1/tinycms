@@ -10,7 +10,6 @@ use App\Controller\AdminMediaController;
 use App\Controller\AdminSettingsController;
 use App\Controller\AdminTermController;
 use App\Controller\AdminUserController;
-use App\Controller\FrontController;
 use App\Controller\InstallController;
 use App\Service\Auth\Auth;
 use App\Service\Feature\AuthService;
@@ -19,7 +18,6 @@ use App\Service\Feature\InstallService;
 use App\Service\Feature\MediaService;
 use App\Service\Feature\UploadService;
 use App\Service\Feature\TermService;
-use App\Service\Feature\ThemeService;
 use App\Service\Support\CsrfService;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\FlashService;
@@ -29,7 +27,6 @@ use App\Service\Support\I18n;
 use App\Service\Support\SluggerService;
 use App\Service\Feature\UserService;
 use App\View\AdminView;
-use App\View\FrontView;
 use App\View\View;
 
 $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
@@ -89,15 +86,10 @@ $contentService = new ContentService();
 $mediaService = new MediaService();
 $slugger = new SluggerService();
 $uploadService = new UploadService(dirname(__DIR__), $slugger);
-$themeService = new ThemeService(dirname(__DIR__));
-$settingsService = new SettingsService($themeService);
-$resolvedSettings = $settingsService->resolved();
-I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
-I18n::setTheme($themeService->resolveTheme((string)($resolvedSettings['theme'] ?? 'default')));
+$settingsService = new SettingsService();
+I18n::setLocale((string)APP_LANG);
 $termService = new TermService();
-$frontView = new FrontView($view, $themeService);
 $adminView = new AdminView($view, $settingsService);
-$front = new FrontController($frontView, $authService, $csrf, $settingsService, $contentService, $termService, $slugger);
 $admin = new AdminController($adminView, $authService, $flash, $csrf);
 $adminUsers = new AdminUserController($adminView, $authService, $userService, $flash, $csrf);
 $adminContent = new AdminContentController($adminView, $authService, $contentService, $userService, $termService, $flash, $csrf);
@@ -106,10 +98,8 @@ $adminMedia = new AdminMediaController($adminView, $authService, $mediaService, 
 $adminSettings = new AdminSettingsController($adminView, $authService, $settingsService, $uploadService, $flash, $csrf);
 $adminTerms = new AdminTermController($adminView, $authService, $termService, $flash, $csrf);
 
-require __DIR__ . '/routes/front.php';
 require __DIR__ . '/routes/admin.php';
 
 return [
     'router' => $router,
-    'front' => $front,
 ];

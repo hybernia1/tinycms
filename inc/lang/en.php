@@ -283,6 +283,7 @@ return [
         ],
     ],
     'auth' => [
+        'login' => 'Login',
         'email_required' => 'Email is required.',
         'email_invalid_format' => 'Email format is invalid.',
         'password_required' => 'Password is required.',
@@ -294,6 +295,7 @@ return [
         'login_success' => 'Login successful.',
         'show_password' => 'Show password',
         'hide_password' => 'Hide password',
+        'remember' => 'Remember me',
         'login_failed' => 'Login failed.',
         'name_required' => 'Name is required.',
         'name_min_3' => 'Name must be at least 3 characters.',
