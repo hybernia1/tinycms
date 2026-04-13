@@ -36,15 +36,15 @@ foreach ($listRootAttrs as $attr => $value) {
 ?>
 <div
 <?php foreach ($rootAttrs as $attr => $value): ?>
-    <?= htmlspecialchars((string)$attr, ENT_QUOTES, 'UTF-8') ?><?= $value === null ? '' : '="' . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '"' ?>
+    <?= $e((string)$attr) ?><?= $value === null ? '' : '="' . $e((string)$value) . '"' ?>
 <?php endforeach; ?>
 >
-    <div data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-csrf class="d-none"><?= $csrfMarkup ?></div>
+    <div data-<?= $e($listName) ?>-csrf class="d-none"><?= $csrfMarkup ?></div>
     <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
         <?php if ($statusEnabled): ?>
             <nav class="filter-nav">
                 <?php foreach ($statusLinks as $key => $label): ?>
-                    <a class="filter-link<?= $statusCurrent === (string)$key ? ' active' : '' ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-status="<?= htmlspecialchars((string)$key, ENT_QUOTES, 'UTF-8') ?>" href="<?= htmlspecialchars($statusUrl !== null ? (string)$statusUrl((string)$key) : '#', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)$label, ENT_QUOTES, 'UTF-8') ?></a>
+                    <a class="filter-link<?= $statusCurrent === (string)$key ? ' active' : '' ?>" data-<?= $e($listName) ?>-status="<?= $e((string)$key) ?>" href="<?= $e($statusUrl !== null ? (string)$statusUrl((string)$key) : '#') ?>"><?= $e((string)$label) ?></a>
                 <?php endforeach; ?>
             </nav>
         <?php else: ?>
@@ -52,10 +52,10 @@ foreach ($listRootAttrs as $attr => $value) {
         <?php endif; ?>
         <form method="get" class="search-form">
             <?php foreach ($searchHidden as $name => $value): ?>
-                <input type="hidden" name="<?= htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8') ?>" value="<?= htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="<?= $e((string)$name) ?>" value="<?= $e((string)$value) ?>">
             <?php endforeach; ?>
             <div class="search-field field-with-icon">
-                <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($listQuery, ENT_QUOTES, 'UTF-8') ?>" placeholder="<?= htmlspecialchars($searchPlaceholder, ENT_QUOTES, 'UTF-8') ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-search>
+                <input class="search-input" type="search" name="q" value="<?= $e($listQuery) ?>" placeholder="<?= $e($searchPlaceholder) ?>" data-<?= $e($listName) ?>-search>
                 <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= $icon('search') ?></span>
             </div>
         </form>
@@ -71,11 +71,11 @@ foreach ($listRootAttrs as $attr => $value) {
                         $label = (string)($column['label'] ?? '');
                         $class = trim((string)($column['class'] ?? ''));
                         ?>
-                        <th<?= $class !== '' ? ' class="' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . '"' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></th>
+                        <th<?= $class !== '' ? ' class="' . $e($class) . '"' : '' ?>><?= $e($label) ?></th>
                     <?php endforeach; ?>
                 </tr>
                 </thead>
-                <tbody data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-list-body>
+                <tbody data-<?= $e($listName) ?>-list-body>
                 <?php foreach ($items as $row): ?>
                     <?= $rowRenderer !== null ? $rowRenderer((array)$row) : '' ?>
                 <?php endforeach; ?>
@@ -87,8 +87,8 @@ foreach ($listRootAttrs as $attr => $value) {
             <?php if ($listTotalPages > 1): ?>
                 <div class="pagination">
                     <?php $prevPage = max(1, $listPage - 1); $nextPage = min($listTotalPages, $listPage + 1); ?>
-                    <a class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" href="<?= htmlspecialchars($paginationUrl !== null ? (string)$paginationUrl($prevPage) : '#', ENT_QUOTES, 'UTF-8') ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-prev<?= $listPage <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= htmlspecialchars($t('common.previous'), ENT_QUOTES, 'UTF-8') ?></span></a>
-                    <a class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" href="<?= htmlspecialchars($paginationUrl !== null ? (string)$paginationUrl($nextPage) : '#', ENT_QUOTES, 'UTF-8') ?>" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-next<?= $listPage >= $listTotalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span><?= htmlspecialchars($t('common.next'), ENT_QUOTES, 'UTF-8') ?></span><?= $icon('next') ?></a>
+                    <a class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" href="<?= $e($paginationUrl !== null ? (string)$paginationUrl($prevPage) : '#') ?>" data-<?= $e($listName) ?>-prev<?= $listPage <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= $e($t('common.previous')) ?></span></a>
+                    <a class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" href="<?= $e($paginationUrl !== null ? (string)$paginationUrl($nextPage) : '#') ?>" data-<?= $e($listName) ?>-next<?= $listPage >= $listTotalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span><?= $e($t('common.next')) ?></span><?= $icon('next') ?></a>
                 </div>
             <?php else: ?>
                 <div></div>
@@ -98,12 +98,12 @@ foreach ($listRootAttrs as $attr => $value) {
         </div>
     </div>
 
-    <div class="modal-overlay" data-modal data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-modal>
+    <div class="modal-overlay" data-modal data-<?= $e($listName) ?>-delete-modal>
         <div class="modal">
-            <p><?= htmlspecialchars($deleteConfirmText, ENT_QUOTES, 'UTF-8') ?></p>
+            <p><?= $e($deleteConfirmText) ?></p>
             <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-cancel><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-                <button class="btn btn-primary" type="button" data-<?= htmlspecialchars($listName, ENT_QUOTES, 'UTF-8') ?>-delete-confirm><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button class="btn btn-light" type="button" data-<?= $e($listName) ?>-delete-cancel><?= $e($t('common.cancel')) ?></button>
+                <button class="btn btn-primary" type="button" data-<?= $e($listName) ?>-delete-confirm><?= $e($t('common.confirm')) ?></button>
             </div>
         </div>
     </div>

@@ -15,27 +15,27 @@ $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField): s
     ?>
     <tr>
         <td>
-            <a href="<?= htmlspecialchars($url('admin/users/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-            <div class="text-muted small"><?= htmlspecialchars((string)($row['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+            <a href="<?= $e($url('admin/users/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+            <div class="text-muted small"><?= $e((string)($row['email'] ?? '')) ?></div>
             <div class="d-flex gap-2 mt-2">
-                <span class="badge text-bg-primary"><?= htmlspecialchars($t('users.roles.' . $roleValue, $roleValue), ENT_QUOTES, 'UTF-8') ?></span>
-                <?php if ($isSuspended): ?><span class="badge text-bg-warning"><?= htmlspecialchars($t('users.status.suspended_single'), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+                <span class="badge text-bg-primary"><?= $e($t('users.roles.' . $roleValue, $roleValue)) ?></span>
+                <?php if ($isSuspended): ?><span class="badge text-bg-warning"><?= $e($t('users.status.suspended_single')) ?></span><?php endif; ?>
             </div>
         </td>
         <td class="table-col-actions">
             <?php if (!$isAdmin): ?>
-                <form method="post" action="<?= htmlspecialchars($url('admin/api/v1/users/' . $id . '/suspend'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                <form method="post" action="<?= $e($url('admin/api/v1/users/' . $id . '/suspend')) ?>" class="inline-form">
                     <?= $csrfField() ?>
                     <input type="hidden" name="id" value="<?= $id ?>">
                     <input type="hidden" name="mode" value="<?= $isSuspended ? 'unsuspend' : 'suspend' ?>">
-                    <button class="btn btn-light btn-icon" type="button" data-users-toggle="<?= $id ?>" data-users-mode="<?= $isSuspended ? 'unsuspend' : 'suspend' ?>" aria-label="<?= htmlspecialchars($isSuspended ? $t('users.unsuspend') : $t('users.suspend'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($isSuspended ? $t('users.unsuspend') : $t('users.suspend'), ENT_QUOTES, 'UTF-8') ?>">
+                    <button class="btn btn-light btn-icon" type="button" data-users-toggle="<?= $id ?>" data-users-mode="<?= $isSuspended ? 'unsuspend' : 'suspend' ?>" aria-label="<?= $e($isSuspended ? $t('users.unsuspend') : $t('users.suspend')) ?>" title="<?= $e($isSuspended ? $t('users.unsuspend') : $t('users.suspend')) ?>">
                         <?= $icon($isSuspended ? 'show' : 'hide') ?>
-                        <span class="sr-only"><?= htmlspecialchars($isSuspended ? $t('users.unsuspend') : $t('users.suspend'), ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="sr-only"><?= $e($isSuspended ? $t('users.unsuspend') : $t('users.suspend')) ?></span>
                     </button>
                 </form>
-                <button class="btn btn-light btn-icon" type="button" data-users-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('users.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('users.delete'), ENT_QUOTES, 'UTF-8') ?>">
+                <button class="btn btn-light btn-icon" type="button" data-users-delete-open="<?= $id ?>" aria-label="<?= $e($t('users.delete')) ?>" title="<?= $e($t('users.delete')) ?>">
                     <?= $icon('delete') ?>
-                    <span class="sr-only"><?= htmlspecialchars($t('users.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="sr-only"><?= $e($t('users.delete')) ?></span>
                 </button>
             <?php endif; ?>
         </td>

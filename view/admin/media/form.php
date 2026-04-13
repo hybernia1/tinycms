@@ -37,61 +37,61 @@ if ($mode === 'edit') {
     class="content-editor-form"
     method="post"
     enctype="multipart/form-data"
-    action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/media/add') : $url('admin/api/v1/media/' . (int)($item['id'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
+    action="<?= $e($mode === 'add' ? $url('admin/api/v1/media/add') : $url('admin/api/v1/media/' . (int)($item['id'] ?? 0) . '/edit')) ?>"
     data-api-submit
-    data-redirect-url="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"
+    data-redirect-url="<?= $e($url('admin/media')) ?>"
 >
     <?= $csrfField() ?>
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">
-                <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
-                <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
-                <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                <label><?= $e($t('common.name')) ?></label>
+                <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" required>
+                <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
             </div>
 
             <?php if ($mode === 'add'): ?>
                 <div class="mb-3">
-                    <label><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></label>
+                    <label><?= $e($t('media.file')) ?></label>
                     <div class="custom-upload-field" data-custom-upload-auto-submit>
                         <label class="btn btn-light custom-upload-button" for="media-file-upload">
                             <span class="custom-upload-main-icon" data-custom-upload-icon><?= $icon('upload') ?></span>
-                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= $e($t('common.upload_add_files')) ?>"><?= $e($t('common.upload_add_files')) ?></span>
                             <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= $icon('loader') ?></span>
                         </label>
-                        <input id="media-file-upload" type="file" name="file" accept="<?= htmlspecialchars((string)($imageUploadAccept ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+                        <input id="media-file-upload" type="file" name="file" accept="<?= $e((string)($imageUploadAccept ?? '')) ?>" required>
                     </div>
-                    <small class="text-muted d-block mt-2"><?= htmlspecialchars(sprintf($t('common.allowed_upload_types'), (string)($imageUploadTypesLabel ?? '')), ENT_QUOTES, 'UTF-8') ?></small>
-                    <?php if (!empty($errors['file'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['file'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                    <small class="text-muted d-block mt-2"><?= $e(sprintf($t('common.allowed_upload_types'), (string)($imageUploadTypesLabel ?? ''))) ?></small>
+                    <?php if (!empty($errors['file'])): ?><small class="text-danger"><?= $e((string)$errors['file']) ?></small><?php endif; ?>
                 </div>
             <?php endif; ?>
 
             <?php if ($mode === 'edit'): ?>
                 <?php if ($previewUrl !== ''): ?>
                     <div class="content-thumbnail-preview mb-3">
-                        <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                        <img src="<?= $e($previewUrl) ?>" alt="<?= $e((string)($item['name'] ?? '')) ?>">
                     </div>
                 <?php endif; ?>
-                <h3 class="mb-3"><?= htmlspecialchars($t('media.used_in'), ENT_QUOTES, 'UTF-8') ?></h3>
+                <h3 class="mb-3"><?= $e($t('media.used_in')) ?></h3>
                 <?php if (($usages ?? []) === []): ?>
-                    <p class="text-muted m-0"><?= htmlspecialchars($t('media.no_usage'), ENT_QUOTES, 'UTF-8') ?></p>
+                    <p class="text-muted m-0"><?= $e($t('media.no_usage')) ?></p>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
                             <tr>
-                                <th><?= htmlspecialchars($t('content.post'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('common.created'), ENT_QUOTES, 'UTF-8') ?></th><th><?= htmlspecialchars($t('media.usage_origin'), ENT_QUOTES, 'UTF-8') ?></th>
+                                <th><?= $e($t('content.post')) ?></th><th><?= $e($t('common.created')) ?></th><th><?= $e($t('media.usage_origin')) ?></th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($usages as $usage): ?>
                                 <tr>
                                     <td>
-                                        <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . (int)($usage['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
-                                            <?= htmlspecialchars((string)($usage['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                                        <a href="<?= $e($url('admin/content/edit?id=' . (int)($usage['id'] ?? 0))) ?>">
+                                            <?= $e((string)($usage['name'] ?? '')) ?>
                                         </a>
                                     </td>
-                                    <td><?= htmlspecialchars($formatDateTime((string)($usage['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></td>
+                                    <td><?= $e($formatDateTime((string)($usage['created'] ?? ''))) ?></td>
                                     <?php
                                     $origins = [];
                                     if ((int)($usage['used_as_thumbnail'] ?? 0) === 1) {
@@ -101,7 +101,7 @@ if ($mode === 'edit') {
                                         $origins[] = $t('media.origin_post_body');
                                     }
                                     ?>
-                                    <td><?= htmlspecialchars(implode(', ', $origins), ENT_QUOTES, 'UTF-8') ?></td>
+                                    <td><?= $e(implode(', ', $origins)) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
@@ -113,65 +113,65 @@ if ($mode === 'edit') {
 
         <aside class="content-editor-sidebar">
             <div class="card">
-                <div class="content-box-header"><?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="content-box-header"><?= $e($t('common.actions')) ?></div>
                 <div class="p-3">
                     <?php if ($mode === 'edit'): ?>
                         <div class="mb-3">
-                            <label><?= htmlspecialchars($t('common.created'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('common.created')) ?></label>
+                            <div class="text-muted"><?= $e($formatDateTime((string)($item['created'] ?? ''))) ?></div>
                         </div>
                         <div class="mb-3">
-                            <label><?= htmlspecialchars($t('common.updated'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars($formatDateTime((string)($item['updated'] ?? ''), '—'), ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('common.updated')) ?></label>
+                            <div class="text-muted"><?= $e($formatDateTime((string)($item['updated'] ?? ''), '—')) ?></div>
                         </div>
 
                         <div class="m-0">
-                            <label><?= htmlspecialchars($t('common.author'), ENT_QUOTES, 'UTF-8') ?></label>
+                            <label><?= $e($t('common.author')) ?></label>
                             <select name="author">
-                                <option value=""><?= htmlspecialchars($t('common.no_author'), ENT_QUOTES, 'UTF-8') ?></option>
+                                <option value=""><?= $e($t('common.no_author')) ?></option>
                                 <?php foreach ($authors as $author): ?>
                                     <?php $authorId = (int)($author['ID'] ?? 0); ?>
                                     <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars((string)($author['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars((string)($author['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)
+                                        <?= $e((string)($author['name'] ?? '')) ?> (<?= $e((string)($author['email'] ?? '')) ?>)
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-                            <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['author'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+                            <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= $e((string)$errors['author']) ?></small><?php endif; ?>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
             <?php if ($mode === 'edit' && $fileMeta !== null): ?>
                 <div class="card">
-                    <div class="content-box-header"><?= htmlspecialchars($t('media.file'), ENT_QUOTES, 'UTF-8') ?></div>
+                    <div class="content-box-header"><?= $e($t('media.file')) ?></div>
                     <div class="p-3">
                         <div class="mb-3">
-                            <label><?= htmlspecialchars($t('media.path'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars((string)($item['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('media.path')) ?></label>
+                            <div class="text-muted"><?= $e((string)($item['path'] ?? '')) ?></div>
                         </div>
                         <div class="mb-3">
-                            <label><?= htmlspecialchars($t('media.path_webp'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars((string)($item['path_webp'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('media.path_webp')) ?></label>
+                            <div class="text-muted"><?= $e((string)($item['path_webp'] ?? '')) ?></div>
                         </div>
                         <div class="mb-3">
-                            <label><?= htmlspecialchars($t('media.filename'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['filename'], ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('media.filename')) ?></label>
+                            <div class="text-muted"><?= $e((string)$fileMeta['filename']) ?></div>
                         </div>
                         <div class="mb-3">
-                            <label><?= htmlspecialchars($t('media.mime'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['mime'], ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('media.mime')) ?></label>
+                            <div class="text-muted"><?= $e((string)$fileMeta['mime']) ?></div>
                         </div>
                         <div class="mb-3">
-                            <label><?= htmlspecialchars($t('media.extension'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['extension'], ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('media.extension')) ?></label>
+                            <div class="text-muted"><?= $e((string)$fileMeta['extension']) ?></div>
                         </div>
                         <div class="mb-3">
-                            <label><?= htmlspecialchars($t('media.dimensions'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['dimensions'], ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('media.dimensions')) ?></label>
+                            <div class="text-muted"><?= $e((string)$fileMeta['dimensions']) ?></div>
                         </div>
                         <div class="m-0">
-                            <label><?= htmlspecialchars($t('media.size'), ENT_QUOTES, 'UTF-8') ?></label>
-                            <div class="text-muted"><?= htmlspecialchars((string)$fileMeta['size'], ENT_QUOTES, 'UTF-8') ?></div>
+                            <label><?= $e($t('media.size')) ?></label>
+                            <div class="text-muted"><?= $e((string)$fileMeta['size']) ?></div>
                         </div>
                     </div>
                 </div>
@@ -184,18 +184,18 @@ if ($mode === 'edit') {
     <form
         id="media-delete-form"
         method="post"
-        action="<?= htmlspecialchars($url('admin/api/v1/media/' . (int)($item['id'] ?? 0) . '/delete'), ENT_QUOTES, 'UTF-8') ?>"
+        action="<?= $e($url('admin/api/v1/media/' . (int)($item['id'] ?? 0) . '/delete')) ?>"
         data-api-submit
-        data-redirect-url="<?= htmlspecialchars($url('admin/media'), ENT_QUOTES, 'UTF-8') ?>"
+        data-redirect-url="<?= $e($url('admin/media')) ?>"
     >
         <?= $csrfField() ?>
     </form>
     <div class="modal-overlay" data-modal id="media-delete-modal">
         <div class="modal">
-            <p data-modal-text><?= htmlspecialchars($t('media.delete_confirm'), ENT_QUOTES, 'UTF-8') ?></p>
+            <p data-modal-text><?= $e($t('media.delete_confirm')) ?></p>
             <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-modal-close><?= htmlspecialchars($t('common.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
-                <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="media-delete-form"><?= htmlspecialchars($t('common.confirm'), ENT_QUOTES, 'UTF-8') ?></button>
+                <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
+                <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="media-delete-form"><?= $e($t('common.confirm')) ?></button>
             </div>
         </div>
     </div>

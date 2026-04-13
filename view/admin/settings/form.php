@@ -3,9 +3,9 @@
         id="settings-form"
         method="post"
         enctype="multipart/form-data"
-        action="<?= htmlspecialchars($url('admin/api/v1/settings'), ENT_QUOTES, 'UTF-8') ?>"
+        action="<?= $e($url('admin/api/v1/settings')) ?>"
         data-api-submit
-        data-redirect-url="<?= htmlspecialchars($url('admin/settings'), ENT_QUOTES, 'UTF-8') ?>"
+        data-redirect-url="<?= $e($url('admin/settings')) ?>"
     >
         <?= $csrfField() ?>
 
@@ -15,17 +15,17 @@
             $labelKey = (string)($field['label_key'] ?? ('settings.fields.' . $fieldKey));
         ?>
             <div class="mb-3">
-                <label><?= htmlspecialchars($t($labelKey, (string)$fieldKey), ENT_QUOTES, 'UTF-8') ?></label>
+                <label><?= $e($t($labelKey, (string)$fieldKey)) ?></label>
                 <?php if ($fieldType === 'textarea'): ?>
-                    <textarea name="settings[<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" rows="4"><?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?></textarea>
+                    <textarea name="settings[<?= $e((string)$fieldKey) ?>]" rows="4"><?= $e($fieldValue) ?></textarea>
                 <?php elseif ($fieldType === 'select'): ?>
                     <?php $options = (array)($field['options'] ?? []); ?>
-                    <select name="settings[<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]">
+                    <select name="settings[<?= $e((string)$fieldKey) ?>]">
                         <?php foreach ($options as $optionValue => $optionLabel): ?>
                             <?php $value = is_string($optionValue) ? trim($optionValue) : trim((string)$optionLabel); ?>
                             <?php if ($value === '') { continue; } ?>
-                            <option value="<?= htmlspecialchars($value, ENT_QUOTES, 'UTF-8') ?>" <?= $fieldValue === $value ? 'selected' : '' ?>>
-                                <?= htmlspecialchars((string)$optionLabel, ENT_QUOTES, 'UTF-8') ?>
+                            <option value="<?= $e($value) ?>" <?= $fieldValue === $value ? 'selected' : '' ?>>
+                                <?= $e((string)$optionLabel) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -33,21 +33,21 @@
                     <?php $inputName = $fieldKey === 'logo' ? 'logo_file' : 'favicon_file'; ?>
                     <?php $fileInputId = 'settings-file-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>
                     <div class="custom-upload-field">
-                        <label class="btn btn-light custom-upload-button" for="<?= htmlspecialchars($fileInputId, ENT_QUOTES, 'UTF-8') ?>">
+                        <label class="btn btn-light custom-upload-button" for="<?= $e($fileInputId) ?>">
                             <?= $icon('upload') ?>
-                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t('common.upload_add_files'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= $e($t('common.upload_add_files')) ?>"><?= $e($t('common.upload_add_files')) ?></span>
                         </label>
-                        <input id="<?= htmlspecialchars($fileInputId, ENT_QUOTES, 'UTF-8') ?>" type="file" name="<?= htmlspecialchars($inputName, ENT_QUOTES, 'UTF-8') ?>" accept="<?= htmlspecialchars((string)($siteImageUploadAccept ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                        <input id="<?= $e($fileInputId) ?>" type="file" name="<?= $e($inputName) ?>" accept="<?= $e((string)($siteImageUploadAccept ?? '')) ?>">
                     </div>
-                    <small class="text-muted d-block mt-2"><?= htmlspecialchars(sprintf($t('common.allowed_upload_types'), (string)($siteImageUploadTypesLabel ?? '')), ENT_QUOTES, 'UTF-8') ?></small>
+                    <small class="text-muted d-block mt-2"><?= $e(sprintf($t('common.allowed_upload_types'), (string)($siteImageUploadTypesLabel ?? ''))) ?></small>
                     <?php if ($fieldValue !== ''): ?>
                         <div class="mt-2">
-                            <div class="text-muted"><?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?></div>
-                            <img src="<?= htmlspecialchars($url($fieldValue), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?> preview" style="width:32px;height:32px">
+                            <div class="text-muted"><?= $e($fieldValue) ?></div>
+                            <img src="<?= $e($url($fieldValue)) ?>" alt="<?= $e((string)$fieldKey) ?> preview" style="width:32px;height:32px">
                         </div>
                     <?php endif; ?>
                 <?php else: ?>
-                    <input type="text" name="settings[<?= htmlspecialchars((string)$fieldKey, ENT_QUOTES, 'UTF-8') ?>]" value="<?= htmlspecialchars($fieldValue, ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="text" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>">
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>

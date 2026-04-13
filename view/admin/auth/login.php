@@ -3,40 +3,40 @@
         <div class="col-12 col-md-6">
             <div class="card p-5">
                 <div class="auth-logo mb-4">
-                    <img src="<?= htmlspecialchars($url('assets/svg/logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="TinyCMS">
+                    <img src="<?= $e($url('assets/svg/logo.svg')) ?>" alt="TinyCMS">
                 </div>
-                <h1 class="m-0 mb-4"><?= htmlspecialchars($t('auth.login'), ENT_QUOTES, 'UTF-8') ?></h1>
+                <h1 class="m-0 mb-4"><?= $e($t('auth.login')) ?></h1>
                 <?php if ($message !== ''): ?>
-                <p class="mb-3 text-danger"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="mb-3 text-danger"><?= $e($message) ?></p>
                 <?php endif; ?>
-                <form method="post" action="<?= htmlspecialchars($url('admin/login'), ENT_QUOTES, 'UTF-8') ?>">
+                <form method="post" action="<?= $e($url('admin/login')) ?>">
                     <?= $csrfField() ?>
                     <div class="mb-3">
-                        <label><?= htmlspecialchars($t('common.email'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <label><?= $e($t('common.email')) ?></label>
                         <div class="field-with-icon">
                             <span class="field-overlay field-overlay-start field-icon" aria-hidden="true"><?= $icon('email') ?></span>
-                            <input class="field-control-with-start-icon" type="email" name="email" value="<?= htmlspecialchars((string)($old['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
+                            <input class="field-control-with-start-icon" type="email" name="email" value="<?= $e((string)($old['email'] ?? '')) ?>" required>
                         </div>
                         <?php if (!empty($errors['email'])): ?>
-                        <small class="text-danger"><?= htmlspecialchars((string)$errors['email'], ENT_QUOTES, 'UTF-8') ?></small>
+                        <small class="text-danger"><?= $e((string)$errors['email']) ?></small>
                         <?php endif; ?>
                     </div>
                     <div class="mb-4">
-                        <label><?= htmlspecialchars($t('common.password'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <label><?= $e($t('common.password')) ?></label>
                         <div class="field-with-icon">
                             <input class="field-control-with-end-icon" type="password" name="password" data-password-input required>
-                            <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= htmlspecialchars($t('auth.show_password'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('auth.show_password'), ENT_QUOTES, 'UTF-8') ?>">
+                            <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= $e($t('auth.show_password')) ?>" title="<?= $e($t('auth.show_password')) ?>">
                                 <?= $icon('show') ?>
                             </button>
                         </div>
                         <?php if (!empty($errors['password'])): ?>
-                        <small class="text-danger"><?= htmlspecialchars((string)$errors['password'], ENT_QUOTES, 'UTF-8') ?></small>
+                        <small class="text-danger"><?= $e((string)$errors['password']) ?></small>
                         <?php endif; ?>
                     </div>
                     <div class="mb-4">
-                        <label><input type="checkbox" name="remember" value="1" <?= ((int)($old['remember'] ?? 0) === 1) ? 'checked' : '' ?>> <?= htmlspecialchars($t('auth.remember'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <label><input type="checkbox" name="remember" value="1" <?= ((int)($old['remember'] ?? 0) === 1) ? 'checked' : '' ?>> <?= $e($t('auth.remember')) ?></label>
                     </div>
-                    <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('auth.login'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <button class="btn btn-primary" type="submit"><?= $e($t('auth.login')) ?></button>
                 </form>
             </div>
         </div>

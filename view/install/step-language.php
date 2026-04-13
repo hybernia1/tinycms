@@ -2,24 +2,24 @@
     <div class="row">
         <div class="col-12 col-md-6">
             <div class="card p-5">
-                <h1 class="m-0 mb-2"><?= htmlspecialchars($t('install.title'), ENT_QUOTES, 'UTF-8') ?></h1>
-                <p class="text-muted mt-2 mb-4"><?= htmlspecialchars(sprintf($t('install.step'), 1, $t('install.language')), ENT_QUOTES, 'UTF-8') ?></p>
+                <h1 class="m-0 mb-2"><?= $e($t('install.title')) ?></h1>
+                <p class="text-muted mt-2 mb-4"><?= $e(sprintf($t('install.step'), 1, $t('install.language'))) ?></p>
                 <?php if ($message !== ''): ?>
-                <p class="mb-3 text-danger"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="mb-3 text-danger"><?= $e($message) ?></p>
                 <?php endif; ?>
-                <form method="post" action="<?= htmlspecialchars($url('install'), ENT_QUOTES, 'UTF-8') ?>">
+                <form method="post" action="<?= $e($url('install')) ?>">
                     <?= $csrfField() ?>
                     <div class="mb-4">
-                        <label><?= htmlspecialchars($t('install.choose_language'), ENT_QUOTES, 'UTF-8') ?></label>
+                        <label><?= $e($t('install.choose_language')) ?></label>
                         <select name="lang" required>
                             <?php foreach ($locales as $locale): ?>
-                            <option value="<?= htmlspecialchars((string)$locale, ENT_QUOTES, 'UTF-8') ?>"<?= $selectedLang === (string)$locale ? ' selected' : '' ?>>
-                                <?= htmlspecialchars((string)($localeLabels[$locale] ?? strtoupper((string)$locale)), ENT_QUOTES, 'UTF-8') ?>
+                            <option value="<?= $e((string)$locale) ?>"<?= $selectedLang === (string)$locale ? ' selected' : '' ?>>
+                                <?= $e((string)($localeLabels[$locale] ?? strtoupper((string)$locale))) ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <button class="btn btn-primary" type="submit"><?= htmlspecialchars($t('install.language_submit'), ENT_QUOTES, 'UTF-8') ?></button>
+                    <button class="btn btn-primary" type="submit"><?= $e($t('install.language_submit')) ?></button>
                 </form>
             </div>
         </div>
