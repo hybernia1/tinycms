@@ -36,17 +36,6 @@ final class View
         );
     }
 
-    public function renderTheme(string $theme, string $template, array $data = []): void
-    {
-        $base = 'themes/' . trim($theme, '/');
-        $this->renderFiles(
-            $this->resolve($base . '/' . $template . '.php', '/themes/'),
-            $this->resolve($base . '/layout.php', '/themes/'),
-            'theme/' . $theme,
-            $data
-        );
-    }
-
     private function renderFiles(string $templateFile, string $layoutFile, string $layout, array $data = []): void
     {
         $url = fn(string $path = ''): string => $this->router->url($path);

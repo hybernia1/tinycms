@@ -496,23 +496,6 @@ final class ContentService
         ];
     }
 
-    public function sitemapPublishedPage(int $page = 1, int $perPage = 2000): array
-    {
-        $safePerPage = $perPage > 0 ? $perPage : 2000;
-        $safePage = $page > 0 ? $page : 1;
-        $offset = ($safePage - 1) * $safePerPage;
-        $contentTable = Table::name('content');
-        $stmt = $this->pdo->prepare(
-            "SELECT id, name, updated, created FROM $contentTable WHERE status = :status AND created <= NOW() ORDER BY id ASC LIMIT :limit OFFSET :offset"
-        );
-        $stmt->bindValue(':status', 'published');
-        $stmt->bindValue(':limit', $safePerPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
     public function publishedVisibleCount(): int
     {
         $contentTable = Table::name('content');
