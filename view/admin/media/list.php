@@ -5,7 +5,7 @@ $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
 ];
-$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t): string {
+$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $e): string {
     $id = (int)($row['id'] ?? 0);
     $previewPath = trim((string)($row['preview_path'] ?? ''));
     if ($previewPath === '') {
@@ -22,23 +22,23 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
             <div class="d-flex align-center gap-2">
                 <?php if ($previewUrl !== ''): ?>
                     <div class="media-list-thumb">
-                        <img src="<?= htmlspecialchars($previewUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                        <img src="<?= $e($previewUrl) ?>" alt="<?= $e((string)($row['name'] ?? '')) ?>">
                     </div>
                 <?php else: ?>
                     <div class="media-list-thumb media-list-thumb-empty"></div>
                 <?php endif; ?>
                 <div>
-                    <a href="<?= htmlspecialchars($url('admin/media/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-                    <div class="text-muted small"><?= htmlspecialchars((string)($row['path'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
-                    <div class="text-muted small"><?= htmlspecialchars($formatDateTime((string)($row['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
+                    <a href="<?= $e($url('admin/media/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+                    <div class="text-muted small"><?= $e((string)($row['path'] ?? '')) ?></div>
+                    <div class="text-muted small"><?= $e($formatDateTime((string)($row['created'] ?? ''))) ?></div>
                 </div>
             </div>
         </td>
-        <td class="mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+        <td class="mobile-hide"><?= $e((string)($row['author_name'] ?? '—')) ?></td>
         <td class="table-col-actions">
-            <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?>">
+            <button class="btn btn-light btn-icon" type="button" data-media-delete-open="<?= $id ?>" aria-label="<?= $e($t('media.delete')) ?>" title="<?= $e($t('media.delete')) ?>">
                 <?= $icon('delete') ?>
-                <span class="sr-only"><?= htmlspecialchars($t('media.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span class="sr-only"><?= $e($t('media.delete')) ?></span>
             </button>
         </td>
     </tr>

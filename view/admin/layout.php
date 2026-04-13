@@ -5,33 +5,33 @@ $authUser = $_SESSION['auth'] ?? null;
 $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 ?>
 <!doctype html>
-<html lang="<?= htmlspecialchars((string)$lang, ENT_QUOTES, 'UTF-8') ?>">
+<html lang="<?= $e((string)$lang) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?> | <?= htmlspecialchars($t('admin.title_suffix'), ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= $e((string)$pageTitle) ?> | <?= $e($t('admin.title_suffix')) ?></title>
     <?php if (!empty($siteFavicon)): ?>
-        <link rel="icon" href="<?= htmlspecialchars($url((string)$siteFavicon), ENT_QUOTES, 'UTF-8') ?>">
+        <link rel="icon" href="<?= $e($url((string)$siteFavicon)) ?>">
     <?php endif; ?>
-    <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/style.css'), ENT_QUOTES, 'UTF-8') ?>">
-    <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/css/admin.css'), ENT_QUOTES, 'UTF-8') ?>">
-    <link rel="stylesheet" href="<?= htmlspecialchars($url('assets/editor/style.css'), ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="stylesheet" href="<?= $e($url('assets/css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= $e($url('assets/css/admin.css')) ?>">
+    <link rel="stylesheet" href="<?= $e($url('assets/editor/style.css')) ?>">
     <script>window.tinycmsI18n = <?= json_encode($adminI18n ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/i18n.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/api.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/flash.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/loader.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/modal.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/admin-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/custom-select.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/custom-datetime.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/password-toggle.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/custom-upload.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/media-library-modal.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/tag-picker.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/content-autosave.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/js/action-menu.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script defer src="<?= htmlspecialchars($url('assets/editor/editor.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script defer src="<?= $e($url('assets/js/i18n.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/api.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/flash.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/loader.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/modal.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/admin-menu.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/custom-select.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/custom-datetime.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/password-toggle.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/custom-upload.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/media-library-modal.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/tag-picker.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/content-autosave.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/js/action-menu.js')) ?>"></script>
+    <script defer src="<?= $e($url('assets/editor/editor.js')) ?>"></script>
 </head>
 <body>
 <script>
@@ -44,8 +44,8 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 </script>
 <div class="admin-shell">
     <aside class="admin-sidebar">
-        <a class="admin-brand" href="<?= htmlspecialchars($url('admin/dashboard'), ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($t('admin.brand'), ENT_QUOTES, 'UTF-8') ?>">
-            <img src="<?= htmlspecialchars($url('assets/svg/logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
+        <a class="admin-brand" href="<?= $e($url('admin/dashboard')) ?>" aria-label="<?= $e($t('admin.brand')) ?>">
+            <img src="<?= $e($url('assets/svg/logo.svg')) ?>" alt="">
         </a>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
@@ -53,23 +53,23 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 $itemPath = trim(parse_url($itemUrl, PHP_URL_PATH) ?? '', '/');
                 $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
             ?>
-            <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= htmlspecialchars((string)$item['url'], ENT_QUOTES, 'UTF-8') ?>">
+            <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= $e((string)$item['url']) ?>">
                 <?php if (!empty($item['icon'])): ?>
                 <?= $icon((string)$item['icon'], 'icon admin-nav-link-icon') ?>
                 <?php endif; ?>
-                <span><?= htmlspecialchars((string)$item['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                <span><?= $e((string)$item['label']) ?></span>
             </a>
             <?php endforeach; ?>
         </nav>
         <div class="admin-sidebar-bottom">
             <?php if (is_array($authUser)): ?>
             <div class="admin-user-meta">
-                <div class="admin-user-name"><?= htmlspecialchars((string)($authUser['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="admin-user-name"><?= $e((string)($authUser['name'] ?? '')) ?></div>
             </div>
             <?php endif; ?>
-            <a class="admin-nav-link" href="<?= htmlspecialchars($url('admin/logout'), ENT_QUOTES, 'UTF-8') ?>">
+            <a class="admin-nav-link" href="<?= $e($url('admin/logout')) ?>">
                 <?= $icon('logout') ?>
-                <span><?= htmlspecialchars($t('admin.logout'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span><?= $e($t('admin.logout')) ?></span>
             </a>
         </div>
     </aside>
@@ -77,44 +77,44 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <main class="admin-main">
         <div class="admin-header-spacer d-flex justify-between align-center p-2">
             <div class="d-flex align-center gap-2">
-                <button class="btn btn-light btn-icon admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-label="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>">
+                <button class="btn btn-light btn-icon admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-label="<?= $e($t('admin.open_menu')) ?>" title="<?= $e($t('admin.open_menu')) ?>">
                     <?= $icon('menu') ?>
-                    <span class="sr-only"><?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="sr-only"><?= $e($t('admin.open_menu')) ?></span>
                 </button>
-                <button class="btn btn-light btn-icon admin-menu-toggle" type="button" data-admin-menu-toggle aria-label="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?>">
+                <button class="btn btn-light btn-icon admin-menu-toggle" type="button" data-admin-menu-toggle aria-label="<?= $e($t('admin.open_menu')) ?>" title="<?= $e($t('admin.open_menu')) ?>">
                     <?= $icon('menu') ?>
-                    <span class="sr-only"><?= htmlspecialchars($t('admin.open_menu'), ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="sr-only"><?= $e($t('admin.open_menu')) ?></span>
                 </button>
-                <strong data-admin-page-title><?= htmlspecialchars((string)$pageTitle, ENT_QUOTES, 'UTF-8') ?></strong>
+                <strong data-admin-page-title><?= $e((string)$pageTitle) ?></strong>
             </div>
             <?php if (($headerAction['type'] ?? '') === 'submit'): ?>
-                <button class="btn btn-primary" type="button" data-save-action-form-submit="<?= htmlspecialchars((string)($headerAction['form'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
-                    <span><?= htmlspecialchars((string)($headerAction['label'] ?? $t('common.save')), ENT_QUOTES, 'UTF-8') ?></span>
+                <button class="btn btn-primary" type="button" data-save-action-form-submit="<?= $e((string)($headerAction['form'] ?? '')) ?>">
+                    <span><?= $e((string)($headerAction['label'] ?? $t('common.save'))) ?></span>
                 </button>
             <?php elseif (($headerAction['type'] ?? '') === 'link'): ?>
-                <a class="btn btn-primary" href="<?= htmlspecialchars($url((string)($headerAction['href'] ?? '')), ENT_QUOTES, 'UTF-8') ?>">
+                <a class="btn btn-primary" href="<?= $e($url((string)($headerAction['href'] ?? ''))) ?>">
                     <?= $icon((string)($headerAction['icon'] ?? 'add')) ?>
-                    <span><?= htmlspecialchars((string)($headerAction['label'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                    <span><?= $e((string)($headerAction['label'] ?? '')) ?></span>
                 </a>
             <?php elseif (($headerAction['type'] ?? '') === 'save-menu'): ?>
-                <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="<?= htmlspecialchars((string)($headerAction['form'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="<?= $e((string)($headerAction['form'] ?? '')) ?>">
                     <div class="admin-header-action-split">
                         <button class="btn btn-primary admin-header-action-main" type="button" data-save-action-primary>
-                            <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span><?= $e($t('common.save')) ?></span>
                         </button>
-                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-save-action-toggle aria-expanded="false" aria-label="<?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?>">
+                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-save-action-toggle aria-expanded="false" aria-label="<?= $e($t('common.actions')) ?>">
                             <?= $icon('next', 'icon content-action-summary-arrow') ?>
                         </button>
                     </div>
                     <div class="admin-header-action-options" hidden>
                         <div class="admin-header-action-group">
                             <button class="btn btn-light admin-header-action-option" type="button" data-save-action-submit>
-                                <span><?= htmlspecialchars($t('common.save'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <span><?= $e($t('common.save')) ?></span>
                             </button>
                         </div>
                         <div class="admin-header-action-group admin-header-action-group-danger">
-                            <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete data-modal-open data-modal-target="<?= htmlspecialchars((string)($headerAction['delete_modal_target'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
-                                <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete data-modal-open data-modal-target="<?= $e((string)($headerAction['delete_modal_target'] ?? '')) ?>">
+                                <span><?= $e($t('common.delete')) ?></span>
                                 <?= $icon('delete') ?>
                             </button>
                         </div>
@@ -124,20 +124,20 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 <div class="admin-header-action-menu" data-content-action-menu>
                     <div class="admin-header-action-split">
                         <button class="btn btn-primary admin-header-action-main" type="button" data-content-action-primary>
-                            <span data-content-action-label><?= htmlspecialchars($t('content.statuses.draft'), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span data-content-action-label><?= $e($t('content.statuses.draft')) ?></span>
                         </button>
-                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-content-action-toggle aria-expanded="false" aria-label="<?= htmlspecialchars($t('common.actions'), ENT_QUOTES, 'UTF-8') ?>">
+                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-content-action-toggle aria-expanded="false" aria-label="<?= $e($t('common.actions')) ?>">
                             <?= $icon('next', 'icon content-action-summary-arrow') ?>
                         </button>
                     </div>
                     <div class="admin-header-action-options" hidden>
                         <div class="admin-header-action-group">
                             <button class="btn btn-light admin-header-action-option" type="button" data-content-action-submit="published">
-                                <span><?= htmlspecialchars($t('content.publish'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <span><?= $e($t('content.publish')) ?></span>
                                 <span data-content-action-check="published"><?= $icon('success') ?></span>
                             </button>
                             <button class="btn btn-light admin-header-action-option" type="button" data-content-action-submit="draft">
-                                <span><?= htmlspecialchars($t('content.statuses.draft'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <span><?= $e($t('content.statuses.draft')) ?></span>
                                 <span data-content-action-check="draft"><?= $icon('success') ?></span>
                             </button>
                         </div>
@@ -151,9 +151,9 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                                 type="button"
                                 data-content-action-delete
                                 data-modal-open
-                                data-modal-target="<?= htmlspecialchars((string)($headerAction['delete_modal_target'] ?? '#content-delete-modal'), ENT_QUOTES, 'UTF-8') ?>"
+                                data-modal-target="<?= $e((string)($headerAction['delete_modal_target'] ?? '#content-delete-modal')) ?>"
                             >
-                                <span><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                                <span><?= $e($t('common.delete')) ?></span>
                                 <?= $icon('delete') ?>
                             </button>
                         </div>
@@ -165,9 +165,9 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
             <?php foreach ($flashes as $flash): ?>
             <?php $flashType = (string)($flash['type'] ?? 'warning'); ?>
             <?php $flashIcon = $flashType === 'success' ? 'success' : ($flashType === 'error' ? 'error' : 'warning'); ?>
-            <div class="flash flash-<?= htmlspecialchars($flashType === 'info' ? 'warning' : $flashType, ENT_QUOTES, 'UTF-8') ?>">
-                <span class="d-flex align-center gap-2"><?= $icon($flashIcon) ?><span><?= htmlspecialchars((string)($flash['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></span>
-                <button type="button" data-flash-close aria-label="<?= htmlspecialchars($t('admin.close_notice'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('admin.close_notice'), ENT_QUOTES, 'UTF-8') ?>">
+            <div class="flash flash-<?= $e($flashType === 'info' ? 'warning' : $flashType) ?>">
+                <span class="d-flex align-center gap-2"><?= $icon($flashIcon) ?><span><?= $e((string)($flash['message'] ?? '')) ?></span></span>
+                <button type="button" data-flash-close aria-label="<?= $e($t('admin.close_notice')) ?>" title="<?= $e($t('admin.close_notice')) ?>">
                     <?= $icon('cancel') ?>
                 </button>
             </div>
@@ -175,7 +175,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
             <?= $content ?>
         </section>
     </main>
-    <div class="admin-version-corner">TinyCMS <?= htmlspecialchars((string)($appVersion ?? '0.9.0'), ENT_QUOTES, 'UTF-8') ?></div>
+    <div class="admin-version-corner">TinyCMS <?= $e((string)($appVersion ?? '0.9.0')) ?></div>
 </div>
 </body>
 </html>

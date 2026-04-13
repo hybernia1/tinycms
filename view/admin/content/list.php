@@ -5,7 +5,7 @@ $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ??
 foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue)) . ' (' . (int)($statusCounts[$statusValue] ?? 0) . ')';
 }
-$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $csrfField): string {
+$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $csrfField, $e): string {
     $id = (int)($row['id'] ?? 0);
     $createdAtRaw = (string)($row['created'] ?? '');
     $createdAt = $formatDateTime($createdAtRaw);
@@ -21,32 +21,32 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
             <?php $statusIcon = $statusValue === 'published' ? 'success' : ($statusValue === 'draft' ? 'concept' : 'warning'); ?>
             <span class="d-flex align-center gap-2">
                 <?php if ($statusIcon !== ''): ?><?= $icon($statusIcon) ?><?php endif; ?>
-                <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
+                <a href="<?= $e($url('admin/content/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
             </span>
-            <div class="text-muted small"><?= htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8') ?></div>
-            <?php if ($isPlanned): ?><div class="mt-2"><span class="badge text-bg-warning"><?= htmlspecialchars($t('content.planned'), ENT_QUOTES, 'UTF-8') ?></span></div><?php endif; ?>
+            <div class="text-muted small"><?= $e($createdAt) ?></div>
+            <?php if ($isPlanned): ?><div class="mt-2"><span class="badge text-bg-warning"><?= $e($t('content.planned')) ?></span></div><?php endif; ?>
         </td>
-        <td class="mobile-hide"><?= htmlspecialchars((string)($row['author_name'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+        <td class="mobile-hide"><?= $e((string)($row['author_name'] ?? '—')) ?></td>
         <td class="table-col-actions">
             <?php if (!$isTrash): ?>
-                <form method="post" action="<?= htmlspecialchars($url('admin/api/v1/content/' . $id . '/status'), ENT_QUOTES, 'UTF-8') ?>" class="inline-form">
+                <form method="post" action="<?= $e($url('admin/api/v1/content/' . $id . '/status')) ?>" class="inline-form">
                     <?= $csrfField() ?>
                     <input type="hidden" name="id" value="<?= $id ?>">
                     <input type="hidden" name="mode" value="<?= $isPublished ? 'draft' : 'publish' ?>">
-                    <button class="btn btn-light btn-icon" type="button" data-content-toggle="<?= $id ?>" data-content-mode="<?= $isPublished ? 'draft' : 'publish' ?>" aria-label="<?= htmlspecialchars($isPublished ? $t('content.switch_to_draft') : $t('content.publish'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($isPublished ? $t('content.switch_to_draft') : $t('content.publish'), ENT_QUOTES, 'UTF-8') ?>">
+                    <button class="btn btn-light btn-icon" type="button" data-content-toggle="<?= $id ?>" data-content-mode="<?= $isPublished ? 'draft' : 'publish' ?>" aria-label="<?= $e($isPublished ? $t('content.switch_to_draft') : $t('content.publish')) ?>" title="<?= $e($isPublished ? $t('content.switch_to_draft') : $t('content.publish')) ?>">
                         <?= $icon($isPublished ? 'hide' : 'show') ?>
-                        <span class="sr-only"><?= htmlspecialchars($isPublished ? $t('content.switch_to_draft') : $t('content.publish'), ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="sr-only"><?= $e($isPublished ? $t('content.switch_to_draft') : $t('content.publish')) ?></span>
                     </button>
                 </form>
             <?php else: ?>
-                <button class="btn btn-light btn-icon" type="button" data-content-restore="<?= $id ?>" aria-label="<?= htmlspecialchars($t('content.restore'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('content.restore'), ENT_QUOTES, 'UTF-8') ?>">
+                <button class="btn btn-light btn-icon" type="button" data-content-restore="<?= $id ?>" aria-label="<?= $e($t('content.restore')) ?>" title="<?= $e($t('content.restore')) ?>">
                     <?= $icon('restore') ?>
-                    <span class="sr-only"><?= htmlspecialchars($t('content.restore'), ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="sr-only"><?= $e($t('content.restore')) ?></span>
                 </button>
             <?php endif; ?>
-            <button class="btn btn-light btn-icon" type="button" data-content-delete-open="<?= $id ?>" data-content-delete-mode="<?= $isTrash ? 'hard' : 'soft' ?>" aria-label="<?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?>">
+            <button class="btn btn-light btn-icon" type="button" data-content-delete-open="<?= $id ?>" data-content-delete-mode="<?= $isTrash ? 'hard' : 'soft' ?>" aria-label="<?= $e($t('common.delete')) ?>" title="<?= $e($t('common.delete')) ?>">
                 <?= $icon('delete') ?>
-                <span class="sr-only"><?= htmlspecialchars($t('common.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span class="sr-only"><?= $e($t('common.delete')) ?></span>
             </button>
         </td>
     </tr>

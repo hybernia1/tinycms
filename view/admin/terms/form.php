@@ -1,39 +1,39 @@
 <form
     id="terms-form"
     method="post"
-    action="<?= htmlspecialchars($mode === 'add' ? $url('admin/api/v1/terms/add') : $url('admin/api/v1/terms/' . (int)($item['id'] ?? 0) . '/edit'), ENT_QUOTES, 'UTF-8') ?>"
+    action="<?= $e($mode === 'add' ? $url('admin/api/v1/terms/add') : $url('admin/api/v1/terms/' . (int)($item['id'] ?? 0) . '/edit')) ?>"
     data-api-submit
-    <?= $mode === 'add' ? 'data-redirect-url="' . htmlspecialchars($url('admin/terms'), ENT_QUOTES, 'UTF-8') . '"' : 'data-stay-on-page' ?>
+    <?= $mode === 'add' ? 'data-redirect-url="' . $e($url('admin/terms')) . '"' : 'data-stay-on-page' ?>
 >
     <?= $csrfField() ?>
     <div class="card p-4">
         <div class="mb-3">
-            <label><?= htmlspecialchars($t('common.name'), ENT_QUOTES, 'UTF-8') ?></label>
-            <input type="text" name="name" value="<?= htmlspecialchars((string)($item['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required>
-            <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= htmlspecialchars((string)$errors['name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+            <label><?= $e($t('common.name')) ?></label>
+            <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" required>
+            <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
         </div>
         <?php if ($mode === 'edit'): ?>
-            <h3 class="mb-3"><?= htmlspecialchars($t('terms.used_in'), ENT_QUOTES, 'UTF-8') ?></h3>
+            <h3 class="mb-3"><?= $e($t('terms.used_in')) ?></h3>
             <?php if (($usages ?? []) === []): ?>
-                <p class="text-muted m-0"><?= htmlspecialchars($t('terms.no_usage'), ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="text-muted m-0"><?= $e($t('terms.no_usage')) ?></p>
             <?php else: ?>
                 <div class="table-responsive mb-3">
                     <table class="table">
                         <thead>
                         <tr>
-                            <th><?= htmlspecialchars($t('content.post'), ENT_QUOTES, 'UTF-8') ?></th>
-                            <th><?= htmlspecialchars($t('common.created'), ENT_QUOTES, 'UTF-8') ?></th>
+                            <th><?= $e($t('content.post')) ?></th>
+                            <th><?= $e($t('common.created')) ?></th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($usages as $usage): ?>
                             <tr>
                                 <td>
-                                    <a href="<?= htmlspecialchars($url('admin/content/edit?id=' . (int)($usage['id'] ?? 0)), ENT_QUOTES, 'UTF-8') ?>">
-                                        <?= htmlspecialchars((string)($usage['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                                    <a href="<?= $e($url('admin/content/edit?id=' . (int)($usage['id'] ?? 0))) ?>">
+                                        <?= $e((string)($usage['name'] ?? '')) ?>
                                     </a>
                                 </td>
-                                <td><?= htmlspecialchars($formatDateTime((string)($usage['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= $e($formatDateTime((string)($usage['created'] ?? ''))) ?></td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>

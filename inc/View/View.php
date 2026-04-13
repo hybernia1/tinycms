@@ -39,6 +39,7 @@ final class View
     private function renderFiles(string $templateFile, string $layoutFile, string $layout, array $data = []): void
     {
         $url = fn(string $path = ''): string => $this->router->url($path);
+        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
         $absoluteUrl = static function (string $path = '') use ($url): string {
             $value = trim($path);
             if ($value === '') {
@@ -58,9 +59,9 @@ final class View
             $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
             return $scheme . '://' . $host . $resolved;
         };
-        $icon = static function (string $name, string $classes = 'icon') use ($url): string {
-            $sprite = htmlspecialchars($url('assets/svg/icons.svg#icon-' . $name), ENT_QUOTES, 'UTF-8');
-            $classAttr = htmlspecialchars($classes, ENT_QUOTES, 'UTF-8');
+        $icon = static function (string $name, string $classes = 'icon') use ($url, $e): string {
+            $sprite = $e($url('assets/svg/icons.svg#icon-' . $name));
+            $classAttr = $e($classes);
             return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
         };
         $csrfField = fn(string $name = '_csrf'): string => $this->csrf->field($name);
@@ -84,6 +85,7 @@ final class View
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
         $data['icon'] = $icon;
+        $data['e'] = $e;
         $data['csrfField'] = $csrfField;
         $data['formatDate'] = $formatDate;
         $data['formatDateTime'] = $formatDateTime;

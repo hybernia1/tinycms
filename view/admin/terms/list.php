@@ -5,19 +5,19 @@ $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('terms.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
 ];
-$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t): string {
+$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $e): string {
     $id = (int)($row['id'] ?? 0);
     ob_start();
     ?>
     <tr>
         <td>
-            <a href="<?= htmlspecialchars($url('admin/terms/edit?id=' . $id), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($row['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></a>
-            <div class="text-muted small"><?= htmlspecialchars($formatDateTime((string)($row['created'] ?? '')), ENT_QUOTES, 'UTF-8') ?></div>
+            <a href="<?= $e($url('admin/terms/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+            <div class="text-muted small"><?= $e($formatDateTime((string)($row['created'] ?? ''))) ?></div>
         </td>
         <td class="table-col-actions">
-            <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="<?= $id ?>" aria-label="<?= htmlspecialchars($t('terms.delete'), ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($t('terms.delete'), ENT_QUOTES, 'UTF-8') ?>">
+            <button class="btn btn-light btn-icon" type="button" data-terms-delete-open="<?= $id ?>" aria-label="<?= $e($t('terms.delete')) ?>" title="<?= $e($t('terms.delete')) ?>">
                 <?= $icon('delete') ?>
-                <span class="sr-only"><?= htmlspecialchars($t('terms.delete'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span class="sr-only"><?= $e($t('terms.delete')) ?></span>
             </button>
         </td>
     </tr>
