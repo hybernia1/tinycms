@@ -6,7 +6,7 @@ $statusLinks = [
     'active' => $t('users.status.active') . ' (' . (int)($statusCounts['active'] ?? 0) . ')',
     'suspended' => $t('users.status.suspended') . ' (' . (int)($statusCounts['suspended'] ?? 0) . ')',
 ];
-$rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField): string {
+$rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField, $e): string {
     $id = (int)($row['ID'] ?? 0);
     $isAdmin = (string)($row['role'] ?? '') === 'admin';
     $isSuspended = (int)($row['suspend'] ?? 0) === 1;

@@ -5,7 +5,7 @@ $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ??
 foreach ($availableStatuses as $statusValue) {
     $statusLinks[$statusValue] = $t('content.statuses.' . $statusValue, ucfirst($statusValue)) . ' (' . (int)($statusCounts[$statusValue] ?? 0) . ')';
 }
-$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $csrfField): string {
+$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $csrfField, $e): string {
     $id = (int)($row['id'] ?? 0);
     $createdAtRaw = (string)($row['created'] ?? '');
     $createdAt = $formatDateTime($createdAtRaw);

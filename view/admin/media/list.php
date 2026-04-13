@@ -5,7 +5,7 @@ $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
 ];
-$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t): string {
+$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $e): string {
     $id = (int)($row['id'] ?? 0);
     $previewPath = trim((string)($row['preview_path'] ?? ''));
     if ($previewPath === '') {
