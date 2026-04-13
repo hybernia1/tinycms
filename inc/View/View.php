@@ -16,7 +16,6 @@ final class View
     private FlashService $flash;
     private CsrfService $csrf;
     private DateTimeFormatter $dateTimeFormatter;
-    private MetaHead $metaHead;
 
     public function __construct(string $rootPath, Router $router, FlashService $flash, CsrfService $csrf, DateTimeFormatter $dateTimeFormatter)
     {
@@ -25,7 +24,6 @@ final class View
         $this->flash = $flash;
         $this->csrf = $csrf;
         $this->dateTimeFormatter = $dateTimeFormatter;
-        $this->metaHead = new MetaHead();
     }
 
     public function render(string $layout, string $template, array $data = []): void
@@ -81,7 +79,6 @@ final class View
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
-        $renderFrontHead = fn(array $options = []): string => $this->metaHead->render($options);
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -104,7 +101,6 @@ final class View
         $data['formatInputDateTime'] = $formatInputDateTime;
         $data['absoluteUrl'] = $absoluteUrl;
         $data['t'] = $t;
-        $data['renderFrontHead'] = $renderFrontHead;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);
