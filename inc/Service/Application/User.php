@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service\Feature;
+namespace App\Service\Application;
 
-use App\Service\Infra\Db\Connection;
-use App\Service\Infra\Db\Query;
-use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
+use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
-final class UserService
+final class User
 {
     private Query $query;
     private SchemaConstraintValidator $columnLimitValidator;

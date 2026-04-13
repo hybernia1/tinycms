@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Service\Auth;
 
-use App\Service\Infra\Db\Connection;
-use App\Service\Infra\Db\Query;
+use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
 
 class Auth
 {

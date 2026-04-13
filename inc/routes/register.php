@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use App\Service\Infra\Router\Router;
+use App\Service\Infrastructure\Router\Router;
 
 if (!function_exists('register_routes')) {
     function register_routes(Router $router, callable $redirect, array $routes): void

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service\Support;
 
-final class SluggerService
+final class Slugger
 {
     public function slug(string $name, int $id): string
     {

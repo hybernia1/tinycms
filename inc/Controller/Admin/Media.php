@@ -1,25 +1,25 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Admin;
 
-use App\Service\Feature\AuthService;
-use App\Service\Feature\MediaService;
-use App\Service\Feature\UploadService;
-use App\Service\Support\CsrfService;
-use App\Service\Support\FlashService;
+use App\Service\Application\Auth;
+use App\Service\Application\Media as MediaService;
+use App\Service\Application\Upload as UploadService;
+use App\Service\Support\Csrf;
+use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\View\AdminView;
 
-final class AdminMediaController extends BaseAdminController
+final class Media extends BaseAdmin
 {
     public function __construct(
         private AdminView $pages,
-        AuthService $authService,
+        Auth $authService,
         private MediaService $media,
         private UploadService $upload,
-        FlashService $flash,
-        CsrfService $csrf
+        Flash $flash,
+        Csrf $csrf
     ) {
         parent::__construct($authService, $flash, $csrf);
     }

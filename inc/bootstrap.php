@@ -3,29 +3,29 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/autoload.php';
 
-use App\Controller\AdminController;
-use App\Controller\AdminContentController;
-use App\Controller\AdminContentMediaApiController;
-use App\Controller\AdminMediaController;
-use App\Controller\AdminSettingsController;
-use App\Controller\AdminTermController;
-use App\Controller\AdminUserController;
-use App\Controller\InstallController;
-use App\Service\Auth\Auth;
-use App\Service\Feature\AuthService;
-use App\Service\Feature\ContentService;
-use App\Service\Feature\InstallService;
-use App\Service\Feature\MediaService;
-use App\Service\Feature\UploadService;
-use App\Service\Feature\TermService;
-use App\Service\Support\CsrfService;
+use App\Controller\Admin\Admin as AdminController;
+use App\Controller\Admin\Content as ContentController;
+use App\Controller\Admin\ContentMedia as ContentMediaController;
+use App\Controller\Admin\Media as MediaController;
+use App\Controller\Admin\Settings as SettingsController;
+use App\Controller\Admin\Term as TermController;
+use App\Controller\Admin\User as UserController;
+use App\Controller\Install\Install as InstallController;
+use App\Service\Auth\Auth as SessionAuth;
+use App\Service\Application\Auth as AppAuth;
+use App\Service\Application\Content as ContentService;
+use App\Service\Application\Install as InstallService;
+use App\Service\Application\Media as MediaService;
+use App\Service\Application\Upload as UploadService;
+use App\Service\Application\Term as TermService;
+use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
-use App\Service\Support\FlashService;
-use App\Service\Infra\Router\Router;
-use App\Service\Feature\SettingsService;
+use App\Service\Support\Flash;
+use App\Service\Infrastructure\Router\Router;
+use App\Service\Application\Settings as SettingsService;
 use App\Service\Support\I18n;
-use App\Service\Support\SluggerService;
-use App\Service\Feature\UserService;
+use App\Service\Support\Slugger;
+use App\Service\Application\User as UserService;
 use App\View\AdminView;
 use App\View\View;
 
@@ -34,8 +34,8 @@ $baseDir = trim(dirname($scriptName), '/.');
 $basePath = $baseDir === '' ? '' : '/' . $baseDir;
 
 $router = new Router($basePath);
-$flash = new FlashService();
-$csrf = new CsrfService();
+$flash = new Flash();
+$csrf = new Csrf();
 $dateTimeFormatter = new DateTimeFormatter(APP_DATE_FORMAT, APP_DATETIME_FORMAT);
 $view = new View(dirname(__DIR__), $router, $flash, $csrf, $dateTimeFormatter);
 
@@ -79,24 +79,24 @@ if (str_starts_with($requestPath, 'install')) {
     $redirect('admin/dashboard');
 }
 
-$auth = new Auth();
-$authService = new AuthService($auth);
+$auth = new SessionAuth();
+$authService = new AppAuth($auth);
 $userService = new UserService();
 $contentService = new ContentService();
 $mediaService = new MediaService();
-$slugger = new SluggerService();
+$slugger = new Slugger();
 $uploadService = new UploadService(dirname(__DIR__), $slugger);
 $settingsService = new SettingsService();
 I18n::setLocale((string)($settingsService->resolved()['app_lang'] ?? APP_LANG));
 $termService = new TermService();
 $adminView = new AdminView($view, $settingsService);
 $admin = new AdminController($adminView, $authService, $flash, $csrf);
-$adminUsers = new AdminUserController($adminView, $authService, $userService, $flash, $csrf);
-$adminContent = new AdminContentController($adminView, $authService, $contentService, $userService, $termService, $flash, $csrf);
-$adminContentMediaApi = new AdminContentMediaApiController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
-$adminMedia = new AdminMediaController($adminView, $authService, $mediaService, $uploadService, $flash, $csrf);
-$adminSettings = new AdminSettingsController($adminView, $authService, $settingsService, $uploadService, $flash, $csrf);
-$adminTerms = new AdminTermController($adminView, $authService, $termService, $flash, $csrf);
+$adminUsers = new UserController($adminView, $authService, $userService, $flash, $csrf);
+$adminContent = new ContentController($adminView, $authService, $contentService, $userService, $termService, $flash, $csrf);
+$adminContentMediaApi = new ContentMediaController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
+$adminMedia = new MediaController($adminView, $authService, $mediaService, $uploadService, $flash, $csrf);
+$adminSettings = new SettingsController($adminView, $authService, $settingsService, $uploadService, $flash, $csrf);
+$adminTerms = new TermController($adminView, $authService, $termService, $flash, $csrf);
 
 require __DIR__ . '/routes/admin.php';
 

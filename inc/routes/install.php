@@ -1,30 +1,15 @@
 <?php
 declare(strict_types=1);
 
-$router->get('install', static function () use ($install): void {
-    $install->formLanguage();
-});
+register_routes($router, $redirect, [
+    ['method' => 'GET', 'path' => 'install', 'controller' => $install, 'action' => 'formLanguage', 'with_redirect' => false],
+    ['method' => 'POST', 'path' => 'install', 'controller' => $install, 'action' => 'submitLanguage'],
 
-$router->post('install', static function () use ($install, $redirect): void {
-    $install->submitLanguage($redirect);
-});
+    ['method' => 'GET', 'path' => 'install/db', 'controller' => $install, 'action' => 'formDb', 'with_redirect' => false],
+    ['method' => 'POST', 'path' => 'install/db', 'controller' => $install, 'action' => 'submitDb'],
 
-$router->get('install/db', static function () use ($install): void {
-    $install->formDb();
-});
+    ['method' => 'GET', 'path' => 'install/admin', 'controller' => $install, 'action' => 'formAdmin'],
+    ['method' => 'POST', 'path' => 'install/admin', 'controller' => $install, 'action' => 'submitAdmin'],
 
-$router->post('install/db', static function () use ($install, $redirect): void {
-    $install->submitDb($redirect);
-});
-
-$router->get('install/admin', static function () use ($install, $redirect): void {
-    $install->formAdmin($redirect);
-});
-
-$router->post('install/admin', static function () use ($install, $redirect): void {
-    $install->submitAdmin($redirect);
-});
-
-$router->get('install/done', static function () use ($install, $redirect): void {
-    $install->done($redirect);
-});
+    ['method' => 'GET', 'path' => 'install/done', 'controller' => $install, 'action' => 'done'],
+]);

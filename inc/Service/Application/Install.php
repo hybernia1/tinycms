@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service\Feature;
+namespace App\Service\Application;
 
-use App\Service\Infra\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Support\I18n;
 use PDO;
 use PDOException;
 
-final class InstallService
+final class Install
 {
     private SchemaConstraintValidator $schemaValidator;
 

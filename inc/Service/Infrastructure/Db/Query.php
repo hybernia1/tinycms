@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service\Infra\Db;
+namespace App\Service\Infrastructure\Db;
 
 use InvalidArgumentException;
 use PDO;
 use PDOException;
 use App\Service\Support\I18n;
-use App\Service\Infra\Db\Table;
+use App\Service\Infrastructure\Db\Table;
 
 class Query
 {
