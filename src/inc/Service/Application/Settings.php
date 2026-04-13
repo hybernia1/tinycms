@@ -36,7 +36,18 @@ final class Settings
             'meta_title' => ['label_key' => 'settings.fields.meta_title', 'type' => 'text', 'default' => 'TinyCMS'],
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
             'google_api_key' => ['label_key' => 'settings.fields.google_api_key', 'type' => 'password', 'default' => ''],
-            'google_api_model' => ['label_key' => 'settings.fields.google_api_model', 'type' => 'text', 'default' => 'gemma-3-27b-it'],
+            'google_api_model' => [
+                'label_key' => 'settings.fields.google_api_model',
+                'type' => 'select',
+                'default' => 'gemma-3-27b-it',
+                'options' => [
+                    'gemma-3-27b-it' => 'gemma-3-27b-it',
+                    'gemini-2.0-flash' => 'gemini-2.0-flash',
+                    'gemini-2.5-flash' => 'gemini-2.5-flash',
+                    'gemini-2.5-pro' => 'gemini-2.5-pro',
+                    'gemini-3-flash-latest' => 'gemini-3-flash-latest',
+                ],
+            ],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
             'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
         ];
