@@ -389,32 +389,52 @@ final class Content extends BaseAdmin
             return;
         }
 
+        $text = (string)($result['text'] ?? '');
+        if ($target === 'body') {
+            $text = $this->extractMarkdownContent($text);
+        }
+
         $this->apiOk([
             'target' => $target,
-            'text' => (string)($result['text'] ?? ''),
+            'text' => $text,
         ]);
     }
 
     private function buildAiPrompt(string $target, string $instruction, string $source): string
     {
         if ($target === 'name') {
-            return "Task: Generate one SEO title from provided source.\n"
-                . "Rules: Max 70 characters. Plain text only. No quotes. No list. No explanations. Return only final title.\n"
+            return "Task: You are writing a news article title.\n"
+                . "Rules: one final SEO title, max 70 characters, plain text only, no quotes, no list, no explanations.\n"
                 . "Localized instruction:\n{$instruction}\n\n"
-                . "Source:\n{$source}";
+                . "Article source:\n{$source}";
         }
 
         if ($target === 'excerpt') {
-            return "Task: Generate one excerpt from provided source.\n"
-                . "Rules: Max 500 characters. Plain text only. No list. No explanations. Return only final excerpt.\n"
+            return "Task: You are writing an excerpt for a news article.\n"
+                . "Rules: one final excerpt, max 500 characters, plain text only, no list, no explanations.\n"
                 . "Localized instruction:\n{$instruction}\n\n"
-                . "Source:\n{$source}";
+                . "Article source:\n{$source}";
         }
 
-        return "Task: Rewrite or generate article body in HTML.\n"
-            . "Rules: Return only HTML fragment, no markdown fences, no explanations, no prefix/suffix text.\n"
+        return "Task: Write article body in Markdown.\n"
+            . "Rules: return only final Markdown article body, no commentary, no tips, no explanations, no intro/outro.\n"
             . "User instruction:\n{$instruction}\n\n"
-            . "Source HTML:\n{$source}";
+            . "Article source:\n{$source}";
+    }
+
+    private function extractMarkdownContent(string $value): string
+    {
+        $text = trim($value);
+        if ($text === '') {
+            return '';
+        }
+
+        if (preg_match('/```(?:md|markdown)?\s*([\s\S]*?)```/i', $text, $match) === 1) {
+            return trim((string)($match[1] ?? ''));
+        }
+
+        $text = preg_replace('/^markdown\s*:\s*/i', '', $text) ?? $text;
+        return trim($text);
     }
 
     private function isValidExternalUrl(string $url): bool

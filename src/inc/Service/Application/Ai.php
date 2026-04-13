@@ -22,6 +22,9 @@ final class Ai
                     'text' => $text,
                 ]],
             ]],
+            'generationConfig' => [
+                'responseMimeType' => 'text/plain',
+            ],
         ], JSON_UNESCAPED_UNICODE);
 
         if (!is_string($payload) || $payload === '') {
