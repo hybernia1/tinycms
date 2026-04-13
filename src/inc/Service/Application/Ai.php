@@ -5,14 +5,13 @@ namespace App\Service\Application;
 
 final class Ai
 {
-    private const GOOGLE_ENDPOINT_PREFIX = 'https://generativelanguage.googleapis.com/v1beta/models/';
+    private const GOOGLE_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent';
 
-    public function generateWithGoogle(string $apiKey, string $prompt, string $model): array
+    public function generateWithGoogle(string $apiKey, string $prompt): array
     {
         $key = trim($apiKey);
         $text = trim($prompt);
-        $modelName = $this->normalizeModel($model);
-        if ($key === '' || $text === '' || $modelName === '') {
+        if ($key === '' || $text === '') {
             return ['success' => false, 'error' => 'INVALID_INPUT'];
         }
 
@@ -28,7 +27,7 @@ final class Ai
             return ['success' => false, 'error' => 'INVALID_PAYLOAD'];
         }
 
-        $response = $this->postJson(self::GOOGLE_ENDPOINT_PREFIX . $modelName . ':generateContent', $payload, [
+        $response = $this->postJson(self::GOOGLE_ENDPOINT, $payload, [
             'Content-Type: application/json',
             'X-goog-api-key: ' . $key,
         ]);
@@ -54,16 +53,6 @@ final class Ai
         }
 
         return ['success' => true, 'text' => $value];
-    }
-
-    private function normalizeModel(string $model): string
-    {
-        $value = trim($model);
-        if ($value === '') {
-            return '';
-        }
-
-        return preg_match('/^[a-z0-9][a-z0-9._-]{1,120}$/i', $value) === 1 ? $value : '';
     }
 
     private function postJson(string $url, string $body, array $headers): string

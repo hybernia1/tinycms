@@ -286,7 +286,7 @@ return [
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
             'google_api_key' => 'Google API key',
-            'google_api_model' => 'Google API model',
+            'google_live_ws_url' => 'Google Live WSS URL',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
         ],
