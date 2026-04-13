@@ -12,7 +12,6 @@ return [
         'confirm' => 'Confirm',
         'next' => 'Next',
         'previous' => 'Previous',
-        'apply' => 'Apply',
         'close' => 'Close',
         'delete' => 'Delete',
         'all' => 'All',

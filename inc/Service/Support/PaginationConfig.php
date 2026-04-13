@@ -16,14 +16,4 @@ final class PaginationConfig
 
         return min($value, self::MAX_PER_PAGE);
     }
-
-    public static function allowed(): array
-    {
-        $base = self::perPage();
-        return array_values(array_unique([
-            $base,
-            min($base * 2, self::MAX_PER_PAGE),
-            min($base * 5, self::MAX_PER_PAGE),
-        ]));
-    }
 }

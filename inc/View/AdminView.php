@@ -6,7 +6,6 @@ namespace App\View;
 use App\Service\Application\Settings;
 use App\Service\Application\Upload;
 use App\Service\Support\I18n;
-use App\Service\Support\PaginationConfig;
 
 final class AdminView
 {
@@ -120,17 +119,14 @@ final class AdminView
 
     private function adminListBase(string $entity, array $pagination, string $status, string $query, array $statusCounts = []): array
     {
-        $perPage = (int)($pagination['per_page'] ?? PaginationConfig::perPage());
         return [
             'entity' => $entity,
             'items' => $pagination['data'] ?? [],
             'page' => (int)($pagination['page'] ?? 1),
-            'perPage' => $perPage,
             'totalPages' => (int)($pagination['total_pages'] ?? 1),
             'statusCurrent' => $status !== '' ? $status : 'all',
             'query' => $query,
             'statusCounts' => $statusCounts,
-            'allowedPerPage' => PaginationConfig::allowed(),
         ];
     }
 
