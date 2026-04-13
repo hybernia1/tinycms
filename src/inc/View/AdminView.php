@@ -227,6 +227,7 @@ final class AdminView
             'datetime',
             'modal',
             'auth',
+            'ai',
         ]);
         return $payload;
     }

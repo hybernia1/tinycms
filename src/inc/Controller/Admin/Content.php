@@ -356,15 +356,26 @@ final class Content extends BaseAdmin
         }
 
         $instruction = trim((string)($_POST['instruction'] ?? ''));
+        $sourceInput = trim((string)($_POST['source'] ?? ''));
         $excerpt = trim((string)($_POST['excerpt'] ?? ''));
+        $name = trim((string)($_POST['name'] ?? ''));
         $body = trim((string)($_POST['body'] ?? ''));
         $target = trim((string)($_POST['target'] ?? ''));
-        if ($instruction === '' || !in_array($target, ['excerpt', 'body'], true)) {
+        if ($instruction === '' || !in_array($target, ['name', 'excerpt', 'body'], true)) {
             $this->apiError('INVALID_INPUT', I18n::t('common.invalid_data'));
             return;
         }
 
-        $source = $target === 'excerpt' ? $excerpt : $body;
+        $source = $sourceInput;
+        if ($source === '') {
+            if ($target === 'name') {
+                $source = $name;
+            } elseif ($target === 'excerpt') {
+                $source = $excerpt;
+            } else {
+                $source = $body;
+            }
+        }
         if ($source === '') {
             $this->apiError('EMPTY_SOURCE', I18n::t('content.ai_empty_source'));
             return;

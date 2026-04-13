@@ -244,12 +244,11 @@ return [
         'thumbnail_deleted' => 'Náhled byl odstraněn z databáze i disku.',
         'media_attach_failed' => 'Médium se nepodařilo připojit.',
         'link_title_not_found' => 'Titulek odkazu nebyl nalezen.',
-        'ai_target_excerpt' => 'Perex',
-        'ai_target_body' => 'Obsah',
-        'ai_modal_title' => 'AI pro',
+        'ai_modal_title' => 'AI instrukce pro obsah',
         'ai_instruction' => 'Instrukce',
         'ai_instruction_placeholder' => 'Např.: Přelož to do češtiny.',
         'ai_generate' => 'Generovat',
+        'ai_generated' => 'AI obsah byl vygenerován.',
         'ai_not_configured' => 'AI není nastavené v nastavení.',
         'ai_empty_source' => 'Cílový text je prázdný.',
         'ai_failed' => 'AI požadavek selhal.',
@@ -326,6 +325,12 @@ return [
         'author_invalid' => 'Autor není validní.',
         'status_required' => 'Status je povinný.',
         'publish_date_invalid' => 'Datum publikace není validní.',
+    ],
+    'ai' => [
+        'commands' => [
+            'title' => 'Vymysli SEO poutavý titulek pro článek z tohoto textu (max 70 znaků, pouze prostý text): %s',
+            'excerpt' => 'Napiš perex z tohoto textu (max 500 znaků, pouze prostý text): %s',
+        ],
     ],
     'editor' => [
         'placeholder' => 'Začněte psát obsah…',

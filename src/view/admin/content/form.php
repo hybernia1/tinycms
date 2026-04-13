@@ -29,7 +29,15 @@ $contentId = (int)($item['id'] ?? 0);
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">
-                <label><?= $e($t('common.name')) ?></label>
+                <div class="d-flex align-center justify-between gap-2 mb-1">
+                    <label><?= $e($t('common.name')) ?></label>
+                    <?php if (!empty($hasAiProvider)): ?>
+                        <button class="btn btn-light btn-xs" type="button" data-content-ai-action="name" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
+                            <?= $icon('wand') ?>
+                            <span>AI</span>
+                        </button>
+                    <?php endif; ?>
+                </div>
                 <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" required>
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
             </div>
@@ -37,7 +45,10 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="d-flex align-center justify-between gap-2 mb-1">
                     <label>Excerpt</label>
                     <?php if (!empty($hasAiProvider)): ?>
-                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="excerpt" data-modal-open data-modal-target="#content-ai-modal">AI</button>
+                        <button class="btn btn-light btn-xs" type="button" data-content-ai-action="excerpt" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
+                            <?= $icon('wand') ?>
+                            <span>AI</span>
+                        </button>
                     <?php endif; ?>
                 </div>
                 <textarea name="excerpt" rows="3"><?= $e((string)($item['excerpt'] ?? '')) ?></textarea>
@@ -48,7 +59,10 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="d-flex align-center justify-between gap-2 mb-1">
                     <label><?= $e($t('content.body')) ?></label>
                     <?php if (!empty($hasAiProvider)): ?>
-                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="body" data-modal-open data-modal-target="#content-ai-modal">AI</button>
+                        <button class="btn btn-light btn-xs" type="button" data-modal-open data-modal-target="#content-ai-modal">
+                            <?= $icon('wand') ?>
+                            <span>AI</span>
+                        </button>
                     <?php endif; ?>
                 </div>
                 <textarea
@@ -250,14 +264,14 @@ $contentId = (int)($item['id'] ?? 0);
 <?php if (!empty($hasAiProvider)): ?>
 <div class="modal-overlay" data-modal id="content-ai-modal">
     <div class="modal">
-        <p class="mb-2"><?= $e($t('content.ai_modal_title')) ?> <strong data-content-ai-modal-target-label><?= $e($t('content.ai_target_excerpt')) ?></strong></p>
+        <p class="mb-2"><?= $e($t('content.ai_modal_title')) ?></p>
         <div class="mb-3">
             <label><?= $e($t('content.ai_instruction')) ?></label>
             <textarea rows="4" data-content-ai-instruction placeholder="<?= $e($t('content.ai_instruction_placeholder')) ?>"></textarea>
         </div>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
-            <button class="btn btn-primary" type="button" data-content-ai-generate data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>" data-target="excerpt"><?= $e($t('content.ai_generate')) ?></button>
+            <button class="btn btn-primary" type="button" data-content-ai-generate data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>" data-target="body"><?= $e($t('content.ai_generate')) ?></button>
         </div>
     </div>
 </div>
