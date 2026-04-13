@@ -1,21 +1,21 @@
 :root {
     --primary: #1d4ed8;
-    --success: #047857;
     --danger: #b91c1c;
     --warning: #92400e;
     --color-bg: #ffffff;
     --color-surface: #ffffff;
     --color-surface-muted: #f3f4f6;
     --color-text: #111827;
-    --color-muted: #6b7280;
+    --color-text-muted: #6b7280;
+    --color-text-soft: #94a3b8;
     --color-border: #d1d5db;
+    --color-border-soft: #e5e7eb;
     --color-emphasis: #0f172a;
     --color-inverse: #ffffff;
     --font-family-base: Arial, sans-serif;
     --fs-xs: 0.75rem;
     --fs-sm: 0.875rem;
     --fs-base: 1rem;
-    --fs-lg: 1.125rem;
     --lh-tight: 1.2;
     --lh-base: 1.5;
     --space-1: 0.25rem;
@@ -30,7 +30,6 @@
     --control-padding-x: var(--space-3);
     --select-arrow-size: 0.6rem;
     --select-arrow-offset: var(--space-3);
-    --color-border-soft: #e5e7eb;
     --link-text: var(--primary);
     --link-hover-text: #1e40af;
     --table-row-alt-bg: #fcfcfd;
@@ -79,44 +78,27 @@ a:focus-visible {
 }
 
 .row {
-    --grid-gutter-x: var(--space-4);
-    --grid-gutter-y: 0;
     display: flex;
     flex-wrap: wrap;
-    margin-top: calc(-1 * var(--grid-gutter-y));
-    margin-right: calc(-0.5 * var(--grid-gutter-x));
-    margin-left: calc(-0.5 * var(--grid-gutter-x));
+    margin-inline: calc(var(--space-4) * -0.5);
 }
 
 .row > * {
-    box-sizing: border-box;
     width: 100%;
-    max-width: 100%;
-    padding-right: calc(var(--grid-gutter-x) * 0.5);
-    padding-left: calc(var(--grid-gutter-x) * 0.5);
-    margin-top: var(--grid-gutter-y);
-}
-
-.col {
-    flex: 1 0 0%;
-}
-
-[class^='col-'],
-[class*=' col-'] {
-    flex: 0 0 auto;
-    width: 100%;
+    padding-inline: calc(var(--space-4) * 0.5);
 }
 
 .col-12 { width: 100%; }
 
 @media (min-width: 768px) {
     .col-md-6 { width: 50%; }
-    .col-lg-8 { width: 66.6666%; }
 }
 
 .d-flex { display: flex; }
+.d-block { display: block; }
 .gap-2 { gap: var(--space-2); }
 .align-center { align-items: center; }
+.justify-center { justify-content: center; }
 .justify-between { justify-content: space-between; }
 
 .p-2 { padding: var(--space-2); }
@@ -132,7 +114,7 @@ a:focus-visible {
 .mt-4 { margin-top: var(--space-4); }
 .mt-2 { margin-top: var(--space-2); }
 
-.text-muted { color: var(--color-muted); }
+.text-muted { color: var(--color-text-muted); }
 .small { font-size: 75%; }
 
 @media (max-width: 768px) {
@@ -154,7 +136,6 @@ a:focus-visible {
 }
 
 .text-bg-primary,
-.text-bg-success,
 .text-bg-warning,
 .text-bg-dark {
     color: var(--color-inverse);
@@ -162,7 +143,6 @@ a:focus-visible {
 }
 
 .text-bg-primary { background: var(--primary); }
-.text-bg-success { background: var(--success); }
 .text-bg-warning {
     background: var(--warning-bg);
     color: var(--warning-text);
@@ -213,6 +193,18 @@ a:focus-visible {
     --btn-bg: var(--color-surface-muted);
     --btn-text: var(--color-text);
     --btn-border: var(--color-border);
+}
+
+.btn-danger {
+    --btn-bg: var(--danger);
+    --btn-text: var(--color-inverse);
+    --btn-border: var(--danger);
+}
+
+.btn-xs {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--fs-xs);
+    min-height: 1.75rem;
 }
 
 .w-100 { width: 100%; }
@@ -462,7 +454,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
 .field-icon-button {
     width: var(--size-icon);
     height: var(--size-icon);
-    color: var(--color-muted);
+    color: var(--color-text-muted);
 }
 
 .field-icon-soft {
@@ -475,7 +467,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--color-muted);
+    color: var(--color-text-muted);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -543,7 +535,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
 
 .custom-datetime-weekdays {
     margin-bottom: var(--space-1);
-    color: var(--color-muted);
+    color: var(--color-text-muted);
     font-size: var(--fs-sm);
 }
 
@@ -556,7 +548,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
 }
 
 .custom-datetime-day.muted {
-    color: var(--color-muted);
+    color: var(--color-text-muted);
     opacity: 0.55;
 }
 
@@ -583,7 +575,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
 }
 
 .custom-datetime-colon {
-    color: var(--color-muted);
+    color: var(--color-text-muted);
 }
 
 .custom-datetime-actions {
