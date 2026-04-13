@@ -34,13 +34,23 @@ $contentId = (int)($item['id'] ?? 0);
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
             </div>
             <div class="mb-3">
-                <label>Excerpt</label>
+                <div class="d-flex align-center justify-between gap-2 mb-1">
+                    <label>Excerpt</label>
+                    <?php if (!empty($hasAiProvider)): ?>
+                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="excerpt" data-modal-open data-modal-target="#content-ai-modal">AI</button>
+                    <?php endif; ?>
+                </div>
                 <textarea name="excerpt" rows="3"><?= $e((string)($item['excerpt'] ?? '')) ?></textarea>
                 <?php if (!empty($errors['excerpt'])): ?><small class="text-danger"><?= $e((string)$errors['excerpt']) ?></small><?php endif; ?>
             </div>
             <input type="hidden" name="status" value="<?= $e((string)($item['status'] ?? 'draft')) ?>" data-content-status-hidden>
             <div class="m-0">
-                <label><?= $e($t('content.body')) ?></label>
+                <div class="d-flex align-center justify-between gap-2 mb-1">
+                    <label><?= $e($t('content.body')) ?></label>
+                    <?php if (!empty($hasAiProvider)): ?>
+                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="body" data-modal-open data-modal-target="#content-ai-modal">AI</button>
+                    <?php endif; ?>
+                </div>
                 <textarea
                     name="body"
                     rows="14"
@@ -124,25 +134,6 @@ $contentId = (int)($item['id'] ?? 0);
                     </button>
                 </div>
             </div>
-            <?php if (!empty($hasAiProvider)): ?>
-            <div class="card">
-                <div class="content-box-header"><?= $e($t('content.ai_panel_title')) ?></div>
-                <div class="p-3 content-ai-panel" data-content-ai-panel data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
-                    <div class="mb-2">
-                        <label><?= $e($t('content.ai_target')) ?></label>
-                        <select data-content-ai-target>
-                            <option value="excerpt"><?= $e($t('content.ai_target_excerpt')) ?></option>
-                            <option value="body"><?= $e($t('content.ai_target_body')) ?></option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label><?= $e($t('content.ai_instruction')) ?></label>
-                        <textarea rows="3" data-content-ai-instruction placeholder="<?= $e($t('content.ai_instruction_placeholder')) ?>"></textarea>
-                    </div>
-                    <button class="btn btn-light" type="button" data-content-ai-generate><?= $e($t('content.ai_generate')) ?></button>
-                </div>
-            </div>
-            <?php endif; ?>
         </aside>
     </div>
     <?php if (!empty($errors['status'])): ?><small class="text-danger"><?= $e((string)$errors['status']) ?></small><?php endif; ?>
@@ -256,6 +247,21 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
     </div>
 </div>
+<?php if (!empty($hasAiProvider)): ?>
+<div class="modal-overlay" data-modal id="content-ai-modal">
+    <div class="modal">
+        <p class="mb-2"><?= $e($t('content.ai_modal_title')) ?> <strong data-content-ai-modal-target-label><?= $e($t('content.ai_target_excerpt')) ?></strong></p>
+        <div class="mb-3">
+            <label><?= $e($t('content.ai_instruction')) ?></label>
+            <textarea rows="4" data-content-ai-instruction placeholder="<?= $e($t('content.ai_instruction_placeholder')) ?>"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
+            <button class="btn btn-primary" type="button" data-content-ai-generate data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>" data-target="excerpt"><?= $e($t('content.ai_generate')) ?></button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 <div class="modal-overlay" data-content-leave-modal>
     <div class="modal">
         <p><?= $e($t('content.leave_page_confirm')) ?></p>
