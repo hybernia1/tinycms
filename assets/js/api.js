@@ -234,7 +234,6 @@ const normalizeListResponse = (payload) => {
         items: Array.isArray(payload?.data) ? payload.data : [],
         page: Number(meta.page || 1),
         totalPages: Number(meta.total_pages || 1),
-        perPage: Number(meta.per_page || 0),
         statusCounts: meta.status_counts && typeof meta.status_counts === 'object' ? meta.status_counts : {},
     };
 };
@@ -259,7 +258,6 @@ const initListApi = (config) => {
     const editBase = root.getAttribute('data-edit-base') || '';
     const csrfInput = root.querySelector(`[data-${config.name}-csrf] input[name="_csrf"]`);
     const searchField = root.querySelector(`[data-${config.name}-search]`);
-    const perPageField = root.querySelector(`[data-${config.name}-per-page]`);
     const body = root.querySelector(`[data-${config.name}-list-body]`);
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
@@ -281,14 +279,12 @@ const initListApi = (config) => {
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
     const loader = window.tinycmsLoader || null;
 
-    const defaultPerPage = Number(perPageField?.value || perPageField?.querySelector('option')?.value || '10') || 10;
     if (deleteModal && deleteModal.parentElement !== document.body) {
         document.body.appendChild(deleteModal);
     }
 
     let state = {
         page: 1,
-        perPage: defaultPerPage,
         query: searchField?.value.trim() || '',
     };
 
@@ -361,7 +357,6 @@ const initListApi = (config) => {
         try {
             const url = new URL(endpoint, window.location.origin);
             url.searchParams.set('page', String(state.page));
-            url.searchParams.set('per_page', String(state.perPage));
 
             if (config.withStatus) {
                 url.searchParams.set('status', state.status);
@@ -390,9 +385,6 @@ const initListApi = (config) => {
             const data = await response.json();
             const normalized = normalizeListResponse(data);
             state.page = Math.max(1, normalized.page || 1);
-            if (normalized.perPage > 0) {
-                state.perPage = normalized.perPage;
-            }
             body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
             setPagination(state.page, normalized.totalPages);
             syncStatusCounts(normalized.statusCounts);
@@ -565,14 +557,6 @@ const initListApi = (config) => {
                 }
                 await fetchList();
             }
-        });
-    }
-
-    if (perPageField) {
-        perPageField.addEventListener('change', async () => {
-            state.perPage = Number(perPageField.value || String(defaultPerPage)) || defaultPerPage;
-            state.page = 1;
-            await fetchList();
         });
     }
 

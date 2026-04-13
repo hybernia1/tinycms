@@ -140,13 +140,8 @@ abstract class BaseAdmin
     protected function resolvePaginationQuery(): array
     {
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $defaultPerPage = PaginationConfig::perPage();
-        $perPage = (int)($_GET['per_page'] ?? $defaultPerPage);
+        $perPage = PaginationConfig::perPage();
         $query = trim((string)($_GET['q'] ?? ''));
-
-        if (!in_array($perPage, PaginationConfig::allowed(), true)) {
-            $perPage = $defaultPerPage;
-        }
 
         return [$page, $perPage, $query];
     }
