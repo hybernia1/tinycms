@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once dirname(__DIR__) . '/autoload.php';
+require_once dirname(__DIR__, 2) . '/autoload.php';
 
 use App\Controller\Admin\Admin as AdminController;
 use App\Controller\Admin\Content as ContentController;
@@ -37,7 +37,7 @@ $router = new Router($basePath);
 $flash = new Flash();
 $csrf = new Csrf();
 $dateTimeFormatter = new DateTimeFormatter(APP_DATE_FORMAT, APP_DATETIME_FORMAT);
-$view = new View(dirname(__DIR__), $router, $flash, $csrf, $dateTimeFormatter);
+$view = new View(dirname(__DIR__, 2), $router, $flash, $csrf, $dateTimeFormatter);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
     header('Location: ' . $router->url($path), true, $permanent ? 301 : 302);
@@ -51,7 +51,7 @@ if ($basePath !== '' && ($requestPath === $basePath || str_starts_with($requestP
 }
 $requestPath = trim($requestPath, '/');
 
-$isInstalled = is_file(dirname(__DIR__) . '/config.php');
+$isInstalled = is_file(dirname(__DIR__, 2) . '/config.php');
 
 require __DIR__ . '/routes/register.php';
 
@@ -62,7 +62,7 @@ if (!$isInstalled) {
         || $requestPath === 'install/db'
         || $requestPath === 'install/admin'
         || $requestPath === 'install/done'
-        || str_starts_with($requestPath, 'assets/');
+        || str_starts_with($requestPath, trim(ASSETS_DIR, '/'));
 
     if (!$allowedWhenMissingConfig) {
         $redirect('install');
@@ -85,7 +85,7 @@ $userService = new UserService();
 $contentService = new ContentService();
 $mediaService = new MediaService();
 $slugger = new Slugger();
-$uploadService = new UploadService(dirname(__DIR__), $slugger);
+$uploadService = new UploadService(dirname(__DIR__, 2), $slugger);
 $settingsService = new SettingsService();
 I18n::setLocale((string)($settingsService->resolved()['app_lang'] ?? APP_LANG));
 $termService = new TermService();

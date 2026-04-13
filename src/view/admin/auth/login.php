@@ -3,7 +3,7 @@
         <div class="col-12 col-md-6">
             <div class="card p-5">
                 <div class="auth-logo mb-4">
-                    <img src="<?= $e($url('assets/svg/logo.svg')) ?>" alt="TinyCMS">
+                    <img src="<?= $e($url(ASSETS_DIR . 'svg/logo.svg')) ?>" alt="TinyCMS">
                 </div>
                 <h1 class="m-0 mb-4"><?= $e($t('auth.login')) ?></h1>
                 <?php if ($message !== ''): ?>

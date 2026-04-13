@@ -7,8 +7,20 @@ if (is_file(__DIR__ . '/config.php')) {
     require_once __DIR__ . '/config.example.php';
 }
 
+if (!defined('SRC_DIR')) {
+    define('SRC_DIR', 'src/');
+}
+
 if (!defined('INC_DIR')) {
-    define('INC_DIR', 'inc/');
+    define('INC_DIR', SRC_DIR . 'inc/');
+}
+
+if (!defined('VIEW_DIR')) {
+    define('VIEW_DIR', SRC_DIR . 'view/');
+}
+
+if (!defined('ASSETS_DIR')) {
+    define('ASSETS_DIR', SRC_DIR . 'assets/');
 }
 
 if (!defined('MEDIA_THUMB_VARIANTS')) {

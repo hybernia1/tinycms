@@ -13,25 +13,25 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <?php if (!empty($siteFavicon)): ?>
         <link rel="icon" href="<?= $e($url((string)$siteFavicon)) ?>">
     <?php endif; ?>
-    <link rel="stylesheet" href="<?= $e($url('assets/css/style.css')) ?>">
-    <link rel="stylesheet" href="<?= $e($url('assets/css/admin.css')) ?>">
-    <link rel="stylesheet" href="<?= $e($url('assets/editor/style.css')) ?>">
+    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/admin.css')) ?>">
+    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'editor/style.css')) ?>">
     <script>window.tinycmsI18n = <?= json_encode($adminI18n ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script defer src="<?= $e($url('assets/js/i18n.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/api.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/flash.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/loader.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/modal.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/admin-menu.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/custom-select.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/custom-datetime.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/password-toggle.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/custom-upload.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/media-library-modal.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/tag-picker.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/content-autosave.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/js/action-menu.js')) ?>"></script>
-    <script defer src="<?= $e($url('assets/editor/editor.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/flash.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/loader.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/admin-menu.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-select.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-datetime.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-upload.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/media-library-modal.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/tag-picker.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'editor/editor.js')) ?>"></script>
 </head>
 <body>
 <script>
@@ -45,7 +45,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="<?= $e($url('admin/dashboard')) ?>" aria-label="<?= $e($t('admin.brand')) ?>">
-            <img src="<?= $e($url('assets/svg/logo.svg')) ?>" alt="">
+            <img src="<?= $e($url(ASSETS_DIR . 'svg/logo.svg')) ?>" alt="">
         </a>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
