@@ -270,7 +270,7 @@ $contentId = (int)($item['id'] ?? 0);
         <div class="mb-3" data-content-ai-variants></div>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-content-ai-regenerate data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>" data-target="name"><?= $e($t('content.ai_regenerate')) ?></button>
-            <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.close')) ?></button>
+            <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
         </div>
     </div>
 </div>

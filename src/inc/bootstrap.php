@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/autoload.php';
 
 use App\Controller\Admin\Admin as AdminController;
+use App\Controller\Admin\Ai as AiController;
 use App\Controller\Admin\Content as ContentController;
 use App\Controller\Admin\ContentMedia as ContentMediaController;
 use App\Controller\Admin\Media as MediaController;
@@ -94,7 +95,8 @@ $termService = new TermService();
 $adminView = new AdminView($view, $settingsService);
 $admin = new AdminController($adminView, $authService, $flash, $csrf);
 $adminUsers = new UserController($adminView, $authService, $userService, $flash, $csrf);
-$adminContent = new ContentController($adminView, $authService, $contentService, $aiService, $settingsService, $userService, $termService, $flash, $csrf);
+$adminContent = new ContentController($adminView, $authService, $contentService, $userService, $termService, $flash, $csrf);
+$adminAi = new AiController($authService, $aiService, $settingsService, $flash, $csrf);
 $adminContentMediaApi = new ContentMediaController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
 $adminMedia = new MediaController($adminView, $authService, $mediaService, $uploadService, $flash, $csrf);
 $adminSettings = new SettingsController($adminView, $authService, $settingsService, $uploadService, $flash, $csrf);

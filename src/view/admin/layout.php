@@ -30,7 +30,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/media-library-modal.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/tag-picker.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/content-ai-modal.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/ai-variants-modal.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor.js')) ?>"></script>
 </head>
