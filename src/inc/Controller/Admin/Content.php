@@ -389,14 +389,9 @@ final class Content extends BaseAdmin
             return;
         }
 
-        $text = (string)($result['text'] ?? '');
-        if ($target === 'body') {
-            $text = $this->extractMarkdownContent($text);
-        }
-
         $this->apiOk([
             'target' => $target,
-            'text' => $text,
+            'text' => (string)($result['text'] ?? ''),
         ]);
     }
 
@@ -416,25 +411,10 @@ final class Content extends BaseAdmin
                 . "Article source:\n{$source}";
         }
 
-        return "Task: Write article body in Markdown.\n"
-            . "Rules: return only final Markdown article body, no commentary, no tips, no explanations, no intro/outro.\n"
+        return "Task: Write simple article body in HTML.\n"
+            . "Rules: return only final simple HTML article content, no commentary, no tips, no explanations, no intro/outro.\n"
             . "User instruction:\n{$instruction}\n\n"
             . "Article source:\n{$source}";
-    }
-
-    private function extractMarkdownContent(string $value): string
-    {
-        $text = trim($value);
-        if ($text === '') {
-            return '';
-        }
-
-        if (preg_match('/```(?:md|markdown)?\s*([\s\S]*?)```/i', $text, $match) === 1) {
-            return trim((string)($match[1] ?? ''));
-        }
-
-        $text = preg_replace('/^markdown\s*:\s*/i', '', $text) ?? $text;
-        return trim($text);
     }
 
     private function isValidExternalUrl(string $url): bool
