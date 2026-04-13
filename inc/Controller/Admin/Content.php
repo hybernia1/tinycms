@@ -456,17 +456,18 @@ final class Content extends BaseAdmin
     {
         $createdAt = (string)($row['created'] ?? '');
         $createdStamp = $createdAt !== '' ? strtotime($createdAt) : false;
+        $status = (string)($row['status'] ?? 'draft');
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
             'can_edit' => true,
             'can_delete' => true,
-            'can_restore' => (string)($row['status'] ?? '') === ContentService::STATUS_TRASH,
+            'can_restore' => $status === ContentService::STATUS_TRASH,
             'author_name' => (string)($row['author_name'] ?? '—'),
-            'status' => (string)($row['status'] ?? 'draft'),
+            'status' => $status,
             'created' => $createdAt,
             'created_label' => $this->formatDateTime($createdAt),
-            'is_planned' => $createdStamp !== false && $createdStamp > time(),
+            'is_planned' => $status === ContentService::STATUS_PUBLISHED && $createdStamp !== false && $createdStamp > time(),
         ];
     }
 

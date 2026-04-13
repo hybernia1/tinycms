@@ -10,21 +10,20 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     $createdAtRaw = (string)($row['created'] ?? '');
     $createdAt = $formatDateTime($createdAtRaw);
     $createdStamp = $createdAtRaw !== '' ? strtotime($createdAtRaw) : false;
-    $isPlanned = $createdStamp !== false && $createdStamp > time();
     $statusValue = (string)($row['status'] ?? '');
     $isPublished = $statusValue === 'published';
+    $isPlanned = $isPublished && $createdStamp !== false && $createdStamp > time();
     $isTrash = $statusValue === 'trash';
     ob_start();
     ?>
     <tr>
         <td>
-            <?php $statusIcon = $statusValue === 'published' ? 'success' : ($statusValue === 'draft' ? 'concept' : 'warning'); ?>
+            <?php $statusIcon = $isPlanned ? 'calendar' : ($statusValue === 'published' ? 'success' : ($statusValue === 'draft' ? 'concept' : 'warning')); ?>
             <span class="d-flex align-center gap-2">
                 <?php if ($statusIcon !== ''): ?><?= $icon($statusIcon) ?><?php endif; ?>
                 <a href="<?= $e($url('admin/content/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
             </span>
             <div class="text-muted small"><?= $e($createdAt) ?></div>
-            <?php if ($isPlanned): ?><div class="mt-2"><span class="badge text-bg-warning"><?= $e($t('content.planned')) ?></span></div><?php endif; ?>
         </td>
         <td class="mobile-hide"><?= $e((string)($row['author_name'] ?? '—')) ?></td>
         <td class="table-col-actions">

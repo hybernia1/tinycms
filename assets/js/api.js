@@ -636,7 +636,8 @@ initListApi({
         const status = String(item.status || 'draft');
         const isTrash = status === 'trash';
         const isPublished = status === 'published';
-        const statusIcon = status === 'published' ? 'success' : (status === 'draft' ? 'concept' : 'warning');
+        const isPlanned = item.is_planned === true;
+        const statusIcon = isPlanned ? 'calendar' : (status === 'published' ? 'success' : (status === 'draft' ? 'concept' : 'warning'));
         const toggleLabel = isPublished ? t('content.switch_to_draft') : t('content.publish');
         const canEdit = item.can_edit === true;
         const canDelete = item.can_delete === true;
@@ -652,7 +653,6 @@ initListApi({
         : `<span>${esc(item.name)}</span>`}
                     </span>
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
-                    ${item.is_planned ? `<div class="mt-2"><span class="badge text-bg-warning">${esc(t('content.planned'))}</span></div>` : ''}
                 </td>
                 <td class="mobile-hide">${esc(item.author_name || '—')}</td>
                 <td class="table-col-actions">
@@ -763,17 +763,17 @@ initListApi({
         const id = Number(item.id || 0);
         const isSuspended = item.is_suspended === true;
         const isAdmin = item.is_admin === true;
+        const statusIcon = isSuspended ? 'suspended' : (isAdmin ? 'admin' : 'user');
         const toggleLabel = isSuspended ? t('users.unsuspend') : t('users.suspend');
 
         return `
             <tr>
                 <td>
-                    <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
+                    <span class="d-flex align-center gap-2">
+                        ${icon(statusIcon)}
+                        <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
+                    </span>
                     <div class="text-muted small">${esc(item.email)}</div>
-                    <div class="d-flex gap-2 mt-2">
-                        <span class="badge text-bg-primary">${esc(t(`users.roles.${String(item.role || '')}`, String(item.role || '')))}</span>
-                        ${isSuspended ? `<span class="badge text-bg-warning">${esc(t('users.status.suspended_single'))}</span>` : ''}
-                    </div>
                 </td>
                 <td class="table-col-actions">
                     ${isAdmin ? '' : `
