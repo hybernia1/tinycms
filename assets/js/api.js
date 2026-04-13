@@ -763,6 +763,7 @@ initListApi({
         const id = Number(item.id || 0);
         const isSuspended = item.is_suspended === true;
         const isAdmin = item.is_admin === true;
+        const roleIcon = isAdmin ? 'admin' : 'user';
         const toggleLabel = isSuspended ? t('users.unsuspend') : t('users.suspend');
 
         return `
@@ -770,9 +771,9 @@ initListApi({
                 <td>
                     <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
                     <div class="text-muted small">${esc(item.email)}</div>
-                    <div class="d-flex gap-2 mt-2">
-                        <span class="badge text-bg-primary">${esc(t(`users.roles.${String(item.role || '')}`, String(item.role || '')))}</span>
-                        ${isSuspended ? `<span class="badge text-bg-warning">${esc(t('users.status.suspended_single'))}</span>` : ''}
+                    <div class="d-flex gap-2 mt-2 text-muted small">
+                        <span class="d-flex align-center gap-1">${icon(roleIcon)}${esc(t(`users.roles.${String(item.role || '')}`, String(item.role || '')))}</span>
+                        ${isSuspended ? `<span class="d-flex align-center gap-1">${icon('suspended')}${esc(t('users.status.suspended_single'))}</span>` : ''}
                     </div>
                 </td>
                 <td class="table-col-actions">
