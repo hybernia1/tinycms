@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service\Support;
 
-final class FlashService
+final class Flash
 {
     public function add(string $type, string $message): void
     {

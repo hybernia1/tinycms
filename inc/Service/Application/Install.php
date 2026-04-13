@@ -8,7 +8,7 @@ use App\Service\Support\I18n;
 use PDO;
 use PDOException;
 
-final class InstallService
+final class Install
 {
     private SchemaConstraintValidator $schemaValidator;
 

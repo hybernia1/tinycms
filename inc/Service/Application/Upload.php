@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Service\Application;
 
-use App\Service\Support\SluggerService;
+use App\Service\Support\Slugger;
 use App\Service\Support\I18n;
 use App\Service\Support\ThumbnailVariants;
 
-final class UploadService
+final class Upload
 {
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     private const SITE_IMAGE_EXTENSIONS = ['png', 'ico', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
@@ -30,7 +30,7 @@ final class UploadService
 
     public function __construct(
         private string $rootPath,
-        private SluggerService $slugger
+        private Slugger $slugger
     ) {
         $this->rootPath = rtrim($rootPath, '/');
     }

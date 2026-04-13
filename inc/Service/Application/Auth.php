@@ -3,24 +3,24 @@ declare(strict_types=1);
 
 namespace App\Service\Application;
 
-use App\Service\Auth\Auth;
+use App\Service\Auth\Auth as SessionAuth;
 use App\Service\Auth\Login;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Support\I18n;
 
-final class AuthService
+final class Auth
 {
-    private Auth $auth;
+    private SessionAuth $auth;
     private Login $login;
 
-    public function __construct(Auth $auth)
+    public function __construct(SessionAuth $auth)
     {
         $this->auth = $auth;
         $this->login = new Login(new Query(Connection::get()));
     }
 
-    public function auth(): Auth
+    public function auth(): SessionAuth
     {
         return $this->auth;
     }

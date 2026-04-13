@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use App\Service\Support\FlashService;
+use App\Service\Support\Flash;
 use App\Service\Infrastructure\Router\Router;
-use App\Service\Support\CsrfService;
+use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\I18n;
 
@@ -13,11 +13,11 @@ final class View
 {
     private string $rootPath;
     private Router $router;
-    private FlashService $flash;
-    private CsrfService $csrf;
+    private Flash $flash;
+    private Csrf $csrf;
     private DateTimeFormatter $dateTimeFormatter;
 
-    public function __construct(string $rootPath, Router $router, FlashService $flash, CsrfService $csrf, DateTimeFormatter $dateTimeFormatter)
+    public function __construct(string $rootPath, Router $router, Flash $flash, Csrf $csrf, DateTimeFormatter $dateTimeFormatter)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;

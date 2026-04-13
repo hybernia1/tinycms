@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
-use App\Service\Application\AuthService;
-use App\Service\Support\CsrfService;
-use App\Service\Support\FlashService;
+use App\Service\Application\Auth;
+use App\Service\Support\Csrf;
+use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\View\AdminView;
 
-final class AdminController extends BaseAdminController
+final class Admin extends BaseAdmin
 {
     public function __construct(
         private AdminView $pages,
-        AuthService $authService,
-        FlashService $flash,
-        CsrfService $csrf
+        Auth $authService,
+        Flash $flash,
+        Csrf $csrf
     ) {
         parent::__construct($authService, $flash, $csrf);
     }

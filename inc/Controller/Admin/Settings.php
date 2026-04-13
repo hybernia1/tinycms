@@ -3,21 +3,21 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
-use App\Service\Application\AuthService;
-use App\Service\Support\CsrfService;
-use App\Service\Support\FlashService;
-use App\Service\Application\SettingsService;
-use App\Service\Application\UploadService;
+use App\Service\Application\Auth;
+use App\Service\Support\Csrf;
+use App\Service\Support\Flash;
+use App\Service\Application\Settings as SettingsService;
+use App\Service\Application\Upload as UploadService;
 use App\Service\Support\I18n;
 use App\View\AdminView;
 
-final class SettingsController extends BaseAdminController
+final class Settings extends BaseAdmin
 {
     private AdminView $pages;
     private SettingsService $settings;
     private UploadService $upload;
 
-    public function __construct(AdminView $pages, AuthService $authService, SettingsService $settings, UploadService $upload, FlashService $flash, CsrfService $csrf)
+    public function __construct(AdminView $pages, Auth $authService, SettingsService $settings, UploadService $upload, Flash $flash, Csrf $csrf)
     {
         parent::__construct($authService, $flash, $csrf);
         $this->pages = $pages;

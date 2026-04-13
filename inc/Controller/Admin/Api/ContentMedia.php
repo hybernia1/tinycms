@@ -2,25 +2,25 @@
 declare(strict_types=1);
 
 namespace App\Controller\Admin\Api;
-use App\Controller\Admin\BaseAdminController;
+use App\Controller\Admin\BaseAdmin;
 
-use App\Service\Application\AuthService;
-use App\Service\Application\ContentService;
-use App\Service\Application\MediaService;
-use App\Service\Application\UploadService;
-use App\Service\Support\CsrfService;
-use App\Service\Support\FlashService;
+use App\Service\Application\Auth;
+use App\Service\Application\Content;
+use App\Service\Application\Media;
+use App\Service\Application\Upload;
+use App\Service\Support\Csrf;
+use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 
-final class ContentMediaController extends BaseAdminController
+final class ContentMedia extends BaseAdmin
 {
     public function __construct(
-        AuthService $authService,
-        private ContentService $content,
-        private MediaService $media,
-        private UploadService $upload,
-        FlashService $flash,
-        CsrfService $csrf
+        Auth $authService,
+        private Content $content,
+        private Media $media,
+        private Upload $upload,
+        Flash $flash,
+        Csrf $csrf
     ) {
         parent::__construct($authService, $flash, $csrf);
     }

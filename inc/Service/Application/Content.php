@@ -10,7 +10,7 @@ use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
-final class ContentService
+final class Content
 {
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PUBLISHED = 'published';

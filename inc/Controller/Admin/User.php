@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
-use App\Service\Application\AuthService;
-use App\Service\Support\CsrfService;
-use App\Service\Support\FlashService;
+use App\Service\Application\Auth;
+use App\Service\Support\Csrf;
+use App\Service\Support\Flash;
 use App\Service\Support\I18n;
-use App\Service\Application\UserService;
+use App\Service\Application\User as UserService;
 use App\View\AdminView;
 
-final class UserController extends BaseAdminController
+final class User extends BaseAdmin
 {
     private AdminView $pages;
     private UserService $users;
 
-    public function __construct(AdminView $pages, AuthService $authService, UserService $users, FlashService $flash, CsrfService $csrf)
+    public function __construct(AdminView $pages, Auth $authService, UserService $users, Flash $flash, Csrf $csrf)
     {
         parent::__construct($authService, $flash, $csrf);
         $this->pages = $pages;

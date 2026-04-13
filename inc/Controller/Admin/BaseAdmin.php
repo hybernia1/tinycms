@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
-use App\Service\Application\AuthService;
-use App\Service\Support\CsrfService;
-use App\Service\Support\FlashService;
+use App\Service\Application\Auth;
+use App\Service\Support\Csrf;
+use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 use App\Service\Support\ThumbnailVariants;
 
-abstract class BaseAdminController
+abstract class BaseAdmin
 {
     public function __construct(
-        protected AuthService $authService,
-        protected FlashService $flash,
-        protected CsrfService $csrf
+        protected Auth $authService,
+        protected Flash $flash,
+        protected Csrf $csrf
     ) {
     }
 

@@ -3,29 +3,29 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/autoload.php';
 
-use App\Controller\Admin\AdminController;
-use App\Controller\Admin\ContentController;
-use App\Controller\Admin\Api\ContentMediaController;
-use App\Controller\Admin\MediaController;
-use App\Controller\Admin\SettingsController;
-use App\Controller\Admin\TermController;
-use App\Controller\Admin\UserController;
-use App\Controller\Install\InstallController;
-use App\Service\Auth\Auth;
-use App\Service\Application\AuthService;
-use App\Service\Application\ContentService;
-use App\Service\Application\InstallService;
-use App\Service\Application\MediaService;
-use App\Service\Application\UploadService;
-use App\Service\Application\TermService;
-use App\Service\Support\CsrfService;
+use App\Controller\Admin\Admin as AdminController;
+use App\Controller\Admin\Content as ContentController;
+use App\Controller\Admin\Api\ContentMedia as ContentMediaController;
+use App\Controller\Admin\Media as MediaController;
+use App\Controller\Admin\Settings as SettingsController;
+use App\Controller\Admin\Term as TermController;
+use App\Controller\Admin\User as UserController;
+use App\Controller\Install\Install as InstallController;
+use App\Service\Auth\Auth as SessionAuth;
+use App\Service\Application\Auth as AppAuth;
+use App\Service\Application\Content as ContentService;
+use App\Service\Application\Install as InstallService;
+use App\Service\Application\Media as MediaService;
+use App\Service\Application\Upload as UploadService;
+use App\Service\Application\Term as TermService;
+use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
-use App\Service\Support\FlashService;
+use App\Service\Support\Flash;
 use App\Service\Infrastructure\Router\Router;
-use App\Service\Application\SettingsService;
+use App\Service\Application\Settings as SettingsService;
 use App\Service\Support\I18n;
-use App\Service\Support\SluggerService;
-use App\Service\Application\UserService;
+use App\Service\Support\Slugger;
+use App\Service\Application\User as UserService;
 use App\View\AdminView;
 use App\View\View;
 
@@ -34,8 +34,8 @@ $baseDir = trim(dirname($scriptName), '/.');
 $basePath = $baseDir === '' ? '' : '/' . $baseDir;
 
 $router = new Router($basePath);
-$flash = new FlashService();
-$csrf = new CsrfService();
+$flash = new Flash();
+$csrf = new Csrf();
 $dateTimeFormatter = new DateTimeFormatter(APP_DATE_FORMAT, APP_DATETIME_FORMAT);
 $view = new View(dirname(__DIR__), $router, $flash, $csrf, $dateTimeFormatter);
 
@@ -79,12 +79,12 @@ if (str_starts_with($requestPath, 'install')) {
     $redirect('admin/dashboard');
 }
 
-$auth = new Auth();
-$authService = new AuthService($auth);
+$auth = new SessionAuth();
+$authService = new AppAuth($auth);
 $userService = new UserService();
 $contentService = new ContentService();
 $mediaService = new MediaService();
-$slugger = new SluggerService();
+$slugger = new Slugger();
 $uploadService = new UploadService(dirname(__DIR__), $slugger);
 $settingsService = new SettingsService();
 I18n::setLocale((string)($settingsService->resolved()['app_lang'] ?? APP_LANG));

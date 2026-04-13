@@ -3,18 +3,18 @@ declare(strict_types=1);
 
 namespace App\Controller\Install;
 
-use App\Service\Application\InstallService;
-use App\Service\Support\CsrfService;
+use App\Service\Application\Install as InstallService;
+use App\Service\Support\Csrf;
 use App\Service\Support\I18n;
 use App\View\View;
 
-final class InstallController
+final class Install
 {
     private View $view;
-    private CsrfService $csrf;
+    private Csrf $csrf;
     private InstallService $installService;
 
-    public function __construct(View $view, CsrfService $csrf, InstallService $installService)
+    public function __construct(View $view, Csrf $csrf, InstallService $installService)
     {
         $this->view = $view;
         $this->csrf = $csrf;

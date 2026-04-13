@@ -9,7 +9,7 @@ use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
-final class UserService
+final class User
 {
     private Query $query;
     private SchemaConstraintValidator $columnLimitValidator;

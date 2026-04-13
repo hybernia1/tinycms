@@ -7,7 +7,7 @@ use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Support\I18n;
 
-final class SettingsService
+final class Settings
 {
     private Query $query;
 

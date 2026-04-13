@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service\Support;
 
-final class CsrfService
+final class Csrf
 {
     private const SESSION_KEY = '_csrf_token';
 

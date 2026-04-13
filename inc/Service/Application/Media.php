@@ -10,7 +10,7 @@ use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
-final class MediaService
+final class Media
 {
     private Query $query;
     private SchemaConstraintValidator $schemaConstraintValidator;

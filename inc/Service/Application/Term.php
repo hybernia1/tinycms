@@ -10,7 +10,7 @@ use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
-final class TermService
+final class Term
 {
     private Query $query;
     private \PDO $pdo;

@@ -3,25 +3,25 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
-use App\Service\Application\AuthService;
-use App\Service\Application\ContentService;
-use App\Service\Application\TermService;
-use App\Service\Support\CsrfService;
-use App\Service\Support\FlashService;
-use App\Service\Application\UserService;
+use App\Service\Application\Auth;
+use App\Service\Application\Content as ContentService;
+use App\Service\Application\Term as TermService;
+use App\Service\Support\Csrf;
+use App\Service\Support\Flash;
+use App\Service\Application\User as UserService;
 use App\Service\Support\I18n;
 use App\View\AdminView;
 
-final class ContentController extends BaseAdminController
+final class Content extends BaseAdmin
 {
     public function __construct(
         private AdminView $pages,
-        AuthService $authService,
+        Auth $authService,
         private ContentService $content,
         private UserService $users,
         private TermService $terms,
-        FlashService $flash,
-        CsrfService $csrf
+        Flash $flash,
+        Csrf $csrf
     ) {
         parent::__construct($authService, $flash, $csrf);
     }

@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use App\Service\Application\SettingsService;
-use App\Service\Application\UploadService;
+use App\Service\Application\Settings;
+use App\Service\Application\Upload;
 use App\Service\Support\I18n;
 use App\Service\Support\PaginationConfig;
 
 final class AdminView
 {
     private View $view;
-    private SettingsService $settings;
+    private Settings $settings;
 
-    public function __construct(View $view, SettingsService $settings)
+    public function __construct(View $view, Settings $settings)
     {
         $this->view = $view;
         $this->settings = $settings;
@@ -181,10 +181,10 @@ final class AdminView
             [
                 'adminMenu' => $this->adminMenu(),
                 'adminI18n' => $this->adminI18n(),
-                'imageUploadAccept' => UploadService::imageAccept(),
-                'siteImageUploadAccept' => UploadService::siteImageAccept(),
-                'imageUploadTypesLabel' => UploadService::imageExtensionsLabel(),
-                'siteImageUploadTypesLabel' => UploadService::siteImageExtensionsLabel(),
+                'imageUploadAccept' => Upload::imageAccept(),
+                'siteImageUploadAccept' => Upload::siteImageAccept(),
+                'imageUploadTypesLabel' => Upload::imageExtensionsLabel(),
+                'siteImageUploadTypesLabel' => Upload::siteImageExtensionsLabel(),
             ]
         ));
     }
