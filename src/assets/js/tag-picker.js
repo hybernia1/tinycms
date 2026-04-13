@@ -149,5 +149,11 @@ if (tagPickers.length) {
                 input.focus();
             }
         });
+
+        picker.addEventListener('tinycms:tag-picker-set', (event) => {
+            const incoming = Array.isArray(event.detail?.tags) ? event.detail.tags : [];
+            tags = incoming.map((item) => String(item || '').trim()).filter((item) => item !== '');
+            sync();
+        });
     });
 }

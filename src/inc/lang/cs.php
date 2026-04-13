@@ -244,10 +244,8 @@ return [
         'thumbnail_deleted' => 'Náhled byl odstraněn z databáze i disku.',
         'media_attach_failed' => 'Médium se nepodařilo připojit.',
         'link_title_not_found' => 'Titulek odkazu nebyl nalezen.',
-        'ai_modal_title' => 'AI instrukce pro obsah',
-        'ai_instruction' => 'Instrukce',
-        'ai_instruction_placeholder' => 'Např.: Přelož to do češtiny.',
-        'ai_generate' => 'Generovat',
+        'ai_modal_title' => 'Vyberte vygenerovanou variantu',
+        'ai_regenerate' => 'Vygenerovat znovu',
         'ai_generated' => 'AI obsah byl vygenerován.',
         'ai_not_configured' => 'AI není nastavené v nastavení.',
         'ai_empty_source' => 'Cílový text je prázdný.',
@@ -331,6 +329,7 @@ return [
         'commands' => [
             'title' => 'Vytvoř jeden SEO titulek z tohoto textu. Vrať jen finální titulek bez omáčky: %s',
             'excerpt' => 'Napiš jeden perex z tohoto textu (max 500 znaků). Vrať jen finální perex bez omáčky: %s',
+            'terms' => 'Vytvoř 3 varianty štítků z tohoto textu. Vrať jen štítky oddělené čárkou: %s',
         ],
     ],
     'editor' => [

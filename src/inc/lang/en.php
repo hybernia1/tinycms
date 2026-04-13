@@ -244,10 +244,8 @@ return [
         'thumbnail_deleted' => 'Thumbnail was removed from database and disk.',
         'media_attach_failed' => 'Could not attach media.',
         'link_title_not_found' => 'Link title not found.',
-        'ai_modal_title' => 'AI content instruction',
-        'ai_instruction' => 'Instruction',
-        'ai_instruction_placeholder' => 'Example: Translate this into English.',
-        'ai_generate' => 'Generate',
+        'ai_modal_title' => 'Choose generated variant',
+        'ai_regenerate' => 'Regenerate',
         'ai_generated' => 'AI content generated.',
         'ai_not_configured' => 'AI is not configured in settings.',
         'ai_empty_source' => 'Target text is empty.',
@@ -331,6 +329,7 @@ return [
         'commands' => [
             'title' => 'Create one SEO article title from this text. Return only final title, nothing else: %s',
             'excerpt' => 'Create one excerpt from this text (max 500 chars). Return only final excerpt, nothing else: %s',
+            'terms' => 'Create 3 variants of article tags from this text. Return plain comma-separated tags only: %s',
         ],
     ],
     'editor' => [

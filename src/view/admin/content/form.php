@@ -32,7 +32,7 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="d-flex align-center justify-between gap-2 mb-1">
                     <label><?= $e($t('common.name')) ?></label>
                     <?php if (!empty($hasAiProvider)): ?>
-                        <button class="btn btn-light btn-xs" type="button" data-content-ai-action="name" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
+                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="name" data-modal-open data-modal-target="#content-ai-modal" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
                             <?= $icon('wand') ?>
                             <span>AI</span>
                         </button>
@@ -45,7 +45,7 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="d-flex align-center justify-between gap-2 mb-1">
                     <label>Excerpt</label>
                     <?php if (!empty($hasAiProvider)): ?>
-                        <button class="btn btn-light btn-xs" type="button" data-content-ai-action="excerpt" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
+                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="excerpt" data-modal-open data-modal-target="#content-ai-modal" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
                             <?= $icon('wand') ?>
                             <span>AI</span>
                         </button>
@@ -58,12 +58,6 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="m-0">
                 <div class="d-flex align-center justify-between gap-2 mb-1">
                     <label><?= $e($t('content.body')) ?></label>
-                    <?php if (!empty($hasAiProvider)): ?>
-                        <button class="btn btn-light btn-xs" type="button" data-modal-open data-modal-target="#content-ai-modal">
-                            <?= $icon('wand') ?>
-                            <span>AI</span>
-                        </button>
-                    <?php endif; ?>
                 </div>
                 <textarea
                     name="body"
@@ -106,6 +100,14 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="card">
                 <div class="content-box-header"><?= $e($t('admin.menu.terms')) ?></div>
                 <div class="p-3">
+                    <?php if (!empty($hasAiProvider)): ?>
+                        <div class="mb-2 d-flex justify-end">
+                            <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="terms" data-modal-open data-modal-target="#content-ai-modal" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
+                                <?= $icon('wand') ?>
+                                <span>AI</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
                     <?php if ($mode === 'add'): ?>
                         <small class="text-muted"><?= $e($t('content.save_to_assign_tags')) ?></small>
                     <?php endif; ?>
@@ -265,13 +267,10 @@ $contentId = (int)($item['id'] ?? 0);
 <div class="modal-overlay" data-modal id="content-ai-modal">
     <div class="modal">
         <p class="mb-2"><?= $e($t('content.ai_modal_title')) ?></p>
-        <div class="mb-3">
-            <label><?= $e($t('content.ai_instruction')) ?></label>
-            <textarea rows="4" data-content-ai-instruction placeholder="<?= $e($t('content.ai_instruction_placeholder')) ?>"></textarea>
-        </div>
+        <div class="mb-3" data-content-ai-variants></div>
         <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
-            <button class="btn btn-primary" type="button" data-content-ai-generate data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>" data-target="body"><?= $e($t('content.ai_generate')) ?></button>
+            <button class="btn btn-light" type="button" data-content-ai-regenerate data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>" data-target="name"><?= $e($t('content.ai_regenerate')) ?></button>
+            <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.close')) ?></button>
         </div>
     </div>
 </div>

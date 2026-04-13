@@ -360,9 +360,10 @@ final class Content extends BaseAdmin
         $sourceInput = trim((string)($_POST['source'] ?? ''));
         $excerpt = trim((string)($_POST['excerpt'] ?? ''));
         $name = trim((string)($_POST['name'] ?? ''));
-        $body = trim((string)($_POST['body'] ?? ''));
+        $terms = trim((string)($_POST['terms'] ?? ''));
+        $count = max(1, min(3, (int)($_POST['count'] ?? 1)));
         $target = trim((string)($_POST['target'] ?? ''));
-        if ($instruction === '' || !in_array($target, ['name', 'excerpt', 'body'], true)) {
+        if ($instruction === '' || !in_array($target, ['name', 'excerpt', 'terms'], true)) {
             $this->apiError('INVALID_INPUT', I18n::t('common.invalid_data'));
             return;
         }
@@ -374,7 +375,7 @@ final class Content extends BaseAdmin
             } elseif ($target === 'excerpt') {
                 $source = $excerpt;
             } else {
-                $source = $body;
+                $source = $terms;
             }
         }
         if ($source === '') {
@@ -389,9 +390,16 @@ final class Content extends BaseAdmin
             return;
         }
 
+        $text = trim((string)($result['text'] ?? ''));
+        $variants = $this->extractVariants($text, $count);
+        if ($variants === []) {
+            $variants = [$text];
+        }
+
         $this->apiOk([
             'target' => $target,
-            'text' => (string)($result['text'] ?? ''),
+            'text' => (string)($variants[0] ?? ''),
+            'variants' => $variants,
         ]);
     }
 
@@ -411,10 +419,31 @@ final class Content extends BaseAdmin
                 . "Article source:\n{$source}";
         }
 
-        return "Task: Write simple article body in HTML.\n"
-            . "Rules: return only final simple HTML article content, no commentary, no tips, no explanations, no intro/outro.\n"
-            . "User instruction:\n{$instruction}\n\n"
+        return "Task: Generate exactly three variants of article tags.\n"
+            . "Rules: each variant on separate line, plain text only, comma-separated short tags, no numbering, no explanations.\n"
+            . "Localized instruction:\n{$instruction}\n\n"
             . "Article source:\n{$source}";
+    }
+
+    private function extractVariants(string $text, int $limit): array
+    {
+        $lines = preg_split('/\r\n|\r|\n/', trim($text)) ?: [];
+        $variants = [];
+
+        foreach ($lines as $line) {
+            $value = trim((string)$line);
+            $value = preg_replace('/^[-*]\s+/', '', $value) ?? $value;
+            $value = preg_replace('/^\d+\.\s+/', '', $value) ?? $value;
+            if ($value === '') {
+                continue;
+            }
+            $variants[] = $value;
+            if (count($variants) >= $limit) {
+                break;
+            }
+        }
+
+        return $variants;
     }
 
     private function isValidExternalUrl(string $url): bool
