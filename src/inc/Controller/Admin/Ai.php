@@ -40,13 +40,15 @@ final class Ai extends BaseAdmin
         $body = (string)($_POST['body'] ?? '');
         $count = max(1, min(10, (int)($_POST['count'] ?? 1)));
         $target = trim((string)($_POST['target'] ?? ''));
-        if ($instruction === '' || !in_array($target, ['name', 'excerpt', 'terms'], true)) {
+        if ($instruction === '' || !in_array($target, ['name', 'excerpt', 'terms', 'body'], true)) {
             $this->apiError('INVALID_INPUT', I18n::t('common.invalid_data'));
             return;
         }
 
         $source = $sourceInput !== '' ? $sourceInput : $body;
-        $source = $this->normalizeSourceText($source, 300);
+        if ($target !== 'body') {
+            $source = $this->normalizeSourceText($source, 300);
+        }
         if ($source === '') {
             $this->apiError('EMPTY_SOURCE', I18n::t('content.ai_empty_source'));
             return;
@@ -59,10 +61,14 @@ final class Ai extends BaseAdmin
             return;
         }
 
-        $text = trim((string)($result['text'] ?? ''));
-        $variants = $this->extractVariants($text, $count);
-        if ($variants === []) {
-            $variants = [$text];
+        $text = (string)($result['text'] ?? '');
+        $variants = [$text];
+        if ($target !== 'body') {
+            $text = trim($text);
+            $variants = $this->extractVariants($text, $count);
+            if ($variants === []) {
+                $variants = [$text];
+            }
         }
 
         $this->apiOk([
@@ -86,6 +92,13 @@ final class Ai extends BaseAdmin
                 . "Rules: each variant on separate line, max 500 characters, plain text only, no numbering, no explanations.\n"
                 . "Localized instruction:\n{$instruction}\n\n"
                 . "Article source:\n{$source}";
+        }
+
+        if ($target === 'body') {
+            return "Task: Rewrite selected article HTML fragment.\n"
+                . "Rules: Keep HTML formatting, return only clean HTML fragment, no commentary, no tips, no explanations.\n"
+                . "User instruction:\n{$instruction}\n\n"
+                . "Selected HTML:\n{$source}";
         }
 
         return "Task: Generate exactly ten article tags.\n"

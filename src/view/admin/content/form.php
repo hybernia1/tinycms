@@ -58,6 +58,12 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="m-0">
                 <div class="d-flex align-center justify-between gap-2 mb-1">
                     <label><?= $e($t('content.body')) ?></label>
+                    <?php if (!empty($hasAiProvider)): ?>
+                        <button class="btn btn-light btn-xs" type="button" data-content-ai-open data-content-ai-target="body" data-modal-open data-modal-target="#content-ai-modal" data-content-ai-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>">
+                            <?= $icon('wand') ?>
+                            <span>AI</span>
+                        </button>
+                    <?php endif; ?>
                 </div>
                 <textarea
                     name="body"
@@ -267,9 +273,15 @@ $contentId = (int)($item['id'] ?? 0);
 <div class="modal-overlay" data-modal id="content-ai-modal">
     <div class="modal">
         <p class="mb-2"><?= $e($t('content.ai_modal_title')) ?></p>
+        <div class="mb-3" data-content-ai-body-tools hidden>
+            <label><?= $e($t('content.ai_instruction')) ?></label>
+            <textarea rows="4" data-content-ai-body-instruction placeholder="<?= $e($t('content.ai_instruction_placeholder')) ?>"></textarea>
+            <small class="text-muted d-block mt-2" data-content-ai-body-selection-preview></small>
+        </div>
         <div class="mb-3" data-content-ai-variants></div>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-content-ai-regenerate data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>" data-target="name"><?= $e($t('content.ai_regenerate')) ?></button>
+            <button class="btn btn-primary" type="button" data-content-ai-body-submit hidden><?= $e($t('content.ai_apply')) ?></button>
             <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
         </div>
     </div>

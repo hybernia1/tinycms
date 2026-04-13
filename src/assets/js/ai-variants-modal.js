@@ -20,15 +20,24 @@
     const csrfInput = form.querySelector('[name="_csrf"]');
     const variantsBox = modal.querySelector('[data-content-ai-variants]');
     const regenerateButton = modal.querySelector('[data-content-ai-regenerate]');
+    const bodyTools = modal.querySelector('[data-content-ai-body-tools]');
+    const bodyInstruction = modal.querySelector('[data-content-ai-body-instruction]');
+    const bodyPreview = modal.querySelector('[data-content-ai-body-selection-preview]');
+    const bodySubmit = modal.querySelector('[data-content-ai-body-submit]');
     const openButtons = form.querySelectorAll('[data-content-ai-open]');
 
-    if (!nameField || !excerptField || !bodyField || !csrfInput || !variantsBox || !regenerateButton || !openButtons.length) {
+    if (!nameField || !excerptField || !bodyField || !csrfInput || !variantsBox || !regenerateButton || !openButtons.length || !bodyTools || !bodyInstruction || !bodyPreview || !bodySubmit) {
         return;
     }
 
     const stripHtml = (value) => String(value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     const firstWords = (value, limit = 300) => stripHtml(value).split(' ').filter(Boolean).slice(0, limit).join(' ');
     const parseTags = (value) => String(value || '').split(',').map((tag) => tag.trim()).filter(Boolean);
+    let selectedRange = null;
+    let selectedHtml = '';
+    let bodyEndpoint = '';
+
+    const editor = form.querySelector('.wysiwyg-editor');
 
     const renderVariants = (target, items) => {
         variantsBox.innerHTML = items.map((item, index) => `
@@ -116,6 +125,23 @@
         renderVariants(target, variants);
     };
 
+    const replaceEditorSelection = (html) => {
+        if (!editor || !selectedRange) {
+            return false;
+        }
+
+        const selection = window.getSelection();
+        if (!selection) {
+            return false;
+        }
+
+        selection.removeAllRanges();
+        selection.addRange(selectedRange);
+        document.execCommand('insertHTML', false, html);
+        editor.dispatchEvent(new Event('input', { bubbles: true }));
+        return true;
+    };
+
     openButtons.forEach((button) => {
         button.addEventListener('click', () => {
             const target = String(button.getAttribute('data-content-ai-target') || '').trim();
@@ -124,6 +150,35 @@
                 return;
             }
 
+            if (target === 'body') {
+                const selection = window.getSelection();
+                if (!editor || !selection || selection.rangeCount === 0) {
+                    pushFlash('warning', t('content.ai_empty_source'));
+                    return;
+                }
+                const range = selection.getRangeAt(0);
+                if (range.collapsed || !editor.contains(range.commonAncestorContainer)) {
+                    pushFlash('warning', t('content.ai_empty_source'));
+                    return;
+                }
+                const wrapper = document.createElement('div');
+                wrapper.appendChild(range.cloneContents());
+                selectedRange = range.cloneRange();
+                selectedHtml = wrapper.innerHTML.trim();
+                bodyEndpoint = endpoint;
+
+                bodyTools.hidden = false;
+                bodySubmit.hidden = false;
+                regenerateButton.hidden = true;
+                variantsBox.hidden = true;
+                bodyPreview.textContent = stripHtml(selectedHtml).slice(0, 220);
+                return;
+            }
+
+            bodyTools.hidden = true;
+            bodySubmit.hidden = true;
+            regenerateButton.hidden = false;
+            variantsBox.hidden = false;
             regenerateButton.setAttribute('data-target', target);
             regenerateButton.setAttribute('data-endpoint', endpoint);
             variantsBox.innerHTML = `<small class="text-muted">${window.tinycms.api.esc(t('common.loading'))}</small>`;
@@ -138,5 +193,40 @@
             return;
         }
         requestVariants(target, endpoint);
+    });
+
+    bodySubmit.addEventListener('click', async () => {
+        const instruction = String(bodyInstruction.value || '').trim();
+        if (!instruction || !selectedHtml || !bodyEndpoint) {
+            return;
+        }
+
+        bodySubmit.disabled = true;
+        const data = new FormData();
+        data.set('_csrf', String(csrfInput.value || ''));
+        data.set('target', 'body');
+        data.set('instruction', instruction);
+        data.set('source', selectedHtml);
+        data.set('count', '1');
+
+        const { response, data: result } = await postForm(bodyEndpoint, data).catch(() => ({ response: null, data: { message: '' } }));
+        bodySubmit.disabled = false;
+
+        if (!response || !response.ok || result?.success !== true) {
+            pushFlash('error', String(result?.message || t('content.ai_failed')));
+            return;
+        }
+
+        const html = String(result?.data?.text || '').trim();
+        if (!replaceEditorSelection(html)) {
+            pushFlash('warning', t('content.ai_failed'));
+            return;
+        }
+
+        modal.classList.remove('open');
+        bodyInstruction.value = '';
+        selectedHtml = '';
+        selectedRange = null;
+        pushFlash('success', t('content.ai_generated'));
     });
 })();
