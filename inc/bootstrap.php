@@ -5,7 +5,7 @@ require_once dirname(__DIR__) . '/autoload.php';
 
 use App\Controller\Admin\Admin as AdminController;
 use App\Controller\Admin\Content as ContentController;
-use App\Controller\Admin\Api\ContentMedia as ContentMediaController;
+use App\Controller\Admin\ContentMedia as ContentMediaController;
 use App\Controller\Admin\Media as MediaController;
 use App\Controller\Admin\Settings as SettingsController;
 use App\Controller\Admin\Term as TermController;
