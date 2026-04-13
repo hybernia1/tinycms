@@ -17,6 +17,7 @@
     const bodyField = form.querySelector('[name="body"]');
     const termsField = form.querySelector('[data-tag-picker-value]');
     const tagPicker = form.querySelector('[data-tag-picker]');
+    const contentIdField = form.querySelector('[data-content-id-hidden]');
     const csrfInput = form.querySelector('[name="_csrf"]');
     const variantsBox = modal.querySelector('[data-content-ai-variants]');
     const regenerateButton = modal.querySelector('[data-content-ai-regenerate]');
@@ -25,7 +26,7 @@
     const bodySubmit = modal.querySelector('[data-content-ai-body-submit]');
     const openButtons = form.querySelectorAll('[data-content-ai-open]');
 
-    if (!nameField || !excerptField || !bodyField || !csrfInput || !variantsBox || !regenerateButton || !openButtons.length || !bodyTools || !bodyInstruction || !bodySubmit) {
+    if (!nameField || !excerptField || !bodyField || !csrfInput || !variantsBox || !regenerateButton || !openButtons.length || !bodyTools || !bodyInstruction || !bodySubmit || !contentIdField) {
         return;
     }
 
@@ -33,6 +34,7 @@
     const firstWords = (value, limit = 300) => stripHtml(value).split(' ').filter(Boolean).slice(0, limit).join(' ');
     const parseTags = (value) => String(value || '').split(',').map((tag) => tag.trim()).filter(Boolean);
     let bodyEndpoint = '';
+    const hasContentId = () => Number(contentIdField.value || '0') > 0;
 
     const renderVariants = (target, items) => {
         variantsBox.innerHTML = items.map((item, index) => `
@@ -77,6 +79,10 @@
     };
 
     const requestVariants = async (target, endpoint) => {
+        if (!hasContentId()) {
+            pushFlash('warning', t('content.draft_required'));
+            return;
+        }
         const source = firstWords(bodyField.value, 300);
         if (!source) {
             pushFlash('warning', t('content.ai_empty_source'));
@@ -167,6 +173,10 @@
     });
 
     bodySubmit.addEventListener('click', async () => {
+        if (!hasContentId()) {
+            pushFlash('warning', t('content.draft_required'));
+            return;
+        }
         const instruction = String(bodyInstruction.value || '').trim();
         const source = String(bodyField.value || '').trim();
         if (!instruction || !source || !bodyEndpoint) {
