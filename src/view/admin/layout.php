@@ -15,7 +15,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <?php endif; ?>
     <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/style.css')) ?>">
     <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/admin.css')) ?>">
-    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'editor/style.css')) ?>">
+    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/editor.css')) ?>">
     <script>window.tinycmsI18n = <?= json_encode($adminI18n ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
@@ -31,7 +31,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/tag-picker.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'editor/editor.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor.js')) ?>"></script>
 </head>
 <body>
 <script>
