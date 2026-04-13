@@ -29,8 +29,8 @@ final class View
     public function render(string $layout, string $template, array $data = []): void
     {
         $this->renderFiles(
-            $this->resolve('view/' . $template . '.php', '/view/'),
-            $this->resolve('view/' . $layout . '.php', '/view/'),
+            $this->resolve(VIEW_DIR . $template . '.php', VIEW_DIR),
+            $this->resolve(VIEW_DIR . $layout . '.php', VIEW_DIR),
             $layout,
             $data
         );
@@ -60,7 +60,7 @@ final class View
             return $scheme . '://' . $host . $resolved;
         };
         $icon = static function (string $name, string $classes = 'icon') use ($url, $e): string {
-            $sprite = $e($url('assets/svg/icons.svg#icon-' . $name));
+            $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . $name));
             $classAttr = $e($classes);
             return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
         };
@@ -106,9 +106,10 @@ final class View
     private function resolve(string $relativePath, string $allowedPath): string
     {
         $fullPath = $this->rootPath . '/' . ltrim($relativePath, '/');
+        $allowedRoot = rtrim($this->rootPath . '/' . trim($allowedPath, '/'), '/');
         $realPath = realpath($fullPath);
 
-        if ($realPath === false || !str_starts_with($realPath, $this->rootPath . $allowedPath) || !is_file($realPath)) {
+        if ($realPath === false || !str_starts_with($realPath, $allowedRoot) || !is_file($realPath)) {
             http_response_code(404);
             exit('404');
         }

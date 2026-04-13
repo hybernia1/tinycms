@@ -2,9 +2,9 @@
     function iconSpritePath() {
         var iconUse = document.querySelector('svg use[href*="#icon-"]');
         if (!iconUse) {
-            return '/assets/svg/icons.svg';
+            return '/src/assets/svg/icons.svg';
         }
-        return String(iconUse.getAttribute('href') || '').split('#')[0] || '/assets/svg/icons.svg';
+        return String(iconUse.getAttribute('href') || '').split('#')[0] || '/src/assets/svg/icons.svg';
     }
 
     function createOverlay() {

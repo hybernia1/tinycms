@@ -13,7 +13,7 @@ require_once __DIR__ . '/autoload.php';
 use App\Service\Support\ErrorHandler;
 
 try {
-    $app = require __DIR__ . '/inc/bootstrap.php';
+    $app = require __DIR__ . '/' . INC_DIR . 'bootstrap.php';
     $router = $app['router'];
 
     if (!$router->dispatch($_SERVER['REQUEST_URI'] ?? '/', $_SERVER['REQUEST_METHOD'] ?? 'GET')) {

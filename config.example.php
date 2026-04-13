@@ -1,7 +1,10 @@
 <?php
 declare(strict_types=1);
 
-define('INC_DIR', 'inc/');
+define('SRC_DIR', 'src/');
+define('INC_DIR', SRC_DIR . 'inc/');
+define('VIEW_DIR', SRC_DIR . 'view/');
+define('ASSETS_DIR', SRC_DIR . 'assets/');
 
 const APP_DEBUG = false;
 const APP_VERSION = '0.9.0';
