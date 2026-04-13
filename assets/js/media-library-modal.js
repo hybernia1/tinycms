@@ -1,3 +1,4 @@
+(() => {
 const modal = document.querySelector('[data-media-library-modal]');
 const t = window.tinycms?.i18n?.t || (() => '');
 const iconSprite = (() => {
@@ -681,3 +682,4 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         });
     }
 }
+})();
