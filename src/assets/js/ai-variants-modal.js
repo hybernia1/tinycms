@@ -22,40 +22,17 @@
     const regenerateButton = modal.querySelector('[data-content-ai-regenerate]');
     const bodyTools = modal.querySelector('[data-content-ai-body-tools]');
     const bodyInstruction = modal.querySelector('[data-content-ai-body-instruction]');
-    const bodyPreview = modal.querySelector('[data-content-ai-body-selection-preview]');
     const bodySubmit = modal.querySelector('[data-content-ai-body-submit]');
     const openButtons = form.querySelectorAll('[data-content-ai-open]');
 
-    if (!nameField || !excerptField || !bodyField || !csrfInput || !variantsBox || !regenerateButton || !openButtons.length || !bodyTools || !bodyInstruction || !bodyPreview || !bodySubmit) {
+    if (!nameField || !excerptField || !bodyField || !csrfInput || !variantsBox || !regenerateButton || !openButtons.length || !bodyTools || !bodyInstruction || !bodySubmit) {
         return;
     }
 
     const stripHtml = (value) => String(value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     const firstWords = (value, limit = 300) => stripHtml(value).split(' ').filter(Boolean).slice(0, limit).join(' ');
     const parseTags = (value) => String(value || '').split(',').map((tag) => tag.trim()).filter(Boolean);
-    let selectedRange = null;
-    let selectedHtml = '';
     let bodyEndpoint = '';
-    let lastEditorRange = null;
-
-    const editor = form.querySelector('.wysiwyg-editor');
-
-    const rememberEditorSelection = () => {
-        if (!editor) {
-            return;
-        }
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0) {
-            return;
-        }
-        const range = selection.getRangeAt(0);
-        if (range.collapsed || !editor.contains(range.commonAncestorContainer)) {
-            return;
-        }
-        lastEditorRange = range.cloneRange();
-    };
-
-    document.addEventListener('selectionchange', rememberEditorSelection);
 
     const renderVariants = (target, items) => {
         variantsBox.innerHTML = items.map((item, index) => `
@@ -143,21 +120,10 @@
         renderVariants(target, variants);
     };
 
-    const replaceEditorSelection = (html) => {
-        if (!editor || !selectedRange) {
-            return false;
-        }
-
-        const selection = window.getSelection();
-        if (!selection) {
-            return false;
-        }
-
-        selection.removeAllRanges();
-        selection.addRange(selectedRange);
-        document.execCommand('insertHTML', false, html);
-        editor.dispatchEvent(new Event('input', { bubbles: true }));
-        return true;
+    const replaceEditorBody = (html) => {
+        bodyField.value = html;
+        bodyField.dispatchEvent(new Event('tinycms:editor-sync-from-textarea', { bubbles: true }));
+        bodyField.dispatchEvent(new Event('input', { bubbles: true }));
     };
 
     openButtons.forEach((button) => {
@@ -169,35 +135,13 @@
             }
 
             if (target === 'body') {
-                const selection = window.getSelection();
-                let range = null;
-                if (editor && selection && selection.rangeCount > 0) {
-                    const current = selection.getRangeAt(0);
-                    if (!current.collapsed && editor.contains(current.commonAncestorContainer)) {
-                        range = current;
-                    }
-                }
-
-                if (!range && lastEditorRange) {
-                    range = lastEditorRange;
-                }
-
-                if (!editor || !range || range.collapsed || !editor.contains(range.commonAncestorContainer)) {
-                    pushFlash('warning', t('content.ai_empty_source'));
-                    modal.classList.remove('open');
-                    return;
-                }
-                const wrapper = document.createElement('div');
-                wrapper.appendChild(range.cloneContents());
-                selectedRange = range.cloneRange();
-                selectedHtml = wrapper.innerHTML.trim();
                 bodyEndpoint = endpoint;
 
                 bodyTools.hidden = false;
                 bodySubmit.hidden = false;
                 regenerateButton.hidden = true;
                 variantsBox.hidden = true;
-                bodyPreview.textContent = stripHtml(selectedHtml).slice(0, 220);
+                bodyInstruction.value = '';
                 modal.classList.add('open');
                 return;
             }
@@ -224,7 +168,9 @@
 
     bodySubmit.addEventListener('click', async () => {
         const instruction = String(bodyInstruction.value || '').trim();
-        if (!instruction || !selectedHtml || !bodyEndpoint) {
+        const source = String(bodyField.value || '').trim();
+        if (!instruction || !source || !bodyEndpoint) {
+            pushFlash('warning', t('content.ai_empty_source'));
             return;
         }
 
@@ -233,7 +179,7 @@
         data.set('_csrf', String(csrfInput.value || ''));
         data.set('target', 'body');
         data.set('instruction', instruction);
-        data.set('source', selectedHtml);
+        data.set('source', source);
         data.set('count', '1');
 
         const { response, data: result } = await postForm(bodyEndpoint, data).catch(() => ({ response: null, data: { message: '' } }));
@@ -245,15 +191,14 @@
         }
 
         const html = String(result?.data?.text || '').trim();
-        if (!replaceEditorSelection(html)) {
+        if (!html) {
             pushFlash('warning', t('content.ai_failed'));
             return;
         }
+        replaceEditorBody(html);
 
         modal.classList.remove('open');
         bodyInstruction.value = '';
-        selectedHtml = '';
-        selectedRange = null;
         pushFlash('success', t('content.ai_generated'));
     });
 })();

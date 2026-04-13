@@ -276,12 +276,11 @@ $contentId = (int)($item['id'] ?? 0);
         <div class="mb-3" data-content-ai-body-tools hidden>
             <label><?= $e($t('content.ai_instruction')) ?></label>
             <textarea rows="4" data-content-ai-body-instruction placeholder="<?= $e($t('content.ai_instruction_placeholder')) ?>"></textarea>
-            <small class="text-muted d-block mt-2" data-content-ai-body-selection-preview></small>
         </div>
         <div class="mb-3" data-content-ai-variants></div>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-content-ai-regenerate data-endpoint="<?= $e($url('admin/api/v1/content/ai/generate')) ?>" data-target="name"><?= $e($t('content.ai_regenerate')) ?></button>
-            <button class="btn btn-primary" type="button" data-content-ai-body-submit hidden><?= $e($t('content.ai_apply')) ?></button>
+            <button class="btn btn-primary" type="button" data-content-ai-body-submit hidden><?= $e($t('content.ai_generate')) ?></button>
             <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
         </div>
     </div>
