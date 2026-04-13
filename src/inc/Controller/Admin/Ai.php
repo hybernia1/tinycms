@@ -62,6 +62,9 @@ final class Ai extends BaseAdmin
         }
 
         $text = (string)($result['text'] ?? '');
+        if ($target === 'body') {
+            $text = $this->normalizeBodyHtml($text);
+        }
         $variants = [$text];
         if ($target !== 'body') {
             $text = trim($text);
@@ -139,5 +142,15 @@ final class Ai extends BaseAdmin
         $words = preg_split('/\s+/', trim($normalized)) ?: [];
         $slice = array_slice(array_filter($words, static fn($word): bool => $word !== ''), 0, max(1, $maxWords));
         return trim(implode(' ', $slice));
+    }
+
+    private function normalizeBodyHtml(string $value): string
+    {
+        $clean = trim($value);
+        if (preg_match('/^\s*```(?:html)?\s*(.*?)\s*```\s*$/is', $clean, $match) === 1) {
+            return trim((string)($match[1] ?? ''));
+        }
+
+        return $clean;
     }
 }
