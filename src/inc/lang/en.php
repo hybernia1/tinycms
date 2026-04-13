@@ -329,7 +329,7 @@ return [
         'commands' => [
             'title' => 'Create one SEO article title from this text. Return only final title, nothing else: %s',
             'excerpt' => 'Create one excerpt from this text (max 500 chars). Return only final excerpt, nothing else: %s',
-            'terms' => 'Create 3 variants of article tags from this text. Return plain comma-separated tags only: %s',
+            'terms' => 'Create 10 article tags from this text. Return one tag per line, no numbering, no explanations: %s',
         ],
     ],
     'editor' => [

@@ -28,6 +28,7 @@
 
     const stripHtml = (value) => String(value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     const firstWords = (value, limit = 300) => stripHtml(value).split(' ').filter(Boolean).slice(0, limit).join(' ');
+    const parseTags = (value) => String(value || '').split(',').map((tag) => tag.trim()).filter(Boolean);
 
     const renderVariants = (target, items) => {
         variantsBox.innerHTML = items.map((item, index) => `
@@ -48,15 +49,21 @@
                     excerptField.value = value;
                     excerptField.dispatchEvent(new Event('input', { bubbles: true }));
                 } else if (target === 'terms' && termsField) {
-                    termsField.value = value;
+                    const current = parseTags(termsField.value);
+                    const map = {};
+                    current.forEach((tag) => { map[tag.toLowerCase()] = tag; });
+                    if (!Object.prototype.hasOwnProperty.call(map, value.toLowerCase())) {
+                        current.push(value);
+                    }
+                    termsField.value = current.join(', ');
                     if (tagPicker) {
                         tagPicker.dispatchEvent(new CustomEvent('tinycms:tag-picker-set', {
                             bubbles: true,
-                            detail: {
-                                tags: value.split(',').map((tag) => tag.trim()).filter(Boolean),
-                            },
+                            detail: { tags: current },
                         }));
                     }
+                    pushFlash('success', t('content.ai_generated'));
+                    return;
                 }
 
                 modal.classList.remove('open');
@@ -88,7 +95,7 @@
         data.set('target', target);
         data.set('instruction', instruction);
         data.set('source', source);
-        data.set('count', '3');
+        data.set('count', target === 'terms' ? '10' : '3');
 
         const { response, data: result } = await postForm(endpoint, data).catch(() => ({ response: null, data: { message: '' } }));
         regenerateButton.disabled = false;
@@ -99,7 +106,7 @@
         }
 
         const variants = Array.isArray(result?.data?.variants)
-            ? result.data.variants.map((item) => stripHtml(String(item || ''))).filter(Boolean).slice(0, 3)
+            ? result.data.variants.map((item) => stripHtml(String(item || ''))).filter(Boolean).slice(0, target === 'terms' ? 10 : 3)
             : [];
         if (!variants.length) {
             pushFlash('warning', t('content.ai_failed'));

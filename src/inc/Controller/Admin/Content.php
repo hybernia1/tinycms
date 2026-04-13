@@ -359,7 +359,7 @@ final class Content extends BaseAdmin
         $instruction = trim((string)($_POST['instruction'] ?? ''));
         $sourceInput = trim((string)($_POST['source'] ?? ''));
         $body = (string)($_POST['body'] ?? '');
-        $count = max(1, min(3, (int)($_POST['count'] ?? 1)));
+        $count = max(1, min(10, (int)($_POST['count'] ?? 1)));
         $target = trim((string)($_POST['target'] ?? ''));
         if ($instruction === '' || !in_array($target, ['name', 'excerpt', 'terms'], true)) {
             $this->apiError('INVALID_INPUT', I18n::t('common.invalid_data'));
@@ -409,8 +409,8 @@ final class Content extends BaseAdmin
                 . "Article source:\n{$source}";
         }
 
-        return "Task: Generate exactly three variants of article tags.\n"
-            . "Rules: each variant on separate line, plain text only, comma-separated short tags, no numbering, no explanations.\n"
+        return "Task: Generate exactly ten article tags.\n"
+            . "Rules: one tag per line, plain text only, short tag, no numbering, no explanations.\n"
             . "Localized instruction:\n{$instruction}\n\n"
             . "Article source:\n{$source}";
     }
