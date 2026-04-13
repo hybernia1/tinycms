@@ -398,6 +398,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     align-items: center;
     justify-content: center;
     background: var(--color-surface-muted);
+    position: relative;
 }
 
 .media-library-detail-preview img {
@@ -405,6 +406,12 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     height: 100%;
     object-fit: cover;
     aspect-ratio: 1 / 1;
+}
+
+.media-library-detail-created-badge {
+    position: absolute;
+    right: var(--space-1);
+    bottom: var(--space-1);
 }
 
 .media-library-detail-meta {

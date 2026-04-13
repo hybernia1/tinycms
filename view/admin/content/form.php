@@ -122,11 +122,6 @@ $contentId = (int)($item['id'] ?? 0);
                             <span><?= $e($t('content.choose_image')) ?></span>
                         <?php endif; ?>
                     </button>
-                    <?php if ((int)($item['thumbnail'] ?? 0) > 0): ?>
-                        <div class="mt-2 d-flex gap-2" data-media-library-detach-wrap>
-                            <button class="btn btn-light" type="button" data-media-library-detach><?= $e($t('content.detach')) ?></button>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
         </aside>
@@ -161,7 +156,6 @@ $contentId = (int)($item['id'] ?? 0);
                             <button class="btn btn-light" type="button" data-media-library-rename disabled><?= $e($t('common.save')) ?></button>
                         </div>
                     </div>
-                    <div><strong><?= $e($t('common.created')) ?>:</strong> <span data-media-library-detail-created>—</span></div>
                 </div>
                 <small class="text-muted" data-media-library-status></small>
                 <div class="d-flex gap-2">

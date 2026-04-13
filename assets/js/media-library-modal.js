@@ -25,8 +25,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     const uploadForm = modal.querySelector('[data-media-library-upload-form]');
     const uploadField = modal.querySelector('[data-media-library-upload-field]');
     const uploadInput = uploadForm ? uploadForm.querySelector('input[type="file"]') : null;
-    const detachButton = document.querySelector('[data-media-library-detach]');
-    const detachWrap = document.querySelector('[data-media-library-detach-wrap]');
     const detachForm = document.querySelector('[data-media-library-detach-form]');
     const selectForm = document.querySelector('[data-media-library-select-form]');
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
@@ -36,7 +34,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     const deleteConfirmModal = document.getElementById('media-library-delete-modal');
     const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
     const detailNameInput = modal.querySelector('[data-media-library-detail-name-input]');
-    const detailCreated = modal.querySelector('[data-media-library-detail-created]');
     const chooseButton = modal.querySelector('[data-media-library-choose]');
     const deleteButton = modal.querySelector('[data-media-library-delete-open]');
     const renameButton = modal.querySelector('[data-media-library-rename]');
@@ -134,10 +131,8 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
 
     const setTriggerEmpty = () => {
         openTrigger.classList.add('empty');
+        openTrigger.setAttribute('data-current-media-id', '0');
         openTrigger.innerHTML = `<span>${t('content.choose_image')}</span>`;
-        if (detachWrap) {
-            detachWrap.remove();
-        }
     };
 
     const setTriggerThumbnail = (media) => {
@@ -249,6 +244,30 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         renderSelected();
     };
 
+    const clearSelected = () => {
+        selectedMedia = null;
+        if (grid) {
+            grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
+        }
+        setStatus('');
+        renderSelected();
+    };
+
+    const detachCurrent = async () => {
+        if (!detachForm) {
+            return false;
+        }
+        const { response, data } = await postForm(detachForm.action, detachForm);
+        if (!response.ok || !data.success) {
+            setStatus(data.message || t('media.detach_failed'));
+            return false;
+        }
+        currentMediaId = 0;
+        setTriggerEmpty();
+        setStatus(t('media.detached'));
+        return true;
+    };
+
     const renderSelected = () => {
         if (detailPreview) {
             detailPreview.innerHTML = '';
@@ -260,6 +279,10 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
                 image.src = absoluteUrl(detailImagePath);
                 image.alt = selectedMedia.name;
                 detailPreview.appendChild(image);
+                const createdBadge = document.createElement('span');
+                createdBadge.className = 'badge media-library-detail-created-badge';
+                createdBadge.textContent = selectedMedia.createdLabel || selectedMedia.created || '—';
+                detailPreview.appendChild(createdBadge);
             } else {
                 detailPreview.textContent = t('media.no_preview');
             }
@@ -268,10 +291,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         if (detailNameInput) {
             detailNameInput.value = selectedMedia ? selectedMedia.name : '';
             detailNameInput.disabled = !(selectedMedia && selectedMedia.canEdit);
-        }
-
-        if (detailCreated) {
-            detailCreated.textContent = selectedMedia ? (selectedMedia.createdLabel || selectedMedia.created) : '—';
         }
 
         if (chooseButton) {
@@ -495,9 +514,18 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     }
 
     if (grid) {
-        grid.addEventListener('click', (event) => {
+        grid.addEventListener('click', async (event) => {
             const target = event.target.closest('[data-media-library-select]');
             if (!target) {
+                return;
+            }
+            const mediaId = Number(target.getAttribute('data-media-library-select') || '0');
+            const isSameSelection = !!(selectedMedia && selectedMedia.id === mediaId);
+            if (isSameSelection) {
+                clearSelected();
+                if (mode === 'thumbnail' && mediaId > 0 && mediaId === currentMediaId) {
+                    await detachCurrent();
+                }
                 return;
             }
 
@@ -667,19 +695,5 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         });
     }
 
-    if (detachButton && detachForm) {
-        detachButton.addEventListener('click', async () => {
-            const { response, data } = await postForm(detachForm.action, detachForm);
-
-            if (!response.ok || !data.success) {
-                setStatus(data.message || t('media.detach_failed'));
-                return;
-            }
-
-            currentMediaId = 0;
-            setTriggerEmpty();
-            setStatus(t('media.detached'));
-        });
-    }
 }
 })();
