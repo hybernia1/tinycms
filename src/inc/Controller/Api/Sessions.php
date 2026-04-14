@@ -8,7 +8,7 @@ use App\Service\Support\Csrf;
 use App\Service\Support\I18n;
 use App\Service\Support\RateLimiter;
 
-final class Heartbeat
+final class Sessions
 {
     public function __construct(
         private Auth $authService,
