@@ -982,7 +982,7 @@
             document.execCommand('removeFormat', false, null);
         }
 
-        function clearEmptyBlockFormattingAtCaret() {
+        function clearTypingStyleAtCaret() {
             var container = getSelectionContainer(editor);
             if (!container) {
                 return;
@@ -991,11 +991,41 @@
             if (!block || !editor.contains(block)) {
                 return;
             }
-            if (!isEmptyTextBlock(block)) {
+            var node = container.nodeType === Node.TEXT_NODE ? container.parentNode : container;
+            while (node && node !== block) {
+                if (node.nodeType === Node.ELEMENT_NODE && (node.tagName === 'SPAN' || node.tagName === 'FONT')) {
+                    node.removeAttribute('style');
+                    node.removeAttribute('color');
+                    node.removeAttribute('bgcolor');
+                }
+                node = node.parentNode;
+            }
+            if (isEmptyTextBlock(block)) {
+                block.removeAttribute('style');
+                block.innerHTML = '<br>';
+            }
+
+            var selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0) {
                 return;
             }
-            block.removeAttribute('style');
-            block.innerHTML = '<br>';
+            var range = selection.getRangeAt(0);
+            if (!range.collapsed) {
+                return;
+            }
+            var marker = document.createTextNode('\u200b');
+            range.insertNode(marker);
+            var markerRange = document.createRange();
+            markerRange.selectNodeContents(marker);
+            selection.removeAllRanges();
+            selection.addRange(markerRange);
+            document.execCommand('removeFormat', false, null);
+            var caretRange = document.createRange();
+            caretRange.setStartAfter(marker);
+            caretRange.collapse(true);
+            marker.parentNode.removeChild(marker);
+            selection.removeAllRanges();
+            selection.addRange(caretRange);
         }
 
         function isEmptyTextBlock(node) {
@@ -1505,6 +1535,7 @@
                     }
                     placeCaret(nextParagraph);
                     resetTypingFormatting();
+                    clearTypingStyleAtCaret();
                     persistEditorState(true);
                     return;
                 }
@@ -1515,7 +1546,7 @@
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
                 resetTypingFormatting();
-                clearEmptyBlockFormattingAtCaret();
+                clearTypingStyleAtCaret();
                 persistEditorState(true);
             }
 
