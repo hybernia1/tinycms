@@ -1013,6 +1013,77 @@
             }
         });
 
+        function runWhenEditable(callback) {
+            if (htmlMode) {
+                return;
+            }
+            callback();
+        }
+
+        function openMediaLibraryCommand() {
+            mediaRange = isSelectionInside(editor) ? rememberSelection() : null;
+            document.dispatchEvent(new CustomEvent('tinycms:media-library-open', {
+                detail: {
+                    mode: 'editor',
+                    editorId: editorId,
+                    contentId: Number(textarea.dataset.contentId || '0'),
+                    endpoint: textarea.dataset.mediaLibraryEndpoint || '',
+                    baseUrl: textarea.dataset.mediaBaseUrl || '',
+                },
+            }));
+        }
+
+        function insertPagebreakCommand() {
+            if (!isSelectionInside(editor)) {
+                focusEditorEnd(editor);
+            }
+            document.execCommand('insertHTML', false, '<hr class="wysiwyg-pagebreak"><p><br></p>');
+            persistEditorState(true);
+        }
+
+        function toggleLinkPanelCommand() {
+            if (isSelectionInside(editor)) {
+                linkRange = rememberSelection();
+                activeLink = getCurrentLink(editor);
+            }
+            if (linkModal.classList.contains('is-open')) {
+                closeMenus();
+                return;
+            }
+            openLinkModal();
+        }
+
+        var toggleMenuCommands = {
+            toggleListMenu: 'is-list-open',
+            toggleHeadingMenu: 'is-heading-open',
+            toggleAlignMenu: 'is-align-open',
+            toggleTextColorMenu: 'is-text-color-open',
+            toggleBackgroundColorMenu: 'is-bg-color-open',
+        };
+
+        var toolbarActions = {
+            toggleFocusMode: function () {
+                setFocusMode(!document.body.classList.contains('admin-focus-mode'));
+                return true;
+            },
+            toggleHtml: function () {
+                setHtmlMode(!htmlMode);
+                return true;
+            },
+            openMediaLibrary: function () {
+                runWhenEditable(openMediaLibraryCommand);
+                return true;
+            },
+            insertPagebreak: function () {
+                runWhenEditable(insertPagebreakCommand);
+                return true;
+            },
+            toggleLinkPanel: function () {
+                runWhenEditable(toggleLinkPanelCommand);
+                return true;
+            }
+        };
+
         toolbar.addEventListener('click', function (event) {
             var button = event.target.closest('[data-command]');
             if (!button) {
@@ -1020,107 +1091,22 @@
             }
 
             var command = button.getAttribute('data-command');
-            if (command === 'toggleFocusMode') {
-                setFocusMode(!document.body.classList.contains('admin-focus-mode'));
+            if (toolbarActions[command]) {
+                toolbarActions[command]();
                 return;
             }
 
-            if (command === 'toggleHtml') {
-                setHtmlMode(!htmlMode);
-                return;
-            }
-
-            if (command === 'openMediaLibrary') {
-                if (htmlMode) {
-                    return;
-                }
-                mediaRange = isSelectionInside(editor) ? rememberSelection() : null;
-                document.dispatchEvent(new CustomEvent('tinycms:media-library-open', {
-                    detail: {
-                        mode: 'editor',
-                        editorId: editorId,
-                        contentId: Number(textarea.dataset.contentId || '0'),
-                        endpoint: textarea.dataset.mediaLibraryEndpoint || '',
-                        baseUrl: textarea.dataset.mediaBaseUrl || '',
-                    },
-                }));
-                return;
-            }
-
-            if (command === 'insertPagebreak') {
-                if (htmlMode) {
-                    return;
-                }
-                if (!isSelectionInside(editor)) {
-                    focusEditorEnd(editor);
-                }
-                document.execCommand('insertHTML', false, '<hr class="wysiwyg-pagebreak"><p><br></p>');
-                persistEditorState(true);
-                return;
-            }
-
-            if (command === 'toggleListMenu') {
-                if (htmlMode) {
-                    return;
-                }
-                toggleMenu('is-list-open');
-                return;
-            }
-
-            if (command === 'toggleHeadingMenu') {
-                if (htmlMode) {
-                    return;
-                }
-                toggleMenu('is-heading-open');
-                return;
-            }
-
-            if (command === 'toggleAlignMenu') {
-                if (htmlMode) {
-                    return;
-                }
-                toggleMenu('is-align-open');
-                return;
-            }
-
-            if (command === 'toggleTextColorMenu') {
-                if (htmlMode) {
-                    return;
-                }
-                toggleMenu('is-text-color-open');
-                return;
-            }
-
-            if (command === 'toggleBackgroundColorMenu') {
-                if (htmlMode) {
-                    return;
-                }
-                toggleMenu('is-bg-color-open');
-                return;
-            }
-
-            if (command === 'toggleLinkPanel') {
-                if (htmlMode) {
-                    return;
-                }
-                if (isSelectionInside(editor)) {
-                    linkRange = rememberSelection();
-                    activeLink = getCurrentLink(editor);
-                }
-                if (linkModal.classList.contains('is-open')) {
-                    closeMenus();
-                } else {
-                    openLinkModal();
-                }
+            if (toggleMenuCommands[command]) {
+                runWhenEditable(function () {
+                    toggleMenu(toggleMenuCommands[command]);
+                });
                 return;
             }
 
             if (command.indexOf('formatBlock:') === 0) {
-                if (command === 'formatBlock:blockquote') {
-                    if (isSelectionInsideTag(editor, 'blockquote')) {
-                        runCommand('formatBlock', '<p>');
-                        return;
-                    }
+                if (command === 'formatBlock:blockquote' && isSelectionInsideTag(editor, 'blockquote')) {
+                    runCommand('formatBlock', '<p>');
+                    return;
                 }
                 runCommand('formatBlock', '<' + command.split(':')[1] + '>');
                 return;
