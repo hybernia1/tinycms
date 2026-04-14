@@ -14,13 +14,41 @@ const openTrigger = Array.prototype.find.call(
 ) || null;
 const requestJson = window.tinycms?.api?.http?.requestJson;
 const postForm = window.tinycms?.api?.http?.postForm;
+const modalApi = window.tinycms?.modal || null;
+const openModalWithTarget = (selector) => {
+    if (modalApi && typeof modalApi.open === 'function') {
+        modalApi.open({
+            getAttribute: (name) => name === 'data-modal-target' ? selector : '',
+            hasAttribute: () => false,
+        });
+        return;
+    }
+    const target = document.querySelector(selector);
+    if (target) {
+        target.classList.add('open');
+    }
+};
+const closeModalElement = (node) => {
+    if (modalApi && typeof modalApi.close === 'function') {
+        modalApi.close(node);
+        return;
+    }
+    if (node) {
+        node.classList.remove('open');
+    }
+};
 
 if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm === 'function') {
+    if (!modal.id) {
+        modal.id = 'media-library-modal';
+    }
+    modal.setAttribute('data-modal', '');
     const loader = window.tinycmsLoader || null;
     const grid = modal.querySelector('[data-media-library-grid]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
     const nextButton = modal.querySelector('[data-media-library-next]');
     const closeButtons = modal.querySelectorAll('[data-media-library-close]');
+    closeButtons.forEach((button) => button.setAttribute('data-modal-close', ''));
     const searchForm = modal.querySelector('[data-media-library-search]');
     const uploadForm = modal.querySelector('[data-media-library-upload-form]');
     const uploadField = modal.querySelector('[data-media-library-upload-field]');
@@ -405,7 +433,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
 
     const open = (detail) => {
         setContext(detail || {});
-        modal.classList.add('open');
+        openModalWithTarget('#' + modal.id);
         if (searchTimer) {
             clearTimeout(searchTimer);
             searchTimer = null;
@@ -431,7 +459,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     });
 
     const close = () => {
-        modal.classList.remove('open');
+        closeModalElement(modal);
     };
 
     if (openTrigger) {
@@ -461,7 +489,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         }
         open(detail);
     });
-    closeButtons.forEach((button) => button.addEventListener('click', close));
     modal.addEventListener('click', (event) => {
         if (event.target === modal) {
             close();
@@ -689,7 +716,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             renderSelected();
             await load().catch(() => null);
             if (deleteConfirmModal) {
-                deleteConfirmModal.classList.remove('open');
+                closeModalElement(deleteConfirmModal);
             }
             setStatus(t('media.deleted'));
         });
