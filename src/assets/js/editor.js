@@ -264,6 +264,24 @@
         textarea.value = serializeEditorHtml(editor);
     }
 
+    function createRootParagraph() {
+        var paragraph = document.createElement('p');
+        paragraph.innerHTML = '';
+        return paragraph;
+    }
+
+    function ensureRootParagraph(editor) {
+        if (!editor) {
+            return;
+        }
+        var meaningfulText = String(editor.textContent || '').replace(/\u00a0/g, ' ').trim();
+        var hasMediaOrEmbed = !!editor.querySelector('img, iframe, hr, video, audio, table, .block.block-image, .block.block-embed');
+        if (meaningfulText === '' && !hasMediaOrEmbed && editor.children.length === 0) {
+            editor.innerHTML = '';
+            editor.appendChild(createRootParagraph());
+        }
+    }
+
     function createImageBreakParagraph() {
         var paragraph = document.createElement('p');
         paragraph.className = 'block-image-break';
@@ -988,6 +1006,7 @@
         function persistEditorState(withFormatState) {
             normalizeBlocks(editor);
             enhanceImageBlocks(editor);
+            ensureRootParagraph(editor);
             sync(textarea, editor);
             if (withFormatState) {
                 updateFormatState();
@@ -1053,6 +1072,7 @@
                 return;
             }
             editor.innerHTML = textarea.value.trim();
+            ensureRootParagraph(editor);
             enhanceImageBlocks(editor);
             textarea.style.display = 'none';
             sync(textarea, editor);
@@ -1065,6 +1085,7 @@
             editor.innerHTML = textarea.value.trim();
             normalizeBlocks(editor);
             enhanceImageBlocks(editor);
+            ensureRootParagraph(editor);
             updateFormatState();
         }
 
@@ -1631,6 +1652,7 @@
         });
 
         editor.addEventListener('input', function () {
+            ensureRootParagraph(editor);
             sync(textarea, editor);
             updateFormatState();
         });
@@ -1666,6 +1688,7 @@
         document.execCommand('defaultParagraphSeparator', false, 'p');
         normalizeBlocks(editor);
         enhanceImageBlocks(editor);
+        ensureRootParagraph(editor);
         sync(textarea, editor);
         updateFormatState();
         updateLinkApplyState();
