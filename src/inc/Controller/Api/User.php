@@ -10,7 +10,7 @@ use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 
-final class Users extends BaseAdmin
+final class User extends BaseAdmin
 {
     public function __construct(
         Auth $authService,
