@@ -97,8 +97,8 @@ const refreshCsrfToken = async () => {
     }
 };
 
-const heartbeat = async () => {
-    if (modal.classList.contains('open') || connectionModal.classList.contains('open') || heartbeatInFlight || loginInFlight) {
+const heartbeat = async (ignoreConnectionModal = false) => {
+    if (modal.classList.contains('open') || (!ignoreConnectionModal && connectionModal.classList.contains('open')) || heartbeatInFlight || loginInFlight) {
         return;
     }
 
@@ -134,9 +134,8 @@ const heartbeat = async () => {
     }
 };
 
-retryButton?.addEventListener('click', async () => {
-    closeConnectionModal();
-    await heartbeat();
+retryButton?.addEventListener('click', () => {
+    heartbeat(true);
 });
 
 form.addEventListener('submit', async (event) => {
