@@ -488,10 +488,11 @@
 
     function createLinkModal() {
         var modal = document.createElement('div');
-        modal.className = 'wysiwyg-link-modal';
+        modal.className = 'modal-overlay wysiwyg-link-modal';
+        modal.setAttribute('data-modal', '');
 
         var dialog = document.createElement('div');
-        dialog.className = 'wysiwyg-link-dialog';
+        dialog.className = 'modal wysiwyg-link-dialog';
 
         var title = document.createElement('h3');
         title.className = 'wysiwyg-link-title';
@@ -529,12 +530,13 @@
         nofollowOption.appendChild(document.createTextNode(' ' + t('editor.add_nofollow')));
 
         var actions = document.createElement('div');
-        actions.className = 'wysiwyg-link-actions';
+        actions.className = 'modal-actions wysiwyg-link-actions';
 
         var cancel = document.createElement('button');
         cancel.type = 'button';
         cancel.className = 'btn btn-light';
         cancel.setAttribute('data-role', 'link-cancel');
+        cancel.setAttribute('data-modal-close', '');
         cancel.textContent = '' + t('editor.cancel') + '';
 
         var remove = document.createElement('button');
@@ -855,7 +857,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('is-open');
+            linkModal.classList.add('open');
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -922,7 +924,7 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('is-open');
+            linkModal.classList.remove('open');
         }
 
         function closeMenus() {
@@ -931,7 +933,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            linkModal.classList.remove('is-open');
+            linkModal.classList.remove('open');
             hideLinkTools();
             activeLink = null;
         }
@@ -1107,7 +1109,7 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                if (linkModal.classList.contains('is-open')) {
+                if (linkModal.classList.contains('open')) {
                     closeMenus();
                 } else {
                     openLinkModal();
@@ -1348,7 +1350,7 @@
             }
 
             hideLinkTools();
-            if (!linkModal.classList.contains('is-open')) {
+            if (!linkModal.classList.contains('open')) {
                 activeLink = null;
             }
 
