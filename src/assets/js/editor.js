@@ -3,7 +3,6 @@
     var requestJson = window.tinycms?.api?.http?.requestJson;
     var postForm = window.tinycms?.api?.http?.postForm;
     var editorCounter = 0;
-    var bogusBrSelector = 'br[data-tinycms-bogus="1"]';
 
     function normalizeHtml(html) {
         return html === '<br>' ? '' : html;
@@ -209,15 +208,9 @@
         clone.querySelectorAll('.image-controls, .image-size-controls, .image-resize-handle, .image-selection-frame').forEach(function (node) {
             node.remove();
         });
-        clone.querySelectorAll(bogusBrSelector).forEach(function (node) {
-            node.remove();
-        });
         clone.querySelectorAll('.block.block-image').forEach(function (block) {
             block.classList.remove('is-selected');
         });
-        while (clone.lastElementChild && isEmptyTextBlock(clone.lastElementChild)) {
-            clone.removeChild(clone.lastElementChild);
-        }
         return normalizeHtml(clone.innerHTML.trim());
     }
 
@@ -228,7 +221,7 @@
     function createImageBreakParagraph() {
         var paragraph = document.createElement('p');
         paragraph.className = 'block-image-break';
-        paragraph.innerHTML = '<br data-tinycms-bogus="1">';
+        paragraph.innerHTML = '<br>';
         return paragraph;
     }
 
@@ -945,7 +938,6 @@
                 return false;
             }
             var html = String(node.innerHTML || '').replace(/\u00a0/g, ' ').replace(/\s+/g, '').toLowerCase();
-            html = html.replace(/<br[^>]*>/g, '<br>');
             return html === '' || html === '<br>' || html === '<br/>';
         }
 
@@ -1394,7 +1386,7 @@
                         event.preventDefault();
                         currentBlock.remove();
                         var paragraph = document.createElement('p');
-                        paragraph.innerHTML = '<br data-tinycms-bogus="1">';
+                        paragraph.innerHTML = '<br>';
                         var quoteParent = quoteBlock.parentNode;
                         var quoteNextSibling = quoteBlock.nextSibling;
                         if (quoteBlock.textContent.replace(/\u00a0/g, ' ').trim() === '' && !quoteBlock.querySelector('img, iframe, hr, video, audio, table')) {
@@ -1411,7 +1403,7 @@
                     }
                     event.preventDefault();
                     var nextParagraph = document.createElement('p');
-                    nextParagraph.innerHTML = '<br data-tinycms-bogus="1">';
+                    nextParagraph.innerHTML = '<br>';
                     if (currentBlock && quoteBlock.contains(currentBlock) && currentBlock !== quoteBlock) {
                         currentBlock.parentNode.insertBefore(nextParagraph, currentBlock.nextSibling);
                     } else {
