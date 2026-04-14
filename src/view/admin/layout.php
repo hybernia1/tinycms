@@ -32,8 +32,9 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/heartbeat.js')) ?>"></script>
 </head>
-<body>
+<body data-heartbeat-endpoint="<?= $e($url('admin/api/v1/heartbeat')) ?>" data-heartbeat-login-endpoint="<?= $e($url('admin/api/v1/auth/login')) ?>">
 <script>
     (function () {
         var collapsed = (document.cookie.split(';').map(function (part) { return part.trim(); }).indexOf('tinycms_admin_sidebar=collapsed') !== -1);
@@ -176,6 +177,38 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
         </section>
     </main>
     <div class="admin-version-corner">TinyCMS <?= $e((string)($appVersion ?? '0.9.0')) ?></div>
+</div>
+<div class="modal-overlay" id="session-login-modal" data-session-login-modal>
+    <div class="modal session-login-modal">
+        <h3 class="m-0 mb-3"><?= $e($t('auth.login')) ?></h3>
+        <p class="m-0 mb-3"><?= $e($t('auth.session_expired')) ?></p>
+        <p class="m-0 mb-3 text-danger" data-session-login-message hidden></p>
+        <form method="post" action="<?= $e($url('admin/api/v1/auth/login')) ?>" data-session-login-form>
+            <?= $csrfField() ?>
+            <div class="mb-3">
+                <label><?= $e($t('common.email')) ?></label>
+                <div class="field-with-icon">
+                    <span class="field-overlay field-overlay-start field-icon" aria-hidden="true"><?= $icon('email') ?></span>
+                    <input class="field-control-with-start-icon" type="email" name="email" data-session-login-email required>
+                </div>
+                <small class="text-danger" data-session-login-error="email" hidden></small>
+            </div>
+            <div class="mb-3">
+                <label><?= $e($t('common.password')) ?></label>
+                <div class="field-with-icon">
+                    <input class="field-control-with-end-icon" type="password" name="password" data-password-input required>
+                    <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= $e($t('auth.show_password')) ?>" title="<?= $e($t('auth.show_password')) ?>">
+                        <?= $icon('show') ?>
+                    </button>
+                </div>
+                <small class="text-danger" data-session-login-error="password" hidden></small>
+            </div>
+            <div class="mb-4">
+                <label><input type="checkbox" name="remember" value="1"> <?= $e($t('auth.remember')) ?></label>
+            </div>
+            <button class="btn btn-primary" type="submit" data-session-login-submit><?= $e($t('auth.login')) ?></button>
+        </form>
+    </div>
 </div>
 </body>
 </html>

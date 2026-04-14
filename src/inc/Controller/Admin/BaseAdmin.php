@@ -90,6 +90,12 @@ abstract class BaseAdmin
     protected function respondJson(array $payload, int $statusCode = 200): void
     {
         header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        if ($statusCode === 429 && isset($payload['error']['retry_after'])) {
+            header('Retry-After: ' . (int)$payload['error']['retry_after']);
+        }
         http_response_code($statusCode);
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     }

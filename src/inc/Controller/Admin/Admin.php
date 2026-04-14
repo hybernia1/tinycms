@@ -84,4 +84,5 @@ final class Admin extends BaseAdmin
         $this->authService->auth()->logout();
         $redirect('admin/login');
     }
+
 }

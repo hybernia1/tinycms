@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller\Admin;
+namespace App\Controller\Api;
+
+use App\Controller\Admin\BaseAdmin;
 
 use App\Service\Application\Auth;
 use App\Service\Application\Content;
