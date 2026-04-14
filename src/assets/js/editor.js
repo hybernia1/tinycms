@@ -393,44 +393,6 @@
         return button;
     }
 
-    function createColorSwatchButton(command, value) {
-        var item = document.createElement('button');
-        item.type = 'button';
-        item.className = 'wysiwyg-color-swatch';
-        item.setAttribute('data-command', command);
-        item.setAttribute('data-value', value);
-        item.style.backgroundColor = value;
-        item.title = value;
-        item.setAttribute('aria-label', value);
-        return item;
-    }
-
-    function createColorGroup(icon, toggleCommand, swatchCommand, title, type) {
-        var group = document.createElement('div');
-        group.className = 'wysiwyg-group wysiwyg-group-color';
-
-        var toggle = createIconButton(icon, toggleCommand, title);
-
-        var menu = document.createElement('div');
-        menu.className = 'wysiwyg-menu wysiwyg-menu-color';
-        menu.setAttribute('data-color-type', type);
-
-        var colors = [
-            '#000000', '#434343', '#666666', '#999999',
-            '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef',
-            '#f3f3f3', '#ffffff', '#980000', '#ff0000',
-            '#ff9900', '#ffff00', '#00ff00', '#00ffff',
-        ];
-
-        colors.forEach(function (color) {
-            menu.appendChild(createColorSwatchButton(swatchCommand, color));
-        });
-
-        group.appendChild(toggle);
-        group.appendChild(menu);
-        return group;
-    }
-
     function createHeadingGroup() {
         var group = document.createElement('div');
         group.className = 'wysiwyg-group wysiwyg-group-heading';
@@ -581,14 +543,11 @@
         var italic = createIconButton('w-italic', 'italic', ''+ t('editor.italic') + '');
         var quote = createIconButton('w-quote', 'formatBlock:blockquote', t('editor.quote'));
         var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
-        var clear = createIconButton('w-clear', 'removeFormat', ''+ t('editor.clear') + '');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
         var media = createIconButton('w-image', 'openMediaLibrary', ''+ t('editor.insert_image') + '');
         var pagebreak = createIconButton('w-pagebreak', 'insertPagebreak', ''+ t('editor.page_break') + '');
         var alignGroup = createAlignGroup();
-        var textColorGroup = createColorGroup('w-text-color', 'toggleTextColorMenu', 'foreColor', t('editor.text_color'), 'text');
-        var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', ''+ t('editor.background_color') + '', 'background');
         var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
         var linkModal = createLinkModal();
@@ -604,21 +563,17 @@
         toolbar.appendChild(quote);
         toolbar.appendChild(link);
         toolbar.appendChild(listGroup);
-        toolbar.appendChild(clear);
         if ((textarea.dataset.mediaLibraryEndpoint || '').trim() !== '') {
             toolbar.appendChild(media);
         }
         toolbar.appendChild(pagebreak);
         toolbar.appendChild(html);
         toolbar.appendChild(alignGroup);
-        toolbar.appendChild(textColorGroup);
-        toolbar.appendChild(backgroundColorGroup);
         toolbar.appendChild(focus);
 
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
         editor.contentEditable = 'true';
-        editor.dataset.placeholder = '' + t('editor.placeholder') + '';
         editor.innerHTML = textarea.value.trim();
 
         var linkRange = null;
@@ -919,7 +874,7 @@
         }
 
         function toggleMenu(menuClass) {
-            ['is-heading-open', 'is-list-open', 'is-align-open', 'is-text-color-open', 'is-bg-color-open'].forEach(function (className) {
+            ['is-heading-open', 'is-list-open', 'is-align-open'].forEach(function (className) {
                 if (className === menuClass) {
                     wrapper.classList.toggle(className);
                     return;
@@ -933,8 +888,6 @@
             wrapper.classList.remove('is-heading-open');
             wrapper.classList.remove('is-list-open');
             wrapper.classList.remove('is-align-open');
-            wrapper.classList.remove('is-text-color-open');
-            wrapper.classList.remove('is-bg-color-open');
             linkModal.classList.remove('open');
             hideLinkTools();
             activeLink = null;
@@ -971,15 +924,6 @@
             document.execCommand(command, false, value || null);
             persistEditorState(true);
             closeMenus();
-        }
-
-        function resetTypingFormatting() {
-            ['bold', 'italic', 'underline', 'strikeThrough'].forEach(function (command) {
-                if (document.queryCommandState(command)) {
-                    document.execCommand(command, false, null);
-                }
-            });
-            document.execCommand('removeFormat', false, null);
         }
 
         function isEmptyTextBlock(node) {
@@ -1070,7 +1014,7 @@
                 if (!isSelectionInside(editor)) {
                     focusEditorEnd(editor);
                 }
-                document.execCommand('insertHTML', false, '<hr class="wysiwyg-pagebreak"><p><br></p>');
+                document.execCommand('insertHTML', false, '<hr />');
                 persistEditorState(true);
                 return;
             }
@@ -1099,22 +1043,6 @@
                 return;
             }
 
-            if (command === 'toggleTextColorMenu') {
-                if (htmlMode) {
-                    return;
-                }
-                toggleMenu('is-text-color-open');
-                return;
-            }
-
-            if (command === 'toggleBackgroundColorMenu') {
-                if (htmlMode) {
-                    return;
-                }
-                toggleMenu('is-bg-color-open');
-                return;
-            }
-
             if (command === 'toggleLinkPanel') {
                 if (htmlMode) {
                     return;
@@ -1139,12 +1067,6 @@
                     }
                 }
                 runCommand('formatBlock', '<' + command.split(':')[1] + '>');
-                return;
-            }
-
-            if (command === 'foreColor' || command === 'hiliteColor') {
-                document.execCommand('styleWithCSS', false, true);
-                runCommand(command, button.getAttribute('data-value') || '#000000');
                 return;
             }
 
@@ -1488,7 +1410,6 @@
                         quoteBlock.appendChild(nextParagraph);
                     }
                     placeCaret(nextParagraph);
-                    resetTypingFormatting();
                     persistEditorState(true);
                     return;
                 }
@@ -1498,7 +1419,6 @@
                 document.execCommand('defaultParagraphSeparator', false, 'p');
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
-                resetTypingFormatting();
                 persistEditorState(true);
             }
 
