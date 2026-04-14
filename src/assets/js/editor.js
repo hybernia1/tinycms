@@ -8,6 +8,51 @@
         return html === '<br>' ? '' : html;
     }
 
+    function rgbChannelToHex(value) {
+        var number = Number(value);
+        if (!isFinite(number)) {
+            return null;
+        }
+        var bounded = Math.max(0, Math.min(255, Math.round(number)));
+        var hex = bounded.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    }
+
+    function normalizeColorValue(value) {
+        var input = String(value || '').trim();
+        var match = input.match(/^rgba?\(([^)]+)\)$/i);
+        if (!match) {
+            return input;
+        }
+        var channels = match[1].split(',').map(function (part) {
+            return part.trim();
+        });
+        if (channels.length < 3) {
+            return input;
+        }
+        if (channels.length === 4 && Number(channels[3]) !== 1) {
+            return input;
+        }
+        var red = rgbChannelToHex(channels[0]);
+        var green = rgbChannelToHex(channels[1]);
+        var blue = rgbChannelToHex(channels[2]);
+        if (!red || !green || !blue) {
+            return input;
+        }
+        return '#' + red + green + blue;
+    }
+
+    function normalizeInlineColors(root) {
+        root.querySelectorAll('[style]').forEach(function (node) {
+            if (node.style.color) {
+                node.style.color = normalizeColorValue(node.style.color);
+            }
+            if (node.style.backgroundColor) {
+                node.style.backgroundColor = normalizeColorValue(node.style.backgroundColor);
+            }
+        });
+    }
+
     function extractYoutubeVideoId(value) {
         var raw = String(value || '').trim();
         if (!raw) {
@@ -211,6 +256,7 @@
         clone.querySelectorAll('.block.block-image').forEach(function (block) {
             block.classList.remove('is-selected');
         });
+        normalizeInlineColors(clone);
         return normalizeHtml(clone.innerHTML.trim());
     }
 
@@ -618,7 +664,6 @@
         var editor = document.createElement('div');
         editor.className = 'wysiwyg-editor';
         editor.contentEditable = 'true';
-        editor.dataset.placeholder = '' + t('editor.placeholder') + '';
         editor.innerHTML = textarea.value.trim();
 
         var linkRange = null;
@@ -1070,7 +1115,7 @@
                 if (!isSelectionInside(editor)) {
                     focusEditorEnd(editor);
                 }
-                document.execCommand('insertHTML', false, '<hr class="wysiwyg-pagebreak"><p><br></p>');
+                document.execCommand('insertHTML', false, '<hr />');
                 persistEditorState(true);
                 return;
             }
