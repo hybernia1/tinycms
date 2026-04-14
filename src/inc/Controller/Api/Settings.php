@@ -51,9 +51,9 @@ final class Settings extends BaseAdmin
             'logo' => (string)($files['logo'] ?? ''),
         ];
 
-        $result = $this->settings->save($payload);
+        $this->settings->save($payload);
         $this->apiOk([
-            'message' => $result['success'] ? I18n::t('settings.saved') : I18n::t('common.saved'),
+            'message' => I18n::t('settings.saved'),
         ]);
     }
 }
