@@ -1565,7 +1565,8 @@
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
                 resetTypingFormatting();
-                persistEditorState(true);
+                sync(textarea, editor);
+                updateFormatState();
             }
 
         });
