@@ -210,5 +210,12 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
         </form>
     </div>
 </div>
+<div class="modal-overlay" id="connection-lost-modal" data-connection-lost-modal>
+    <div class="modal session-login-modal">
+        <h3 class="m-0 mb-3"><?= $e($t('common.connection_lost')) ?></h3>
+        <p class="m-0 mb-4"><?= $e($t('auth.connection_lost')) ?></p>
+        <button class="btn btn-primary" type="button" data-connection-lost-retry><?= $e($t('common.retry')) ?></button>
+    </div>
+</div>
 </body>
 </html>

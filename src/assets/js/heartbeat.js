@@ -9,12 +9,15 @@ const message = modal?.querySelector('[data-session-login-message]');
 const submit = form?.querySelector('[data-session-login-submit]');
 const emailInput = form?.querySelector('[data-session-login-email]');
 const errorFields = form ? Array.from(form.querySelectorAll('[data-session-login-error]')) : [];
+const connectionModal = document.querySelector('[data-connection-lost-modal]');
+const retryButton = connectionModal?.querySelector('[data-connection-lost-retry]');
 const heartbeatEndpoint = document.body.getAttribute('data-heartbeat-endpoint') || '';
 const loginEndpoint = document.body.getAttribute('data-heartbeat-login-endpoint') || '';
 let heartbeatInFlight = false;
 let loginInFlight = false;
+let connectionLost = false;
 
-if (!modal || !form || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
+if (!modal || !form || !connectionModal || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
     return;
 }
 
@@ -50,7 +53,7 @@ const setMessage = (text) => {
 const openModal = (payload) => {
     clearErrors();
     updateCsrfToken(payload?.error?.csrf || payload?.data?.csrf);
-    setMessage('');
+    setMessage(payload?.error?.message || '');
     modal.classList.add('open');
     if (emailInput) {
         emailInput.focus();
@@ -61,6 +64,14 @@ const closeModal = () => {
     modal.classList.remove('open');
     clearErrors();
     form.reset();
+};
+
+const openConnectionModal = () => {
+    connectionModal.classList.add('open');
+};
+
+const closeConnectionModal = () => {
+    connectionModal.classList.remove('open');
 };
 
 const setLoading = (loading) => {
@@ -86,8 +97,8 @@ const refreshCsrfToken = async () => {
     }
 };
 
-const heartbeat = async () => {
-    if (modal.classList.contains('open') || heartbeatInFlight || loginInFlight) {
+const heartbeat = async (ignoreConnectionModal = false) => {
+    if (modal.classList.contains('open') || (!ignoreConnectionModal && connectionModal.classList.contains('open')) || heartbeatInFlight || loginInFlight) {
         return;
     }
 
@@ -102,6 +113,8 @@ const heartbeat = async () => {
         });
 
         updateCsrfToken(raw?.data?.csrf || raw?.error?.csrf);
+        connectionLost = false;
+        closeConnectionModal();
 
         if (response.ok && raw?.ok === true) {
             return;
@@ -111,10 +124,19 @@ const heartbeat = async () => {
             openModal(raw);
         }
     } catch (_) {
+        if (connectionLost || modal.classList.contains('open')) {
+            return;
+        }
+        connectionLost = true;
+        openConnectionModal();
     } finally {
         heartbeatInFlight = false;
     }
 };
+
+retryButton?.addEventListener('click', () => {
+    heartbeat(true);
+});
 
 form.addEventListener('submit', async (event) => {
     if (loginInFlight) {

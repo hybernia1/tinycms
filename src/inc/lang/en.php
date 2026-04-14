@@ -12,6 +12,7 @@ return [
         'confirm' => 'Confirm',
         'next' => 'Next',
         'previous' => 'Previous',
+        'retry' => 'Retry',
         'close' => 'Close',
         'delete' => 'Delete',
         'all' => 'All',
@@ -31,6 +32,7 @@ return [
         'allowed_upload_types' => 'Allowed types: %s',
         'loading' => 'Loading...',
         'close_notice' => 'Close notification',
+        'connection_lost' => 'Connection lost',
     ],
     'install' => [
         'title' => 'Installation',
@@ -297,6 +299,7 @@ return [
         'remember' => 'Remember me',
         'login_failed' => 'Login failed.',
         'session_expired' => 'Your session has expired, please sign in again.',
+        'connection_lost' => 'Connection was lost. Check your internet and try again.',
         'too_many_attempts' => 'Too many requests. Please try again shortly.',
         'name_required' => 'Name is required.',
         'name_min_3' => 'Name must be at least 3 characters.',
