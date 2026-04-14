@@ -60,10 +60,11 @@ form.addEventListener('submit', async (event) => {
     event.preventDefault();
     clearErrors();
     setMessage('');
+    const payload = new FormData(form);
     setLoading(true);
 
     try {
-        const { response, raw } = await postForm(form.action, new FormData(form), {
+        const { response, raw } = await postForm(form.action, payload, {
             credentials: 'same-origin',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
