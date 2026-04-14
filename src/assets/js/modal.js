@@ -48,11 +48,16 @@ const openModal = (trigger) => {
 };
 
 window.tinycms = window.tinycms || {};
-window.tinycms.modal = Object.assign({}, window.tinycms.modal, {
-    getModal,
-    open: openModal,
-    close: closeModal,
-});
+window.tinycms.modal = window.tinycms.modal || {};
+if (typeof window.tinycms.modal.getModal !== 'function') {
+    window.tinycms.modal.getModal = getModal;
+}
+if (typeof window.tinycms.modal.open !== 'function') {
+    window.tinycms.modal.open = openModal;
+}
+if (typeof window.tinycms.modal.close !== 'function') {
+    window.tinycms.modal.close = closeModal;
+}
 
 document.addEventListener('click', (event) => {
     const openTrigger = event.target.closest('[data-modal-open]');
