@@ -9,13 +9,15 @@ const message = modal?.querySelector('[data-session-login-message]');
 const submit = form?.querySelector('[data-session-login-submit]');
 const emailInput = form?.querySelector('[data-session-login-email]');
 const errorFields = form ? Array.from(form.querySelectorAll('[data-session-login-error]')) : [];
+const connectionModal = document.querySelector('[data-connection-lost-modal]');
+const retryButton = connectionModal?.querySelector('[data-connection-lost-retry]');
 const heartbeatEndpoint = document.body.getAttribute('data-heartbeat-endpoint') || '';
 const loginEndpoint = document.body.getAttribute('data-heartbeat-login-endpoint') || '';
 let heartbeatInFlight = false;
 let loginInFlight = false;
 let connectionLost = false;
 
-if (!modal || !form || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
+if (!modal || !form || !connectionModal || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
     return;
 }
 
@@ -64,6 +66,14 @@ const closeModal = () => {
     form.reset();
 };
 
+const openConnectionModal = () => {
+    connectionModal.classList.add('open');
+};
+
+const closeConnectionModal = () => {
+    connectionModal.classList.remove('open');
+};
+
 const setLoading = (loading) => {
     form.querySelectorAll('input:not([type="hidden"]), button').forEach((field) => {
         field.disabled = loading;
@@ -88,7 +98,7 @@ const refreshCsrfToken = async () => {
 };
 
 const heartbeat = async () => {
-    if (modal.classList.contains('open') || heartbeatInFlight || loginInFlight) {
+    if (modal.classList.contains('open') || connectionModal.classList.contains('open') || heartbeatInFlight || loginInFlight) {
         return;
     }
 
@@ -104,6 +114,7 @@ const heartbeat = async () => {
 
         updateCsrfToken(raw?.data?.csrf || raw?.error?.csrf);
         connectionLost = false;
+        closeConnectionModal();
 
         if (response.ok && raw?.ok === true) {
             return;
@@ -117,15 +128,16 @@ const heartbeat = async () => {
             return;
         }
         connectionLost = true;
-        openModal({
-            error: {
-                message: t('auth.connection_lost'),
-            },
-        });
+        openConnectionModal();
     } finally {
         heartbeatInFlight = false;
     }
 };
+
+retryButton?.addEventListener('click', async () => {
+    closeConnectionModal();
+    await heartbeat();
+});
 
 form.addEventListener('submit', async (event) => {
     if (loginInFlight) {
