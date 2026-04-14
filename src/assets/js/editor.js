@@ -973,6 +973,28 @@
             closeMenus();
         }
 
+        function resetTypingFormatting() {
+            var defaultColor = window.getComputedStyle(editor).color || 'rgb(0, 0, 0)';
+            var defaultBackground = window.getComputedStyle(editor).backgroundColor || 'rgba(0, 0, 0, 0)';
+            var backgroundFallback = defaultBackground === 'rgba(0, 0, 0, 0)' || defaultBackground === 'transparent' ? '#ffffff' : defaultBackground;
+            document.execCommand('styleWithCSS', false, false);
+            document.execCommand('removeFormat', false, null);
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('foreColor', false, defaultColor);
+            document.execCommand('hiliteColor', false, backgroundFallback);
+            document.execCommand('backColor', false, backgroundFallback);
+        }
+
+        function isEmptyTextBlock(node) {
+            if (!node) {
+                return false;
+            }
+            if (node.querySelector('img, iframe, hr, video, audio, table')) {
+                return false;
+            }
+            return (node.textContent || '').replace(/\u00a0/g, ' ').trim() === '';
+        }
+
         function setHtmlMode(enabled) {
             htmlMode = enabled;
             wrapper.classList.toggle('is-html-mode', enabled);
@@ -1435,14 +1457,26 @@
                 var quoteContainer = getSelectionContainer(editor);
                 var quoteBlock = quoteContainer ? quoteContainer.closest('blockquote') : null;
                 if (quoteBlock) {
-                    event.preventDefault();
-                    var paragraph = document.createElement('p');
-                    paragraph.innerHTML = '<br>';
-                    quoteBlock.parentNode.insertBefore(paragraph, quoteBlock.nextSibling);
-                    placeCaret(paragraph);
-                    persistEditorState(true);
-                    return;
+                    var currentBlock = quoteContainer.closest('p, h1, h2, h3, h4, h5, h6, li, div');
+                    if (currentBlock && quoteBlock.contains(currentBlock) && isEmptyTextBlock(currentBlock)) {
+                        event.preventDefault();
+                        currentBlock.remove();
+                        var paragraph = document.createElement('p');
+                        paragraph.innerHTML = '<br>';
+                        quoteBlock.parentNode.insertBefore(paragraph, quoteBlock.nextSibling);
+                        placeCaret(paragraph);
+                        persistEditorState(true);
+                        return;
+                    }
                 }
+            }
+
+            if (event.key === 'Enter' && !event.shiftKey) {
+                document.execCommand('defaultParagraphSeparator', false, 'p');
+                event.preventDefault();
+                document.execCommand('insertParagraph', false, null);
+                resetTypingFormatting();
+                persistEditorState(true);
             }
 
         });
