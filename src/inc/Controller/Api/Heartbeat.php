@@ -19,11 +19,7 @@ final class Heartbeat
 
     public function heartbeatApiV1(): void
     {
-        $rateLimit = $this->rateLimiter->hit($this->rateKey('heartbeat'), 120, 60);
-        if (($rateLimit['allowed'] ?? false) !== true) {
-            $this->apiError('RATE_LIMITED', I18n::t('auth.too_many_attempts'), 429, [
-                'retry_after' => (int)($rateLimit['retry_after'] ?? 60),
-            ]);
+        if (!$this->guardRateLimit('heartbeat', 120, 60)) {
             return;
         }
 
@@ -43,18 +39,14 @@ final class Heartbeat
 
     public function loginApiV1(): void
     {
-        $rateLimit = $this->rateLimiter->hit($this->rateKey('login'), 10, 300);
-        if (($rateLimit['allowed'] ?? false) !== true) {
-            $this->apiError('RATE_LIMITED', I18n::t('auth.too_many_attempts'), 429, [
-                'retry_after' => (int)($rateLimit['retry_after'] ?? 300),
-            ]);
+        if (!$this->guardRateLimit('login', 10, 300)) {
             return;
         }
 
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
             $this->apiError('INVALID_CSRF', I18n::t('common.csrf_expired'), 419, [
                 'errors' => [],
-                'csrf' => $this->csrf->token(),
+                ...$this->csrfPayload(),
             ]);
             return;
         }
@@ -76,7 +68,7 @@ final class Heartbeat
         if ($errors !== []) {
             $this->apiError('INVALID_DATA', I18n::t('auth.form_has_errors'), 422, [
                 'errors' => $errors,
-                'csrf' => $this->csrf->token(),
+                ...$this->csrfPayload(),
             ]);
             return;
         }
@@ -89,7 +81,7 @@ final class Heartbeat
         if (($result['success'] ?? false) !== true) {
             $this->apiError('LOGIN_FAILED', I18n::t('auth.invalid_credentials'), 422, [
                 'errors' => [],
-                'csrf' => $this->csrf->token(),
+                ...$this->csrfPayload(),
             ]);
             return;
         }
@@ -107,8 +99,24 @@ final class Heartbeat
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         header('Pragma: no-cache');
         header('Expires: 0');
+        if ($statusCode === 429 && isset($payload['error']['retry_after'])) {
+            header('Retry-After: ' . (int)$payload['error']['retry_after']);
+        }
         http_response_code($statusCode);
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
+
+    private function guardRateLimit(string $scope, int $limit, int $windowSeconds): bool
+    {
+        $rateLimit = $this->rateLimiter->hit($this->rateKey($scope), $limit, $windowSeconds);
+        if (($rateLimit['allowed'] ?? false) === true) {
+            return true;
+        }
+
+        $this->apiError('RATE_LIMITED', I18n::t('auth.too_many_attempts'), 429, [
+            'retry_after' => (int)($rateLimit['retry_after'] ?? $windowSeconds),
+        ]);
+        return false;
     }
 
     private function rateKey(string $scope): string
@@ -143,5 +151,10 @@ final class Heartbeat
             'ok' => false,
             'error' => $error,
         ], $statusCode);
+    }
+
+    private function csrfPayload(): array
+    {
+        return ['csrf' => $this->csrf->token()];
     }
 }

@@ -12,8 +12,8 @@ final class RateLimiter
         $baseDirectory = $directory ?? sys_get_temp_dir() . '/tinycms-rate-limit';
         $this->directory = rtrim($baseDirectory, '/');
 
-        if (!is_dir($this->directory)) {
-            mkdir($this->directory, 0775, true);
+        if (!is_dir($this->directory) && !@mkdir($this->directory, 0775, true) && !is_dir($this->directory)) {
+            $this->directory = sys_get_temp_dir();
         }
     }
 
@@ -70,6 +70,11 @@ final class RateLimiter
 
     private function store(string $path, array $hits): void
     {
-        file_put_contents($path, json_encode(array_values($hits), JSON_UNESCAPED_UNICODE), LOCK_EX);
+        $encoded = json_encode(array_values($hits), JSON_UNESCAPED_UNICODE);
+        if ($encoded === false) {
+            return;
+        }
+
+        @file_put_contents($path, $encoded, LOCK_EX);
     }
 }
