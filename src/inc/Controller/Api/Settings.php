@@ -29,17 +29,42 @@ final class Settings extends BaseAdmin
             return;
         }
 
-        $upload = $this->upload->uploadSiteFiles($_FILES, [
-            'favicon' => UploadService::siteUploadPath('favicon'),
-            'logo' => UploadService::siteUploadPath('logo'),
-        ]);
+        $current = $this->settings->resolved();
+        $faviconPath = (string)($current['favicon'] ?? '');
+        $logoPath = (string)($current['logo'] ?? '');
 
-        if (($upload['success'] ?? false) !== true) {
-            $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')), 422);
-            return;
+        if ($this->hasUploadedFile($_FILES, 'favicon_file')) {
+            $upload = $this->upload->uploadFavicon((array)$_FILES['favicon_file']);
+            if (($upload['success'] ?? false) !== true) {
+                $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')), 422);
+                return;
+            }
+
+            $newPath = (string)($upload['data']['path'] ?? '');
+            if ($newPath !== '') {
+                if ($faviconPath !== '' && $faviconPath !== $newPath) {
+                    $this->upload->deleteRelativeFile($faviconPath);
+                }
+                $faviconPath = $newPath;
+            }
         }
 
-        $files = (array)($upload['data'] ?? []);
+        if ($this->hasUploadedFile($_FILES, 'logo_file')) {
+            $upload = $this->upload->uploadLogo((array)$_FILES['logo_file']);
+            if (($upload['success'] ?? false) !== true) {
+                $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')), 422);
+                return;
+            }
+
+            $newPath = (string)($upload['data']['path'] ?? '');
+            if ($newPath !== '') {
+                if ($logoPath !== '' && $logoPath !== $newPath) {
+                    $this->upload->deleteRelativeFile($logoPath);
+                }
+                $logoPath = $newPath;
+            }
+        }
+
         $payload = [
             'app_lang' => (string)($_POST['settings']['app_lang'] ?? ''),
             'theme' => (string)($_POST['settings']['theme'] ?? ''),
@@ -47,13 +72,22 @@ final class Settings extends BaseAdmin
             'siteauthor' => (string)($_POST['settings']['siteauthor'] ?? ''),
             'meta_title' => (string)($_POST['settings']['meta_title'] ?? ''),
             'meta_description' => (string)($_POST['settings']['meta_description'] ?? ''),
-            'favicon' => (string)($files['favicon'] ?? ''),
-            'logo' => (string)($files['logo'] ?? ''),
+            'favicon' => $faviconPath,
+            'logo' => $logoPath,
         ];
 
         $this->settings->save($payload);
         $this->apiOk([
             'message' => I18n::t('settings.saved'),
         ]);
+    }
+
+    private function hasUploadedFile(array $files, string $key): bool
+    {
+        if (!isset($files[$key]) || !is_array($files[$key])) {
+            return false;
+        }
+
+        return (int)($files[$key]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
     }
 }
