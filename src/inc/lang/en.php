@@ -296,6 +296,7 @@ return [
         'hide_password' => 'Hide password',
         'remember' => 'Remember me',
         'login_failed' => 'Login failed.',
+        'session_expired' => 'Your session has expired, please sign in again.',
         'name_required' => 'Name is required.',
         'name_min_3' => 'Name must be at least 3 characters.',
         'name_too_long' => 'Name is too long.',

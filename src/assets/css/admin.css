@@ -755,3 +755,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .tag-picker-suggestion:hover {
     background: var(--table-row-hover-bg);
 }
+
+.session-login-modal {
+    max-width: 460px;
+}
