@@ -167,7 +167,6 @@ $contentId = (int)($item['id'] ?? 0);
                         data-modal-open
                         data-modal-target="#media-library-delete-modal"
                         data-type="<?= $e($t('content.image')) ?>"
-                        data-form-id="media-library-delete-form"
                         disabled
                     >
                         <?= $e($t('common.delete')) ?>
@@ -233,7 +232,7 @@ $contentId = (int)($item['id'] ?? 0);
         <p data-modal-text><?= $e($t('content.delete_image_confirm')) ?></p>
         <div class="modal-actions">
             <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
-            <button class="btn btn-primary" type="button" data-media-library-delete-confirm><?= $e($t('common.confirm')) ?></button>
+            <button class="btn btn-primary" type="button" data-modal-confirm data-modal-confirm-manual><?= $e($t('common.confirm')) ?></button>
         </div>
     </div>
 </div>

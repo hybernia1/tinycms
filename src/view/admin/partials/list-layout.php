@@ -100,10 +100,10 @@ foreach ($listRootAttrs as $attr => $value) {
 
     <div class="modal-overlay" data-modal data-<?= $e($listName) ?>-delete-modal>
         <div class="modal">
-            <p><?= $e($deleteConfirmText) ?></p>
+            <p data-modal-text><?= $e($deleteConfirmText) ?></p>
             <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-<?= $e($listName) ?>-delete-cancel><?= $e($t('common.cancel')) ?></button>
-                <button class="btn btn-primary" type="button" data-<?= $e($listName) ?>-delete-confirm><?= $e($t('common.confirm')) ?></button>
+                <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
+                <button class="btn btn-primary" type="button" data-modal-confirm><?= $e($t('common.confirm')) ?></button>
             </div>
         </div>
     </div>
