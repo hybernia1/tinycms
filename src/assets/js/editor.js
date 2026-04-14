@@ -976,13 +976,19 @@
         function resetTypingFormatting() {
             var defaultColor = window.getComputedStyle(editor).color || 'rgb(0, 0, 0)';
             var defaultBackground = window.getComputedStyle(editor).backgroundColor || 'rgba(0, 0, 0, 0)';
-            var backgroundFallback = defaultBackground === 'rgba(0, 0, 0, 0)' || defaultBackground === 'transparent' ? '#ffffff' : defaultBackground;
-            document.execCommand('styleWithCSS', false, false);
-            document.execCommand('removeFormat', false, null);
+            var hasBackgroundColor = !(defaultBackground === 'rgba(0, 0, 0, 0)' || defaultBackground === 'transparent');
+            ['bold', 'italic', 'underline', 'strikeThrough'].forEach(function (command) {
+                if (document.queryCommandState(command)) {
+                    document.execCommand(command, false, null);
+                }
+            });
             document.execCommand('styleWithCSS', false, true);
+            document.execCommand('removeFormat', false, null);
             document.execCommand('foreColor', false, defaultColor);
-            document.execCommand('hiliteColor', false, backgroundFallback);
-            document.execCommand('backColor', false, backgroundFallback);
+            if (hasBackgroundColor) {
+                document.execCommand('hiliteColor', false, defaultBackground);
+                document.execCommand('backColor', false, defaultBackground);
+            }
         }
 
         function isEmptyTextBlock(node) {
@@ -992,7 +998,12 @@
             if (node.querySelector('img, iframe, hr, video, audio, table')) {
                 return false;
             }
-            return (node.textContent || '').replace(/\u00a0/g, ' ').trim() === '';
+            var text = (node.textContent || '').replace(/\u00a0/g, ' ').trim();
+            if (text !== '') {
+                return false;
+            }
+            var html = String(node.innerHTML || '').replace(/\u00a0/g, ' ').replace(/\s+/g, '').toLowerCase();
+            return html === '' || html === '<br>' || html === '<br/>';
         }
 
         function setHtmlMode(enabled) {
