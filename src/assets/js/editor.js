@@ -549,6 +549,8 @@
         confirm.type = 'button';
         confirm.className = 'btn btn-primary';
         confirm.setAttribute('data-role', 'link-apply');
+        confirm.setAttribute('data-modal-confirm', '');
+        confirm.setAttribute('data-modal-confirm-manual', '');
         confirm.textContent = '' + t('editor.save') + '';
 
         actions.appendChild(cancel);
@@ -1143,11 +1145,6 @@
             var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
             var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
 
-            if (event.target === linkModal) {
-                closeMenus();
-                return;
-            }
-
             if (event.target.closest('[data-role="link-remove"]')) {
                 if (activeLink && editor.contains(activeLink)) {
                     var parent = activeLink.parentNode;
@@ -1224,21 +1221,6 @@
         linkModal.addEventListener('input', function (event) {
             if (event.target && event.target.matches('[data-role="link-input"]')) {
                 updateLinkApplyState();
-            }
-        });
-
-        linkModal.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                event.preventDefault();
-                closeMenus();
-                return;
-            }
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                var apply = linkModal.querySelector('[data-role="link-apply"]');
-                if (apply) {
-                    apply.click();
-                }
             }
         });
 
