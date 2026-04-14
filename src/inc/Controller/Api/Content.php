@@ -363,8 +363,10 @@ final class Content extends BaseAdmin
             return '';
         }
 
-        if (preg_match('/<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $match) === 1) {
-            return $this->sanitizeRemoteTitle($match[1]);
+        if (preg_match('/<meta[^>]*(?:property|name)=["\']og:title["\'][^>]*>/i', $html, $metaTag) === 1) {
+            if (preg_match('/content=["\']([^"\']+)["\']/i', $metaTag[0], $metaContent) === 1) {
+                return $this->sanitizeRemoteTitle($metaContent[1]);
+            }
         }
 
         if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $match) === 1) {
