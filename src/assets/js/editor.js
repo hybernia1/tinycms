@@ -1047,12 +1047,6 @@
                 quote.classList.remove('is-active');
                 return;
             }
-            if (isEditorTypingEmpty()) {
-                bold.classList.remove('is-active');
-                italic.classList.remove('is-active');
-                quote.classList.toggle('is-active', isSelectionInsideTag(editor, 'blockquote'));
-                return;
-            }
             var insideHeading = isSelectionInsideHeading(editor);
             bold.classList.toggle('is-active', !insideHeading && document.queryCommandState('bold'));
             italic.classList.toggle('is-active', document.queryCommandState('italic'));
