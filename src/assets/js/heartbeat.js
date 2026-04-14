@@ -13,6 +13,7 @@ const heartbeatEndpoint = document.body.getAttribute('data-heartbeat-endpoint') 
 const loginEndpoint = document.body.getAttribute('data-heartbeat-login-endpoint') || '';
 let heartbeatInFlight = false;
 let loginInFlight = false;
+let connectionLost = false;
 
 if (!modal || !form || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
     return;
@@ -50,7 +51,7 @@ const setMessage = (text) => {
 const openModal = (payload) => {
     clearErrors();
     updateCsrfToken(payload?.error?.csrf || payload?.data?.csrf);
-    setMessage('');
+    setMessage(payload?.error?.message || '');
     modal.classList.add('open');
     if (emailInput) {
         emailInput.focus();
@@ -102,6 +103,7 @@ const heartbeat = async () => {
         });
 
         updateCsrfToken(raw?.data?.csrf || raw?.error?.csrf);
+        connectionLost = false;
 
         if (response.ok && raw?.ok === true) {
             return;
@@ -111,6 +113,15 @@ const heartbeat = async () => {
             openModal(raw);
         }
     } catch (_) {
+        if (connectionLost || modal.classList.contains('open')) {
+            return;
+        }
+        connectionLost = true;
+        openModal({
+            error: {
+                message: t('auth.connection_lost'),
+            },
+        });
     } finally {
         heartbeatInFlight = false;
     }
