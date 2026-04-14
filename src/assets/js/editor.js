@@ -543,7 +543,6 @@
         var italic = createIconButton('w-italic', 'italic', ''+ t('editor.italic') + '');
         var quote = createIconButton('w-quote', 'formatBlock:blockquote', t('editor.quote'));
         var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
-        var clear = createIconButton('w-clear', 'removeFormat', ''+ t('editor.clear') + '');
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
         var media = createIconButton('w-image', 'openMediaLibrary', ''+ t('editor.insert_image') + '');
@@ -564,7 +563,6 @@
         toolbar.appendChild(quote);
         toolbar.appendChild(link);
         toolbar.appendChild(listGroup);
-        toolbar.appendChild(clear);
         if ((textarea.dataset.mediaLibraryEndpoint || '').trim() !== '') {
             toolbar.appendChild(media);
         }
@@ -926,15 +924,6 @@
             document.execCommand(command, false, value || null);
             persistEditorState(true);
             closeMenus();
-        }
-
-        function resetTypingFormatting() {
-            ['bold', 'italic', 'underline', 'strikeThrough'].forEach(function (command) {
-                if (document.queryCommandState(command)) {
-                    document.execCommand(command, false, null);
-                }
-            });
-            document.execCommand('removeFormat', false, null);
         }
 
         function isEmptyTextBlock(node) {
@@ -1421,7 +1410,6 @@
                         quoteBlock.appendChild(nextParagraph);
                     }
                     placeCaret(nextParagraph);
-                    resetTypingFormatting();
                     persistEditorState(true);
                     return;
                 }
@@ -1431,7 +1419,6 @@
                 document.execCommand('defaultParagraphSeparator', false, 'p');
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
-                resetTypingFormatting();
                 persistEditorState(true);
             }
 
