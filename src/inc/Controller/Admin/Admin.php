@@ -95,10 +95,6 @@ final class Admin extends BaseAdmin
             return;
         }
 
-        if ($this->authService->auth()->check()) {
-            $this->authService->auth()->logout();
-        }
-
         $this->apiError('UNAUTHENTICATED', I18n::t('auth.session_expired'), 401, [
             'authenticated' => false,
             'csrf' => $this->csrf->token(),

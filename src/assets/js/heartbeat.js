@@ -11,6 +11,8 @@ const emailInput = form?.querySelector('[data-session-login-email]');
 const errorFields = form ? Array.from(form.querySelectorAll('[data-session-login-error]')) : [];
 const heartbeatEndpoint = document.body.getAttribute('data-heartbeat-endpoint') || '';
 const loginEndpoint = document.body.getAttribute('data-heartbeat-login-endpoint') || '';
+let heartbeatInFlight = false;
+let loginInFlight = false;
 
 if (!modal || !form || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
     return;
@@ -70,7 +72,26 @@ const setLoading = (loading) => {
     }
 };
 
+const refreshCsrfToken = async () => {
+    try {
+        const { raw } = await requestJson(heartbeatEndpoint, {
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        updateCsrfToken(raw?.data?.csrf || raw?.error?.csrf);
+    } catch (_) {
+    }
+};
+
 const heartbeat = async () => {
+    if (modal.classList.contains('open') || heartbeatInFlight || loginInFlight) {
+        return;
+    }
+
+    heartbeatInFlight = true;
     try {
         const { response, raw } = await requestJson(heartbeatEndpoint, {
             credentials: 'same-origin',
@@ -90,13 +111,20 @@ const heartbeat = async () => {
             openModal(raw);
         }
     } catch (_) {
+    } finally {
+        heartbeatInFlight = false;
     }
 };
 
 form.addEventListener('submit', async (event) => {
+    if (loginInFlight) {
+        return;
+    }
+
     event.preventDefault();
     clearErrors();
     setLoading(true);
+    loginInFlight = true;
 
     try {
         const { response, raw } = await postForm(loginEndpoint, form, {
@@ -114,6 +142,12 @@ form.addEventListener('submit', async (event) => {
             return;
         }
 
+        if (response.status === 419) {
+            await refreshCsrfToken();
+            setMessage(t('auth.session_expired'));
+            return;
+        }
+
         const errors = raw?.error?.errors && typeof raw.error.errors === 'object' ? raw.error.errors : {};
         errorFields.forEach((field) => {
             const name = field.getAttribute('data-session-login-error') || '';
@@ -125,6 +159,8 @@ form.addEventListener('submit', async (event) => {
     } catch (_) {
         setLoading(false);
         setMessage(t('auth.login_failed'));
+    } finally {
+        loginInFlight = false;
     }
 });
 
