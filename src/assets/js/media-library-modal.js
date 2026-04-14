@@ -30,8 +30,8 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     const mediaIdField = document.querySelector('[data-media-library-media-id]');
     const deleteMediaIdField = document.querySelector('[data-media-library-delete-media-id]');
     const deleteForm = document.getElementById('media-library-delete-form');
-    const deleteConfirmButton = document.querySelector('[data-media-library-delete-confirm]');
     const deleteConfirmModal = document.getElementById('media-library-delete-modal');
+    const deleteConfirmButton = deleteConfirmModal?.querySelector('[data-modal-confirm]');
     const detailPreview = modal.querySelector('[data-media-library-detail-preview]');
     const detailNameInput = modal.querySelector('[data-media-library-detail-name-input]');
     const chooseButton = modal.querySelector('[data-media-library-choose]');

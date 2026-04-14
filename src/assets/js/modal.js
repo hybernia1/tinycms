@@ -77,6 +77,10 @@ document.addEventListener('click', (event) => {
         return;
     }
 
+    if (confirmTrigger.hasAttribute('data-modal-confirm-manual')) {
+        return;
+    }
+
     const formId = confirmTrigger.getAttribute('data-form-id') || '';
     const form = formId ? document.getElementById(formId) : null;
 
