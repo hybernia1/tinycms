@@ -110,9 +110,9 @@ $adminSettings = new SettingsController($adminView, $authService, $settingsServi
 $adminTerms = new TermController($adminView, $authService, $termService, $flash, $csrf);
 $apiContent = new ApiContentController($adminContent);
 $apiContentMedia = new ApiContentMediaController($adminContentMediaApi);
-$apiMedia = new ApiMediaController($adminMedia);
-$apiSettings = new ApiSettingsController($adminSettings);
-$apiTerm = new ApiTermController($adminTerms);
+$apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, $flash, $csrf);
+$apiSettings = new ApiSettingsController($authService, $settingsService, $uploadService, $flash, $csrf);
+$apiTerm = new ApiTermController($authService, $termService, $flash, $csrf);
 
 require __DIR__ . '/routes/admin.php';
 
