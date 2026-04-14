@@ -102,14 +102,16 @@
     };
 
     const setFormMessage = (form, message) => {
-        const container = form.querySelector('[data-api-form-message]');
+        const container = form.querySelector('[data-api-form-message]')
+            || form.parentElement?.querySelector('[data-api-form-message]');
         if (!container) {
-            return;
+            return false;
         }
 
         const text = String(message || '').trim();
         container.textContent = text;
         container.hidden = text === '';
+        return true;
     };
 
     const updateCsrfFields = (payload) => {
@@ -191,8 +193,11 @@
         if (!response.ok || payload?.ok !== true) {
             clearFieldErrors(form);
             applyFieldErrors(form, payload?.error?.errors || {});
-            setFormMessage(form, payload?.error?.message || '');
-            showError(payload?.error?.message || '');
+            const errorMessage = payload?.error?.message || '';
+            const hasInlineMessage = setFormMessage(form, errorMessage);
+            if (!hasInlineMessage) {
+                showError(errorMessage);
+            }
             return;
         }
 
