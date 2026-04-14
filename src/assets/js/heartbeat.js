@@ -50,7 +50,7 @@ const setMessage = (text) => {
 const openModal = (payload) => {
     clearErrors();
     updateCsrfToken(payload?.error?.csrf || payload?.data?.csrf);
-    setMessage(payload?.error?.message || t('auth.session_expired'));
+    setMessage('');
     modal.classList.add('open');
     if (emailInput) {
         emailInput.focus();
