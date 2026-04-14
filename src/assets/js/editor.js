@@ -64,6 +64,87 @@
             .replace(/"/g, '&quot;');
     }
 
+    function colorChannelToHex(value) {
+        var number = Math.max(0, Math.min(255, Number(value) || 0));
+        return number.toString(16).padStart(2, '0');
+    }
+
+    function normalizeColorValue(value) {
+        var raw = String(value || '').trim().toLowerCase();
+        if (!raw) {
+            return '';
+        }
+        var shortHex = raw.match(/^#([0-9a-f]{3})$/i);
+        if (shortHex) {
+            return '#' + shortHex[1].split('').map(function (char) {
+                return char + char;
+            }).join('');
+        }
+        var hex = raw.match(/^#([0-9a-f]{6})$/i);
+        if (hex) {
+            return '#' + hex[1];
+        }
+        var rgb = raw.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i);
+        if (rgb) {
+            return '#' + colorChannelToHex(rgb[1]) + colorChannelToHex(rgb[2]) + colorChannelToHex(rgb[3]);
+        }
+        return raw;
+    }
+
+    function replaceTagWith(node, tagName) {
+        var replacement = document.createElement(tagName);
+        Array.prototype.slice.call(node.attributes).forEach(function (attribute) {
+            replacement.setAttribute(attribute.name, attribute.value);
+        });
+        while (node.firstChild) {
+            replacement.appendChild(node.firstChild);
+        }
+        node.parentNode.replaceChild(replacement, node);
+    }
+
+    function normalizeInlineSemantics(root) {
+        root.querySelectorAll('b').forEach(function (node) {
+            replaceTagWith(node, 'strong');
+        });
+        root.querySelectorAll('i').forEach(function (node) {
+            replaceTagWith(node, 'em');
+        });
+        root.querySelectorAll('font').forEach(function (node) {
+            var span = document.createElement('span');
+            var color = normalizeColorValue(node.getAttribute('color'));
+            if (color) {
+                span.style.color = color;
+            }
+            while (node.firstChild) {
+                span.appendChild(node.firstChild);
+            }
+            node.parentNode.replaceChild(span, node);
+        });
+        root.querySelectorAll('[style]').forEach(function (node) {
+            var color = normalizeColorValue(node.style.color);
+            var backgroundColor = normalizeColorValue(node.style.backgroundColor);
+            var cssText = '';
+            if (color) {
+                cssText += 'color: ' + color + ';';
+            }
+            if (backgroundColor) {
+                cssText += (cssText ? ' ' : '') + 'background-color: ' + backgroundColor + ';';
+            }
+            if (cssText) {
+                node.setAttribute('style', cssText);
+                return;
+            }
+            node.removeAttribute('style');
+            if (node.tagName === 'SPAN' && node.attributes.length === 0) {
+                var parent = node.parentNode;
+                while (node.firstChild) {
+                    parent.insertBefore(node.firstChild, node);
+                }
+                parent.removeChild(node);
+            }
+        });
+    }
+
     function extractPastedUrl(value) {
         var raw = String(value || '').trim();
         if (!raw || /\s/.test(raw)) {
@@ -211,6 +292,7 @@
         clone.querySelectorAll('.block.block-image').forEach(function (block) {
             block.classList.remove('is-selected');
         });
+        normalizeInlineSemantics(clone);
         return normalizeHtml(clone.innerHTML.trim());
     }
 
