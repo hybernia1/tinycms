@@ -99,7 +99,7 @@ I18n::setLocale((string)($settingsService->resolved()['app_lang'] ?? APP_LANG));
 $termService = new TermService();
 $adminView = new AdminView($view, $settingsService);
 $admin = new AdminController($adminView, $authService, $flash, $csrf);
-$apiSessions = new SessionsController($authService, $csrf, $rateLimiter);
+$apiSessions = new SessionsController($authService, $flash, $csrf, $rateLimiter);
 $apiUser = new ApiUserController($authService, $userService, $flash, $csrf);
 $adminUsers = new UserController($adminView, $authService, $userService, $flash, $csrf);
 $adminContent = new ContentController($adminView, $authService, $contentService, $userService, $termService, $flash, $csrf);

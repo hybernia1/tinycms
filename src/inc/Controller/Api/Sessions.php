@@ -3,18 +3,22 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
+use App\Controller\Admin\BaseAdmin;
 use App\Service\Application\Auth;
 use App\Service\Support\Csrf;
+use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\Service\Support\RateLimiter;
 
-final class Sessions
+final class Sessions extends BaseAdmin
 {
     public function __construct(
-        private Auth $authService,
-        private Csrf $csrf,
+        Auth $authService,
+        Flash $flash,
+        Csrf $csrf,
         private RateLimiter $rateLimiter
     ) {
+        parent::__construct($authService, $flash, $csrf);
     }
 
     public function heartbeatApiV1(): void
@@ -93,19 +97,6 @@ final class Sessions
         ]);
     }
 
-    private function respondJson(array $payload, int $statusCode = 200): void
-    {
-        header('Content-Type: application/json; charset=utf-8');
-        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-        header('Pragma: no-cache');
-        header('Expires: 0');
-        if ($statusCode === 429 && isset($payload['error']['retry_after'])) {
-            header('Retry-After: ' . (int)$payload['error']['retry_after']);
-        }
-        http_response_code($statusCode);
-        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
-    }
-
     private function guardRateLimit(string $scope, int $limit, int $windowSeconds): bool
     {
         $rateLimit = $this->rateLimiter->hit($this->rateKey($scope), $limit, $windowSeconds);
@@ -125,32 +116,6 @@ final class Sessions
         $userAgent = trim((string)($_SERVER['HTTP_USER_AGENT'] ?? ''));
 
         return $scope . '|' . $ip . '|' . $userAgent;
-    }
-
-    private function apiOk(array $data = [], int $statusCode = 200): void
-    {
-        $payload = ['ok' => true];
-        if ($data !== []) {
-            $payload['data'] = $data;
-        }
-
-        $this->respondJson($payload, $statusCode);
-    }
-
-    private function apiError(string $code, string $message, int $statusCode = 422, array $details = []): void
-    {
-        $error = [
-            'code' => $code,
-            'message' => $message,
-        ];
-        if ($details !== []) {
-            $error = array_merge($error, $details);
-        }
-
-        $this->respondJson([
-            'ok' => false,
-            'error' => $error,
-        ], $statusCode);
     }
 
     private function csrfPayload(): array
