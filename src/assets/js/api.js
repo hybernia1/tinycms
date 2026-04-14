@@ -101,6 +101,28 @@
         }
     };
 
+    const setFormMessage = (form, message) => {
+        const container = form.querySelector('[data-api-form-message]');
+        if (!container) {
+            return;
+        }
+
+        const text = String(message || '').trim();
+        container.textContent = text;
+        container.hidden = text === '';
+    };
+
+    const updateCsrfFields = (payload) => {
+        const token = String(payload?.data?.csrf || payload?.error?.csrf || '').trim();
+        if (token === '') {
+            return;
+        }
+
+        document.querySelectorAll('input[name="_csrf"]').forEach((input) => {
+            input.value = token;
+        });
+    };
+
     const escapeSelector = (value) => {
         if (window.CSS && typeof window.CSS.escape === 'function') {
             return window.CSS.escape(value);
@@ -165,14 +187,17 @@
         });
 
         const payload = await response.json().catch(() => null);
+        updateCsrfFields(payload);
         if (!response.ok || payload?.ok !== true) {
             clearFieldErrors(form);
             applyFieldErrors(form, payload?.error?.errors || {});
+            setFormMessage(form, payload?.error?.message || '');
             showError(payload?.error?.message || '');
             return;
         }
 
         clearFieldErrors(form);
+        setFormMessage(form, '');
 
         const payloadRedirect = String(payload?.data?.redirect || '').trim();
         const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();

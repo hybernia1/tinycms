@@ -16,7 +16,6 @@ declare(strict_types=1);
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/auth-login.js')) ?>"></script>
 </head>
 <body>
 <?= $content ?>
