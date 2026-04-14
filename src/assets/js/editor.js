@@ -488,10 +488,11 @@
 
     function createLinkModal() {
         var modal = document.createElement('div');
-        modal.className = 'wysiwyg-link-modal';
+        modal.className = 'modal-overlay wysiwyg-link-modal';
+        modal.setAttribute('data-modal', '');
 
         var dialog = document.createElement('div');
-        dialog.className = 'wysiwyg-link-dialog';
+        dialog.className = 'modal wysiwyg-link-dialog';
 
         var title = document.createElement('h3');
         title.className = 'wysiwyg-link-title';
@@ -529,12 +530,13 @@
         nofollowOption.appendChild(document.createTextNode(' ' + t('editor.add_nofollow')));
 
         var actions = document.createElement('div');
-        actions.className = 'wysiwyg-link-actions';
+        actions.className = 'modal-actions wysiwyg-link-actions';
 
         var cancel = document.createElement('button');
         cancel.type = 'button';
         cancel.className = 'btn btn-light';
         cancel.setAttribute('data-role', 'link-cancel');
+        cancel.setAttribute('data-modal-close', '');
         cancel.textContent = '' + t('editor.cancel') + '';
 
         var remove = document.createElement('button');
@@ -547,6 +549,8 @@
         confirm.type = 'button';
         confirm.className = 'btn btn-primary';
         confirm.setAttribute('data-role', 'link-apply');
+        confirm.setAttribute('data-modal-confirm', '');
+        confirm.setAttribute('data-modal-confirm-manual', '');
         confirm.textContent = '' + t('editor.save') + '';
 
         actions.appendChild(cancel);
@@ -855,7 +859,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('is-open');
+            linkModal.classList.add('open');
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -922,7 +926,7 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('is-open');
+            linkModal.classList.remove('open');
         }
 
         function closeMenus() {
@@ -931,7 +935,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            linkModal.classList.remove('is-open');
+            linkModal.classList.remove('open');
             hideLinkTools();
             activeLink = null;
         }
@@ -969,16 +973,28 @@
             closeMenus();
         }
 
-        function resetTypingColors() {
-            var defaultColor = window.getComputedStyle(editor).color || 'rgb(0, 0, 0)';
-            var defaultBackground = window.getComputedStyle(editor).backgroundColor || 'rgba(0, 0, 0, 0)';
-            var backgroundFallback = defaultBackground === 'rgba(0, 0, 0, 0)' || defaultBackground === 'transparent' ? '#ffffff' : defaultBackground;
-            document.execCommand('styleWithCSS', false, false);
+        function resetTypingFormatting() {
+            ['bold', 'italic', 'underline', 'strikeThrough'].forEach(function (command) {
+                if (document.queryCommandState(command)) {
+                    document.execCommand(command, false, null);
+                }
+            });
             document.execCommand('removeFormat', false, null);
-            document.execCommand('styleWithCSS', false, true);
-            document.execCommand('foreColor', false, defaultColor);
-            document.execCommand('hiliteColor', false, backgroundFallback);
-            document.execCommand('backColor', false, backgroundFallback);
+        }
+
+        function isEmptyTextBlock(node) {
+            if (!node) {
+                return false;
+            }
+            if (node.querySelector('img, iframe, hr, video, audio, table')) {
+                return false;
+            }
+            var text = (node.textContent || '').replace(/\u00a0/g, ' ').trim();
+            if (text !== '') {
+                return false;
+            }
+            var html = String(node.innerHTML || '').replace(/\u00a0/g, ' ').replace(/\s+/g, '').toLowerCase();
+            return html === '' || html === '<br>' || html === '<br/>';
         }
 
         function setHtmlMode(enabled) {
@@ -1107,7 +1123,7 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                if (linkModal.classList.contains('is-open')) {
+                if (linkModal.classList.contains('open')) {
                     closeMenus();
                 } else {
                     openLinkModal();
@@ -1140,11 +1156,6 @@
             var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
             var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
             var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
-
-            if (event.target === linkModal) {
-                closeMenus();
-                return;
-            }
 
             if (event.target.closest('[data-role="link-remove"]')) {
                 if (activeLink && editor.contains(activeLink)) {
@@ -1222,21 +1233,6 @@
         linkModal.addEventListener('input', function (event) {
             if (event.target && event.target.matches('[data-role="link-input"]')) {
                 updateLinkApplyState();
-            }
-        });
-
-        linkModal.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                event.preventDefault();
-                closeMenus();
-                return;
-            }
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                var apply = linkModal.querySelector('[data-role="link-apply"]');
-                if (apply) {
-                    apply.click();
-                }
             }
         });
 
@@ -1348,7 +1344,7 @@
             }
 
             hideLinkTools();
-            if (!linkModal.classList.contains('is-open')) {
+            if (!linkModal.classList.contains('open')) {
                 activeLink = null;
             }
 
@@ -1463,33 +1459,49 @@
                 var quoteContainer = getSelectionContainer(editor);
                 var quoteBlock = quoteContainer ? quoteContainer.closest('blockquote') : null;
                 if (quoteBlock) {
+                    var currentBlock = quoteContainer.closest('p, h1, h2, h3, h4, h5, h6, li, div');
+                    if (currentBlock && quoteBlock.contains(currentBlock) && isEmptyTextBlock(currentBlock)) {
+                        event.preventDefault();
+                        currentBlock.remove();
+                        var paragraph = document.createElement('p');
+                        paragraph.innerHTML = '<br>';
+                        var quoteParent = quoteBlock.parentNode;
+                        var quoteNextSibling = quoteBlock.nextSibling;
+                        if (quoteBlock.textContent.replace(/\u00a0/g, ' ').trim() === '' && !quoteBlock.querySelector('img, iframe, hr, video, audio, table')) {
+                            quoteBlock.remove();
+                        }
+                        if (quoteParent) {
+                            quoteParent.insertBefore(paragraph, quoteNextSibling);
+                        } else {
+                            editor.appendChild(paragraph);
+                        }
+                        placeCaret(paragraph);
+                        persistEditorState(true);
+                        return;
+                    }
                     event.preventDefault();
-                    var paragraph = document.createElement('p');
-                    paragraph.innerHTML = '<br>';
-                    quoteBlock.parentNode.insertBefore(paragraph, quoteBlock.nextSibling);
-                    placeCaret(paragraph);
+                    var nextParagraph = document.createElement('p');
+                    nextParagraph.innerHTML = '<br>';
+                    if (currentBlock && quoteBlock.contains(currentBlock) && currentBlock !== quoteBlock) {
+                        currentBlock.parentNode.insertBefore(nextParagraph, currentBlock.nextSibling);
+                    } else {
+                        quoteBlock.appendChild(nextParagraph);
+                    }
+                    placeCaret(nextParagraph);
+                    resetTypingFormatting();
                     persistEditorState(true);
                     return;
                 }
             }
 
             if (event.key === 'Enter' && !event.shiftKey) {
-                var insideHeading = isSelectionInsideHeading(editor);
-                var wasBold = !insideHeading && document.queryCommandState('bold');
-                var wasItalic = document.queryCommandState('italic');
                 document.execCommand('defaultParagraphSeparator', false, 'p');
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
-                document.execCommand('removeFormat', false, null);
-                resetTypingColors();
-                if (wasBold) {
-                    document.execCommand('bold', false, null);
-                }
-                if (wasItalic) {
-                    document.execCommand('italic', false, null);
-                }
-                updateFormatState();
+                resetTypingFormatting();
+                persistEditorState(true);
             }
+
         });
 
         editor.addEventListener('paste', function (event) {

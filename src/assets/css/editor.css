@@ -107,17 +107,10 @@
 }
 
 .wysiwyg-link-modal {
-    position: fixed;
-    inset: 0;
     display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.45);
-    padding: var(--space-4);
-    z-index: var(--admin-z-modal, 200);
 }
 
-.wysiwyg-link-modal.is-open {
+.wysiwyg-link-modal.open {
     display: flex;
 }
 

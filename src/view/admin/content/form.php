@@ -137,11 +137,11 @@ $contentId = (int)($item['id'] ?? 0);
 >
     <?= $csrfField() ?>
 </form>
-<div class="media-library-modal" data-media-library-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
-    <div class="media-library-modal-dialog">
+<div class="media-library-modal modal-overlay" data-media-library-modal data-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
+    <div class="media-library-modal-dialog modal">
         <div class="media-library-modal-header">
             <strong>Media library</strong>
-            <button class="btn btn-light btn-icon" type="button" data-media-library-close aria-label="<?= $e($t('common.close')) ?>">
+            <button class="btn btn-light btn-icon" type="button" data-modal-close aria-label="<?= $e($t('common.close')) ?>">
                 <?= $icon('cancel') ?>
             </button>
         </div>
