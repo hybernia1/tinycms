@@ -973,18 +973,6 @@
             closeMenus();
         }
 
-        function resetTypingColors() {
-            var defaultColor = window.getComputedStyle(editor).color || 'rgb(0, 0, 0)';
-            var defaultBackground = window.getComputedStyle(editor).backgroundColor || 'rgba(0, 0, 0, 0)';
-            var backgroundFallback = defaultBackground === 'rgba(0, 0, 0, 0)' || defaultBackground === 'transparent' ? '#ffffff' : defaultBackground;
-            document.execCommand('styleWithCSS', false, false);
-            document.execCommand('removeFormat', false, null);
-            document.execCommand('styleWithCSS', false, true);
-            document.execCommand('foreColor', false, defaultColor);
-            document.execCommand('hiliteColor', false, backgroundFallback);
-            document.execCommand('backColor', false, backgroundFallback);
-        }
-
         function setHtmlMode(enabled) {
             htmlMode = enabled;
             wrapper.classList.toggle('is-html-mode', enabled);
@@ -1457,23 +1445,6 @@
                 }
             }
 
-            if (event.key === 'Enter' && !event.shiftKey) {
-                var insideHeading = isSelectionInsideHeading(editor);
-                var wasBold = !insideHeading && document.queryCommandState('bold');
-                var wasItalic = document.queryCommandState('italic');
-                document.execCommand('defaultParagraphSeparator', false, 'p');
-                event.preventDefault();
-                document.execCommand('insertParagraph', false, null);
-                document.execCommand('removeFormat', false, null);
-                resetTypingColors();
-                if (wasBold) {
-                    document.execCommand('bold', false, null);
-                }
-                if (wasItalic) {
-                    document.execCommand('italic', false, null);
-                }
-                updateFormatState();
-            }
         });
 
         editor.addEventListener('paste', function (event) {
