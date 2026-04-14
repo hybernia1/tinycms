@@ -20,7 +20,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     const grid = modal.querySelector('[data-media-library-grid]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
     const nextButton = modal.querySelector('[data-media-library-next]');
-    const closeButtons = modal.querySelectorAll('[data-media-library-close]');
     const searchForm = modal.querySelector('[data-media-library-search]');
     const uploadForm = modal.querySelector('[data-media-library-upload-form]');
     const uploadField = modal.querySelector('[data-media-library-upload-field]');
@@ -461,13 +460,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         }
         open(detail);
     });
-    closeButtons.forEach((button) => button.addEventListener('click', close));
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            close();
-        }
-    });
-
     if (prevButton) {
         prevButton.addEventListener('click', (event) => {
             event.preventDefault();
