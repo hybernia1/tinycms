@@ -306,9 +306,9 @@ const initListApi = (config) => {
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
     const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`)
         || document.querySelector(`[data-${config.name}-delete-modal]`);
-    const deleteCancel = deleteModal?.querySelector(`[data-${config.name}-delete-cancel]`);
-    const deleteConfirm = deleteModal?.querySelector(`[data-${config.name}-delete-confirm]`);
-    const deleteModalText = deleteModal?.querySelector('p');
+    const deleteCancel = deleteModal?.querySelector('[data-modal-close]');
+    const deleteConfirm = deleteModal?.querySelector('[data-modal-confirm]');
+    const deleteModalText = deleteModal?.querySelector('[data-modal-text]');
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
         : [];
