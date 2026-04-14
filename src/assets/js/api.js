@@ -101,6 +101,30 @@
         }
     };
 
+    const setFormMessage = (form, message) => {
+        const container = form.querySelector('[data-api-form-message]')
+            || form.parentElement?.querySelector('[data-api-form-message]');
+        if (!container) {
+            return false;
+        }
+
+        const text = String(message || '').trim();
+        container.textContent = text;
+        container.hidden = text === '';
+        return true;
+    };
+
+    const updateCsrfFields = (payload) => {
+        const token = String(payload?.data?.csrf || payload?.error?.csrf || '').trim();
+        if (token === '') {
+            return;
+        }
+
+        document.querySelectorAll('input[name="_csrf"]').forEach((input) => {
+            input.value = token;
+        });
+    };
+
     const escapeSelector = (value) => {
         if (window.CSS && typeof window.CSS.escape === 'function') {
             return window.CSS.escape(value);
@@ -165,14 +189,20 @@
         });
 
         const payload = await response.json().catch(() => null);
+        updateCsrfFields(payload);
         if (!response.ok || payload?.ok !== true) {
             clearFieldErrors(form);
             applyFieldErrors(form, payload?.error?.errors || {});
-            showError(payload?.error?.message || '');
+            const errorMessage = payload?.error?.message || '';
+            const hasInlineMessage = setFormMessage(form, errorMessage);
+            if (!hasInlineMessage) {
+                showError(errorMessage);
+            }
             return;
         }
 
         clearFieldErrors(form);
+        setFormMessage(form, '');
 
         const payloadRedirect = String(payload?.data?.redirect || '').trim();
         const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();

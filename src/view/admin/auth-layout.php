@@ -14,6 +14,7 @@ declare(strict_types=1);
     <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/admin.css')) ?>">
     <script>window.tinycmsI18n = <?= json_encode($adminI18n ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
 </head>
 <body>

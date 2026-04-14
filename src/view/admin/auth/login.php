@@ -6,10 +6,8 @@
                     <img src="<?= $e($url(ASSETS_DIR . 'svg/logo.svg')) ?>" alt="TinyCMS">
                 </div>
                 <h1 class="m-0 mb-4"><?= $e($t('auth.login')) ?></h1>
-                <?php if ($message !== ''): ?>
-                <p class="mb-3 text-danger"><?= $e($message) ?></p>
-                <?php endif; ?>
-                <form method="post" action="<?= $e($url('admin/login')) ?>">
+                <p class="mb-3 text-danger" data-api-form-message hidden></p>
+                <form method="post" action="<?= $e($url('admin/api/v1/auth/login')) ?>" data-api-submit data-redirect-url="<?= $e($url('admin/dashboard')) ?>">
                     <?= $csrfField() ?>
                     <div class="mb-3">
                         <label><?= $e($t('common.email')) ?></label>
@@ -17,9 +15,6 @@
                             <span class="field-overlay field-overlay-start field-icon" aria-hidden="true"><?= $icon('email') ?></span>
                             <input class="field-control-with-start-icon" type="email" name="email" value="<?= $e((string)($old['email'] ?? '')) ?>" required>
                         </div>
-                        <?php if (!empty($errors['email'])): ?>
-                        <small class="text-danger"><?= $e((string)$errors['email']) ?></small>
-                        <?php endif; ?>
                     </div>
                     <div class="mb-4">
                         <label><?= $e($t('common.password')) ?></label>
@@ -29,9 +24,6 @@
                                 <?= $icon('show') ?>
                             </button>
                         </div>
-                        <?php if (!empty($errors['password'])): ?>
-                        <small class="text-danger"><?= $e((string)$errors['password']) ?></small>
-                        <?php endif; ?>
                     </div>
                     <div class="mb-4">
                         <label><input type="checkbox" name="remember" value="1" <?= ((int)($old['remember'] ?? 0) === 1) ? 'checked' : '' ?>> <?= $e($t('auth.remember')) ?></label>
