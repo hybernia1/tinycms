@@ -19,7 +19,7 @@
         var headerDeleteGroup = document.querySelector('[data-content-delete-group]');
         var headerDeleteButton = document.querySelector('[data-content-action-delete]');
         var firstDraftAutosaveDelay = 30000;
-        var autosaveDelay = 1200;
+        var autosaveDelay = 60000;
         var saveTimer = null;
         var saving = false;
         var pending = false;
