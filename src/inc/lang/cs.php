@@ -297,6 +297,7 @@ return [
         'remember' => 'Zapamatovat si mě',
         'login_failed' => 'Přihlášení selhalo.',
         'session_expired' => 'Relace vypršela, přihlaste se prosím znovu.',
+        'too_many_attempts' => 'Příliš mnoho požadavků. Zkuste to prosím za chvíli.',
         'name_required' => 'Jméno je povinné.',
         'name_min_3' => 'Jméno musí mít alespoň 3 znaky.',
         'name_too_long' => 'Jméno je příliš dlouhé.',

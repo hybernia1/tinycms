@@ -297,6 +297,7 @@ return [
         'remember' => 'Remember me',
         'login_failed' => 'Login failed.',
         'session_expired' => 'Your session has expired, please sign in again.',
+        'too_many_attempts' => 'Too many requests. Please try again shortly.',
         'name_required' => 'Name is required.',
         'name_min_3' => 'Name must be at least 3 characters.',
         'name_too_long' => 'Name is too long.',
