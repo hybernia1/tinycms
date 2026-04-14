@@ -64,7 +64,7 @@ const closeModal = () => {
 };
 
 const setLoading = (loading) => {
-    form.querySelectorAll('input, button').forEach((field) => {
+    form.querySelectorAll('input:not([type="hidden"]), button').forEach((field) => {
         field.disabled = loading;
     });
     if (submit) {
@@ -123,11 +123,12 @@ form.addEventListener('submit', async (event) => {
 
     event.preventDefault();
     clearErrors();
+    const payload = new FormData(form);
     setLoading(true);
     loginInFlight = true;
 
     try {
-        const { response, raw } = await postForm(loginEndpoint, form, {
+        const { response, raw } = await postForm(loginEndpoint, payload, {
             credentials: 'same-origin',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
