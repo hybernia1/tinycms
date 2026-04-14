@@ -1104,22 +1104,6 @@
             selection.addRange(caretRange);
         }
 
-        function normalizeFreshParagraphAtCaret() {
-            var container = getSelectionContainer(editor);
-            if (!container) {
-                return;
-            }
-            var block = container.closest('p, div');
-            if (!block || !editor.contains(block)) {
-                return;
-            }
-            if (!isEmptyTextBlock(block)) {
-                return;
-            }
-            block.removeAttribute('style');
-            block.innerHTML = '<br>';
-        }
-
         function handleEnterOnSelectedImage(event) {
             var selectedImageBlock = editor.querySelector('.block.block-image.is-selected');
             if (!selectedImageBlock) {
@@ -1170,9 +1154,6 @@
                 quoteBlock.appendChild(nextParagraph);
             }
             placeCaret(nextParagraph);
-            resetTypingFormatting();
-            normalizeFreshParagraphAtCaret();
-            resetCollapsedTypingState();
             persistEditorState(true);
             return true;
         }
@@ -1181,9 +1162,6 @@
             document.execCommand('defaultParagraphSeparator', false, 'p');
             event.preventDefault();
             document.execCommand('insertParagraph', false, null);
-            resetTypingFormatting();
-            normalizeFreshParagraphAtCaret();
-            resetCollapsedTypingState();
             persistEditorState(true);
         }
 
