@@ -3,6 +3,68 @@
     var requestJson = window.tinycms?.api?.http?.requestJson;
     var postForm = window.tinycms?.api?.http?.postForm;
     var editorCounter = 0;
+    var tinyMceScriptPromise = null;
+
+    function loadTinyMceScript() {
+        if (window.tinymce && typeof window.tinymce.init === 'function') {
+            return Promise.resolve(window.tinymce);
+        }
+        if (tinyMceScriptPromise) {
+            return tinyMceScriptPromise;
+        }
+        tinyMceScriptPromise = new Promise(function (resolve, reject) {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/tinymce@6.8.3/tinymce.min.js';
+            script.referrerPolicy = 'origin';
+            script.onload = function () {
+                if (window.tinymce && typeof window.tinymce.init === 'function') {
+                    resolve(window.tinymce);
+                    return;
+                }
+                reject(new Error('tinymce-not-available'));
+            };
+            script.onerror = function () {
+                reject(new Error('tinymce-load-failed'));
+            };
+            document.head.appendChild(script);
+        });
+        return tinyMceScriptPromise;
+    }
+
+    function initClassicTinyMce(textarea) {
+        return loadTinyMceScript().then(function (tinymce) {
+            var id = textarea.id;
+            if (!id) {
+                id = 'tinycms-classic-' + (editorCounter + 1);
+                textarea.id = id;
+            }
+            if (tinymce.get(id)) {
+                return true;
+            }
+            return tinymce.init({
+                target: textarea,
+                menubar: false,
+                branding: false,
+                promotion: false,
+                browser_spellcheck: true,
+                plugins: 'lists link paste',
+                toolbar: 'formatselect | bold italic blockquote | bullist numlist | link unlink | forecolor backcolor | removeformat',
+                block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3',
+                forced_root_block: 'p',
+                end_container_on_empty_block: true,
+                keep_styles: true,
+                convert_fonts_to_spans: true,
+                setup: function (editor) {
+                    var sync = function () {
+                        editor.save();
+                    };
+                    editor.on('input keyup change undo redo SetContent ExecCommand', sync);
+                }
+            }).then(function () {
+                return true;
+            });
+        });
+    }
 
     function normalizeHtml(html) {
         return html === '<br>' ? '' : html;
@@ -650,6 +712,20 @@
     }
 
     function init(textarea) {
+        if (textarea.dataset.tinycmsClassicFallback !== '1') {
+            initClassicTinyMce(textarea).then(function (initialized) {
+                if (initialized) {
+                    textarea.dataset.tinycmsClassicReady = '1';
+                }
+            }).catch(function () {
+                if (textarea.dataset.tinycmsClassicFallback === '1') {
+                    return;
+                }
+                textarea.dataset.tinycmsClassicFallback = '1';
+                init(textarea);
+            });
+            return;
+        }
         editorCounter += 1;
         var editorId = 'wysiwyg-' + editorCounter;
         var wrapper = document.createElement('div');
