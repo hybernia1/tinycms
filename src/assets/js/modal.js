@@ -47,6 +47,17 @@ const openModal = (trigger) => {
     modal.classList.add('open');
 };
 
+const getOpenConfirmModal = () => {
+    const modals = document.querySelectorAll('[data-modal].open');
+    for (let index = modals.length - 1; index >= 0; index -= 1) {
+        const modal = modals[index];
+        if (modal.querySelector('[data-modal-confirm]')) {
+            return modal;
+        }
+    }
+    return null;
+};
+
 document.addEventListener('click', (event) => {
     const openTrigger = event.target.closest('[data-modal-open]');
     if (openTrigger) {
@@ -79,5 +90,40 @@ document.addEventListener('click', (event) => {
     }
 
     closeModal(confirmTrigger.closest('[data-modal]'));
+});
+
+document.addEventListener('keydown', (event) => {
+    const modal = getOpenConfirmModal();
+    if (!modal) {
+        return;
+    }
+
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        const closeTrigger = modal.querySelector('[data-modal-close]');
+        if (closeTrigger) {
+            closeTrigger.click();
+            return;
+        }
+        closeModal(modal);
+        return;
+    }
+
+    if (event.key !== 'Enter' || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+        return;
+    }
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLTextAreaElement) {
+        return;
+    }
+
+    const confirmTrigger = modal.querySelector('[data-modal-confirm]');
+    if (!confirmTrigger) {
+        return;
+    }
+
+    event.preventDefault();
+    confirmTrigger.click();
 });
 })();
