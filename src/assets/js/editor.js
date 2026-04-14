@@ -709,6 +709,7 @@
         var mediaRange = null;
         var linkPasteSeq = 0;
         var draftInitPromise = null;
+        var resetTypingStateOnInput = false;
 
         function absoluteMediaUrl(path) {
             var value = String(path || '').trim();
@@ -1031,11 +1032,25 @@
             }
         }
 
+        function isEditorTypingEmpty() {
+            if (editor.querySelector('img, iframe, hr, video, audio, table')) {
+                return false;
+            }
+            var text = (editor.textContent || '').replace(/\u00a0/g, ' ').trim();
+            return text === '';
+        }
+
         function updateFormatState() {
             if (htmlMode || !isSelectionInside(editor)) {
                 bold.classList.remove('is-active');
                 italic.classList.remove('is-active');
                 quote.classList.remove('is-active');
+                return;
+            }
+            if (isEditorTypingEmpty()) {
+                bold.classList.remove('is-active');
+                italic.classList.remove('is-active');
+                quote.classList.toggle('is-active', isSelectionInsideTag(editor, 'blockquote'));
                 return;
             }
             var insideHeading = isSelectionInsideHeading(editor);
@@ -1603,6 +1618,7 @@
 
         editor.addEventListener('keydown', function (event) {
             if (event.key === 'Backspace' || event.key === 'Delete') {
+                resetTypingStateOnInput = true;
                 var selectedImageForDelete = editor.querySelector('.block.block-image.is-selected');
                 if (selectedImageForDelete) {
                     event.preventDefault();
@@ -1632,6 +1648,7 @@
                     }
                     placeCaret(caretTarget);
                     persistEditorState(false);
+                    resetTypingStateOnInput = false;
                     return;
                 }
             }
@@ -1730,8 +1747,13 @@
         });
 
         editor.addEventListener('input', function () {
+            if (resetTypingStateOnInput && isEditorTypingEmpty()) {
+                resetTypingFormatting();
+                resetCollapsedTypingState();
+            }
             sync(textarea, editor);
             updateFormatState();
+            resetTypingStateOnInput = false;
         });
 
         editor.addEventListener('blur', function () {
