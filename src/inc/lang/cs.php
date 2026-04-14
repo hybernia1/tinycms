@@ -217,6 +217,7 @@ return [
         'updated' => 'Obsah upraven.',
         'save_failed' => 'Nepodařilo se uložit obsah.',
         'update_failed' => 'Nepodařilo se upravit obsah.',
+        'update_conflict' => 'Obsah mezitím upravil někdo jiný. Načtěte stránku znovu.',
         'delete_failed' => 'Obsah se nepodařilo smazat.',
         'not_found' => 'Obsah nenalezen.',
         'deleted' => 'Obsah smazán.',

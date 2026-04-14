@@ -217,6 +217,7 @@ return [
         'updated' => 'Content updated.',
         'save_failed' => 'Could not save content.',
         'update_failed' => 'Could not update content.',
+        'update_conflict' => 'Content was updated by someone else. Reload the page.',
         'delete_failed' => 'Could not delete content.',
         'not_found' => 'Content not found.',
         'deleted' => 'Content deleted.',

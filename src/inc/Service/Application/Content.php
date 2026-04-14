@@ -136,7 +136,7 @@ final class Content
         ], ['id' => $id]) >= 0;
     }
 
-    public function save(array $input, int $defaultAuthorId, ?int $id = null): array
+    public function save(array $input, int $defaultAuthorId, ?int $id = null, ?string $expectedUpdated = null): array
     {
         $name = trim((string)($input['name'] ?? ''));
         $status = trim((string)($input['status'] ?? 'draft'));
@@ -205,7 +205,9 @@ final class Content
                 $payload['created'] = $created;
             }
 
-            $updated = $this->query->update('content', $payload, ['id' => $id]);
+            $updated = $expectedUpdated === null
+                ? $this->query->update('content', $payload, ['id' => $id])
+                : $this->updateWithExpectedTimestamp($id, $payload, $expectedUpdated);
             if ($updated >= 0) {
                 $this->syncAttachments($id, $body);
             }
@@ -214,6 +216,26 @@ final class Content
         } catch (InvalidArgumentException $e) {
             return ['success' => false, 'errors' => ['_global' => $e->getMessage()]];
         }
+    }
+
+    private function updateWithExpectedTimestamp(int $id, array $payload, string $expectedUpdated): int
+    {
+        if ($payload === []) {
+            throw new InvalidArgumentException(I18n::t('errors.db.update_data_empty'));
+        }
+
+        $set = [];
+        $params = [':id' => $id, ':expected_updated' => $expectedUpdated];
+        foreach ($payload as $column => $value) {
+            $set[] = "$column = :$column";
+            $params[":$column"] = $value;
+        }
+
+        $table = Table::name('content');
+        $sql = "UPDATE $table SET " . implode(', ', $set) . " WHERE id = :id AND COALESCE(updated, created) = :expected_updated";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->rowCount();
     }
 
     public function statuses(): array

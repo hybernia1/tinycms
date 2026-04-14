@@ -182,18 +182,38 @@ final class Content extends BaseAdmin
             return;
         }
 
-        if ($this->content->find($id) === null) {
+        $item = $this->content->find($id);
+        if ($item === null) {
             $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
             return;
         }
 
+        if (!$this->hasMatchingLockVersion($_POST, $item)) {
+            $this->apiError('UPDATE_CONFLICT', I18n::t('content.update_conflict'), 409, [
+                'current_lock_version' => $this->lockVersionFromItem($item),
+            ]);
+            return;
+        }
+
         $authorId = (int)($this->authService->auth()->id() ?? 0);
-        $result = $this->content->save($_POST, $authorId, $id);
+        $result = $this->content->save($_POST, $authorId, $id, $this->lockVersionFromPost($_POST));
+
+        if (($result['success'] ?? false) !== true) {
+            $fresh = $this->content->find($id);
+            if ($fresh !== null && !$this->hasMatchingLockVersion($_POST, $fresh)) {
+                $this->apiError('UPDATE_CONFLICT', I18n::t('content.update_conflict'), 409, [
+                    'current_lock_version' => $this->lockVersionFromItem($fresh),
+                ]);
+                return;
+            }
+        }
 
         if (($result['success'] ?? false) === true) {
             $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
+            $saved = $this->content->find($id);
             $this->apiOk([
                 'message' => I18n::t('content.updated'),
+                'lock_version' => $this->lockVersionFromItem($saved),
             ]);
             return;
         }
@@ -288,9 +308,17 @@ final class Content extends BaseAdmin
             return;
         }
 
+        $item = null;
         if ($id > 0) {
-            if ($this->content->find($id) === null) {
+            $item = $this->content->find($id);
+            if ($item === null) {
                 $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+                return;
+            }
+            if (!$this->hasMatchingLockVersion($_POST, $item)) {
+                $this->apiError('UPDATE_CONFLICT', I18n::t('content.update_conflict'), 409, [
+                    'current_lock_version' => $this->lockVersionFromItem($item),
+                ]);
                 return;
             }
         }
@@ -298,9 +326,18 @@ final class Content extends BaseAdmin
         $authorId = (int)($this->authService->auth()->id() ?? 0);
         $payload = $this->resolveAutosavePayload($_POST, $authorId);
         $isCreate = $id <= 0;
-        $result = $this->content->save($payload, $authorId, $isCreate ? null : $id);
+        $result = $this->content->save($payload, $authorId, $isCreate ? null : $id, $isCreate ? null : $this->lockVersionFromPost($_POST));
 
         if (($result['success'] ?? false) !== true) {
+            if (!$isCreate) {
+                $fresh = $this->content->find($id);
+                if ($fresh !== null && !$this->hasMatchingLockVersion($_POST, $fresh)) {
+                    $this->apiError('UPDATE_CONFLICT', I18n::t('content.update_conflict'), 409, [
+                        'current_lock_version' => $this->lockVersionFromItem($fresh),
+                    ]);
+                    return;
+                }
+            }
             $this->apiError('SAVE_FAILED', I18n::t('content.autosave_failed'), 422, ['errors' => $result['errors'] ?? []]);
             return;
         }
@@ -311,10 +348,12 @@ final class Content extends BaseAdmin
             $this->terms->syncContentTerms($savedId, (string)$_POST['terms']);
         }
 
+        $savedItem = $savedId > 0 ? $this->content->find($savedId) : null;
         $this->apiOk([
             'id' => $savedId,
             'created_new' => $isCreate,
             'updated' => date('Y-m-d H:i:s'),
+            'lock_version' => $this->lockVersionFromItem($savedItem),
         ]);
     }
 
@@ -441,6 +480,36 @@ final class Content extends BaseAdmin
     private function resolveAutosaveDraftName(): string
     {
         return I18n::t('content.autosave_draft_name');
+    }
+
+    private function lockVersionFromPost(array $input): ?string
+    {
+        $value = trim((string)($input['expected_updated'] ?? ''));
+        return $value === '' ? null : $value;
+    }
+
+    private function lockVersionFromItem(?array $item): string
+    {
+        if ($item === null) {
+            return '';
+        }
+
+        $updated = trim((string)($item['updated'] ?? ''));
+        if ($updated !== '') {
+            return $updated;
+        }
+
+        return trim((string)($item['created'] ?? ''));
+    }
+
+    private function hasMatchingLockVersion(array $input, ?array $item): bool
+    {
+        $expected = $this->lockVersionFromPost($input);
+        if ($expected === null) {
+            return false;
+        }
+
+        return $expected === $this->lockVersionFromItem($item);
     }
 
     private function resolveListQuery(): array

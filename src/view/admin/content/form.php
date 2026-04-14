@@ -11,6 +11,10 @@ if ($thumbnailPath === '') {
 }
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
+$lockVersion = trim((string)($item['updated'] ?? ''));
+if ($lockVersion === '') {
+    $lockVersion = trim((string)($item['created'] ?? ''));
+}
 ?>
 <form
     id="content-editor-form"
@@ -26,6 +30,7 @@ $contentId = (int)($item['id'] ?? 0);
 >
     <?= $csrfField() ?>
     <input type="hidden" name="id" value="<?= $contentId ?>" data-content-id-hidden>
+    <input type="hidden" name="expected_updated" value="<?= $e($lockVersion) ?>" data-content-lock-version>
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">

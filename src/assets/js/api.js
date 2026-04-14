@@ -198,6 +198,15 @@
             pushFlash('success', successMessage);
         }
 
+        const lockVersion = String(payload?.data?.lock_version || '').trim();
+        if (lockVersion !== '') {
+            form.querySelectorAll('[data-content-lock-version]').forEach((field) => {
+                if (field instanceof HTMLInputElement) {
+                    field.value = lockVersion;
+                }
+            });
+        }
+
         if (form.hasAttribute('data-stay-on-page')) {
             return;
         }

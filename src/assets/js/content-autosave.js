@@ -14,7 +14,9 @@
         var draftInitEndpoint = form.dataset.draftInitEndpoint || '';
         var editUrlBase = form.dataset.editUrlBase || '';
         var idInput = form.querySelector('[data-content-id-hidden]');
+        var lockVersionInput = form.querySelector('[data-content-lock-version]');
         var bodyTextarea = form.querySelector('textarea[name="body"]');
+        var pushFlash = window.tinycms?.api?.pushFlash;
         var thumbnailTrigger = document.querySelector('[data-media-library-open]');
         var headerDeleteGroup = document.querySelector('[data-content-delete-group]');
         var headerDeleteButton = document.querySelector('[data-content-action-delete]');
@@ -59,6 +61,13 @@
 
         function contentId() {
             return Number(idInput ? idInput.value : '0');
+        }
+
+        function setLockVersion(value) {
+            if (!lockVersionInput) {
+                return;
+            }
+            lockVersionInput.value = String(value || '').trim();
         }
 
         function setContentId(id) {
@@ -198,11 +207,26 @@
             var autosaveResult = await postForm(autosaveEndpoint, data);
             var response = autosaveResult.response;
             var normalized = autosaveResult.data;
+            if (response.status === 409) {
+                var serverVersion = String(normalized.data?.current_lock_version || '').trim();
+                if (serverVersion !== '') {
+                    setLockVersion(serverVersion);
+                }
+                if (typeof pushFlash === 'function') {
+                    pushFlash('warning', normalized.message || '');
+                }
+                saving = false;
+                return;
+            }
             if (response.ok && normalized.success) {
                 lastSent = currentSignature;
                 var id = Number(normalized.data?.id || 0);
                 if (id > 0) {
                     setContentId(id);
+                }
+                var lockVersion = String(normalized.data?.lock_version || '').trim();
+                if (lockVersion !== '') {
+                    setLockVersion(lockVersion);
                 }
             }
 
