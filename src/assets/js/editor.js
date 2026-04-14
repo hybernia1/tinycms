@@ -1064,6 +1064,37 @@
             document.execCommand('removeFormat', false, null);
         }
 
+        function resetCollapsedTypingState() {
+            var selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0) {
+                return;
+            }
+            var range = selection.getRangeAt(0);
+            if (!range.collapsed || !editor.contains(range.commonAncestorContainer)) {
+                return;
+            }
+
+            var marker = document.createTextNode('\u200b');
+            range.insertNode(marker);
+            var markerRange = document.createRange();
+            markerRange.selectNodeContents(marker);
+            selection.removeAllRanges();
+            selection.addRange(markerRange);
+
+            var computedColor = normalizeColorValue(window.getComputedStyle(editor).color) || '#000000';
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('foreColor', false, computedColor);
+            document.execCommand('hiliteColor', false, 'transparent');
+            document.execCommand('removeFormat', false, null);
+
+            var caretRange = document.createRange();
+            caretRange.setStartAfter(marker);
+            caretRange.collapse(true);
+            marker.parentNode.removeChild(marker);
+            selection.removeAllRanges();
+            selection.addRange(caretRange);
+        }
+
         function normalizeFreshParagraphAtCaret() {
             var container = getSelectionContainer(editor);
             if (!container) {
@@ -1132,6 +1163,7 @@
             placeCaret(nextParagraph);
             resetTypingFormatting();
             normalizeFreshParagraphAtCaret();
+            resetCollapsedTypingState();
             persistEditorState(true);
             return true;
         }
@@ -1142,6 +1174,7 @@
             document.execCommand('insertParagraph', false, null);
             resetTypingFormatting();
             normalizeFreshParagraphAtCaret();
+            resetCollapsedTypingState();
             persistEditorState(true);
         }
 
