@@ -982,6 +982,22 @@
             document.execCommand('removeFormat', false, null);
         }
 
+        function clearEmptyBlockFormattingAtCaret() {
+            var container = getSelectionContainer(editor);
+            if (!container) {
+                return;
+            }
+            var block = container.closest('p, div, li');
+            if (!block || !editor.contains(block)) {
+                return;
+            }
+            if (!isEmptyTextBlock(block)) {
+                return;
+            }
+            block.removeAttribute('style');
+            block.innerHTML = '<br>';
+        }
+
         function isEmptyTextBlock(node) {
             if (!node) {
                 return false;
@@ -1499,6 +1515,7 @@
                 event.preventDefault();
                 document.execCommand('insertParagraph', false, null);
                 resetTypingFormatting();
+                clearEmptyBlockFormattingAtCaret();
                 persistEditorState(true);
             }
 
