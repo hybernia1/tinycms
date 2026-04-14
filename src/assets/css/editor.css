@@ -117,7 +117,7 @@
     z-index: var(--admin-z-modal, 200);
 }
 
-.wysiwyg-link-modal.is-open {
+.wysiwyg-link-modal.open {
     display: flex;
 }
 

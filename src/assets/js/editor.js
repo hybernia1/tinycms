@@ -486,9 +486,11 @@
         return group;
     }
 
-    function createLinkModal() {
+    function createLinkModal(modalId) {
         var modal = document.createElement('div');
         modal.className = 'wysiwyg-link-modal';
+        modal.id = modalId;
+        modal.setAttribute('data-modal', '');
 
         var dialog = document.createElement('div');
         dialog.className = 'wysiwyg-link-dialog';
@@ -535,6 +537,7 @@
         cancel.type = 'button';
         cancel.className = 'btn btn-light';
         cancel.setAttribute('data-role', 'link-cancel');
+        cancel.setAttribute('data-modal-close', '');
         cancel.textContent = '' + t('editor.cancel') + '';
 
         var remove = document.createElement('button');
@@ -587,7 +590,9 @@
         var backgroundColorGroup = createColorGroup('w-bg-color', 'toggleBackgroundColorMenu', 'hiliteColor', ''+ t('editor.background_color') + '', 'background');
         var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
-        var linkModal = createLinkModal();
+        var linkModalId = editorId + '-link-modal';
+        link.setAttribute('data-modal-target', '#' + linkModalId);
+        var linkModal = createLinkModal(linkModalId);
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
         linkTools.setAttribute('contenteditable', 'false');
@@ -623,6 +628,18 @@
         var mediaRange = null;
         var linkPasteSeq = 0;
         var draftInitPromise = null;
+
+        function isLinkModalOpen() {
+            return linkModal.classList.contains('open');
+        }
+
+        function closeLinkModal() {
+            var close = window.tinycms && window.tinycms.modal && typeof window.tinycms.modal.close === 'function'
+                ? window.tinycms.modal.close
+                : function (modalNode) { modalNode.classList.remove('open'); };
+            close(linkModal);
+        }
+
 
         function absoluteMediaUrl(path) {
             var value = String(path || '').trim();
@@ -855,7 +872,11 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('is-open');
+            if (window.tinycms && window.tinycms.modal && typeof window.tinycms.modal.open === 'function') {
+                window.tinycms.modal.open(link);
+            } else {
+                linkModal.classList.add('open');
+            }
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -922,7 +943,7 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('is-open');
+            closeLinkModal();
         }
 
         function closeMenus() {
@@ -931,7 +952,7 @@
             wrapper.classList.remove('is-align-open');
             wrapper.classList.remove('is-text-color-open');
             wrapper.classList.remove('is-bg-color-open');
-            linkModal.classList.remove('is-open');
+            closeLinkModal();
             hideLinkTools();
             activeLink = null;
         }
@@ -1107,7 +1128,7 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                if (linkModal.classList.contains('is-open')) {
+                if (isLinkModalOpen()) {
                     closeMenus();
                 } else {
                     openLinkModal();
@@ -1348,7 +1369,7 @@
             }
 
             hideLinkTools();
-            if (!linkModal.classList.contains('is-open')) {
+            if (!isLinkModalOpen()) {
                 activeLink = null;
             }
 

@@ -47,6 +47,13 @@ const openModal = (trigger) => {
     modal.classList.add('open');
 };
 
+window.tinycms = window.tinycms || {};
+window.tinycms.modal = Object.assign({}, window.tinycms.modal, {
+    getModal,
+    open: openModal,
+    close: closeModal,
+});
+
 document.addEventListener('click', (event) => {
     const openTrigger = event.target.closest('[data-modal-open]');
     if (openTrigger) {
