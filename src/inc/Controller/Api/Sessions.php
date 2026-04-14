@@ -113,9 +113,7 @@ final class Sessions extends BaseAdmin
     private function rateKey(string $scope): string
     {
         $ip = trim((string)($_SERVER['REMOTE_ADDR'] ?? ''));
-        $userAgent = trim((string)($_SERVER['HTTP_USER_AGENT'] ?? ''));
-
-        return $scope . '|' . $ip . '|' . $userAgent;
+        return $scope . '|' . $ip;
     }
 
     private function csrfPayload(): array
