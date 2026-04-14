@@ -982,50 +982,85 @@
             document.execCommand('removeFormat', false, null);
         }
 
-        function clearTypingStyleAtCaret() {
+        function normalizeFreshParagraphAtCaret() {
             var container = getSelectionContainer(editor);
             if (!container) {
                 return;
             }
-            var block = container.closest('p, div, li');
+            var block = container.closest('p, div');
             if (!block || !editor.contains(block)) {
                 return;
             }
-            var node = container.nodeType === Node.TEXT_NODE ? container.parentNode : container;
-            while (node && node !== block) {
-                if (node.nodeType === Node.ELEMENT_NODE && (node.tagName === 'SPAN' || node.tagName === 'FONT')) {
-                    node.removeAttribute('style');
-                    node.removeAttribute('color');
-                    node.removeAttribute('bgcolor');
-                }
-                node = node.parentNode;
+            if (!isEmptyTextBlock(block)) {
+                return;
             }
-            if (isEmptyTextBlock(block)) {
-                block.removeAttribute('style');
-                block.innerHTML = '<br>';
-            }
+            block.removeAttribute('style');
+            block.innerHTML = '<br>';
+        }
 
-            var selection = window.getSelection();
-            if (!selection || selection.rangeCount === 0) {
-                return;
+        function handleEnterOnSelectedImage(event) {
+            var selectedImageBlock = editor.querySelector('.block.block-image.is-selected');
+            if (!selectedImageBlock) {
+                return false;
             }
-            var range = selection.getRangeAt(0);
-            if (!range.collapsed) {
-                return;
+            event.preventDefault();
+            var next = selectedImageBlock.nextElementSibling;
+            var target = next && next.classList.contains('block-image-break') ? next : createImageBreakParagraph();
+            if (target !== next) {
+                selectedImageBlock.parentNode.insertBefore(target, selectedImageBlock.nextSibling);
             }
-            var marker = document.createTextNode('\u200b');
-            range.insertNode(marker);
-            var markerRange = document.createRange();
-            markerRange.selectNodeContents(marker);
-            selection.removeAllRanges();
-            selection.addRange(markerRange);
-            document.execCommand('removeFormat', false, null);
-            var caretRange = document.createRange();
-            caretRange.setStartAfter(marker);
-            caretRange.collapse(true);
-            marker.parentNode.removeChild(marker);
-            selection.removeAllRanges();
-            selection.addRange(caretRange);
+            placeCaret(target);
+            persistEditorState(false);
+            return true;
+        }
+
+        function handleEnterInBlockquote(event) {
+            var quoteContainer = getSelectionContainer(editor);
+            var quoteBlock = quoteContainer ? quoteContainer.closest('blockquote') : null;
+            if (!quoteBlock) {
+                return false;
+            }
+            var currentBlock = quoteContainer.closest('p, h1, h2, h3, h4, h5, h6, li, div');
+            event.preventDefault();
+            if (currentBlock && quoteBlock.contains(currentBlock) && isEmptyTextBlock(currentBlock)) {
+                currentBlock.remove();
+                var paragraph = document.createElement('p');
+                paragraph.innerHTML = '<br>';
+                var quoteParent = quoteBlock.parentNode;
+                var quoteNextSibling = quoteBlock.nextSibling;
+                if (quoteBlock.textContent.replace(/\u00a0/g, ' ').trim() === '' && !quoteBlock.querySelector('img, iframe, hr, video, audio, table')) {
+                    quoteBlock.remove();
+                }
+                if (quoteParent) {
+                    quoteParent.insertBefore(paragraph, quoteNextSibling);
+                } else {
+                    editor.appendChild(paragraph);
+                }
+                placeCaret(paragraph);
+                persistEditorState(true);
+                return true;
+            }
+            var nextParagraph = document.createElement('p');
+            nextParagraph.innerHTML = '<br>';
+            if (currentBlock && quoteBlock.contains(currentBlock) && currentBlock !== quoteBlock) {
+                currentBlock.parentNode.insertBefore(nextParagraph, currentBlock.nextSibling);
+            } else {
+                quoteBlock.appendChild(nextParagraph);
+            }
+            placeCaret(nextParagraph);
+            resetTypingFormatting();
+            normalizeFreshParagraphAtCaret();
+            persistEditorState(true);
+            return true;
+        }
+
+        function handleDefaultEnter(event) {
+            document.execCommand('defaultParagraphSeparator', false, 'p');
+            event.preventDefault();
+            document.execCommand('insertParagraph', false, null);
+            resetTypingFormatting();
+            normalizeFreshParagraphAtCaret();
+            persistEditorState(true);
         }
 
         function isEmptyTextBlock(node) {
@@ -1487,67 +1522,13 @@
             }
 
             if (event.key === 'Enter' && !event.shiftKey) {
-                var selectedImageBlock = editor.querySelector('.block.block-image.is-selected');
-                if (selectedImageBlock) {
-                    event.preventDefault();
-                    var next = selectedImageBlock.nextElementSibling;
-                    var target = next && next.classList.contains('block-image-break') ? next : createImageBreakParagraph();
-                    if (target !== next) {
-                        selectedImageBlock.parentNode.insertBefore(target, selectedImageBlock.nextSibling);
-                    }
-                    placeCaret(target);
-                    persistEditorState(false);
+                if (handleEnterOnSelectedImage(event)) {
                     return;
                 }
-            }
-
-            if (event.key === 'Enter' && !event.shiftKey) {
-                var quoteContainer = getSelectionContainer(editor);
-                var quoteBlock = quoteContainer ? quoteContainer.closest('blockquote') : null;
-                if (quoteBlock) {
-                    var currentBlock = quoteContainer.closest('p, h1, h2, h3, h4, h5, h6, li, div');
-                    if (currentBlock && quoteBlock.contains(currentBlock) && isEmptyTextBlock(currentBlock)) {
-                        event.preventDefault();
-                        currentBlock.remove();
-                        var paragraph = document.createElement('p');
-                        paragraph.innerHTML = '<br>';
-                        var quoteParent = quoteBlock.parentNode;
-                        var quoteNextSibling = quoteBlock.nextSibling;
-                        if (quoteBlock.textContent.replace(/\u00a0/g, ' ').trim() === '' && !quoteBlock.querySelector('img, iframe, hr, video, audio, table')) {
-                            quoteBlock.remove();
-                        }
-                        if (quoteParent) {
-                            quoteParent.insertBefore(paragraph, quoteNextSibling);
-                        } else {
-                            editor.appendChild(paragraph);
-                        }
-                        placeCaret(paragraph);
-                        persistEditorState(true);
-                        return;
-                    }
-                    event.preventDefault();
-                    var nextParagraph = document.createElement('p');
-                    nextParagraph.innerHTML = '<br>';
-                    if (currentBlock && quoteBlock.contains(currentBlock) && currentBlock !== quoteBlock) {
-                        currentBlock.parentNode.insertBefore(nextParagraph, currentBlock.nextSibling);
-                    } else {
-                        quoteBlock.appendChild(nextParagraph);
-                    }
-                    placeCaret(nextParagraph);
-                    resetTypingFormatting();
-                    clearTypingStyleAtCaret();
-                    persistEditorState(true);
+                if (handleEnterInBlockquote(event)) {
                     return;
                 }
-            }
-
-            if (event.key === 'Enter' && !event.shiftKey) {
-                document.execCommand('defaultParagraphSeparator', false, 'p');
-                event.preventDefault();
-                document.execCommand('insertParagraph', false, null);
-                resetTypingFormatting();
-                clearTypingStyleAtCaret();
-                persistEditorState(true);
+                handleDefaultEnter(event);
             }
 
         });
