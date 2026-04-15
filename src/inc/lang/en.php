@@ -251,6 +251,7 @@ return [
         'status' => 'Status',
         'publish_date' => 'Publish date',
         'post' => 'Post',
+        'name_placeholder' => 'Enter title',
         'save_to_assign_tags' => 'Save content first to assign tags.',
         'find_or_add_tag' => 'Find or add tag',
         'thumbnail' => 'Thumbnail',

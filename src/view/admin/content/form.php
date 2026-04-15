@@ -29,7 +29,7 @@ $contentId = (int)($item['id'] ?? 0);
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">
-                <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" placeholder="Zadejte název" required>
+                <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" placeholder="<?= $e($t('content.name_placeholder')) ?>" required>
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
             </div>
             <div class="mb-3">
