@@ -32,11 +32,6 @@ $contentId = (int)($item['id'] ?? 0);
                 <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" placeholder="<?= $e($t('content.name_placeholder')) ?>" required>
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
             </div>
-            <div class="mb-3">
-                <label>Excerpt</label>
-                <textarea name="excerpt" rows="3"><?= $e((string)($item['excerpt'] ?? '')) ?></textarea>
-                <?php if (!empty($errors['excerpt'])): ?><small class="text-danger"><?= $e((string)$errors['excerpt']) ?></small><?php endif; ?>
-            </div>
             <input type="hidden" name="status" value="<?= $e((string)($item['status'] ?? 'draft')) ?>" data-content-status-hidden>
             <div class="m-0">
                 <textarea
@@ -59,11 +54,8 @@ $contentId = (int)($item['id'] ?? 0);
                         <input type="datetime-local" name="created" value="<?= $e($createdAt) ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= $e((string)$errors['created']) ?></small><?php endif; ?>
                     </div>
-                </div>
-            </div>
-                <div class="card">
-                    <div class="content-box-header"><?= $e($t('common.author')) ?></div>
-                    <div class="p-3">
+                    <div class="mt-3">
+                        <label><?= $e($t('common.author')) ?></label>
                         <select name="author">
                             <option value=""><?= $e($t('common.no_author')) ?></option>
                             <?php foreach ($authors as $author): ?>
@@ -76,6 +68,14 @@ $contentId = (int)($item['id'] ?? 0);
                         <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= $e((string)$errors['author']) ?></small><?php endif; ?>
                     </div>
                 </div>
+            </div>
+            <div class="card">
+                <div class="content-box-header">Excerpt</div>
+                <div class="p-3">
+                    <textarea name="excerpt" rows="3"><?= $e((string)($item['excerpt'] ?? '')) ?></textarea>
+                    <?php if (!empty($errors['excerpt'])): ?><small class="text-danger"><?= $e((string)$errors['excerpt']) ?></small><?php endif; ?>
+                </div>
+            </div>
 
             <div class="card">
                 <div class="content-box-header"><?= $e($t('admin.menu.terms')) ?></div>
