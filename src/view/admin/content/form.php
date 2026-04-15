@@ -29,8 +29,7 @@ $contentId = (int)($item['id'] ?? 0);
     <div class="content-editor-layout">
         <div class="card p-4">
             <div class="mb-3">
-                <label><?= $e($t('common.name')) ?></label>
-                <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" required>
+                <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" placeholder="Zadejte název" required>
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
             </div>
             <div class="mb-3">
@@ -40,7 +39,6 @@ $contentId = (int)($item['id'] ?? 0);
             </div>
             <input type="hidden" name="status" value="<?= $e((string)($item['status'] ?? 'draft')) ?>" data-content-status-hidden>
             <div class="m-0">
-                <label><?= $e($t('content.body')) ?></label>
                 <textarea
                     name="body"
                     rows="14"
