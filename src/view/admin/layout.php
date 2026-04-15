@@ -31,7 +31,11 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/tag-picker.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor/utils.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor/selection.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor/image-blocks.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor/ui.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor/editor.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/heartbeat.js')) ?>"></script>
 </head>
 <body data-heartbeat-endpoint="<?= $e($url('admin/api/v1/heartbeat')) ?>" data-heartbeat-login-endpoint="<?= $e($url('admin/api/v1/auth/login')) ?>">
