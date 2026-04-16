@@ -8,7 +8,7 @@ use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\I18n;
-use App\Service\Support\MediaPath;
+use App\Service\Support\Media;
 
 final class View
 {
@@ -70,7 +70,7 @@ final class View
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
-        $media = static fn(string $path = '', string $size = 'origin'): string => MediaPath::bySize($path, $size);
+        $media = static fn(string $path = '', string $size = 'origin'): string => Media::bySize($path, $size);
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 

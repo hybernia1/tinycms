@@ -7,7 +7,7 @@ use App\Service\Application\Auth;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
-use App\Service\Support\MediaPath;
+use App\Service\Support\Media;
 use App\Service\Support\PaginationConfig;
 
 abstract class BaseAdmin
@@ -189,7 +189,7 @@ abstract class BaseAdmin
     {
         $path = trim((string)($item['path'] ?? ''));
         if ($path !== '') {
-            return MediaPath::bySize($path, 'small');
+            return Media::bySize($path, 'small');
         }
 
         return '';

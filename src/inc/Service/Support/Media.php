@@ -3,13 +3,28 @@ declare(strict_types=1);
 
 namespace App\Service\Support;
 
-final class ThumbnailVariants
+final class Media
 {
     public const SMALL_SUFFIX = '_small.webp';
     public const MEDIUM_SUFFIX = '_medium.webp';
     private const DEFAULT_SMALL_WIDTH = 300;
     private const DEFAULT_SMALL_HEIGHT = 300;
     private const DEFAULT_MEDIUM_WIDTH = 768;
+
+    public static function bySize(string $path, string $size = 'origin'): string
+    {
+        $normalized = trim($path);
+        if ($normalized === '') {
+            return '';
+        }
+
+        return match (strtolower(trim($size))) {
+            'small' => self::smallPath($normalized),
+            'medium' => self::thumbnailPath(self::webpPath($normalized), self::MEDIUM_SUFFIX),
+            'webp' => self::webpPath($normalized),
+            default => $normalized,
+        };
+    }
 
     public static function webpPath(string $path): string
     {

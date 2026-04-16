@@ -23,10 +23,6 @@ if (!defined('ASSETS_DIR')) {
     define('ASSETS_DIR', SRC_DIR . 'assets/');
 }
 
-if (!defined('MEDIA_THUMB_VARIANTS')) {
-    define('MEDIA_THUMB_VARIANTS', []);
-}
-
 if (!defined('APP_DEBUG')) {
     define('APP_DEBUG', false);
 }
