@@ -111,11 +111,11 @@ if ($mode === 'edit') {
             <?php endif; ?>
         </div>
 
-        <aside class="content-editor-sidebar">
-            <div class="card">
-                <div class="content-box-header"><?= $e($t('common.actions')) ?></div>
-                <div class="p-3">
-                    <?php if ($mode === 'edit'): ?>
+        <?php if ($mode === 'edit'): ?>
+            <aside class="content-editor-sidebar">
+                <div class="card">
+                    <div class="content-box-header"><?= $e($t('common.actions')) ?></div>
+                    <div class="p-3">
                         <div class="mb-3">
                             <label><?= $e($t('common.created')) ?></label>
                             <div class="text-muted"><?= $e($formatDateTime((string)($item['created'] ?? ''))) ?></div>
@@ -133,45 +133,45 @@ if ($mode === 'edit') {
                             </select>
                             <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= $e((string)$errors['author']) ?></small><?php endif; ?>
                         </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php if ($mode === 'edit' && $fileMeta !== null): ?>
-                <div class="card">
-                    <div class="content-box-header"><?= $e($t('media.file')) ?></div>
-                    <div class="p-3">
-                        <div class="mb-3">
-                            <label><?= $e($t('media.path')) ?></label>
-                            <div class="text-muted"><?= $e((string)($item['path'] ?? '')) ?></div>
-                        </div>
-                        <div class="mb-3">
-                            <label><?= $e($t('media.path_webp')) ?></label>
-                            <div class="text-muted"><?= $e((string)($item['path_webp'] ?? '')) ?></div>
-                        </div>
-                        <div class="mb-3">
-                            <label><?= $e($t('media.filename')) ?></label>
-                            <div class="text-muted"><?= $e((string)$fileMeta['filename']) ?></div>
-                        </div>
-                        <div class="mb-3">
-                            <label><?= $e($t('media.mime')) ?></label>
-                            <div class="text-muted"><?= $e((string)$fileMeta['mime']) ?></div>
-                        </div>
-                        <div class="mb-3">
-                            <label><?= $e($t('media.extension')) ?></label>
-                            <div class="text-muted"><?= $e((string)$fileMeta['extension']) ?></div>
-                        </div>
-                        <div class="mb-3">
-                            <label><?= $e($t('media.dimensions')) ?></label>
-                            <div class="text-muted"><?= $e((string)$fileMeta['dimensions']) ?></div>
-                        </div>
-                        <div class="m-0">
-                            <label><?= $e($t('media.size')) ?></label>
-                            <div class="text-muted"><?= $e((string)$fileMeta['size']) ?></div>
-                        </div>
                     </div>
                 </div>
-            <?php endif; ?>
-        </aside>
+                <?php if ($fileMeta !== null): ?>
+                    <div class="card">
+                        <div class="content-box-header"><?= $e($t('media.file')) ?></div>
+                        <div class="p-3">
+                            <div class="mb-3">
+                                <label><?= $e($t('media.path')) ?></label>
+                                <div class="text-muted"><?= $e((string)($item['path'] ?? '')) ?></div>
+                            </div>
+                            <div class="mb-3">
+                                <label><?= $e($t('media.path_webp')) ?></label>
+                                <div class="text-muted"><?= $e((string)($item['path_webp'] ?? '')) ?></div>
+                            </div>
+                            <div class="mb-3">
+                                <label><?= $e($t('media.filename')) ?></label>
+                                <div class="text-muted"><?= $e((string)$fileMeta['filename']) ?></div>
+                            </div>
+                            <div class="mb-3">
+                                <label><?= $e($t('media.mime')) ?></label>
+                                <div class="text-muted"><?= $e((string)$fileMeta['mime']) ?></div>
+                            </div>
+                            <div class="mb-3">
+                                <label><?= $e($t('media.extension')) ?></label>
+                                <div class="text-muted"><?= $e((string)$fileMeta['extension']) ?></div>
+                            </div>
+                            <div class="mb-3">
+                                <label><?= $e($t('media.dimensions')) ?></label>
+                                <div class="text-muted"><?= $e((string)$fileMeta['dimensions']) ?></div>
+                            </div>
+                            <div class="m-0">
+                                <label><?= $e($t('media.size')) ?></label>
+                                <div class="text-muted"><?= $e((string)$fileMeta['size']) ?></div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </aside>
+        <?php endif; ?>
     </div>
 </form>
 
