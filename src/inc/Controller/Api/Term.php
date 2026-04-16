@@ -23,7 +23,7 @@ final class Term extends BaseAdmin
 
     public function listApiV1(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
@@ -37,7 +37,7 @@ final class Term extends BaseAdmin
 
     public function suggest(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 

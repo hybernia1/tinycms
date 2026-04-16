@@ -43,7 +43,7 @@ final class Content extends BaseAdmin
 
     public function listApiV1(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
@@ -322,7 +322,7 @@ final class Content extends BaseAdmin
 
     public function linkTitleApiV1(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 

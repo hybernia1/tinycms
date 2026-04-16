@@ -23,7 +23,7 @@ final class User extends BaseAdmin
 
     public function listApiV1(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 

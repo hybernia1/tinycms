@@ -25,7 +25,7 @@ final class Media extends BaseAdmin
 
     public function listApiV1(callable $redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
