@@ -1,9 +1,12 @@
 <?php
-$previewPath = $postThumbnail((string)($item['path'] ?? ''), 'small');
+$originPath = trim((string)($item['path'] ?? ''));
+$previewPath = $mode === 'edit'
+    ? \App\Service\Support\ThumbnailVariants::webpPath($originPath)
+    : $postThumbnail($originPath, 'small');
 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
 $fileMeta = null;
 if ($mode === 'edit') {
-    $metaPath = trim((string)($item['path'] ?? ''));
+    $metaPath = $originPath;
     $absolutePath = dirname(__DIR__, 3) . '/' . ltrim($metaPath, '/');
     if ($metaPath !== '' && is_file($absolutePath)) {
         $imageInfo = @getimagesize($absolutePath) ?: [0, 0, 'mime' => ''];
