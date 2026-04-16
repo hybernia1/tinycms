@@ -5,7 +5,7 @@ $termsValue = implode(', ', $initialTerms);
 $termsJson = $e(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]');
 ?>
 <?php
-$thumbnailPath = \App\Service\Support\ThumbnailVariants::smallPath((string)($item['thumbnail_path'] ?? ''));
+$thumbnailPath = $media((string)($item['thumbnail_path'] ?? ''), 'small');
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
 ?>

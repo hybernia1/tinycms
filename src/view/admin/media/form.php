@@ -1,5 +1,5 @@
 <?php
-$previewPath = \App\Service\Support\ThumbnailVariants::smallPath((string)($item['path'] ?? ''));
+$previewPath = $media((string)($item['path'] ?? ''), 'small');
 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
 $fileMeta = null;
 if ($mode === 'edit') {

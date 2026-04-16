@@ -5,12 +5,9 @@ $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
     'unassigned' => $t('media.status.unassigned') . ' (' . (int)($statusCounts['unassigned'] ?? 0) . ')',
 ];
-$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $e): string {
+$rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $e, $media): string {
     $id = (int)($row['id'] ?? 0);
-    $previewPath = trim((string)($row['preview_path'] ?? ''));
-    if ($previewPath === '') {
-        $previewPath = trim((string)($row['path'] ?? ''));
-    }
+    $previewPath = $media((string)($row['path'] ?? ''), 'small');
     $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
     ob_start();
     ?>

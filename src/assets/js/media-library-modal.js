@@ -139,7 +139,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             return;
         }
 
-        const imagePath = absoluteUrl(media.preview_path || media.path || '');
+        const imagePath = absoluteUrl(media.preview_path || '');
         if (imagePath === '') {
             return;
         }
@@ -269,7 +269,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         if (detailPreview) {
             detailPreview.innerHTML = '';
             const detailImagePath = selectedMedia
-                ? (selectedMedia.previewPath || selectedMedia.path || '')
+                ? selectedMedia.previewPath
                 : '';
             if (selectedMedia && detailImagePath !== '') {
                 const image = document.createElement('img');
@@ -530,7 +530,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             }
 
             if (mode === 'editor') {
-                const imageUrl = absoluteUrl(selectedMedia.previewPath || selectedMedia.path || '');
+                const imageUrl = absoluteUrl(selectedMedia.previewPath || '');
                 if (imageUrl === '') {
                     setStatus(t('media.invalid_url'));
                     return;

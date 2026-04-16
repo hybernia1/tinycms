@@ -758,7 +758,7 @@
                     return;
                 }
                 var mediaId = Number(media.id || 0);
-                var imageUrl = absoluteMediaUrl(media.preview_path || media.path || '');
+                var imageUrl = absoluteMediaUrl(media.preview_path || '');
                 if (mediaId <= 0 || !imageUrl) {
                     removeLoadingBlockAndPersist();
                     return;
