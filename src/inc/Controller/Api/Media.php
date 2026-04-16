@@ -84,14 +84,12 @@ final class Media extends BaseAdmin
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('media.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('media.invalid_id'))) {
             return;
         }
 
         $item = $this->media->find($id);
-        if ($item === null) {
-            $this->apiError('NOT_FOUND', I18n::t('media.not_found'), 404);
+        if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('media.not_found'))) {
             return;
         }
 
@@ -120,14 +118,12 @@ final class Media extends BaseAdmin
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('media.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('media.invalid_id'))) {
             return;
         }
 
         $item = $this->media->find($id);
-        if ($item === null) {
-            $this->apiError('NOT_FOUND', I18n::t('media.not_found'), 404);
+        if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('media.not_found'))) {
             return;
         }
 

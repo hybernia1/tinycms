@@ -41,8 +41,7 @@ final class User extends BaseAdmin
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
             return;
         }
 
@@ -61,8 +60,7 @@ final class User extends BaseAdmin
         }
 
         $mode = (string)($_POST['mode'] ?? 'suspend');
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
             return;
         }
 
@@ -111,8 +109,7 @@ final class User extends BaseAdmin
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
             return;
         }
 

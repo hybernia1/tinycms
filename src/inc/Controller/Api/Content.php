@@ -61,13 +61,11 @@ final class Content extends BaseAdmin
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
-        if ($this->content->find($id) === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
 
@@ -90,13 +88,11 @@ final class Content extends BaseAdmin
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
-        if ($this->content->find($id) === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
 
@@ -179,13 +175,11 @@ final class Content extends BaseAdmin
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
-        if ($this->content->find($id) === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
 
@@ -212,8 +206,7 @@ final class Content extends BaseAdmin
         }
 
         $mode = (string)($_POST['mode'] ?? 'draft');
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
@@ -291,8 +284,7 @@ final class Content extends BaseAdmin
         }
 
         if ($id > 0) {
-            if ($this->content->find($id) === null) {
-                $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+            if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
                 return;
             }
         }

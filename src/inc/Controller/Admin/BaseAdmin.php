@@ -128,6 +128,26 @@ abstract class BaseAdmin
         ], $statusCode);
     }
 
+    protected function requirePositiveId(int $id, string $code, string $message, int $statusCode = 422): bool
+    {
+        if ($id > 0) {
+            return true;
+        }
+
+        $this->apiError($code, $message, $statusCode);
+        return false;
+    }
+
+    protected function requireEntity(?array $entity, string $code, string $message, int $statusCode = 404): bool
+    {
+        if ($entity !== null) {
+            return true;
+        }
+
+        $this->apiError($code, $message, $statusCode);
+        return false;
+    }
+
     protected function formatDateTime(string $value): string
     {
         $stamp = $value !== '' ? strtotime($value) : false;
