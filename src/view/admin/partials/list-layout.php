@@ -6,7 +6,7 @@ $listName = (string)($list['name'] ?? $entity);
 $statusCurrent = (string)($list['statusCurrent'] ?? 'all');
 $listQuery = (string)($list['query'] ?? '');
 $listEndpoint = (string)($list['endpoint'] ?? ($entity !== '' ? $url('admin/api/v1/' . $entity) : ''));
-$listEditBase = (string)($list['editBase'] ?? ($entity !== '' ? $url('admin/' . $entity . '/edit?id=') : ''));
+$listEditBase = $entity !== '' ? $url('admin/' . $entity . '/edit?id=') : '';
 $listRootAttrs = is_array($list['rootAttrs'] ?? null) ? $list['rootAttrs'] : [];
 $searchPlaceholder = (string)($list['searchPlaceholder'] ?? '');
 $searchHidden = is_array($list['searchHidden'] ?? null) ? $list['searchHidden'] : ['status' => $statusCurrent, 'page' => '1'];
@@ -18,9 +18,7 @@ $statusEnabled = (bool)($list['statusEnabled'] ?? $statusLinks !== []);
 $statusUrl = is_callable($list['statusUrl'] ?? null)
     ? $list['statusUrl']
     : static fn(string $targetStatus): string => $url('admin/' . $entity . '?status=' . urlencode($targetStatus) . '&page=1');
-$paginationUrl = is_callable($list['paginationUrl'] ?? null)
-    ? $list['paginationUrl']
-    : static fn(int $targetPage): string => $url('admin/' . $entity . '?page=' . $targetPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
+$paginationUrl = static fn(int $targetPage): string => $url('admin/' . $entity . '?page=' . $targetPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
 $rowRenderer = is_callable($list['rowRenderer'] ?? null) ? $list['rowRenderer'] : null;
 $deleteConfirmText = (string)($list['deleteConfirmText'] ?? '');
 $csrfMarkup = (string)($list['csrfMarkup'] ?? $csrfField());
