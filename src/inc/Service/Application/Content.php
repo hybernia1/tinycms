@@ -70,7 +70,6 @@ final class Content
             'thumbnail',
             "(SELECT name FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_name",
             "(SELECT path FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path",
-            "(SELECT path_webp FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path_webp",
             'created',
             'updated',
         ], ['id' => $id]);

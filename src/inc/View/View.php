@@ -8,6 +8,7 @@ use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\I18n;
+use App\Service\Support\ThumbnailVariants;
 
 final class View
 {
@@ -69,6 +70,14 @@ final class View
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
         $formatInputDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->toInputDateTimeLocal($value, $fallback);
         $t = static fn(string $key, ?string $fallback = null): string => I18n::t($key, $fallback);
+        $postThumbnail = static function (string $path = '', string $size = 'origin'): string {
+            $origin = trim($path);
+            if ($origin === '' || $size === 'origin' || $size === '') {
+                return $origin;
+            }
+
+            return ThumbnailVariants::path($origin, $size);
+        };
 
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
@@ -92,6 +101,7 @@ final class View
         $data['formatInputDateTime'] = $formatInputDateTime;
         $data['absoluteUrl'] = $absoluteUrl;
         $data['t'] = $t;
+        $data['postThumbnail'] = $postThumbnail;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
         extract($data, EXTR_SKIP);

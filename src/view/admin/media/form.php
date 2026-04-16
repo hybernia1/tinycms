@@ -1,15 +1,9 @@
 <?php
-$previewPath = trim((string)($item['path_webp'] ?? ''));
-if ($previewPath === '') {
-    $previewPath = trim((string)($item['path'] ?? ''));
-}
+$previewPath = $postThumbnail((string)($item['path'] ?? ''), 'small');
 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
 $fileMeta = null;
 if ($mode === 'edit') {
     $metaPath = trim((string)($item['path'] ?? ''));
-    if ($metaPath === '') {
-        $metaPath = trim((string)($item['path_webp'] ?? ''));
-    }
     $absolutePath = dirname(__DIR__, 3) . '/' . ltrim($metaPath, '/');
     if ($metaPath !== '' && is_file($absolutePath)) {
         $imageInfo = @getimagesize($absolutePath) ?: [0, 0, 'mime' => ''];
@@ -145,7 +139,7 @@ if ($mode === 'edit') {
                             </div>
                             <div class="mb-3">
                                 <label><?= $e($t('media.path_webp')) ?></label>
-                                <div class="text-muted"><?= $e((string)($item['path_webp'] ?? '')) ?></div>
+                                <div class="text-muted"><?= $e(\App\Service\Support\ThumbnailVariants::webpPath((string)($item['path'] ?? ''))) ?></div>
                             </div>
                             <div class="mb-3">
                                 <label><?= $e($t('media.filename')) ?></label>

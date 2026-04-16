@@ -8,6 +8,7 @@ use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
+use App\Service\Support\ThumbnailVariants;
 use InvalidArgumentException;
 
 final class Media
@@ -21,13 +22,12 @@ final class Media
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
-    public function create(?int $author, string $name, string $path, ?string $pathWebp): int
+    public function create(?int $author, string $name, string $path): int
     {
         $result = $this->save([
             'author' => $author,
             'name' => $name,
             'path' => $path,
-            'path_webp' => $pathWebp,
         ]);
         return $result['success'] === true ? (int)($result['id'] ?? 0) : 0;
     }
@@ -95,7 +95,7 @@ final class Media
     {
         $name = trim((string)($input['name'] ?? ''));
         $path = trim((string)($input['path'] ?? ''));
-        $pathWebp = trim((string)($input['path_webp'] ?? ''));
+        $pathWebp = ThumbnailVariants::webpPath($path);
         $author = $this->resolveAuthor($input);
         $errors = [];
 

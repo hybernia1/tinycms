@@ -5,11 +5,8 @@ $termsValue = implode(', ', $initialTerms);
 $termsJson = $e(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]');
 ?>
 <?php
-$thumbnailPath = trim((string)($item['thumbnail_path_webp'] ?? ''));
-if ($thumbnailPath === '') {
-    $thumbnailPath = trim((string)($item['thumbnail_path'] ?? ''));
-}
-$thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
+$thumbnailPath = trim((string)($item['thumbnail_path'] ?? ''));
+$thumbnailUrl = $thumbnailPath !== '' ? $url($postThumbnail($thumbnailPath, 'small')) : '';
 $contentId = (int)($item['id'] ?? 0);
 ?>
 <form

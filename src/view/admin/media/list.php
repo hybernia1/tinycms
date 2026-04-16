@@ -9,9 +9,6 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     $id = (int)($row['id'] ?? 0);
     $previewPath = trim((string)($row['preview_path'] ?? ''));
     if ($previewPath === '') {
-        $previewPath = trim((string)($row['path_webp'] ?? ''));
-    }
-    if ($previewPath === '') {
         $previewPath = trim((string)($row['path'] ?? ''));
     }
     $previewUrl = $previewPath !== '' ? $url($previewPath) : '';

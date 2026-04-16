@@ -12,6 +12,7 @@ use App\Service\Application\Upload;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
+use App\Service\Support\ThumbnailVariants;
 
 final class ContentMedia extends BaseAdmin
 {
@@ -155,8 +156,7 @@ final class ContentMedia extends BaseAdmin
         $mediaId = $this->media->create(
             $author > 0 ? $author : null,
             (string)($data['name'] ?? ''),
-            (string)($data['path'] ?? ''),
-            (string)($data['path_webp'] ?? '')
+            (string)($data['path'] ?? '')
         );
 
         if ($mediaId <= 0) {
@@ -172,7 +172,7 @@ final class ContentMedia extends BaseAdmin
             'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
             'preview_path' => $previewPath,
             'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
-            'webp_path' => (string)($media['path_webp'] ?? ($data['path_webp'] ?? '')),
+            'webp_path' => ThumbnailVariants::webpPath((string)($media['path'] ?? ($data['path'] ?? ''))),
             'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
             'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
         ]);
@@ -202,7 +202,6 @@ final class ContentMedia extends BaseAdmin
         $result = $this->media->save([
             'name' => $name,
             'path' => (string)($media['path'] ?? ''),
-            'path_webp' => (string)($media['path_webp'] ?? ''),
             'author' => (string)($media['author'] ?? ''),
         ], $mediaId);
 
@@ -273,7 +272,7 @@ final class ContentMedia extends BaseAdmin
             'can_delete' => true,
             'preview_path' => $this->resolvePreviewPath($item),
             'path' => (string)($item['path'] ?? ''),
-            'webp_path' => (string)($item['path_webp'] ?? ''),
+            'webp_path' => ThumbnailVariants::webpPath((string)($item['path'] ?? '')),
             'created' => $createdAt,
             'created_label' => $this->formatDateTime($createdAt),
         ];
@@ -289,7 +288,7 @@ final class ContentMedia extends BaseAdmin
         $haystacks = [
             (string)($item['name'] ?? ''),
             (string)($item['path'] ?? ''),
-            (string)($item['path_webp'] ?? ''),
+            ThumbnailVariants::webpPath((string)($item['path'] ?? '')),
         ];
 
         foreach ($haystacks as $value) {
