@@ -7,8 +7,8 @@ use App\Service\Application\Auth;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
+use App\Service\Support\Media;
 use App\Service\Support\PaginationConfig;
-use App\Service\Support\ThumbnailVariants;
 
 abstract class BaseAdmin
 {
@@ -187,12 +187,12 @@ abstract class BaseAdmin
 
     protected function resolvePreviewPath(array $item): string
     {
-        $pathWebp = trim((string)($item['path_webp'] ?? ''));
-        if ($pathWebp !== '') {
-            return ThumbnailVariants::thumbnailPath($pathWebp);
+        $path = trim((string)($item['path'] ?? ''));
+        if ($path !== '') {
+            return Media::bySize($path, 'small');
         }
 
-        return trim((string)($item['path'] ?? ''));
+        return '';
     }
 
 }

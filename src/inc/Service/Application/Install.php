@@ -210,9 +210,9 @@ final class Install
             . "const DB_USER = " . var_export((string)$db['db_user'], true) . ";\n"
             . "const DB_PASS = " . var_export((string)$db['db_pass'], true) . ";\n\n"
             . "const DB_PREFIX = " . var_export($prefix, true) . ";\n\n"
-            . "const MEDIA_THUMB_VARIANTS = [\n"
-            . "    ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],\n"
-            . "];\n";
+            . "const MEDIA_SMALL_WIDTH = 300;\n"
+            . "const MEDIA_SMALL_HEIGHT = 300;\n"
+            . "const MEDIA_MEDIUM_WIDTH = 768;\n";
 
         $written = file_put_contents(dirname(__DIR__, 4) . '/config.php', $content, LOCK_EX);
 

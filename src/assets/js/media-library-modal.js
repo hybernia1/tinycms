@@ -139,7 +139,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             return;
         }
 
-        const imagePath = absoluteUrl(media.webp_path || media.preview_path || media.path || '');
+        const imagePath = absoluteUrl(media.preview_path || '');
         if (imagePath === '') {
             return;
         }
@@ -205,7 +205,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             button.appendChild(check);
             button.dataset.mediaName = name;
             button.dataset.mediaPath = String(item.path || '');
-            button.dataset.mediaWebpPath = String(item.webp_path || '');
             button.dataset.mediaCreated = String(item.created || '');
             button.dataset.mediaCreatedLabel = String(item.created_label || item.created || '');
             button.dataset.mediaPreviewPath = previewPath;
@@ -229,7 +228,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             id: mediaId,
             name: target.dataset.mediaName || t('media.untitled'),
             path: target.dataset.mediaPath || '',
-            webpPath: target.dataset.mediaWebpPath || '',
             created: target.dataset.mediaCreated || '',
             createdLabel: target.dataset.mediaCreatedLabel || target.dataset.mediaCreated || '',
             previewPath: target.dataset.mediaPreviewPath || '',
@@ -271,7 +269,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         if (detailPreview) {
             detailPreview.innerHTML = '';
             const detailImagePath = selectedMedia
-                ? (selectedMedia.webpPath || selectedMedia.previewPath || selectedMedia.path || '')
+                ? selectedMedia.previewPath
                 : '';
             if (selectedMedia && detailImagePath !== '') {
                 const image = document.createElement('img');
@@ -532,7 +530,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             }
 
             if (mode === 'editor') {
-                const imageUrl = absoluteUrl(selectedMedia.webpPath || selectedMedia.path || selectedMedia.previewPath || '');
+                const imageUrl = absoluteUrl(selectedMedia.previewPath || '');
                 if (imageUrl === '') {
                     setStatus(t('media.invalid_url'));
                     return;

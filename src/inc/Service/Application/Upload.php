@@ -5,7 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Support\Slugger;
 use App\Service\Support\I18n;
-use App\Service\Support\ThumbnailVariants;
+use App\Service\Support\Media;
 
 final class Upload
 {
@@ -78,7 +78,7 @@ final class Upload
             return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed')];
         }
 
-        $webpRel = $extension === 'webp' ? $fileRel : $subdir . '/' . $slug . '.webp';
+        $webpRel = Media::webpPath($fileRel);
         $webpAbs = $this->rootPath . '/' . $webpRel;
 
         if (!$this->createWebp($fileAbs, $webpAbs, $mime, self::MAX_WEBP_WIDTH)) {
@@ -112,19 +112,19 @@ final class Upload
             'data' => [
                 'name' => trim($baseName) !== '' ? trim($baseName) : (string)pathinfo($fileRel, PATHINFO_FILENAME),
                 'path' => $fileRel,
-                'path_webp' => $webpRel,
             ],
         ];
     }
 
     public function deleteMediaFiles(array $media): void
     {
+        $path = trim((string)($media['path'] ?? ''));
+        $webpPath = Media::webpPath($path);
         $paths = array_filter([
-            trim((string)($media['path'] ?? '')),
-            trim((string)($media['path_webp'] ?? '')),
+            $path,
+            $webpPath,
         ]);
 
-        $webpPath = trim((string)($media['path_webp'] ?? ''));
         if ($webpPath !== '') {
             foreach ($this->thumbVariants() as $variant) {
                 $paths[] = $this->thumbnailPath($webpPath, (string)$variant['suffix']);
@@ -388,11 +388,11 @@ final class Upload
 
     private function thumbnailPath(string $webpPath, string $suffix): string
     {
-        return ThumbnailVariants::thumbnailPath($webpPath, $suffix);
+        return Media::thumbnailPath($webpPath, $suffix);
     }
 
     private function thumbVariants(): array
     {
-        return ThumbnailVariants::variants();
+        return Media::variants();
     }
 }

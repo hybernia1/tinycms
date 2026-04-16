@@ -59,7 +59,6 @@ final class Media extends BaseAdmin
         $input = array_merge($_POST, [
             'name' => trim((string)($_POST['name'] ?? '')) !== '' ? (string)$_POST['name'] : (string)($uploadData['name'] ?? ''),
             'path' => (string)($uploadData['path'] ?? ''),
-            'path_webp' => (string)($uploadData['path_webp'] ?? ''),
             'author' => trim((string)($_POST['author'] ?? '')) !== '' ? (string)$_POST['author'] : ($authorId > 0 ? (string)$authorId : ''),
         ]);
         $result = $this->media->save($input);
@@ -98,7 +97,6 @@ final class Media extends BaseAdmin
 
         $input = array_merge($_POST, [
             'path' => (string)($item['path'] ?? ''),
-            'path_webp' => (string)($item['path_webp'] ?? ''),
         ]);
 
         $result = $this->media->save($input, $id);
@@ -163,7 +161,6 @@ final class Media extends BaseAdmin
             'can_edit' => true,
             'can_delete' => true,
             'path' => (string)($row['path'] ?? ''),
-            'path_webp' => (string)($row['path_webp'] ?? ''),
             'preview_path' => $previewPath,
             'author_name' => (string)($row['author_name'] ?? '—'),
             'created' => (string)($row['created'] ?? ''),

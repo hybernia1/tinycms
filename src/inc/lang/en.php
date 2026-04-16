@@ -164,7 +164,6 @@ return [
     'media' => [
         'file' => 'File',
         'path' => 'Path',
-        'path_webp' => 'Path webp',
         'used_in' => 'Used in',
         'no_usage' => 'Media is not used in any post.',
         'usage_origin' => 'Used as',

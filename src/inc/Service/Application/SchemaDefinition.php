@@ -17,7 +17,6 @@ final class SchemaDefinition
             'media' => [
                 'path' => ['max' => 500, 'nullable' => true],
                 'name' => ['max' => 255, 'nullable' => true],
-                'path_webp' => ['max' => 500, 'nullable' => true],
             ],
             'content' => [
                 'status' => ['max' => 50, 'nullable' => false],
@@ -68,7 +67,6 @@ final class SchemaDefinition
                 author INT DEFAULT NULL,
                 path VARCHAR(500) DEFAULT NULL,
                 name VARCHAR(255) DEFAULT NULL,
-                path_webp VARCHAR(500) DEFAULT NULL,
                 created DATETIME NOT NULL DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (id),

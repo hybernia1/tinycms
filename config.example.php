@@ -19,6 +19,6 @@ const DB_USER = 'root';
 const DB_PASS = '';
 const DB_PREFIX = '';
 
-const MEDIA_THUMB_VARIANTS = [
-    ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],
-];
+const MEDIA_SMALL_WIDTH = 300;
+const MEDIA_SMALL_HEIGHT = 300;
+const MEDIA_MEDIUM_WIDTH = 768;

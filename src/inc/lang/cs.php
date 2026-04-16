@@ -164,7 +164,6 @@ return [
     'media' => [
         'file' => 'Soubor',
         'path' => 'Cesta',
-        'path_webp' => 'Cesta webp',
         'used_in' => 'Použito v',
         'no_usage' => 'Médium není použité v žádném článku.',
         'usage_origin' => 'Použito jako',
