@@ -1,4 +1,6 @@
 <?php
+use App\Service\Support\AdminUrl;
+
 $list = $listBase ?? [];
 $statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = [
@@ -28,7 +30,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
                     <div class="media-list-thumb media-list-thumb-empty"></div>
                 <?php endif; ?>
                 <div>
-                    <a href="<?= $e($url('admin/media/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+                    <a href="<?= $e($url(AdminUrl::entityEdit('media', $id))) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
                     <div class="text-muted small"><?= $e((string)($row['path'] ?? '')) ?></div>
                     <div class="text-muted small"><?= $e($formatDateTime((string)($row['created'] ?? ''))) ?></div>
                 </div>

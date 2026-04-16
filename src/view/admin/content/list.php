@@ -1,4 +1,6 @@
 <?php
+use App\Service\Support\AdminUrl;
+
 $list = $listBase ?? [];
 $statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];
@@ -21,7 +23,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
             <?php $statusIcon = $isPlanned ? 'calendar' : ($statusValue === 'published' ? 'success' : ($statusValue === 'draft' ? 'concept' : 'warning')); ?>
             <span class="d-flex align-center gap-2">
                 <?php if ($statusIcon !== ''): ?><?= $icon($statusIcon) ?><?php endif; ?>
-                <a href="<?= $e($url('admin/content/edit?id=' . $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+                <a href="<?= $e($url(AdminUrl::entityEdit('content', $id))) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
             </span>
             <div class="text-muted small"><?= $e($createdAt) ?></div>
         </td>

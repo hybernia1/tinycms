@@ -1,3 +1,4 @@
+<?php use App\Service\Support\AdminUrl; ?>
 <form
     id="terms-form"
     method="post"
@@ -29,7 +30,7 @@
                         <?php foreach ($usages as $usage): ?>
                             <tr>
                                 <td>
-                                    <a href="<?= $e($url('admin/content/edit?id=' . (int)($usage['id'] ?? 0))) ?>">
+                                    <a href="<?= $e($url(AdminUrl::entityEdit('content', (int)($usage['id'] ?? 0)))) ?>">
                                         <?= $e((string)($usage['name'] ?? '')) ?>
                                     </a>
                                 </td>
