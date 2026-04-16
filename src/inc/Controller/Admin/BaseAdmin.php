@@ -187,12 +187,8 @@ abstract class BaseAdmin
 
     protected function resolvePreviewPath(array $item): string
     {
-        $pathWebp = trim((string)($item['path_webp'] ?? ''));
-        if ($pathWebp !== '') {
-            return ThumbnailVariants::thumbnailPath($pathWebp);
-        }
-
-        return trim((string)($item['path'] ?? ''));
+        $path = trim((string)($item['path'] ?? ''));
+        return $path === '' ? '' : ThumbnailVariants::contentMediaPath($path, ThumbnailVariants::SMALL_NAME);
     }
 
 }

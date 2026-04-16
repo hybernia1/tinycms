@@ -5,6 +5,7 @@ namespace App\Service\Support;
 
 final class ThumbnailVariants
 {
+    public const SMALL_NAME = 'small';
     public const FIXED_SUFFIX = '_100x100.webp';
     public const FIXED_WIDTH = 100;
 
@@ -16,6 +17,7 @@ final class ThumbnailVariants
     public static function variants(): array
     {
         $variants = [[
+            'name' => self::SMALL_NAME,
             'suffix' => self::FIXED_SUFFIX,
             'mode' => 'crop',
             'width' => self::FIXED_WIDTH,
@@ -49,6 +51,42 @@ final class ThumbnailVariants
         }
 
         return $variants;
+    }
+
+    public static function contentMediaPath(string $originalPath, string $name = self::SMALL_NAME): string
+    {
+        $normalized = trim($originalPath);
+        if ($normalized === '') {
+            return '';
+        }
+
+        $basePath = (string)(preg_replace('/\.[^.\/]+$/', '', $normalized) ?? $normalized);
+        if ($basePath === $normalized) {
+            return $normalized;
+        }
+
+        $variant = self::variantByName($name);
+        if ($variant === null) {
+            return $basePath . '.webp';
+        }
+
+        return $basePath . (string)$variant['suffix'];
+    }
+
+    private static function variantByName(string $name): ?array
+    {
+        $needle = strtolower(trim($name));
+        if ($needle === '') {
+            return null;
+        }
+
+        foreach (self::variants() as $variant) {
+            if (strtolower((string)($variant['name'] ?? '')) === $needle) {
+                return $variant;
+            }
+        }
+
+        return null;
     }
 
     public static function suffixWidthMap(): array
