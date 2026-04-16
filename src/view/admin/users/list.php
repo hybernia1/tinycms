@@ -1,6 +1,4 @@
 <?php
-use App\Service\Support\AdminUrl;
-
 $list = $listBase ?? [];
 $statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = [
@@ -19,7 +17,7 @@ $rowRenderer = static function (array $row) use ($url, $icon, $t, $csrfField, $e
         <td>
             <span class="d-flex align-center gap-2">
                 <?= $icon($statusIcon) ?>
-                <a href="<?= $e($url(AdminUrl::entityEdit('users', $id))) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+                <a href="<?= $e($adminVars['entityEdit']('users', $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
             </span>
             <div class="text-muted small"><?= $e((string)($row['email'] ?? '')) ?></div>
         </td>

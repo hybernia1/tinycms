@@ -1,6 +1,4 @@
 <?php
-use App\Service\Support\AdminUrl;
-
 $list = $listBase ?? [];
 $statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = [
@@ -13,7 +11,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     ?>
     <tr>
         <td>
-            <a href="<?= $e($url(AdminUrl::entityEdit('terms', $id))) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
+            <a href="<?= $e($adminVars['entityEdit']('terms', $id)) ?>"><?= $e((string)($row['name'] ?? '')) ?></a>
             <div class="text-muted small"><?= $e($formatDateTime((string)($row['created'] ?? ''))) ?></div>
         </td>
         <td class="table-col-actions">

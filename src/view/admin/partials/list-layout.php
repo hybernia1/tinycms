@@ -1,14 +1,12 @@
 <?php
-use App\Service\Support\AdminUrl;
-
 $list = is_array($list ?? null) ? $list : [];
 $items = is_array($list['items'] ?? null) ? $list['items'] : [];
 $entity = (string)($list['entity'] ?? '');
 $listName = (string)($list['name'] ?? $entity);
 $statusCurrent = (string)($list['statusCurrent'] ?? 'all');
 $listQuery = (string)($list['query'] ?? '');
-$listEndpoint = (string)($list['endpoint'] ?? ($entity !== '' ? $url(AdminUrl::entityApiBase($entity)) : ''));
-$listEditBase = $entity !== '' ? $url(AdminUrl::entityEditBase($entity)) : '';
+$listEndpoint = (string)($list['endpoint'] ?? ($entity !== '' ? $adminVars['entityApiBase']($entity) : ''));
+$listEditBase = $entity !== '' ? $adminVars['entityEditBase']($entity) : '';
 $listRootAttrs = is_array($list['rootAttrs'] ?? null) ? $list['rootAttrs'] : [];
 $searchPlaceholder = (string)($list['searchPlaceholder'] ?? '');
 $searchHidden = is_array($list['searchHidden'] ?? null) ? $list['searchHidden'] : ['status' => $statusCurrent, 'page' => '1'];
@@ -17,8 +15,8 @@ $listPage = (int)($list['page'] ?? 1);
 $listTotalPages = (int)($list['totalPages'] ?? 1);
 $statusLinks = is_array($list['statusLinks'] ?? null) ? $list['statusLinks'] : [];
 $statusEnabled = (bool)($list['statusEnabled'] ?? $statusLinks !== []);
-$statusUrl = static fn(string $targetStatus): string => $url(AdminUrl::entityList($entity, ['status' => $targetStatus, 'page' => 1]));
-$paginationUrl = static fn(int $targetPage): string => $url(AdminUrl::entityList($entity, ['page' => $targetPage, 'status' => $statusCurrent, 'q' => $listQuery]));
+$statusUrl = static fn(string $targetStatus): string => $adminVars['entityList']($entity, ['status' => $targetStatus, 'page' => 1]);
+$paginationUrl = static fn(int $targetPage): string => $adminVars['entityList']($entity, ['page' => $targetPage, 'status' => $statusCurrent, 'q' => $listQuery]);
 $rowRenderer = is_callable($list['rowRenderer'] ?? null) ? $list['rowRenderer'] : null;
 $deleteConfirmText = (string)($list['deleteConfirmText'] ?? '');
 $csrfMarkup = (string)($list['csrfMarkup'] ?? $csrfField());

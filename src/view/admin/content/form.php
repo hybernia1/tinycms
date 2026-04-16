@@ -1,7 +1,5 @@
 <?php $createdAt = $formatInputDateTime((string)($item['created'] ?? '')); ?>
 <?php
-use App\Service\Support\AdminUrl;
-
 $initialTerms = array_values(array_filter(array_map(static fn($term): string => trim((string)$term), (array)($selectedTerms ?? []))));
 $termsValue = implode(', ', $initialTerms);
 $termsJson = $e(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]');
@@ -24,7 +22,7 @@ $contentId = (int)($item['id'] ?? 0);
     <?= $mode === 'add' ? 'data-redirect-url="' . $e($url('admin/content')) . '"' : 'data-stay-on-page' ?>
     data-autosave-endpoint="<?= $e($url('admin/api/v1/content/autosave')) ?>"
     data-draft-init-endpoint="<?= $e($url('admin/api/v1/content/draft/init')) ?>"
-    data-edit-url-base="<?= $e($url(AdminUrl::entityEditBase('content'))) ?>"
+    data-edit-url-base="<?= $e($adminVars['entityEditBase']('content')) ?>"
 >
     <?= $csrfField() ?>
     <input type="hidden" name="id" value="<?= $contentId ?>" data-content-id-hidden>

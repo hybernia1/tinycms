@@ -1,6 +1,4 @@
 <?php
-use App\Service\Support\AdminUrl;
-
 $previewPath = trim((string)($item['path_webp'] ?? ''));
 if ($previewPath === '') {
     $previewPath = trim((string)($item['path'] ?? ''));
@@ -89,7 +87,7 @@ if ($mode === 'edit') {
                             <?php foreach ($usages as $usage): ?>
                                 <tr>
                                     <td>
-                                        <a href="<?= $e($url(AdminUrl::entityEdit('content', (int)($usage['id'] ?? 0)))) ?>">
+                                        <a href="<?= $e($adminVars['entityEdit']('content', (int)($usage['id'] ?? 0))) ?>">
                                             <?= $e((string)($usage['name'] ?? '')) ?>
                                         </a>
                                     </td>

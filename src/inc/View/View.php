@@ -8,6 +8,7 @@ use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\I18n;
+use App\Service\Support\AdminVars;
 
 final class View
 {
@@ -81,6 +82,9 @@ final class View
                     'icon' => (string)($item['icon'] ?? ''),
                 ];
             }, $data['adminMenu']);
+        }
+        if ($isAdminLayout) {
+            $data['adminVars'] = AdminVars::make($url);
         }
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
