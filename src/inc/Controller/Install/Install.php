@@ -45,7 +45,7 @@ final class Install
         $this->applyInstallLocale($_SESSION['install'] ?? []);
 
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
+            $_SESSION['install']['message'] = I18n::t('common.invalid_csrf');
             $_SESSION['install']['db_valid'] = false;
             $redirect('install/db');
         }
@@ -104,7 +104,7 @@ final class Install
         $this->applyInstallLocale($_SESSION['install'] ?? []);
 
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
+            $_SESSION['install']['message'] = I18n::t('common.invalid_csrf');
             $redirect('install/admin');
         }
 
@@ -172,7 +172,7 @@ final class Install
     public function submitLanguage(callable $redirect): void
     {
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $_SESSION['install']['message'] = I18n::t('common.csrf_expired');
+            $_SESSION['install']['message'] = I18n::t('common.invalid_csrf');
             $redirect('install');
         }
 

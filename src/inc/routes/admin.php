@@ -27,7 +27,7 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/edit', 'controller' => $apiContent, 'action' => 'editApiV1', 'params' => ['id' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/draft/init', 'controller' => $apiContent, 'action' => 'draftInitApiV1'],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/autosave', 'controller' => $apiContent, 'action' => 'autosaveApiV1'],
-    ['method' => 'GET', 'path' => 'admin/api/v1/link-title', 'controller' => $apiContent, 'action' => 'linkTitleApiV1'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/content/link-title', 'controller' => $apiContent, 'action' => 'linkTitleApiV1'],
     ['method' => 'GET', 'path' => 'admin/content/add', 'controller' => $adminContent, 'action' => 'addForm'],
     ['method' => 'GET', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editForm'],
     ['method' => 'GET', 'path' => 'admin/api/v1/content/{contentId}/media', 'controller' => $apiContentMedia, 'action' => 'mediaLibraryApiV1', 'params' => ['contentId' => 'int']],
@@ -43,7 +43,7 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/api/v1/terms/add', 'controller' => $apiTerm, 'action' => 'addApiV1'],
     ['method' => 'POST', 'path' => 'admin/api/v1/terms/{id}/edit', 'controller' => $apiTerm, 'action' => 'editApiV1', 'params' => ['id' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/terms/{id}/delete', 'controller' => $apiTerm, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
-    ['method' => 'GET', 'path' => 'admin/api/v1/terms/suggest', 'controller' => $apiTerm, 'action' => 'suggest'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/terms/suggest', 'controller' => $apiTerm, 'action' => 'suggestApiV1'],
     ['method' => 'GET', 'path' => 'admin/terms/add', 'controller' => $adminTerms, 'action' => 'addForm'],
     ['method' => 'GET', 'path' => 'admin/terms/edit', 'controller' => $adminTerms, 'action' => 'editForm'],
 

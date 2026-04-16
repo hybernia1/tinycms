@@ -45,7 +45,7 @@ $contentId = (int)($item['id'] ?? 0);
                     data-content-id="<?= $contentId ?>"
                     data-media-library-endpoint="<?= $e($url('admin/api/v1/content/' . $contentId . '/media')) ?>"
                     data-media-base-url="<?= $e($url('')) ?>"
-                    data-link-title-endpoint="<?= $e($url('admin/api/v1/link-title')) ?>"
+                    data-link-title-endpoint="<?= $e($url('admin/api/v1/content/link-title')) ?>"
                 ><?= $e((string)($item['body'] ?? '')) ?></textarea>
             </div>
         </div>

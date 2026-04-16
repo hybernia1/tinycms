@@ -87,6 +87,11 @@ abstract class BaseAdmin
         return false;
     }
 
+    protected function guardApiAdminCsrfInvalid(bool $flashDenied = false): bool
+    {
+        return $this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'), $flashDenied);
+    }
+
     protected function respondJson(array $payload, int $statusCode = 200): void
     {
         header('Content-Type: application/json; charset=utf-8');

@@ -258,6 +258,8 @@
             return {
                 success: payload.ok === true,
                 message: String(payload.error?.message || ''),
+                errorCode: String(payload.error?.code || ''),
+                errors: payload.error?.errors && typeof payload.error.errors === 'object' ? payload.error.errors : {},
                 data: payload.data,
                 meta: payload.meta || {},
             };
@@ -266,6 +268,8 @@
         return {
             success: payload?.success === true || !Object.prototype.hasOwnProperty.call(payload || {}, 'success'),
             message: String(payload?.message || ''),
+            errorCode: '',
+            errors: payload?.errors && typeof payload.errors === 'object' ? payload.errors : {},
             data: payload,
             meta: payload || {},
         };

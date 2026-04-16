@@ -28,7 +28,7 @@ final class ContentMedia extends BaseAdmin
 
     public function thumbnailDetachApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrfInvalid()) {
             return;
         }
 
@@ -47,7 +47,7 @@ final class ContentMedia extends BaseAdmin
 
     public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrfInvalid()) {
             return;
         }
 
@@ -106,7 +106,7 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrfInvalid()) {
             return;
         }
 
@@ -136,7 +136,7 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrfInvalid()) {
             return;
         }
 
@@ -178,7 +178,7 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrfInvalid()) {
             return;
         }
 
@@ -213,7 +213,7 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrfInvalid()) {
             return;
         }
 
@@ -254,12 +254,12 @@ final class ContentMedia extends BaseAdmin
 
     private function requireExistingMedia(int $mediaId): ?array
     {
-        if (!$this->requirePositiveId($mediaId, 'MEDIA_NOT_FOUND', I18n::t('media.not_found'), 404)) {
+        if (!$this->requirePositiveId($mediaId, 'NOT_FOUND', I18n::t('media.not_found'), 404)) {
             return null;
         }
 
         $media = $this->media->find($mediaId);
-        if (!$this->requireEntity($media, 'MEDIA_NOT_FOUND', I18n::t('media.not_found'))) {
+        if (!$this->requireEntity($media, 'NOT_FOUND', I18n::t('media.not_found'))) {
             return null;
         }
 
