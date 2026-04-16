@@ -189,6 +189,10 @@ body {
     min-width: 0;
 }
 
+.content-editor-layout > :only-child {
+    grid-column: 1 / -1;
+}
+
 .content-editor-sidebar {
     display: flex;
     flex-direction: column;

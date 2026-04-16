@@ -82,9 +82,6 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="card">
                 <div class="content-box-header"><?= $e($t('admin.menu.terms')) ?></div>
                 <div class="p-3">
-                    <?php if ($mode === 'add'): ?>
-                        <small class="text-muted"><?= $e($t('content.save_to_assign_tags')) ?></small>
-                    <?php endif; ?>
                     <div
                         class="tag-picker"
                         data-tag-picker
@@ -103,9 +100,6 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="card">
                 <div class="content-box-header"><?= $e($t('content.thumbnail')) ?></div>
                 <div class="p-3">
-                    <?php if ($mode === 'add'): ?>
-                        <small class="text-muted"><?= $e($t('content.thumbnail_hint')) ?></small>
-                    <?php endif; ?>
                     <button
                         class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
                         type="button"
