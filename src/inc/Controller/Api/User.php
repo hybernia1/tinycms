@@ -37,7 +37,7 @@ final class User extends BaseAdmin
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -56,7 +56,7 @@ final class User extends BaseAdmin
 
     public function suspendApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -86,7 +86,7 @@ final class User extends BaseAdmin
 
     public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
@@ -107,7 +107,7 @@ final class User extends BaseAdmin
 
     public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
             return;
         }
 
