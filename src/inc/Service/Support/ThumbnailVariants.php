@@ -69,17 +69,32 @@ final class ThumbnailVariants
             return '';
         }
 
-        $basePath = (string)(preg_replace('/\.[^.\/]+$/', '', $normalized) ?? $normalized);
-        if ($basePath === $normalized) {
+        $webpPath = self::webpPath($normalized);
+        if ($webpPath === '') {
             return $normalized;
         }
 
         $variant = self::variantByName($name);
         if ($variant === null) {
-            return $basePath . '.webp';
+            return $webpPath;
         }
 
-        return $basePath . (string)$variant['suffix'];
+        return self::thumbnailPath($webpPath, (string)$variant['suffix']);
+    }
+
+    public static function webpPath(string $originalPath): string
+    {
+        $normalized = trim($originalPath);
+        if ($normalized === '') {
+            return '';
+        }
+
+        $basePath = (string)(preg_replace('/\.[^.\/]+$/', '', $normalized) ?? $normalized);
+        if ($basePath === $normalized) {
+            return '';
+        }
+
+        return $basePath . '.webp';
     }
 
     private static function variantByName(string $name): ?array

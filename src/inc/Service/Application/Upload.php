@@ -112,7 +112,6 @@ final class Upload
             'data' => [
                 'name' => trim($baseName) !== '' ? trim($baseName) : (string)pathinfo($fileRel, PATHINFO_FILENAME),
                 'path' => $fileRel,
-                'path_webp' => $webpRel,
             ],
         ];
     }
@@ -121,11 +120,11 @@ final class Upload
     {
         $paths = array_filter([
             trim((string)($media['path'] ?? '')),
-            trim((string)($media['path_webp'] ?? '')),
         ]);
 
-        $webpPath = trim((string)($media['path_webp'] ?? ''));
+        $webpPath = ThumbnailVariants::webpPath((string)($media['path'] ?? ''));
         if ($webpPath !== '') {
+            $paths[] = $webpPath;
             foreach ($this->thumbVariants() as $variant) {
                 $paths[] = $this->thumbnailPath($webpPath, (string)$variant['suffix']);
             }

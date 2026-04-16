@@ -138,10 +138,6 @@ if ($mode === 'edit') {
                                 <div class="text-muted"><?= $e((string)($item['path'] ?? '')) ?></div>
                             </div>
                             <div class="mb-3">
-                                <label><?= $e($t('media.path_webp')) ?></label>
-                                <div class="text-muted"><?= $e((string)($item['path_webp'] ?? '')) ?></div>
-                            </div>
-                            <div class="mb-3">
                                 <label><?= $e($t('media.filename')) ?></label>
                                 <div class="text-muted"><?= $e((string)$fileMeta['filename']) ?></div>
                             </div>

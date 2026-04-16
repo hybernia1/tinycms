@@ -40,7 +40,7 @@ final class Media extends BaseAdmin
             return;
         }
 
-        $fallback = ['id' => null, 'name' => '', 'path' => '', 'path_webp' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
+        $fallback = ['id' => null, 'name' => '', 'path' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
         $this->pages->adminMediaForm('add', $fallback, [], $this->media->authorOptions(), []);
     }
 

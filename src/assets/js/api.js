@@ -745,8 +745,7 @@ initListApi({
     rowHtml: (item, { editBase }) => {
         const id = Number(item.id || 0);
         const preview = String(item.preview_path || '');
-        const webp = String(item.path_webp || '');
-        const img = preview !== '' ? preview : (webp !== '' ? webp : String(item.path || ''));
+        const img = preview !== '' ? preview : String(item.path || '');
         const canEdit = item.can_edit === true;
         const canDelete = item.can_delete === true;
 
