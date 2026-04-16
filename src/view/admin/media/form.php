@@ -1,5 +1,5 @@
 <?php
-$previewPath = $contentMedia((string)($item['path'] ?? ''), 'small');
+$previewPath = $contentMedia((string)($item['path'] ?? ''), 'medium');
 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
 $fileMeta = null;
 if ($mode === 'edit') {

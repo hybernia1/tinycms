@@ -166,10 +166,12 @@ final class ContentMedia extends BaseAdmin
 
         $media = $this->media->find($mediaId);
         $previewPath = $media !== null ? $this->resolvePreviewPath($media) : (string)($data['path'] ?? '');
+        $previewMediumPath = $media !== null ? $this->resolvePreviewPath($media, 'medium') : (string)($data['path'] ?? '');
         $this->apiOk([
             'id' => $mediaId,
             'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
             'preview_path' => $previewPath,
+            'preview_medium_path' => $previewMediumPath,
             'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
             'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
             'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
@@ -269,6 +271,7 @@ final class ContentMedia extends BaseAdmin
             'can_edit' => true,
             'can_delete' => true,
             'preview_path' => $this->resolvePreviewPath($item),
+            'preview_medium_path' => $this->resolvePreviewPath($item, 'medium'),
             'path' => (string)($item['path'] ?? ''),
             'created' => $createdAt,
             'created_label' => $this->formatDateTime($createdAt),

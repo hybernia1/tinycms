@@ -5,7 +5,7 @@ $termsValue = implode(', ', $initialTerms);
 $termsJson = $e(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]');
 ?>
 <?php
-$thumbnailPath = trim((string)($item['thumbnail_path'] ?? ''));
+$thumbnailPath = $contentMedia((string)($item['thumbnail_path'] ?? ''), 'medium');
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
 ?>

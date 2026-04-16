@@ -139,7 +139,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             return;
         }
 
-        const imagePath = absoluteUrl(media.preview_path || media.path || '');
+        const imagePath = absoluteUrl(media.preview_medium_path || media.preview_path || media.path || '');
         if (imagePath === '') {
             return;
         }
@@ -208,6 +208,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             button.dataset.mediaCreated = String(item.created || '');
             button.dataset.mediaCreatedLabel = String(item.created_label || item.created || '');
             button.dataset.mediaPreviewPath = previewPath;
+            button.dataset.mediaPreviewMediumPath = String(item.preview_medium_path || '');
             button.dataset.mediaCanEdit = item.can_edit === true ? '1' : '0';
             button.dataset.mediaCanDelete = item.can_delete === true ? '1' : '0';
             grid.appendChild(button);
@@ -231,6 +232,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             created: target.dataset.mediaCreated || '',
             createdLabel: target.dataset.mediaCreatedLabel || target.dataset.mediaCreated || '',
             previewPath: target.dataset.mediaPreviewPath || '',
+            previewMediumPath: target.dataset.mediaPreviewMediumPath || '',
             canEdit: target.dataset.mediaCanEdit === '1',
             canDelete: target.dataset.mediaCanDelete === '1',
         };
@@ -269,7 +271,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         if (detailPreview) {
             detailPreview.innerHTML = '';
             const detailImagePath = selectedMedia
-                ? (selectedMedia.previewPath || selectedMedia.path || '')
+                ? (selectedMedia.previewMediumPath || selectedMedia.previewPath || selectedMedia.path || '')
                 : '';
             if (selectedMedia && detailImagePath !== '') {
                 const image = document.createElement('img');

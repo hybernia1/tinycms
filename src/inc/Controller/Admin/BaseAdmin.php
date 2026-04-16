@@ -185,10 +185,10 @@ abstract class BaseAdmin
         return $basePath . $normalized;
     }
 
-    protected function resolvePreviewPath(array $item): string
+    protected function resolvePreviewPath(array $item, string $size = ThumbnailVariants::SMALL_NAME): string
     {
         $path = trim((string)($item['path'] ?? ''));
-        return $path === '' ? '' : ThumbnailVariants::contentMediaPath($path, ThumbnailVariants::SMALL_NAME);
+        return $path === '' ? '' : ThumbnailVariants::contentMediaPath($path, $size);
     }
 
 }
