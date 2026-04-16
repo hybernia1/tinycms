@@ -240,9 +240,12 @@ final class ContentMedia extends BaseAdmin
 
     private function requireExistingContent(int $contentId): ?array
     {
+        if (!$this->requirePositiveId($contentId, 'NOT_FOUND', I18n::t('content.not_found'), 404)) {
+            return null;
+        }
+
         $content = $this->content->find($contentId);
-        if ($contentId <= 0 || $content === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($content, 'NOT_FOUND', I18n::t('content.not_found'))) {
             return null;
         }
 
@@ -251,9 +254,12 @@ final class ContentMedia extends BaseAdmin
 
     private function requireExistingMedia(int $mediaId): ?array
     {
+        if (!$this->requirePositiveId($mediaId, 'MEDIA_NOT_FOUND', I18n::t('media.not_found'), 404)) {
+            return null;
+        }
+
         $media = $this->media->find($mediaId);
-        if ($mediaId <= 0 || $media === null) {
-            $this->apiError('MEDIA_NOT_FOUND', I18n::t('media.not_found'), 404);
+        if (!$this->requireEntity($media, 'MEDIA_NOT_FOUND', I18n::t('media.not_found'))) {
             return null;
         }
 

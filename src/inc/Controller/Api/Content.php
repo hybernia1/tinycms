@@ -211,8 +211,7 @@ final class Content extends BaseAdmin
         }
 
         $item = $this->content->find($id);
-        if ($item === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
 
