@@ -5,59 +5,80 @@ namespace App\Service\Support;
 
 final class ThumbnailVariants
 {
-    public const FIXED_SUFFIX = '_100x100.webp';
-    public const FIXED_WIDTH = 100;
+    public const SMALL_SUFFIX = '_small.webp';
+    public const MEDIUM_SUFFIX = '_medium.webp';
+    private const DEFAULT_SMALL_WIDTH = 300;
+    private const DEFAULT_SMALL_HEIGHT = 300;
+    private const DEFAULT_MEDIUM_WIDTH = 768;
 
-    public static function thumbnailPath(string $webpPath, string $suffix = self::FIXED_SUFFIX): string
+    public static function webpPath(string $path): string
+    {
+        $trimmed = trim($path);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        if (preg_match('/\.webp$/i', $trimmed) === 1) {
+            return $trimmed;
+        }
+
+        $converted = preg_replace('/\.[^.\/]+$/', '.webp', $trimmed);
+        if (is_string($converted) && $converted !== '') {
+            return $converted;
+        }
+
+        return $trimmed . '.webp';
+    }
+
+    public static function thumbnailPath(string $webpPath, string $suffix): string
     {
         return (string)(preg_replace('/\.webp$/i', $suffix, $webpPath) ?? $webpPath);
     }
 
-    public static function variants(): array
+    public static function smallPath(string $path): string
     {
-        $variants = [[
-            'suffix' => self::FIXED_SUFFIX,
-            'mode' => 'crop',
-            'width' => self::FIXED_WIDTH,
-            'height' => self::FIXED_WIDTH,
-        ]];
-
-        $raw = defined('MEDIA_THUMB_VARIANTS') && is_array(MEDIA_THUMB_VARIANTS) ? MEDIA_THUMB_VARIANTS : [];
-        foreach ($raw as $item) {
-            if (!is_array($item)) {
-                continue;
-            }
-
-            $suffix = trim((string)($item['suffix'] ?? ''));
-            $width = (int)($item['width'] ?? 0);
-            if ($suffix === '' || $width <= 0 || !str_ends_with(strtolower($suffix), '.webp') || $suffix === self::FIXED_SUFFIX) {
-                continue;
-            }
-
-            $mode = trim((string)($item['mode'] ?? 'crop'));
-            if ($mode === 'fit') {
-                $variants[] = ['suffix' => $suffix, 'mode' => 'fit', 'width' => $width, 'height' => 0];
-                continue;
-            }
-
-            $height = (int)($item['height'] ?? 0);
-            if ($height <= 0) {
-                continue;
-            }
-
-            $variants[] = ['suffix' => $suffix, 'mode' => 'crop', 'width' => $width, 'height' => $height];
-        }
-
-        return $variants;
+        return self::variantPath($path, self::SMALL_SUFFIX);
     }
 
-    public static function suffixWidthMap(): array
+    public static function variants(): array
     {
-        $map = [];
-        foreach (self::variants() as $variant) {
-            $map[(string)$variant['suffix']] = (int)$variant['width'];
+        return [[
+            'name' => 'small',
+            'suffix' => self::SMALL_SUFFIX,
+            'mode' => 'crop',
+            'width' => self::smallWidth(),
+            'height' => self::smallHeight(),
+        ], [
+            'name' => 'medium',
+            'suffix' => self::MEDIUM_SUFFIX,
+            'mode' => 'fit',
+            'width' => self::mediumWidth(),
+            'height' => 0,
+        ]];
+    }
+
+    private static function variantPath(string $path, string $suffix): string
+    {
+        $webpPath = self::webpPath($path);
+        if ($webpPath === '') {
+            return '';
         }
 
-        return $map;
+        return self::thumbnailPath($webpPath, $suffix);
+    }
+
+    private static function smallWidth(): int
+    {
+        return max(1, defined('MEDIA_SMALL_WIDTH') ? (int)MEDIA_SMALL_WIDTH : self::DEFAULT_SMALL_WIDTH);
+    }
+
+    private static function smallHeight(): int
+    {
+        return max(1, defined('MEDIA_SMALL_HEIGHT') ? (int)MEDIA_SMALL_HEIGHT : self::DEFAULT_SMALL_HEIGHT);
+    }
+
+    private static function mediumWidth(): int
+    {
+        return max(1, defined('MEDIA_MEDIUM_WIDTH') ? (int)MEDIA_MEDIUM_WIDTH : self::DEFAULT_MEDIUM_WIDTH);
     }
 }

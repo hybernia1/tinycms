@@ -21,13 +21,12 @@ final class Media
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
-    public function create(?int $author, string $name, string $path, ?string $pathWebp): int
+    public function create(?int $author, string $name, string $path): int
     {
         $result = $this->save([
             'author' => $author,
             'name' => $name,
             'path' => $path,
-            'path_webp' => $pathWebp,
         ]);
         return $result['success'] === true ? (int)($result['id'] ?? 0) : 0;
     }
@@ -44,7 +43,6 @@ final class Media
             'id',
             'name',
             'path',
-            'path_webp',
             'author',
             'created',
             'updated',
@@ -53,10 +51,10 @@ final class Media
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'path', 'path_webp', 'author', 'created', 'updated'],
+            'orderByAllowed' => ['id', 'name', 'path', 'author', 'created', 'updated'],
             'orderDir' => 'DESC',
             'search' => $search,
-            'searchColumns' => ['name', 'path', 'path_webp'],
+            'searchColumns' => ['name', 'path'],
         ]);
     }
 
@@ -82,7 +80,7 @@ final class Media
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('media', ['id', 'author', 'name', 'path', 'path_webp', 'created', 'updated'], ['id' => $id]);
+        $rows = $this->query->select('media', ['id', 'author', 'name', 'path', 'created', 'updated'], ['id' => $id]);
         return $rows[0] ?? null;
     }
 
@@ -95,7 +93,6 @@ final class Media
     {
         $name = trim((string)($input['name'] ?? ''));
         $path = trim((string)($input['path'] ?? ''));
-        $pathWebp = trim((string)($input['path_webp'] ?? ''));
         $author = $this->resolveAuthor($input);
         $errors = [];
 
@@ -114,11 +111,9 @@ final class Media
         $lengthErrors = $this->schemaConstraintValidator->validate('media', [
             'name' => $name,
             'path' => $path,
-            'path_webp' => $pathWebp,
         ], [
             'name' => 'name',
             'path' => 'path',
-            'path_webp' => 'path_webp',
         ]);
 
         foreach ($lengthErrors as $field => $message) {
@@ -134,7 +129,6 @@ final class Media
         $payload = [
             'name' => $name,
             'path' => $path,
-            'path_webp' => $pathWebp === '' ? null : $pathWebp,
             'author' => $author,
         ];
 
@@ -256,7 +250,7 @@ final class Media
         $params = [];
         $searchSql = '';
         if ($search !== '') {
-            $searchSql = ' AND (m.name LIKE :search OR m.path LIKE :search OR m.path_webp LIKE :search)';
+            $searchSql = ' AND (m.name LIKE :search OR m.path LIKE :search)';
             $params['search'] = '%' . $search . '%';
         }
 
@@ -278,7 +272,7 @@ final class Media
 
         $sql = implode("\n", [
             'SELECT',
-            'm.id, m.name, m.path, m.path_webp, m.author, m.created, m.updated,',
+            'm.id, m.name, m.path, m.author, m.created, m.updated,',
             "(SELECT name FROM $usersTable u WHERE u.ID = m.author LIMIT 1) AS author_name",
             $baseSql,
             'ORDER BY m.id DESC',
