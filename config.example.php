@@ -20,5 +20,5 @@ const DB_PASS = '';
 const DB_PREFIX = '';
 
 const MEDIA_THUMB_VARIANTS = [
-    ['suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],
+    ['name' => 'medium', 'suffix' => '_w768.webp', 'mode' => 'fit', 'width' => 768],
 ];

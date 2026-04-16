@@ -30,6 +30,7 @@ final class ThumbnailVariants
                 continue;
             }
 
+            $name = strtolower(trim((string)($item['name'] ?? '')));
             $suffix = trim((string)($item['suffix'] ?? ''));
             $width = (int)($item['width'] ?? 0);
             if ($suffix === '' || $width <= 0 || !str_ends_with(strtolower($suffix), '.webp') || $suffix === self::FIXED_SUFFIX) {
@@ -38,7 +39,11 @@ final class ThumbnailVariants
 
             $mode = trim((string)($item['mode'] ?? 'crop'));
             if ($mode === 'fit') {
-                $variants[] = ['suffix' => $suffix, 'mode' => 'fit', 'width' => $width, 'height' => 0];
+                $variant = ['suffix' => $suffix, 'mode' => 'fit', 'width' => $width, 'height' => 0];
+                if ($name !== '') {
+                    $variant['name'] = $name;
+                }
+                $variants[] = $variant;
                 continue;
             }
 
@@ -47,7 +52,11 @@ final class ThumbnailVariants
                 continue;
             }
 
-            $variants[] = ['suffix' => $suffix, 'mode' => 'crop', 'width' => $width, 'height' => $height];
+            $variant = ['suffix' => $suffix, 'mode' => 'crop', 'width' => $width, 'height' => $height];
+            if ($name !== '') {
+                $variant['name'] = $name;
+            }
+            $variants[] = $variant;
         }
 
         return $variants;
