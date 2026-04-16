@@ -482,20 +482,26 @@ const initListApi = (config) => {
         const result = await postForm(path, formData);
         const response = result.response;
         const normalized = result.data;
-        if (!response.ok) {
-            const message = normalized.message;
+        if (!response.ok || !normalized.success) {
+            const errorCode = String(normalized.errorCode || '');
+            const fallbackMessage = errorCode === 'INVALID_CSRF' ? t('common.invalid_csrf') : '';
+            const message = String(normalized.message || fallbackMessage || '').trim();
             if (message !== '') {
                 pushFlash('error', message);
             }
-            return { success: false };
-        }
-        if (!normalized.success && normalized.message !== '') {
-            pushFlash('error', normalized.message);
+            return {
+                success: false,
+                message,
+                errorCode,
+                errors: normalized.errors && typeof normalized.errors === 'object' ? normalized.errors : {},
+            };
         }
 
         return {
             success: normalized.success,
             message: normalized.message,
+            errorCode: normalized.errorCode,
+            errors: normalized.errors && typeof normalized.errors === 'object' ? normalized.errors : {},
             ...(normalized.data && typeof normalized.data === 'object' ? normalized.data : {}),
         };
     };

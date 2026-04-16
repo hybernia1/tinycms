@@ -43,7 +43,7 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/api/v1/terms/add', 'controller' => $apiTerm, 'action' => 'addApiV1'],
     ['method' => 'POST', 'path' => 'admin/api/v1/terms/{id}/edit', 'controller' => $apiTerm, 'action' => 'editApiV1', 'params' => ['id' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/terms/{id}/delete', 'controller' => $apiTerm, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
-    ['method' => 'GET', 'path' => 'admin/api/v1/terms/suggest', 'controller' => $apiTerm, 'action' => 'suggestApiV1'],
+    ['method' => 'GET', 'path' => 'admin/api/v1/terms/search', 'controller' => $apiTerm, 'action' => 'searchApiV1'],
     ['method' => 'GET', 'path' => 'admin/terms/add', 'controller' => $adminTerms, 'action' => 'addForm'],
     ['method' => 'GET', 'path' => 'admin/terms/edit', 'controller' => $adminTerms, 'action' => 'editForm'],
 

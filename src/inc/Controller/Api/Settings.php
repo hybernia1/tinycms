@@ -25,7 +25,7 @@ final class Settings extends BaseAdmin
 
     public function submitApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 

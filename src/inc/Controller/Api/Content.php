@@ -41,7 +41,7 @@ final class Content extends BaseAdmin
         $this->pages->adminContentList($pagination, $status, $query, $availableStatuses, $statusCounts);
     }
 
-    public function listApiV1(callable $redirect): void
+    public function listApiV1(callable $_redirect): void
     {
         if (!$this->guardApiAdmin()) {
             return;
@@ -57,7 +57,7 @@ final class Content extends BaseAdmin
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -84,7 +84,7 @@ final class Content extends BaseAdmin
 
     public function restoreApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -124,7 +124,7 @@ final class Content extends BaseAdmin
 
     public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -171,7 +171,7 @@ final class Content extends BaseAdmin
 
     public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -201,7 +201,7 @@ final class Content extends BaseAdmin
 
     public function statusApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -240,7 +240,7 @@ final class Content extends BaseAdmin
 
     public function draftInitApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -270,7 +270,7 @@ final class Content extends BaseAdmin
 
     public function autosaveApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -311,7 +311,7 @@ final class Content extends BaseAdmin
         ]);
     }
 
-    public function linkTitleApiV1(callable $redirect): void
+    public function linkTitleApiV1(callable $_redirect): void
     {
         if (!$this->guardApiAdmin()) {
             return;

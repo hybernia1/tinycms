@@ -28,7 +28,7 @@ final class ContentMedia extends BaseAdmin
 
     public function thumbnailDetachApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -47,7 +47,7 @@ final class ContentMedia extends BaseAdmin
 
     public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -73,7 +73,7 @@ final class ContentMedia extends BaseAdmin
         ]);
     }
 
-    public function mediaLibraryApiV1(callable $redirect, int $contentId): void
+    public function mediaLibraryApiV1(callable $_redirect, int $contentId): void
     {
         if (!$this->guardApiAdmin()) {
             return;
@@ -106,7 +106,7 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -136,7 +136,7 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -178,12 +178,12 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
         $name = trim((string)($_POST['name'] ?? ''));
-        if ($contentId <= 0 || $mediaId <= 0 || $name === '') {
+        if ($name === '') {
             $this->apiError('INVALID_DATA', I18n::t('common.invalid_data'));
             return;
         }
@@ -213,12 +213,7 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
-            return;
-        }
-
-        if ($contentId <= 0 || $mediaId <= 0) {
-            $this->apiError('INVALID_DATA', I18n::t('common.invalid_data'));
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 

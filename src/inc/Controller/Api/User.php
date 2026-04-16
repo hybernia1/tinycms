@@ -21,7 +21,7 @@ final class User extends BaseAdmin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function listApiV1(callable $redirect): void
+    public function listApiV1(callable $_redirect): void
     {
         if (!$this->guardApiAdmin()) {
             return;
@@ -37,7 +37,7 @@ final class User extends BaseAdmin
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -55,7 +55,7 @@ final class User extends BaseAdmin
 
     public function suspendApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -84,7 +84,7 @@ final class User extends BaseAdmin
 
     public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -105,7 +105,7 @@ final class User extends BaseAdmin
 
     public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrfInvalid()) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 

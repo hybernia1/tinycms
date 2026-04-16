@@ -73,7 +73,7 @@ abstract class BaseAdmin
         return true;
     }
 
-    protected function guardApiAdminCsrf(string $message, bool $flashDenied = false): bool
+    protected function guardApiAdminCsrf(?string $message = null, bool $flashDenied = false): bool
     {
         if (!$this->guardApiAdmin($flashDenied)) {
             return false;
@@ -83,13 +83,8 @@ abstract class BaseAdmin
             return true;
         }
 
-        $this->apiError('INVALID_CSRF', $message, 419);
+        $this->apiError('INVALID_CSRF', $message ?? I18n::t('common.invalid_csrf'), 419);
         return false;
-    }
-
-    protected function guardApiAdminCsrfInvalid(bool $flashDenied = false): bool
-    {
-        return $this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'), $flashDenied);
     }
 
     protected function respondJson(array $payload, int $statusCode = 200): void
