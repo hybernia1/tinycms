@@ -79,6 +79,7 @@ final class Content extends BaseAdmin
             'id' => $id,
             'action' => $action,
             'message' => $action === 'soft_deleted' ? I18n::t('content.moved_to_trash') : I18n::t('content.deleted'),
+            'redirect' => $this->buildPath('admin/content'),
         ]);
     }
 

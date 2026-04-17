@@ -94,6 +94,7 @@ final class Sessions extends BaseAdmin
             'authenticated' => true,
             'message' => I18n::t('auth.login_success'),
             'csrf' => $this->csrf->token(),
+            'redirect' => $this->buildPath('admin/dashboard'),
         ]);
     }
 

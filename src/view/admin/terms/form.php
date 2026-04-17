@@ -3,7 +3,7 @@
     method="post"
     action="<?= $e($mode === 'add' ? $url('admin/api/v1/terms/add') : $url('admin/api/v1/terms/' . (int)($item['id'] ?? 0) . '/edit')) ?>"
     data-api-submit
-    <?= $mode === 'add' ? 'data-redirect-url="' . $e($url('admin/terms')) . '"' : 'data-stay-on-page' ?>
+    <?= $mode === 'edit' ? 'data-stay-on-page' : '' ?>
 >
     <?= $csrfField() ?>
     <div class="card p-4">

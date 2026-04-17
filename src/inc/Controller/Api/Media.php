@@ -136,6 +136,7 @@ final class Media extends BaseAdmin
         $this->apiOk([
             'id' => $id,
             'message' => I18n::t('media.deleted'),
+            'redirect' => $this->buildPath('admin/media'),
         ]);
     }
 

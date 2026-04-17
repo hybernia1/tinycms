@@ -53,6 +53,7 @@ final class User extends BaseAdmin
         $this->apiOk([
             'id' => $id,
             'message' => I18n::t('users.deleted'),
+            'redirect' => $this->buildPath('admin/users'),
         ]);
     }
 

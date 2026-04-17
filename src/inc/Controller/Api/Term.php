@@ -109,6 +109,7 @@ final class Term extends BaseAdmin
         $this->apiOk([
             'id' => $id,
             'message' => I18n::t('terms.deleted'),
+            'redirect' => $this->buildPath('admin/terms'),
         ]);
     }
 

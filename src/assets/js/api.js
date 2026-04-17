@@ -205,17 +205,11 @@
         setFormMessage(form, '');
 
         const payloadRedirect = String(payload?.data?.redirect || '').trim();
-        const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();
-        const redirect = payloadRedirect !== '' ? payloadRedirect : fallbackRedirect;
+        const redirect = payloadRedirect;
         const successMessage = String(payload?.data?.message || '').trim();
         if (redirect !== '') {
             if (successMessage !== '') {
                 storeFlash('success', successMessage);
-            } else {
-                const fallbackMessage = t('common.saved', '');
-                if (fallbackMessage !== '') {
-                    storeFlash('success', fallbackMessage);
-                }
             }
             const target = /^https?:\/\//i.test(redirect) || redirect.startsWith('/')
                 ? redirect

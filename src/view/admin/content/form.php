@@ -16,7 +16,7 @@ $contentId = (int)($item['id'] ?? 0);
     enctype="multipart/form-data"
     action="<?= $e($mode === 'add' ? $url('admin/api/v1/content/add') : $url('admin/api/v1/content/' . (int)($item['id'] ?? 0) . '/edit')) ?>"
     data-api-submit
-    <?= $mode === 'add' ? 'data-redirect-url="' . $e($url('admin/content')) . '"' : 'data-stay-on-page' ?>
+    <?= $mode === 'edit' ? 'data-stay-on-page' : '' ?>
     data-autosave-endpoint="<?= $e($url('admin/api/v1/content/autosave')) ?>"
     data-draft-init-endpoint="<?= $e($url('admin/api/v1/content/draft/init')) ?>"
     data-edit-url-base="<?= $e($url('admin/content/edit?id=')) ?>"
@@ -124,7 +124,6 @@ $contentId = (int)($item['id'] ?? 0);
     method="post"
     action="<?= $e($url('admin/api/v1/content/' . $contentId . '/delete')) ?>"
     data-api-submit
-    data-redirect-url="<?= $e($url('admin/content')) ?>"
 >
     <?= $csrfField() ?>
 </form>

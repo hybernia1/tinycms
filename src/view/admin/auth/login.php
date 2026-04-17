@@ -7,7 +7,7 @@
                 </div>
                 <h1 class="m-0 mb-4"><?= $e($t('auth.login')) ?></h1>
                 <p class="mb-3 text-danger" data-api-form-message hidden></p>
-                <form method="post" action="<?= $e($url('admin/api/v1/auth/login')) ?>" data-api-submit data-redirect-url="<?= $e($url('admin/dashboard')) ?>">
+                <form method="post" action="<?= $e($url('admin/api/v1/auth/login')) ?>" data-api-submit>
                     <?= $csrfField() ?>
                     <div class="mb-3">
                         <label><?= $e($t('common.email')) ?></label>

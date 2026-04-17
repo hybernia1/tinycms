@@ -33,7 +33,6 @@ if ($mode === 'edit') {
     enctype="multipart/form-data"
     action="<?= $e($mode === 'add' ? $url('admin/api/v1/media/add') : $url('admin/api/v1/media/' . (int)($item['id'] ?? 0) . '/edit')) ?>"
     data-api-submit
-    data-redirect-url="<?= $e($url('admin/media')) ?>"
 >
     <?= $csrfField() ?>
     <div class="content-editor-layout">
@@ -171,7 +170,6 @@ if ($mode === 'edit') {
         method="post"
         action="<?= $e($url('admin/api/v1/media/' . (int)($item['id'] ?? 0) . '/delete')) ?>"
         data-api-submit
-        data-redirect-url="<?= $e($url('admin/media')) ?>"
     >
         <?= $csrfField() ?>
     </form>

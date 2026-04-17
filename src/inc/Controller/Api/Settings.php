@@ -79,6 +79,7 @@ final class Settings extends BaseAdmin
         $this->settings->save($payload);
         $this->apiOk([
             'message' => I18n::t('settings.saved'),
+            'redirect' => $this->buildPath('admin/settings'),
         ]);
     }
 }
