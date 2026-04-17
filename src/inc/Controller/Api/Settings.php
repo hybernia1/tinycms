@@ -67,7 +67,6 @@ final class Settings extends Admin
 
         $payload = [
             'app_lang' => (string)($_POST['settings']['app_lang'] ?? ''),
-            'theme' => (string)($_POST['settings']['theme'] ?? ''),
             'sitename' => (string)($_POST['settings']['sitename'] ?? ''),
             'siteauthor' => (string)($_POST['settings']['siteauthor'] ?? ''),
             'meta_title' => (string)($_POST['settings']['meta_title'] ?? ''),

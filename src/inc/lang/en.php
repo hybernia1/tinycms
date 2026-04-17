@@ -269,7 +269,6 @@ return [
         'saved' => 'Settings saved.',
         'fields' => [
             'app_lang' => 'Application language',
-            'theme' => 'Theme',
             'sitename' => 'Site name',
             'siteauthor' => 'Site author',
             'meta_title' => 'Meta title',
