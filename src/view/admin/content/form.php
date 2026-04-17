@@ -82,7 +82,7 @@ $contentId = (int)($item['id'] ?? 0);
                     <div
                         class="tag-picker"
                         data-tag-picker
-                        data-suggest-endpoint="<?= $e($url('admin/api/v1/terms/search')) ?>"
+                        data-search-endpoint="<?= $e($url('admin/api/v1/terms/search')) ?>"
                         data-initial="<?= $termsJson ?>"
                     >
                         <div class="tag-picker-field">
