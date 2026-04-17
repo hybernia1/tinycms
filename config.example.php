@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-define('BASE_DIR', __DIR__);
+if (!defined('BASE_DIR')) {
+    define('BASE_DIR', __DIR__);
+}
 define('SRC_DIR', 'src/');
 define('INC_DIR', SRC_DIR . 'inc/');
 define('VIEW_DIR', SRC_DIR . 'view/');
