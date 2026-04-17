@@ -173,25 +173,20 @@ final class Install
         $prefix = $this->normalizePrefix($prefix);
         $users = $prefix . 'users';
         try {
-            $exists = $pdo->prepare("SELECT id, role FROM $users WHERE email = :email LIMIT 1");
+            $exists = $pdo->prepare("SELECT id FROM $users WHERE email = :email LIMIT 1");
             $exists->execute(['email' => (string)$admin['email']]);
             $row = $exists->fetch(PDO::FETCH_ASSOC);
 
             if (is_array($row)) {
-                if ((string)($row['role'] ?? '') === 'admin') {
-                    return null;
-                }
-
-                return I18n::t('install.email_exists_other_role');
+                return null;
             }
 
-            $insert = $pdo->prepare("INSERT INTO $users (name, email, password, role, suspend) VALUES (:name, :email, :password, :role, :suspend)");
+            $insert = $pdo->prepare("INSERT INTO $users (name, email, password, role) VALUES (:name, :email, :password, :role)");
             $insert->execute([
                 'name' => (string)$admin['name'],
                 'email' => (string)$admin['email'],
                 'password' => password_hash((string)$admin['password'], PASSWORD_DEFAULT),
                 'role' => 'admin',
-                'suspend' => 0,
             ]);
 
             return null;

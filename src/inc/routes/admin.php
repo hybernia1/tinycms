@@ -13,15 +13,6 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => 'admin', 'controller' => $admin, 'action' => 'index'],
     ['method' => 'GET', 'path' => 'admin/dashboard', 'controller' => $admin, 'action' => 'dashboard'],
 
-    ['method' => 'GET', 'path' => 'admin/users', 'controller' => $adminUsers, 'action' => 'list'],
-    ['method' => 'GET', 'path' => 'admin/api/v1/users', 'controller' => $apiUser, 'action' => 'listApiV1'],
-    ['method' => 'POST', 'path' => 'admin/api/v1/users/add', 'controller' => $apiUser, 'action' => 'addApiV1'],
-    ['method' => 'POST', 'path' => 'admin/api/v1/users/{id}/edit', 'controller' => $apiUser, 'action' => 'editApiV1', 'params' => ['id' => 'int']],
-    ['method' => 'POST', 'path' => 'admin/api/v1/users/{id}/delete', 'controller' => $apiUser, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
-    ['method' => 'POST', 'path' => 'admin/api/v1/users/{id}/suspend', 'controller' => $apiUser, 'action' => 'suspendApiV1', 'params' => ['id' => 'int']],
-    ['method' => 'GET', 'path' => 'admin/users/add', 'controller' => $adminUsers, 'action' => 'addForm'],
-    ['method' => 'GET', 'path' => 'admin/users/edit', 'controller' => $adminUsers, 'action' => 'editForm'],
-
     ['method' => 'GET', 'path' => 'admin/content', 'controller' => $adminContent, 'action' => 'list'],
     ['method' => 'GET', 'path' => 'admin/api/v1/content', 'controller' => $apiContent, 'action' => 'listApiV1'],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/delete', 'controller' => $apiContent, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],

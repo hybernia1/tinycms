@@ -787,46 +787,5 @@ initListApi({
     },
 });
 
-initListApi({
-    name: 'users',
-    rootSelector: '[data-users-list]',
-    withStatus: true,
-    toggle: { defaultMode: 'suspend' },
-    togglePath: (endpointBase, id) => `${endpointBase}/${id}/suspend`,
-    deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
-    messages: {
-        deleteSuccess: t('users.deleted'),
-        toggleSuccess: (mode) => mode === 'unsuspend' ? t('users.unsuspended') : t('users.suspended'),
-    },
-    rowHtml: (item, { editBase }) => {
-        const id = Number(item.id || 0);
-        const isSuspended = item.is_suspended === true;
-        const isAdmin = item.is_admin === true;
-        const statusIcon = isSuspended ? 'suspended' : (isAdmin ? 'admin' : 'users');
-        const toggleLabel = isSuspended ? t('users.unsuspend') : t('users.suspend');
 
-        return `
-            <tr>
-                <td>
-                    <span class="d-flex align-center gap-2">
-                        ${icon(statusIcon)}
-                        <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
-                    </span>
-                    <div class="text-muted small">${esc(item.email)}</div>
-                </td>
-                <td class="table-col-actions">
-                    ${isAdmin ? '' : `
-                    <button class="btn btn-light btn-icon" type="button" data-users-toggle="${id}" data-users-mode="${isSuspended ? 'unsuspend' : 'suspend'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
-                        ${icon(isSuspended ? 'show' : 'hide')}
-                        <span class="sr-only">${esc(toggleLabel)}</span>
-                    </button>
-                    <button class="btn btn-light btn-icon" type="button" data-users-delete-open="${id}" aria-label="${esc(t('users.delete'))}" title="${esc(t('users.delete'))}">
-                        ${icon('delete')}
-                        <span class="sr-only">${esc(t('users.delete'))}</span>
-                    </button>`}
-                </td>
-            </tr>
-        `;
-    },
-});
 })();

@@ -33,15 +33,6 @@ final class AdminView
         ]));
     }
 
-    public function adminUsersList(array $pagination, string $status, string $query, array $statusCounts): void
-    {
-        $this->renderAdmin('admin/users/list', [
-            'listBase' => $this->adminListBase('users', $pagination, $status, $query, $statusCounts),
-            'pageTitle' => I18n::t('admin.menu.users'),
-            'headerAction' => $this->linkHeaderAction('admin/users/add', I18n::t('admin.add_user')),
-        ]);
-    }
-
     public function adminSettingsForm(array $fields, array $values): void
     {
         $this->renderAdmin('admin/settings/form', [
@@ -49,17 +40,6 @@ final class AdminView
             'values' => $values,
             'pageTitle' => I18n::t('admin.menu.settings'),
             'headerAction' => $this->submitHeaderAction('#settings-form'),
-        ]);
-    }
-
-    public function adminUsersForm(string $mode, array $user, array $errors): void
-    {
-        $this->renderAdmin('admin/users/form', [
-            'mode' => $mode,
-            'user' => $user,
-            'errors' => $errors,
-            'pageTitle' => $mode === 'add' ? I18n::t('admin.add_user') : I18n::t('admin.edit_user'),
-            'headerAction' => $this->submitHeaderAction('#users-form'),
         ]);
     }
 
@@ -220,7 +200,6 @@ final class AdminView
             'content',
             'terms',
             'media',
-            'users',
             'editor',
             'datetime',
             'modal',
@@ -233,7 +212,6 @@ final class AdminView
     {
         return [
             ['label' => I18n::t('admin.menu.dashboard'), 'url' => 'admin/dashboard', 'icon' => 'dashboard'],
-            ['label' => I18n::t('admin.menu.users'), 'url' => 'admin/users', 'icon' => 'users'],
             ['label' => I18n::t('admin.menu.content'), 'url' => 'admin/content', 'icon' => 'content'],
             ['label' => I18n::t('admin.menu.media'), 'url' => 'admin/media', 'icon' => 'media'],
             ['label' => I18n::t('admin.menu.terms'), 'url' => 'admin/terms', 'icon' => 'terms'],

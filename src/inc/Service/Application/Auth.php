@@ -56,6 +56,6 @@ final class Auth
 
     public function canAccessAdmin(): bool
     {
-        return $this->auth->check() && (string)$this->auth->role() === 'admin';
+        return $this->auth->check();
     }
 }

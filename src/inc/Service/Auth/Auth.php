@@ -38,20 +38,6 @@ class Auth
         return $this->check() ? $_SESSION['auth'] : null;
     }
 
-    public function role(): ?string
-    {
-        return $this->check() ? (string)$_SESSION['auth']['role'] : null;
-    }
-
-    public function hasRole(string $role): bool
-    {
-        return $this->check() && (string)$_SESSION['auth']['role'] === $role;
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->hasRole('admin');
-    }
 
     public function logout(): void
     {
@@ -82,9 +68,9 @@ class Auth
         }
 
         $userId = (int)$_SESSION['auth']['id'];
-        $rows = (new Query(Connection::get()))->select('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $userId]);
+        $rows = (new Query(Connection::get()))->select('users', ['ID', 'name', 'email'], ['ID' => $userId]);
 
-        if (empty($rows) || (int)($rows[0]['suspend'] ?? 0) === 1) {
+        if (empty($rows)) {
             unset($_SESSION['auth']);
             $this->synced = true;
             return;
@@ -95,7 +81,6 @@ class Auth
             'id' => (int)$user['ID'],
             'name' => (string)$user['name'],
             'email' => (string)$user['email'],
-            'role' => (string)$user['role'],
         ];
 
         $this->synced = true;

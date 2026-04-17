@@ -57,7 +57,7 @@ class Login
             ];
         }
 
-        $users = $this->query->select('users', ['ID', 'name', 'email', 'password', 'role', 'suspend'], [
+        $users = $this->query->select('users', ['ID', 'name', 'email', 'password'], [
             'email' => $email,
         ]);
 
@@ -73,12 +73,6 @@ class Login
 
         $user = $users[0];
 
-        if ((int)($user['suspend'] ?? 0) === 1) {
-            return [
-                'success' => false,
-                'message' => I18n::t('auth.account_blocked'),
-            ];
-        }
 
         if (!isset($user['password']) || !password_verify($password, (string)$user['password'])) {
             return [
@@ -100,7 +94,6 @@ class Login
             'id' => (int)$user['ID'],
             'name' => (string)$user['name'],
             'email' => (string)$user['email'],
-            'role' => (string)$user['role'],
         ];
 
         if ($remember) {
@@ -125,7 +118,6 @@ class Login
                 'id' => (int)$user['ID'],
                 'name' => (string)$user['name'],
                 'email' => (string)$user['email'],
-                'role' => (string)$user['role'],
             ],
         ];
     }
