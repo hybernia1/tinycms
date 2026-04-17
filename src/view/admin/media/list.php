@@ -53,4 +53,4 @@ $list['columns'] = [
 $list['deleteConfirmText'] = $t('media.delete_confirm');
 $list['rowRenderer'] = $rowRenderer;
 
-require __DIR__ . '/../partials/list-layout.php';
+require BASE_DIR . '/' . VIEW_DIR . 'admin/partials/list-layout.php';

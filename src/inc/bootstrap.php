@@ -65,7 +65,7 @@ $requestPath = trim($requestPath, '/');
 
 $isInstalled = is_file(BASE_DIR . '/config.php');
 
-require __DIR__ . '/routes/register.php';
+require BASE_DIR . '/' . INC_DIR . 'routes/register.php';
 
 if (!$isInstalled) {
     $install = new InstallController($view, $csrf, new InstallService());
@@ -80,7 +80,7 @@ if (!$isInstalled) {
         $redirect('install');
     }
 
-    require __DIR__ . '/routes/install.php';
+    require BASE_DIR . '/' . INC_DIR . 'routes/install.php';
 
     return [
         'router' => $router,
@@ -116,7 +116,7 @@ $apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, 
 $apiSettings = new ApiSettingsController($authService, $settingsService, $uploadService, $flash, $csrf);
 $apiTerm = new ApiTermController($authService, $termService, $flash, $csrf);
 
-require __DIR__ . '/routes/admin.php';
+require BASE_DIR . '/' . INC_DIR . 'routes/admin.php';
 
 return [
     'router' => $router,

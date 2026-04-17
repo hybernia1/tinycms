@@ -52,7 +52,7 @@ final class I18n
 
     public static function availableLocales(): array
     {
-        $dir = dirname(__DIR__, 2) . '/lang';
+        $dir = BASE_DIR . '/' . INC_DIR . 'lang';
         if (!is_dir($dir)) {
             return [self::DEFAULT_LOCALE];
         }
@@ -114,7 +114,7 @@ final class I18n
         }
 
         $catalogue = [];
-        $baseFile = dirname(__DIR__, 2) . '/lang/' . $locale . '.php';
+        $baseFile = BASE_DIR . '/' . INC_DIR . 'lang/' . $locale . '.php';
         if (is_file($baseFile)) {
             $base = require $baseFile;
             if (is_array($base)) {
