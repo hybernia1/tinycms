@@ -1,5 +1,9 @@
 <?php
 declare(strict_types=1);
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 $authUser = $_SESSION['auth'] ?? null;
 $headerAction = is_array($headerAction ?? null) ? $headerAction : [];

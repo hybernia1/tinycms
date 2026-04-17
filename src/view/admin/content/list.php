@@ -1,4 +1,8 @@
 <?php
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 $list = $listBase ?? [];
 $statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];
@@ -62,4 +66,4 @@ $list['columns'] = [
 $list['deleteConfirmText'] = $t('content.delete_confirm_move_to_trash');
 $list['rowRenderer'] = $rowRenderer;
 
-require __DIR__ . '/../partials/list-layout.php';
+require BASE_DIR . '/' . VIEW_DIR . 'admin/partials/list-layout.php';

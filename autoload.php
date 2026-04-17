@@ -7,6 +7,10 @@ if (is_file(__DIR__ . '/config.php')) {
     require_once __DIR__ . '/config.example.php';
 }
 
+if (!defined('BASE_DIR')) {
+    define('BASE_DIR', __DIR__);
+}
+
 if (!defined('SRC_DIR')) {
     define('SRC_DIR', 'src/');
 }

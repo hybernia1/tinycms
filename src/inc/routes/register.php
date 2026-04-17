@@ -1,5 +1,9 @@
 <?php
 declare(strict_types=1);
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 
 use App\Service\Infrastructure\Router\Router;
 

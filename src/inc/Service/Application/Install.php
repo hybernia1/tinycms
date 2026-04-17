@@ -204,7 +204,7 @@ final class Install
     {
         $normalizedLang = strtolower(trim($lang));
         $prefix = $this->normalizePrefix((string)($db['db_prefix'] ?? ''));
-        $content = "<?php\ndeclare(strict_types=1);\n\ndefine('SRC_DIR', 'src/');\ndefine('INC_DIR', SRC_DIR . 'inc/');\ndefine('VIEW_DIR', SRC_DIR . 'view/');\ndefine('ASSETS_DIR', SRC_DIR . 'assets/');\n\nconst APP_DEBUG = false;\nconst APP_VERSION = '0.9.0';\nconst APP_LANG = " . var_export($normalizedLang, true) . ";\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\nconst APP_POSTS_PER_PAGE = 10;\n\n"
+        $content = "<?php\ndeclare(strict_types=1);\n\ndefine('BASE_DIR', __DIR__);\ndefine('SRC_DIR', 'src/');\ndefine('INC_DIR', SRC_DIR . 'inc/');\ndefine('VIEW_DIR', SRC_DIR . 'view/');\ndefine('ASSETS_DIR', SRC_DIR . 'assets/');\n\nconst APP_DEBUG = false;\nconst APP_VERSION = '0.9.0';\nconst APP_LANG = " . var_export($normalizedLang, true) . ";\nconst APP_DATE_FORMAT = 'd.m.Y';\nconst APP_DATETIME_FORMAT = 'd.m.Y H:i';\nconst APP_POSTS_PER_PAGE = 10;\n\n"
             . "const DB_HOST = " . var_export((string)$db['db_host'], true) . ";\n"
             . "const DB_NAME = " . var_export((string)$db['db_name'], true) . ";\n"
             . "const DB_USER = " . var_export((string)$db['db_user'], true) . ";\n"
@@ -214,7 +214,7 @@ final class Install
             . "const MEDIA_SMALL_HEIGHT = 300;\n"
             . "const MEDIA_MEDIUM_WIDTH = 768;\n";
 
-        $written = file_put_contents(dirname(__DIR__, 4) . '/config.php', $content, LOCK_EX);
+        $written = file_put_contents(BASE_DIR . '/config.php', $content, LOCK_EX);
 
         if ($written === false) {
             throw new \RuntimeException('Config write failed.');

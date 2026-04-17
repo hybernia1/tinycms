@@ -1,4 +1,8 @@
 <?php
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 $list = is_array($list ?? null) ? $list : [];
 $items = is_array($list['items'] ?? null) ? $list['items'] : [];
 $entity = (string)($list['entity'] ?? '');

@@ -1,7 +1,11 @@
 <?php
 declare(strict_types=1);
 
-require_once dirname(__DIR__, 2) . '/autoload.php';
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
+require_once BASE_DIR . '/autoload.php';
 
 use App\Controller\Admin\Admin as AdminController;
 use App\Controller\Admin\Content as ContentController;
@@ -45,7 +49,7 @@ $flash = new Flash();
 $csrf = new Csrf();
 $rateLimiter = new RateLimiter();
 $dateTimeFormatter = new DateTimeFormatter(APP_DATE_FORMAT, APP_DATETIME_FORMAT);
-$view = new View(dirname(__DIR__, 2), $router, $flash, $csrf, $dateTimeFormatter);
+$view = new View(BASE_DIR, $router, $flash, $csrf, $dateTimeFormatter);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
     header('Location: ' . $router->url($path), true, $permanent ? 301 : 302);
@@ -59,9 +63,9 @@ if ($basePath !== '' && ($requestPath === $basePath || str_starts_with($requestP
 }
 $requestPath = trim($requestPath, '/');
 
-$isInstalled = is_file(dirname(__DIR__, 2) . '/config.php');
+$isInstalled = is_file(BASE_DIR . '/config.php');
 
-require __DIR__ . '/routes/register.php';
+require BASE_DIR . '/' . INC_DIR . 'routes/register.php';
 
 if (!$isInstalled) {
     $install = new InstallController($view, $csrf, new InstallService());
@@ -76,7 +80,7 @@ if (!$isInstalled) {
         $redirect('install');
     }
 
-    require __DIR__ . '/routes/install.php';
+    require BASE_DIR . '/' . INC_DIR . 'routes/install.php';
 
     return [
         'router' => $router,
@@ -93,7 +97,7 @@ $userService = new UserService();
 $contentService = new ContentService();
 $mediaService = new MediaService();
 $slugger = new Slugger();
-$uploadService = new UploadService(dirname(__DIR__, 2), $slugger);
+$uploadService = new UploadService(BASE_DIR, $slugger);
 $settingsService = new SettingsService();
 I18n::setLocale((string)($settingsService->resolved()['app_lang'] ?? APP_LANG));
 $termService = new TermService();
@@ -112,7 +116,7 @@ $apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, 
 $apiSettings = new ApiSettingsController($authService, $settingsService, $uploadService, $flash, $csrf);
 $apiTerm = new ApiTermController($authService, $termService, $flash, $csrf);
 
-require __DIR__ . '/routes/admin.php';
+require BASE_DIR . '/' . INC_DIR . 'routes/admin.php';
 
 return [
     'router' => $router,
