@@ -1,10 +1,5 @@
 <?php
 declare(strict_types=1);
-if (!defined('BASE_DIR')) {
-    exit;
-}
-
-
 return [
     'meta' => [
         'language_name' => 'Čeština',
