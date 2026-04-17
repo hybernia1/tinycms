@@ -1,4 +1,8 @@
 <?php
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 $list = $listBase ?? [];
 $statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = ['all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')'];

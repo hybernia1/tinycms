@@ -1,5 +1,9 @@
 <?php
 declare(strict_types=1);
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 
 register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => 'install', 'controller' => $install, 'action' => 'formLanguage', 'with_redirect' => false],

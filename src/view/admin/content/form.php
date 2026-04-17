@@ -1,4 +1,8 @@
-<?php $createdAt = $formatInputDateTime((string)($item['created'] ?? '')); ?>
+<?php
+if (!defined('BASE_DIR')) {
+    exit;
+}
+ $createdAt = $formatInputDateTime((string)($item['created'] ?? '')); ?>
 <?php
 $initialTerms = array_values(array_filter(array_map(static fn($term): string => trim((string)$term), (array)($selectedTerms ?? []))));
 $termsValue = implode(', ', $initialTerms);

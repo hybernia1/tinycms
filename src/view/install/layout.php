@@ -1,5 +1,9 @@
 <?php
 declare(strict_types=1);
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 ?>
 <!doctype html>
 <html lang="<?= $e((string)$lang) ?>">

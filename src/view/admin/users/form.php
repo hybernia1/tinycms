@@ -1,4 +1,8 @@
-<?php $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
+<?php
+if (!defined('BASE_DIR')) {
+    exit;
+}
+ $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-4">
     <form
         id="users-form"

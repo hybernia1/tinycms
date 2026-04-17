@@ -1,10 +1,14 @@
 <?php
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 $previewPath = $media((string)($item['path'] ?? ''), 'small');
 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
 $fileMeta = null;
 if ($mode === 'edit') {
     $metaPath = trim((string)($item['path'] ?? ''));
-    $absolutePath = dirname(__DIR__, 4) . '/' . ltrim($metaPath, '/');
+    $absolutePath = BASE_DIR . '/' . ltrim($metaPath, '/');
     if ($metaPath !== '' && is_file($absolutePath)) {
         $imageInfo = @getimagesize($absolutePath) ?: [0, 0, 'mime' => ''];
         $mime = trim((string)($imageInfo['mime'] ?? ''));
