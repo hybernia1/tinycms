@@ -30,7 +30,6 @@ final class Settings extends Admin
         $resolved = $this->settings->resolved();
         $this->pages->adminSettingsForm($this->settings->fields(), [
             'app_lang' => (string)($resolved['app_lang'] ?? APP_LANG),
-            'theme' => (string)($resolved['theme'] ?? ''),
             'sitename' => (string)($resolved['sitename'] ?? ''),
             'siteauthor' => (string)($resolved['siteauthor'] ?? ''),
             'meta_title' => (string)($resolved['meta_title'] ?? ''),

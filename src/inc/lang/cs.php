@@ -269,7 +269,6 @@ return [
         'saved' => 'Nastavení uloženo.',
         'fields' => [
             'app_lang' => 'Jazyk aplikace',
-            'theme' => 'Šablona',
             'sitename' => 'Název webu',
             'siteauthor' => 'Autor webu',
             'meta_title' => 'Meta title',
