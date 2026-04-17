@@ -128,7 +128,7 @@ abstract class BaseAdmin
         ], $statusCode);
     }
 
-    protected function requirePositiveId(int $id, string $code, string $message, int $statusCode = 422): bool
+    protected function requirePositiveId(int $id, string $code, string $message, int $statusCode = 400): bool
     {
         if ($id > 0) {
             return true;

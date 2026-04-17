@@ -226,7 +226,11 @@ final class Content extends BaseAdmin
                 return;
             }
 
-            $this->apiOk(['id' => $id, 'status' => 'published']);
+            $this->apiOk([
+                'id' => $id,
+                'status' => 'published',
+                'message' => I18n::t('content.published'),
+            ]);
             return;
         }
 
@@ -235,7 +239,11 @@ final class Content extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id, 'status' => 'draft']);
+        $this->apiOk([
+            'id' => $id,
+            'status' => 'draft',
+            'message' => I18n::t('content.switched_to_draft'),
+        ]);
     }
 
     public function draftInitApiV1(callable $redirect): void
@@ -261,11 +269,15 @@ final class Content extends BaseAdmin
 
         $id = (int)($result['id'] ?? 0);
         if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.draft_invalid_id'));
+            $this->apiError('INVALID_ID', I18n::t('content.draft_invalid_id'), 400);
             return;
         }
 
-        $this->apiOk(['id' => $id, 'created_new' => true]);
+        $this->apiOk([
+            'id' => $id,
+            'created_new' => true,
+            'message' => I18n::t('content.created'),
+        ]);
     }
 
     public function autosaveApiV1(callable $redirect): void

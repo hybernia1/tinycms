@@ -106,7 +106,10 @@ final class Term extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('terms.deleted'),
+        ]);
     }
 
     private function mapListItem(array $row): array

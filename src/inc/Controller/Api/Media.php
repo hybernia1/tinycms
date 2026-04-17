@@ -133,7 +133,10 @@ final class Media extends BaseAdmin
         }
 
         $this->upload->deleteMediaFiles($item);
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('media.deleted'),
+        ]);
     }
 
     private function resolveListQuery(): array

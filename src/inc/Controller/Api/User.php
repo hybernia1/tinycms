@@ -50,7 +50,10 @@ final class User extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('users.deleted'),
+        ]);
     }
 
     public function suspendApiV1(callable $redirect, int $id): void
@@ -70,7 +73,11 @@ final class User extends BaseAdmin
                 return;
             }
 
-            $this->apiOk(['id' => $id, 'suspend' => 0]);
+            $this->apiOk([
+                'id' => $id,
+                'suspend' => 0,
+                'message' => I18n::t('users.unsuspended'),
+            ]);
             return;
         }
 
@@ -79,7 +86,11 @@ final class User extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id, 'suspend' => 1]);
+        $this->apiOk([
+            'id' => $id,
+            'suspend' => 1,
+            'message' => I18n::t('users.suspended'),
+        ]);
     }
 
     public function addApiV1(callable $redirect): void

@@ -42,7 +42,10 @@ final class ContentMedia extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('media.detached'),
+        ]);
     }
 
     public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
@@ -70,6 +73,7 @@ final class ContentMedia extends BaseAdmin
             'content_id' => $contentId,
             'media_id' => $mediaId,
             'media' => $this->mapLibraryItem($media),
+            'message' => I18n::t('content.updated'),
         ]);
     }
 
@@ -115,8 +119,7 @@ final class ContentMedia extends BaseAdmin
             return;
         }
 
-        if ($mediaId <= 0) {
-            $this->apiError('INVALID_MEDIA_ID', I18n::t('media.not_found'));
+        if (!$this->requirePositiveId($mediaId, 'INVALID_ID', I18n::t('media.invalid_id'))) {
             return;
         }
 
@@ -131,7 +134,11 @@ final class ContentMedia extends BaseAdmin
         }
 
         $this->upload->deleteMediaFiles($media);
-        $this->apiOk(['id' => $mediaId, 'content_id' => $contentId]);
+        $this->apiOk([
+            'id' => $mediaId,
+            'content_id' => $contentId,
+            'message' => I18n::t('media.deleted'),
+        ]);
     }
 
     public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
@@ -173,6 +180,7 @@ final class ContentMedia extends BaseAdmin
             'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
             'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
             'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
+            'message' => I18n::t('media.uploaded'),
         ]);
     }
 
@@ -208,7 +216,11 @@ final class ContentMedia extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $mediaId, 'name' => $name]);
+        $this->apiOk([
+            'id' => $mediaId,
+            'name' => $name,
+            'message' => I18n::t('media.rename_saved'),
+        ]);
     }
 
     public function mediaAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
@@ -230,7 +242,11 @@ final class ContentMedia extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['content_id' => $contentId, 'media_id' => $mediaId]);
+        $this->apiOk([
+            'content_id' => $contentId,
+            'media_id' => $mediaId,
+            'message' => I18n::t('content.updated'),
+        ]);
     }
 
     private function requireExistingContent(int $contentId): ?array
