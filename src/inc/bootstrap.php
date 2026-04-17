@@ -54,12 +54,7 @@ $redirect = static function (string $path = '', bool $permanent = false) use ($r
     exit;
 };
 
-$requestPath = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? '/');
-$requestPath = '/' . ltrim($requestPath, '/');
-if ($basePath !== '' && ($requestPath === $basePath || str_starts_with($requestPath, $basePath . '/'))) {
-    $requestPath = (string)substr($requestPath, strlen($basePath));
-}
-$requestPath = trim($requestPath, '/');
+$requestPath = $router->requestPath((string)($_SERVER['REQUEST_URI'] ?? '/'));
 
 $isInstalled = is_file(BASE_DIR . '/config.php');
 
