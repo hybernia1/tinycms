@@ -10,7 +10,7 @@ use App\Service\Support\I18n;
 use App\Service\Application\User as UserService;
 use App\View\AdminView;
 
-final class User extends BaseAdmin
+final class User extends Admin
 {
     private AdminView $pages;
     private UserService $users;

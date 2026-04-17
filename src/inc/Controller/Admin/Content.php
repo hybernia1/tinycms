@@ -12,7 +12,7 @@ use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\View\AdminView;
 
-final class Content extends BaseAdmin
+final class Content extends Admin
 {
     public function __construct(
         private AdminView $pages,

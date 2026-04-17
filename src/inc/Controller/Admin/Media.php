@@ -10,7 +10,7 @@ use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\View\AdminView;
 
-final class Media extends BaseAdmin
+final class Media extends Admin
 {
     public function __construct(
         private AdminView $pages,
