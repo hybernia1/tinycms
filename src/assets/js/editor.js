@@ -829,6 +829,7 @@
             if (linkNoFollow) {
                 linkNoFollow.checked = relValues.indexOf('nofollow') !== -1;
             }
+            updateLinkApplyState();
         }
 
         function setFocusMode(enabled) {
@@ -844,11 +845,15 @@
 
         function updateLinkApplyState() {
             var linkInput = linkModal.querySelector('[data-role="link-input"]');
+            var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
             var applyButton = linkModal.querySelector('[data-role="link-apply"]');
             if (!applyButton) {
                 return;
             }
-            applyButton.disabled = !linkInput || linkInput.value.trim() === '';
+            var inputUrl = linkInput ? linkInput.value.trim() : '';
+            var existingUrl = activeLink && editor.contains(activeLink) ? String(activeLink.getAttribute('href') || '').trim() : '';
+            var textValue = linkTextInput ? linkTextInput.value.trim() : '';
+            applyButton.disabled = inputUrl === '' && existingUrl === '' && textValue === '';
         }
 
         function resetLinkModalFields() {
@@ -1100,6 +1105,9 @@
             var apply = event.target.closest('[data-role="link-apply"]');
             if (apply) {
                 var url = normalizeLinkUrl(linkInput ? linkInput.value : '');
+                if (!url && activeLink && editor.contains(activeLink)) {
+                    url = normalizeLinkUrl(activeLink.getAttribute('href') || '');
+                }
                 var textValue = linkTextInput ? linkTextInput.value.trim() : '';
                 var withTargetBlank = !!(linkTargetBlank && linkTargetBlank.checked);
                 var withNoFollow = !!(linkNoFollow && linkNoFollow.checked);
@@ -1153,7 +1161,7 @@
         });
 
         linkModal.addEventListener('input', function (event) {
-            if (event.target && event.target.matches('[data-role="link-input"]')) {
+            if (event.target && event.target.matches('[data-role="link-input"], [data-role="link-text-input"]')) {
                 updateLinkApplyState();
             }
         });
