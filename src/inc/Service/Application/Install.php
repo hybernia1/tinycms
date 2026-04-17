@@ -233,8 +233,12 @@ final class Install
     {
         $clean = trim($prefix);
 
-        if ($clean === '' || preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $clean) === 1) {
+        if ($clean === '') {
             return $clean;
+        }
+
+        if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $clean) === 1) {
+            return str_ends_with($clean, '_') ? $clean : $clean . '_';
         }
 
         throw new \RuntimeException('Invalid database prefix.');
