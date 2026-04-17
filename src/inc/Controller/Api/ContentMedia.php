@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
-use App\Controller\Admin\BaseAdmin;
+use App\Controller\Admin\Admin;
 
 use App\Service\Application\Auth;
 use App\Service\Application\Content;
@@ -13,7 +13,7 @@ use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 
-final class ContentMedia extends BaseAdmin
+final class ContentMedia extends Admin
 {
     public function __construct(
         Auth $authService,

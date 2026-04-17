@@ -9,7 +9,7 @@ use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\View\AdminView;
 
-final class Settings extends BaseAdmin
+final class Settings extends Admin
 {
     public function __construct(
         private AdminView $pages,

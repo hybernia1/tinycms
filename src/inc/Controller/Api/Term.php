@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
-use App\Controller\Admin\BaseAdmin;
+use App\Controller\Admin\Admin;
 use App\Service\Application\Auth;
 use App\Service\Application\Term as TermService;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 
-final class Term extends BaseAdmin
+final class Term extends Admin
 {
     public function __construct(
         Auth $authService,

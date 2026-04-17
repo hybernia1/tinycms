@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
-use App\Controller\Admin\BaseAdmin;
+use App\Controller\Admin\Admin;
 
 use App\Service\Application\Auth;
 use App\Service\Application\Content as ContentService;
@@ -14,7 +14,7 @@ use App\Service\Application\User as UserService;
 use App\Service\Support\I18n;
 use App\View\AdminView;
 
-final class Content extends BaseAdmin
+final class Content extends Admin
 {
     public function __construct(
         private AdminView $pages,
