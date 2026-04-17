@@ -25,7 +25,7 @@ final class Settings extends BaseAdmin
 
     public function submitApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -33,7 +33,7 @@ final class Settings extends BaseAdmin
         $faviconPath = (string)($current['favicon'] ?? '');
         $logoPath = (string)($current['logo'] ?? '');
 
-        if ($this->hasUploadedFile($_FILES, 'favicon_file')) {
+        if ($this->hasUpload('favicon_file')) {
             $upload = $this->upload->uploadFavicon((array)$_FILES['favicon_file']);
             if (($upload['success'] ?? false) !== true) {
                 $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')), 422);
@@ -49,7 +49,7 @@ final class Settings extends BaseAdmin
             }
         }
 
-        if ($this->hasUploadedFile($_FILES, 'logo_file')) {
+        if ($this->hasUpload('logo_file')) {
             $upload = $this->upload->uploadLogo((array)$_FILES['logo_file']);
             if (($upload['success'] ?? false) !== true) {
                 $this->apiError('UPLOAD_FAILED', (string)($upload['error'] ?? I18n::t('upload.file_upload_failed')), 422);
@@ -79,15 +79,7 @@ final class Settings extends BaseAdmin
         $this->settings->save($payload);
         $this->apiOk([
             'message' => I18n::t('settings.saved'),
+            'redirect' => $this->buildPath('admin/settings'),
         ]);
-    }
-
-    private function hasUploadedFile(array $files, string $key): bool
-    {
-        if (!isset($files[$key]) || !is_array($files[$key])) {
-            return false;
-        }
-
-        return (int)($files[$key]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
     }
 }

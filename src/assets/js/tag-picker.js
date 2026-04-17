@@ -7,7 +7,7 @@ if (tagPickers.length) {
         const input = picker.querySelector('[data-tag-picker-input]');
         const valueField = picker.querySelector('[data-tag-picker-value]');
         const suggestions = picker.querySelector('[data-tag-picker-suggestions]');
-        const endpoint = picker.getAttribute('data-suggest-endpoint') || '';
+        const endpoint = picker.getAttribute('data-search-endpoint') || '';
         const initialRaw = picker.getAttribute('data-initial') || '[]';
 
         let tags = [];

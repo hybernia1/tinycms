@@ -9,18 +9,11 @@ $listEndpoint = (string)($list['endpoint'] ?? ($entity !== '' ? $url('admin/api/
 $listEditBase = (string)($list['editBase'] ?? ($entity !== '' ? $url('admin/' . $entity . '/edit?id=') : ''));
 $listRootAttrs = is_array($list['rootAttrs'] ?? null) ? $list['rootAttrs'] : [];
 $searchPlaceholder = (string)($list['searchPlaceholder'] ?? '');
-$searchHidden = is_array($list['searchHidden'] ?? null) ? $list['searchHidden'] : ['status' => $statusCurrent, 'page' => '1'];
 $listColumns = is_array($list['columns'] ?? null) ? $list['columns'] : [];
 $listPage = (int)($list['page'] ?? 1);
 $listTotalPages = (int)($list['totalPages'] ?? 1);
 $statusLinks = is_array($list['statusLinks'] ?? null) ? $list['statusLinks'] : [];
 $statusEnabled = (bool)($list['statusEnabled'] ?? $statusLinks !== []);
-$statusUrl = is_callable($list['statusUrl'] ?? null)
-    ? $list['statusUrl']
-    : static fn(string $targetStatus): string => $url('admin/' . $entity . '?status=' . urlencode($targetStatus) . '&page=1');
-$paginationUrl = is_callable($list['paginationUrl'] ?? null)
-    ? $list['paginationUrl']
-    : static fn(int $targetPage): string => $url('admin/' . $entity . '?page=' . $targetPage . '&status=' . urlencode($statusCurrent) . '&q=' . urlencode($listQuery));
 $rowRenderer = is_callable($list['rowRenderer'] ?? null) ? $list['rowRenderer'] : null;
 $deleteConfirmText = (string)($list['deleteConfirmText'] ?? '');
 $csrfMarkup = (string)($list['csrfMarkup'] ?? $csrfField());
@@ -44,21 +37,18 @@ foreach ($listRootAttrs as $attr => $value) {
         <?php if ($statusEnabled): ?>
             <nav class="filter-nav">
                 <?php foreach ($statusLinks as $key => $label): ?>
-                    <a class="filter-link<?= $statusCurrent === (string)$key ? ' active' : '' ?>" data-<?= $e($listName) ?>-status="<?= $e((string)$key) ?>" href="<?= $e($statusUrl !== null ? (string)$statusUrl((string)$key) : '#') ?>"><?= $e((string)$label) ?></a>
+                    <button class="filter-link<?= $statusCurrent === (string)$key ? ' active' : '' ?>" type="button" data-<?= $e($listName) ?>-status="<?= $e((string)$key) ?>"><?= $e((string)$label) ?></button>
                 <?php endforeach; ?>
             </nav>
         <?php else: ?>
             <div></div>
         <?php endif; ?>
-        <form method="get" class="search-form">
-            <?php foreach ($searchHidden as $name => $value): ?>
-                <input type="hidden" name="<?= $e((string)$name) ?>" value="<?= $e((string)$value) ?>">
-            <?php endforeach; ?>
+        <div class="search-form">
             <div class="search-field field-with-icon">
-                <input class="search-input" type="search" name="q" value="<?= $e($listQuery) ?>" placeholder="<?= $e($searchPlaceholder) ?>" data-<?= $e($listName) ?>-search>
+                <input class="search-input" type="search" value="<?= $e($listQuery) ?>" placeholder="<?= $e($searchPlaceholder) ?>" data-<?= $e($listName) ?>-search>
                 <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= $icon('search') ?></span>
             </div>
-        </form>
+        </div>
     </div>
 
     <div class="card p-2">
@@ -86,9 +76,8 @@ foreach ($listRootAttrs as $attr => $value) {
         <div class="d-flex justify-between align-center mt-4">
             <?php if ($listTotalPages > 1): ?>
                 <div class="pagination">
-                    <?php $prevPage = max(1, $listPage - 1); $nextPage = min($listTotalPages, $listPage + 1); ?>
-                    <a class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" href="<?= $e($paginationUrl !== null ? (string)$paginationUrl($prevPage) : '#') ?>" data-<?= $e($listName) ?>-prev<?= $listPage <= 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>><?= $icon('prev') ?><span><?= $e($t('common.previous')) ?></span></a>
-                    <a class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" href="<?= $e($paginationUrl !== null ? (string)$paginationUrl($nextPage) : '#') ?>" data-<?= $e($listName) ?>-next<?= $listPage >= $listTotalPages ? ' aria-disabled="true" tabindex="-1"' : '' ?>><span><?= $e($t('common.next')) ?></span><?= $icon('next') ?></a>
+                    <button class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" type="button" data-<?= $e($listName) ?>-prev<?= $listPage <= 1 ? ' disabled aria-disabled="true"' : '' ?>><?= $icon('prev') ?><span><?= $e($t('common.previous')) ?></span></button>
+                    <button class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" type="button" data-<?= $e($listName) ?>-next<?= $listPage >= $listTotalPages ? ' disabled aria-disabled="true"' : '' ?>><span><?= $e($t('common.next')) ?></span><?= $icon('next') ?></button>
                 </div>
             <?php else: ?>
                 <div></div>

@@ -21,9 +21,9 @@ final class User extends BaseAdmin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function listApiV1(callable $redirect): void
+    public function listApiV1(callable $_redirect): void
     {
-        if (!$this->guardAdmin($redirect)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
@@ -37,12 +37,11 @@ final class User extends BaseAdmin
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
             return;
         }
 
@@ -51,18 +50,21 @@ final class User extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('users.deleted'),
+            'redirect' => $this->buildPath('admin/users'),
+        ]);
     }
 
     public function suspendApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
         $mode = (string)($_POST['mode'] ?? 'suspend');
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
             return;
         }
 
@@ -72,7 +74,11 @@ final class User extends BaseAdmin
                 return;
             }
 
-            $this->apiOk(['id' => $id, 'suspend' => 0]);
+            $this->apiOk([
+                'id' => $id,
+                'suspend' => 0,
+                'message' => I18n::t('users.unsuspended'),
+            ]);
             return;
         }
 
@@ -81,12 +87,16 @@ final class User extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id, 'suspend' => 1]);
+        $this->apiOk([
+            'id' => $id,
+            'suspend' => 1,
+            'message' => I18n::t('users.suspended'),
+        ]);
     }
 
     public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -107,12 +117,11 @@ final class User extends BaseAdmin
 
     public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.csrf_expired'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('users.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
             return;
         }
 

@@ -21,9 +21,9 @@ final class Term extends BaseAdmin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function listApiV1(callable $redirect): void
+    public function listApiV1(callable $_redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
@@ -35,9 +35,9 @@ final class Term extends BaseAdmin
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
-    public function suggest(callable $redirect): void
+    public function searchApiV1(callable $_redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
@@ -49,7 +49,7 @@ final class Term extends BaseAdmin
 
     public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -70,12 +70,11 @@ final class Term extends BaseAdmin
 
     public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('terms.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('terms.invalid_id'))) {
             return;
         }
 
@@ -94,12 +93,11 @@ final class Term extends BaseAdmin
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('terms.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('terms.invalid_id'))) {
             return;
         }
 
@@ -108,7 +106,11 @@ final class Term extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('terms.deleted'),
+            'redirect' => $this->buildPath('admin/terms'),
+        ]);
     }
 
     private function mapListItem(array $row): array

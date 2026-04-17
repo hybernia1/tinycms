@@ -41,9 +41,9 @@ final class Content extends BaseAdmin
         $this->pages->adminContentList($pagination, $status, $query, $availableStatuses, $statusCounts);
     }
 
-    public function listApiV1(callable $redirect): void
+    public function listApiV1(callable $_redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
@@ -57,17 +57,15 @@ final class Content extends BaseAdmin
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
-        if ($this->content->find($id) === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
 
@@ -81,22 +79,21 @@ final class Content extends BaseAdmin
             'id' => $id,
             'action' => $action,
             'message' => $action === 'soft_deleted' ? I18n::t('content.moved_to_trash') : I18n::t('content.deleted'),
+            'redirect' => $this->buildPath('admin/content'),
         ]);
     }
 
     public function restoreApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
-        if ($this->content->find($id) === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
 
@@ -128,7 +125,7 @@ final class Content extends BaseAdmin
 
     public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -175,17 +172,15 @@ final class Content extends BaseAdmin
 
     public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
-        if ($this->content->find($id) === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
 
@@ -207,19 +202,17 @@ final class Content extends BaseAdmin
 
     public function statusApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
         $mode = (string)($_POST['mode'] ?? 'draft');
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
         $item = $this->content->find($id);
-        if ($item === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
 
@@ -234,7 +227,11 @@ final class Content extends BaseAdmin
                 return;
             }
 
-            $this->apiOk(['id' => $id, 'status' => 'published']);
+            $this->apiOk([
+                'id' => $id,
+                'status' => 'published',
+                'message' => I18n::t('content.published'),
+            ]);
             return;
         }
 
@@ -243,12 +240,16 @@ final class Content extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id, 'status' => 'draft']);
+        $this->apiOk([
+            'id' => $id,
+            'status' => 'draft',
+            'message' => I18n::t('content.switched_to_draft'),
+        ]);
     }
 
     public function draftInitApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -269,16 +270,20 @@ final class Content extends BaseAdmin
 
         $id = (int)($result['id'] ?? 0);
         if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('content.draft_invalid_id'));
+            $this->apiError('INVALID_ID', I18n::t('content.draft_invalid_id'), 400);
             return;
         }
 
-        $this->apiOk(['id' => $id, 'created_new' => true]);
+        $this->apiOk([
+            'id' => $id,
+            'created_new' => true,
+            'message' => I18n::t('content.created'),
+        ]);
     }
 
     public function autosaveApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -291,8 +296,7 @@ final class Content extends BaseAdmin
         }
 
         if ($id > 0) {
-            if ($this->content->find($id) === null) {
-                $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+            if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
                 return;
             }
         }
@@ -320,9 +324,9 @@ final class Content extends BaseAdmin
         ]);
     }
 
-    public function linkTitleApiV1(callable $redirect): void
+    public function linkTitleApiV1(callable $_redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 

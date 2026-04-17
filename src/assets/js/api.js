@@ -205,17 +205,11 @@
         setFormMessage(form, '');
 
         const payloadRedirect = String(payload?.data?.redirect || '').trim();
-        const fallbackRedirect = String(form.getAttribute('data-redirect-url') || '').trim();
-        const redirect = payloadRedirect !== '' ? payloadRedirect : fallbackRedirect;
+        const redirect = payloadRedirect;
         const successMessage = String(payload?.data?.message || '').trim();
         if (redirect !== '') {
             if (successMessage !== '') {
                 storeFlash('success', successMessage);
-            } else {
-                const fallbackMessage = t('common.saved', '');
-                if (fallbackMessage !== '') {
-                    storeFlash('success', fallbackMessage);
-                }
             }
             const target = /^https?:\/\//i.test(redirect) || redirect.startsWith('/')
                 ? redirect
@@ -254,20 +248,24 @@
 })();
 (() => {
     const normalizePayload = (payload) => {
-        if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
+        if (!payload || !Object.prototype.hasOwnProperty.call(payload, 'ok')) {
             return {
-                success: payload.ok === true,
-                message: String(payload.error?.message || ''),
-                data: payload.data,
-                meta: payload.meta || {},
+                success: false,
+                message: '',
+                errorCode: 'INVALID_PAYLOAD',
+                errors: {},
+                data: null,
+                meta: {},
             };
         }
 
         return {
-            success: payload?.success === true || !Object.prototype.hasOwnProperty.call(payload || {}, 'success'),
-            message: String(payload?.message || ''),
-            data: payload,
-            meta: payload || {},
+            success: payload.ok === true,
+            message: String(payload.ok === true ? (payload.data?.message || '') : (payload.error?.message || '')),
+            errorCode: String(payload.error?.code || ''),
+            errors: payload.error?.errors && typeof payload.error.errors === 'object' ? payload.error.errors : {},
+            data: payload.data,
+            meta: payload.meta || {},
         };
     };
 
@@ -373,6 +371,15 @@ const initListApi = (config) => {
     let searchTimer = null;
     let fetchController = null;
 
+    const setButtonDisabled = (button, disabled) => {
+        if (!button) {
+            return;
+        }
+        button.disabled = disabled;
+        button.classList.toggle('disabled', disabled);
+        button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    };
+
     const setPagination = (page, totalPages) => {
         if (!prevLink || !nextLink) {
             return;
@@ -381,10 +388,8 @@ const initListApi = (config) => {
         const prevDisabled = page <= 1;
         const nextDisabled = page >= totalPages;
 
-        prevLink.classList.toggle('disabled', prevDisabled);
-        nextLink.classList.toggle('disabled', nextDisabled);
-        prevLink.setAttribute('aria-disabled', prevDisabled ? 'true' : 'false');
-        nextLink.setAttribute('aria-disabled', nextDisabled ? 'true' : 'false');
+        setButtonDisabled(prevLink, prevDisabled);
+        setButtonDisabled(nextLink, nextDisabled);
     };
 
     const syncFilters = () => {
@@ -478,20 +483,26 @@ const initListApi = (config) => {
         const result = await postForm(path, formData);
         const response = result.response;
         const normalized = result.data;
-        if (!response.ok) {
-            const message = normalized.message;
+        if (!response.ok || !normalized.success) {
+            const errorCode = String(normalized.errorCode || '');
+            const fallbackMessage = errorCode === 'INVALID_CSRF' ? t('common.invalid_csrf') : '';
+            const message = String(normalized.message || fallbackMessage || '').trim();
             if (message !== '') {
                 pushFlash('error', message);
             }
-            return { success: false };
-        }
-        if (!normalized.success && normalized.message !== '') {
-            pushFlash('error', normalized.message);
+            return {
+                success: false,
+                message,
+                errorCode,
+                errors: normalized.errors && typeof normalized.errors === 'object' ? normalized.errors : {},
+            };
         }
 
         return {
             success: normalized.success,
             message: normalized.message,
+            errorCode: normalized.errorCode,
+            errors: normalized.errors && typeof normalized.errors === 'object' ? normalized.errors : {},
             ...(normalized.data && typeof normalized.data === 'object' ? normalized.data : {}),
         };
     };

@@ -23,9 +23,9 @@ final class Media extends BaseAdmin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function listApiV1(callable $redirect): void
+    public function listApiV1(callable $_redirect): void
     {
-        if (!$this->guardAdmin($redirect, false)) {
+        if (!$this->guardApiAdmin()) {
             return;
         }
 
@@ -39,7 +39,7 @@ final class Media extends BaseAdmin
 
     public function addApiV1(callable $redirect): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -80,18 +80,16 @@ final class Media extends BaseAdmin
 
     public function editApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('media.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('media.invalid_id'))) {
             return;
         }
 
         $item = $this->media->find($id);
-        if ($item === null) {
-            $this->apiError('NOT_FOUND', I18n::t('media.not_found'), 404);
+        if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('media.not_found'))) {
             return;
         }
 
@@ -116,18 +114,16 @@ final class Media extends BaseAdmin
 
     public function deleteApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
-        if ($id <= 0) {
-            $this->apiError('INVALID_ID', I18n::t('media.invalid_id'));
+        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('media.invalid_id'))) {
             return;
         }
 
         $item = $this->media->find($id);
-        if ($item === null) {
-            $this->apiError('NOT_FOUND', I18n::t('media.not_found'), 404);
+        if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('media.not_found'))) {
             return;
         }
 
@@ -137,7 +133,11 @@ final class Media extends BaseAdmin
         }
 
         $this->upload->deleteMediaFiles($item);
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('media.deleted'),
+            'redirect' => $this->buildPath('admin/media'),
+        ]);
     }
 
     private function resolveListQuery(): array

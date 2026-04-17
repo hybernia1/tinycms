@@ -6,7 +6,7 @@
         autocomplete="off"
         action="<?= $e($mode === 'add' ? $url('admin/api/v1/users/add') : $url('admin/api/v1/users/' . (int)($user['ID'] ?? 0) . '/edit')) ?>"
         data-api-submit
-        <?= $mode === 'add' ? 'data-redirect-url="' . $e($url('admin/users')) . '"' : 'data-stay-on-page' ?>
+        <?= $mode === 'edit' ? 'data-stay-on-page' : '' ?>
     >
         <?= $csrfField() ?>
         <div class="mb-3">

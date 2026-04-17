@@ -5,7 +5,6 @@
         enctype="multipart/form-data"
         action="<?= $e($url('admin/api/v1/settings')) ?>"
         data-api-submit
-        data-redirect-url="<?= $e($url('admin/settings')) ?>"
     >
         <?= $csrfField() ?>
 

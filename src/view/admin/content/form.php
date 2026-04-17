@@ -16,7 +16,7 @@ $contentId = (int)($item['id'] ?? 0);
     enctype="multipart/form-data"
     action="<?= $e($mode === 'add' ? $url('admin/api/v1/content/add') : $url('admin/api/v1/content/' . (int)($item['id'] ?? 0) . '/edit')) ?>"
     data-api-submit
-    <?= $mode === 'add' ? 'data-redirect-url="' . $e($url('admin/content')) . '"' : 'data-stay-on-page' ?>
+    <?= $mode === 'edit' ? 'data-stay-on-page' : '' ?>
     data-autosave-endpoint="<?= $e($url('admin/api/v1/content/autosave')) ?>"
     data-draft-init-endpoint="<?= $e($url('admin/api/v1/content/draft/init')) ?>"
     data-edit-url-base="<?= $e($url('admin/content/edit?id=')) ?>"
@@ -45,7 +45,7 @@ $contentId = (int)($item['id'] ?? 0);
                     data-content-id="<?= $contentId ?>"
                     data-media-library-endpoint="<?= $e($url('admin/api/v1/content/' . $contentId . '/media')) ?>"
                     data-media-base-url="<?= $e($url('')) ?>"
-                    data-link-title-endpoint="<?= $e($url('admin/api/v1/link-title')) ?>"
+                    data-link-title-endpoint="<?= $e($url('admin/api/v1/content/link-title')) ?>"
                 ><?= $e((string)($item['body'] ?? '')) ?></textarea>
             </div>
         </div>
@@ -82,7 +82,7 @@ $contentId = (int)($item['id'] ?? 0);
                     <div
                         class="tag-picker"
                         data-tag-picker
-                        data-suggest-endpoint="<?= $e($url('admin/api/v1/terms/suggest')) ?>"
+                        data-search-endpoint="<?= $e($url('admin/api/v1/terms/search')) ?>"
                         data-initial="<?= $termsJson ?>"
                     >
                         <div class="tag-picker-field">
@@ -124,7 +124,6 @@ $contentId = (int)($item['id'] ?? 0);
     method="post"
     action="<?= $e($url('admin/api/v1/content/' . $contentId . '/delete')) ?>"
     data-api-submit
-    data-redirect-url="<?= $e($url('admin/content')) ?>"
 >
     <?= $csrfField() ?>
 </form>

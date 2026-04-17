@@ -48,7 +48,7 @@ final class Sessions extends BaseAdmin
         }
 
         if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $this->apiError('INVALID_CSRF', I18n::t('common.csrf_expired'), 419, [
+            $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
                 'errors' => [],
                 ...$this->csrfPayload(),
             ]);
@@ -94,6 +94,7 @@ final class Sessions extends BaseAdmin
             'authenticated' => true,
             'message' => I18n::t('auth.login_success'),
             'csrf' => $this->csrf->token(),
+            'redirect' => $this->buildPath('admin/dashboard'),
         ]);
     }
 

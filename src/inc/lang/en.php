@@ -25,7 +25,6 @@ return [
         'created' => 'Created',
         'updated' => 'Updated',
         'no_author' => 'No author',
-        'csrf_expired' => 'Security token expired, please submit the form again.',
         'invalid_csrf' => 'Invalid CSRF token.',
         'invalid_data' => 'Invalid data.',
         'upload_add_files' => 'Add files',

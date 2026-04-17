@@ -73,7 +73,7 @@ abstract class BaseAdmin
         return true;
     }
 
-    protected function guardApiAdminCsrf(string $message, bool $flashDenied = false): bool
+    protected function guardApiAdminCsrf(?string $message = null, bool $flashDenied = false): bool
     {
         if (!$this->guardApiAdmin($flashDenied)) {
             return false;
@@ -83,7 +83,7 @@ abstract class BaseAdmin
             return true;
         }
 
-        $this->apiError('INVALID_CSRF', $message, 419);
+        $this->apiError('INVALID_CSRF', $message ?? I18n::t('common.invalid_csrf'), 419);
         return false;
     }
 
@@ -126,6 +126,26 @@ abstract class BaseAdmin
             'ok' => false,
             'error' => $error,
         ], $statusCode);
+    }
+
+    protected function requirePositiveId(int $id, string $code, string $message, int $statusCode = 400): bool
+    {
+        if ($id > 0) {
+            return true;
+        }
+
+        $this->apiError($code, $message, $statusCode);
+        return false;
+    }
+
+    protected function requireEntity(?array $entity, string $code, string $message, int $statusCode = 404): bool
+    {
+        if ($entity !== null) {
+            return true;
+        }
+
+        $this->apiError($code, $message, $statusCode);
+        return false;
     }
 
     protected function formatDateTime(string $value): string

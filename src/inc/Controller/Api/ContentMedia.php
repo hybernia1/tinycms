@@ -28,7 +28,7 @@ final class ContentMedia extends BaseAdmin
 
     public function thumbnailDetachApiV1(callable $redirect, int $id): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -42,12 +42,15 @@ final class ContentMedia extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $id]);
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('media.detached'),
+        ]);
     }
 
     public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -70,10 +73,11 @@ final class ContentMedia extends BaseAdmin
             'content_id' => $contentId,
             'media_id' => $mediaId,
             'media' => $this->mapLibraryItem($media),
+            'message' => I18n::t('content.updated'),
         ]);
     }
 
-    public function mediaLibraryApiV1(callable $redirect, int $contentId): void
+    public function mediaLibraryApiV1(callable $_redirect, int $contentId): void
     {
         if (!$this->guardApiAdmin()) {
             return;
@@ -106,7 +110,7 @@ final class ContentMedia extends BaseAdmin
 
     public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -115,8 +119,7 @@ final class ContentMedia extends BaseAdmin
             return;
         }
 
-        if ($mediaId <= 0) {
-            $this->apiError('INVALID_MEDIA_ID', I18n::t('media.not_found'));
+        if (!$this->requirePositiveId($mediaId, 'INVALID_ID', I18n::t('media.invalid_id'))) {
             return;
         }
 
@@ -131,12 +134,16 @@ final class ContentMedia extends BaseAdmin
         }
 
         $this->upload->deleteMediaFiles($media);
-        $this->apiOk(['id' => $mediaId, 'content_id' => $contentId]);
+        $this->apiOk([
+            'id' => $mediaId,
+            'content_id' => $contentId,
+            'message' => I18n::t('media.deleted'),
+        ]);
     }
 
     public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -173,17 +180,18 @@ final class ContentMedia extends BaseAdmin
             'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
             'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
             'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
+            'message' => I18n::t('media.uploaded'),
         ]);
     }
 
     public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
         $name = trim((string)($_POST['name'] ?? ''));
-        if ($contentId <= 0 || $mediaId <= 0 || $name === '') {
+        if ($name === '') {
             $this->apiError('INVALID_DATA', I18n::t('common.invalid_data'));
             return;
         }
@@ -208,17 +216,16 @@ final class ContentMedia extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['id' => $mediaId, 'name' => $name]);
+        $this->apiOk([
+            'id' => $mediaId,
+            'name' => $name,
+            'message' => I18n::t('media.rename_saved'),
+        ]);
     }
 
     public function mediaAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
     {
-        if (!$this->guardApiAdminCsrf(I18n::t('common.invalid_csrf'))) {
-            return;
-        }
-
-        if ($contentId <= 0 || $mediaId <= 0) {
-            $this->apiError('INVALID_DATA', I18n::t('common.invalid_data'));
+        if (!$this->guardApiAdminCsrf()) {
             return;
         }
 
@@ -235,14 +242,21 @@ final class ContentMedia extends BaseAdmin
             return;
         }
 
-        $this->apiOk(['content_id' => $contentId, 'media_id' => $mediaId]);
+        $this->apiOk([
+            'content_id' => $contentId,
+            'media_id' => $mediaId,
+            'message' => I18n::t('content.updated'),
+        ]);
     }
 
     private function requireExistingContent(int $contentId): ?array
     {
+        if (!$this->requirePositiveId($contentId, 'NOT_FOUND', I18n::t('content.not_found'), 404)) {
+            return null;
+        }
+
         $content = $this->content->find($contentId);
-        if ($contentId <= 0 || $content === null) {
-            $this->apiError('NOT_FOUND', I18n::t('content.not_found'), 404);
+        if (!$this->requireEntity($content, 'NOT_FOUND', I18n::t('content.not_found'))) {
             return null;
         }
 
@@ -251,9 +265,12 @@ final class ContentMedia extends BaseAdmin
 
     private function requireExistingMedia(int $mediaId): ?array
     {
+        if (!$this->requirePositiveId($mediaId, 'NOT_FOUND', I18n::t('media.not_found'), 404)) {
+            return null;
+        }
+
         $media = $this->media->find($mediaId);
-        if ($mediaId <= 0 || $media === null) {
-            $this->apiError('MEDIA_NOT_FOUND', I18n::t('media.not_found'), 404);
+        if (!$this->requireEntity($media, 'NOT_FOUND', I18n::t('media.not_found'))) {
             return null;
         }
 
