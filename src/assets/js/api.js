@@ -371,6 +371,15 @@ const initListApi = (config) => {
     let searchTimer = null;
     let fetchController = null;
 
+    const setButtonDisabled = (button, disabled) => {
+        if (!button) {
+            return;
+        }
+        button.disabled = disabled;
+        button.classList.toggle('disabled', disabled);
+        button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    };
+
     const setPagination = (page, totalPages) => {
         if (!prevLink || !nextLink) {
             return;
@@ -379,10 +388,8 @@ const initListApi = (config) => {
         const prevDisabled = page <= 1;
         const nextDisabled = page >= totalPages;
 
-        prevLink.classList.toggle('disabled', prevDisabled);
-        nextLink.classList.toggle('disabled', nextDisabled);
-        prevLink.setAttribute('aria-disabled', prevDisabled ? 'true' : 'false');
-        nextLink.setAttribute('aria-disabled', nextDisabled ? 'true' : 'false');
+        setButtonDisabled(prevLink, prevDisabled);
+        setButtonDisabled(nextLink, nextDisabled);
     };
 
     const syncFilters = () => {
