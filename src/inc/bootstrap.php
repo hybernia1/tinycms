@@ -5,8 +5,6 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-require_once BASE_DIR . '/autoload.php';
-
 use App\Controller\Admin\Admin as AdminController;
 use App\Controller\Admin\Content as ContentController;
 use App\Controller\Admin\Media as MediaController;
