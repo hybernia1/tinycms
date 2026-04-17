@@ -254,24 +254,24 @@
 })();
 (() => {
     const normalizePayload = (payload) => {
-        if (payload && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
+        if (!payload || !Object.prototype.hasOwnProperty.call(payload, 'ok')) {
             return {
-                success: payload.ok === true,
-                message: String(payload.error?.message || ''),
-                errorCode: String(payload.error?.code || ''),
-                errors: payload.error?.errors && typeof payload.error.errors === 'object' ? payload.error.errors : {},
-                data: payload.data,
-                meta: payload.meta || {},
+                success: false,
+                message: '',
+                errorCode: 'INVALID_PAYLOAD',
+                errors: {},
+                data: null,
+                meta: {},
             };
         }
 
         return {
-            success: payload?.success === true || !Object.prototype.hasOwnProperty.call(payload || {}, 'success'),
-            message: String(payload?.message || ''),
-            errorCode: '',
-            errors: payload?.errors && typeof payload.errors === 'object' ? payload.errors : {},
-            data: payload,
-            meta: payload || {},
+            success: payload.ok === true,
+            message: String(payload.ok === true ? (payload.data?.message || '') : (payload.error?.message || '')),
+            errorCode: String(payload.error?.code || ''),
+            errors: payload.error?.errors && typeof payload.error.errors === 'object' ? payload.error.errors : {},
+            data: payload.data,
+            meta: payload.meta || {},
         };
     };
 
