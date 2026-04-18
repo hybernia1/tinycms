@@ -28,7 +28,7 @@ final class Term extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
         $pagination = $this->terms->paginate($page, $perPage, $query, $status);
         $statusCounts = $this->terms->statusCounts();
 
@@ -61,13 +61,5 @@ final class Term extends Admin
         }
 
         $this->pages->adminTermForm('edit', $item, [], $this->terms->contentUsages($id));
-    }
-
-    private function resolveListQuery(): array
-    {
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = $this->resolveStatusFilter(['all', 'unassigned']);
-
-        return [$page, $perPage, $status, $query];
     }
 }

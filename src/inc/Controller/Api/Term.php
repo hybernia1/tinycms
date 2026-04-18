@@ -27,7 +27,7 @@ final class Term extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
         $pagination = $this->terms->paginate($page, $perPage, $query, $status);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->terms->statusCounts();
@@ -121,13 +121,5 @@ final class Term extends Admin
             'created' => (string)($row['created'] ?? ''),
             'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
         ];
-    }
-
-    private function resolveListQuery(): array
-    {
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = $this->resolveStatusFilter(['all', 'unassigned']);
-
-        return [$page, $perPage, $status, $query];
     }
 }

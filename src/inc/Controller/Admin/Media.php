@@ -28,7 +28,7 @@ final class Media extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
         $pagination = $this->media->paginate($page, $perPage, $query, $status);
         $statusCounts = $this->media->statusCounts();
         $this->pages->adminMediaList($pagination, $status, $query, $statusCounts);
@@ -61,13 +61,5 @@ final class Media extends Admin
 
         $navigation = $this->media->editNavigation($id);
         $this->pages->adminMediaForm('edit', $item, [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
-    }
-
-    private function resolveListQuery(): array
-    {
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = $this->resolveStatusFilter(['all', 'unassigned']);
-
-        return [$page, $perPage, $status, $query];
     }
 }
