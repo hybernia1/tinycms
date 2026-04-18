@@ -28,11 +28,8 @@ final class User extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $suspend, $query] = $this->resolveUserListQuery();
-
-        $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
-        $statusCounts = $this->users->statusCounts();
-        $this->pages->adminUsersList($pagination, $status, $query, $statusCounts);
+        [, , $status, , $query] = $this->resolveUserListQuery();
+        $this->pages->adminUsersList($status, $query);
     }
 
     public function addForm(callable $redirect): void

@@ -32,11 +32,13 @@ final class Content extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveContentListQuery($this->content->statuses());
-
-        $pagination = $this->content->paginate($page, $perPage, $status, $query);
-        $statusCounts = $this->content->statusCounts($availableStatuses);
-        $this->pages->adminContentList($pagination, $status, $query, $availableStatuses, $statusCounts);
+        $availableStatuses = [
+            ContentService::STATUS_DRAFT,
+            ContentService::STATUS_PUBLISHED,
+            ContentService::STATUS_TRASH,
+        ];
+        [, , $status, $query] = $this->resolveContentListQuery($availableStatuses);
+        $this->pages->adminContentList($status, $query, $availableStatuses);
     }
 
     public function addForm(callable $redirect): void

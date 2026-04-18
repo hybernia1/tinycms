@@ -28,10 +28,8 @@ final class Media extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
-        $pagination = $this->media->paginate($page, $perPage, $query, $status);
-        $statusCounts = $this->media->statusCounts();
-        $this->pages->adminMediaList($pagination, $status, $query, $statusCounts);
+        [, , $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
+        $this->pages->adminMediaList($status, $query);
     }
 
     public function addForm(callable $redirect): void

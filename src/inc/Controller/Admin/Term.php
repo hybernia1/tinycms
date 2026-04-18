@@ -28,11 +28,8 @@ final class Term extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
-        $pagination = $this->terms->paginate($page, $perPage, $query, $status);
-        $statusCounts = $this->terms->statusCounts();
-
-        $this->pages->adminTermList($pagination, $status, $query, $statusCounts);
+        [, , $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
+        $this->pages->adminTermList($status, $query);
     }
 
     public function addForm(callable $redirect): void
