@@ -215,6 +215,22 @@ class Admin
         return in_array($status, $allowed, true) ? $status : $default;
     }
 
+    protected function resolveSimpleListQuery(array $allowedStatuses, string $defaultStatus = 'all', string $statusParam = 'status'): array
+    {
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
+        $status = $this->resolveStatusFilter($allowedStatuses, $defaultStatus, $statusParam);
+
+        return [$page, $perPage, $status, $query];
+    }
+
+    protected function resolveUserListQuery(): array
+    {
+        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', 'active', 'suspended']);
+        $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
+
+        return [$page, $perPage, $status, $suspend, $query];
+    }
+
     protected function buildListMeta(array $pagination, int $perPage, string $status, string $query, array $statusCounts): array
     {
         return [

@@ -28,7 +28,7 @@ final class User extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $suspend, $query] = $this->resolveListQuery();
+        [$page, $perPage, $status, $suspend, $query] = $this->resolveUserListQuery();
 
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
         $statusCounts = $this->users->statusCounts();
@@ -68,14 +68,4 @@ final class User extends Admin
 
         $this->pages->adminUsersForm('edit', $user, []);
     }
-
-    private function resolveListQuery(): array
-    {
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = $this->resolveStatusFilter(['all', 'active', 'suspended']);
-        $suspend = $status === 'active' ? 0 : ($status === 'suspended' ? 1 : null);
-
-        return [$page, $perPage, $status, $suspend, $query];
-    }
-
 }

@@ -29,7 +29,7 @@ final class Media extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query] = $this->resolveListQuery();
+        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
         $pagination = $this->media->paginate($page, $perPage, $query, $status);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->media->statusCounts();
@@ -139,15 +139,6 @@ final class Media extends Admin
             'redirect' => $this->buildPath('admin/media'),
         ]);
     }
-
-    private function resolveListQuery(): array
-    {
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $status = $this->resolveStatusFilter(['all', 'unassigned']);
-
-        return [$page, $perPage, $status, $query];
-    }
-
     private function mapListItem(array $row): array
     {
         $previewPath = $this->resolvePreviewPath($row);
