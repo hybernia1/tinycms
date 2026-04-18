@@ -5,8 +5,6 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-require_once BASE_DIR . '/autoload.php';
-
 use App\Controller\Admin\Admin as AdminController;
 use App\Controller\Admin\Content as ContentController;
 use App\Controller\Admin\Media as MediaController;
@@ -56,12 +54,7 @@ $redirect = static function (string $path = '', bool $permanent = false) use ($r
     exit;
 };
 
-$requestPath = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? '/');
-$requestPath = '/' . ltrim($requestPath, '/');
-if ($basePath !== '' && ($requestPath === $basePath || str_starts_with($requestPath, $basePath . '/'))) {
-    $requestPath = (string)substr($requestPath, strlen($basePath));
-}
-$requestPath = trim($requestPath, '/');
+$requestPath = $router->requestPath((string)($_SERVER['REQUEST_URI'] ?? '/'));
 
 $isInstalled = is_file(BASE_DIR . '/config.php');
 

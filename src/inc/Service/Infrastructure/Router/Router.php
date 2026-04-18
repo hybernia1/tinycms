@@ -77,7 +77,7 @@ final class Router
         return ($this->basePath === '' ? '' : $this->basePath) . '/' . $cleanPath;
     }
 
-    private function requestPath(string $uri): string
+    public function requestPath(string $uri): string
     {
         $raw = (string)(parse_url($uri, PHP_URL_PATH) ?? '');
         $normalized = '/' . ltrim($raw, '/');
