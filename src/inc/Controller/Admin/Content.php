@@ -32,7 +32,7 @@ final class Content extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveListQuery();
+        [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveContentListQuery($this->content->statuses());
 
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
         $statusCounts = $this->content->statusCounts($availableStatuses);
@@ -72,15 +72,6 @@ final class Content extends Admin
         $formItem = $item;
         $selectedTerms = $this->resolveSelectedTerms($formItem, $id);
         $this->pages->adminContentForm('edit', $formItem, [], $statuses, $this->users->authorOptions(), $selectedTerms);
-    }
-
-    private function resolveListQuery(): array
-    {
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $availableStatuses = $this->content->statuses();
-        $status = $this->resolveStatusFilter(array_merge(['all'], $availableStatuses));
-
-        return [$page, $perPage, $status, $query, $availableStatuses];
     }
 
     private function resolveSelectedTerms(array $item, ?int $contentId): array

@@ -231,6 +231,20 @@ class Admin
         return [$page, $perPage, $status, $suspend, $query];
     }
 
+    protected function resolveContentListQuery(array $availableStatuses): array
+    {
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
+        $statuses = array_values(array_filter(array_map(
+            static fn(mixed $value): string => trim((string)$value),
+            $availableStatuses,
+        ), static fn(string $value): bool => $value !== ''));
+        $statuses = array_values(array_unique($statuses));
+        $allowedStatuses = array_merge(['all'], $statuses);
+        $status = $this->resolveStatusFilter($allowedStatuses);
+
+        return [$page, $perPage, $status, $query, $statuses];
+    }
+
     protected function buildListMeta(array $pagination, int $perPage, string $status, string $query, array $statusCounts): array
     {
         return [
