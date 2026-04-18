@@ -39,35 +39,15 @@ final class ErrorHandler
 
     private function databaseMessage(Throwable $e): ?string
     {
-        if ($e instanceof RuntimeException && $e->getMessage() === 'Database connection failed.' && $e->getPrevious() instanceof PDOException) {
-            return $this->pdoConnectionMessage($e->getPrevious());
+        if ($e instanceof PDOException) {
+            return 'Database error';
         }
 
-        if ($e instanceof PDOException) {
-            return $this->pdoConnectionMessage($e);
+        if ($e instanceof RuntimeException && $e->getMessage() === 'Database connection failed.' && $e->getPrevious() instanceof PDOException) {
+            return 'Database error';
         }
 
         return null;
-    }
-
-    private function pdoConnectionMessage(PDOException $e): string
-    {
-        $driverCode = (int)($e->errorInfo[1] ?? 0);
-        $message = mb_strtolower($e->getMessage());
-
-        if ($driverCode === 1044 || $driverCode === 1045 || str_contains($message, 'access denied')) {
-            return I18n::t('errors.db.access_denied');
-        }
-
-        if (str_contains($message, 'php_network_getaddresses') || str_contains($message, 'getaddrinfo')) {
-            return I18n::t('errors.db.host_unresolved');
-        }
-
-        if ($driverCode === 2002 || str_contains($message, 'connection refused') || str_contains($message, 'timed out')) {
-            return I18n::t('errors.db.server_unreachable');
-        }
-
-        return I18n::t('errors.db.generic');
     }
 
     private function renderDebug(Throwable $e): void
