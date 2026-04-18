@@ -334,7 +334,9 @@ select option {
     background: var(--color-surface);
 }
 
-.has-custom-select .custom-select-native {
+.has-custom-select .custom-select-native,
+.has-custom-datetime .custom-datetime-native,
+.custom-upload-field input[type='file'] {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -462,8 +464,6 @@ input[type='week']::-webkit-calendar-picker-indicator {
 }
 
 .field-icon-button {
-    width: var(--size-icon);
-    height: var(--size-icon);
     padding: 0;
     border: 0;
     background: transparent;
@@ -476,14 +476,6 @@ input[type='week']::-webkit-calendar-picker-indicator {
 
 .search-form {
     min-width: 260px;
-}
-
-.has-custom-datetime .custom-datetime-native {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
 }
 
 .custom-datetime {
