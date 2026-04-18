@@ -30,7 +30,7 @@ final class Content extends Admin
             return;
         }
 
-        [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveListQuery();
+        [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveContentListQuery($this->content->statuses());
         $pagination = $this->content->paginate($page, $perPage, $status, $query);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->content->statusCounts($availableStatuses);
@@ -397,15 +397,6 @@ final class Content extends Admin
     private function resolveAutosaveDraftName(): string
     {
         return I18n::t('content.autosave_draft_name');
-    }
-
-    private function resolveListQuery(): array
-    {
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $availableStatuses = $this->content->statuses();
-        $status = $this->resolveStatusFilter(array_merge(['all'], $availableStatuses));
-
-        return [$page, $perPage, $status, $query, $availableStatuses];
     }
 
     private function mapListItem(array $row): array
