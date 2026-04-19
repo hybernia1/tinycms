@@ -282,8 +282,21 @@ return [
             'siteauthor' => 'Site author',
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
+            'front_home_mode' => 'Default home page',
+            'front_home_content' => 'Home page (content)',
+            'front_posts_per_page' => 'Posts per page',
+            'front_theme' => 'Theme',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+        ],
+        'options' => [
+            'front_home_mode' => [
+                'latest' => 'Latest posts loop',
+                'content' => 'Selected content',
+            ],
+            'front_home_content' => [
+                'none' => '— Select content —',
+            ],
         ],
     ],
     'auth' => [

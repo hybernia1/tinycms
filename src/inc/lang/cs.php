@@ -282,8 +282,21 @@ return [
             'siteauthor' => 'Autor webu',
             'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
+            'front_home_mode' => 'Výchozí domovská stránka',
+            'front_home_content' => 'Domovská stránka (obsah)',
+            'front_posts_per_page' => 'Počet příspěvků na stránku',
+            'front_theme' => 'Šablona',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+        ],
+        'options' => [
+            'front_home_mode' => [
+                'latest' => 'Výpis posledních příspěvků',
+                'content' => 'Vybraný obsah',
+            ],
+            'front_home_content' => [
+                'none' => '— Vyberte obsah —',
+            ],
         ],
     ],
     'auth' => [

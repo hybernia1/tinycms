@@ -45,6 +45,10 @@
                             <img src="<?= $e($url($fieldValue)) ?>" alt="<?= $e((string)$fieldKey) ?> preview" style="width:32px;height:32px">
                         </div>
                     <?php endif; ?>
+                <?php elseif ($fieldType === 'number'): ?>
+                    <?php $min = (int)($field['min'] ?? 1); ?>
+                    <?php $max = (int)($field['max'] ?? 100); ?>
+                    <input type="number" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>" min="<?= $min ?>" max="<?= $max ?>" step="1">
                 <?php else: ?>
                     <input type="text" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>">
                 <?php endif; ?>
