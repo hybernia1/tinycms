@@ -50,11 +50,15 @@ final class Email
         $websiteEmail = trim((string)($settings['website_email'] ?? ''));
         $supportEmail = filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : ('tinycms@' . (explode(':', $host)[0] ?? 'localhost'));
 
+        $siteName = trim((string)($settings['sitename'] ?? 'TinyCMS')) !== '' ? (string)$settings['sitename'] : 'TinyCMS';
+
         return [
             'name' => I18n::t('auth.reset_email_generic_user'),
             'email' => trim($to),
             'token' => '',
-            'site_name' => trim((string)($settings['sitename'] ?? 'TinyCMS')) !== '' ? (string)$settings['sitename'] : 'TinyCMS',
+            'site_name' => $siteName,
+            'sitename' => $siteName,
+            'Sitename' => $siteName,
             'site_url' => $siteUrl,
             'login_url' => $siteUrl . '/auth/login',
             'support_email' => $supportEmail,

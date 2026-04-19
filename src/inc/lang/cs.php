@@ -360,19 +360,19 @@ return [
     'emails' => [
         'password_reset' => [
             'subject' => 'Reset hesla TinyCMS',
-            'body' => "Dobrý den {name},\n\nobdrželi jsme žádost o reset hesla v TinyCMS.\nPro změnu hesla otevřete tento odkaz:\n{link}\n\nPlatnost odkazu je 24 hodin.\nPokud jste o reset nežádali, tento e-mail ignorujte.\n\nTinyCMS",
+            'body' => "Dobrý den {name},\n\nobdrželi jsme žádost o reset hesla v {site_name}.\nPro změnu hesla otevřete tento odkaz:\n{link}\n\nPlatnost odkazu je 24 hodin.\nPokud jste o reset nežádali, tento e-mail ignorujte.\n\n{site_name}",
         ],
         'welcome_user' => [
             'subject' => 'Vítejte v TinyCMS',
-            'body' => "Dobrý den {name},\n\nvítejte v TinyCMS.\nVáš účet je připraven k použití.\n\nTinyCMS",
+            'body' => "Dobrý den {name},\n\nvítejte v {site_name}.\nVáš účet je připraven k použití.\n\n{site_name}",
         ],
         'user_suspended' => [
             'subject' => 'Účet byl suspendován',
-            'body' => "Dobrý den {name},\n\nváš účet v TinyCMS byl suspendován.\nPokud je to neočekávané, kontaktujte podporu webu.\n\nTinyCMS",
+            'body' => "Dobrý den {name},\n\nváš účet v {site_name} byl suspendován.\nPokud je to neočekávané, kontaktujte podporu webu.\n\n{site_name}",
         ],
         'user_unsuspended' => [
             'subject' => 'Účet byl znovu aktivován',
-            'body' => "Dobrý den {name},\n\nváš účet v TinyCMS byl znovu aktivován.\nMůžete se opět přihlásit.\n\nTinyCMS",
+            'body' => "Dobrý den {name},\n\nváš účet v {site_name} byl znovu aktivován.\nMůžete se opět přihlásit.\n\n{site_name}",
         ],
         'install_credentials' => [
             'subject' => 'Instalace TinyCMS dokončena',

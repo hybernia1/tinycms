@@ -360,19 +360,19 @@ return [
     'emails' => [
         'password_reset' => [
             'subject' => 'TinyCMS password reset',
-            'body' => "Hello {name},\n\nwe received a TinyCMS password reset request.\nUse this link to set a new password:\n{link}\n\nThis link is valid for 24 hours.\nIf you did not request this reset, you can ignore this email.\n\nTinyCMS",
+            'body' => "Hello {name},\n\nwe received a password reset request in {site_name}.\nUse this link to set a new password:\n{link}\n\nThis link is valid for 24 hours.\nIf you did not request this reset, you can ignore this email.\n\n{site_name}",
         ],
         'welcome_user' => [
             'subject' => 'Welcome to TinyCMS',
-            'body' => "Hello {name},\n\nwelcome to TinyCMS.\nYour account is ready.\n\nTinyCMS",
+            'body' => "Hello {name},\n\nwelcome to {site_name}.\nYour account is ready.\n\n{site_name}",
         ],
         'user_suspended' => [
             'subject' => 'Account suspended',
-            'body' => "Hello {name},\n\nyour TinyCMS account has been suspended.\nIf this is unexpected, contact website support.\n\nTinyCMS",
+            'body' => "Hello {name},\n\nyour account in {site_name} has been suspended.\nIf this is unexpected, contact website support.\n\n{site_name}",
         ],
         'user_unsuspended' => [
             'subject' => 'Account reactivated',
-            'body' => "Hello {name},\n\nyour TinyCMS account has been reactivated.\nYou can sign in again.\n\nTinyCMS",
+            'body' => "Hello {name},\n\nyour account in {site_name} has been reactivated.\nYou can sign in again.\n\n{site_name}",
         ],
         'install_credentials' => [
             'subject' => 'TinyCMS installation complete',
