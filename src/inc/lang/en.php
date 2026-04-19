@@ -280,7 +280,6 @@ return [
             'app_lang' => 'Application language',
             'sitename' => 'Site name',
             'siteauthor' => 'Site author',
-            'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
             'front_home_mode' => 'Default home page',
             'front_home_content' => 'Home page (content)',

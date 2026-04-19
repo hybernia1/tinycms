@@ -280,7 +280,6 @@ return [
             'app_lang' => 'Jazyk aplikace',
             'sitename' => 'Název webu',
             'siteauthor' => 'Autor webu',
-            'meta_title' => 'Meta title',
             'meta_description' => 'Meta description',
             'front_home_mode' => 'Výchozí domovská stránka',
             'front_home_content' => 'Domovská stránka (obsah)',

@@ -39,8 +39,7 @@ final class Theme
             return trim($value);
         }
 
-        $meta = trim($this->setting('meta_title'));
-        return $meta !== '' ? $meta : $this->siteTitle();
+        return $this->siteTitle();
     }
 
     public function head(array $context = []): string
