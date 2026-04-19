@@ -20,6 +20,7 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fafafa; color: #1
 .content-card-thumb img, .content-cover img { width: 100%; height: auto; display: block; border-radius: 6px; }
 .content-card-thumb img { aspect-ratio: 1 / 1; object-fit: cover; }
 .content-cover { margin: 0 0 1rem; }
+.content-excerpt-lead { margin: 0 0 1rem; }
 .term-list { list-style: none; padding: 0; display: flex; gap: .5rem; flex-wrap: wrap; }
 .pagination { display: flex; gap: .75rem; align-items: center; margin: 1.5rem 0 3rem; }
 .text-muted { color: #6b7280; }
