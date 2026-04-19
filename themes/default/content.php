@@ -5,7 +5,7 @@
     <?php if ($terms !== []): ?>
         <ul class="term-list">
             <?php foreach ($terms as $term): ?>
-                <li><a href="<?= $e($url('term/' . (int)($term['id'] ?? 0))) ?>"><?= $e((string)($term['name'] ?? '')) ?></a></li>
+                <li><a href="<?= $e($termUrl($term)) ?>"><?= $e((string)($term['name'] ?? '')) ?></a></li>
             <?php endforeach; ?>
         </ul>
     <?php endif; ?>

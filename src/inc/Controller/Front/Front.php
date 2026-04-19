@@ -74,15 +74,21 @@ final class Front
         $redirect($this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0)), true);
     }
 
-    public function termArchive(array $params): void
+    public function termArchive(callable $redirect, array $params): void
     {
-        $termId = (int)($params['id'] ?? 0);
+        $slug = trim((string)($params['slug'] ?? ''));
+        $termId = $this->slugger->extractId($slug);
         $term = $termId > 0 ? $this->services->term->find($termId) : null;
 
         if ($term === null) {
             http_response_code(404);
             echo '404';
             return;
+        }
+
+        $canonicalSlug = $this->slugger->slug((string)($term['name'] ?? ''), (int)($term['id'] ?? 0));
+        if ($slug !== $canonicalSlug) {
+            $redirect('term/' . $canonicalSlug, true);
         }
 
         $settings = $this->services->settings->resolved();

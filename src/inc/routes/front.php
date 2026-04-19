@@ -8,5 +8,5 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => '', 'controller' => $front, 'action' => 'home', 'with_redirect' => false],
     ['method' => 'GET', 'path' => 'content/{id}', 'controller' => $front, 'action' => 'contentLegacy', 'raw_params' => true],
     ['method' => 'GET', 'path' => '{slug}', 'controller' => $front, 'action' => 'content', 'raw_params' => true],
-    ['method' => 'GET', 'path' => 'term/{id}', 'controller' => $front, 'action' => 'termArchive', 'with_redirect' => false, 'raw_params' => true],
+    ['method' => 'GET', 'path' => 'term/{slug}', 'controller' => $front, 'action' => 'termArchive', 'raw_params' => true],
 ]);

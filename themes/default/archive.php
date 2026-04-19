@@ -4,5 +4,5 @@
     <p><?= $e($t('front.empty')) ?></p>
 <?php else: ?>
     <?php $includePartial('content-loop', ['items' => $items]); ?>
-    <?php $includePartial('pagination', ['pagination' => $pagination ?? [], 'basePath' => 'term/' . (int)($term['id'] ?? 0)]); ?>
+    <?php $includePartial('pagination', ['pagination' => $pagination ?? [], 'basePath' => trim((string)parse_url($termUrl((array)$term), PHP_URL_PATH), '/')]); ?>
 <?php endif; ?>

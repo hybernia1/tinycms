@@ -95,6 +95,16 @@ final class Theme
         return $this->url($this->slugger->slug((string)($item['name'] ?? ''), $id));
     }
 
+    public function termUrl(array $term): string
+    {
+        $id = (int)($term['id'] ?? 0);
+        if ($id <= 0) {
+            return $this->url('term');
+        }
+
+        return $this->url('term/' . $this->slugger->slug((string)($term['name'] ?? ''), $id));
+    }
+
     public function mediaSrcSet(string $path): string
     {
         $trimmed = trim($path);
