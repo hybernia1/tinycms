@@ -53,6 +53,18 @@ final class FrontView
             'kind' => 'archive',
             'term' => $term,
             'pagination' => $pagination,
+            'archiveLabel' => $this->translate('front.archive_for'),
+        ]);
+    }
+
+    public function authorArchive(array $author, array $pagination, string $archivePath): void
+    {
+        $this->render('archive', [
+            'kind' => 'archive',
+            'term' => $author,
+            'pagination' => $pagination,
+            'archiveLabel' => $this->translate('front.archive_for_author'),
+            'archivePath' => trim($archivePath, '/'),
         ]);
     }
 

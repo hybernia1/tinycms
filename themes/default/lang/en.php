@@ -4,6 +4,7 @@ return [
     'front.latest_content' => 'Latest content',
     'front.empty' => 'No content found.',
     'front.archive_for' => 'Archive for term',
+    'front.archive_for_author' => 'Author archive',
     'front.prev' => 'Previous',
     'front.next' => 'Next',
     'front.search_button' => 'Search',
