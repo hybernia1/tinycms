@@ -16,7 +16,7 @@
             <h2>
                 <a href="<?= $e($contentUrl($loopItem)) ?>"><?= $e((string)($loopItem['name'] ?? '')) ?></a>
             </h2>
-            <?php $meta = array_values(array_filter([$postAuthor($loopItem), $postDate($loopItem)])); ?>
+            <?php $meta = array_values(array_filter([$contentAuthor($loopItem), $contentDate($loopItem)])); ?>
             <?php if ($meta !== []): ?>
                 <p class="text-muted small"><?= $e(implode(' · ', $meta)) ?></p>
             <?php endif; ?>

@@ -127,7 +127,7 @@ final class Theme
         return implode(', ', $sources);
     }
 
-    public function postThumbnail(array $item, array $options = []): string
+    public function contentThumbnail(array $item, array $options = []): string
     {
         $thumbnail = trim((string)($item['thumbnail'] ?? ''));
         if ($thumbnail === '') {
@@ -151,7 +151,7 @@ final class Theme
         );
     }
 
-    public function postAuthor(array $item, string $fallback = ''): string
+    public function contentAuthor(array $item, string $fallback = ''): string
     {
         $author = trim((string)($item['author_name'] ?? ''));
         if ($author !== '') {
@@ -161,7 +161,7 @@ final class Theme
         return trim($fallback);
     }
 
-    public function postDate(array $item, string $fallback = ''): string
+    public function contentDate(array $item, string $fallback = ''): string
     {
         $raw = trim((string)($item['created'] ?? ''));
         if ($raw === '') {
