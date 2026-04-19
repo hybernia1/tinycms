@@ -256,15 +256,26 @@ final class Theme
         $placeholder = trim((string)($labels['placeholder'] ?? 'Search content'));
         $button = trim((string)($labels['button'] ?? 'Search'));
         $formAction = $this->esc($this->url(trim($action, '/')));
-        $value = $this->esc(trim($query));
+        $queryValue = trim($query);
+        $value = $this->esc($queryValue);
+        $state = $queryValue !== '' ? ' is-open' : '';
 
         return sprintf(
-            '<form class="search-form" action="%s" method="get"><input type="search" name="q" value="%s" placeholder="%s"><button type="submit">%s</button></form>',
+            '<form class="search-form search-form-expand%s" action="%s" method="get"><input type="search" name="q" value="%s" placeholder="%s" aria-label="%s"><button type="submit" aria-label="%s">%s</button></form>',
+            $state,
             $formAction,
             $value,
             $this->esc($placeholder),
             $this->esc($button),
+            $this->esc($placeholder),
+            $this->icon('search'),
         );
+    }
+
+    private function icon(string $name): string
+    {
+        $sprite = $this->esc($this->themeUrl('assets/svg/icons.svg#icon-' . trim($name)));
+        return '<svg class="icon" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
     }
 
     private function paginationUrl(string $basePath, int $page): string
