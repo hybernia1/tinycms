@@ -281,14 +281,12 @@ final class Install
         $name = trim((string)($admin['name'] ?? ''));
         $password = (string)($admin['password'] ?? '');
         $loginUrl = $this->loginUrl();
-        $siteName = 'TinyCMS';
-        $template = I18n::t('emails.install_credentials.body');
-        $body = strtr($template, [
+        $body = $this->renderInstallTemplate([
             '{name}' => $name !== '' ? $name : I18n::t('auth.reset_email_generic_user'),
             '{email}' => $email,
             '{password}' => $password,
             '{login_url}' => $loginUrl,
-            '{site_name}' => $siteName,
+            '{site_name}' => 'TinyCMS',
         ]);
         $mailer = new Mailer();
         $mailer->send($email, I18n::t('emails.install_credentials.subject'), $body);
@@ -302,5 +300,10 @@ final class Install
         $baseDir = trim(dirname($scriptName), '/.');
         $basePath = $baseDir === '' ? '' : '/' . $baseDir;
         return $scheme . '://' . $host . $basePath . '/auth/login';
+    }
+
+    private function renderInstallTemplate(array $vars): string
+    {
+        return strtr(I18n::t('emails.install_credentials.body'), $vars);
     }
 }

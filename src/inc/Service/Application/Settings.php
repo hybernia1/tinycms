@@ -197,6 +197,9 @@ final class Settings
                 $max = (int)($fields[$key]['max'] ?? 100);
                 $value = (string)max($min, min($max, $numeric > 0 ? $numeric : $min));
             }
+            if ($key === 'website_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                $value = '';
+            }
             if (($fields[$key]['type'] ?? '') === 'select') {
                 $options = (array)($fields[$key]['options'] ?? []);
                 if ($value !== '' && !array_key_exists($value, $options)) {

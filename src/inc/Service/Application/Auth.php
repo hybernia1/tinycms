@@ -13,6 +13,8 @@ use App\Service\Application\User as UserService;
 
 final class Auth
 {
+    private const RESET_TOKEN_TTL_SECONDS = 86400;
+
     private SessionAuth $auth;
     private Login $login;
     private SettingsService $settings;
@@ -144,14 +146,11 @@ final class Auth
 
         $token = trim((string)($user['reset_token'] ?? ''));
         $expiryRaw = trim((string)($user['reset_token_expiry'] ?? ''));
-        $expiryTs = $expiryRaw !== '' ? strtotime($expiryRaw) : false;
-        $now = time();
-
-        if ($token === '' || $expiryTs === false || $expiryTs <= $now) {
+        if ($this->shouldRegenerateResetToken($token, $expiryRaw)) {
             $token = bin2hex(random_bytes(32));
             $this->query->update('users', [
                 'reset_token' => $token,
-                'reset_token_expiry' => date('Y-m-d H:i:s', $now + 86400),
+                'reset_token_expiry' => $this->nextResetTokenExpiry(),
             ], [
                 'id' => (int)$user['id'],
             ]);
@@ -252,5 +251,20 @@ final class Auth
         }
 
         return $user;
+    }
+
+    private function shouldRegenerateResetToken(string $token, string $expiryRaw): bool
+    {
+        if (trim($token) === '') {
+            return true;
+        }
+
+        $expiryTs = $expiryRaw !== '' ? strtotime($expiryRaw) : false;
+        return $expiryTs === false || $expiryTs <= time();
+    }
+
+    private function nextResetTokenExpiry(): string
+    {
+        return date('Y-m-d H:i:s', time() + self::RESET_TOKEN_TTL_SECONDS);
     }
 }

@@ -20,12 +20,9 @@ final class Email
     public function send(string $to, string $templateKey, array $vars = []): bool
     {
         $resolvedVars = array_replace($this->defaultVars($to), $this->normalizeVars($vars));
-        $subject = trim(I18n::t($templateKey . '.subject'));
-        $body = $this->template(I18n::t($templateKey . '.body'), $resolvedVars);
-        $websiteEmail = trim((string)($this->settings->resolved()['website_email'] ?? ''));
-        $sender = filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : null;
+        [$subject, $body] = $this->templateParts($templateKey, $resolvedVars);
 
-        return $this->mailer->send($to, $subject, $body, $sender);
+        return $this->mailer->send($to, $subject, $body, $this->senderFromSettings());
     }
 
     private function template(string $message, array $vars): string
@@ -85,5 +82,18 @@ final class Email
         }
 
         return $normalized;
+    }
+
+    private function templateParts(string $templateKey, array $vars): array
+    {
+        $subject = trim(I18n::t($templateKey . '.subject'));
+        $body = $this->template(I18n::t($templateKey . '.body'), $vars);
+        return [$subject, $body];
+    }
+
+    private function senderFromSettings(): ?string
+    {
+        $websiteEmail = trim((string)($this->settings->resolved()['website_email'] ?? ''));
+        return filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : null;
     }
 }
