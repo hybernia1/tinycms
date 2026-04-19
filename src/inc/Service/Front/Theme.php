@@ -102,6 +102,47 @@ final class Theme
         );
     }
 
+    public function pagination(array $pagination, string $basePath = '', array $labels = []): string
+    {
+        $totalPages = (int)($pagination['total_pages'] ?? 1);
+        $page = (int)($pagination['page'] ?? 1);
+        if ($totalPages <= 1) {
+            return '';
+        }
+
+        $current = max(1, min($page, $totalPages));
+        $prevLabel = trim((string)($labels['prev'] ?? 'Previous'));
+        $nextLabel = trim((string)($labels['next'] ?? 'Next'));
+        $items = [];
+
+        if ($current > 1) {
+            $items[] = sprintf(
+                '<a href="%s">%s</a>',
+                $this->esc($this->paginationUrl($basePath, $current - 1)),
+                $this->esc($prevLabel !== '' ? $prevLabel : 'Previous'),
+            );
+        }
+
+        $items[] = sprintf('<span>%d / %d</span>', $current, $totalPages);
+
+        if ($current < $totalPages) {
+            $items[] = sprintf(
+                '<a href="%s">%s</a>',
+                $this->esc($this->paginationUrl($basePath, $current + 1)),
+                $this->esc($nextLabel !== '' ? $nextLabel : 'Next'),
+            );
+        }
+
+        return '<nav class="pagination" aria-label="Pagination">' . implode('', $items) . '</nav>';
+    }
+
+    private function paginationUrl(string $basePath, int $page): string
+    {
+        $base = trim($basePath, '/');
+        $suffix = $page > 1 ? '?page=' . $page : '';
+        return $this->url($base . $suffix);
+    }
+
     private function esc(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
