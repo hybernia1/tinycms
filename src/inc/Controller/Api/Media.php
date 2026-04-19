@@ -84,10 +84,6 @@ final class Media extends Admin
             return;
         }
 
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('media.invalid_id'))) {
-            return;
-        }
-
         $item = $this->media->find($id);
         if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('media.not_found'))) {
             return;
@@ -115,10 +111,6 @@ final class Media extends Admin
     public function deleteApiV1(callable $redirect, int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
-            return;
-        }
-
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('media.invalid_id'))) {
             return;
         }
 

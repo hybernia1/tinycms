@@ -74,10 +74,6 @@ final class Term extends Admin
             return;
         }
 
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('terms.invalid_id'))) {
-            return;
-        }
-
         $result = $this->terms->save($_POST, $id);
         if (($result['success'] ?? false) === true) {
             $this->apiOk([
@@ -94,10 +90,6 @@ final class Term extends Admin
     public function deleteApiV1(callable $redirect, int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
-            return;
-        }
-
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('terms.invalid_id'))) {
             return;
         }
 

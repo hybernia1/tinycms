@@ -119,11 +119,7 @@ final class ContentMedia extends Admin
             return;
         }
 
-        if (!$this->requirePositiveId($mediaId, 'INVALID_ID', I18n::t('media.invalid_id'))) {
-            return;
-        }
-
-        $media = $this->media->find($mediaId);
+        $media = $this->requireExistingMedia($mediaId);
         if ($media === null || !$this->media->delete($mediaId)) {
             $this->apiError('DELETE_FAILED', I18n::t('media.delete_failed'));
             return;
@@ -251,10 +247,6 @@ final class ContentMedia extends Admin
 
     private function requireExistingContent(int $contentId): ?array
     {
-        if (!$this->requirePositiveId($contentId, 'NOT_FOUND', I18n::t('content.not_found'), 404)) {
-            return null;
-        }
-
         $content = $this->content->find($contentId);
         if (!$this->requireEntity($content, 'NOT_FOUND', I18n::t('content.not_found'))) {
             return null;
@@ -265,10 +257,6 @@ final class ContentMedia extends Admin
 
     private function requireExistingMedia(int $mediaId): ?array
     {
-        if (!$this->requirePositiveId($mediaId, 'NOT_FOUND', I18n::t('media.not_found'), 404)) {
-            return null;
-        }
-
         $media = $this->media->find($mediaId);
         if (!$this->requireEntity($media, 'NOT_FOUND', I18n::t('media.not_found'))) {
             return null;
