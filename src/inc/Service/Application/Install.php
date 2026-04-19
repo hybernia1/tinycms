@@ -5,6 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Support\I18n;
+use App\Service\Support\Mailer;
 use PDO;
 use PDOException;
 
@@ -157,6 +158,8 @@ final class Install
             return ['success' => false, 'message' => $adminResult];
         }
 
+        $this->sendInstallEmail($admin);
+
         return ['success' => true, 'message' => I18n::t('install.success')];
     }
 
@@ -266,5 +269,41 @@ final class Install
         }
 
         return false;
+    }
+
+    private function sendInstallEmail(array $admin): void
+    {
+        $email = trim((string)($admin['email'] ?? ''));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        $name = trim((string)($admin['name'] ?? ''));
+        $password = (string)($admin['password'] ?? '');
+        $loginUrl = $this->loginUrl();
+        $body = $this->renderInstallTemplate([
+            '{name}' => $name !== '' ? $name : I18n::t('auth.reset_email_generic_user'),
+            '{email}' => $email,
+            '{password}' => $password,
+            '{login_url}' => $loginUrl,
+            '{site_name}' => 'TinyCMS',
+        ]);
+        $mailer = new Mailer();
+        $mailer->send($email, I18n::t('emails.install_credentials.subject'), $body);
+    }
+
+    private function loginUrl(): string
+    {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = trim((string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
+        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+        $baseDir = trim(dirname($scriptName), '/.');
+        $basePath = $baseDir === '' ? '' : '/' . $baseDir;
+        return $scheme . '://' . $host . $basePath . '/auth/login';
+    }
+
+    private function renderInstallTemplate(array $vars): string
+    {
+        return strtr(I18n::t('emails.install_credentials.body'), $vars);
     }
 }

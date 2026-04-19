@@ -289,6 +289,7 @@ return [
             'allow_registration' => 'Povolit registrace',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+            'website_email' => 'E-mail webu',
         ],
         'options' => [
             'front_home_mode' => [
@@ -307,6 +308,15 @@ return [
     'auth' => [
         'login' => 'Přihlášení',
         'register' => 'Registrace',
+        'lost_password' => 'Zapomenuté heslo',
+        'send_reset_link' => 'Poslat odkaz pro reset',
+        'reset_password' => 'Změnit heslo',
+        'new_password' => 'Nové heslo',
+        'back_to_login' => 'Zpět na přihlášení',
+        'reset_email_sent' => 'Pokud e-mail existuje, poslali jsme odkaz pro reset hesla.',
+        'reset_token_invalid' => 'Token pro reset je neplatný nebo vypršel.',
+        'password_reset_success' => 'Heslo bylo změněno.',
+        'reset_email_generic_user' => 'uživateli',
         'create_account' => 'Vytvořit účet',
         'have_account' => 'Už máte účet? Přihlásit se',
         'email_required' => 'E-mail je povinný.',
@@ -346,6 +356,28 @@ return [
         'author_invalid' => 'Autor není validní.',
         'status_required' => 'Status je povinný.',
         'publish_date_invalid' => 'Datum publikace není validní.',
+    ],
+    'emails' => [
+        'password_reset' => [
+            'subject' => 'Reset hesla TinyCMS',
+            'body' => "Dobrý den {name},\n\nobdrželi jsme žádost o reset hesla v {site_name}.\nPro změnu hesla otevřete tento odkaz:\n{link}\n\nPlatnost odkazu je 24 hodin.\nPokud jste o reset nežádali, tento e-mail ignorujte.\n\n{site_name}",
+        ],
+        'welcome_user' => [
+            'subject' => 'Vítejte v TinyCMS',
+            'body' => "Dobrý den {name},\n\nvítejte v {site_name}.\nVáš účet je připraven k použití.\n\n{site_name}",
+        ],
+        'user_suspended' => [
+            'subject' => 'Účet byl suspendován',
+            'body' => "Dobrý den {name},\n\nváš účet v {site_name} byl suspendován.\nPokud je to neočekávané, kontaktujte podporu webu.\n\n{site_name}",
+        ],
+        'user_unsuspended' => [
+            'subject' => 'Účet byl znovu aktivován',
+            'body' => "Dobrý den {name},\n\nváš účet v {site_name} byl znovu aktivován.\nMůžete se opět přihlásit.\n\n{site_name}",
+        ],
+        'install_credentials' => [
+            'subject' => 'Instalace TinyCMS dokončena',
+            'body' => "Dobrý den {name},\n\ninstalace TinyCMS byla úspěšně dokončena.\nPřihlášení: {login_url}\nE-mail: {email}\nHeslo: {password}\n\nProsím, uschovejte si tento e-mail pro budoucí použití.\n\nTinyCMS",
+        ],
     ],
     'editor' => [
         'headings' => 'Nadpisy',

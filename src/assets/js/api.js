@@ -101,7 +101,7 @@
         }
     };
 
-    const setFormMessage = (form, message) => {
+    const setFormMessage = (form, message, tone = 'error') => {
         const container = form.querySelector('[data-api-form-message]')
             || form.parentElement?.querySelector('[data-api-form-message]');
         if (!container) {
@@ -111,6 +111,10 @@
         const text = String(message || '').trim();
         container.textContent = text;
         container.hidden = text === '';
+        container.classList.remove('text-danger', 'text-success');
+        if (text !== '') {
+            container.classList.add(tone === 'success' ? 'text-success' : 'text-danger');
+        }
         return true;
     };
 
@@ -194,7 +198,7 @@
             clearFieldErrors(form);
             applyFieldErrors(form, payload?.error?.errors || {});
             const errorMessage = payload?.error?.message || '';
-            const hasInlineMessage = setFormMessage(form, errorMessage);
+            const hasInlineMessage = setFormMessage(form, errorMessage, 'error');
             if (!hasInlineMessage) {
                 showError(errorMessage);
             }
@@ -223,6 +227,9 @@
         }
 
         if (form.hasAttribute('data-stay-on-page')) {
+            if (successMessage !== '') {
+                setFormMessage(form, successMessage, 'success');
+            }
             return;
         }
 

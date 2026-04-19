@@ -289,6 +289,7 @@ return [
             'allow_registration' => 'Allow registrations',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+            'website_email' => 'Website email',
         ],
         'options' => [
             'front_home_mode' => [
@@ -307,6 +308,15 @@ return [
     'auth' => [
         'login' => 'Login',
         'register' => 'Register',
+        'lost_password' => 'Lost password',
+        'send_reset_link' => 'Send reset link',
+        'reset_password' => 'Reset password',
+        'new_password' => 'New password',
+        'back_to_login' => 'Back to login',
+        'reset_email_sent' => 'If the email exists, a reset link has been sent.',
+        'reset_token_invalid' => 'Reset token is invalid or expired.',
+        'password_reset_success' => 'Password has been changed.',
+        'reset_email_generic_user' => 'user',
         'create_account' => 'Create account',
         'have_account' => 'Already have an account? Sign in',
         'email_required' => 'Email is required.',
@@ -346,6 +356,28 @@ return [
         'author_invalid' => 'Author is not valid.',
         'status_required' => 'Status is required.',
         'publish_date_invalid' => 'Publish date is not valid.',
+    ],
+    'emails' => [
+        'password_reset' => [
+            'subject' => 'TinyCMS password reset',
+            'body' => "Hello {name},\n\nwe received a password reset request in {site_name}.\nUse this link to set a new password:\n{link}\n\nThis link is valid for 24 hours.\nIf you did not request this reset, you can ignore this email.\n\n{site_name}",
+        ],
+        'welcome_user' => [
+            'subject' => 'Welcome to TinyCMS',
+            'body' => "Hello {name},\n\nwelcome to {site_name}.\nYour account is ready.\n\n{site_name}",
+        ],
+        'user_suspended' => [
+            'subject' => 'Account suspended',
+            'body' => "Hello {name},\n\nyour account in {site_name} has been suspended.\nIf this is unexpected, contact website support.\n\n{site_name}",
+        ],
+        'user_unsuspended' => [
+            'subject' => 'Account reactivated',
+            'body' => "Hello {name},\n\nyour account in {site_name} has been reactivated.\nYou can sign in again.\n\n{site_name}",
+        ],
+        'install_credentials' => [
+            'subject' => 'TinyCMS installation complete',
+            'body' => "Hello {name},\n\nTinyCMS has been installed successfully.\nLogin URL: {login_url}\nEmail: {email}\nPassword: {password}\n\nPlease keep this email for future use.\n\nTinyCMS",
+        ],
     ],
     'editor' => [
         'headings' => 'Headings',

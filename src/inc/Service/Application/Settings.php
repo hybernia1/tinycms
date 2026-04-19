@@ -76,6 +76,7 @@ final class Settings
             ],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
             'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
+            'website_email' => ['label_key' => 'settings.fields.website_email', 'type' => 'text', 'default' => ''],
         ];
     }
 
@@ -195,6 +196,9 @@ final class Settings
                 $min = (int)($fields[$key]['min'] ?? 1);
                 $max = (int)($fields[$key]['max'] ?? 100);
                 $value = (string)max($min, min($max, $numeric > 0 ? $numeric : $min));
+            }
+            if ($key === 'website_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                $value = '';
             }
             if (($fields[$key]['type'] ?? '') === 'select') {
                 $options = (array)($fields[$key]['options'] ?? []);

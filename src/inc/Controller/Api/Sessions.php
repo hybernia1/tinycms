@@ -47,11 +47,7 @@ final class Sessions extends Admin
             return;
         }
 
-        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
-                'errors' => [],
-                ...$this->csrfPayload(),
-            ]);
+        if (!$this->verifyApiCsrf()) {
             return;
         }
 
@@ -104,11 +100,7 @@ final class Sessions extends Admin
             return;
         }
 
-        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
-                'errors' => [],
-                ...$this->csrfPayload(),
-            ]);
+        if (!$this->verifyApiCsrf()) {
             return;
         }
 
@@ -123,6 +115,63 @@ final class Sessions extends Admin
 
         $this->apiOk([
             'message' => (string)($result['message'] ?? I18n::t('auth.registration_success')),
+            'csrf' => $this->csrf->token(),
+            'redirect' => $this->buildPath((string)($result['redirect'] ?? 'auth/login')),
+        ]);
+    }
+
+    public function lostRequestApiV1(): void
+    {
+        if (!$this->guardRateLimit('lost-request', 6, 300)) {
+            return;
+        }
+
+        if (!$this->verifyApiCsrf()) {
+            return;
+        }
+
+        $result = $this->authService->requestPasswordReset(
+            ['email' => trim((string)($_POST['email'] ?? ''))],
+            $this->absolutePath('auth/lost')
+        );
+        if (($result['success'] ?? false) !== true) {
+            $this->apiError('LOST_REQUEST_FAILED', (string)($result['message'] ?? I18n::t('auth.form_has_errors')), 422, [
+                'errors' => $result['errors'] ?? [],
+                ...$this->csrfPayload(),
+            ]);
+            return;
+        }
+
+        $this->apiOk([
+            'message' => (string)($result['message'] ?? I18n::t('auth.reset_email_sent')),
+            'csrf' => $this->csrf->token(),
+        ]);
+    }
+
+    public function lostResetApiV1(): void
+    {
+        if (!$this->guardRateLimit('lost-reset', 10, 300)) {
+            return;
+        }
+
+        if (!$this->verifyApiCsrf()) {
+            return;
+        }
+
+        $result = $this->authService->resetPassword([
+            'token' => trim((string)($_POST['token'] ?? '')),
+            'password' => (string)($_POST['password'] ?? ''),
+        ]);
+        if (($result['success'] ?? false) !== true) {
+            $this->apiError('LOST_RESET_FAILED', (string)($result['message'] ?? I18n::t('auth.form_has_errors')), 422, [
+                'errors' => $result['errors'] ?? [],
+                ...$this->csrfPayload(),
+            ]);
+            return;
+        }
+
+        $this->apiOk([
+            'message' => (string)($result['message'] ?? I18n::t('auth.password_reset_success')),
             'csrf' => $this->csrf->token(),
             'redirect' => $this->buildPath((string)($result['redirect'] ?? 'auth/login')),
         ]);
@@ -150,5 +199,25 @@ final class Sessions extends Admin
     private function csrfPayload(): array
     {
         return ['csrf' => $this->csrf->token()];
+    }
+
+    private function verifyApiCsrf(): bool
+    {
+        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            return true;
+        }
+
+        $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
+            'errors' => [],
+            ...$this->csrfPayload(),
+        ]);
+        return false;
+    }
+
+    private function absolutePath(string $path): string
+    {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = trim((string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
+        return $scheme . '://' . $host . $this->buildPath($path);
     }
 }

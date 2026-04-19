@@ -13,6 +13,7 @@ final class SchemaDefinition
                 'password' => ['max' => 255, 'nullable' => false],
                 'name' => ['max' => 255, 'nullable' => true],
                 'role' => ['max' => 50, 'nullable' => false, 'allowed' => ['admin', 'user']],
+                'reset_token' => ['max' => 100, 'nullable' => true],
             ],
             'media' => [
                 'path' => ['max' => 500, 'nullable' => true],
@@ -61,7 +62,10 @@ final class SchemaDefinition
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                 role VARCHAR(50) NOT NULL DEFAULT 'user',
                 suspend TINYINT(1) NOT NULL DEFAULT 0,
+                reset_token VARCHAR(100) DEFAULT NULL,
+                reset_token_expiry DATETIME DEFAULT NULL,
                 PRIMARY KEY (id),
+                KEY idx_users_reset_token (reset_token),
                 UNIQUE KEY uq_users_email (email)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS $media (
