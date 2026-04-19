@@ -41,6 +41,7 @@ final class Settings extends Admin
             'allow_registration' => (string)($resolved['allow_registration'] ?? '0'),
             'favicon' => (string)($resolved['favicon'] ?? ''),
             'logo' => (string)($resolved['logo'] ?? ''),
+            'website_email' => (string)($resolved['website_email'] ?? ''),
         ]);
     }
 }

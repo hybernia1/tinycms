@@ -78,6 +78,7 @@ final class Settings extends Admin
             'allow_registration' => (string)($_POST['settings']['allow_registration'] ?? '0'),
             'favicon' => $faviconPath,
             'logo' => $logoPath,
+            'website_email' => (string)($_POST['settings']['website_email'] ?? ''),
         ];
 
         $this->settings->save($payload);
