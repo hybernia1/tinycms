@@ -1,9 +1,17 @@
 <?php if (($mode ?? 'loop') === 'content' && isset($item) && is_array($item)): ?>
     <article class="content-single">
         <h1><?= $e((string)($item['name'] ?? '')) ?></h1>
-        <?php $meta = array_values(array_filter([$contentAuthor($item), $contentDate($item)])); ?>
-        <?php if ($meta !== []): ?>
-            <p class="text-muted small"><?= $e(implode(' · ', $meta)) ?></p>
+        <?php $date = $contentDate($item); ?>
+        <?php $author = $contentAuthor($item); ?>
+        <?php if ($date !== '' || $author !== ''): ?>
+            <p class="text-muted small content-card-meta">
+                <?php if ($date !== ''): ?>
+                    <span class="content-card-meta-item"><?= $icon('calendar') ?><span><?= $e($date) ?></span></span>
+                <?php endif; ?>
+                <?php if ($author !== ''): ?>
+                    <span class="content-card-meta-item"><?= $icon('users') ?><span><?= $e($author) ?></span></span>
+                <?php endif; ?>
+            </p>
         <?php endif; ?>
         <?php $excerpt = trim((string)($item['excerpt'] ?? '')); ?>
         <?php if ($excerpt !== ''): ?>

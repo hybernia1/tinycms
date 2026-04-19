@@ -10,6 +10,11 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fafafa; color: #1
 .search-form input { border: 1px solid #374151; border-radius: 6px; padding: .5rem .75rem; min-width: 220px; background: #111827; color: #fff; }
 .search-form button { border: 1px solid #4b5563; border-radius: 6px; padding: .5rem .75rem; background: #1f2937; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; }
 .search-form button:hover { background: #374151; }
+.search-form-expand { gap: .4rem; }
+.search-form-expand input { min-width: 0; width: 0; padding-left: 0; padding-right: 0; border-width: 0; opacity: 0; pointer-events: none; transition: width .2s ease, opacity .2s ease, border-width .2s ease, padding .2s ease; }
+.search-form-expand:focus-within input,
+.search-form-expand.is-open input { width: 220px; padding: .5rem .75rem; border-width: 1px; opacity: 1; pointer-events: auto; }
+.search-form-expand button { padding: .5rem; }
 .content-card, .content-single { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
 .content-card h2, .content-single h1 { margin-top: 0; }
 .content-card { display: flex; gap: 1rem; align-items: flex-start; }

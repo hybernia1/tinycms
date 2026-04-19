@@ -256,15 +256,19 @@ final class Theme
         $placeholder = trim((string)($labels['placeholder'] ?? 'Search content'));
         $button = trim((string)($labels['button'] ?? 'Search'));
         $formAction = $this->esc($this->url(trim($action, '/')));
-        $value = $this->esc(trim($query));
+        $queryValue = trim($query);
+        $value = $this->esc($queryValue);
+        $state = $queryValue !== '' ? ' is-open' : '';
 
         return sprintf(
-            '<form class="search-form" action="%s" method="get"><input type="search" name="q" value="%s" placeholder="%s"><button type="submit">%s<span>%s</span></button></form>',
+            '<form class="search-form search-form-expand%s" action="%s" method="get"><input type="search" name="q" value="%s" placeholder="%s" aria-label="%s"><button type="submit" aria-label="%s">%s</button></form>',
+            $state,
             $formAction,
             $value,
             $this->esc($placeholder),
-            $this->icon('search'),
             $this->esc($button),
+            $this->esc($placeholder),
+            $this->icon('search'),
         );
     }
 
