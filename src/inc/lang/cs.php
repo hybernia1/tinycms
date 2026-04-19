@@ -362,6 +362,22 @@ return [
             'subject' => 'Reset hesla TinyCMS',
             'body' => "Dobrý den {name},\n\nobdrželi jsme žádost o reset hesla v TinyCMS.\nPro změnu hesla otevřete tento odkaz:\n{link}\n\nPlatnost odkazu je 24 hodin.\nPokud jste o reset nežádali, tento e-mail ignorujte.\n\nTinyCMS",
         ],
+        'welcome_user' => [
+            'subject' => 'Vítejte v TinyCMS',
+            'body' => "Dobrý den {name},\n\nvítejte v TinyCMS.\nVáš účet je připraven k použití.\n\nTinyCMS",
+        ],
+        'user_suspended' => [
+            'subject' => 'Účet byl suspendován',
+            'body' => "Dobrý den {name},\n\nváš účet v TinyCMS byl suspendován.\nPokud je to neočekávané, kontaktujte podporu webu.\n\nTinyCMS",
+        ],
+        'user_unsuspended' => [
+            'subject' => 'Účet byl znovu aktivován',
+            'body' => "Dobrý den {name},\n\nváš účet v TinyCMS byl znovu aktivován.\nMůžete se opět přihlásit.\n\nTinyCMS",
+        ],
+        'install_credentials' => [
+            'subject' => 'Instalace TinyCMS dokončena',
+            'body' => "Dobrý den {name},\n\ninstalace TinyCMS byla úspěšně dokončena.\nPřihlášení: {login_url}\nE-mail: {email}\nHeslo: {password}\n\nProsím, uschovejte si tento e-mail pro budoucí použití.\n\nTinyCMS",
+        ],
     ],
     'editor' => [
         'headings' => 'Nadpisy',

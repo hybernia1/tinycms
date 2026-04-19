@@ -13,11 +13,13 @@ final class User
 {
     private Query $query;
     private SchemaConstraintValidator $columnLimitValidator;
+    private Email $email;
 
     public function __construct()
     {
         $this->query = new Query(Connection::get());
         $this->columnLimitValidator = new SchemaConstraintValidator();
+        $this->email = new Email();
         $this->query->update('users', ['role' => 'user'], ['role' => 'editor']);
     }
 
@@ -61,9 +63,16 @@ final class User
             return false;
         }
 
-        return $this->query->update('users', [
+        $updated = $this->query->update('users', [
             'suspend' => 1,
         ], ['ID' => $id]) > 0;
+        if ($updated) {
+            $this->email->send((string)($user['email'] ?? ''), 'emails.user_suspended', [
+                'name' => trim((string)($user['name'] ?? '')) !== '' ? (string)$user['name'] : I18n::t('auth.reset_email_generic_user'),
+            ]);
+        }
+
+        return $updated;
     }
 
     public function unsuspend(int $id): bool
@@ -74,9 +83,16 @@ final class User
             return false;
         }
 
-        return $this->query->update('users', [
+        $updated = $this->query->update('users', [
             'suspend' => 0,
         ], ['ID' => $id]) > 0;
+        if ($updated) {
+            $this->email->send((string)($user['email'] ?? ''), 'emails.user_unsuspended', [
+                'name' => trim((string)($user['name'] ?? '')) !== '' ? (string)$user['name'] : I18n::t('auth.reset_email_generic_user'),
+            ]);
+        }
+
+        return $updated;
     }
 
     public function save(array $input, ?int $id = null): array
@@ -150,6 +166,11 @@ final class User
         try {
             if ($id === null) {
                 $newId = $this->query->insert('users', $payload);
+                if ($newId > 0) {
+                    $this->email->send($email, 'emails.welcome_user', [
+                        'name' => $name !== '' ? $name : I18n::t('auth.reset_email_generic_user'),
+                    ]);
+                }
                 return ['success' => $newId > 0, 'id' => $newId, 'errors' => []];
             }
 

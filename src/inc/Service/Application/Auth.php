@@ -7,7 +7,6 @@ use App\Service\Auth\Auth as SessionAuth;
 use App\Service\Auth\Login;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Support\Mailer;
 use App\Service\Support\I18n;
 use App\Service\Application\Settings as SettingsService;
 use App\Service\Application\User as UserService;
@@ -19,7 +18,7 @@ final class Auth
     private SettingsService $settings;
     private UserService $users;
     private Query $query;
-    private Mailer $mailer;
+    private Email $email;
 
     public function __construct(SessionAuth $auth)
     {
@@ -28,7 +27,7 @@ final class Auth
         $this->login = new Login($this->query);
         $this->settings = new SettingsService();
         $this->users = new UserService();
-        $this->mailer = new Mailer();
+        $this->email = new Email();
     }
 
     public function auth(): SessionAuth
@@ -159,14 +158,13 @@ final class Auth
         }
 
         $link = $resetLinkBase . '?token=' . urlencode($token);
-        $websiteEmail = trim((string)($this->settings->resolved()['website_email'] ?? ''));
-        $sender = filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : null;
-
-        $this->mailer->send(
+        $this->email->send(
             (string)$user['email'],
-            I18n::t('emails.password_reset.subject'),
-            $this->resetEmailBody((string)($user['name'] ?? ''), $link),
-            $sender
+            'emails.password_reset',
+            [
+                'name' => trim((string)($user['name'] ?? '')) !== '' ? (string)$user['name'] : I18n::t('auth.reset_email_generic_user'),
+                'link' => $link,
+            ]
         );
 
         return [
@@ -254,12 +252,5 @@ final class Auth
         }
 
         return $user;
-    }
-
-    private function resetEmailBody(string $name, string $link): string
-    {
-        $greeting = trim($name) !== '' ? trim($name) : I18n::t('auth.reset_email_generic_user');
-        $template = I18n::t('emails.password_reset.body');
-        return str_replace(['{name}', '{link}'], [$greeting, $link], $template);
     }
 }

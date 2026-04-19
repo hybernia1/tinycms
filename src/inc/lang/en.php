@@ -362,6 +362,22 @@ return [
             'subject' => 'TinyCMS password reset',
             'body' => "Hello {name},\n\nwe received a TinyCMS password reset request.\nUse this link to set a new password:\n{link}\n\nThis link is valid for 24 hours.\nIf you did not request this reset, you can ignore this email.\n\nTinyCMS",
         ],
+        'welcome_user' => [
+            'subject' => 'Welcome to TinyCMS',
+            'body' => "Hello {name},\n\nwelcome to TinyCMS.\nYour account is ready.\n\nTinyCMS",
+        ],
+        'user_suspended' => [
+            'subject' => 'Account suspended',
+            'body' => "Hello {name},\n\nyour TinyCMS account has been suspended.\nIf this is unexpected, contact website support.\n\nTinyCMS",
+        ],
+        'user_unsuspended' => [
+            'subject' => 'Account reactivated',
+            'body' => "Hello {name},\n\nyour TinyCMS account has been reactivated.\nYou can sign in again.\n\nTinyCMS",
+        ],
+        'install_credentials' => [
+            'subject' => 'TinyCMS installation complete',
+            'body' => "Hello {name},\n\nTinyCMS has been installed successfully.\nLogin URL: {login_url}\nEmail: {email}\nPassword: {password}\n\nPlease keep this email for future use.\n\nTinyCMS",
+        ],
     ],
     'editor' => [
         'headings' => 'Headings',
