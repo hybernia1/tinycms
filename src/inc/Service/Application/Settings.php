@@ -52,8 +52,7 @@ final class Settings
                 continue;
             }
 
-            $decoded = json_decode((string)($row['value'] ?? 'null'), true);
-            $values[$key] = is_scalar($decoded) || $decoded === null ? (string)($decoded ?? '') : '';
+            $values[$key] = trim((string)($row['value'] ?? ''));
         }
 
         return $values;
@@ -94,8 +93,7 @@ final class Settings
                 continue;
             }
 
-            $value = trim((string)$rawValue);
-            $payload = ['value' => json_encode($value, JSON_UNESCAPED_UNICODE)];
+            $payload = ['value' => trim((string)$rawValue)];
 
             if (isset($existingKeys[$key])) {
                 $this->query->update('settings', $payload, ['key_name' => $key]);
