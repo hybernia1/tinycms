@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Service\Infrastructure\Router\Router;
+use App\Service\Support\Media;
 
 final class FrontView
 {
@@ -62,8 +63,29 @@ final class FrontView
         $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
         $setting = fn(string $key, string $default = ''): string => (string)($this->settings[$key] ?? $default);
         $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
+        $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $url(Media::bySize($path, $size));
+        $mediaSrcSet = function (string $path): string {
+            $trimmed = trim($path);
+            if ($trimmed === '') {
+                return '';
+            }
+
+            $sources = [];
+            foreach (Media::variants() as $variant) {
+                $name = trim((string)($variant['name'] ?? ''));
+                $width = (int)($variant['width'] ?? 0);
+                if ($name === '' || $width <= 0) {
+                    continue;
+                }
+
+                $sources[] = $this->router->url(Media::bySize($trimmed, $name)) . ' ' . $width . 'w';
+            }
+
+            $sources[] = $this->router->url(Media::bySize($trimmed, 'webp')) . ' 1024w';
+            return implode(', ', $sources);
+        };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang): void {
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;

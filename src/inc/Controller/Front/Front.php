@@ -84,11 +84,13 @@ final class Front
 
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
+        $mediaTable = Table::name('media');
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name",
+            "u.name AS author_name, m.path AS thumbnail_path",
             "FROM $contentTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
+            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
             'WHERE c.id = :id AND c.status = :status',
             'LIMIT 1',
         ]));
@@ -99,6 +101,7 @@ final class Front
             return null;
         }
 
+        $item = $this->withThumbnail($item);
         $item['terms'] = $this->services->term->listByContent((int)$item['id']);
         return $item;
     }
@@ -107,6 +110,7 @@ final class Front
     {
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
+        $mediaTable = Table::name('media');
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
@@ -117,9 +121,10 @@ final class Front
 
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name",
+            "u.name AS author_name, m.path AS thumbnail_path",
             "FROM $contentTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
+            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
             'WHERE c.status = :status',
             'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
             'LIMIT :limit OFFSET :offset',
@@ -129,7 +134,7 @@ final class Front
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
 
-        return $this->paginationPayload($stmt->fetchAll(\PDO::FETCH_ASSOC), $page, $perPage, $total);
+        return $this->paginationPayload($this->withThumbnails($stmt->fetchAll(\PDO::FETCH_ASSOC)), $page, $perPage, $total);
     }
 
     private function paginateTermPublished(int $termId, int $page, int $perPage): array
@@ -137,6 +142,7 @@ final class Front
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
         $contentTermsTable = Table::name('content_terms');
+        $mediaTable = Table::name('media');
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
@@ -152,10 +158,11 @@ final class Front
 
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name",
+            "u.name AS author_name, m.path AS thumbnail_path",
             "FROM $contentTable c",
             "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
             "LEFT JOIN $usersTable u ON u.id = c.author",
+            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
             'WHERE c.status = :status AND ct.term = :term',
             'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
             'LIMIT :limit OFFSET :offset',
@@ -166,7 +173,7 @@ final class Front
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
 
-        return $this->paginationPayload($stmt->fetchAll(\PDO::FETCH_ASSOC), $page, $perPage, $total);
+        return $this->paginationPayload($this->withThumbnails($stmt->fetchAll(\PDO::FETCH_ASSOC)), $page, $perPage, $total);
     }
 
     private function paginationPayload(array $rows, int $page, int $perPage, int $total): array
@@ -180,5 +187,17 @@ final class Front
             'total' => $total,
             'total_pages' => $totalPages,
         ];
+    }
+
+    private function withThumbnails(array $rows): array
+    {
+        return array_map(fn(array $row): array => $this->withThumbnail($row), $rows);
+    }
+
+    private function withThumbnail(array $row): array
+    {
+        $path = trim((string)($row['thumbnail_path'] ?? ''));
+        $row['thumbnail'] = $path;
+        return $row;
     }
 }
