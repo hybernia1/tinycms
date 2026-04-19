@@ -75,23 +75,6 @@ class Admin
         return true;
     }
 
-    protected function guardCsrf(callable $redirect, string $redirectPath, string $message): bool
-    {
-        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            return true;
-        }
-
-        $this->flash->add('error', $message);
-        $redirect($redirectPath);
-        return false;
-    }
-
-    protected function guardAdminCsrf(callable $redirect, string $redirectPath, string $message, bool $flashDenied = false): bool
-    {
-        return $this->guardAdmin($redirect, $flashDenied)
-            && $this->guardCsrf($redirect, $redirectPath, $message);
-    }
-
     protected function guardApiAdmin(bool $flashDenied = false): bool
     {
         if (!$this->authService->auth()->check()) {
