@@ -1,0 +1,144 @@
+<?php
+declare(strict_types=1);
+
+namespace App\View;
+
+use App\Service\Infrastructure\Router\Router;
+
+final class FrontView
+{
+    private string $rootPath;
+    private Router $router;
+    private array $settings;
+    private string $theme;
+
+    public function __construct(string $rootPath, Router $router, array $settings)
+    {
+        $this->rootPath = rtrim($rootPath, '/');
+        $this->router = $router;
+        $this->settings = $settings;
+        $this->theme = $this->resolveTheme((string)($settings['front_theme'] ?? 'default'));
+    }
+
+    public function homeLoop(array $pagination): void
+    {
+        $this->render('index', [
+            'mode' => 'loop',
+            'pagination' => $pagination,
+        ]);
+    }
+
+    public function homeContent(array $item): void
+    {
+        $this->render('index', [
+            'mode' => 'content',
+            'item' => $item,
+        ]);
+    }
+
+    public function singleContent(array $item): void
+    {
+        $this->render('content', [
+            'item' => $item,
+        ]);
+    }
+
+    public function termArchive(array $term, array $pagination): void
+    {
+        $this->render('archive', [
+            'term' => $term,
+            'pagination' => $pagination,
+        ]);
+    }
+
+    private function render(string $template, array $data): void
+    {
+        $layoutFile = $this->resolveThemeFile('layout.php');
+        $templateFile = $this->resolveThemeFile($template . '.php');
+        $themeDir = trim((string)(defined('THEMES_DIR') ? THEMES_DIR : 'themes/'), '/');
+        $themeBase = $themeDir . '/' . $this->theme;
+        $url = fn(string $path = ''): string => $this->router->url($path);
+        $themeUrl = fn(string $path = ''): string => $url(trim($themeBase . '/' . ltrim($path, '/'), '/'));
+        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $setting = fn(string $key, string $default = ''): string => (string)($this->settings[$key] ?? $default);
+        $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
+        $lang = $this->resolvedLanguage();
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang): void {
+            $file = $this->resolveThemeFile('partials/' . $name . '.php');
+            extract($context, EXTR_SKIP);
+            require $file;
+        };
+
+        $pageTitle = (string)($data['pageTitle'] ?? $setting('meta_title', $setting('sitename', 'TinyCMS')));
+        extract($data, EXTR_SKIP);
+
+        ob_start();
+        require $templateFile;
+        $content = (string)ob_get_clean();
+
+        require $layoutFile;
+    }
+
+    private function resolveTheme(string $theme): string
+    {
+        $clean = trim($theme);
+        if ($clean === '') {
+            return 'default';
+        }
+
+        $path = $this->themePath($clean);
+        return is_dir($path) ? $clean : 'default';
+    }
+
+    private function resolveThemeFile(string $file): string
+    {
+        $path = $this->themePath($this->theme) . '/' . ltrim($file, '/');
+        $real = realpath($path);
+        $root = rtrim($this->themePath($this->theme), '/');
+
+        if ($real === false || !str_starts_with($real, $root) || !is_file($real)) {
+            http_response_code(404);
+            exit('404');
+        }
+
+        return $real;
+    }
+
+    private function themePath(string $theme): string
+    {
+        $themeDir = trim((string)(defined('THEMES_DIR') ? THEMES_DIR : 'themes/'), '/');
+        return $this->rootPath . '/' . $themeDir . '/' . trim($theme, '/');
+    }
+
+    private function translate(string $key, ?string $fallback = null): string
+    {
+        static $cache = [];
+
+        $lang = $this->resolvedLanguage();
+        if (!isset($cache[$lang])) {
+            $cache[$lang] = $this->loadLang($lang);
+        }
+        if (!isset($cache['en'])) {
+            $cache['en'] = $this->loadLang('en');
+        }
+
+        return (string)($cache[$lang][$key] ?? $cache['en'][$key] ?? $fallback ?? $key);
+    }
+
+    private function loadLang(string $lang): array
+    {
+        $file = $this->themePath($this->theme) . '/lang/' . $lang . '.php';
+        if (!is_file($file)) {
+            return [];
+        }
+
+        $payload = require $file;
+        return is_array($payload) ? $payload : [];
+    }
+
+    private function resolvedLanguage(): string
+    {
+        $lang = trim((string)($this->settings['app_lang'] ?? 'en'));
+        return $lang !== '' ? $lang : 'en';
+    }
+}

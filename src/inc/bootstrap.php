@@ -11,6 +11,7 @@ use App\Controller\Admin\Media as MediaController;
 use App\Controller\Admin\Settings as SettingsController;
 use App\Controller\Admin\Term as TermController;
 use App\Controller\Admin\User as UserController;
+use App\Controller\Front\Front as FrontController;
 use App\Controller\Api\Content as ApiContentController;
 use App\Controller\Api\ContentMedia as ApiContentMediaController;
 use App\Controller\Api\Media as ApiMediaController;
@@ -35,7 +36,9 @@ use App\Service\Support\I18n;
 use App\Service\Support\RateLimiter;
 use App\Service\Support\Slugger;
 use App\Service\Application\User as UserService;
+use App\Service\Front\Services as FrontServices;
 use App\View\AdminView;
+use App\View\FrontView;
 use App\View\View;
 
 $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
@@ -94,6 +97,9 @@ $uploadService = new UploadService(BASE_DIR, $slugger);
 $settingsService = new SettingsService();
 I18n::setLocale((string)($settingsService->resolved()['app_lang'] ?? APP_LANG));
 $termService = new TermService();
+$frontServices = new FrontServices($contentService, $userService, $mediaService, $termService, $settingsService);
+$frontView = new FrontView(BASE_DIR, $router, $settingsService->resolved());
+$front = new FrontController($frontView, $frontServices);
 $adminView = new AdminView($view, $settingsService);
 $admin = new AdminController($authService, $flash, $csrf, $adminView);
 $apiSessions = new SessionsController($authService, $flash, $csrf, $rateLimiter);
@@ -109,6 +115,7 @@ $apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, 
 $apiSettings = new ApiSettingsController($authService, $settingsService, $uploadService, $flash, $csrf);
 $apiTerm = new ApiTermController($authService, $termService, $flash, $csrf);
 
+require BASE_DIR . '/' . INC_DIR . 'routes/front.php';
 require BASE_DIR . '/' . INC_DIR . 'routes/admin.php';
 
 return [
