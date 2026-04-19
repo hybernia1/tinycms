@@ -62,6 +62,11 @@ $contentId = (int)($item['id'] ?? 0);
                         <input type="datetime-local" name="created" value="<?= $e($createdAt) ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= $e((string)$errors['created']) ?></small><?php endif; ?>
                     </div>
+                    <div class="mt-3 m-0">
+                        <label><?= $e($t('content.type')) ?></label>
+                        <input type="text" name="type" value="<?= $e((string)($item['type'] ?? 'post')) ?>" required>
+                        <?php if (!empty($errors['type'])): ?><small class="text-danger"><?= $e((string)$errors['type']) ?></small><?php endif; ?>
+                    </div>
                 </div>
             </div>
                 <div class="card">

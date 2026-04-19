@@ -245,6 +245,7 @@ return [
         'link_title_not_found' => 'Link title not found.',
         'body' => 'Content',
         'publication' => 'Publication',
+        'type' => 'Type',
         'status' => 'Status',
         'publish_date' => 'Publish date',
         'post' => 'Post',

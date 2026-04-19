@@ -41,6 +41,7 @@ final class Content
             'id',
             'name',
             'status',
+            'type',
             'author',
             "(SELECT name FROM $usersTable WHERE $usersTable.ID = $contentTable.author LIMIT 1) AS author_name",
             'created',
@@ -49,7 +50,7 @@ final class Content
             'page' => $page,
             'perPage' => $perPage,
             'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'status', 'author', 'created', 'updated'],
+            'orderByAllowed' => ['id', 'name', 'status', 'type', 'author', 'created', 'updated'],
             'orderDir' => 'DESC',
             'search' => $search,
             'searchColumns' => ['name', 'excerpt', 'body'],
@@ -64,6 +65,7 @@ final class Content
             'id',
             'name',
             'status',
+            'type',
             'excerpt',
             'body',
             'author',
@@ -139,6 +141,7 @@ final class Content
     {
         $name = trim((string)($input['name'] ?? ''));
         $status = trim((string)($input['status'] ?? 'draft'));
+        $type = trim((string)($input['type'] ?? 'post'));
         $excerpt = $this->sanitizeExcerpt((string)($input['excerpt'] ?? ''));
         $body = trim((string)($input['body'] ?? ''));
         $author = $this->resolveAuthorId($input, $defaultAuthorId);
@@ -153,6 +156,10 @@ final class Content
             $errors['status'] = I18n::t('validation.status_required');
         }
 
+        if ($type === '') {
+            $errors['type'] = I18n::t('errors.validation.required');
+        }
+
         if (($input['author'] ?? '') !== '' && $author === null) {
             $errors['author'] = I18n::t('validation.author_invalid');
         }
@@ -164,10 +171,12 @@ final class Content
         $lengthErrors = $this->schemaConstraintValidator->validate('content', [
             'name' => $name,
             'status' => $status,
+            'type' => $type,
             'excerpt' => $excerpt,
         ], [
             'name' => 'name',
             'status' => 'status',
+            'type' => 'type',
             'excerpt' => 'excerpt',
         ]);
 
@@ -185,6 +194,7 @@ final class Content
         $payload = [
             'name' => $name,
             'status' => $status,
+            'type' => $type,
             'excerpt' => $excerpt === '' ? null : mb_substr($excerpt, 0, 500),
             'body' => $body,
             'author' => $author,

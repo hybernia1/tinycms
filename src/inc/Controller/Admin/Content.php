@@ -45,7 +45,7 @@ final class Content extends Admin
             return;
         }
 
-        $fallback = ['id' => null, 'name' => '', 'status' => 'draft', 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
+        $fallback = ['id' => null, 'name' => '', 'status' => 'draft', 'type' => 'post', 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $fallback['author'] = (int)($this->authService->auth()->id() ?? 0);
         $statuses = $this->content->statuses();
         $item = $fallback;

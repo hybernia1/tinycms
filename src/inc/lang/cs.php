@@ -245,6 +245,7 @@ return [
         'link_title_not_found' => 'Titulek odkazu nebyl nalezen.',
         'body' => 'Obsah',
         'publication' => 'Publikace',
+        'type' => 'Typ',
         'status' => 'Status',
         'publish_date' => 'Datum publikace',
         'post' => 'Článek',
