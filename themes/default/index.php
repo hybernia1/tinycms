@@ -5,6 +5,10 @@
         <?php if ($meta !== []): ?>
             <p class="text-muted small"><?= $e(implode(' · ', $meta)) ?></p>
         <?php endif; ?>
+        <?php $excerpt = trim((string)($item['excerpt'] ?? '')); ?>
+        <?php if ($excerpt !== ''): ?>
+            <p class="content-excerpt-lead"><strong><?= $e($excerpt) ?></strong></p>
+        <?php endif; ?>
         <?= $contentThumbnail($item, ['sizes' => '(max-width: 1024px) 100vw, 1024px', 'loading' => 'eager']) ?>
         <div class="content-body"><?= (string)($item['body'] ?? '') ?></div>
     </article>

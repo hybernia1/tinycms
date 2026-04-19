@@ -101,8 +101,13 @@ final class FrontView
             'placeholder' => $this->translate('front.search_placeholder'),
             'button' => $this->translate('front.search_button'),
         ]);
+        $icon = static function (string $name, string $classes = 'icon') use ($e, $themeUrl): string {
+            $sprite = $e($themeUrl('assets/svg/icons.svg#icon-' . trim($name)));
+            $class = trim($classes);
+            return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
+        };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $searchForm, $theme): void {
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $searchForm, $theme, $icon): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;

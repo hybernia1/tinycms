@@ -259,12 +259,19 @@ final class Theme
         $value = $this->esc(trim($query));
 
         return sprintf(
-            '<form class="search-form" action="%s" method="get"><input type="search" name="q" value="%s" placeholder="%s"><button type="submit">%s</button></form>',
+            '<form class="search-form" action="%s" method="get"><input type="search" name="q" value="%s" placeholder="%s"><button type="submit">%s<span>%s</span></button></form>',
             $formAction,
             $value,
             $this->esc($placeholder),
+            $this->icon('search'),
             $this->esc($button),
         );
+    }
+
+    private function icon(string $name): string
+    {
+        $sprite = $this->esc($this->themeUrl('assets/svg/icons.svg#icon-' . trim($name)));
+        return '<svg class="icon" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
     }
 
     private function paginationUrl(string $basePath, int $page): string
