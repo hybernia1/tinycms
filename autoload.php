@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 if (is_file(__DIR__ . '/config.php')) {
     require_once __DIR__ . '/config.php';
-} elseif (is_file(__DIR__ . '/config.example.php')) {
-    require_once __DIR__ . '/config.example.php';
 }
 
 if (!defined('BASE_DIR')) {
