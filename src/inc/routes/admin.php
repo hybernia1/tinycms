@@ -6,7 +6,6 @@ if (!defined('BASE_DIR')) {
 
 
 register_routes($router, $redirect, [
-    ['method' => 'GET', 'path' => '', 'controller' => $admin, 'action' => 'index'],
     ['method' => 'GET', 'path' => 'admin/login', 'controller' => $admin, 'action' => 'loginForm'],
     ['method' => 'GET', 'path' => 'admin/api/v1/heartbeat', 'controller' => $apiSessions, 'action' => 'heartbeatApiV1', 'with_redirect' => false],
     ['method' => 'POST', 'path' => 'admin/api/v1/auth/login', 'controller' => $apiSessions, 'action' => 'loginApiV1', 'with_redirect' => false],
