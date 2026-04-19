@@ -64,6 +64,7 @@ final class Theme
             '<meta property="og:description" content="' . $this->esc($description) . '">',
             '<meta property="og:type" content="' . $this->esc($ogType) . '">',
             '<meta property="og:url" content="' . $this->esc($url) . '">',
+            '<meta property="og:site_name" content="' . $this->esc($this->siteTitle()) . '">',
             '<meta name="twitter:card" content="' . $this->esc($image !== '' ? 'summary_large_image' : 'summary') . '">',
             '<meta name="twitter:title" content="' . $this->esc($title) . '">',
             '<meta name="twitter:description" content="' . $this->esc($description) . '">',
@@ -80,7 +81,7 @@ final class Theme
             $tags[] = '<meta property="og:image" content="' . $this->esc($image) . '">';
             $tags[] = '<meta name="twitter:image" content="' . $this->esc($image) . '">';
         }
-        if ($kind === 'content' || $kind === 'home-content') {
+        if (($kind === 'content' || $kind === 'home-content') && $this->isArticleType((string)($item['type'] ?? ''))) {
             $published = $this->isoDate((string)($item['created'] ?? ''));
             $updated = $this->isoDate((string)($item['updated'] ?? ''));
             if ($published !== '') {
@@ -412,11 +413,18 @@ final class Theme
     {
         $normalized = trim($type);
         return match ($normalized) {
+            'page' => 'WebPage',
+            'about_page' => 'AboutPage',
             'news_article' => 'NewsArticle',
             'blog_posting' => 'BlogPosting',
             'faq_page' => 'FAQPage',
             default => 'Article',
         };
+    }
+
+    private function isArticleType(string $type): bool
+    {
+        return in_array(trim($type), ['article', 'news_article', 'blog_posting'], true);
     }
 
     private function absoluteUrl(string $path): string
