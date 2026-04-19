@@ -5,14 +5,17 @@ namespace App\Service\Front;
 
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Media;
+use App\Service\Support\Slugger;
 
 final class Theme
 {
     private string $theme;
+    private Slugger $slugger;
 
     public function __construct(private Router $router, private array $settings, string $theme)
     {
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
+        $this->slugger = new Slugger();
     }
 
     public function setting(string $key, string $default = ''): string
@@ -80,6 +83,16 @@ final class Theme
     public function mediaUrl(string $path = '', string $size = 'origin'): string
     {
         return $this->url(Media::bySize($path, $size));
+    }
+
+    public function contentUrl(array $item): string
+    {
+        $id = (int)($item['id'] ?? 0);
+        if ($id <= 0) {
+            return $this->url('');
+        }
+
+        return $this->url($this->slugger->slug((string)($item['name'] ?? ''), $id));
     }
 
     public function mediaSrcSet(string $path): string

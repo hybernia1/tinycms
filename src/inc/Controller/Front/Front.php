@@ -6,15 +6,18 @@ namespace App\Controller\Front;
 use App\Service\Front\Services;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
+use App\Service\Support\Slugger;
 use App\View\FrontView;
 
 final class Front
 {
     private \PDO $pdo;
+    private Slugger $slugger;
 
     public function __construct(private FrontView $view, private Services $services)
     {
         $this->pdo = Connection::get();
+        $this->slugger = new Slugger();
     }
 
     public function home(): void
@@ -37,7 +40,27 @@ final class Front
         $this->view->homeLoop($pagination);
     }
 
-    public function content(array $params): void
+    public function content(callable $redirect, array $params): void
+    {
+        $slug = trim((string)($params['slug'] ?? ''));
+        $id = $this->slugger->extractId($slug);
+        $item = $this->findPublishedContent($id);
+
+        if ($item === null) {
+            http_response_code(404);
+            echo '404';
+            return;
+        }
+
+        $canonicalSlug = $this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0));
+        if ($slug !== $canonicalSlug) {
+            $redirect($canonicalSlug, true);
+        }
+
+        $this->view->singleContent($item);
+    }
+
+    public function contentLegacy(callable $redirect, array $params): void
     {
         $id = (int)($params['id'] ?? 0);
         $item = $this->findPublishedContent($id);
@@ -48,7 +71,7 @@ final class Front
             return;
         }
 
-        $this->view->singleContent($item);
+        $redirect($this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0)), true);
     }
 
     public function termArchive(array $params): void
