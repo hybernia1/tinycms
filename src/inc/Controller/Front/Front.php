@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Front;
 
+use App\Service\Auth\Auth;
 use App\Service\Front\Services;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
@@ -14,7 +15,7 @@ final class Front
     private \PDO $pdo;
     private Slugger $slugger;
 
-    public function __construct(private FrontView $view, private Services $services)
+    public function __construct(private FrontView $view, private Services $services, private Auth $auth)
     {
         $this->pdo = Connection::get();
         $this->slugger = new Slugger();
@@ -107,6 +108,20 @@ final class Front
         $pagination = $this->paginateTermPublished($termId, $page, $perPage);
 
         $this->view->termArchive($term, $pagination);
+    }
+
+    public function account(callable $redirect): void
+    {
+        if (!$this->auth->check()) {
+            $redirect('auth/login');
+        }
+
+        $user = $this->auth->user();
+        if (!is_array($user)) {
+            $redirect('auth/login');
+        }
+
+        $this->view->account($user);
     }
 
     private function resolvePerPage(array $settings): int

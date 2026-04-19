@@ -38,6 +38,7 @@ final class Settings extends Admin
             'front_home_content' => (string)($resolved['front_home_content'] ?? ''),
             'front_posts_per_page' => (string)($resolved['front_posts_per_page'] ?? APP_POSTS_PER_PAGE),
             'front_theme' => (string)($resolved['front_theme'] ?? 'default'),
+            'allow_registration' => (string)($resolved['allow_registration'] ?? '0'),
             'favicon' => (string)($resolved['favicon'] ?? ''),
             'logo' => (string)($resolved['logo'] ?? ''),
         ]);

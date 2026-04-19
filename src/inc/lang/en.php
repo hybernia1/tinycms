@@ -286,6 +286,7 @@ return [
             'front_home_content' => 'Home page (content)',
             'front_posts_per_page' => 'Posts per page',
             'front_theme' => 'Theme',
+            'allow_registration' => 'Allow registrations',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
         ],
@@ -297,10 +298,17 @@ return [
             'front_home_content' => [
                 'none' => '— Select content —',
             ],
+            'allow_registration' => [
+                'disabled' => 'No',
+                'enabled' => 'Yes',
+            ],
         ],
     ],
     'auth' => [
         'login' => 'Login',
+        'register' => 'Register',
+        'create_account' => 'Create account',
+        'have_account' => 'Already have an account? Sign in',
         'email_required' => 'Email is required.',
         'email_invalid_format' => 'Email format is invalid.',
         'password_required' => 'Password is required.',
@@ -327,6 +335,7 @@ return [
         'password_hash_failed' => 'Failed to create password hash.',
         'registration_save_failed' => 'Registration could not be saved.',
         'registration_success' => 'Registration successful.',
+        'registration_disabled' => 'Registrations are disabled.',
     ],
     'validation' => [
         'name_required' => 'Name is required.',
