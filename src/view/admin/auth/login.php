@@ -35,6 +35,9 @@
                         <a href="<?= $e($url('auth/register')) ?>"><?= $e($t('auth.create_account')) ?></a>
                     </p>
                 <?php endif; ?>
+                <p class="mt-2 mb-0">
+                    <a href="<?= $e($url('auth/lost')) ?>"><?= $e($t('auth.lost_password')) ?></a>
+                </p>
             </div>
         </div>
     </div>

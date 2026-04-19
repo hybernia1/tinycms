@@ -71,6 +71,20 @@ class Admin
         ]);
     }
 
+    public function lostForm(callable $redirect): void
+    {
+        if ($this->authService->auth()->check()) {
+            $redirect($this->authService->redirectAfterLogin());
+        }
+
+        $token = trim((string)($_GET['token'] ?? ''));
+        $this->requirePages()->adminLostForm([
+            'token' => $token,
+            'tokenValid' => $token !== '' && $this->authService->canUseResetToken($token),
+            'old' => ['email' => ''],
+        ]);
+    }
+
     protected function guardAdmin(callable $redirect, bool $flashDenied = true): bool
     {
         if (!$this->authService->auth()->check()) {

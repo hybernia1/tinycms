@@ -42,6 +42,13 @@ final class AdminView
         ]));
     }
 
+    public function adminLostForm(array $state): void
+    {
+        $this->renderAdminAuth('admin/auth/lost', array_merge($state, [
+            'pageTitle' => I18n::t('auth.lost_password'),
+        ]));
+    }
+
     public function adminUsersList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/users/list', [
