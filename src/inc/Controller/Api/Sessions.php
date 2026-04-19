@@ -144,8 +144,7 @@ final class Sessions extends Admin
 
         $result = $this->authService->requestPasswordReset(
             ['email' => trim((string)($_POST['email'] ?? ''))],
-            $this->absolutePath('auth/lost'),
-            I18n::locale()
+            $this->absolutePath('auth/lost')
         );
         if (($result['success'] ?? false) !== true) {
             $this->apiError('LOST_REQUEST_FAILED', (string)($result['message'] ?? I18n::t('auth.form_has_errors')), 422, [

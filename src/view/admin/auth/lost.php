@@ -6,7 +6,7 @@
                     <img src="<?= $e($url(ASSETS_DIR . 'svg/logo.svg')) ?>" alt="TinyCMS">
                 </div>
                 <h1 class="m-0 mb-4"><?= $e($t('auth.lost_password')) ?></h1>
-                <p class="mb-3 text-danger" data-api-form-message hidden></p>
+                <p class="mb-3" data-api-form-message hidden></p>
                 <?php if (($tokenValid ?? false) === true): ?>
                     <form method="post" action="<?= $e($url('admin/api/v1/auth/lost/reset')) ?>" data-api-submit>
                         <?= $csrfField() ?>

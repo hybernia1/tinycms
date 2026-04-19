@@ -7,13 +7,10 @@ use App\Service\Auth\Auth as SessionAuth;
 use App\Service\Auth\Login;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\Mailer;
 use App\Service\Support\I18n;
 use App\Service\Application\Settings as SettingsService;
 use App\Service\Application\User as UserService;
-use PDO;
-use Throwable;
 
 final class Auth
 {
@@ -23,7 +20,6 @@ final class Auth
     private UserService $users;
     private Query $query;
     private Mailer $mailer;
-    private static bool $resetColumnsChecked = false;
 
     public function __construct(SessionAuth $auth)
     {
@@ -33,7 +29,6 @@ final class Auth
         $this->settings = new SettingsService();
         $this->users = new UserService();
         $this->mailer = new Mailer();
-        $this->ensureResetColumns();
     }
 
     public function auth(): SessionAuth
@@ -119,7 +114,7 @@ final class Auth
         return $this->findUserByResetToken($token) !== null;
     }
 
-    public function requestPasswordReset(array $input, string $resetLinkBase, string $locale): array
+    public function requestPasswordReset(array $input, string $resetLinkBase): array
     {
         $email = mb_strtolower(trim((string)($input['email'] ?? '')));
         $errors = [];
@@ -164,11 +159,14 @@ final class Auth
         }
 
         $link = $resetLinkBase . '?token=' . urlencode($token);
+        $domain = trim((string)parse_url($resetLinkBase, PHP_URL_HOST));
+        $sender = $domain !== '' ? 'webmaster@' . $domain : 'webmaster@domena.tld';
+
         $this->mailer->send(
             (string)$user['email'],
-            I18n::t('auth.reset_email_subject'),
-            $this->resetEmailBody((string)($user['name'] ?? ''), $link, $locale),
-            'TinyCMS@domena.tld'
+            I18n::t('emails.password_reset.subject'),
+            $this->resetEmailBody((string)($user['name'] ?? ''), $link),
+            $sender
         );
 
         return [
@@ -258,46 +256,10 @@ final class Auth
         return $user;
     }
 
-    private function resetEmailBody(string $name, string $link, string $locale): string
+    private function resetEmailBody(string $name, string $link): string
     {
         $greeting = trim($name) !== '' ? trim($name) : I18n::t('auth.reset_email_generic_user');
-        $isCs = strtolower($locale) === 'cs';
-        if ($isCs) {
-            return "Dobrý den {$greeting},\n\nobdrželi jsme žádost o reset hesla v TinyCMS.\nPro změnu hesla otevřete tento odkaz:\n{$link}\n\nPlatnost odkazu je 24 hodin.\nPokud jste o reset nežádali, tento e-mail ignorujte.\n\nTinyCMS";
-        }
-
-        return "Hello {$greeting},\n\nwe received a TinyCMS password reset request.\nUse this link to set a new password:\n{$link}\n\nThis link is valid for 24 hours.\nIf you did not request this reset, you can ignore this email.\n\nTinyCMS";
-    }
-
-    private function ensureResetColumns(): void
-    {
-        if (self::$resetColumnsChecked) {
-            return;
-        }
-        self::$resetColumnsChecked = true;
-
-        try {
-            $pdo = Connection::get();
-            $table = Table::name('users');
-            $dbName = (string)DB_NAME;
-            $check = $pdo->prepare('SELECT column_name FROM information_schema.columns WHERE table_schema = :schema AND table_name = :table AND column_name IN (\'reset_token\', \'reset_token_expiry\')');
-            $check->execute([
-                'schema' => $dbName,
-                'table' => $table,
-            ]);
-            $existing = $check->fetchAll(PDO::FETCH_COLUMN);
-            $columns = is_array($existing) ? $existing : [];
-            $missing = [];
-            if (!in_array('reset_token', $columns, true)) {
-                $missing[] = 'ADD COLUMN reset_token VARCHAR(100) DEFAULT NULL';
-            }
-            if (!in_array('reset_token_expiry', $columns, true)) {
-                $missing[] = 'ADD COLUMN reset_token_expiry DATETIME DEFAULT NULL';
-            }
-            if ($missing !== []) {
-                $pdo->exec('ALTER TABLE ' . $table . ' ' . implode(', ', $missing));
-            }
-        } catch (Throwable) {
-        }
+        $template = I18n::t('emails.password_reset.body');
+        return str_replace(['{name}', '{link}'], [$greeting, $link], $template);
     }
 }

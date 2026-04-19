@@ -312,7 +312,6 @@ return [
         'reset_password' => 'Změnit heslo',
         'new_password' => 'Nové heslo',
         'back_to_login' => 'Zpět na přihlášení',
-        'reset_email_subject' => 'Reset hesla TinyCMS',
         'reset_email_sent' => 'Pokud e-mail existuje, poslali jsme odkaz pro reset hesla.',
         'reset_token_invalid' => 'Token pro reset je neplatný nebo vypršel.',
         'password_reset_success' => 'Heslo bylo změněno.',
@@ -356,6 +355,12 @@ return [
         'author_invalid' => 'Autor není validní.',
         'status_required' => 'Status je povinný.',
         'publish_date_invalid' => 'Datum publikace není validní.',
+    ],
+    'emails' => [
+        'password_reset' => [
+            'subject' => 'Reset hesla TinyCMS',
+            'body' => "Dobrý den {name},\n\nobdrželi jsme žádost o reset hesla v TinyCMS.\nPro změnu hesla otevřete tento odkaz:\n{link}\n\nPlatnost odkazu je 24 hodin.\nPokud jste o reset nežádali, tento e-mail ignorujte.\n\nTinyCMS",
+        ],
     ],
     'editor' => [
         'headings' => 'Nadpisy',

@@ -312,7 +312,6 @@ return [
         'reset_password' => 'Reset password',
         'new_password' => 'New password',
         'back_to_login' => 'Back to login',
-        'reset_email_subject' => 'TinyCMS password reset',
         'reset_email_sent' => 'If the email exists, a reset link has been sent.',
         'reset_token_invalid' => 'Reset token is invalid or expired.',
         'password_reset_success' => 'Password has been changed.',
@@ -356,6 +355,12 @@ return [
         'author_invalid' => 'Author is not valid.',
         'status_required' => 'Status is required.',
         'publish_date_invalid' => 'Publish date is not valid.',
+    ],
+    'emails' => [
+        'password_reset' => [
+            'subject' => 'TinyCMS password reset',
+            'body' => "Hello {name},\n\nwe received a TinyCMS password reset request.\nUse this link to set a new password:\n{link}\n\nThis link is valid for 24 hours.\nIf you did not request this reset, you can ignore this email.\n\nTinyCMS",
+        ],
     ],
     'editor' => [
         'headings' => 'Headings',
