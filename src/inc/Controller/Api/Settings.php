@@ -75,6 +75,7 @@ final class Settings extends Admin
             'front_home_content' => (string)($_POST['settings']['front_home_content'] ?? ''),
             'front_posts_per_page' => (string)($_POST['settings']['front_posts_per_page'] ?? APP_POSTS_PER_PAGE),
             'front_theme' => (string)($_POST['settings']['front_theme'] ?? 'default'),
+            'allow_registration' => (string)($_POST['settings']['allow_registration'] ?? '0'),
             'favicon' => $faviconPath,
             'logo' => $logoPath,
         ];
