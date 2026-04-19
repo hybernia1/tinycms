@@ -94,7 +94,37 @@ final class Sessions extends Admin
             'authenticated' => true,
             'message' => I18n::t('auth.login_success'),
             'csrf' => $this->csrf->token(),
-            'redirect' => $this->buildPath('admin/dashboard'),
+            'redirect' => $this->buildPath((string)($result['redirect'] ?? 'account')),
+        ]);
+    }
+
+    public function registerApiV1(): void
+    {
+        if (!$this->guardRateLimit('register', 10, 300)) {
+            return;
+        }
+
+        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
+                'errors' => [],
+                ...$this->csrfPayload(),
+            ]);
+            return;
+        }
+
+        $result = $this->authService->register($_POST);
+        if (($result['success'] ?? false) !== true) {
+            $this->apiError('REGISTER_FAILED', (string)($result['message'] ?? I18n::t('auth.registration_save_failed')), 422, [
+                'errors' => $result['errors'] ?? [],
+                ...$this->csrfPayload(),
+            ]);
+            return;
+        }
+
+        $this->apiOk([
+            'message' => (string)($result['message'] ?? I18n::t('auth.registration_success')),
+            'csrf' => $this->csrf->token(),
+            'redirect' => $this->buildPath((string)($result['redirect'] ?? 'auth/login')),
         ]);
     }
 

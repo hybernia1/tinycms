@@ -71,6 +71,15 @@ final class FrontView
         ]);
     }
 
+    public function account(array $user): void
+    {
+        $this->render('account', [
+            'kind' => 'account',
+            'user' => $user,
+            'pageTitle' => $this->translate('front.account_title'),
+        ]);
+    }
+
     private function render(string $template, array $data): void
     {
         $layoutFile = $this->resolveThemeFile('layout.php');

@@ -286,6 +286,7 @@ return [
             'front_home_content' => 'Domovská stránka (obsah)',
             'front_posts_per_page' => 'Počet příspěvků na stránku',
             'front_theme' => 'Šablona',
+            'allow_registration' => 'Povolit registrace',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
         ],
@@ -297,10 +298,17 @@ return [
             'front_home_content' => [
                 'none' => '— Vyberte obsah —',
             ],
+            'allow_registration' => [
+                'disabled' => 'Ne',
+                'enabled' => 'Ano',
+            ],
         ],
     ],
     'auth' => [
         'login' => 'Přihlášení',
+        'register' => 'Registrace',
+        'create_account' => 'Vytvořit účet',
+        'have_account' => 'Už máte účet? Přihlásit se',
         'email_required' => 'E-mail je povinný.',
         'email_invalid_format' => 'E-mail není ve správném formátu.',
         'password_required' => 'Heslo je povinné.',
@@ -327,6 +335,7 @@ return [
         'password_hash_failed' => 'Nepodařilo se vytvořit hash hesla.',
         'registration_save_failed' => 'Registraci se nepodařilo uložit.',
         'registration_success' => 'Registrace proběhla úspěšně.',
+        'registration_disabled' => 'Registrace jsou vypnuté.',
     ],
     'validation' => [
         'name_required' => 'Název je povinný.',

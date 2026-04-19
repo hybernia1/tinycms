@@ -65,6 +65,15 @@ final class Settings
                 'default' => 'default',
                 'options' => $themeOptions,
             ],
+            'allow_registration' => [
+                'label_key' => 'settings.fields.allow_registration',
+                'type' => 'select',
+                'default' => '0',
+                'options' => [
+                    '0' => I18n::t('settings.options.allow_registration.disabled'),
+                    '1' => I18n::t('settings.options.allow_registration.enabled'),
+                ],
+            ],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
             'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
         ];

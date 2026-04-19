@@ -28,8 +28,17 @@ final class AdminView
 
     public function adminLoginForm(array $state): void
     {
+        $settings = $this->settings->resolved();
         $this->renderAdminAuth('admin/auth/login', array_merge($state, [
             'pageTitle' => I18n::t('auth.login'),
+            'allowRegistration' => (int)($settings['allow_registration'] ?? 0) === 1,
+        ]));
+    }
+
+    public function adminRegisterForm(array $state): void
+    {
+        $this->renderAdminAuth('admin/auth/register', array_merge($state, [
+            'pageTitle' => I18n::t('auth.register'),
         ]));
     }
 

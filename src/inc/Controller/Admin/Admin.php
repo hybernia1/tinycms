@@ -53,13 +53,28 @@ class Admin
     public function logout(callable $redirect): void
     {
         $this->authService->auth()->logout();
-        $redirect('admin/login');
+        $redirect('auth/login');
+    }
+
+    public function registerForm(callable $redirect): void
+    {
+        if ($this->authService->auth()->check()) {
+            $redirect($this->authService->redirectAfterLogin());
+        }
+
+        if (!$this->authService->isRegistrationAllowed()) {
+            $redirect('auth/login');
+        }
+
+        $this->requirePages()->adminRegisterForm([
+            'old' => ['name' => '', 'email' => ''],
+        ]);
     }
 
     protected function guardAdmin(callable $redirect, bool $flashDenied = true): bool
     {
         if (!$this->authService->auth()->check()) {
-            $redirect('admin/login');
+            $redirect('auth/login');
             return false;
         }
 
@@ -68,7 +83,7 @@ class Admin
                 $this->flash->add('info', I18n::t('admin.access_denied'));
             }
 
-            $redirect('admin/login');
+            $redirect('auth/login');
             return false;
         }
 

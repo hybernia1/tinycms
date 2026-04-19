@@ -10,4 +10,6 @@ return [
     'front.search_placeholder' => 'Hledat obsah',
     'front.search_results' => 'Výsledky hledání',
     'front.search_results_for' => 'Výsledky pro',
+    'front.account_title' => 'Můj účet',
+    'front.account_welcome' => 'Přihlášen jako',
 ];

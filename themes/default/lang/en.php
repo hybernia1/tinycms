@@ -10,4 +10,6 @@ return [
     'front.search_placeholder' => 'Search content',
     'front.search_results' => 'Search results',
     'front.search_results_for' => 'Results for',
+    'front.account_title' => 'My account',
+    'front.account_welcome' => 'Signed in as',
 ];
