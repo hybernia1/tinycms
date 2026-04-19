@@ -47,11 +47,7 @@ final class Sessions extends Admin
             return;
         }
 
-        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
-                'errors' => [],
-                ...$this->csrfPayload(),
-            ]);
+        if (!$this->verifyApiCsrf()) {
             return;
         }
 
@@ -104,11 +100,7 @@ final class Sessions extends Admin
             return;
         }
 
-        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
-                'errors' => [],
-                ...$this->csrfPayload(),
-            ]);
+        if (!$this->verifyApiCsrf()) {
             return;
         }
 
@@ -134,11 +126,7 @@ final class Sessions extends Admin
             return;
         }
 
-        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
-                'errors' => [],
-                ...$this->csrfPayload(),
-            ]);
+        if (!$this->verifyApiCsrf()) {
             return;
         }
 
@@ -166,11 +154,7 @@ final class Sessions extends Admin
             return;
         }
 
-        if (!$this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
-                'errors' => [],
-                ...$this->csrfPayload(),
-            ]);
+        if (!$this->verifyApiCsrf()) {
             return;
         }
 
@@ -215,6 +199,19 @@ final class Sessions extends Admin
     private function csrfPayload(): array
     {
         return ['csrf' => $this->csrf->token()];
+    }
+
+    private function verifyApiCsrf(): bool
+    {
+        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            return true;
+        }
+
+        $this->apiError('INVALID_CSRF', I18n::t('common.invalid_csrf'), 419, [
+            'errors' => [],
+            ...$this->csrfPayload(),
+        ]);
+        return false;
     }
 
     private function absolutePath(string $path): string
