@@ -1,6 +1,6 @@
 <article class="content-single">
     <h1><?= $e((string)($item['name'] ?? '')) ?></h1>
-    <?php $includePartial('content-thumbnail', ['item' => $item, 'sizes' => '(max-width: 1024px) 100vw, 1024px', 'loading' => 'eager']); ?>
+    <?= $postThumbnail($item, ['sizes' => '(max-width: 1024px) 100vw, 1024px', 'loading' => 'eager']) ?>
     <?php $terms = (array)($item['terms'] ?? []); ?>
     <?php if ($terms !== []): ?>
         <ul class="term-list">

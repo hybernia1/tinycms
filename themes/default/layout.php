@@ -10,7 +10,12 @@
 <body>
 <header class="site-header">
     <div class="container">
-        <a href="<?= $e($url('')) ?>" class="site-title"><?= $e($setting('sitename', 'TinyCMS')) ?></a>
+        <a href="<?= $e($url('')) ?>" class="site-title">
+            <?php if (trim($theme->siteLogo()) !== ''): ?>
+                <img src="<?= $e($url($theme->siteLogo())) ?>" alt="<?= $e($theme->siteTitle()) ?>" class="site-logo">
+            <?php endif; ?>
+            <span><?= $e($theme->siteTitle()) ?></span>
+        </a>
     </div>
 </header>
 <main class="container">

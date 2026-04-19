@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
-use App\Service\Support\Media;
 
 final class FrontView
 {
@@ -56,42 +56,23 @@ final class FrontView
     {
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
-        $themeDir = trim((string)(defined('THEMES_DIR') ? THEMES_DIR : 'themes/'), '/');
-        $themeBase = $themeDir . '/' . $this->theme;
-        $url = fn(string $path = ''): string => $this->router->url($path);
-        $themeUrl = fn(string $path = ''): string => $url(trim($themeBase . '/' . ltrim($path, '/'), '/'));
+        $theme = new Theme($this->router, $this->settings, $this->theme);
+        $url = fn(string $path = ''): string => $theme->url($path);
+        $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
         $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-        $setting = fn(string $key, string $default = ''): string => (string)($this->settings[$key] ?? $default);
+        $setting = fn(string $key, string $default = ''): string => $theme->setting($key, $default);
         $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
-        $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $url(Media::bySize($path, $size));
-        $mediaSrcSet = function (string $path): string {
-            $trimmed = trim($path);
-            if ($trimmed === '') {
-                return '';
-            }
-
-            $sources = [];
-            foreach (Media::variants() as $variant) {
-                $name = trim((string)($variant['name'] ?? ''));
-                $width = (int)($variant['width'] ?? 0);
-                if ($name === '' || $width <= 0) {
-                    continue;
-                }
-
-                $sources[] = $this->router->url(Media::bySize($trimmed, $name)) . ' ' . $width . 'w';
-            }
-
-            $sources[] = $this->router->url(Media::bySize($trimmed, 'webp')) . ' 1024w';
-            return implode(', ', $sources);
-        };
+        $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);
+        $mediaSrcSet = fn(string $path): string => $theme->mediaSrcSet($path);
+        $postThumbnail = fn(array $item, array $options = []): string => $theme->postThumbnail($item, $options);
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet): void {
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $postThumbnail, $theme): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;
         };
 
-        $pageTitle = (string)($data['pageTitle'] ?? $setting('meta_title', $setting('sitename', 'TinyCMS')));
+        $pageTitle = $theme->pageTitle(isset($data['pageTitle']) ? (string)$data['pageTitle'] : null);
         extract($data, EXTR_SKIP);
 
         ob_start();
