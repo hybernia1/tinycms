@@ -151,6 +151,32 @@ final class Theme
         );
     }
 
+    public function postAuthor(array $item, string $fallback = ''): string
+    {
+        $author = trim((string)($item['author_name'] ?? ''));
+        if ($author !== '') {
+            return $author;
+        }
+
+        return trim($fallback);
+    }
+
+    public function postDate(array $item, string $fallback = ''): string
+    {
+        $raw = trim((string)($item['created'] ?? ''));
+        if ($raw === '') {
+            return trim($fallback);
+        }
+
+        $timestamp = $this->timestamp($raw);
+        if ($timestamp === null) {
+            return trim($fallback);
+        }
+
+        $format = (string)(defined('APP_DATETIME_FORMAT') ? APP_DATETIME_FORMAT : 'Y-m-d H:i:s');
+        return date($format, $timestamp);
+    }
+
     public function pagination(array $pagination, string $basePath = '', array $labels = []): string
     {
         $totalPages = (int)($pagination['total_pages'] ?? 1);
@@ -247,6 +273,25 @@ final class Theme
         $clean = trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
         $clean = preg_replace('/\s+/', ' ', $clean) ?? '';
         return $limit > 0 ? mb_substr($clean, 0, $limit) : $clean;
+    }
+
+    private function timestamp(string $value): ?int
+    {
+        $clean = trim($value);
+        if ($clean === '') {
+            return null;
+        }
+
+        $formats = ['Y-m-d H:i:s', 'Y-m-d H:i', 'Y-m-d\\TH:i:s', 'Y-m-d\\TH:i'];
+        foreach ($formats as $format) {
+            $date = \DateTimeImmutable::createFromFormat($format, $clean);
+            if ($date instanceof \DateTimeImmutable && $date->format($format) === $clean) {
+                return $date->getTimestamp();
+            }
+        }
+
+        $timestamp = strtotime($clean);
+        return $timestamp === false ? null : $timestamp;
     }
 
     private function esc(string $value): string

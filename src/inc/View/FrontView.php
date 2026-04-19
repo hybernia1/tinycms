@@ -69,10 +69,12 @@ final class FrontView
         $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);
         $mediaSrcSet = fn(string $path): string => $theme->mediaSrcSet($path);
         $postThumbnail = fn(array $item, array $options = []): string => $theme->postThumbnail($item, $options);
+        $postAuthor = fn(array $item, string $fallback = ''): string => $theme->postAuthor($item, $fallback);
+        $postDate = fn(array $item, string $fallback = ''): string => $theme->postDate($item, $fallback);
         $contentUrl = fn(array $item): string => $theme->contentUrl($item);
         $termUrl = fn(array $term): string => $theme->termUrl($term);
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $postThumbnail, $contentUrl, $termUrl, $theme): void {
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $postThumbnail, $postAuthor, $postDate, $contentUrl, $termUrl, $theme): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;

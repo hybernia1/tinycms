@@ -1,5 +1,9 @@
 <article class="content-single">
     <h1><?= $e((string)($item['name'] ?? '')) ?></h1>
+    <?php $meta = array_values(array_filter([$postAuthor($item), $postDate($item)])); ?>
+    <?php if ($meta !== []): ?>
+        <p class="text-muted small"><?= $e(implode(' · ', $meta)) ?></p>
+    <?php endif; ?>
     <?= $postThumbnail($item, ['sizes' => '(max-width: 1024px) 100vw, 1024px', 'loading' => 'eager']) ?>
     <?php $terms = (array)($item['terms'] ?? []); ?>
     <?php if ($terms !== []): ?>
