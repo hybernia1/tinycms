@@ -21,8 +21,7 @@
                     <?php $options = (array)($field['options'] ?? []); ?>
                     <select name="settings[<?= $e((string)$fieldKey) ?>]">
                         <?php foreach ($options as $optionValue => $optionLabel): ?>
-                            <?php $value = is_string($optionValue) ? trim($optionValue) : trim((string)$optionLabel); ?>
-                            <?php if ($value === '') { continue; } ?>
+                            <?php $value = trim((string)$optionValue); ?>
                             <option value="<?= $e($value) ?>" <?= $fieldValue === $value ? 'selected' : '' ?>>
                                 <?= $e((string)$optionLabel) ?>
                             </option>
