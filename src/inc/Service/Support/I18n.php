@@ -21,8 +21,8 @@ final class I18n
             return self::$locale;
         }
 
-        self::setLocale((string)APP_LANG);
-        return (string)self::$locale;
+        self::setLocale((string) APP_LANG);
+        return self::$locale ?? self::DEFAULT_LOCALE;
     }
 
     public static function htmlLang(): string
@@ -108,9 +108,8 @@ final class I18n
 
     private static function loadCatalogue(string $locale): array
     {
-        $cacheKey = $locale;
-        if (isset(self::$catalogues[$cacheKey])) {
-            return self::$catalogues[$cacheKey];
+        if (isset(self::$catalogues[$locale])) {
+            return self::$catalogues[$locale];
         }
 
         $catalogue = [];
@@ -122,7 +121,7 @@ final class I18n
             }
         }
 
-        self::$catalogues[$cacheKey] = $catalogue;
+        self::$catalogues[$locale] = $catalogue;
         return $catalogue;
     }
 
