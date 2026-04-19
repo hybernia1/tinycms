@@ -12,14 +12,14 @@ use App\View\AdminView;
 
 final class User extends Admin
 {
-    private AdminView $pages;
-    private UserService $users;
-
-    public function __construct(AdminView $pages, Auth $authService, UserService $users, Flash $flash, Csrf $csrf)
-    {
+    public function __construct(
+        private AdminView $pages,
+        Auth $authService,
+        private UserService $users,
+        Flash $flash,
+        Csrf $csrf
+    ) {
         parent::__construct($authService, $flash, $csrf);
-        $this->pages = $pages;
-        $this->users = $users;
     }
 
     public function list(callable $redirect): void

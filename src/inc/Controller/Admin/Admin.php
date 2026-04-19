@@ -75,23 +75,6 @@ class Admin
         return true;
     }
 
-    protected function guardCsrf(callable $redirect, string $redirectPath, string $message): bool
-    {
-        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
-            return true;
-        }
-
-        $this->flash->add('error', $message);
-        $redirect($redirectPath);
-        return false;
-    }
-
-    protected function guardAdminCsrf(callable $redirect, string $redirectPath, string $message, bool $flashDenied = false): bool
-    {
-        return $this->guardAdmin($redirect, $flashDenied)
-            && $this->guardCsrf($redirect, $redirectPath, $message);
-    }
-
     protected function guardApiAdmin(bool $flashDenied = false): bool
     {
         if (!$this->authService->auth()->check()) {
@@ -163,16 +146,6 @@ class Admin
             'ok' => false,
             'error' => $error,
         ], $statusCode);
-    }
-
-    protected function requirePositiveId(int $id, string $code, string $message, int $statusCode = 400): bool
-    {
-        if ($id > 0) {
-            return true;
-        }
-
-        $this->apiError($code, $message, $statusCode);
-        return false;
     }
 
     protected function requireEntity(?array $entity, string $code, string $message, int $statusCode = 404): bool

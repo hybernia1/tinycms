@@ -41,10 +41,6 @@ final class User extends Admin
             return;
         }
 
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
-            return;
-        }
-
         if (!$this->users->delete($id)) {
             $this->apiError('DELETE_FAILED', I18n::t('users.delete_failed'));
             return;
@@ -64,9 +60,6 @@ final class User extends Admin
         }
 
         $mode = (string)($_POST['mode'] ?? 'suspend');
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
-            return;
-        }
 
         if ($mode === 'unsuspend') {
             if (!$this->users->unsuspend($id)) {
@@ -118,10 +111,6 @@ final class User extends Admin
     public function editApiV1(callable $redirect, int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
-            return;
-        }
-
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('users.invalid_id'))) {
             return;
         }
 

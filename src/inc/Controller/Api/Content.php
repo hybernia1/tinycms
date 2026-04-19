@@ -44,10 +44,6 @@ final class Content extends Admin
             return;
         }
 
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
-            return;
-        }
-
         if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
@@ -69,10 +65,6 @@ final class Content extends Admin
     public function restoreApiV1(callable $redirect, int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
-            return;
-        }
-
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
             return;
         }
 
@@ -124,10 +116,6 @@ final class Content extends Admin
             return;
         }
 
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
-            return;
-        }
-
         if (!$this->requireEntity($this->content->find($id), 'NOT_FOUND', I18n::t('content.not_found'))) {
             return;
         }
@@ -155,9 +143,6 @@ final class Content extends Admin
         }
 
         $mode = (string)($_POST['mode'] ?? 'draft');
-        if (!$this->requirePositiveId($id, 'INVALID_ID', I18n::t('content.invalid_id'))) {
-            return;
-        }
 
         $item = $this->content->find($id);
         if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('content.not_found'))) {
