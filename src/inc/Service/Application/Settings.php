@@ -76,6 +76,7 @@ final class Settings
             ],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
             'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
+            'website_email' => ['label_key' => 'settings.fields.website_email', 'type' => 'text', 'default' => ''],
         ];
     }
 

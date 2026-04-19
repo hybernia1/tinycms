@@ -159,8 +159,8 @@ final class Auth
         }
 
         $link = $resetLinkBase . '?token=' . urlencode($token);
-        $domain = trim((string)parse_url($resetLinkBase, PHP_URL_HOST));
-        $sender = $domain !== '' ? 'webmaster@' . $domain : 'webmaster@domena.tld';
+        $websiteEmail = trim((string)($this->settings->resolved()['website_email'] ?? ''));
+        $sender = filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : null;
 
         $this->mailer->send(
             (string)$user['email'],

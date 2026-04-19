@@ -289,6 +289,7 @@ return [
             'allow_registration' => 'Allow registrations',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+            'website_email' => 'Website email',
         ],
         'options' => [
             'front_home_mode' => [

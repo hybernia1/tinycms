@@ -289,6 +289,7 @@ return [
             'allow_registration' => 'Povolit registrace',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+            'website_email' => 'E-mail webu',
         ],
         'options' => [
             'front_home_mode' => [
