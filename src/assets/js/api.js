@@ -304,6 +304,9 @@ const icon = window.tinycms?.api?.icon || (() => '');
 const pushFlash = window.tinycms?.api?.pushFlash || (() => {});
 const requestJson = window.tinycms?.api?.http?.requestJson;
 const postForm = window.tinycms?.api?.http?.postForm;
+const modalApi = window.tinycms?.modal;
+const openModalElement = modalApi?.open;
+const closeModalElement = modalApi?.close;
 
 const normalizeListResponse = (payload) => {
     const meta = payload && typeof payload.meta === 'object' ? payload.meta : {};
@@ -316,7 +319,7 @@ const normalizeListResponse = (payload) => {
 };
 
 const initListApi = (config) => {
-    if (typeof requestJson !== 'function' || typeof postForm !== 'function') {
+    if (typeof requestJson !== 'function' || typeof postForm !== 'function' || typeof openModalElement !== 'function' || typeof closeModalElement !== 'function') {
         return;
     }
     const root = document.querySelector(config.rootSelector);
@@ -593,7 +596,7 @@ const initListApi = (config) => {
                     : config.messages.deleteConfirm.soft;
             }
             if (deleteModal) {
-                deleteModal.classList.add('open');
+                openModalElement(deleteModal);
             }
         }
     });
@@ -603,7 +606,7 @@ const initListApi = (config) => {
             pendingDeleteId = 0;
             pendingDeleteMode = 'soft';
             if (deleteModal) {
-                deleteModal.classList.remove('open');
+                closeModalElement(deleteModal);
             }
         });
     }
@@ -624,7 +627,7 @@ const initListApi = (config) => {
                 pendingDeleteId = 0;
                 pendingDeleteMode = 'soft';
                 if (deleteModal) {
-                    deleteModal.classList.remove('open');
+                    closeModalElement(deleteModal);
                 }
                 if (config.messages?.deleteSuccess) {
                     pushFlash('success', result.message || config.messages.deleteSuccess);

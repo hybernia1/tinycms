@@ -2,6 +2,9 @@
     var t = window.tinycms?.i18n?.t || function () { return ""; };
     var requestJson = window.tinycms?.api?.http?.requestJson;
     var postForm = window.tinycms?.api?.http?.postForm;
+    var modalApi = window.tinycms?.modal;
+    var openModal = modalApi?.open;
+    var closeModal = modalApi?.close;
     var editorCounter = 0;
 
     function normalizeHtml(html) {
@@ -812,7 +815,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('open');
+            openModal(linkModal);
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -884,14 +887,14 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('open');
+            closeModal(linkModal);
         }
 
         function closeMenus() {
             wrapper.classList.remove('is-heading-open');
             wrapper.classList.remove('is-list-open');
             wrapper.classList.remove('is-align-open');
-            linkModal.classList.remove('open');
+            closeModal(linkModal);
             hideLinkTools();
             activeLink = null;
         }

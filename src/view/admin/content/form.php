@@ -230,7 +230,7 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
     </div>
 </div>
-<div class="modal-overlay" data-content-leave-modal>
+<div class="modal-overlay" data-modal id="content-leave-modal">
     <div class="modal">
         <p><?= $e($t('content.leave_page_confirm')) ?></p>
         <div class="modal-actions">

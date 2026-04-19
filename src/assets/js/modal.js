@@ -1,5 +1,7 @@
 (() => {
 const t = window.tinycms?.i18n?.t || (() => '');
+window.tinycms = window.tinycms || {};
+window.tinycms.modal = window.tinycms.modal || {};
 
 const getModal = (trigger) => {
     const target = trigger?.getAttribute('data-modal-target') || '';
@@ -15,8 +17,14 @@ const closeModal = (modal) => {
     }
 };
 
+const openModalElement = (modal) => {
+    if (modal) {
+        modal.classList.add('open');
+    }
+};
+
 const hoistModalsToBody = () => {
-    document.querySelectorAll('[data-modal], [data-content-leave-modal], [data-media-library-modal]').forEach((modal) => {
+    document.querySelectorAll('[data-modal]').forEach((modal) => {
         if (modal.parentElement !== document.body) {
             document.body.appendChild(modal);
         }
@@ -44,7 +52,7 @@ const openModal = (trigger) => {
         confirm.setAttribute('data-form-id', formId);
     }
 
-    modal.classList.add('open');
+    openModalElement(modal);
 };
 
 const getOpenConfirmModal = () => {
@@ -130,4 +138,7 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
     confirmTrigger.click();
 });
+
+window.tinycms.modal.open = openModalElement;
+window.tinycms.modal.close = closeModal;
 })();

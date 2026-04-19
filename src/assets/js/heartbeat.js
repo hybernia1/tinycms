@@ -2,6 +2,9 @@
 const t = window.tinycms?.i18n?.t || (() => '');
 const postForm = window.tinycms?.api?.http?.postForm;
 const requestJson = window.tinycms?.api?.http?.requestJson;
+const modalApi = window.tinycms?.modal;
+const openModalElement = modalApi?.open;
+const closeModalElement = modalApi?.close;
 
 const modal = document.querySelector('[data-session-login-modal]');
 const form = modal?.querySelector('[data-session-login-form]');
@@ -17,7 +20,7 @@ let heartbeatInFlight = false;
 let loginInFlight = false;
 let connectionLost = false;
 
-if (!modal || !form || !connectionModal || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
+if (!modal || !form || !connectionModal || typeof postForm !== 'function' || typeof requestJson !== 'function' || typeof openModalElement !== 'function' || typeof closeModalElement !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
     return;
 }
 
@@ -54,24 +57,24 @@ const openModal = (payload) => {
     clearErrors();
     updateCsrfToken(payload?.error?.csrf || payload?.data?.csrf);
     setMessage(payload?.error?.message || '');
-    modal.classList.add('open');
+    openModalElement(modal);
     if (emailInput) {
         emailInput.focus();
     }
 };
 
 const closeModal = () => {
-    modal.classList.remove('open');
+    closeModalElement(modal);
     clearErrors();
     form.reset();
 };
 
 const openConnectionModal = () => {
-    connectionModal.classList.add('open');
+    openModalElement(connectionModal);
 };
 
 const closeConnectionModal = () => {
-    connectionModal.classList.remove('open');
+    closeModalElement(connectionModal);
 };
 
 const setLoading = (loading) => {

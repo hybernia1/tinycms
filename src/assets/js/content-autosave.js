@@ -1,6 +1,9 @@
 (function () {
     var postForm = window.tinycms?.api?.http?.postForm;
-    if (typeof postForm !== 'function') {
+    var modalApi = window.tinycms?.modal;
+    var openModalElement = modalApi?.open;
+    var closeModalElement = modalApi?.close;
+    if (typeof postForm !== 'function' || typeof openModalElement !== 'function' || typeof closeModalElement !== 'function') {
         return;
     }
 
@@ -226,14 +229,12 @@
         }
 
         function leaveModal() {
-            return document.querySelector('[data-content-leave-modal]');
+            return document.getElementById('content-leave-modal');
         }
 
         function closeLeaveModal() {
             var modal = leaveModal();
-            if (modal) {
-                modal.classList.remove('open');
-            }
+            closeModalElement(modal);
             pendingNavigation = '';
             pendingReload = false;
         }
@@ -243,7 +244,7 @@
             if (!modal) {
                 return;
             }
-            modal.classList.add('open');
+            openModalElement(modal);
         }
 
         function shouldGuardLink(link) {

@@ -22,10 +22,10 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/editor.css')) ?>">
     <script>window.tinycmsI18n = <?= json_encode($adminI18n ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/flash.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/loader.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/admin-menu.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-select.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-datetime.js')) ?>"></script>
@@ -182,7 +182,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     </main>
     <div class="admin-version-corner">TinyCMS <?= $e((string)($appVersion ?? '0.9.0')) ?></div>
 </div>
-<div class="modal-overlay" id="session-login-modal" data-session-login-modal>
+<div class="modal-overlay" id="session-login-modal" data-modal data-session-login-modal>
     <div class="modal session-login-modal">
         <h3 class="m-0 mb-3"><?= $e($t('auth.login')) ?></h3>
         <p class="m-0 mb-3"><?= $e($t('auth.session_expired')) ?></p>
@@ -214,7 +214,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
         </form>
     </div>
 </div>
-<div class="modal-overlay" id="connection-lost-modal" data-connection-lost-modal>
+<div class="modal-overlay" id="connection-lost-modal" data-modal data-connection-lost-modal>
     <div class="modal session-login-modal">
         <h3 class="m-0 mb-3"><?= $e($t('common.connection_lost')) ?></h3>
         <p class="m-0 mb-4"><?= $e($t('auth.connection_lost')) ?></p>
