@@ -13,6 +13,7 @@
             <?php endif; ?>
             <span><?= $e($theme->siteTitle()) ?></span>
         </a>
+        <?= $searchForm('search', (string)($_GET['q'] ?? '')) ?>
     </div>
 </header>
 <main class="container">

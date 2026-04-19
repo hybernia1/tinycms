@@ -56,6 +56,21 @@ final class FrontView
         ]);
     }
 
+    public function searchResults(array $pagination, string $query): void
+    {
+        $title = $this->translate('front.search_results');
+        if (trim($query) !== '') {
+            $title .= ': ' . $query;
+        }
+
+        $this->render('search', [
+            'kind' => 'search',
+            'pagination' => $pagination,
+            'query' => $query,
+            'pageTitle' => $title,
+        ]);
+    }
+
     private function render(string $template, array $data): void
     {
         $layoutFile = $this->resolveThemeFile('layout.php');
@@ -73,8 +88,12 @@ final class FrontView
         $contentDate = fn(array $item, string $fallback = ''): string => $theme->contentDate($item, $fallback);
         $contentUrl = fn(array $item): string => $theme->contentUrl($item);
         $termUrl = fn(array $term): string => $theme->termUrl($term);
+        $searchForm = fn(string $action = 'search', string $query = ''): string => $theme->searchForm($action, $query, [
+            'placeholder' => $this->translate('front.search_placeholder'),
+            'button' => $this->translate('front.search_button'),
+        ]);
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $theme): void {
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $searchForm, $theme): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;

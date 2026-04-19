@@ -214,10 +214,27 @@ final class Theme
         return '<nav class="pagination" aria-label="Pagination">' . implode('', $items) . '</nav>';
     }
 
+    public function searchForm(string $action = 'search', string $query = '', array $labels = []): string
+    {
+        $placeholder = trim((string)($labels['placeholder'] ?? 'Search content'));
+        $button = trim((string)($labels['button'] ?? 'Search'));
+        $formAction = $this->esc($this->url(trim($action, '/')));
+        $value = $this->esc(trim($query));
+
+        return sprintf(
+            '<form class="search-form" action="%s" method="get"><input type="search" name="q" value="%s" placeholder="%s"><button type="submit">%s</button></form>',
+            $formAction,
+            $value,
+            $this->esc($placeholder),
+            $this->esc($button),
+        );
+    }
+
     private function paginationUrl(string $basePath, int $page): string
     {
         $base = trim($basePath, '/');
-        $suffix = $page > 1 ? '?page=' . $page : '';
+        $separator = str_contains($base, '?') ? '&' : '?';
+        $suffix = $page > 1 ? $separator . 'page=' . $page : '';
         return $this->url($base . $suffix);
     }
 

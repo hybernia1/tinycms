@@ -74,6 +74,16 @@ final class Front
         $redirect($this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0)), true);
     }
 
+    public function search(): void
+    {
+        $settings = $this->services->settings->resolved();
+        $perPage = $this->resolvePerPage($settings);
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $query = $this->sanitizeSearch((string)($_GET['q'] ?? ''));
+        $pagination = $this->paginatePublished($page, $perPage, $query);
+        $this->view->searchResults($pagination, $query);
+    }
+
     public function termArchive(callable $redirect, array $params): void
     {
         $slug = trim((string)($params['slug'] ?? ''));
@@ -135,17 +145,31 @@ final class Front
         return $item;
     }
 
-    private function paginatePublished(int $page, int $perPage): array
+    private function paginatePublished(int $page, int $perPage, string $search = ''): array
     {
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
         $mediaTable = Table::name('media');
+        $search = $this->sanitizeSearch($search);
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
 
-        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable WHERE status = :status");
-        $countStmt->execute(['status' => 'published']);
+        $where = 'WHERE c.status = :status';
+        if ($search !== '') {
+            $where .= ' AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)';
+        }
+
+        $countStmt = $this->pdo->prepare(implode("\n", [
+            'SELECT COUNT(*)',
+            "FROM $contentTable c",
+            $where,
+        ]));
+        $countStmt->bindValue(':status', 'published');
+        if ($search !== '') {
+            $countStmt->bindValue(':search', '%' . $search . '%');
+        }
+        $countStmt->execute();
         $total = (int)($countStmt->fetchColumn() ?: 0);
 
         $stmt = $this->pdo->prepare(implode("\n", [
@@ -154,11 +178,14 @@ final class Front
             "FROM $contentTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE c.status = :status',
+            $where,
             'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
             'LIMIT :limit OFFSET :offset',
         ]));
         $stmt->bindValue(':status', 'published');
+        if ($search !== '') {
+            $stmt->bindValue(':search', '%' . $search . '%');
+        }
         $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
@@ -228,5 +255,10 @@ final class Front
         $path = trim((string)($row['thumbnail_path'] ?? ''));
         $row['thumbnail'] = $path;
         return $row;
+    }
+
+    private function sanitizeSearch(string $value): string
+    {
+        return mb_substr(trim($value), 0, 100);
     }
 }
