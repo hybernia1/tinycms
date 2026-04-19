@@ -32,7 +32,6 @@ final class Settings extends Admin
             'app_lang' => (string)($resolved['app_lang'] ?? APP_LANG),
             'sitename' => (string)($resolved['sitename'] ?? ''),
             'siteauthor' => (string)($resolved['siteauthor'] ?? ''),
-            'meta_title' => (string)($resolved['meta_title'] ?? ''),
             'meta_description' => (string)($resolved['meta_description'] ?? ''),
             'front_home_mode' => (string)($resolved['front_home_mode'] ?? 'latest'),
             'front_home_content' => (string)($resolved['front_home_content'] ?? ''),

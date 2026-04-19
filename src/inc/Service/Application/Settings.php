@@ -35,7 +35,6 @@ final class Settings
             ],
             'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
             'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
-            'meta_title' => ['label_key' => 'settings.fields.meta_title', 'type' => 'text', 'default' => 'TinyCMS'],
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
             'front_home_mode' => [
                 'label_key' => 'settings.fields.front_home_mode',
@@ -184,7 +183,6 @@ final class Settings
                 $existingKeys[$key] = true;
             }
         }
-
         foreach ($input as $key => $rawValue) {
             if (!isset($fields[$key])) {
                 continue;
