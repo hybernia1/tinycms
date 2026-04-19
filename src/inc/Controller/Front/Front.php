@@ -6,15 +6,18 @@ namespace App\Controller\Front;
 use App\Service\Front\Services;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
+use App\Service\Support\Slugger;
 use App\View\FrontView;
 
 final class Front
 {
     private \PDO $pdo;
+    private Slugger $slugger;
 
     public function __construct(private FrontView $view, private Services $services)
     {
         $this->pdo = Connection::get();
+        $this->slugger = new Slugger();
     }
 
     public function home(): void
@@ -37,7 +40,27 @@ final class Front
         $this->view->homeLoop($pagination);
     }
 
-    public function content(array $params): void
+    public function content(callable $redirect, array $params): void
+    {
+        $slug = trim((string)($params['slug'] ?? ''));
+        $id = $this->slugger->extractId($slug);
+        $item = $this->findPublishedContent($id);
+
+        if ($item === null) {
+            http_response_code(404);
+            echo '404';
+            return;
+        }
+
+        $canonicalSlug = $this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0));
+        if ($slug !== $canonicalSlug) {
+            $redirect($canonicalSlug, true);
+        }
+
+        $this->view->singleContent($item);
+    }
+
+    public function contentLegacy(callable $redirect, array $params): void
     {
         $id = (int)($params['id'] ?? 0);
         $item = $this->findPublishedContent($id);
@@ -48,18 +71,34 @@ final class Front
             return;
         }
 
-        $this->view->singleContent($item);
+        $redirect($this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0)), true);
     }
 
-    public function termArchive(array $params): void
+    public function search(): void
     {
-        $termId = (int)($params['id'] ?? 0);
+        $settings = $this->services->settings->resolved();
+        $perPage = $this->resolvePerPage($settings);
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $query = $this->sanitizeSearch((string)($_GET['q'] ?? ''));
+        $pagination = $this->paginatePublished($page, $perPage, $query);
+        $this->view->searchResults($pagination, $query);
+    }
+
+    public function termArchive(callable $redirect, array $params): void
+    {
+        $slug = trim((string)($params['slug'] ?? ''));
+        $termId = $this->slugger->extractId($slug);
         $term = $termId > 0 ? $this->services->term->find($termId) : null;
 
         if ($term === null) {
             http_response_code(404);
             echo '404';
             return;
+        }
+
+        $canonicalSlug = $this->slugger->slug((string)($term['name'] ?? ''), (int)($term['id'] ?? 0));
+        if ($slug !== $canonicalSlug) {
+            $redirect('term/' . $canonicalSlug, true);
         }
 
         $settings = $this->services->settings->resolved();
@@ -87,7 +126,7 @@ final class Front
         $mediaTable = Table::name('media');
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path",
+            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
             "FROM $contentTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
@@ -106,30 +145,47 @@ final class Front
         return $item;
     }
 
-    private function paginatePublished(int $page, int $perPage): array
+    private function paginatePublished(int $page, int $perPage, string $search = ''): array
     {
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
         $mediaTable = Table::name('media');
+        $search = $this->sanitizeSearch($search);
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
 
-        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable WHERE status = :status");
-        $countStmt->execute(['status' => 'published']);
+        $where = 'WHERE c.status = :status';
+        if ($search !== '') {
+            $where .= ' AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)';
+        }
+
+        $countStmt = $this->pdo->prepare(implode("\n", [
+            'SELECT COUNT(*)',
+            "FROM $contentTable c",
+            $where,
+        ]));
+        $countStmt->bindValue(':status', 'published');
+        if ($search !== '') {
+            $countStmt->bindValue(':search', '%' . $search . '%');
+        }
+        $countStmt->execute();
         $total = (int)($countStmt->fetchColumn() ?: 0);
 
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path",
+            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
             "FROM $contentTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE c.status = :status',
+            $where,
             'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
             'LIMIT :limit OFFSET :offset',
         ]));
         $stmt->bindValue(':status', 'published');
+        if ($search !== '') {
+            $stmt->bindValue(':search', '%' . $search . '%');
+        }
         $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
@@ -158,7 +214,7 @@ final class Front
 
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path",
+            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
             "FROM $contentTable c",
             "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
             "LEFT JOIN $usersTable u ON u.id = c.author",
@@ -199,5 +255,10 @@ final class Front
         $path = trim((string)($row['thumbnail_path'] ?? ''));
         $row['thumbnail'] = $path;
         return $row;
+    }
+
+    private function sanitizeSearch(string $value): string
+    {
+        return mb_substr(trim($value), 0, 100);
     }
 }
