@@ -48,8 +48,9 @@ final class Theme
         $kind = trim((string)($context['kind'] ?? 'home'));
         $item = is_array($context['item'] ?? null) ? $context['item'] : [];
         $term = is_array($context['term'] ?? null) ? $context['term'] : [];
+        $query = trim((string)($context['query'] ?? ''));
         $title = $this->resolveHeadTitle($kind, $item, $term, isset($context['pageTitle']) ? (string)$context['pageTitle'] : null);
-        $description = $this->resolveHeadDescription($kind, $item, $term);
+        $description = $this->resolveHeadDescription($kind, $item, $term, $query);
         $ogType = $this->resolveOgType($kind, $item);
         $url = $this->currentRequestUrl();
         $image = trim((string)($item['thumbnail'] ?? '')) !== '' ? $this->absoluteUrl($this->mediaUrl((string)$item['thumbnail'], 'webp')) : '';
@@ -94,8 +95,11 @@ final class Theme
                 $tags[] = '<meta property="article:author" content="' . $this->esc($author) . '">';
             }
         }
+        if ($kind === 'search') {
+            $tags[] = '<meta name="robots" content="noindex,follow">';
+        }
 
-        $jsonLd = $this->jsonLd($kind, $item, $term, $title, $description, $url, $image, $author);
+        $jsonLd = $this->jsonLd($kind, $item, $term, $title, $description, $url, $image, $author, $query);
         if ($jsonLd !== '') {
             $tags[] = '<script type="application/ld+json">' . $jsonLd . '</script>';
         }
@@ -290,7 +294,7 @@ final class Theme
         return $this->pageTitle(null);
     }
 
-    private function resolveHeadDescription(string $kind, array $item, array $term): string
+    private function resolveHeadDescription(string $kind, array $item, array $term, string $query = ''): string
     {
         if ($kind === 'content' || $kind === 'home-content') {
             $excerpt = $this->plainText((string)($item['excerpt'] ?? ''));
@@ -307,6 +311,9 @@ final class Theme
         if ($kind === 'archive' && trim((string)($term['name'] ?? '')) !== '') {
             return trim((string)$term['name']);
         }
+        if ($kind === 'search' && trim($query) !== '') {
+            return 'Search results for: ' . trim($query);
+        }
 
         $meta = $this->plainText($this->setting('meta_description'));
         return $meta !== '' ? $meta : $this->siteTitle();
@@ -322,7 +329,7 @@ final class Theme
         return in_array($type, ['article', 'news_article', 'blog_posting'], true) ? 'article' : 'website';
     }
 
-    private function jsonLd(string $kind, array $item, array $term, string $title, string $description, string $url, string $image, string $author): string
+    private function jsonLd(string $kind, array $item, array $term, string $title, string $description, string $url, string $image, string $author, string $query = ''): string
     {
         if ($kind === 'content' || $kind === 'home-content') {
             $payload = [
@@ -354,6 +361,32 @@ final class Theme
 
             return $this->jsonEncode($payload);
         }
+        if ($kind === 'archive') {
+            $payload = [
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => $title,
+                'description' => $description,
+                'url' => $url,
+                'isPartOf' => $this->absoluteUrl($this->url('')),
+            ];
+            if (trim((string)($term['name'] ?? '')) !== '') {
+                $payload['about'] = ['@type' => 'Thing', 'name' => trim((string)$term['name'])];
+            }
+
+            return $this->jsonEncode($payload);
+        }
+        if ($kind === 'search') {
+            return $this->jsonEncode([
+                '@context' => 'https://schema.org',
+                '@type' => 'SearchResultsPage',
+                'name' => $title,
+                'description' => $description,
+                'url' => $url,
+                'isPartOf' => $this->absoluteUrl($this->url('')),
+                'about' => trim($query) !== '' ? trim($query) : null,
+            ]);
+        }
 
         $payload = [
             '@context' => 'https://schema.org',
@@ -366,10 +399,6 @@ final class Theme
                 'query-input' => 'required name=search_term_string',
             ],
         ];
-        if ($kind === 'archive' && trim((string)($term['name'] ?? '')) !== '') {
-            $payload['about'] = ['@type' => 'Thing', 'name' => trim((string)$term['name'])];
-        }
-
         return $this->jsonEncode($payload);
     }
 
@@ -457,6 +486,7 @@ final class Theme
 
     private function jsonEncode(array $payload): string
     {
+        $payload = array_filter($payload, static fn(mixed $value): bool => $value !== null && $value !== '');
         return (string)json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
