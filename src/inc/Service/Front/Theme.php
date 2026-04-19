@@ -138,7 +138,10 @@ final class Theme
         $sizes = trim((string)($options['sizes'] ?? '(max-width: 1024px) 100vw, 1024px'));
         $loading = trim((string)($options['loading'] ?? 'lazy'));
         $class = trim((string)($options['class'] ?? 'content-cover'));
-        $name = trim((string)($item['name'] ?? ''));
+        $name = trim((string)($item['thumbnail_name'] ?? ''));
+        if ($name === '') {
+            $name = trim((string)($item['name'] ?? ''));
+        }
 
         return sprintf(
             '<figure class="%s"><img src="%s" srcset="%s" sizes="%s" alt="%s" loading="%s" decoding="async"></figure>',

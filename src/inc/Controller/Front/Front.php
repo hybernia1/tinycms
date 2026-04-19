@@ -116,7 +116,7 @@ final class Front
         $mediaTable = Table::name('media');
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path",
+            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
             "FROM $contentTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
@@ -150,7 +150,7 @@ final class Front
 
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path",
+            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
             "FROM $contentTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
@@ -187,7 +187,7 @@ final class Front
 
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path",
+            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
             "FROM $contentTable c",
             "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
             "LEFT JOIN $usersTable u ON u.id = c.author",
