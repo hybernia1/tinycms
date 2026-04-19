@@ -2,6 +2,10 @@
 <html lang="<?= $e($lang) ?>">
 <head>
     <?= $head ?>
+    <?php $siteFavicon = trim($setting('favicon')); ?>
+    <?php if ($siteFavicon !== ''): ?>
+        <link rel="icon" href="<?= $e($url($siteFavicon)) ?>">
+    <?php endif; ?>
     <link rel="stylesheet" href="<?= $e($themeUrl('assets/css/style.css')) ?>">
 </head>
 <body>
