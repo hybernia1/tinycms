@@ -12,6 +12,7 @@ use App\View\FrontView;
 
 final class Front
 {
+    private const SITEMAP_CHUNK_SIZE = 5000;
     private \PDO $pdo;
     private Slugger $slugger;
 
@@ -124,6 +125,65 @@ final class Front
         $this->view->account($user);
     }
 
+    public function robotsTxt(): void
+    {
+        header('Content-Type: text/plain; charset=utf-8');
+        echo "User-agent: *\n";
+        echo "Allow: /\n";
+        echo 'Sitemap: ' . $this->absoluteUrl('sitemap.xml') . "\n";
+    }
+
+    public function sitemapIndex(): void
+    {
+        $contentChunks = $this->sitemapContentChunkCount();
+        $termChunks = $this->sitemapTermChunkCount();
+        $items = [];
+
+        for ($chunk = 1; $chunk <= $contentChunks; $chunk++) {
+            $items[] = $this->absoluteUrl('sitemap-content' . $chunk . '.xml');
+        }
+
+        for ($chunk = 1; $chunk <= $termChunks; $chunk++) {
+            $items[] = $this->absoluteUrl('sitemap-terms' . $chunk . '.xml');
+        }
+
+        header('Content-Type: application/xml; charset=utf-8');
+        echo '<?xml version="1.0" encoding="UTF-8"?>';
+        echo '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        foreach ($items as $item) {
+            echo '<sitemap><loc>' . $this->xml($item) . '</loc></sitemap>';
+        }
+        echo '</sitemapindex>';
+    }
+
+    public function sitemapContent(array $params): void
+    {
+        $chunk = max(1, (int)($params['chunk'] ?? 0));
+        $rows = $this->sitemapContentChunk($chunk);
+        $this->renderSitemapUrlSet(array_map(function (array $row): array {
+            $id = (int)($row['id'] ?? 0);
+            $slug = $this->slugger->slug((string)($row['name'] ?? ''), $id);
+            return [
+                'loc' => $this->absoluteUrl($slug),
+                'lastmod' => (string)($row['updated'] ?? $row['created'] ?? ''),
+            ];
+        }, $rows));
+    }
+
+    public function sitemapTerms(array $params): void
+    {
+        $chunk = max(1, (int)($params['chunk'] ?? 0));
+        $rows = $this->sitemapTermChunk($chunk);
+        $this->renderSitemapUrlSet(array_map(function (array $row): array {
+            $id = (int)($row['id'] ?? 0);
+            $slug = $this->slugger->slug((string)($row['name'] ?? ''), $id);
+            return [
+                'loc' => $this->absoluteUrl('term/' . $slug),
+                'lastmod' => (string)($row['lastmod'] ?? ''),
+            ];
+        }, $rows));
+    }
+
     private function resolvePerPage(array $settings): int
     {
         $value = (int)($settings['front_posts_per_page'] ?? APP_POSTS_PER_PAGE);
@@ -145,10 +205,10 @@ final class Front
             "FROM $contentTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE c.id = :id AND c.status = :status',
+            'WHERE c.id = :id AND c.status = :status AND c.created <= :now',
             'LIMIT 1',
         ]));
-        $stmt->execute(['id' => $id, 'status' => 'published']);
+        $stmt->execute(['id' => $id, 'status' => 'published', 'now' => $this->now()]);
         $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
 
         if ($item === null) {
@@ -170,7 +230,7 @@ final class Front
         $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
 
-        $where = 'WHERE c.status = :status';
+        $where = 'WHERE c.status = :status AND c.created <= :now';
         if ($search !== '') {
             $where .= ' AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)';
         }
@@ -181,6 +241,7 @@ final class Front
             $where,
         ]));
         $countStmt->bindValue(':status', 'published');
+        $countStmt->bindValue(':now', $this->now());
         if ($search !== '') {
             $countStmt->bindValue(':search', '%' . $search . '%');
         }
@@ -198,6 +259,7 @@ final class Front
             'LIMIT :limit OFFSET :offset',
         ]));
         $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':now', $this->now());
         if ($search !== '') {
             $stmt->bindValue(':search', '%' . $search . '%');
         }
@@ -222,9 +284,9 @@ final class Front
             'SELECT COUNT(*)',
             "FROM $contentTable c",
             "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
-            'WHERE c.status = :status AND ct.term = :term',
+            'WHERE c.status = :status AND ct.term = :term AND c.created <= :now',
         ]));
-        $countStmt->execute(['status' => 'published', 'term' => $termId]);
+        $countStmt->execute(['status' => 'published', 'term' => $termId, 'now' => $this->now()]);
         $total = (int)($countStmt->fetchColumn() ?: 0);
 
         $stmt = $this->pdo->prepare(implode("\n", [
@@ -234,12 +296,13 @@ final class Front
             "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE c.status = :status AND ct.term = :term',
+            'WHERE c.status = :status AND ct.term = :term AND c.created <= :now',
             'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
             'LIMIT :limit OFFSET :offset',
         ]));
         $stmt->bindValue(':status', 'published');
         $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
+        $stmt->bindValue(':now', $this->now());
         $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
@@ -275,5 +338,124 @@ final class Front
     private function sanitizeSearch(string $value): string
     {
         return mb_substr(trim($value), 0, 100);
+    }
+
+    private function sitemapContentChunkCount(): int
+    {
+        $contentTable = Table::name('content');
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable c WHERE c.status = :status AND c.created <= :now");
+        $stmt->execute(['status' => 'published', 'now' => $this->now()]);
+        return max(1, (int)ceil(((int)($stmt->fetchColumn() ?: 0)) / self::SITEMAP_CHUNK_SIZE));
+    }
+
+    private function sitemapTermChunkCount(): int
+    {
+        $termsTable = Table::name('terms');
+        $contentTable = Table::name('content');
+        $contentTermsTable = Table::name('content_terms');
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT COUNT(DISTINCT t.id)',
+            "FROM $termsTable t",
+            "INNER JOIN $contentTermsTable ct ON ct.term = t.id",
+            "INNER JOIN $contentTable c ON c.id = ct.content",
+            'WHERE c.status = :status AND c.created <= :now',
+        ]));
+        $stmt->execute(['status' => 'published', 'now' => $this->now()]);
+        return max(1, (int)ceil(((int)($stmt->fetchColumn() ?: 0)) / self::SITEMAP_CHUNK_SIZE));
+    }
+
+    private function sitemapContentChunk(int $chunk): array
+    {
+        $contentTable = Table::name('content');
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT c.id, c.name, c.created, c.updated',
+            "FROM $contentTable c",
+            'WHERE c.status = :status AND c.created <= :now',
+            'ORDER BY c.id ASC',
+            'LIMIT :limit OFFSET :offset',
+        ]));
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':now', $this->now());
+        $stmt->bindValue(':limit', self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', ($chunk - 1) * self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    }
+
+    private function sitemapTermChunk(int $chunk): array
+    {
+        $termsTable = Table::name('terms');
+        $contentTable = Table::name('content');
+        $contentTermsTable = Table::name('content_terms');
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT t.id, t.name, MAX(COALESCE(c.updated, c.created)) AS lastmod',
+            "FROM $termsTable t",
+            "INNER JOIN $contentTermsTable ct ON ct.term = t.id",
+            "INNER JOIN $contentTable c ON c.id = ct.content",
+            'WHERE c.status = :status AND c.created <= :now',
+            'GROUP BY t.id, t.name',
+            'ORDER BY t.id ASC',
+            'LIMIT :limit OFFSET :offset',
+        ]));
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':now', $this->now());
+        $stmt->bindValue(':limit', self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', ($chunk - 1) * self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    }
+
+    private function renderSitemapUrlSet(array $items): void
+    {
+        header('Content-Type: application/xml; charset=utf-8');
+        echo '<?xml version="1.0" encoding="UTF-8"?>';
+        echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        foreach ($items as $item) {
+            $loc = trim((string)($item['loc'] ?? ''));
+            if ($loc === '') {
+                continue;
+            }
+            $lastmod = $this->sitemapDate((string)($item['lastmod'] ?? ''));
+            echo '<url><loc>' . $this->xml($loc) . '</loc>';
+            if ($lastmod !== '') {
+                echo '<lastmod>' . $this->xml($lastmod) . '</lastmod>';
+            }
+            echo '</url>';
+        }
+        echo '</urlset>';
+    }
+
+    private function now(): string
+    {
+        return date('Y-m-d H:i:s');
+    }
+
+    private function absoluteUrl(string $path): string
+    {
+        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+        $baseDir = trim(dirname($scriptName), '/.');
+        $prefix = $baseDir === '' ? '' : '/' . $baseDir;
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = trim((string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
+        $cleanPath = ltrim($path, '/');
+        return $scheme . '://' . $host . $prefix . '/' . $cleanPath;
+    }
+
+    private function xml(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+    }
+
+    private function sitemapDate(string $value): string
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return '';
+        }
+        $timestamp = strtotime($trimmed);
+        if ($timestamp === false) {
+            return '';
+        }
+        return gmdate('c', $timestamp);
     }
 }
