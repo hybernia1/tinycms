@@ -105,14 +105,38 @@ final class Router
         $parts = [];
 
         foreach ($segments as $segment) {
-            if (preg_match('/^\{([a-zA-Z_][a-zA-Z0-9_]*)\}$/', $segment, $matches) === 1) {
-                $name = $matches[1];
-                $params[] = $name;
-                $parts[] = '(?<' . $name . '>[^/]+)';
+            if (!str_contains($segment, '{')) {
+                $parts[] = preg_quote($segment, '#');
                 continue;
             }
 
-            $parts[] = preg_quote($segment, '#');
+            $segmentRegex = '';
+            $offset = 0;
+
+            if (preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', $segment, $matches, PREG_OFFSET_CAPTURE) === 0) {
+                $parts[] = preg_quote($segment, '#');
+                continue;
+            }
+
+            foreach ($matches[1] as $index => $match) {
+                $name = (string)$match[0];
+                $tokenOffset = (int)$matches[0][$index][1];
+                $tokenLength = strlen((string)$matches[0][$index][0]);
+                $literal = substr($segment, $offset, $tokenOffset - $offset);
+                if ($literal !== false && $literal !== '') {
+                    $segmentRegex .= preg_quote($literal, '#');
+                }
+                $params[] = $name;
+                $segmentRegex .= '(?<' . $name . '>[^/]+)';
+                $offset = $tokenOffset + $tokenLength;
+            }
+
+            $tail = substr($segment, $offset);
+            if ($tail !== false && $tail !== '') {
+                $segmentRegex .= preg_quote($tail, '#');
+            }
+
+            $parts[] = $segmentRegex;
         }
 
         return ['#^' . implode('/', $parts) . '$#', $params];
