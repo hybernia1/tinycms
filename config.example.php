@@ -6,6 +6,7 @@ define('SRC_DIR', 'src/');
 define('INC_DIR', SRC_DIR . 'inc/');
 define('VIEW_DIR', SRC_DIR . 'view/');
 define('ASSETS_DIR', SRC_DIR . 'assets/');
+define('THEMES_DIR', 'themes/');
 
 const APP_DEBUG = false;
 const APP_VERSION = '0.9.0';

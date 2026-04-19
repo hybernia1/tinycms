@@ -20,6 +20,7 @@ final class SchemaDefinition
             ],
             'content' => [
                 'status' => ['max' => 50, 'nullable' => false],
+                'type' => ['max' => 100, 'nullable' => false, 'allowed' => ['article', 'page', 'about_page', 'news_article', 'blog_posting', 'faq_page']],
                 'excerpt' => ['max' => 500, 'nullable' => true],
                 'name' => ['max' => 255, 'nullable' => true],
             ],
@@ -78,6 +79,7 @@ final class SchemaDefinition
                 id INT NOT NULL AUTO_INCREMENT,
                 author INT DEFAULT NULL,
                 status VARCHAR(50) NOT NULL DEFAULT 'draft',
+                type VARCHAR(100) NOT NULL DEFAULT 'article',
                 created DATETIME NOT NULL DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                 body LONGTEXT,
@@ -87,6 +89,7 @@ final class SchemaDefinition
                 PRIMARY KEY (id),
                 KEY idx_content_status_created_id (status, created, id),
                 KEY idx_content_status (status),
+                KEY idx_content_type (type),
                 KEY idx_content_created (created),
                 KEY idx_content_author (author),
                 KEY idx_content_thumbnail (thumbnail),

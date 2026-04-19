@@ -34,6 +34,10 @@ final class Settings extends Admin
             'siteauthor' => (string)($resolved['siteauthor'] ?? ''),
             'meta_title' => (string)($resolved['meta_title'] ?? ''),
             'meta_description' => (string)($resolved['meta_description'] ?? ''),
+            'front_home_mode' => (string)($resolved['front_home_mode'] ?? 'latest'),
+            'front_home_content' => (string)($resolved['front_home_content'] ?? ''),
+            'front_posts_per_page' => (string)($resolved['front_posts_per_page'] ?? APP_POSTS_PER_PAGE),
+            'front_theme' => (string)($resolved['front_theme'] ?? 'default'),
             'favicon' => (string)($resolved['favicon'] ?? ''),
             'logo' => (string)($resolved['logo'] ?? ''),
         ]);

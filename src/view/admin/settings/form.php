@@ -21,8 +21,7 @@
                     <?php $options = (array)($field['options'] ?? []); ?>
                     <select name="settings[<?= $e((string)$fieldKey) ?>]">
                         <?php foreach ($options as $optionValue => $optionLabel): ?>
-                            <?php $value = is_string($optionValue) ? trim($optionValue) : trim((string)$optionLabel); ?>
-                            <?php if ($value === '') { continue; } ?>
+                            <?php $value = trim((string)$optionValue); ?>
                             <option value="<?= $e($value) ?>" <?= $fieldValue === $value ? 'selected' : '' ?>>
                                 <?= $e((string)$optionLabel) ?>
                             </option>
@@ -45,6 +44,10 @@
                             <img src="<?= $e($url($fieldValue)) ?>" alt="<?= $e((string)$fieldKey) ?> preview" style="width:32px;height:32px">
                         </div>
                     <?php endif; ?>
+                <?php elseif ($fieldType === 'number'): ?>
+                    <?php $min = (int)($field['min'] ?? 1); ?>
+                    <?php $max = (int)($field['max'] ?? 100); ?>
+                    <input type="number" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>" min="<?= $min ?>" max="<?= $max ?>" step="1">
                 <?php else: ?>
                     <input type="text" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>">
                 <?php endif; ?>
