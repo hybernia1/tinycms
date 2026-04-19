@@ -24,6 +24,7 @@ final class FrontView
     public function homeLoop(array $pagination): void
     {
         $this->render('index', [
+            'kind' => 'home',
             'mode' => 'loop',
             'pagination' => $pagination,
         ]);
@@ -32,6 +33,7 @@ final class FrontView
     public function homeContent(array $item): void
     {
         $this->render('index', [
+            'kind' => 'home-content',
             'mode' => 'content',
             'item' => $item,
         ]);
@@ -40,6 +42,7 @@ final class FrontView
     public function singleContent(array $item): void
     {
         $this->render('content', [
+            'kind' => 'content',
             'item' => $item,
         ]);
     }
@@ -47,6 +50,7 @@ final class FrontView
     public function termArchive(array $term, array $pagination): void
     {
         $this->render('archive', [
+            'kind' => 'archive',
             'term' => $term,
             'pagination' => $pagination,
         ]);
@@ -73,6 +77,7 @@ final class FrontView
         };
 
         $pageTitle = $theme->pageTitle(isset($data['pageTitle']) ? (string)$data['pageTitle'] : null);
+        $head = $theme->head($data);
         extract($data, EXTR_SKIP);
 
         ob_start();

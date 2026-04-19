@@ -40,6 +40,32 @@ final class Theme
         return $meta !== '' ? $meta : $this->siteTitle();
     }
 
+    public function head(array $context = []): string
+    {
+        $kind = trim((string)($context['kind'] ?? 'home'));
+        $item = is_array($context['item'] ?? null) ? $context['item'] : [];
+        $term = is_array($context['term'] ?? null) ? $context['term'] : [];
+        $title = $this->resolveHeadTitle($kind, $item, $term, isset($context['pageTitle']) ? (string)$context['pageTitle'] : null);
+        $description = $this->resolveHeadDescription($kind, $item, $term);
+        $ogType = $this->resolveOgType($kind, $item);
+        $tags = [
+            '<meta charset="utf-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=1">',
+            '<title>' . $this->esc($title) . '</title>',
+            '<meta name="description" content="' . $this->esc($description) . '">',
+            '<meta property="og:title" content="' . $this->esc($title) . '">',
+            '<meta property="og:description" content="' . $this->esc($description) . '">',
+            '<meta property="og:type" content="' . $this->esc($ogType) . '">',
+        ];
+
+        $contentType = trim((string)($item['type'] ?? ''));
+        if ($contentType !== '') {
+            $tags[] = '<meta name="content:type" content="' . $this->esc($contentType) . '">';
+        }
+
+        return implode(PHP_EOL, $tags);
+    }
+
     public function url(string $path = ''): string
     {
         return $this->router->url($path);
@@ -141,6 +167,63 @@ final class Theme
         $base = trim($basePath, '/');
         $suffix = $page > 1 ? '?page=' . $page : '';
         return $this->url($base . $suffix);
+    }
+
+    private function resolveHeadTitle(string $kind, array $item, array $term, ?string $customTitle): string
+    {
+        $custom = trim((string)$customTitle);
+        if ($custom !== '') {
+            return $custom;
+        }
+
+        if (($kind === 'content' || $kind === 'home-content') && trim((string)($item['name'] ?? '')) !== '') {
+            return trim((string)$item['name']) . ' | ' . $this->siteTitle();
+        }
+
+        if ($kind === 'archive' && trim((string)($term['name'] ?? '')) !== '') {
+            return trim((string)$term['name']) . ' | ' . $this->siteTitle();
+        }
+
+        return $this->pageTitle(null);
+    }
+
+    private function resolveHeadDescription(string $kind, array $item, array $term): string
+    {
+        if ($kind === 'content' || $kind === 'home-content') {
+            $excerpt = $this->plainText((string)($item['excerpt'] ?? ''));
+            if ($excerpt !== '') {
+                return $excerpt;
+            }
+
+            $body = $this->plainText((string)($item['body'] ?? ''));
+            if ($body !== '') {
+                return $body;
+            }
+        }
+
+        if ($kind === 'archive' && trim((string)($term['name'] ?? '')) !== '') {
+            return trim((string)$term['name']);
+        }
+
+        $meta = $this->plainText($this->setting('meta_description'));
+        return $meta !== '' ? $meta : $this->siteTitle();
+    }
+
+    private function resolveOgType(string $kind, array $item): string
+    {
+        if ($kind !== 'content' && $kind !== 'home-content') {
+            return 'website';
+        }
+
+        $type = trim((string)($item['type'] ?? ''));
+        return in_array($type, ['article', 'news_article', 'blog_posting'], true) ? 'article' : 'website';
+    }
+
+    private function plainText(string $value, int $limit = 160): string
+    {
+        $clean = trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $clean = preg_replace('/\s+/', ' ', $clean) ?? '';
+        return $limit > 0 ? mb_substr($clean, 0, $limit) : $clean;
     }
 
     private function esc(string $value): string
