@@ -45,12 +45,13 @@ final class Content extends Admin
             return;
         }
 
-        $fallback = ['id' => null, 'name' => '', 'status' => 'draft', 'type' => 'post', 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
+        $fallback = ['id' => null, 'name' => '', 'status' => 'draft', 'type' => ContentService::TYPE_ARTICLE, 'excerpt' => '', 'body' => '', 'created' => date('Y-m-d H:i:s'), 'updated' => null];
         $fallback['author'] = (int)($this->authService->auth()->id() ?? 0);
         $statuses = $this->content->statuses();
+        $types = $this->content->types();
         $item = $fallback;
         $selectedTerms = $this->resolveSelectedTerms($item, null);
-        $this->pages->adminContentForm('add', $item, [], $statuses, $this->users->authorOptions(), $selectedTerms);
+        $this->pages->adminContentForm('add', $item, [], $statuses, $types, $this->users->authorOptions(), $selectedTerms);
     }
 
     public function editForm(callable $redirect): void
@@ -69,9 +70,14 @@ final class Content extends Admin
         }
 
         $statuses = $this->content->statuses();
+        $types = $this->content->types();
+        $itemType = (string)($item['type'] ?? '');
+        if ($itemType !== '' && !in_array($itemType, $types, true)) {
+            $types[] = $itemType;
+        }
         $formItem = $item;
         $selectedTerms = $this->resolveSelectedTerms($formItem, $id);
-        $this->pages->adminContentForm('edit', $formItem, [], $statuses, $this->users->authorOptions(), $selectedTerms);
+        $this->pages->adminContentForm('edit', $formItem, [], $statuses, $types, $this->users->authorOptions(), $selectedTerms);
     }
 
     private function resolveSelectedTerms(array $item, ?int $contentId): array

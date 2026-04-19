@@ -64,7 +64,15 @@ $contentId = (int)($item['id'] ?? 0);
                     </div>
                     <div class="mt-3 m-0">
                         <label><?= $e($t('content.type')) ?></label>
-                        <input type="text" name="type" value="<?= $e((string)($item['type'] ?? 'post')) ?>" required>
+                        <?php $selectedType = (string)($item['type'] ?? \App\Service\Application\Content::TYPE_ARTICLE); ?>
+                        <select name="type" required>
+                            <?php foreach ((array)($contentTypes ?? []) as $typeOption): ?>
+                                <?php $typeKey = (string)$typeOption; ?>
+                                <option value="<?= $e($typeKey) ?>" <?= $selectedType === $typeKey ? 'selected' : '' ?>>
+                                    <?= $e($t('content.types.' . $typeKey, ucfirst(str_replace('_', ' ', $typeKey)))) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                         <?php if (!empty($errors['type'])): ?><small class="text-danger"><?= $e((string)$errors['type']) ?></small><?php endif; ?>
                     </div>
                 </div>

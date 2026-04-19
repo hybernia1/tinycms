@@ -190,7 +190,7 @@ final class Content extends Admin
         $payload = [
             'name' => $this->resolveAutosaveDraftName(),
             'status' => 'draft',
-            'type' => 'post',
+            'type' => ContentService::TYPE_ARTICLE,
             'excerpt' => '',
             'body' => '',
             'author' => $authorId > 0 ? (string)$authorId : '',
@@ -373,7 +373,7 @@ final class Content extends Admin
         return [
             'name' => $name,
             'status' => trim((string)($input['status'] ?? 'draft')) ?: 'draft',
-            'type' => trim((string)($input['type'] ?? 'post')) ?: 'post',
+            'type' => trim((string)($input['type'] ?? ContentService::TYPE_ARTICLE)) ?: ContentService::TYPE_ARTICLE,
             'excerpt' => (string)($input['excerpt'] ?? ''),
             'body' => (string)($input['body'] ?? ''),
             'author' => $author,

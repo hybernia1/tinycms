@@ -15,6 +15,12 @@ final class Content
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PUBLISHED = 'published';
     public const STATUS_TRASH = 'trash';
+    public const TYPE_ARTICLE = 'article';
+    public const TYPE_PAGE = 'page';
+    public const TYPE_ABOUT_PAGE = 'about_page';
+    public const TYPE_NEWS_ARTICLE = 'news_article';
+    public const TYPE_BLOG_POSTING = 'blog_posting';
+    public const TYPE_FAQ_PAGE = 'faq_page';
 
     private Query $query;
     private \PDO $pdo;
@@ -141,7 +147,7 @@ final class Content
     {
         $name = trim((string)($input['name'] ?? ''));
         $status = trim((string)($input['status'] ?? 'draft'));
-        $type = trim((string)($input['type'] ?? 'post'));
+        $type = trim((string)($input['type'] ?? self::TYPE_ARTICLE));
         $excerpt = $this->sanitizeExcerpt((string)($input['excerpt'] ?? ''));
         $body = trim((string)($input['body'] ?? ''));
         $author = $this->resolveAuthorId($input, $defaultAuthorId);
@@ -158,6 +164,8 @@ final class Content
 
         if ($type === '') {
             $errors['type'] = I18n::t('errors.validation.required');
+        } elseif (!in_array($type, $this->types(), true)) {
+            $errors['type'] = I18n::t('errors.validation.invalid_value');
         }
 
         if (($input['author'] ?? '') !== '' && $author === null) {
@@ -233,6 +241,18 @@ final class Content
 
         sort($statuses);
         return $statuses;
+    }
+
+    public function types(): array
+    {
+        return [
+            self::TYPE_ARTICLE,
+            self::TYPE_PAGE,
+            self::TYPE_ABOUT_PAGE,
+            self::TYPE_NEWS_ARTICLE,
+            self::TYPE_BLOG_POSTING,
+            self::TYPE_FAQ_PAGE,
+        ];
     }
 
     public function statusCounts(array $statuses = []): array

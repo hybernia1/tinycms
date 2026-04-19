@@ -73,13 +73,14 @@ final class AdminView
         ]);
     }
 
-    public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $authors, array $selectedTerms = []): void
+    public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $contentTypes, array $authors, array $selectedTerms = []): void
     {
         $this->renderAdmin('admin/content/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
             'availableStatuses' => $availableStatuses,
+            'contentTypes' => $contentTypes,
             'authors' => $authors,
             'selectedTerms' => $selectedTerms,
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_content') : I18n::t('admin.edit_content'),
