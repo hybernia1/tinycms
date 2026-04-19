@@ -28,6 +28,7 @@ final class SchemaDefinition
             ],
             'settings' => [
                 'key_name' => ['max' => 100, 'nullable' => false],
+                'value' => ['max' => 1000, 'nullable' => true],
             ],
         ];
     }
@@ -118,7 +119,7 @@ final class SchemaDefinition
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS $settings (
                 key_name VARCHAR(100) NOT NULL,
-                value JSON DEFAULT NULL,
+                value VARCHAR(1000) DEFAULT NULL,
                 PRIMARY KEY (key_name)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
         ];
