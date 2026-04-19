@@ -51,19 +51,52 @@ final class Theme
         $title = $this->resolveHeadTitle($kind, $item, $term, isset($context['pageTitle']) ? (string)$context['pageTitle'] : null);
         $description = $this->resolveHeadDescription($kind, $item, $term);
         $ogType = $this->resolveOgType($kind, $item);
+        $url = $this->currentRequestUrl();
+        $image = trim((string)($item['thumbnail'] ?? '')) !== '' ? $this->absoluteUrl($this->mediaUrl((string)$item['thumbnail'], 'webp')) : '';
+        $author = trim((string)($item['author_name'] ?? ''));
         $tags = [
             '<meta charset="utf-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1">',
             '<title>' . $this->esc($title) . '</title>',
             '<meta name="description" content="' . $this->esc($description) . '">',
+            '<link rel="canonical" href="' . $this->esc($url) . '">',
             '<meta property="og:title" content="' . $this->esc($title) . '">',
             '<meta property="og:description" content="' . $this->esc($description) . '">',
             '<meta property="og:type" content="' . $this->esc($ogType) . '">',
+            '<meta property="og:url" content="' . $this->esc($url) . '">',
+            '<meta name="twitter:card" content="' . $this->esc($image !== '' ? 'summary_large_image' : 'summary') . '">',
+            '<meta name="twitter:title" content="' . $this->esc($title) . '">',
+            '<meta name="twitter:description" content="' . $this->esc($description) . '">',
         ];
 
         $contentType = trim((string)($item['type'] ?? ''));
         if ($contentType !== '') {
             $tags[] = '<meta name="content:type" content="' . $this->esc($contentType) . '">';
+        }
+        if ($author !== '') {
+            $tags[] = '<meta name="author" content="' . $this->esc($author) . '">';
+        }
+        if ($image !== '') {
+            $tags[] = '<meta property="og:image" content="' . $this->esc($image) . '">';
+            $tags[] = '<meta name="twitter:image" content="' . $this->esc($image) . '">';
+        }
+        if ($kind === 'content' || $kind === 'home-content') {
+            $published = $this->isoDate((string)($item['created'] ?? ''));
+            $updated = $this->isoDate((string)($item['updated'] ?? ''));
+            if ($published !== '') {
+                $tags[] = '<meta property="article:published_time" content="' . $this->esc($published) . '">';
+            }
+            if ($updated !== '') {
+                $tags[] = '<meta property="article:modified_time" content="' . $this->esc($updated) . '">';
+            }
+            if ($author !== '') {
+                $tags[] = '<meta property="article:author" content="' . $this->esc($author) . '">';
+            }
+        }
+
+        $jsonLd = $this->jsonLd($kind, $item, $term, $title, $description, $url, $image, $author);
+        if ($jsonLd !== '') {
+            $tags[] = '<script type="application/ld+json">' . $jsonLd . '</script>';
         }
 
         return implode(PHP_EOL, $tags);
@@ -288,6 +321,57 @@ final class Theme
         return in_array($type, ['article', 'news_article', 'blog_posting'], true) ? 'article' : 'website';
     }
 
+    private function jsonLd(string $kind, array $item, array $term, string $title, string $description, string $url, string $image, string $author): string
+    {
+        if ($kind === 'content' || $kind === 'home-content') {
+            $payload = [
+                '@context' => 'https://schema.org',
+                '@type' => $this->schemaType((string)($item['type'] ?? '')),
+                'headline' => $title,
+                'description' => $description,
+                'mainEntityOfPage' => $url,
+                'url' => $url,
+            ];
+            if ($image !== '') {
+                $payload['image'] = $image;
+            }
+            $published = $this->isoDate((string)($item['created'] ?? ''));
+            if ($published !== '') {
+                $payload['datePublished'] = $published;
+            }
+            $updated = $this->isoDate((string)($item['updated'] ?? ''));
+            if ($updated !== '') {
+                $payload['dateModified'] = $updated;
+            }
+            if ($author !== '') {
+                $payload['author'] = ['@type' => 'Person', 'name' => $author];
+            }
+            $terms = array_values(array_filter(array_map(static fn(array $entry): string => trim((string)($entry['name'] ?? '')), (array)($item['terms'] ?? []))));
+            if ($terms !== []) {
+                $payload['keywords'] = implode(', ', $terms);
+            }
+
+            return $this->jsonEncode($payload);
+        }
+
+        $payload = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => $this->siteTitle(),
+            'url' => $this->absoluteUrl($this->url('')),
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => $this->absoluteUrl($this->url('search')) . '?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ];
+        if ($kind === 'archive' && trim((string)($term['name'] ?? '')) !== '') {
+            $payload['about'] = ['@type' => 'Thing', 'name' => trim((string)$term['name'])];
+        }
+
+        return $this->jsonEncode($payload);
+    }
+
     private function plainText(string $value, int $limit = 160): string
     {
         $clean = trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
@@ -312,6 +396,60 @@ final class Theme
 
         $timestamp = strtotime($clean);
         return $timestamp === false ? null : $timestamp;
+    }
+
+    private function isoDate(string $value): string
+    {
+        $timestamp = $this->timestamp($value);
+        if ($timestamp === null) {
+            return '';
+        }
+
+        return gmdate('c', $timestamp);
+    }
+
+    private function schemaType(string $type): string
+    {
+        $normalized = trim($type);
+        return match ($normalized) {
+            'news_article' => 'NewsArticle',
+            'blog_posting' => 'BlogPosting',
+            'faq_page' => 'FAQPage',
+            default => 'Article',
+        };
+    }
+
+    private function absoluteUrl(string $path): string
+    {
+        if (preg_match('#^https?://#i', $path) === 1) {
+            return $path;
+        }
+
+        $host = trim((string)($_SERVER['HTTP_HOST'] ?? ''));
+        if ($host === '') {
+            return $path;
+        }
+
+        $proto = (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') ? 'https' : 'http';
+        return $proto . '://' . $host . '/' . ltrim($path, '/');
+    }
+
+    private function currentRequestUrl(): string
+    {
+        $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+        $raw = (string)(parse_url($uri, PHP_URL_PATH) ?? '/');
+        $query = (string)(parse_url($uri, PHP_URL_QUERY) ?? '');
+        $path = $this->url(trim($raw, '/'));
+        if ($query !== '') {
+            $path .= '?' . $query;
+        }
+
+        return $this->absoluteUrl($path);
+    }
+
+    private function jsonEncode(array $payload): string
+    {
+        return (string)json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     private function esc(string $value): string
