@@ -58,6 +58,7 @@ return [
         'prefix_in_use' => 'TinyCMS tables already exist for the selected prefix. Choose a different prefix or remove existing tables first.',
         'admin_name_required' => 'Name is required.',
         'admin_email_invalid' => 'Email is not valid.',
+        'website_url_required' => 'Website URL is required.',
         'website_url_invalid' => 'Website URL must be a valid http(s) URL.',
         'admin_password_min' => 'Password must have at least 8 characters.',
         'schema_failed' => 'Could not create database schema.',

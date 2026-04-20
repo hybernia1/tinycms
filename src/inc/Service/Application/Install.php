@@ -93,7 +93,9 @@ final class Install
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors['email'] = I18n::t('install.admin_email_invalid');
         }
-        if (!RequestContext::isValidWebsiteUrl($websiteUrl)) {
+        if ($websiteUrl === '') {
+            $errors['website_url'] = I18n::t('install.website_url_required');
+        } elseif (!RequestContext::isValidWebsiteUrl($websiteUrl)) {
             $errors['website_url'] = I18n::t('install.website_url_invalid');
         }
 
@@ -165,11 +167,9 @@ final class Install
         }
 
         $websiteUrl = trim((string)($admin['website_url'] ?? ''));
-        if ($websiteUrl !== '') {
-            $settingsResult = $this->saveWebsiteUrlSetting($pdo, $websiteUrl, $prefix);
-            if ($settingsResult !== null) {
-                return ['success' => false, 'message' => $settingsResult];
-            }
+        $settingsResult = $this->saveWebsiteUrlSetting($pdo, $websiteUrl, $prefix);
+        if ($settingsResult !== null) {
+            return ['success' => false, 'message' => $settingsResult];
         }
 
         RequestContext::setWebsiteUrl($websiteUrl);

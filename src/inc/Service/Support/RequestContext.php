@@ -40,25 +40,12 @@ final class RequestContext
             }
             return self::$websiteUrlParts['host'] . ':' . $port;
         }
-
-        [$host, $port] = self::firstTrustedHost();
-        if ($host === '') {
-            return 'localhost';
-        }
-        if ($port === null) {
-            return $host;
-        }
-        return $host . ':' . $port;
+        return 'localhost';
     }
 
     public static function hasAuthority(): bool
     {
-        if (self::$websiteUrlParts !== null) {
-            return true;
-        }
-
-        [$host] = self::firstTrustedHost();
-        return $host !== '';
+        return self::$websiteUrlParts !== null;
     }
 
     public static function domain(): string
@@ -66,19 +53,7 @@ final class RequestContext
         if (self::$websiteUrlParts !== null) {
             return self::$websiteUrlParts['host'];
         }
-
-        [$host] = self::firstTrustedHost();
-        return $host !== '' ? $host : 'localhost';
-    }
-
-    private static function firstTrustedHost(): array
-    {
-        [$serverName] = self::parseAuthority((string)($_SERVER['SERVER_NAME'] ?? ''));
-        if ($serverName !== '') {
-            return [$serverName, null];
-        }
-
-        return self::parseAuthority((string)($_SERVER['HTTP_HOST'] ?? ''));
+        return 'localhost';
     }
 
     private static function parseWebsiteUrl(?string $url): ?array
@@ -108,22 +83,6 @@ final class RequestContext
             'host' => $host,
             'port' => isset($parts['port']) ? (int)$parts['port'] : null,
         ];
-    }
-
-    private static function parseAuthority(string $value): array
-    {
-        $raw = trim($value);
-        if ($raw === '') {
-            return ['', null];
-        }
-
-        $host = strtolower((string)parse_url('http://' . $raw, PHP_URL_HOST));
-        if (!self::isValidHost($host)) {
-            return ['', null];
-        }
-
-        $port = parse_url('http://' . $raw, PHP_URL_PORT);
-        return [$host, is_int($port) ? $port : null];
     }
 
     private static function isValidHost(string $host): bool
