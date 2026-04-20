@@ -8,6 +8,7 @@ use App\Service\Application\Auth;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
+use App\Service\Support\RequestContext;
 use App\Service\Support\RateLimiter;
 
 final class Sessions extends Admin
@@ -216,8 +217,6 @@ final class Sessions extends Admin
 
     private function absolutePath(string $path): string
     {
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = trim((string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
-        return $scheme . '://' . $host . $this->buildPath($path);
+        return RequestContext::scheme() . '://' . RequestContext::authority() . $this->buildPath($path);
     }
 }

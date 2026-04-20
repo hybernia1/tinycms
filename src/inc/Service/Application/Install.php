@@ -6,6 +6,7 @@ namespace App\Service\Application;
 use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Support\I18n;
 use App\Service\Support\Mailer;
+use App\Service\Support\RequestContext;
 use PDO;
 use PDOException;
 
@@ -294,12 +295,12 @@ final class Install
 
     private function loginUrl(): string
     {
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = trim((string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
+        $scheme = RequestContext::scheme();
+        $authority = RequestContext::authority();
         $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
         $baseDir = trim(dirname($scriptName), '/.');
         $basePath = $baseDir === '' ? '' : '/' . $baseDir;
-        return $scheme . '://' . $host . $basePath . '/auth/login';
+        return $scheme . '://' . $authority . $basePath . '/auth/login';
     }
 
     private function renderInstallTemplate(array $vars): string
