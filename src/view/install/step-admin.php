@@ -1,7 +1,10 @@
 <div class="container py-5">
-    <div class="row">
+    <div class="row justify-center">
         <div class="col-12 col-md-6">
             <div class="card p-5">
+                <div class="auth-logo mb-4">
+                    <img src="<?= $e($url(ASSETS_DIR . 'svg/logo.svg')) ?>" alt="TinyCMS">
+                </div>
                 <h1 class="m-0 mb-2"><?= $e($t('install.title')) ?></h1>
                 <p class="text-muted mt-2 mb-4"><?= $e(sprintf($t('install.step'), 3, $t('install.admin'))) ?></p>
                 <?php if ($message !== ''): ?>
