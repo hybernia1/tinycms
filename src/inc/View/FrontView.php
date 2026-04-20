@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\Auth\Auth;
 use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
 
@@ -13,7 +14,7 @@ final class FrontView
     private array $settings;
     private string $theme;
 
-    public function __construct(string $rootPath, Router $router, array $settings)
+    public function __construct(string $rootPath, Router $router, array $settings, private Auth $auth)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
@@ -121,7 +122,51 @@ final class FrontView
         require $templateFile;
         $content = (string)ob_get_clean();
 
+        ob_start();
         require $layoutFile;
+        $output = (string)ob_get_clean();
+
+        echo $this->withAdminBar($output, $data);
+    }
+
+    private function withAdminBar(string $output, array $data): string
+    {
+        if (!$this->auth->isAdmin()) {
+            return $output;
+        }
+
+        $assetHref = htmlspecialchars($this->router->url(ASSETS_DIR . 'css/admin-bar.css'), ENT_QUOTES, 'UTF-8');
+        $injection = '<link rel="stylesheet" href="' . $assetHref . '">' . $this->adminBarHtml($data);
+
+        if (str_contains($output, '</body>')) {
+            return str_replace('</body>', $injection . '</body>', $output);
+        }
+
+        return $output . $injection;
+    }
+
+    private function adminBarHtml(array $data): string
+    {
+        $dashboard = htmlspecialchars($this->router->url('admin/dashboard'), ENT_QUOTES, 'UTF-8');
+        $newContent = htmlspecialchars($this->router->url('admin/content/new'), ENT_QUOTES, 'UTF-8');
+        $logout = htmlspecialchars($this->router->url('admin/logout'), ENT_QUOTES, 'UTF-8');
+        $edit = '';
+
+        if (is_array($data['item'] ?? null)) {
+            $id = (int)($data['item']['id'] ?? 0);
+            if ($id > 0) {
+                $editUrl = htmlspecialchars($this->router->url('admin/content/' . $id), ENT_QUOTES, 'UTF-8');
+                $edit = '<a href="' . $editUrl . '">Editovat obsah</a>';
+            }
+        }
+
+        return '<div class="tinycms-admin-bar" role="navigation" aria-label="TinyCMS admin">'
+            . '<span class="tinycms-admin-bar-brand">TinyCMS</span>'
+            . '<a href="' . $dashboard . '">Dashboard</a>'
+            . $edit
+            . '<a href="' . $newContent . '">Nový obsah</a>'
+            . '<a href="' . $logout . '">Odhlásit</a>'
+            . '</div>';
     }
 
     private function resolveTheme(string $theme): string

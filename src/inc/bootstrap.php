@@ -98,7 +98,7 @@ $settingsService = new SettingsService();
 I18n::setLocale((string)($settingsService->resolved()['app_lang'] ?? APP_LANG));
 $termService = new TermService();
 $frontServices = new FrontServices($contentService, $userService, $mediaService, $termService, $settingsService);
-$frontView = new FrontView(BASE_DIR, $router, $settingsService->resolved());
+$frontView = new FrontView(BASE_DIR, $router, $settingsService->resolved(), $auth);
 $front = new FrontController($frontView, $frontServices, $auth);
 $adminView = new AdminView($view, $settingsService);
 $admin = new AdminController($authService, $flash, $csrf, $adminView);
