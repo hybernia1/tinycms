@@ -51,14 +51,14 @@ final class AdminBar
             return $this->link('admin/content/edit?id=' . $contentId);
         }
 
-        $termId = (int)($context['term']['id'] ?? 0);
-        if ($termId > 0) {
-            return $this->link('admin/terms/edit?id=' . $termId);
-        }
-
         $userId = (int)($context['user']['id'] ?? 0);
         if ($userId > 0) {
             return $this->link('admin/users/edit?id=' . $userId);
+        }
+
+        $termId = (int)($context['term']['id'] ?? 0);
+        if ($termId > 0) {
+            return $this->link('admin/terms/edit?id=' . $termId);
         }
 
         return '';
