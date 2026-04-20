@@ -8,6 +8,7 @@ use App\Controller\Admin\Admin;
 use App\Service\Application\Auth;
 use App\Service\Application\Content as ContentService;
 use App\Service\Application\Term as TermService;
+use App\Service\Application\WordpressImporter;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
@@ -18,6 +19,7 @@ final class Content extends Admin
         Auth $authService,
         private ContentService $content,
         private TermService $terms,
+        private WordpressImporter $wordpressImporter,
         Flash $flash,
         Csrf $csrf
     ) {
@@ -258,6 +260,40 @@ final class Content extends Admin
         ]);
     }
 
+
+    public function wpImportApiV1(callable $redirect): void
+    {
+        if (!$this->guardApiAdminCsrf()) {
+            return;
+        }
+
+        $siteUrl = trim((string)($_POST['site_url'] ?? ''));
+        $startPage = (int)($_POST['start_page'] ?? 1);
+        $batchPages = (int)($_POST['batch_pages'] ?? 2);
+        $authorId = (int)($this->authService->auth()->id() ?? 0);
+
+        $result = $this->wordpressImporter->import($siteUrl, $authorId, $startPage, $batchPages);
+        if (($result['success'] ?? false) !== true) {
+            $this->apiError('WP_IMPORT_FAILED', (string)($result['message'] ?? I18n::t('content.import_failed')), 422, [
+                'imported' => (int)($result['imported'] ?? 0),
+                'skipped' => (int)($result['skipped'] ?? 0),
+                'failed' => (int)($result['failed'] ?? 0),
+                'next_page' => (int)($result['next_page'] ?? max(1, $startPage)),
+            ]);
+            return;
+        }
+
+        $this->apiOk([
+            'message' => I18n::t('content.import_done', sprintf('Import dokončen. Importováno: %d, přeskočeno: %d, chyb: %d.', (int)($result['imported'] ?? 0), (int)($result['skipped'] ?? 0), (int)($result['failed'] ?? 0))),
+            'imported' => (int)($result['imported'] ?? 0),
+            'skipped' => (int)($result['skipped'] ?? 0),
+            'failed' => (int)($result['failed'] ?? 0),
+            'next_page' => (int)($result['next_page'] ?? 1),
+            'has_more' => (bool)($result['has_more'] ?? false),
+            'total_pages' => (int)($result['total_pages'] ?? 1),
+        ]);
+    }
+
     public function linkTitleApiV1(callable $_redirect): void
     {
         if (!$this->guardApiAdmin()) {
@@ -398,6 +434,7 @@ final class Content extends Admin
             'can_delete' => true,
             'can_restore' => $status === ContentService::STATUS_TRASH,
             'author_name' => (string)($row['author_name'] ?? '—'),
+            'source' => (string)($row['source'] ?? ''),
             'status' => $status,
             'created' => $createdAt,
             'created_label' => $this->formatDateTime($createdAt),

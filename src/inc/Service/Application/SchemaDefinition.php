@@ -24,6 +24,7 @@ final class SchemaDefinition
                 'type' => ['max' => 100, 'nullable' => false, 'allowed' => ['article', 'page', 'about_page', 'news_article', 'blog_posting', 'faq_page']],
                 'excerpt' => ['max' => 500, 'nullable' => true],
                 'name' => ['max' => 255, 'nullable' => true],
+                'source' => ['max' => 1000, 'nullable' => true],
             ],
             'terms' => [
                 'name' => ['max' => 255, 'nullable' => false],
@@ -90,6 +91,7 @@ final class SchemaDefinition
                 excerpt VARCHAR(500) DEFAULT NULL,
                 name VARCHAR(255) DEFAULT NULL,
                 thumbnail INT DEFAULT NULL,
+                source VARCHAR(1000) DEFAULT NULL,
                 PRIMARY KEY (id),
                 KEY idx_content_status_created_id (status, created, id),
                 KEY idx_content_status (status),

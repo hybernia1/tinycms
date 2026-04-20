@@ -31,6 +31,7 @@ final class Content
         $this->pdo = Connection::get();
         $this->query = new Query($this->pdo);
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->ensureSourceColumn();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
@@ -52,6 +53,7 @@ final class Content
             "(SELECT name FROM $usersTable WHERE $usersTable.ID = $contentTable.author LIMIT 1) AS author_name",
             'created',
             'updated',
+            'source',
         ], $where, [
             'page' => $page,
             'perPage' => $perPage,
@@ -76,11 +78,24 @@ final class Content
             'body',
             'author',
             'thumbnail',
+            'source',
             "(SELECT name FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_name",
             "(SELECT path FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path",
             'created',
             'updated',
         ], ['id' => $id]);
+        return $rows[0] ?? null;
+    }
+
+
+    public function findBySource(string $source): ?array
+    {
+        $normalizedSource = trim($source);
+        if ($normalizedSource === '') {
+            return null;
+        }
+
+        $rows = $this->query->select('content', ['id', 'source'], ['source' => $normalizedSource]);
         return $rows[0] ?? null;
     }
 
@@ -152,6 +167,7 @@ final class Content
         $body = trim((string)($input['body'] ?? ''));
         $author = $this->resolveAuthorId($input, $defaultAuthorId);
         $created = $this->resolveDateTime((string)($input['created'] ?? ''));
+        $source = trim((string)($input['source'] ?? ''));
         $errors = [];
 
         if ($name === '') {
@@ -181,11 +197,13 @@ final class Content
             'status' => $status,
             'type' => $type,
             'excerpt' => $excerpt,
+            'source' => $source,
         ], [
             'name' => 'name',
             'status' => 'status',
             'type' => 'type',
             'excerpt' => 'excerpt',
+            'source' => 'source',
         ]);
 
         foreach ($lengthErrors as $field => $message) {
@@ -206,6 +224,7 @@ final class Content
             'excerpt' => $excerpt === '' ? null : mb_substr($excerpt, 0, 500),
             'body' => $body,
             'author' => $author,
+            'source' => $source === '' ? null : $source,
         ];
 
         try {
@@ -362,6 +381,19 @@ final class Content
         $allowed = array_fill_keys($existingIds, true);
 
         return array_values(array_filter($ids, static fn(int $id): bool => isset($allowed[$id])));
+    }
+
+
+    private function ensureSourceColumn(): void
+    {
+        $contentTable = Table::name('content');
+        $stmt = $this->pdo->prepare("SHOW COLUMNS FROM $contentTable LIKE :column");
+        $stmt->execute(['column' => 'source']);
+        if ($stmt->fetch(\PDO::FETCH_ASSOC) !== false) {
+            return;
+        }
+
+        $this->pdo->exec("ALTER TABLE $contentTable ADD source VARCHAR(1000) DEFAULT NULL");
     }
 
     private function sanitizeExcerpt(string $excerpt): string

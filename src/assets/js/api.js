@@ -703,6 +703,7 @@ initListApi({
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                 </td>
                 <td class="mobile-hide">${esc(item.author_name || '—')}</td>
+                <td class="mobile-hide">${item.source ? `<a href="${esc(item.source)}" target="_blank" rel="noreferrer noopener">${esc(item.source)}</a>` : '—'}</td>
                 <td class="table-col-actions">
                     ${canEdit && !isTrash ? `
                     <button class="btn btn-light btn-icon" type="button" data-content-toggle="${Number(item.id || 0)}" data-content-mode="${isPublished ? 'draft' : 'publish'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">

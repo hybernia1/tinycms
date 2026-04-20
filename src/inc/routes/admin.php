@@ -35,6 +35,7 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{id}/edit', 'controller' => $apiContent, 'action' => 'editApiV1', 'params' => ['id' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/draft/init', 'controller' => $apiContent, 'action' => 'draftInitApiV1'],
     ['method' => 'POST', 'path' => 'admin/api/v1/content/autosave', 'controller' => $apiContent, 'action' => 'autosaveApiV1'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/content/import/wp', 'controller' => $apiContent, 'action' => 'wpImportApiV1'],
     ['method' => 'GET', 'path' => 'admin/api/v1/content/link-title', 'controller' => $apiContent, 'action' => 'linkTitleApiV1'],
     ['method' => 'GET', 'path' => 'admin/content/add', 'controller' => $adminContent, 'action' => 'addForm'],
     ['method' => 'GET', 'path' => 'admin/content/edit', 'controller' => $adminContent, 'action' => 'editForm'],

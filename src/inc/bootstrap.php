@@ -37,6 +37,7 @@ use App\Service\Support\RequestContext;
 use App\Service\Support\RateLimiter;
 use App\Service\Support\Slugger;
 use App\Service\Application\User as UserService;
+use App\Service\Application\WordpressImporter;
 use App\Service\Front\AdminBar;
 use App\Service\Front\Services as FrontServices;
 use App\View\AdminView;
@@ -114,7 +115,8 @@ $adminContent = new ContentController($adminView, $authService, $contentService,
 $adminMedia = new MediaController($adminView, $authService, $mediaService, $flash, $csrf);
 $adminSettings = new SettingsController($adminView, $authService, $settingsService, $flash, $csrf);
 $adminTerms = new TermController($adminView, $authService, $termService, $flash, $csrf);
-$apiContent = new ApiContentController($authService, $contentService, $termService, $flash, $csrf);
+$wordpressImporter = new WordpressImporter($contentService, $mediaService, $termService, $slugger, BASE_DIR);
+$apiContent = new ApiContentController($authService, $contentService, $termService, $wordpressImporter, $flash, $csrf);
 $apiContentMedia = new ApiContentMediaController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
 $apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, $flash, $csrf);
 $apiSettings = new ApiSettingsController($authService, $settingsService, $uploadService, $flash, $csrf);
