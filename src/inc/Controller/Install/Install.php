@@ -6,6 +6,7 @@ namespace App\Controller\Install;
 use App\Service\Application\Install as InstallService;
 use App\Service\Support\Csrf;
 use App\Service\Support\I18n;
+use App\Service\Support\RequestContext;
 use App\View\View;
 
 final class Install
@@ -84,11 +85,15 @@ final class Install
 
         $state = $_SESSION['install'] ?? [];
         $this->applyInstallLocale($state);
+        $admin = (array)($state['admin'] ?? ['name' => '', 'email' => '', 'password' => '', 'website_url' => '']);
+        if (trim((string)($admin['website_url'] ?? '')) === '') {
+            $admin['website_url'] = $this->detectedWebsiteUrl();
+        }
 
         $this->view->render('install/layout', 'install/step-admin', [
             'pageTitle' => I18n::t('install.page_admin'),
             'errors' => (array)($state['errors_admin'] ?? []),
-            'old' => (array)($state['admin'] ?? ['name' => '', 'email' => '', 'password' => '', 'website_url' => '']),
+            'old' => $admin,
             'message' => (string)($state['message'] ?? ''),
         ]);
 
@@ -190,5 +195,18 @@ final class Install
     private function applyInstallLocale(array $state): void
     {
         I18n::setLocale((string)($state['lang'] ?? APP_LANG));
+    }
+
+    private function detectedWebsiteUrl(): string
+    {
+        if (!RequestContext::hasAuthority()) {
+            return '';
+        }
+
+        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+        $baseDir = trim(dirname($scriptName), '/.');
+        $basePath = $baseDir === '' ? '' : '/' . $baseDir;
+
+        return RequestContext::scheme() . '://' . RequestContext::authority() . $basePath;
     }
 }

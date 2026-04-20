@@ -25,7 +25,7 @@
                     </div>
                     <div class="mb-3">
                         <label><?= $e($t('install.website_url')) ?></label>
-                        <input type="url" name="website_url" value="<?= $e((string)($old['website_url'] ?? '')) ?>" placeholder="https://example.com">
+                        <input type="url" name="website_url" value="<?= $e((string)($old['website_url'] ?? '')) ?>" required>
                         <?php if (!empty($errors['website_url'])): ?>
                         <small class="text-danger"><?= $e((string)$errors['website_url']) ?></small>
                         <?php endif; ?>

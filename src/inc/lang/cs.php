@@ -58,6 +58,7 @@ return [
         'prefix_in_use' => 'Pro zvolený prefix už existují tabulky TinyCMS. Vyberte jiný prefix, nebo původní tabulky nejdříve odstraňte.',
         'admin_name_required' => 'Jméno je povinné.',
         'admin_email_invalid' => 'E-mail není validní.',
+        'website_url_required' => 'URL webu je povinné.',
         'website_url_invalid' => 'URL webu musí být validní http(s) adresa.',
         'admin_password_min' => 'Heslo musí mít alespoň 8 znaků.',
         'schema_failed' => 'Nepodařilo se vytvořit databázové tabulky.',
