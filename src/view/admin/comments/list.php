@@ -12,6 +12,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     $id = (int)($row['id'] ?? 0);
     $contentId = (int)($row['content'] ?? 0);
     $contentName = trim((string)($row['content_name'] ?? ''));
+    $authorName = trim((string)($row['author_name'] ?? ''));
     $body = trim((string)($row['body'] ?? ''));
     if (mb_strlen($body) > 160) {
         $body = mb_substr($body, 0, 160) . '…';
@@ -21,17 +22,20 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     ?>
     <tr>
         <td>
-            <a href="<?= $e($url('admin/comments/edit?id=' . $id)) ?>"><?= $e($t('comments.comment')) ?> #<?= $id ?></a>
-            <br>
+            <strong><?= $e($authorName !== '' ? $authorName : $t('common.no_author')) ?></strong>
+            <div class="text-muted small"><?= $e($formatDateTime((string)($row['created'] ?? ''))) ?></div>
             <?php if ($contentId > 0 && $contentName !== ''): ?>
-                <a href="<?= $e($url('admin/content/edit?id=' . $contentId)) ?>"><?= $e($contentName) ?></a>
+                <div class="small"><a href="<?= $e($url('admin/content/edit?id=' . $contentId)) ?>"><?= $e($contentName) ?></a></div>
             <?php else: ?>
-                <span><?= $e($t('comments.no_content')) ?></span>
+                <div class="small"><?= $e($t('comments.no_content')) ?></div>
             <?php endif; ?>
-            <div class="text-muted small"><?= $e((string)($row['author_name'] ?? '')) ?> · <?= $e($formatDateTime((string)($row['created'] ?? ''))) ?></div>
-            <div class="small"><?= $e($body) ?></div>
         </td>
+        <td><?= $e($body) ?></td>
         <td class="table-col-actions">
+            <a class="btn btn-light btn-icon" href="<?= $e($url('admin/comments/edit?id=' . $id)) ?>" aria-label="<?= $e($t('admin.edit_comment')) ?>" title="<?= $e($t('admin.edit_comment')) ?>">
+                <?= $icon('edit') ?>
+                <span class="sr-only"><?= $e($t('admin.edit_comment')) ?></span>
+            </a>
             <button class="btn btn-light btn-icon" type="button" data-comments-delete-open="<?= $id ?>" aria-label="<?= $e($t('comments.delete')) ?>" title="<?= $e($t('comments.delete')) ?>">
                 <?= $icon('delete') ?>
                 <span class="sr-only"><?= $e($t('comments.delete')) ?></span>
@@ -45,6 +49,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
 $list['statusLinks'] = $statusLinks;
 $list['searchPlaceholder'] = $t('comments.search_placeholder');
 $list['columns'] = [
+    ['label' => $t('users.user')],
     ['label' => $t('comments.comment')],
     ['label' => $t('common.actions'), 'class' => 'table-col-actions'],
 ];

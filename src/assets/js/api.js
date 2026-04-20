@@ -857,14 +857,20 @@ initListApi({
         return `
             <tr>
                 <td>
-                    ${commentEditPath !== '' ? `<a href="${esc(commentEditPath)}">${esc(t('comments.comment'))} #${id}</a><br>` : ''}
+                    <strong>${esc(item.author_name || t('common.no_author'))}</strong>
+                    <div class="text-muted small">${esc(item.created_label || item.created || '')}</div>
                     ${contentEditPath !== '' && contentName !== ''
-        ? `<a href="${esc(contentEditPath)}">${esc(contentName)}</a>`
-        : `<span>${esc(t('comments.no_content'))}</span>`}
-                    <div class="text-muted small">${esc(item.author_name || '')} · ${esc(item.created_label || item.created || '')}</div>
-                    <div class="small">${esc(body)}</div>
+        ? `<div class="small"><a href="${esc(contentEditPath)}">${esc(contentName)}</a></div>`
+        : `<div class="small">${esc(t('comments.no_content'))}</div>`}
                 </td>
+                <td>${esc(body)}</td>
                 <td class="table-col-actions">
+                    ${commentEditPath !== '' ? `
+                    <a class="btn btn-light btn-icon" href="${esc(commentEditPath)}" aria-label="${esc(t('admin.edit_comment'))}" title="${esc(t('admin.edit_comment'))}">
+                        ${icon('edit')}
+                        <span class="sr-only">${esc(t('admin.edit_comment'))}</span>
+                    </a>
+                    ` : ''}
                     <button class="btn btn-light btn-icon" type="button" data-comments-delete-open="${id}" aria-label="${esc(t('comments.delete'))}" title="${esc(t('comments.delete'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('comments.delete'))}</span>
