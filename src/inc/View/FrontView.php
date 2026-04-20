@@ -53,6 +53,18 @@ final class FrontView
             'kind' => 'archive',
             'term' => $term,
             'pagination' => $pagination,
+            'archiveLabel' => $this->translate('front.archive_for'),
+        ]);
+    }
+
+    public function authorArchive(array $author, array $pagination, string $archivePath): void
+    {
+        $this->render('archive', [
+            'kind' => 'archive',
+            'term' => $author,
+            'pagination' => $pagination,
+            'archiveLabel' => $this->translate('front.archive_for_author'),
+            'archivePath' => trim($archivePath, '/'),
         ]);
     }
 
@@ -97,6 +109,7 @@ final class FrontView
         $contentDate = fn(array $item, string $fallback = ''): string => $theme->contentDate($item, $fallback);
         $contentUrl = fn(array $item): string => $theme->contentUrl($item);
         $termUrl = fn(array $term): string => $theme->termUrl($term);
+        $authorUrl = fn(array $item): string => $theme->authorUrl($item);
         $searchForm = fn(string $action = 'search', string $query = ''): string => $theme->searchForm($action, $query, [
             'placeholder' => $this->translate('front.search_placeholder'),
             'button' => $this->translate('front.search_button'),
@@ -107,7 +120,7 @@ final class FrontView
             return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
         };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $searchForm, $theme, $icon): void {
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $theme, $icon): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;

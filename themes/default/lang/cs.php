@@ -4,6 +4,7 @@ return [
     'front.latest_content' => 'Nejnovější obsah',
     'front.empty' => 'Žádný obsah nebyl nalezen.',
     'front.archive_for' => 'Archiv pro term',
+    'front.archive_for_author' => 'Archiv autora',
     'front.prev' => 'Předchozí',
     'front.next' => 'Další',
     'front.search_button' => 'Hledat',

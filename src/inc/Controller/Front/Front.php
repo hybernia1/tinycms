@@ -111,6 +111,33 @@ final class Front
         $this->view->termArchive($term, $pagination);
     }
 
+    public function authorArchive(callable $redirect, array $params): void
+    {
+        $slug = trim((string)($params['slug'] ?? ''));
+        $authorId = $this->slugger->extractId($slug);
+        $author = $authorId > 0 ? $this->services->user->find($authorId) : null;
+
+        if ($author === null) {
+            http_response_code(404);
+            echo '404';
+            return;
+        }
+
+        $canonicalSlug = $this->slugger->slug((string)($author['name'] ?? ''), (int)($author['ID'] ?? 0));
+        if ($slug !== $canonicalSlug) {
+            $redirect('author/' . $canonicalSlug, true);
+        }
+
+        $settings = $this->services->settings->resolved();
+        $perPage = $this->resolvePerPage($settings);
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $pagination = $this->paginateAuthorPublished($authorId, $page, $perPage);
+        $this->view->authorArchive([
+            'id' => (int)($author['ID'] ?? 0),
+            'name' => (string)($author['name'] ?? ''),
+        ], $pagination, 'author/' . $canonicalSlug);
+    }
+
     public function account(callable $redirect): void
     {
         if (!$this->auth->check()) {
@@ -302,6 +329,43 @@ final class Front
         ]));
         $stmt->bindValue(':status', 'published');
         $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
+        $stmt->bindValue(':now', $this->now());
+        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $this->paginationPayload($this->withThumbnails($stmt->fetchAll(\PDO::FETCH_ASSOC)), $page, $perPage, $total);
+    }
+
+    private function paginateAuthorPublished(int $authorId, int $page, int $perPage): array
+    {
+        $contentTable = Table::name('content');
+        $usersTable = Table::name('users');
+        $mediaTable = Table::name('media');
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $offset = ($page - 1) * $perPage;
+
+        $countStmt = $this->pdo->prepare(implode("\n", [
+            'SELECT COUNT(*)',
+            "FROM $contentTable c",
+            'WHERE c.status = :status AND c.author = :author AND c.created <= :now',
+        ]));
+        $countStmt->execute(['status' => 'published', 'author' => $authorId, 'now' => $this->now()]);
+        $total = (int)($countStmt->fetchColumn() ?: 0);
+
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
+            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
+            "FROM $contentTable c",
+            "LEFT JOIN $usersTable u ON u.id = c.author",
+            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
+            'WHERE c.status = :status AND c.author = :author AND c.created <= :now',
+            'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
+            'LIMIT :limit OFFSET :offset',
+        ]));
+        $stmt->bindValue(':status', 'published');
+        $stmt->bindValue(':author', $authorId, \PDO::PARAM_INT);
         $stmt->bindValue(':now', $this->now());
         $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);

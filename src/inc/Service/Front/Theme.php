@@ -142,6 +142,17 @@ final class Theme
         return $this->url('term/' . $this->slugger->slug((string)($term['name'] ?? ''), $id));
     }
 
+    public function authorUrl(array $item): string
+    {
+        $id = (int)($item['author'] ?? 0);
+        if ($id <= 0) {
+            return '';
+        }
+
+        $name = trim((string)($item['author_name'] ?? ''));
+        return $this->url('author/' . $this->slugger->slug($name !== '' ? $name : 'author', $id));
+    }
+
     public function mediaSrcSet(string $path): string
     {
         $trimmed = trim($path);
