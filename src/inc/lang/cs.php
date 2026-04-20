@@ -288,6 +288,7 @@ return [
             'allow_registration' => 'Povolit registrace',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+            'website_url' => 'URL webu',
             'website_email' => 'E-mail webu',
         ],
         'options' => [

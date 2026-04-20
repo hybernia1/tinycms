@@ -75,6 +75,7 @@ final class Settings
             ],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
             'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
+            'website_url' => ['label_key' => 'settings.fields.website_url', 'type' => 'text', 'default' => ''],
             'website_email' => ['label_key' => 'settings.fields.website_email', 'type' => 'text', 'default' => ''],
         ];
     }
@@ -198,6 +199,9 @@ final class Settings
             if ($key === 'website_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 $value = '';
             }
+            if ($key === 'website_url' && !$this->isValidWebsiteUrl($value)) {
+                $value = '';
+            }
             if (($fields[$key]['type'] ?? '') === 'select') {
                 $options = (array)($fields[$key]['options'] ?? []);
                 if ($value !== '' && !array_key_exists($value, $options)) {
@@ -214,5 +218,32 @@ final class Settings
             $this->query->insert('settings', ['key_name' => $key, 'value' => $payload['value']]);
             $existingKeys[$key] = true;
         }
+    }
+
+    private function isValidWebsiteUrl(string $value): bool
+    {
+        if ($value === '') {
+            return true;
+        }
+
+        $parts = parse_url($value);
+        if (!is_array($parts)) {
+            return false;
+        }
+
+        $scheme = strtolower((string)($parts['scheme'] ?? ''));
+        if ($scheme !== 'http' && $scheme !== 'https') {
+            return false;
+        }
+
+        $host = strtolower(trim((string)($parts['host'] ?? '')));
+        if ($host === 'localhost') {
+            return true;
+        }
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return true;
+        }
+
+        return filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false;
     }
 }

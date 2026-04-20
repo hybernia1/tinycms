@@ -288,6 +288,7 @@ return [
             'allow_registration' => 'Allow registrations',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+            'website_url' => 'Website URL',
             'website_email' => 'Website email',
         ],
         'options' => [

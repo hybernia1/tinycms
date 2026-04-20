@@ -5,11 +5,17 @@ namespace App\Service\Support;
 
 final class RequestContext
 {
+    private static ?array $websiteUrlParts = null;
+
+    public static function setWebsiteUrl(?string $url): void
+    {
+        self::$websiteUrlParts = self::parseWebsiteUrl($url);
+    }
+
     public static function scheme(): string
     {
-        $fromConfig = self::configParts();
-        if ($fromConfig !== null) {
-            return $fromConfig['scheme'];
+        if (self::$websiteUrlParts !== null) {
+            return self::$websiteUrlParts['scheme'];
         }
 
         return (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') ? 'https' : 'http';
@@ -17,13 +23,12 @@ final class RequestContext
 
     public static function authority(): string
     {
-        $fromConfig = self::configParts();
-        if ($fromConfig !== null) {
-            $port = $fromConfig['port'];
+        if (self::$websiteUrlParts !== null) {
+            $port = self::$websiteUrlParts['port'];
             if ($port === null) {
-                return $fromConfig['host'];
+                return self::$websiteUrlParts['host'];
             }
-            return $fromConfig['host'] . ':' . $port;
+            return self::$websiteUrlParts['host'] . ':' . $port;
         }
 
         [$host, $port] = self::firstTrustedHost();
@@ -38,7 +43,7 @@ final class RequestContext
 
     public static function hasAuthority(): bool
     {
-        if (self::configParts() !== null) {
+        if (self::$websiteUrlParts !== null) {
             return true;
         }
 
@@ -48,9 +53,8 @@ final class RequestContext
 
     public static function domain(): string
     {
-        $fromConfig = self::configParts();
-        if ($fromConfig !== null) {
-            return $fromConfig['host'];
+        if (self::$websiteUrlParts !== null) {
+            return self::$websiteUrlParts['host'];
         }
 
         [$host] = self::firstTrustedHost();
@@ -67,13 +71,9 @@ final class RequestContext
         return self::parseAuthority((string)($_SERVER['HTTP_HOST'] ?? ''));
     }
 
-    private static function configParts(): ?array
+    private static function parseWebsiteUrl(?string $url): ?array
     {
-        if (!defined('APP_URL')) {
-            return null;
-        }
-
-        $raw = trim((string)APP_URL);
+        $raw = trim((string)$url);
         if ($raw === '') {
             return null;
         }
