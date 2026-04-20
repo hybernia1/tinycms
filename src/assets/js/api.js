@@ -736,6 +736,7 @@ initListApi({
     messages: { deleteSuccess: t('terms.deleted') },
     rowHtml: (item, { editBase }) => {
         const id = Number(item.id || 0);
+        const commentEditPath = String(item.comment_edit_path || '');
 
         return `
             <tr>
@@ -845,6 +846,7 @@ initListApi({
     messages: { deleteSuccess: t('comments.deleted') },
     rowHtml: (item) => {
         const id = Number(item.id || 0);
+        const commentEditPath = String(item.comment_edit_path || '');
         const contentName = String(item.content_name || '');
         const contentEditPath = String(item.content_edit_path || '');
         let body = String(item.body || '');
@@ -855,6 +857,7 @@ initListApi({
         return `
             <tr>
                 <td>
+                    ${commentEditPath !== '' ? `<a href="${esc(commentEditPath)}">${esc(t('comments.comment'))} #${id}</a><br>` : ''}
                     ${contentEditPath !== '' && contentName !== ''
         ? `<a href="${esc(contentEditPath)}">${esc(contentName)}</a>`
         : `<span>${esc(t('comments.no_content'))}</span>`}

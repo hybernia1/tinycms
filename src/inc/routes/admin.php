@@ -48,7 +48,9 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/api/v1/content/{contentId}/thumbnail/{mediaId}/select', 'controller' => $apiContentMedia, 'action' => 'thumbnailSelectApiV1', 'params' => ['contentId' => 'int', 'mediaId' => 'int']],
 
     ['method' => 'GET', 'path' => 'admin/comments', 'controller' => $adminComments, 'action' => 'list'],
+    ['method' => 'GET', 'path' => 'admin/comments/edit', 'controller' => $adminComments, 'action' => 'editForm'],
     ['method' => 'GET', 'path' => 'admin/api/v1/comments', 'controller' => $apiComment, 'action' => 'listApiV1'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/comments/{id}/edit', 'controller' => $apiComment, 'action' => 'editApiV1', 'params' => ['id' => 'int']],
     ['method' => 'POST', 'path' => 'admin/api/v1/comments/{id}/delete', 'controller' => $apiComment, 'action' => 'deleteApiV1', 'params' => ['id' => 'int']],
 
     ['method' => 'GET', 'path' => 'admin/terms', 'controller' => $adminTerms, 'action' => 'list'],

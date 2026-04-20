@@ -88,6 +88,7 @@ return [
         'edit_media' => 'Edit media',
         'add_term' => 'Add tag',
         'edit_term' => 'Edit tag',
+        'edit_comment' => 'Edit comment',
         'close_notice' => 'Close notification',
         'title_suffix' => 'Admin',
         'dashboard' => [
@@ -474,5 +475,8 @@ return [
         'delete_failed' => 'Could not delete comment.',
         'not_found' => 'Comment not found.',
         'no_content' => 'Content not found',
+        'updated' => 'Comment updated.',
+        'update_failed' => 'Could not update comment.',
+        'published_in' => 'Published in',
     ],
 ];

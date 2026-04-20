@@ -157,6 +157,29 @@ final class Comment
         return isset($rows[0]) && is_array($rows[0]) ? $rows[0] : null;
     }
 
+    public function findDetailed(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+
+        $commentsTable = Table::name('comments');
+        $contentTable = Table::name('content');
+        $usersTable = Table::name('users');
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT c.id, c.content, c.author, c.parent, c.reply_to, c.body, c.status, c.created, c.updated,',
+            'u.name AS author_name, p.name AS content_name',
+            "FROM $commentsTable c",
+            "LEFT JOIN $usersTable u ON u.id = c.author",
+            "LEFT JOIN $contentTable p ON p.id = c.content",
+            'WHERE c.id = :id',
+            'LIMIT 1',
+        ]));
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return is_array($row) ? $this->mapItem($row) : null;
+    }
+
     public function delete(int $id): bool
     {
         if ($id <= 0) {
@@ -170,6 +193,46 @@ final class Comment
     {
         $rows = $this->query->select('comments', ['id'], ['status' => self::STATUS_PUBLISHED]);
         return ['all' => count($rows)];
+    }
+
+    public function save(array $input, int $id): array
+    {
+        $existing = $this->find($id);
+        if ($existing === null) {
+            return ['success' => false, 'errors' => ['_global' => I18n::t('comments.not_found')]];
+        }
+
+        $body = trim((string)($input['body'] ?? ''));
+        $errors = [];
+        if ($body === '') {
+            $errors['body'] = I18n::t('comments.body_required');
+        }
+
+        $lengthErrors = $this->schemaConstraintValidator->validate('comments', [
+            'body' => $body,
+            'status' => self::STATUS_PUBLISHED,
+        ], [
+            'body' => 'body',
+            'status' => 'status',
+        ]);
+        foreach ($lengthErrors as $field => $message) {
+            if (!isset($errors[$field])) {
+                $errors[$field] = $message;
+            }
+        }
+
+        if ($errors !== []) {
+            return ['success' => false, 'errors' => $errors];
+        }
+
+        $updated = $this->query->update('comments', [
+            'body' => $body,
+        ], ['id' => $id]);
+
+        return [
+            'success' => $updated >= 0,
+            'errors' => $updated >= 0 ? [] : ['_global' => I18n::t('comments.update_failed')],
+        ];
     }
 
     public function create(array $input, int $authorId): array

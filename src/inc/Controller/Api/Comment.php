@@ -97,6 +97,29 @@ final class Comment extends Admin
         ]);
     }
 
+    public function editApiV1(callable $_redirect, int $id): void
+    {
+        if (!$this->guardApiAdminCsrf()) {
+            return;
+        }
+
+        if (!$this->requireEntity($this->comments->find($id), 'NOT_FOUND', I18n::t('comments.not_found'))) {
+            return;
+        }
+
+        $result = $this->comments->save($_POST, $id);
+        if (($result['success'] ?? false) !== true) {
+            $this->apiError('UPDATE_FAILED', I18n::t('comments.update_failed'), 422, [
+                'errors' => $result['errors'] ?? [],
+            ]);
+            return;
+        }
+
+        $this->apiOk([
+            'message' => I18n::t('comments.updated'),
+        ]);
+    }
+
     private function guardAuthenticatedApi(): bool
     {
         if ($this->authService->auth()->check()) {
@@ -127,6 +150,7 @@ final class Comment extends Admin
     {
         return [
             'id' => (int)($row['id'] ?? 0),
+            'comment_edit_path' => (int)($row['id'] ?? 0) > 0 ? $this->buildPath('admin/comments/edit?id=' . (int)($row['id'] ?? 0)) : '',
             'content' => (int)($row['content'] ?? 0),
             'content_name' => (string)($row['content_name'] ?? ''),
             'content_edit_path' => (int)($row['content'] ?? 0) > 0 ? $this->buildEditPath('admin/content', (int)($row['content'] ?? 0)) : '',

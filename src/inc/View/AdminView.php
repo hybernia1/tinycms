@@ -97,6 +97,17 @@ final class AdminView
         ]);
     }
 
+    public function adminCommentForm(array $item, array $errors, array $publishedIn): void
+    {
+        $this->renderAdmin('admin/comments/form', [
+            'item' => $item,
+            'errors' => $errors,
+            'publishedIn' => $publishedIn,
+            'pageTitle' => I18n::t('admin.edit_comment'),
+            'headerAction' => $this->submitHeaderAction('#comments-form'),
+        ]);
+    }
+
     public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $contentTypes, array $authors, array $selectedTerms = []): void
     {
         $this->renderAdmin('admin/content/form', [

@@ -21,6 +21,8 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     ?>
     <tr>
         <td>
+            <a href="<?= $e($url('admin/comments/edit?id=' . $id)) ?>"><?= $e($t('comments.comment')) ?> #<?= $id ?></a>
+            <br>
             <?php if ($contentId > 0 && $contentName !== ''): ?>
                 <a href="<?= $e($url('admin/content/edit?id=' . $contentId)) ?>"><?= $e($contentName) ?></a>
             <?php else: ?>

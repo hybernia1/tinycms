@@ -88,6 +88,7 @@ return [
         'edit_media' => 'Upravit médium',
         'add_term' => 'Přidat štítek',
         'edit_term' => 'Upravit štítek',
+        'edit_comment' => 'Upravit komentář',
         'close_notice' => 'Zavřít notifikaci',
         'title_suffix' => 'Admin',
         'dashboard' => [
@@ -474,5 +475,8 @@ return [
         'delete_failed' => 'Komentář se nepodařilo smazat.',
         'not_found' => 'Komentář nenalezen.',
         'no_content' => 'Obsah nenalezen',
+        'updated' => 'Komentář byl upraven.',
+        'update_failed' => 'Komentář se nepodařilo upravit.',
+        'published_in' => 'Publikováno v',
     ],
 ];
