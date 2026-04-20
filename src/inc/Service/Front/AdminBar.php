@@ -5,6 +5,7 @@ namespace App\Service\Front;
 
 use App\Service\Auth\Auth;
 use App\Service\Infrastructure\Router\Router;
+use App\Service\Support\I18n;
 
 final class AdminBar
 {
@@ -35,12 +36,12 @@ final class AdminBar
         $logout = $this->esc($this->router->url('admin/logout'));
         $edit = $this->editLink($context);
 
-        return '<div class="tinycms-admin-bar" role="navigation" aria-label="TinyCMS admin">'
-            . '<span class="tinycms-admin-bar-brand">TinyCMS</span>'
-            . '<a href="' . $dashboard . '">Dashboard</a>'
-            . '<a href="' . $newContent . '">Nový příspěvek</a>'
+        return '<div class="tinycms-admin-bar" role="navigation" aria-label="' . $this->esc(I18n::t('admin.brand')) . '">'
+            . '<span class="tinycms-admin-bar-brand">' . $this->esc(I18n::t('admin.brand')) . '</span>'
+            . '<a href="' . $dashboard . '">' . $this->esc(I18n::t('admin.menu.dashboard')) . '</a>'
+            . '<a href="' . $newContent . '">' . $this->esc(I18n::t('admin.add_content')) . '</a>'
             . $edit
-            . '<a href="' . $logout . '">Odhlásit</a>'
+            . '<a href="' . $logout . '">' . $this->esc(I18n::t('admin.logout')) . '</a>'
             . '</div>';
     }
 
@@ -48,25 +49,25 @@ final class AdminBar
     {
         $contentId = (int)($context['item']['id'] ?? 0);
         if ($contentId > 0) {
-            return $this->link('admin/content/edit?id=' . $contentId);
+            return $this->link('admin/content/edit?id=' . $contentId, I18n::t('admin.edit_content'));
         }
 
         $userId = (int)($context['user']['id'] ?? 0);
         if ($userId > 0) {
-            return $this->link('admin/users/edit?id=' . $userId);
+            return $this->link('admin/users/edit?id=' . $userId, I18n::t('admin.edit_user'));
         }
 
         $termId = (int)($context['term']['id'] ?? 0);
         if ($termId > 0) {
-            return $this->link('admin/terms/edit?id=' . $termId);
+            return $this->link('admin/terms/edit?id=' . $termId, I18n::t('admin.edit_term'));
         }
 
         return '';
     }
 
-    private function link(string $path): string
+    private function link(string $path, string $label): string
     {
-        return '<a href="' . $this->esc($this->router->url($path)) . '">Editovat</a>';
+        return '<a href="' . $this->esc($this->router->url($path)) . '">' . $this->esc($label) . '</a>';
     }
 
     private function esc(string $value): string
