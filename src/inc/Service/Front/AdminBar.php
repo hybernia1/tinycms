@@ -40,7 +40,6 @@ final class AdminBar
 
         return '<div class="tinycms-admin-bar" role="navigation" aria-label="' . $this->esc(I18n::t('admin.brand')) . '">'
             . '<a class="tinycms-admin-bar-brand" href="' . $dashboard . '" aria-label="' . $this->esc(I18n::t('admin.menu.dashboard')) . '"><img src="' . $logo . '" alt=""></a>'
-            . $this->link($dashboard, I18n::t('admin.menu.dashboard'), 'dashboard', $icons)
             . $this->link($newContent, I18n::t('admin.add_content'), 'add', $icons)
             . $edit
             . $this->link($logout, I18n::t('admin.logout'), 'logout', $icons, 'tinycms-admin-bar-link-logout')
