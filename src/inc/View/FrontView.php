@@ -5,6 +5,7 @@ namespace App\View;
 
 use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
+use App\Service\Support\Csrf;
 use App\Service\Infrastructure\Router\Router;
 
 final class FrontView
@@ -14,7 +15,7 @@ final class FrontView
     private array $settings;
     private string $theme;
 
-    public function __construct(string $rootPath, Router $router, array $settings, private AdminBar $adminBar)
+    public function __construct(string $rootPath, Router $router, array $settings, private AdminBar $adminBar, private Csrf $csrf)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
@@ -85,6 +86,18 @@ final class FrontView
         ]);
     }
 
+
+    public function comments(array $item, array $comments, array $state = []): void
+    {
+        $this->render('comments', [
+            'kind' => 'comments',
+            'item' => $item,
+            'comments' => $comments,
+            'commentState' => $state,
+            'pageTitle' => $this->translate('front.comments_title') . ': ' . (string)($item['name'] ?? ''),
+        ]);
+    }
+
     public function account(array $user): void
     {
         $this->render('account', [
@@ -120,6 +133,7 @@ final class FrontView
         $contentAuthor = fn(array $item, string $fallback = ''): string => $theme->contentAuthor($item, $fallback);
         $contentDate = fn(array $item, string $fallback = ''): string => $theme->contentDate($item, $fallback);
         $contentUrl = fn(array $item): string => $theme->contentUrl($item);
+        $contentCommentsUrl = fn(array $item): string => $theme->contentCommentsUrl($item);
         $termUrl = fn(array $term): string => $theme->termUrl($term);
         $authorUrl = fn(array $item): string => $theme->authorUrl($item);
         $searchForm = fn(string $action = 'search', string $query = ''): string => $theme->searchForm($action, $query, [
@@ -132,7 +146,8 @@ final class FrontView
             return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
         };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $theme, $icon): void {
+        $csrfField = fn(string $name = "_csrf"): string => $this->csrf->field($name);
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $contentCommentsUrl, $termUrl, $authorUrl, $searchForm, $theme, $icon, $csrfField): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;

@@ -457,4 +457,13 @@ return [
             'invalid_value' => 'This field contains a disallowed value.',
         ],
     ],
+
+    'comments' => [
+        'login_required' => 'You must be signed in to comment.',
+        'invalid_content' => 'Invalid content.',
+        'invalid_parent' => 'Invalid reply.',
+        'body_required' => 'Comment is required.',
+        'save_failed' => 'Could not save comment.',
+        'created' => 'Comment has been added.',
+    ],
 ];

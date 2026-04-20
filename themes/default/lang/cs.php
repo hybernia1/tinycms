@@ -16,4 +16,16 @@ return [
     'front.not_found_title' => 'Stránka nebyla nalezena',
     'front.not_found_text' => 'Požadovaná stránka neexistuje.',
     'front.not_found_home' => 'Zpět na úvod',
+
+    'front.comments_title' => 'Komentáře',
+    'front.comments_heading' => 'Diskuze',
+    'front.comments_open' => 'Zobrazit komentáře',
+    'front.comments_back_to_content' => 'Zpět na článek',
+    'front.comments_form_label' => 'Komentář',
+    'front.comments_submit' => 'Přidat komentář',
+    'front.comments_submit_reply' => 'Odpovědět',
+    'front.comments_reply' => 'Odpovědět',
+    'front.comments_empty' => 'Zatím tu nejsou žádné komentáře.',
+    'front.comments_login_required' => 'Pro komentování se přihlaste.',
+    'front.comments_login_link' => 'Přihlásit se',
 ];

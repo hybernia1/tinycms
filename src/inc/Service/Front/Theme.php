@@ -133,6 +133,17 @@ final class Theme
         return $this->url($this->slugger->slug((string)($item['name'] ?? ''), $id));
     }
 
+
+    public function contentCommentsUrl(array $item): string
+    {
+        $base = trim($this->contentUrl($item), '/');
+        if ($base === '') {
+            return $this->url('comments');
+        }
+
+        return $this->url($base . '/comments');
+    }
+
     public function termUrl(array $term): string
     {
         $id = (int)($term['id'] ?? 0);

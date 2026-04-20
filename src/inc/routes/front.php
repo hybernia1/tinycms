@@ -15,5 +15,6 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => 'content/{id}', 'controller' => $front, 'action' => 'contentLegacy', 'raw_params' => true],
     ['method' => 'GET', 'path' => 'term/{slug}', 'controller' => $front, 'action' => 'termArchive', 'raw_params' => true],
     ['method' => 'GET', 'path' => 'author/{slug}', 'controller' => $front, 'action' => 'authorArchive', 'raw_params' => true],
+    ['method' => 'GET', 'path' => '{slug}/comments', 'controller' => $front, 'action' => 'comments', 'raw_params' => true],
     ['method' => 'GET', 'path' => '{slug}', 'controller' => $front, 'action' => 'content', 'raw_params' => true],
 ]);

@@ -32,6 +32,10 @@ final class SchemaDefinition
                 'key_name' => ['max' => 100, 'nullable' => false],
                 'value' => ['max' => 1000, 'nullable' => true],
             ],
+            'comments' => [
+                'status' => ['max' => 50, 'nullable' => false, 'allowed' => ['published']],
+                'body' => ['max' => 5000, 'nullable' => false],
+            ],
         ];
     }
 
@@ -44,6 +48,7 @@ final class SchemaDefinition
         $contentTerms = $prefix . 'content_terms';
         $contentMedia = $prefix . 'content_media';
         $settings = $prefix . 'settings';
+        $comments = $prefix . 'comments';
         $fkMediaAuthorUser = self::constraintName($prefix, 'fk_media_author_user');
         $fkContentAuthorUser = self::constraintName($prefix, 'fk_content_author_user');
         $fkContentThumbnailMedia = self::constraintName($prefix, 'fk_content_thumbnail_media');
@@ -51,6 +56,10 @@ final class SchemaDefinition
         $fkContentTermsTerm = self::constraintName($prefix, 'fk_content_terms_term');
         $fkContentMediaContent = self::constraintName($prefix, 'fk_content_media_content');
         $fkContentMediaMedia = self::constraintName($prefix, 'fk_content_media_media');
+        $fkCommentsContent = self::constraintName($prefix, 'fk_comments_content');
+        $fkCommentsAuthor = self::constraintName($prefix, 'fk_comments_author');
+        $fkCommentsParent = self::constraintName($prefix, 'fk_comments_parent');
+        $fkCommentsReplyTo = self::constraintName($prefix, 'fk_comments_reply_to');
 
         return [
             "CREATE TABLE IF NOT EXISTS $users (
@@ -128,6 +137,26 @@ final class SchemaDefinition
                 key_name VARCHAR(100) NOT NULL,
                 value VARCHAR(1000) DEFAULT NULL,
                 PRIMARY KEY (key_name)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
+            "CREATE TABLE IF NOT EXISTS $comments (
+                id INT NOT NULL AUTO_INCREMENT,
+                content INT NOT NULL,
+                author INT NOT NULL,
+                parent INT DEFAULT NULL,
+                reply_to INT DEFAULT NULL,
+                body VARCHAR(5000) NOT NULL,
+                status VARCHAR(50) NOT NULL DEFAULT 'published',
+                created DATETIME NOT NULL DEFAULT (NOW()),
+                updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY idx_comments_content_created (content, created, id),
+                KEY idx_comments_author (author),
+                KEY idx_comments_parent (parent),
+                KEY idx_comments_reply_to (reply_to),
+                CONSTRAINT $fkCommentsContent FOREIGN KEY (content) REFERENCES $content (id) ON DELETE CASCADE,
+                CONSTRAINT $fkCommentsAuthor FOREIGN KEY (author) REFERENCES $users (id) ON DELETE CASCADE,
+                CONSTRAINT $fkCommentsParent FOREIGN KEY (parent) REFERENCES $comments (id) ON DELETE CASCADE,
+                CONSTRAINT $fkCommentsReplyTo FOREIGN KEY (reply_to) REFERENCES $comments (id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
         ];
     }

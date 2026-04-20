@@ -38,3 +38,35 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fafafa; color: #1
   .content-card { flex-direction: column; }
   .content-card-thumb { width: 100%; height: auto; aspect-ratio: 1 / 1; }
 }
+
+.comments-block {
+    margin-top: 2rem;
+}
+
+.comments-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.comment-item,
+.comment-child {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.comment-children {
+    margin-top: 1rem;
+    display: grid;
+    gap: .75rem;
+}
+
+.comment-child {
+    margin-left: 1rem;
+}
+
+.comments-block textarea {
+    width: 100%;
+    margin-top: .35rem;
+    margin-bottom: .5rem;
+}

@@ -27,4 +27,6 @@
         </ul>
     <?php endif; ?>
     <div class="content-body"><?= (string)($item['body'] ?? '') ?></div>
+
+    <p><a href="<?= $e($contentCommentsUrl($item)) ?>"><?= $e($t('front.comments_open')) ?></a></p>
 </article>

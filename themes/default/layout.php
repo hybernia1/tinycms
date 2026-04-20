@@ -24,5 +24,9 @@
     <?= $content ?>
 </main>
 <script src="<?= $e($themeUrl('assets/js/main.js')) ?>" defer></script>
+<?php if (($kind ?? '') === 'comments'): ?>
+    <script src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>" defer></script>
+    <script src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>" defer></script>
+<?php endif; ?>
 </body>
 </html>

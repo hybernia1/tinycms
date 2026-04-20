@@ -16,4 +16,16 @@ return [
     'front.not_found_title' => 'Page not found',
     'front.not_found_text' => 'The requested page does not exist.',
     'front.not_found_home' => 'Back to homepage',
+
+    'front.comments_title' => 'Comments',
+    'front.comments_heading' => 'Discussion',
+    'front.comments_open' => 'View comments',
+    'front.comments_back_to_content' => 'Back to content',
+    'front.comments_form_label' => 'Comment',
+    'front.comments_submit' => 'Add comment',
+    'front.comments_submit_reply' => 'Reply',
+    'front.comments_reply' => 'Reply',
+    'front.comments_empty' => 'No comments yet.',
+    'front.comments_login_required' => 'Please sign in to comment.',
+    'front.comments_login_link' => 'Sign in',
 ];

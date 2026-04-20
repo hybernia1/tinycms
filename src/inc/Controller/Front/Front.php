@@ -136,6 +136,32 @@ final class Front
     }
 
 
+
+    public function comments(callable $redirect, array $params): void
+    {
+        $slug = trim((string)($params['slug'] ?? ''));
+        $id = $this->slugger->extractId($slug);
+        $item = $this->findPublishedContent($id);
+
+        if ($item === null) {
+            $this->notFound();
+            return;
+        }
+
+        $canonicalSlug = $this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0));
+        if ($slug !== $canonicalSlug) {
+            $redirect($canonicalSlug . '/comments', true);
+        }
+
+        $comments = $this->services->comment->listByContent((int)($item['id'] ?? 0));
+        $user = $this->auth->user();
+
+        $this->view->comments($item, $comments, [
+            'isAuthenticated' => $this->auth->check(),
+            'user' => is_array($user) ? $user : null,
+        ]);
+    }
+
     public function notFound(): void
     {
         $this->view->notFound();

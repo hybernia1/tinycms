@@ -14,6 +14,7 @@ register_routes($router, $redirect, [
     ['method' => 'POST', 'path' => 'admin/api/v1/auth/register', 'controller' => $apiSessions, 'action' => 'registerApiV1', 'with_redirect' => false],
     ['method' => 'POST', 'path' => 'admin/api/v1/auth/lost', 'controller' => $apiSessions, 'action' => 'lostRequestApiV1', 'with_redirect' => false],
     ['method' => 'POST', 'path' => 'admin/api/v1/auth/lost/reset', 'controller' => $apiSessions, 'action' => 'lostResetApiV1', 'with_redirect' => false],
+    ['method' => 'POST', 'path' => 'admin/api/v1/comments/add', 'controller' => $apiComment, 'action' => 'addApiV1', 'with_redirect' => false],
     ['method' => 'GET', 'path' => 'admin', 'controller' => $admin, 'action' => 'index'],
     ['method' => 'GET', 'path' => 'admin/dashboard', 'controller' => $admin, 'action' => 'dashboard'],
 

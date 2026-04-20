@@ -457,4 +457,13 @@ return [
             'invalid_value' => 'Pole obsahuje nepovolenou hodnotu.',
         ],
     ],
+
+    'comments' => [
+        'login_required' => 'Pro komentování se musíte přihlásit.',
+        'invalid_content' => 'Neplatný příspěvek.',
+        'invalid_parent' => 'Neplatná odpověď.',
+        'body_required' => 'Komentář je povinný.',
+        'save_failed' => 'Komentář se nepodařilo uložit.',
+        'created' => 'Komentář byl přidán.',
+    ],
 ];
