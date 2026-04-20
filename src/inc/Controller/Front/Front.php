@@ -50,8 +50,7 @@ final class Front
         $item = $this->findPublishedContent($id);
 
         if ($item === null) {
-            http_response_code(404);
-            echo '404';
+            $this->notFound();
             return;
         }
 
@@ -69,8 +68,7 @@ final class Front
         $item = $this->findPublishedContent($id);
 
         if ($item === null) {
-            http_response_code(404);
-            echo '404';
+            $this->notFound();
             return;
         }
 
@@ -94,8 +92,7 @@ final class Front
         $term = $termId > 0 ? $this->services->term->find($termId) : null;
 
         if ($term === null) {
-            http_response_code(404);
-            echo '404';
+            $this->notFound();
             return;
         }
 
@@ -119,8 +116,7 @@ final class Front
         $author = $authorId > 0 ? $this->services->user->find($authorId) : null;
 
         if ($author === null) {
-            http_response_code(404);
-            echo '404';
+            $this->notFound();
             return;
         }
 
@@ -139,6 +135,12 @@ final class Front
         ], $pagination, 'author/' . $canonicalSlug);
     }
 
+
+    public function notFound(): void
+    {
+        $this->view->notFound();
+    }
+
     public function account(callable $redirect): void
     {
         if (!$this->auth->check()) {
@@ -152,6 +154,7 @@ final class Front
 
         $this->view->account($user);
     }
+
 
     public function robotsTxt(): void
     {
