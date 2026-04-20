@@ -36,6 +36,16 @@ final class RequestContext
         return $host . ':' . $port;
     }
 
+    public static function hasAuthority(): bool
+    {
+        if (self::configParts() !== null) {
+            return true;
+        }
+
+        [$host] = self::firstTrustedHost();
+        return $host !== '';
+    }
+
     public static function domain(): string
     {
         $fromConfig = self::configParts();

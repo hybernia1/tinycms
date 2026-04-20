@@ -9,6 +9,7 @@ use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
+use App\Service\Support\RequestContext;
 
 final class View
 {
@@ -52,13 +53,11 @@ final class View
             }
 
             $resolved = $url($value);
-            $host = trim((string)($_SERVER['HTTP_HOST'] ?? ''));
-            if ($host === '') {
+            if (!RequestContext::hasAuthority()) {
                 return $resolved;
             }
 
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            return $scheme . '://' . $host . $resolved;
+            return RequestContext::scheme() . '://' . RequestContext::authority() . $resolved;
         };
         $icon = static function (string $name, string $classes = 'icon') use ($url, $e): string {
             $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . $name));

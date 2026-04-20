@@ -5,6 +5,7 @@ namespace App\Service\Front;
 
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Media;
+use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
 
 final class Theme
@@ -483,13 +484,11 @@ final class Theme
             return $path;
         }
 
-        $host = trim((string)($_SERVER['HTTP_HOST'] ?? ''));
-        if ($host === '') {
+        if (!RequestContext::hasAuthority()) {
             return $path;
         }
 
-        $proto = (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') ? 'https' : 'http';
-        return $proto . '://' . $host . '/' . ltrim($path, '/');
+        return RequestContext::scheme() . '://' . RequestContext::authority() . '/' . ltrim($path, '/');
     }
 
     private function currentRequestUrl(): string
