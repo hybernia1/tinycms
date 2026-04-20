@@ -98,6 +98,10 @@ final class Theme
         if ($kind === 'search') {
             $tags[] = '<meta name="robots" content="noindex,follow">';
         }
+        $favicon = trim($this->setting('favicon'));
+        if ($favicon !== '') {
+            $tags[] = '<link rel="icon" href="' . $this->esc($this->url($favicon)) . '">';
+        }
 
         $jsonLd = $this->jsonLd($kind, $item, $term, $title, $description, $url, $image, $author, $query);
         if ($jsonLd !== '') {
