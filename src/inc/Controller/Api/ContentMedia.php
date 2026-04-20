@@ -9,6 +9,7 @@ use App\Service\Application\Auth;
 use App\Service\Application\Content;
 use App\Service\Application\Media;
 use App\Service\Application\Upload;
+use App\Service\Support\Media as MediaPath;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
@@ -173,6 +174,7 @@ final class ContentMedia extends Admin
             'id' => $mediaId,
             'name' => (string)($media['name'] ?? ($data['name'] ?? '')),
             'preview_path' => $previewPath,
+            'webp_path' => MediaPath::bySize((string)($media['path'] ?? ($data['path'] ?? '')), 'webp'),
             'path' => (string)($media['path'] ?? ($data['path'] ?? '')),
             'created' => (string)($media['created'] ?? date('Y-m-d H:i:s')),
             'created_label' => $this->formatDateTime((string)($media['created'] ?? date('Y-m-d H:i:s'))),
@@ -274,6 +276,7 @@ final class ContentMedia extends Admin
             'can_edit' => true,
             'can_delete' => true,
             'preview_path' => $this->resolvePreviewPath($item),
+            'webp_path' => MediaPath::bySize((string)($item['path'] ?? ''), 'webp'),
             'path' => (string)($item['path'] ?? ''),
             'created' => $createdAt,
             'created_label' => $this->formatDateTime($createdAt),

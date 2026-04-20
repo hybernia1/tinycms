@@ -3,7 +3,7 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$previewPath = $media((string)($item['path'] ?? ''), 'small');
+$previewPath = (string)($item['path'] ?? '');
 $previewUrl = $previewPath !== '' ? $url($previewPath) : '';
 $fileMeta = null;
 if ($mode === 'edit') {

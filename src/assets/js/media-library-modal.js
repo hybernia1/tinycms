@@ -210,6 +210,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             button.dataset.mediaPreviewPath = previewPath;
             button.dataset.mediaCanEdit = item.can_edit === true ? '1' : '0';
             button.dataset.mediaCanDelete = item.can_delete === true ? '1' : '0';
+            button.dataset.mediaWebpPath = String(item.webp_path || '');
             grid.appendChild(button);
         });
     };
@@ -231,6 +232,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             created: target.dataset.mediaCreated || '',
             createdLabel: target.dataset.mediaCreatedLabel || target.dataset.mediaCreated || '',
             previewPath: target.dataset.mediaPreviewPath || '',
+            webpPath: target.dataset.mediaWebpPath || '',
             canEdit: target.dataset.mediaCanEdit === '1',
             canDelete: target.dataset.mediaCanDelete === '1',
         };
@@ -530,7 +532,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             }
 
             if (mode === 'editor') {
-                const imageUrl = absoluteUrl(selectedMedia.previewPath || '');
+                const imageUrl = absoluteUrl(selectedMedia.webpPath || selectedMedia.previewPath || '');
                 if (imageUrl === '') {
                     setStatus(t('media.invalid_url'));
                     return;
