@@ -199,7 +199,8 @@ final class Install
 
     private function detectedWebsiteUrl(): string
     {
-        if (!RequestContext::hasAuthority()) {
+        $authority = $this->detectedAuthority();
+        if ($authority === '') {
             return '';
         }
 
@@ -207,6 +208,27 @@ final class Install
         $baseDir = trim(dirname($scriptName), '/.');
         $basePath = $baseDir === '' ? '' : '/' . $baseDir;
 
-        return RequestContext::scheme() . '://' . RequestContext::authority() . $basePath;
+        return RequestContext::scheme() . '://' . $authority . $basePath;
+    }
+
+    private function detectedAuthority(): string
+    {
+        $candidate = trim((string)($_SERVER['SERVER_NAME'] ?? ''));
+        if ($candidate === '') {
+            $candidate = trim((string)($_SERVER['HTTP_HOST'] ?? ''));
+        }
+        if ($candidate === '') {
+            return '';
+        }
+
+        $host = strtolower((string)parse_url('http://' . $candidate, PHP_URL_HOST));
+        if ($host === '') {
+            return '';
+        }
+
+        $port = parse_url('http://' . $candidate, PHP_URL_PORT);
+        $authority = $host . (is_int($port) ? ':' . $port : '');
+
+        return RequestContext::isValidWebsiteUrl('http://' . $authority) ? $authority : '';
     }
 }
