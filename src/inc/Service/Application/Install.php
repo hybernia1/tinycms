@@ -311,13 +311,12 @@ final class Install
         }
 
         $name = trim((string)($admin['name'] ?? ''));
-        $password = (string)($admin['password'] ?? '');
         $loginUrl = $this->loginUrl();
         $body = $this->renderInstallTemplate([
             '{name}' => $name !== '' ? $name : I18n::t('auth.reset_email_generic_user'),
             '{email}' => $email,
-            '{password}' => $password,
             '{login_url}' => $loginUrl,
+            '{lost_password_url}' => $this->lostPasswordUrl(),
             '{site_name}' => 'TinyCMS',
         ]);
         $mailer = new Mailer();
@@ -326,12 +325,22 @@ final class Install
 
     private function loginUrl(): string
     {
+        return $this->authUrl('/auth/login');
+    }
+
+    private function lostPasswordUrl(): string
+    {
+        return $this->authUrl('/auth/lost');
+    }
+
+    private function authUrl(string $path): string
+    {
         $scheme = RequestContext::scheme();
         $authority = RequestContext::authority();
         $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
         $baseDir = trim(dirname($scriptName), '/.');
         $basePath = $baseDir === '' ? '' : '/' . $baseDir;
-        return $scheme . '://' . $authority . $basePath . '/auth/login';
+        return $scheme . '://' . $authority . $basePath . $path;
     }
 
     private function renderInstallTemplate(array $vars): string

@@ -380,7 +380,7 @@ return [
         ],
         'install_credentials' => [
             'subject' => 'TinyCMS installation complete',
-            'body' => "Hello {name},\n\nTinyCMS has been installed successfully.\nLogin URL: {login_url}\nEmail: {email}\nPassword: {password}\n\nPlease keep this email for future use.\n\nTinyCMS",
+            'body' => "Hello {name},\n\nTinyCMS has been installed successfully.\nLogin URL: {login_url}\nEmail: {email}\nIf you don't know your password, you can reset it here: {lost_password_url}\n\nPlease keep this email for future use.\n\nTinyCMS",
         ],
     ],
     'editor' => [
