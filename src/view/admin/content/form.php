@@ -144,7 +144,7 @@ $contentId = (int)($item['id'] ?? 0);
 >
     <?= $csrfField() ?>
 </form>
-<div class="media-library-modal modal-overlay" data-media-library-modal data-modal data-media-library-per-page="<?= \App\Service\Support\PaginationConfig::perPage() ?>">
+<div class="media-library-modal modal-overlay" data-media-library-modal data-modal data-media-library-per-page="10">
     <div class="media-library-modal-dialog modal">
         <div class="media-library-modal-header">
             <strong>Media library</strong>

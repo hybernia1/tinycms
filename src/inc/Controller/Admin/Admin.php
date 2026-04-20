@@ -8,11 +8,12 @@ use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
-use App\Service\Support\PaginationConfig;
 use App\View\AdminView;
 
 class Admin
 {
+    private const ADMIN_PER_PAGE = 10;
+
     public function __construct(
         protected Auth $authService,
         protected Flash $flash,
@@ -205,7 +206,7 @@ class Admin
     protected function resolvePaginationQuery(): array
     {
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = PaginationConfig::perPage();
+        $perPage = self::ADMIN_PER_PAGE;
         $query = trim((string)($_GET['q'] ?? ''));
 
         return [$page, $perPage, $query];
