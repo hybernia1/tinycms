@@ -7,6 +7,7 @@ if (!defined('BASE_DIR')) {
 
 use App\Controller\Admin\Admin as AdminController;
 use App\Controller\Admin\Content as ContentController;
+use App\Controller\Admin\Comment as CommentController;
 use App\Controller\Admin\Media as MediaController;
 use App\Controller\Admin\Settings as SettingsController;
 use App\Controller\Admin\Term as TermController;
@@ -114,6 +115,7 @@ $apiSessions = new SessionsController($authService, $flash, $csrf, $rateLimiter)
 $apiUser = new ApiUserController($authService, $userService, $flash, $csrf);
 $adminUsers = new UserController($adminView, $authService, $userService, $flash, $csrf);
 $adminContent = new ContentController($adminView, $authService, $contentService, $userService, $termService, $flash, $csrf);
+$adminComments = new CommentController($adminView, $authService, $commentService, $flash, $csrf);
 $adminMedia = new MediaController($adminView, $authService, $mediaService, $flash, $csrf);
 $adminSettings = new SettingsController($adminView, $authService, $settingsService, $flash, $csrf);
 $adminTerms = new TermController($adminView, $authService, $termService, $flash, $csrf);

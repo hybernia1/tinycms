@@ -89,6 +89,14 @@ final class AdminView
         ]);
     }
 
+    public function adminCommentList(array $pagination, string $query, array $statusCounts): void
+    {
+        $this->renderAdmin('admin/comments/list', [
+            'listBase' => $this->adminListBase('comments', $pagination, 'all', $query, $statusCounts),
+            'pageTitle' => I18n::t('admin.menu.comments'),
+        ]);
+    }
+
     public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $contentTypes, array $authors, array $selectedTerms = []): void
     {
         $this->renderAdmin('admin/content/form', [
@@ -237,6 +245,7 @@ final class AdminView
             'content',
             'terms',
             'media',
+            'comments',
             'users',
             'editor',
             'datetime',
@@ -253,6 +262,7 @@ final class AdminView
             ['label' => I18n::t('admin.menu.users'), 'url' => 'admin/users', 'icon' => 'users'],
             ['label' => I18n::t('admin.menu.content'), 'url' => 'admin/content', 'icon' => 'content'],
             ['label' => I18n::t('admin.menu.media'), 'url' => 'admin/media', 'icon' => 'media'],
+            ['label' => I18n::t('admin.menu.comments'), 'url' => 'admin/comments', 'icon' => 'content'],
             ['label' => I18n::t('admin.menu.terms'), 'url' => 'admin/terms', 'icon' => 'terms'],
             ['label' => I18n::t('admin.menu.settings'), 'url' => 'admin/settings', 'icon' => 'settings'],
         ];

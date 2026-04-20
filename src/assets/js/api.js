@@ -836,4 +836,39 @@ initListApi({
         `;
     },
 });
+
+initListApi({
+    name: 'comments',
+    rootSelector: '[data-comments-list]',
+    withStatus: true,
+    deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
+    messages: { deleteSuccess: t('comments.deleted') },
+    rowHtml: (item) => {
+        const id = Number(item.id || 0);
+        const contentName = String(item.content_name || '');
+        const contentEditPath = String(item.content_edit_path || '');
+        let body = String(item.body || '');
+        if (body.length > 160) {
+            body = `${body.slice(0, 160)}…`;
+        }
+
+        return `
+            <tr>
+                <td>
+                    ${contentEditPath !== '' && contentName !== ''
+        ? `<a href="${esc(contentEditPath)}">${esc(contentName)}</a>`
+        : `<span>${esc(t('comments.no_content'))}</span>`}
+                    <div class="text-muted small">${esc(item.author_name || '')} · ${esc(item.created_label || item.created || '')}</div>
+                    <div class="small">${esc(body)}</div>
+                </td>
+                <td class="table-col-actions">
+                    <button class="btn btn-light btn-icon" type="button" data-comments-delete-open="${id}" aria-label="${esc(t('comments.delete'))}" title="${esc(t('comments.delete'))}">
+                        ${icon('delete')}
+                        <span class="sr-only">${esc(t('comments.delete'))}</span>
+                    </button>
+                </td>
+            </tr>
+        `;
+    },
+});
 })();

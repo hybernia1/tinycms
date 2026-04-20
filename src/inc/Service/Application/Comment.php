@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
@@ -13,12 +14,74 @@ final class Comment
     public const STATUS_PUBLISHED = 'published';
 
     private \PDO $pdo;
+    private Query $query;
     private SchemaConstraintValidator $schemaConstraintValidator;
 
     public function __construct()
     {
         $this->pdo = Connection::get();
+        $this->query = new Query($this->pdo);
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
+    }
+
+    public function paginate(int $page = 1, int $perPage = 10, string $search = ''): array
+    {
+        $commentsTable = Table::name('comments');
+        $contentTable = Table::name('content');
+        $usersTable = Table::name('users');
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $offset = ($page - 1) * $perPage;
+        $search = trim($search);
+        $where = 'WHERE c.status = :status';
+
+        if ($search !== '') {
+            $where .= ' AND (c.body LIKE :search OR u.name LIKE :search OR p.name LIKE :search)';
+        }
+
+        $countStmt = $this->pdo->prepare(implode("\n", [
+            'SELECT COUNT(*)',
+            "FROM $commentsTable c",
+            "LEFT JOIN $usersTable u ON u.id = c.author",
+            "LEFT JOIN $contentTable p ON p.id = c.content",
+            $where,
+        ]));
+        $countStmt->bindValue(':status', self::STATUS_PUBLISHED);
+        if ($search !== '') {
+            $countStmt->bindValue(':search', '%' . $search . '%');
+        }
+        $countStmt->execute();
+        $total = (int)($countStmt->fetchColumn() ?: 0);
+        $totalPages = max(1, (int)ceil($total / $perPage));
+        $currentPage = min($page, $totalPages);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT c.id, c.content, c.author, c.parent, c.reply_to, c.body, c.created, c.updated, c.status,',
+            'u.name AS author_name, p.name AS content_name',
+            "FROM $commentsTable c",
+            "LEFT JOIN $usersTable u ON u.id = c.author",
+            "LEFT JOIN $contentTable p ON p.id = c.content",
+            $where,
+            'ORDER BY c.created DESC, c.id DESC',
+            'LIMIT :limit OFFSET :offset',
+        ]));
+        $stmt->bindValue(':status', self::STATUS_PUBLISHED);
+        if ($search !== '') {
+            $stmt->bindValue(':search', '%' . $search . '%');
+        }
+        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return [
+            'data' => is_array($data) ? array_map([$this, 'mapItem'], $data) : [],
+            'page' => $currentPage,
+            'per_page' => $perPage,
+            'total' => $total,
+            'total_pages' => $totalPages,
+        ];
     }
 
     public function listByContent(int $contentId): array
@@ -82,6 +145,31 @@ final class Comment
         }
 
         return $result;
+    }
+
+    public function find(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+
+        $rows = $this->query->select('comments', ['id', 'content', 'author', 'parent', 'reply_to', 'body', 'status', 'created', 'updated'], ['id' => $id]);
+        return isset($rows[0]) && is_array($rows[0]) ? $rows[0] : null;
+    }
+
+    public function delete(int $id): bool
+    {
+        if ($id <= 0) {
+            return false;
+        }
+
+        return $this->query->delete('comments', ['id' => $id]) > 0;
+    }
+
+    public function statusCounts(): array
+    {
+        $rows = $this->query->select('comments', ['id'], ['status' => self::STATUS_PUBLISHED]);
+        return ['all' => count($rows)];
     }
 
     public function create(array $input, int $authorId): array

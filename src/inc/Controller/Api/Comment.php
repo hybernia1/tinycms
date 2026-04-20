@@ -61,6 +61,42 @@ final class Comment extends Admin
         ]);
     }
 
+    public function listApiV1(callable $_redirect): void
+    {
+        if (!$this->guardApiAdmin()) {
+            return;
+        }
+
+        [$page, $perPage, $query] = $this->resolvePaginationQuery();
+        $pagination = $this->comments->paginate($page, $perPage, $query);
+        $statusCounts = $this->comments->statusCounts();
+        $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, 'all', $query, $statusCounts));
+    }
+
+    public function deleteApiV1(callable $_redirect, int $id): void
+    {
+        if (!$this->guardApiAdminCsrf()) {
+            return;
+        }
+
+        if (!$this->requireEntity($this->comments->find($id), 'NOT_FOUND', I18n::t('comments.not_found'))) {
+            return;
+        }
+
+        if (!$this->comments->delete($id)) {
+            $this->apiError('DELETE_FAILED', I18n::t('comments.delete_failed'));
+            return;
+        }
+
+        $this->apiOk([
+            'id' => $id,
+            'message' => I18n::t('comments.deleted'),
+            'redirect' => $this->buildPath('admin/comments'),
+        ]);
+    }
+
     private function guardAuthenticatedApi(): bool
     {
         if ($this->authService->auth()->check()) {
@@ -85,5 +121,22 @@ final class Comment extends Admin
             'csrf' => $this->csrf->token(),
         ]);
         return false;
+    }
+
+    private function mapListItem(array $row): array
+    {
+        return [
+            'id' => (int)($row['id'] ?? 0),
+            'content' => (int)($row['content'] ?? 0),
+            'content_name' => (string)($row['content_name'] ?? ''),
+            'content_edit_path' => (int)($row['content'] ?? 0) > 0 ? $this->buildEditPath('admin/content', (int)($row['content'] ?? 0)) : '',
+            'author' => (int)($row['author'] ?? 0),
+            'author_name' => (string)($row['author_name'] ?? ''),
+            'body' => (string)($row['body'] ?? ''),
+            'parent' => (int)($row['parent'] ?? 0),
+            'reply_to' => (int)($row['reply_to'] ?? 0),
+            'created' => (string)($row['created'] ?? ''),
+            'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),
+        ];
     }
 }
