@@ -13,4 +13,7 @@ return [
     'front.search_results_for' => 'Results for',
     'front.account_title' => 'My account',
     'front.account_welcome' => 'Signed in as',
+    'front.not_found_title' => 'Page not found',
+    'front.not_found_text' => 'The requested page does not exist.',
+    'front.not_found_home' => 'Back to homepage',
 ];

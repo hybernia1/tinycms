@@ -125,4 +125,5 @@ require BASE_DIR . '/' . INC_DIR . 'routes/admin.php';
 
 return [
     'router' => $router,
+    'front' => $front,
 ];

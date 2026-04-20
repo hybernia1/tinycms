@@ -17,8 +17,12 @@ try {
     $router = $app['router'];
 
     if (!$router->dispatch($_SERVER['REQUEST_URI'] ?? '/', $_SERVER['REQUEST_METHOD'] ?? 'GET')) {
-        http_response_code(404);
-        echo '404';
+        if (isset($app['front']) && $app['front'] instanceof \App\Controller\Front\Front) {
+            $app['front']->notFound();
+        } else {
+            http_response_code(404);
+            echo '404';
+        }
     }
 } catch (\Throwable $e) {
     (new ErrorHandler())->handle($e);

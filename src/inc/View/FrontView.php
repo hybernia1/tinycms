@@ -94,6 +94,16 @@ final class FrontView
         ]);
     }
 
+
+    public function notFound(): void
+    {
+        http_response_code(404);
+        $this->render('404', [
+            'kind' => '404',
+            'pageTitle' => $this->translate('front.not_found_title'),
+        ]);
+    }
+
     private function render(string $template, array $data): void
     {
         $layoutFile = $this->resolveThemeFile('layout.php');

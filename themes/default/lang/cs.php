@@ -13,4 +13,7 @@ return [
     'front.search_results_for' => 'Výsledky pro',
     'front.account_title' => 'Můj účet',
     'front.account_welcome' => 'Přihlášen jako',
+    'front.not_found_title' => 'Stránka nebyla nalezena',
+    'front.not_found_text' => 'Požadovaná stránka neexistuje.',
+    'front.not_found_home' => 'Zpět na úvod',
 ];
