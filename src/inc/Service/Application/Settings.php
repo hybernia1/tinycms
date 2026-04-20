@@ -175,6 +175,7 @@ final class Settings
     public function save(array $input): void
     {
         $fields = $this->fields();
+        $currentValues = $this->values();
         $existingRows = $this->query->select('settings', ['key_name']);
         $existingKeys = [];
 
@@ -202,6 +203,12 @@ final class Settings
             }
             if ($key === 'website_url' && !RequestContext::isValidWebsiteUrl($value)) {
                 $value = '';
+            }
+            if ($key === 'website_url' && $value === '') {
+                $currentUrl = trim((string)($currentValues['website_url'] ?? ''));
+                if ($currentUrl !== '') {
+                    $value = $currentUrl;
+                }
             }
             if (($fields[$key]['type'] ?? '') === 'select') {
                 $options = (array)($fields[$key]['options'] ?? []);
