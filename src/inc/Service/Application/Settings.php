@@ -6,6 +6,7 @@ namespace App\Service\Application;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Support\I18n;
+use App\Service\Support\RequestContext;
 
 final class Settings
 {
@@ -199,7 +200,7 @@ final class Settings
             if ($key === 'website_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 $value = '';
             }
-            if ($key === 'website_url' && !$this->isValidWebsiteUrl($value)) {
+            if ($key === 'website_url' && !RequestContext::isValidWebsiteUrl($value)) {
                 $value = '';
             }
             if (($fields[$key]['type'] ?? '') === 'select') {
@@ -220,30 +221,4 @@ final class Settings
         }
     }
 
-    private function isValidWebsiteUrl(string $value): bool
-    {
-        if ($value === '') {
-            return true;
-        }
-
-        $parts = parse_url($value);
-        if (!is_array($parts)) {
-            return false;
-        }
-
-        $scheme = strtolower((string)($parts['scheme'] ?? ''));
-        if ($scheme !== 'http' && $scheme !== 'https') {
-            return false;
-        }
-
-        $host = strtolower(trim((string)($parts['host'] ?? '')));
-        if ($host === 'localhost') {
-            return true;
-        }
-        if (filter_var($host, FILTER_VALIDATE_IP)) {
-            return true;
-        }
-
-        return filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false;
-    }
 }

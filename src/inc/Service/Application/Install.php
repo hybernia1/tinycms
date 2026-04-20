@@ -81,6 +81,7 @@ final class Install
     {
         $name = trim((string)($input['name'] ?? ''));
         $email = mb_strtolower(trim((string)($input['email'] ?? '')));
+        $websiteUrl = trim((string)($input['website_url'] ?? ''));
         $password = (string)($input['password'] ?? '');
 
         $errors = [];
@@ -91,6 +92,9 @@ final class Install
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors['email'] = I18n::t('install.admin_email_invalid');
+        }
+        if (!RequestContext::isValidWebsiteUrl($websiteUrl)) {
+            $errors['website_url'] = I18n::t('install.website_url_invalid');
         }
 
         if (mb_strlen($password) < 8) {
@@ -117,6 +121,7 @@ final class Install
             'values' => [
                 'name' => $name,
                 'email' => $email,
+                'website_url' => $websiteUrl,
                 'password' => $password,
             ],
             'errors' => $errors,
@@ -159,6 +164,15 @@ final class Install
             return ['success' => false, 'message' => $adminResult];
         }
 
+        $websiteUrl = trim((string)($admin['website_url'] ?? ''));
+        if ($websiteUrl !== '') {
+            $settingsResult = $this->saveWebsiteUrlSetting($pdo, $websiteUrl, $prefix);
+            if ($settingsResult !== null) {
+                return ['success' => false, 'message' => $settingsResult];
+            }
+        }
+
+        RequestContext::setWebsiteUrl($websiteUrl);
         $this->sendInstallEmail($admin);
 
         return ['success' => true, 'message' => I18n::t('install.success')];
@@ -230,6 +244,23 @@ final class Install
         $prefix = $this->normalizePrefix($prefix);
         foreach (SchemaDefinition::ddl($prefix) as $query) {
             $pdo->exec($query);
+        }
+    }
+
+    private function saveWebsiteUrlSetting(PDO $pdo, string $websiteUrl, string $prefix = ''): ?string
+    {
+        $prefix = $this->normalizePrefix($prefix);
+        $settings = $prefix . 'settings';
+
+        try {
+            $insert = $pdo->prepare("INSERT INTO $settings (key_name, value) VALUES (:key_name, :value)");
+            $insert->execute([
+                'key_name' => 'website_url',
+                'value' => $websiteUrl,
+            ]);
+            return null;
+        } catch (PDOException $e) {
+            return I18n::t('install.save_settings_failed');
         }
     }
 

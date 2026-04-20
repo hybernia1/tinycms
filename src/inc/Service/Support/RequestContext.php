@@ -12,6 +12,16 @@ final class RequestContext
         self::$websiteUrlParts = self::parseWebsiteUrl($url);
     }
 
+    public static function isValidWebsiteUrl(string $value): bool
+    {
+        $raw = trim($value);
+        if ($raw === '') {
+            return true;
+        }
+
+        return self::parseWebsiteUrl($raw) !== null;
+    }
+
     public static function scheme(): string
     {
         if (self::$websiteUrlParts !== null) {

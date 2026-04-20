@@ -71,7 +71,7 @@ final class Install
         $_SESSION['install']['db'] = $result['values'];
         $_SESSION['install']['db_valid'] = true;
         $_SESSION['install']['errors_admin'] = [];
-        $_SESSION['install']['admin'] = ['name' => '', 'email' => '', 'password' => ''];
+        $_SESSION['install']['admin'] = ['name' => '', 'email' => '', 'password' => '', 'website_url' => ''];
 
         $redirect('install/admin');
     }
@@ -88,7 +88,7 @@ final class Install
         $this->view->render('install/layout', 'install/step-admin', [
             'pageTitle' => I18n::t('install.page_admin'),
             'errors' => (array)($state['errors_admin'] ?? []),
-            'old' => (array)($state['admin'] ?? ['name' => '', 'email' => '', 'password' => '']),
+            'old' => (array)($state['admin'] ?? ['name' => '', 'email' => '', 'password' => '', 'website_url' => '']),
             'message' => (string)($state['message'] ?? ''),
         ]);
 
