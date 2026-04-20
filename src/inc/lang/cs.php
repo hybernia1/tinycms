@@ -279,6 +279,10 @@ return [
     'settings' => [
         'save' => 'Uložit nastavení',
         'saved' => 'Nastavení uloženo.',
+        'groups' => [
+            'general' => 'Obecné',
+            'seo' => 'SEO',
+        ],
         'fields' => [
             'app_lang' => 'Jazyk aplikace',
             'sitename' => 'Název webu',

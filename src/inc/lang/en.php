@@ -279,6 +279,10 @@ return [
     'settings' => [
         'save' => 'Save settings',
         'saved' => 'Settings saved.',
+        'groups' => [
+            'general' => 'General',
+            'seo' => 'SEO',
+        ],
         'fields' => [
             'app_lang' => 'Application language',
             'sitename' => 'Site name',

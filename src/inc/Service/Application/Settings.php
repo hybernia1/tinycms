@@ -27,58 +27,77 @@ final class Settings
         $themeOptions = $this->themeOptions();
         $homePageOptions = $this->homePageOptions();
 
-        return [
-            'app_lang' => [
-                'label_key' => 'settings.fields.app_lang',
-                'type' => 'select',
-                'default' => (string)APP_LANG,
-                'options' => $localeOptions,
-            ],
-            'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
-            'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
-            'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
-            'front_home_mode' => [
-                'label_key' => 'settings.fields.front_home_mode',
-                'type' => 'select',
-                'default' => 'latest',
-                'options' => [
-                    'latest' => I18n::t('settings.options.front_home_mode.latest'),
-                    'content' => I18n::t('settings.options.front_home_mode.content'),
+        $groups = [
+            'general' => [
+                'app_lang' => [
+                    'label_key' => 'settings.fields.app_lang',
+                    'type' => 'select',
+                    'default' => (string)APP_LANG,
+                    'options' => $localeOptions,
                 ],
-            ],
-            'front_home_content' => [
-                'label_key' => 'settings.fields.front_home_content',
-                'type' => 'select',
-                'default' => '',
-                'options' => $homePageOptions,
-            ],
-            'front_posts_per_page' => [
-                'label_key' => 'settings.fields.front_posts_per_page',
-                'type' => 'number',
-                'default' => (string)APP_POSTS_PER_PAGE,
-                'min' => 1,
-                'max' => 100,
-            ],
-            'front_theme' => [
-                'label_key' => 'settings.fields.front_theme',
-                'type' => 'select',
-                'default' => 'default',
-                'options' => $themeOptions,
-            ],
-            'allow_registration' => [
-                'label_key' => 'settings.fields.allow_registration',
-                'type' => 'select',
-                'default' => '0',
-                'options' => [
-                    '0' => I18n::t('settings.options.allow_registration.disabled'),
-                    '1' => I18n::t('settings.options.allow_registration.enabled'),
+                'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
+                'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
+                'front_home_mode' => [
+                    'label_key' => 'settings.fields.front_home_mode',
+                    'type' => 'select',
+                    'default' => 'latest',
+                    'options' => [
+                        'latest' => I18n::t('settings.options.front_home_mode.latest'),
+                        'content' => I18n::t('settings.options.front_home_mode.content'),
+                    ],
                 ],
+                'front_home_content' => [
+                    'label_key' => 'settings.fields.front_home_content',
+                    'type' => 'select',
+                    'default' => '',
+                    'options' => $homePageOptions,
+                ],
+                'front_posts_per_page' => [
+                    'label_key' => 'settings.fields.front_posts_per_page',
+                    'type' => 'number',
+                    'default' => (string)APP_POSTS_PER_PAGE,
+                    'min' => 1,
+                    'max' => 100,
+                ],
+                'front_theme' => [
+                    'label_key' => 'settings.fields.front_theme',
+                    'type' => 'select',
+                    'default' => 'default',
+                    'options' => $themeOptions,
+                ],
+                'allow_registration' => [
+                    'label_key' => 'settings.fields.allow_registration',
+                    'type' => 'select',
+                    'default' => '0',
+                    'options' => [
+                        '0' => I18n::t('settings.options.allow_registration.disabled'),
+                        '1' => I18n::t('settings.options.allow_registration.enabled'),
+                    ],
+                ],
+                'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
+                'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
+                'website_url' => ['label_key' => 'settings.fields.website_url', 'type' => 'text', 'default' => ''],
+                'website_email' => ['label_key' => 'settings.fields.website_email', 'type' => 'text', 'default' => ''],
             ],
-            'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
-            'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
-            'website_url' => ['label_key' => 'settings.fields.website_url', 'type' => 'text', 'default' => ''],
-            'website_email' => ['label_key' => 'settings.fields.website_email', 'type' => 'text', 'default' => ''],
+            'seo' => [
+                'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
+            ],
         ];
+
+        return $this->withGroups($groups);
+    }
+
+    private function withGroups(array $groups): array
+    {
+        $fields = [];
+        foreach ($groups as $groupKey => $groupFields) {
+            foreach ($groupFields as $fieldKey => $field) {
+                $field['group'] = (string)$groupKey;
+                $fields[(string)$fieldKey] = $field;
+            }
+        }
+
+        return $fields;
     }
 
     private function homePageOptions(): array
