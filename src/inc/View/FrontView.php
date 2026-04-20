@@ -63,6 +63,7 @@ final class FrontView
         $this->render('archive', [
             'kind' => 'archive',
             'term' => $author,
+            'user' => $author,
             'pagination' => $pagination,
             'archiveLabel' => $this->translate('front.archive_for_author'),
             'archivePath' => trim($archivePath, '/'),

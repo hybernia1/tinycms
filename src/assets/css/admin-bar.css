@@ -16,8 +16,15 @@
 }
 
 .tinycms-admin-bar-brand {
-    font-weight: 700;
-    margin-right: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.25rem;
+}
+
+.tinycms-admin-bar-brand img {
+    display: block;
+    width: 32px;
+    height: auto;
 }
 
 .tinycms-admin-bar a {
@@ -26,9 +33,36 @@
     opacity: 0.9;
 }
 
+.tinycms-admin-bar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.tinycms-admin-bar-link-logout {
+    margin-left: auto;
+}
+
+.tinycms-admin-bar-icon {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    flex: 0 0 auto;
+}
+
 .tinycms-admin-bar a:hover {
     opacity: 1;
     text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+    .tinycms-admin-bar-link-label {
+        display: none;
+    }
+
+    .tinycms-admin-bar-link {
+        gap: 0;
+    }
 }
 
 body {
