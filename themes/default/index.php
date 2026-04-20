@@ -3,13 +3,14 @@
         <h1><?= $e((string)($item['name'] ?? '')) ?></h1>
         <?php $date = $contentDate($item); ?>
         <?php $author = $contentAuthor($item); ?>
+        <?php $authorLink = $authorUrl($item); ?>
         <?php if ($date !== '' || $author !== ''): ?>
             <p class="text-muted small content-card-meta">
                 <?php if ($date !== ''): ?>
                     <span class="content-card-meta-item"><?= $icon('calendar') ?><span><?= $e($date) ?></span></span>
                 <?php endif; ?>
                 <?php if ($author !== ''): ?>
-                    <span class="content-card-meta-item"><?= $icon('users') ?><span><?= $e($author) ?></span></span>
+                    <span class="content-card-meta-item"><?= $icon('users') ?><span><?php if ($authorLink !== ''): ?><a href="<?= $e($authorLink) ?>"><?= $e($author) ?></a><?php else: ?><?= $e($author) ?><?php endif; ?></span></span>
                 <?php endif; ?>
             </p>
         <?php endif; ?>
