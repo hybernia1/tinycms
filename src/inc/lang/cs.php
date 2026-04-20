@@ -380,7 +380,7 @@ return [
         ],
         'install_credentials' => [
             'subject' => 'Instalace TinyCMS dokončena',
-            'body' => "Dobrý den {name},\n\ninstalace TinyCMS byla úspěšně dokončena.\nPřihlášení: {login_url}\nE-mail: {email}\nHeslo: {password}\n\nProsím, uschovejte si tento e-mail pro budoucí použití.\n\nTinyCMS",
+            'body' => "Dobrý den {name},\n\ninstalace TinyCMS byla úspěšně dokončena.\nPřihlášení: {login_url}\nE-mail: {email}\nPokud heslo neznáte, můžete ho resetovat zde: {lost_password_url}\n\nProsím, uschovejte si tento e-mail pro budoucí použití.\n\nTinyCMS",
         ],
     ],
     'editor' => [
