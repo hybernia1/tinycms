@@ -1,3 +1,10 @@
+<?php
+
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
+?>
 <!doctype html>
 <html lang="<?= $e($lang) ?>">
 <head>

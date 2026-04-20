@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
 return [
     'front.latest_content' => 'Latest content',
     'front.empty' => 'No content found.',

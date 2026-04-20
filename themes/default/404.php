@@ -1,3 +1,10 @@
+<?php
+
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
+?>
 <section class="error-page">
     <h1><?= $e($t('front.not_found_title')) ?></h1>
     <p><?= $e($t('front.not_found_text')) ?></p>
