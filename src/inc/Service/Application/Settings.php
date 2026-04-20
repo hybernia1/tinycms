@@ -6,6 +6,7 @@ namespace App\Service\Application;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Support\I18n;
+use App\Service\Support\RequestContext;
 
 final class Settings
 {
@@ -75,6 +76,7 @@ final class Settings
             ],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
             'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
+            'website_url' => ['label_key' => 'settings.fields.website_url', 'type' => 'text', 'default' => ''],
             'website_email' => ['label_key' => 'settings.fields.website_email', 'type' => 'text', 'default' => ''],
         ];
     }
@@ -173,6 +175,7 @@ final class Settings
     public function save(array $input): void
     {
         $fields = $this->fields();
+        $currentValues = $this->values();
         $existingRows = $this->query->select('settings', ['key_name']);
         $existingKeys = [];
 
@@ -198,6 +201,15 @@ final class Settings
             if ($key === 'website_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 $value = '';
             }
+            if ($key === 'website_url' && !RequestContext::isValidWebsiteUrl($value)) {
+                $value = '';
+            }
+            if ($key === 'website_url' && $value === '') {
+                $currentUrl = trim((string)($currentValues['website_url'] ?? ''));
+                if ($currentUrl !== '') {
+                    $value = $currentUrl;
+                }
+            }
             if (($fields[$key]['type'] ?? '') === 'select') {
                 $options = (array)($fields[$key]['options'] ?? []);
                 if ($value !== '' && !array_key_exists($value, $options)) {
@@ -215,4 +227,5 @@ final class Settings
             $existingKeys[$key] = true;
         }
     }
+
 }

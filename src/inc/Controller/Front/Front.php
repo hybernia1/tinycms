@@ -7,6 +7,7 @@ use App\Service\Auth\Auth;
 use App\Service\Front\Services;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
+use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
 use App\View\FrontView;
 
@@ -499,10 +500,8 @@ final class Front
         $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
         $baseDir = trim(dirname($scriptName), '/.');
         $prefix = $baseDir === '' ? '' : '/' . $baseDir;
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = trim((string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
         $cleanPath = ltrim($path, '/');
-        return $scheme . '://' . $host . $prefix . '/' . $cleanPath;
+        return RequestContext::scheme() . '://' . RequestContext::authority() . $prefix . '/' . $cleanPath;
     }
 
     private function xml(string $value): string

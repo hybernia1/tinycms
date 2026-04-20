@@ -32,17 +32,6 @@ final class Mailer
         if ($candidate !== '' && filter_var($candidate, FILTER_VALIDATE_EMAIL)) {
             return $candidate;
         }
-
-        $host = trim((string)($_SERVER['HTTP_HOST'] ?? 'domena.tld'));
-        if ($host === '') {
-            $host = 'domena.tld';
-        }
-        $domain = explode(':', $host)[0] ?? 'domena.tld';
-        $domain = trim($domain);
-        if ($domain === '') {
-            $domain = 'domena.tld';
-        }
-
-        return 'tinycms@' . $domain;
+        return 'tinycms@' . RequestContext::domain();
     }
 }

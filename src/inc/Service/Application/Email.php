@@ -5,6 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Support\I18n;
 use App\Service\Support\Mailer;
+use App\Service\Support\RequestContext;
 
 final class Email
 {
@@ -38,14 +39,14 @@ final class Email
     private function defaultVars(string $to): array
     {
         $settings = $this->settings->resolved();
-        $host = trim((string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $scheme = RequestContext::scheme();
+        $authority = RequestContext::authority();
         $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
         $baseDir = trim(dirname($scriptName), '/.');
         $basePath = $baseDir === '' ? '' : '/' . $baseDir;
-        $siteUrl = $scheme . '://' . $host . $basePath;
+        $siteUrl = $scheme . '://' . $authority . $basePath;
         $websiteEmail = trim((string)($settings['website_email'] ?? ''));
-        $supportEmail = filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : ('tinycms@' . (explode(':', $host)[0] ?? 'localhost'));
+        $supportEmail = filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : ('tinycms@' . RequestContext::domain());
 
         $siteName = (string)($settings['sitename'] ?? 'TinyCMS');
 
