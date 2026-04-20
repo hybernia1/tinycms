@@ -19,56 +19,76 @@
         }
         ?>
 
-        <?php foreach ($groupedFields as $groupKey => $groupFields): ?>
-            <div class="mb-4">
-                <h3 class="mb-3"><?= $e($t('settings.groups.' . $groupKey, ucfirst($groupKey))) ?></h3>
-
-                <?php foreach ($groupFields as $fieldKey => $field):
-                    $fieldType = (string)($field['type'] ?? 'text');
-                    $fieldValue = (string)($values[$fieldKey] ?? '');
-                    $labelKey = (string)($field['label_key'] ?? ('settings.fields.' . $fieldKey));
-                ?>
-                    <div class="mb-3">
-                        <label><?= $e($t($labelKey, (string)$fieldKey)) ?></label>
-                        <?php if ($fieldType === 'textarea'): ?>
-                            <textarea name="settings[<?= $e((string)$fieldKey) ?>]" rows="4"><?= $e($fieldValue) ?></textarea>
-                        <?php elseif ($fieldType === 'select'): ?>
-                            <?php $options = (array)($field['options'] ?? []); ?>
-                            <select name="settings[<?= $e((string)$fieldKey) ?>]">
-                                <?php foreach ($options as $optionValue => $optionLabel): ?>
-                                    <?php $value = trim((string)$optionValue); ?>
-                                    <option value="<?= $e($value) ?>" <?= $fieldValue === $value ? 'selected' : '' ?>>
-                                        <?= $e((string)$optionLabel) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        <?php elseif ($fieldType === 'file'): ?>
-                            <?php $inputName = $fieldKey === 'logo' ? 'logo_file' : 'favicon_file'; ?>
-                            <?php $fileInputId = 'settings-file-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>
-                            <div class="custom-upload-field">
-                                <label class="btn btn-light custom-upload-button" for="<?= $e($fileInputId) ?>">
-                                    <?= $icon('upload') ?>
-                                    <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= $e($t('common.upload_add_files')) ?>"><?= $e($t('common.upload_add_files')) ?></span>
-                                </label>
-                                <input id="<?= $e($fileInputId) ?>" type="file" name="<?= $e($inputName) ?>" accept="<?= $e((string)($siteImageUploadAccept ?? '')) ?>">
-                            </div>
-                            <small class="text-muted d-block mt-2"><?= $e(sprintf($t('common.allowed_upload_types'), (string)($siteImageUploadTypesLabel ?? ''))) ?></small>
-                            <?php if ($fieldValue !== ''): ?>
-                                <div class="mt-2">
-                                    <div class="text-muted"><?= $e($fieldValue) ?></div>
-                                    <img src="<?= $e($url($fieldValue)) ?>" alt="<?= $e((string)$fieldKey) ?> preview" style="width:32px;height:32px">
-                                </div>
-                            <?php endif; ?>
-                        <?php elseif ($fieldType === 'number'): ?>
-                            <?php $min = (int)($field['min'] ?? 1); ?>
-                            <?php $max = (int)($field['max'] ?? 100); ?>
-                            <input type="number" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>" min="<?= $min ?>" max="<?= $max ?>" step="1">
-                        <?php else: ?>
-                            <input type="text" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>">
-                        <?php endif; ?>
-                    </div>
+        <div data-settings-tabs>
+            <nav class="filter-nav mb-3" role="tablist">
+                <?php $groupIndex = 0; ?>
+                <?php foreach ($groupedFields as $groupKey => $groupFields): ?>
+                    <?php $tabId = 'settings-tab-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$groupKey); ?>
+                    <button
+                        class="filter-link<?= $groupIndex === 0 ? ' active' : '' ?>"
+                        type="button"
+                        role="tab"
+                        aria-selected="<?= $groupIndex === 0 ? 'true' : 'false' ?>"
+                        data-settings-tab-trigger="<?= $e($tabId) ?>"
+                    >
+                        <?= $e($t('settings.groups.' . $groupKey, ucfirst($groupKey))) ?>
+                    </button>
+                    <?php $groupIndex++; ?>
                 <?php endforeach; ?>
-            </div>
-        <?php endforeach; ?>
+            </nav>
+
+            <?php $groupIndex = 0; ?>
+            <?php foreach ($groupedFields as $groupKey => $groupFields): ?>
+                <?php $tabId = 'settings-tab-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$groupKey); ?>
+                <section data-settings-tab-panel="<?= $e($tabId) ?>"<?= $groupIndex === 0 ? '' : ' hidden' ?>>
+                    <?php foreach ($groupFields as $fieldKey => $field):
+                        $fieldType = (string)($field['type'] ?? 'text');
+                        $fieldValue = (string)($values[$fieldKey] ?? '');
+                        $labelKey = (string)($field['label_key'] ?? ('settings.fields.' . $fieldKey));
+                    ?>
+                        <div class="mb-3">
+                            <label><?= $e($t($labelKey, (string)$fieldKey)) ?></label>
+                            <?php if ($fieldType === 'textarea'): ?>
+                                <textarea name="settings[<?= $e((string)$fieldKey) ?>]" rows="4"><?= $e($fieldValue) ?></textarea>
+                            <?php elseif ($fieldType === 'select'): ?>
+                                <?php $options = (array)($field['options'] ?? []); ?>
+                                <select name="settings[<?= $e((string)$fieldKey) ?>]">
+                                    <?php foreach ($options as $optionValue => $optionLabel): ?>
+                                        <?php $value = trim((string)$optionValue); ?>
+                                        <option value="<?= $e($value) ?>" <?= $fieldValue === $value ? 'selected' : '' ?>>
+                                            <?= $e((string)$optionLabel) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php elseif ($fieldType === 'file'): ?>
+                                <?php $inputName = $fieldKey === 'logo' ? 'logo_file' : 'favicon_file'; ?>
+                                <?php $fileInputId = 'settings-file-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>
+                                <div class="custom-upload-field">
+                                    <label class="btn btn-light custom-upload-button" for="<?= $e($fileInputId) ?>">
+                                        <?= $icon('upload') ?>
+                                        <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= $e($t('common.upload_add_files')) ?>"><?= $e($t('common.upload_add_files')) ?></span>
+                                    </label>
+                                    <input id="<?= $e($fileInputId) ?>" type="file" name="<?= $e($inputName) ?>" accept="<?= $e((string)($siteImageUploadAccept ?? '')) ?>">
+                                </div>
+                                <small class="text-muted d-block mt-2"><?= $e(sprintf($t('common.allowed_upload_types'), (string)($siteImageUploadTypesLabel ?? ''))) ?></small>
+                                <?php if ($fieldValue !== ''): ?>
+                                    <div class="mt-2">
+                                        <div class="text-muted"><?= $e($fieldValue) ?></div>
+                                        <img src="<?= $e($url($fieldValue)) ?>" alt="<?= $e((string)$fieldKey) ?> preview" style="width:32px;height:32px">
+                                    </div>
+                                <?php endif; ?>
+                            <?php elseif ($fieldType === 'number'): ?>
+                                <?php $min = (int)($field['min'] ?? 1); ?>
+                                <?php $max = (int)($field['max'] ?? 100); ?>
+                                <input type="number" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>" min="<?= $min ?>" max="<?= $max ?>" step="1">
+                            <?php else: ?>
+                                <input type="text" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>">
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </section>
+                <?php $groupIndex++; ?>
+            <?php endforeach; ?>
+        </div>
     </form>
 </div>

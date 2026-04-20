@@ -31,6 +31,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-datetime.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-upload.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/settings-tabs.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/media-library-modal.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/tag-picker.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
