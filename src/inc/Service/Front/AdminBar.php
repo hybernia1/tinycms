@@ -19,8 +19,7 @@ final class AdminBar
             return $output;
         }
 
-        $assetHref = $this->esc($this->router->url(ASSETS_DIR . 'css/admin-bar.css'));
-        $injection = '<link rel="stylesheet" href="' . $assetHref . '">' . $this->html($context);
+        $injection = '<link rel="stylesheet" href="' . $this->cssHref() . '">' . $this->render($context);
 
         if (str_contains($output, '</body>')) {
             return str_replace('</body>', $injection . '</body>', $output);
@@ -29,7 +28,12 @@ final class AdminBar
         return $output . $injection;
     }
 
-    private function html(array $context): string
+    public function cssHref(): string
+    {
+        return $this->esc($this->router->url(ASSETS_DIR . 'css/admin-bar.css'));
+    }
+
+    public function render(array $context = []): string
     {
         $dashboard = $this->esc($this->router->url('admin/dashboard'));
         $newContent = $this->esc($this->router->url('admin/content/add'));

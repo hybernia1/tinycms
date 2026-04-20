@@ -20,6 +20,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/style.css')) ?>">
     <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/admin.css')) ?>">
     <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/editor.css')) ?>">
+    <link rel="stylesheet" href="<?= $e((string)($adminBarCssHref ?? '')) ?>">
     <script>window.tinycmsI18n = <?= json_encode($adminI18n ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
@@ -47,6 +48,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
         }
     })();
 </script>
+<?= (string)($adminBarHtml ?? '') ?>
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="<?= $e($url('admin/dashboard')) ?>" aria-label="<?= $e($t('admin.brand')) ?>">

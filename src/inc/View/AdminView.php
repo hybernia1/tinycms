@@ -5,17 +5,20 @@ namespace App\View;
 
 use App\Service\Application\Settings;
 use App\Service\Application\Upload;
+use App\Service\Front\AdminBar;
 use App\Service\Support\I18n;
 
 final class AdminView
 {
     private View $view;
     private Settings $settings;
+    private AdminBar $adminBar;
 
-    public function __construct(View $view, Settings $settings)
+    public function __construct(View $view, Settings $settings, AdminBar $adminBar)
     {
         $this->view = $view;
         $this->settings = $settings;
+        $this->adminBar = $adminBar;
     }
 
     public function adminDashboard(?array $user): void
@@ -198,6 +201,8 @@ final class AdminView
                 'siteImageUploadAccept' => Upload::siteImageAccept(),
                 'imageUploadTypesLabel' => Upload::imageExtensionsLabel(),
                 'siteImageUploadTypesLabel' => Upload::siteImageExtensionsLabel(),
+                'adminBarCssHref' => $this->adminBar->cssHref(),
+                'adminBarHtml' => $this->adminBar->render($data),
             ]
         ));
     }
