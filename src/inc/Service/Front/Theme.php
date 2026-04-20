@@ -508,7 +508,7 @@ final class Theme
     private function jsonEncode(array $payload): string
     {
         $payload = array_filter($payload, static fn(mixed $value): bool => $value !== null && $value !== '');
-        return (string)json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return (string)json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
     }
 
     private function esc(string $value): string
