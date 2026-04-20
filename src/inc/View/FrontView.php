@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
 
@@ -13,7 +14,7 @@ final class FrontView
     private array $settings;
     private string $theme;
 
-    public function __construct(string $rootPath, Router $router, array $settings)
+    public function __construct(string $rootPath, Router $router, array $settings, private AdminBar $adminBar)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
@@ -134,7 +135,11 @@ final class FrontView
         require $templateFile;
         $content = (string)ob_get_clean();
 
+        ob_start();
         require $layoutFile;
+        $output = (string)ob_get_clean();
+
+        echo $this->adminBar->inject($output, $data);
     }
 
     private function resolveTheme(string $theme): string

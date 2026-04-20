@@ -1,0 +1,36 @@
+.tinycms-admin-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: #111827;
+    color: #f9fafb;
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+.tinycms-admin-bar-brand {
+    font-weight: 700;
+    margin-right: 0.5rem;
+}
+
+.tinycms-admin-bar a {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.9;
+}
+
+.tinycms-admin-bar a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+body {
+    padding-top: 42px;
+}
