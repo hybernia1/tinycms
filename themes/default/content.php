@@ -1,3 +1,10 @@
+<?php
+
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
+?>
 <article class="content-single">
     <h1><?= $e((string)($item['name'] ?? '')) ?></h1>
     <?php $date = $contentDate($item); ?>

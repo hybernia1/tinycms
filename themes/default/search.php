@@ -1,3 +1,10 @@
+<?php
+
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
+?>
 <h1><?= $e($t('front.search_results')) ?></h1>
 <?php $queryText = trim((string)($query ?? '')); ?>
 <?php if ($queryText !== ''): ?>

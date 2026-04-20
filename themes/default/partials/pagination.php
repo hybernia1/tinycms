@@ -1,3 +1,10 @@
+<?php
+
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
+?>
 <?= $theme->pagination(
     (array)($pagination ?? []),
     (string)($basePath ?? ''),

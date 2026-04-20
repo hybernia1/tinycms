@@ -1,3 +1,10 @@
+<?php
+
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
+?>
 <section class="content-loop">
     <?php foreach ($items as $loopItem): ?>
         <article class="content-card">

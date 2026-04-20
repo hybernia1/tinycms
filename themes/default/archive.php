@@ -1,3 +1,10 @@
+<?php
+
+if (!defined('BASE_DIR')) {
+    exit;
+}
+
+?>
 <h1><?= $e((string)($archiveLabel ?? $t('front.archive_for'))) ?>: <?= $e((string)($term['name'] ?? '')) ?></h1>
 <?php $items = (array)(($pagination ?? [])['data'] ?? []); ?>
 <?php $basePath = trim((string)($archivePath ?? ''), '/'); ?>
