@@ -289,6 +289,7 @@ final class Comment
         return [
             'id' => (int)($row['id'] ?? 0),
             'content' => (int)($row['content'] ?? 0),
+            'content_name' => (string)($row['content_name'] ?? ''),
             'author' => (int)($row['author'] ?? 0),
             'author_name' => (string)($row['author_name'] ?? ''),
             'parent' => (int)($row['parent'] ?? 0),
