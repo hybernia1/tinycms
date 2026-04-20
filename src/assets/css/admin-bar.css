@@ -16,8 +16,15 @@
 }
 
 .tinycms-admin-bar-brand {
-    font-weight: 700;
-    margin-right: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.25rem;
+}
+
+.tinycms-admin-bar-brand img {
+    display: block;
+    width: 96px;
+    height: auto;
 }
 
 .tinycms-admin-bar a {

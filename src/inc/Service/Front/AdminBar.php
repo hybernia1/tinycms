@@ -34,11 +34,11 @@ final class AdminBar
         $dashboard = $this->esc($this->router->url('admin/dashboard'));
         $newContent = $this->esc($this->router->url('admin/content/add'));
         $logout = $this->esc($this->router->url('admin/logout'));
+        $logo = $this->esc($this->router->url(ASSETS_DIR . 'svg/logo.svg'));
         $edit = $this->editLink($context);
 
         return '<div class="tinycms-admin-bar" role="navigation" aria-label="' . $this->esc(I18n::t('admin.brand')) . '">'
-            . '<span class="tinycms-admin-bar-brand">' . $this->esc(I18n::t('admin.brand')) . '</span>'
-            . '<a href="' . $dashboard . '">' . $this->esc(I18n::t('admin.menu.dashboard')) . '</a>'
+            . '<a class="tinycms-admin-bar-brand" href="' . $dashboard . '" aria-label="' . $this->esc(I18n::t('admin.menu.dashboard')) . '"><img src="' . $logo . '" alt=""></a>'
             . '<a href="' . $newContent . '">' . $this->esc(I18n::t('admin.add_content')) . '</a>'
             . $edit
             . '<a href="' . $logout . '">' . $this->esc(I18n::t('admin.logout')) . '</a>'
