@@ -31,7 +31,7 @@ function sendImageNotFoundFallback(string $uri): bool
 
     http_response_code(404);
     header('Content-Type: image/svg+xml; charset=utf-8');
-    echo '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" role="img" aria-label="404 image not found"><rect width="640" height="480" fill="#f3f4f6"/><g fill="#9ca3af"><rect x="120" y="130" width="400" height="220" rx="14"/><circle cx="230" cy="220" r="28"/><path d="M168 314l88-88 64 64 56-56 96 80z"/></g><text x="320" y="418" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#6b7280">404 · Image not found</text></svg>';
+    echo '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" role="img" aria-label="Missing image placeholder"><rect width="640" height="480" fill="#f3f4f6"/><rect x="120" y="120" width="400" height="240" rx="14" fill="none" stroke="#cbd5e1" stroke-width="20"/><circle cx="235" cy="220" r="34" fill="#cbd5e1"/><path d="M160 320l96-96 82 82 62-62 80 76H160z" fill="#cbd5e1"/></svg>';
     return true;
 }
 
