@@ -89,10 +89,10 @@ final class AdminView
         ]);
     }
 
-    public function adminCommentList(array $pagination, string $query, array $statusCounts): void
+    public function adminCommentList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/comments/list', [
-            'listBase' => $this->adminListBase('comments', $pagination, 'all', $query, $statusCounts),
+            'listBase' => $this->adminListBase('comments', $pagination, $status, $query, $statusCounts),
             'pageTitle' => I18n::t('admin.menu.comments'),
         ]);
     }

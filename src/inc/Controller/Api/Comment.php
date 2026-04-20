@@ -67,12 +67,12 @@ final class Comment extends Admin
             return;
         }
 
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $pagination = $this->comments->paginate($page, $perPage, $query);
+        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', CommentService::STATUS_DRAFT, CommentService::STATUS_PUBLISHED]);
+        $pagination = $this->comments->paginate($page, $perPage, $status, $query);
         $statusCounts = $this->comments->statusCounts();
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
 
-        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, 'all', $query, $statusCounts));
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function deleteApiV1(callable $_redirect, int $id): void
@@ -120,6 +120,43 @@ final class Comment extends Admin
         ]);
     }
 
+    public function statusApiV1(callable $_redirect, int $id): void
+    {
+        if (!$this->guardApiAdminCsrf()) {
+            return;
+        }
+
+        $item = $this->comments->find($id);
+        if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('comments.not_found'))) {
+            return;
+        }
+
+        $mode = trim((string)($_POST['mode'] ?? 'draft'));
+        if ($mode === 'publish') {
+            if (!$this->comments->setStatus($id, CommentService::STATUS_PUBLISHED)) {
+                $this->apiError('PUBLISH_FAILED', I18n::t('comments.publish_failed'));
+                return;
+            }
+            $this->apiOk([
+                'id' => $id,
+                'status' => CommentService::STATUS_PUBLISHED,
+                'message' => I18n::t('comments.published'),
+            ]);
+            return;
+        }
+
+        if (!$this->comments->setStatus($id, CommentService::STATUS_DRAFT)) {
+            $this->apiError('DRAFT_FAILED', I18n::t('comments.draft_failed'));
+            return;
+        }
+
+        $this->apiOk([
+            'id' => $id,
+            'status' => CommentService::STATUS_DRAFT,
+            'message' => I18n::t('comments.switched_to_draft'),
+        ]);
+    }
+
     private function guardAuthenticatedApi(): bool
     {
         if ($this->authService->auth()->check()) {
@@ -156,6 +193,7 @@ final class Comment extends Admin
             'content_edit_path' => (int)($row['content'] ?? 0) > 0 ? $this->buildEditPath('admin/content', (int)($row['content'] ?? 0)) : '',
             'author' => (int)($row['author'] ?? 0),
             'author_name' => (string)($row['author_name'] ?? ''),
+            'status' => (string)($row['status'] ?? CommentService::STATUS_PUBLISHED),
             'body' => (string)($row['body'] ?? ''),
             'parent' => (int)($row['parent'] ?? 0),
             'reply_to' => (int)($row['reply_to'] ?? 0),

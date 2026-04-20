@@ -11,6 +11,7 @@ use App\Service\Support\I18n;
 
 final class Comment
 {
+    public const STATUS_DRAFT = 'draft';
     public const STATUS_PUBLISHED = 'published';
 
     private \PDO $pdo;
@@ -24,7 +25,7 @@ final class Comment
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
-    public function paginate(int $page = 1, int $perPage = 10, string $search = ''): array
+    public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
     {
         $commentsTable = Table::name('comments');
         $contentTable = Table::name('content');
@@ -33,11 +34,14 @@ final class Comment
         $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
         $search = trim($search);
-        $where = 'WHERE c.status = :status';
-
-        if ($search !== '') {
-            $where .= ' AND (c.body LIKE :search OR u.name LIKE :search OR p.name LIKE :search)';
+        $whereParts = [];
+        if ($status !== 'all') {
+            $whereParts[] = 'c.status = :status';
         }
+        if ($search !== '') {
+            $whereParts[] = '(c.body LIKE :search OR u.name LIKE :search OR p.name LIKE :search)';
+        }
+        $where = $whereParts === [] ? '' : 'WHERE ' . implode(' AND ', $whereParts);
 
         $countStmt = $this->pdo->prepare(implode("\n", [
             'SELECT COUNT(*)',
@@ -46,7 +50,9 @@ final class Comment
             "LEFT JOIN $contentTable p ON p.id = c.content",
             $where,
         ]));
-        $countStmt->bindValue(':status', self::STATUS_PUBLISHED);
+        if ($status !== 'all') {
+            $countStmt->bindValue(':status', $status);
+        }
         if ($search !== '') {
             $countStmt->bindValue(':search', '%' . $search . '%');
         }
@@ -66,7 +72,9 @@ final class Comment
             'ORDER BY c.created DESC, c.id DESC',
             'LIMIT :limit OFFSET :offset',
         ]));
-        $stmt->bindValue(':status', self::STATUS_PUBLISHED);
+        if ($status !== 'all') {
+            $stmt->bindValue(':status', $status);
+        }
         if ($search !== '') {
             $stmt->bindValue(':search', '%' . $search . '%');
         }
@@ -191,8 +199,33 @@ final class Comment
 
     public function statusCounts(): array
     {
-        $rows = $this->query->select('comments', ['id'], ['status' => self::STATUS_PUBLISHED]);
-        return ['all' => count($rows)];
+        $rows = $this->query->select('comments', ['status']);
+        $counts = ['all' => count($rows), self::STATUS_DRAFT => 0, self::STATUS_PUBLISHED => 0];
+        foreach ($rows as $row) {
+            $key = trim((string)($row['status'] ?? ''));
+            if ($key === '') {
+                continue;
+            }
+            if (!isset($counts[$key])) {
+                $counts[$key] = 0;
+            }
+            $counts[$key]++;
+        }
+        return $counts;
+    }
+
+    public function setStatus(int $id, string $status): bool
+    {
+        if ($id <= 0 || !in_array($status, [self::STATUS_DRAFT, self::STATUS_PUBLISHED], true)) {
+            return false;
+        }
+
+        $item = $this->find($id);
+        if ($item === null || (string)($item['status'] ?? '') === $status) {
+            return false;
+        }
+
+        return $this->query->update('comments', ['status' => $status], ['id' => $id]) > 0;
     }
 
     public function save(array $input, int $id): array
@@ -355,6 +388,7 @@ final class Comment
             'content_name' => (string)($row['content_name'] ?? ''),
             'author' => (int)($row['author'] ?? 0),
             'author_name' => (string)($row['author_name'] ?? ''),
+            'status' => (string)($row['status'] ?? self::STATUS_PUBLISHED),
             'parent' => (int)($row['parent'] ?? 0),
             'reply_to' => (int)($row['reply_to'] ?? 0),
             'reply_author_name' => (string)($row['reply_author_name'] ?? ''),

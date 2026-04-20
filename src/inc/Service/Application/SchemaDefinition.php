@@ -33,7 +33,7 @@ final class SchemaDefinition
                 'value' => ['max' => 1000, 'nullable' => true],
             ],
             'comments' => [
-                'status' => ['max' => 50, 'nullable' => false, 'allowed' => ['published']],
+                'status' => ['max' => 50, 'nullable' => false, 'allowed' => ['draft', 'published']],
                 'body' => ['max' => 5000, 'nullable' => false],
             ],
         ];

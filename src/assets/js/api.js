@@ -842,13 +842,20 @@ initListApi({
     name: 'comments',
     rootSelector: '[data-comments-list]',
     withStatus: true,
+    toggle: { defaultMode: 'draft' },
+    togglePath: (endpointBase, id) => `${endpointBase}/${id}/status`,
     deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
-    messages: { deleteSuccess: t('comments.deleted') },
+    messages: {
+        deleteSuccess: t('comments.deleted'),
+        toggleSuccess: (mode) => mode === 'publish' ? t('comments.published') : t('comments.switched_to_draft'),
+    },
     rowHtml: (item) => {
         const id = Number(item.id || 0);
         const commentEditPath = String(item.comment_edit_path || '');
         const contentName = String(item.content_name || '');
         const contentEditPath = String(item.content_edit_path || '');
+        const status = String(item.status || 'published');
+        const toggleLabel = status === 'published' ? t('comments.switch_to_draft') : t('comments.publish');
         let body = String(item.body || '');
         if (body.length > 160) {
             body = `${body.slice(0, 160)}…`;
@@ -857,7 +864,7 @@ initListApi({
         return `
             <tr>
                 <td>
-                    <strong>${esc(item.author_name || t('common.no_author'))}</strong>
+                    ${commentEditPath !== '' ? `<a href="${esc(commentEditPath)}"><strong>${esc(item.author_name || t('common.no_author'))}</strong></a>` : `<strong>${esc(item.author_name || t('common.no_author'))}</strong>`}
                     <div class="text-muted small">${esc(item.created_label || item.created || '')}</div>
                     ${contentEditPath !== '' && contentName !== ''
         ? `<div class="small"><a href="${esc(contentEditPath)}">${esc(contentName)}</a></div>`
@@ -865,12 +872,10 @@ initListApi({
                 </td>
                 <td>${esc(body)}</td>
                 <td class="table-col-actions">
-                    ${commentEditPath !== '' ? `
-                    <a class="btn btn-light btn-icon" href="${esc(commentEditPath)}" aria-label="${esc(t('admin.edit_comment'))}" title="${esc(t('admin.edit_comment'))}">
-                        ${icon('edit')}
-                        <span class="sr-only">${esc(t('admin.edit_comment'))}</span>
-                    </a>
-                    ` : ''}
+                    <button class="btn btn-light btn-icon" type="button" data-comments-toggle="${id}" data-comments-mode="${status === 'published' ? 'draft' : 'publish'}" aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
+                        ${icon(status === 'published' ? 'hide' : 'show')}
+                        <span class="sr-only">${esc(toggleLabel)}</span>
+                    </button>
                     <button class="btn btn-light btn-icon" type="button" data-comments-delete-open="${id}" aria-label="${esc(t('comments.delete'))}" title="${esc(t('comments.delete'))}">
                         ${icon('delete')}
                         <span class="sr-only">${esc(t('comments.delete'))}</span>

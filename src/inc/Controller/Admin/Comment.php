@@ -32,11 +32,11 @@ final class Comment extends Admin
             return;
         }
 
-        [$page, $perPage, $query] = $this->resolvePaginationQuery();
-        $pagination = $this->comments->paginate($page, $perPage, $query);
+        [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', CommentService::STATUS_DRAFT, CommentService::STATUS_PUBLISHED]);
+        $pagination = $this->comments->paginate($page, $perPage, $status, $query);
         $statusCounts = $this->comments->statusCounts();
 
-        $this->pages->adminCommentList($pagination, $query, $statusCounts);
+        $this->pages->adminCommentList($pagination, $status, $query, $statusCounts);
     }
 
     public function editForm(callable $redirect): void

@@ -7,6 +7,8 @@ $list = $listBase ?? [];
 $statusCounts = (array)($list['statusCounts'] ?? []);
 $statusLinks = [
     'all' => $t('common.all') . ' (' . (int)($statusCounts['all'] ?? 0) . ')',
+    'published' => $t('comments.statuses.published') . ' (' . (int)($statusCounts['published'] ?? 0) . ')',
+    'draft' => $t('comments.statuses.draft') . ' (' . (int)($statusCounts['draft'] ?? 0) . ')',
 ];
 $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $t, $e): string {
     $id = (int)($row['id'] ?? 0);
@@ -22,7 +24,7 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
     ?>
     <tr>
         <td>
-            <strong><?= $e($authorName !== '' ? $authorName : $t('common.no_author')) ?></strong>
+            <a href="<?= $e($url('admin/comments/edit?id=' . $id)) ?>"><strong><?= $e($authorName !== '' ? $authorName : $t('common.no_author')) ?></strong></a>
             <div class="text-muted small"><?= $e($formatDateTime((string)($row['created'] ?? ''))) ?></div>
             <?php if ($contentId > 0 && $contentName !== ''): ?>
                 <div class="small"><a href="<?= $e($url('admin/content/edit?id=' . $contentId)) ?>"><?= $e($contentName) ?></a></div>
@@ -32,10 +34,11 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $icon, $
         </td>
         <td><?= $e($body) ?></td>
         <td class="table-col-actions">
-            <a class="btn btn-light btn-icon" href="<?= $e($url('admin/comments/edit?id=' . $id)) ?>" aria-label="<?= $e($t('admin.edit_comment')) ?>" title="<?= $e($t('admin.edit_comment')) ?>">
-                <?= $icon('edit') ?>
-                <span class="sr-only"><?= $e($t('admin.edit_comment')) ?></span>
-            </a>
+            <?php $status = (string)($row['status'] ?? 'published'); ?>
+            <button class="btn btn-light btn-icon" type="button" data-comments-toggle="<?= $id ?>" data-comments-mode="<?= $status === 'published' ? 'draft' : 'publish' ?>" aria-label="<?= $e($status === 'published' ? $t('comments.switch_to_draft') : $t('comments.publish')) ?>" title="<?= $e($status === 'published' ? $t('comments.switch_to_draft') : $t('comments.publish')) ?>">
+                <?= $icon($status === 'published' ? 'hide' : 'show') ?>
+                <span class="sr-only"><?= $e($status === 'published' ? $t('comments.switch_to_draft') : $t('comments.publish')) ?></span>
+            </button>
             <button class="btn btn-light btn-icon" type="button" data-comments-delete-open="<?= $id ?>" aria-label="<?= $e($t('comments.delete')) ?>" title="<?= $e($t('comments.delete')) ?>">
                 <?= $icon('delete') ?>
                 <span class="sr-only"><?= $e($t('comments.delete')) ?></span>

@@ -478,5 +478,15 @@ return [
         'updated' => 'Komentář byl upraven.',
         'update_failed' => 'Komentář se nepodařilo upravit.',
         'published_in' => 'Publikováno v',
+        'publish' => 'Publikovat',
+        'switch_to_draft' => 'Přepnout do draftu',
+        'published' => 'Komentář publikován.',
+        'switched_to_draft' => 'Komentář přepnut do draftu.',
+        'publish_failed' => 'Komentář se nepodařilo publikovat.',
+        'draft_failed' => 'Komentář se nepodařilo přepnout do draftu.',
+        'statuses' => [
+            'draft' => 'Draft',
+            'published' => 'Publikováno',
+        ],
     ],
 ];

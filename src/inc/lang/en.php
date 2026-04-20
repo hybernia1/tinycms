@@ -478,5 +478,15 @@ return [
         'updated' => 'Comment updated.',
         'update_failed' => 'Could not update comment.',
         'published_in' => 'Published in',
+        'publish' => 'Publish',
+        'switch_to_draft' => 'Switch to draft',
+        'published' => 'Comment published.',
+        'switched_to_draft' => 'Comment switched to draft.',
+        'publish_failed' => 'Could not publish comment.',
+        'draft_failed' => 'Could not switch comment to draft.',
+        'statuses' => [
+            'draft' => 'Draft',
+            'published' => 'Published',
+        ],
     ],
 ];
