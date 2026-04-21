@@ -607,7 +607,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
 
 .custom-datetime-day {
     border: 1px solid transparent;
-    background: transparent;
+    background: var(--color-border-soft);
     color: var(--color-text);
     min-height: 2rem;
     cursor: pointer;
