@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service\Front;
 
 use App\Service\Infrastructure\Router\Router;
+use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
@@ -229,7 +230,7 @@ final class Theme
             return trim($fallback);
         }
 
-        $format = (string)(defined('APP_DATETIME_FORMAT') ? APP_DATETIME_FORMAT : 'Y-m-d H:i:s');
+        $format = DateTimeFormatter::normalizeDateTimeFormat($this->setting('app_datetime_format', DateTimeFormatter::defaultDateTimeFormat()));
         return date($format, $timestamp);
     }
 

@@ -59,7 +59,14 @@ $router = new Router($basePath, RequestContext::queryMode($basePath));
 $flash = new Flash();
 $csrf = new Csrf();
 $rateLimiter = new RateLimiter();
-$dateTimeFormatter = new DateTimeFormatter(APP_DATE_FORMAT, APP_DATETIME_FORMAT);
+DateTimeFormatter::configure(
+    (string)($resolvedSettings['app_date_format'] ?? APP_DATE_FORMAT),
+    (string)($resolvedSettings['app_datetime_format'] ?? APP_DATETIME_FORMAT),
+);
+$dateTimeFormatter = new DateTimeFormatter(
+    DateTimeFormatter::defaultDateFormat(),
+    DateTimeFormatter::defaultDateTimeFormat(),
+);
 $view = new View(BASE_DIR, $router, $flash, $csrf, $dateTimeFormatter);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {

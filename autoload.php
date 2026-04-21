@@ -34,11 +34,11 @@ if (!defined('APP_LANG')) {
 }
 
 if (!defined('APP_DATE_FORMAT')) {
-    define('APP_DATE_FORMAT', 'Y-m-d');
+    define('APP_DATE_FORMAT', 'd.m.Y');
 }
 
 if (!defined('APP_DATETIME_FORMAT')) {
-    define('APP_DATETIME_FORMAT', 'Y-m-d H:i:s');
+    define('APP_DATETIME_FORMAT', 'd.m.Y H:i');
 }
 
 if (!defined('APP_POSTS_PER_PAGE')) {

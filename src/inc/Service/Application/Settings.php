@@ -5,6 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
+use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\I18n;
 use App\Service\Support\RequestContext;
 
@@ -30,21 +31,40 @@ final class Settings
         return [
             'app_lang' => [
                 'label_key' => 'settings.fields.app_lang',
+                'section' => 'localization',
                 'type' => 'select',
                 'default' => (string)APP_LANG,
                 'options' => $localeOptions,
             ],
-            'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
-            'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
-            'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
+            'app_date_format' => [
+                'label_key' => 'settings.fields.app_date_format',
+                'section' => 'localization',
+                'type' => 'select',
+                'default' => DateTimeFormatter::normalizeDateFormat((string)(defined('APP_DATE_FORMAT') ? APP_DATE_FORMAT : '')),
+                'options' => DateTimeFormatter::dateFormatOptions(),
+            ],
+            'app_datetime_format' => [
+                'label_key' => 'settings.fields.app_datetime_format',
+                'section' => 'localization',
+                'type' => 'select',
+                'default' => DateTimeFormatter::normalizeDateTimeFormat((string)(defined('APP_DATETIME_FORMAT') ? APP_DATETIME_FORMAT : '')),
+                'options' => DateTimeFormatter::dateTimeFormatOptions(),
+            ],
+            'sitename' => ['label_key' => 'settings.fields.sitename', 'section' => 'general', 'type' => 'text', 'default' => 'TinyCMS'],
+            'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'section' => 'general', 'type' => 'text', 'default' => 'Admin'],
+            'meta_description' => ['label_key' => 'settings.fields.meta_description', 'section' => 'general', 'type' => 'textarea', 'default' => ''],
+            'website_url' => ['label_key' => 'settings.fields.website_url', 'section' => 'general', 'type' => 'text', 'default' => ''],
+            'website_email' => ['label_key' => 'settings.fields.website_email', 'section' => 'general', 'type' => 'text', 'default' => ''],
             'front_home_content' => [
                 'label_key' => 'settings.fields.front_home_content',
+                'section' => 'content',
                 'type' => 'select',
                 'default' => '',
                 'options' => $homePageOptions,
             ],
             'front_posts_per_page' => [
                 'label_key' => 'settings.fields.front_posts_per_page',
+                'section' => 'content',
                 'type' => 'number',
                 'default' => (string)APP_POSTS_PER_PAGE,
                 'min' => 1,
@@ -52,12 +72,14 @@ final class Settings
             ],
             'front_theme' => [
                 'label_key' => 'settings.fields.front_theme',
+                'section' => 'appearance',
                 'type' => 'select',
                 'default' => 'default',
                 'options' => $themeOptions,
             ],
             'allow_registration' => [
                 'label_key' => 'settings.fields.allow_registration',
+                'section' => 'content',
                 'type' => 'select',
                 'default' => '0',
                 'options' => [
@@ -65,10 +87,8 @@ final class Settings
                     '1' => I18n::t('settings.options.allow_registration.enabled'),
                 ],
             ],
-            'favicon' => ['label_key' => 'settings.fields.favicon', 'type' => 'file', 'default' => ''],
-            'logo' => ['label_key' => 'settings.fields.logo', 'type' => 'file', 'default' => ''],
-            'website_url' => ['label_key' => 'settings.fields.website_url', 'type' => 'text', 'default' => ''],
-            'website_email' => ['label_key' => 'settings.fields.website_email', 'type' => 'text', 'default' => ''],
+            'logo' => ['label_key' => 'settings.fields.logo', 'section' => 'appearance', 'type' => 'file', 'default' => ''],
+            'favicon' => ['label_key' => 'settings.fields.favicon', 'section' => 'appearance', 'type' => 'file', 'default' => ''],
         ];
     }
 
@@ -160,7 +180,26 @@ final class Settings
 
     public function resolved(): array
     {
-        return array_replace($this->defaults(), $this->values());
+        $fields = $this->fields();
+        $result = [];
+
+        foreach ($fields as $key => $field) {
+            $result[$key] = (string)($field['default'] ?? '');
+        }
+
+        $result = array_replace($result, $this->values());
+        foreach ($fields as $key => $field) {
+            if (($field['type'] ?? '') !== 'select') {
+                continue;
+            }
+
+            $options = (array)($field['options'] ?? []);
+            if (!array_key_exists((string)($result[$key] ?? ''), $options)) {
+                $result[$key] = (string)($field['default'] ?? '');
+            }
+        }
+
+        return $result;
     }
 
     public function save(array $input): void

@@ -27,6 +27,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/loader.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/admin-menu.js')) ?>"></script>
+    <script defer src="<?= $e($url(ASSETS_DIR . 'js/settings-tabs.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-select.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-datetime.js')) ?>"></script>
     <script defer src="<?= $e($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>

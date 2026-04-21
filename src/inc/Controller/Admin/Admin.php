@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 
 use App\Service\Application\Auth;
 use App\Service\Support\Csrf;
+use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
@@ -190,12 +191,7 @@ class Admin
 
     protected function formatDateTime(string $value): string
     {
-        $stamp = $value !== '' ? strtotime($value) : false;
-        if ($stamp === false) {
-            return '';
-        }
-
-        return date(APP_DATETIME_FORMAT, $stamp);
+        return DateTimeFormatter::formatDateTimeValue($value);
     }
 
     protected function hasUpload(string $field): bool

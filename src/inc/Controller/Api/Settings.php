@@ -65,20 +65,13 @@ final class Settings extends Admin
             }
         }
 
-        $payload = [
-            'app_lang' => (string)($_POST['settings']['app_lang'] ?? ''),
-            'sitename' => (string)($_POST['settings']['sitename'] ?? ''),
-            'siteauthor' => (string)($_POST['settings']['siteauthor'] ?? ''),
-            'meta_description' => (string)($_POST['settings']['meta_description'] ?? ''),
-            'front_home_content' => (string)($_POST['settings']['front_home_content'] ?? ''),
-            'front_posts_per_page' => (string)($_POST['settings']['front_posts_per_page'] ?? APP_POSTS_PER_PAGE),
-            'front_theme' => (string)($_POST['settings']['front_theme'] ?? 'default'),
-            'allow_registration' => (string)($_POST['settings']['allow_registration'] ?? '0'),
-            'favicon' => $faviconPath,
-            'logo' => $logoPath,
-            'website_url' => (string)($_POST['settings']['website_url'] ?? ''),
-            'website_email' => (string)($_POST['settings']['website_email'] ?? ''),
-        ];
+        $input = (array)($_POST['settings'] ?? []);
+        $payload = [];
+        foreach (array_keys($this->settings->fields()) as $key) {
+            $payload[$key] = (string)($input[$key] ?? '');
+        }
+        $payload['favicon'] = $faviconPath;
+        $payload['logo'] = $logoPath;
 
         $this->settings->save($payload);
         $this->apiOk([

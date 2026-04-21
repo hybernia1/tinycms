@@ -281,8 +281,16 @@ return [
     'settings' => [
         'save' => 'Save settings',
         'saved' => 'Settings saved.',
+        'sections' => [
+            'general' => 'General',
+            'localization' => 'Localization',
+            'content' => 'Content',
+            'appearance' => 'Appearance',
+        ],
         'fields' => [
             'app_lang' => 'Application language',
+            'app_date_format' => 'Date format',
+            'app_datetime_format' => 'Date and time format',
             'sitename' => 'Site name',
             'siteauthor' => 'Site author',
             'meta_description' => 'Meta description',

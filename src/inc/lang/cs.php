@@ -281,8 +281,16 @@ return [
     'settings' => [
         'save' => 'Uložit nastavení',
         'saved' => 'Nastavení uloženo.',
+        'sections' => [
+            'general' => 'Obecné',
+            'localization' => 'Lokalizace',
+            'content' => 'Obsah',
+            'appearance' => 'Vzhled',
+        ],
         'fields' => [
             'app_lang' => 'Jazyk aplikace',
+            'app_date_format' => 'Formát data',
+            'app_datetime_format' => 'Formát data a času',
             'sitename' => 'Název webu',
             'siteauthor' => 'Autor webu',
             'meta_description' => 'Meta description',

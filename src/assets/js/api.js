@@ -44,28 +44,47 @@
         container.prepend(flash);
     };
 
+    const sessionStore = {
+        get(key) {
+            try {
+                return window.sessionStorage.getItem(key) || '';
+            } catch (_) {
+                return '';
+            }
+        },
+        set(key, value) {
+            try {
+                window.sessionStorage.setItem(key, value);
+            } catch (_) {
+            }
+        },
+        remove(key) {
+            try {
+                window.sessionStorage.removeItem(key);
+            } catch (_) {
+            }
+        },
+    };
+
     const storeFlash = (type, message) => {
         const text = String(message || '').trim();
         if (text === '') {
             return;
         }
 
-        try {
-            window.sessionStorage.setItem('tinycms:flash', JSON.stringify({
-                type,
-                message: text,
-            }));
-        } catch (_) {
-        }
+        sessionStore.set('tinycms:flash', JSON.stringify({
+            type,
+            message: text,
+        }));
     };
 
     const consumeStoredFlash = () => {
         try {
-            const raw = window.sessionStorage.getItem('tinycms:flash');
+            const raw = sessionStore.get('tinycms:flash');
             if (!raw) {
                 return;
             }
-            window.sessionStorage.removeItem('tinycms:flash');
+            sessionStore.remove('tinycms:flash');
             const payload = JSON.parse(raw);
             pushFlash((payload && payload.type) || 'success', (payload && payload.message) || '');
         } catch (_) {
@@ -87,6 +106,7 @@
         icon,
         pushFlash,
         storeFlash,
+        sessionStore,
     };
 })();
 (() => {
@@ -309,6 +329,7 @@ const t = window.tinycms?.i18n?.t || (() => '');
 const esc = window.tinycms?.api?.esc || ((value) => String(value || ''));
 const icon = window.tinycms?.api?.icon || (() => '');
 const pushFlash = window.tinycms?.api?.pushFlash || (() => {});
+const sessionStore = window.tinycms?.api?.sessionStore || { get: () => '', set: () => {} };
 const requestJson = window.tinycms?.api?.http?.requestJson;
 const postForm = window.tinycms?.api?.http?.postForm;
 
@@ -354,6 +375,10 @@ const initListApi = (config) => {
             filterBaseLabels[statusKey] = String(link.textContent || '').replace(/\s*\(\d+\)\s*$/, '').trim();
         }
     });
+    const statusStorageKey = `tinycms.${config.name}.activeStatus`;
+    const statusExists = (status) => filterLinks.some((link) => link.getAttribute(`data-${config.name}-status`) === status);
+    const activeStatus = () => filterLinks.find((link) => link.classList.contains('active'))?.getAttribute(`data-${config.name}-status`) || 'all';
+    const initialStatus = config.withStatus ? activeStatus() : 'all';
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
     const loader = window.tinycmsLoader || null;
 
@@ -367,10 +392,13 @@ const initListApi = (config) => {
     };
 
     if (config.withStatus) {
+        const urlStatus = new URLSearchParams(window.location.search).get('status') || '';
+        const storedStatus = sessionStore.get(statusStorageKey);
         state = {
             ...state,
-            status: filterLinks.find((link) => link.classList.contains('active'))?.getAttribute(`data-${config.name}-status`) || 'all',
+            status: statusExists(urlStatus) ? urlStatus : (statusExists(storedStatus) ? storedStatus : initialStatus),
         };
+        sessionStore.set(statusStorageKey, state.status);
     }
 
     let pendingDeleteId = 0;
@@ -521,6 +549,7 @@ const initListApi = (config) => {
                 event.preventDefault();
                 state.status = statusLink.getAttribute(`data-${config.name}-status`) || 'all';
                 state.page = 1;
+                sessionStore.set(statusStorageKey, state.status);
                 await fetchList();
                 return;
             }
@@ -653,6 +682,11 @@ const initListApi = (config) => {
                 await fetchList();
             }, 1000);
         });
+    }
+
+    if (config.withStatus && state.status !== initialStatus) {
+        syncFilters();
+        fetchList();
     }
 };
 
