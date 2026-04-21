@@ -12,6 +12,7 @@ $termsJson = $e(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APO
 $thumbnailPath = $media((string)($item['thumbnail_path'] ?? ''), 'small');
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
+$previewUrl = $contentId > 0 ? $url('content/' . $contentId . '?preview=true') : '';
 ?>
 <form
     id="content-editor-form"
@@ -60,6 +61,18 @@ $contentId = (int)($item['id'] ?? 0);
                         <label><?= $e($t('content.publish_date')) ?></label>
                         <input type="datetime-local" name="created" value="<?= $e($createdAt) ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= $e((string)$errors['created']) ?></small><?php endif; ?>
+                    </div>
+                    <div class="mb-3">
+                        <a
+                            class="btn btn-light w-100<?= $previewUrl === '' ? ' disabled' : '' ?>"
+                            href="<?= $e($previewUrl !== '' ? $previewUrl : '#') ?>"
+                            target="_blank"
+                            rel="noopener"
+                            data-content-preview-link
+                            <?= $previewUrl === '' ? 'aria-disabled="true" tabindex="-1"' : '' ?>
+                        >
+                            <?= $e($t('content.preview')) ?>
+                        </a>
                     </div>
                     <div class="mt-3 mb-3">
                         <label><?= $e($t('content.type')) ?></label>

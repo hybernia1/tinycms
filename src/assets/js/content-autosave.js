@@ -15,6 +15,7 @@
         var editUrlBase = form.dataset.editUrlBase || '';
         var idInput = form.querySelector('[data-content-id-hidden]');
         var bodyTextarea = form.querySelector('textarea[name="body"]');
+        var previewLink = form.querySelector('[data-content-preview-link]');
         var thumbnailTrigger = document.querySelector('[data-media-library-open]');
         var headerDeleteGroup = document.querySelector('[data-content-delete-group]');
         var headerDeleteButton = document.querySelector('[data-content-action-delete]');
@@ -136,6 +137,13 @@
                     window.history.replaceState({}, '', editUrlBase + value);
                     applyEditLayoutContext();
                 }
+            }
+
+            if (previewLink) {
+                previewLink.href = contentApi('/content/' + value + '?preview=true');
+                previewLink.classList.remove('disabled');
+                previewLink.removeAttribute('aria-disabled');
+                previewLink.removeAttribute('tabindex');
             }
         }
 

@@ -44,7 +44,7 @@ final class Front
     {
         $slug = trim((string)($params['slug'] ?? ''));
         $id = $this->slugger->extractId($slug);
-        $item = $this->findPublishedContent($id);
+        $item = $this->findRequestedContent($id);
 
         if ($item === null) {
             $this->notFound();
@@ -62,10 +62,15 @@ final class Front
     public function contentLegacy(callable $redirect, array $params): void
     {
         $id = (int)($params['id'] ?? 0);
-        $item = $this->findPublishedContent($id);
+        $item = $this->findRequestedContent($id);
 
         if ($item === null) {
             $this->notFound();
+            return;
+        }
+
+        if ($this->isPreviewMode()) {
+            $this->view->singleContent($item);
             return;
         }
 
@@ -237,6 +242,54 @@ final class Front
             'LIMIT 1',
         ]));
         $stmt->execute(['id' => $id, 'status' => 'published', 'now' => $this->now()]);
+        $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+
+        if ($item === null) {
+            return null;
+        }
+
+        $item = $this->withThumbnail($item);
+        $item['terms'] = $this->services->term->listByContent((int)$item['id']);
+        return $item;
+    }
+
+    private function findRequestedContent(int $id): ?array
+    {
+        if ($this->isPreviewMode()) {
+            return $this->findContentForPreview($id);
+        }
+
+        return $this->findPublishedContent($id);
+    }
+
+    private function isPreviewMode(): bool
+    {
+        if ((string)($_GET['preview'] ?? '') !== 'true') {
+            return false;
+        }
+
+        return $this->auth->check() && $this->auth->isAdmin();
+    }
+
+    private function findContentForPreview(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+
+        $contentTable = Table::name('content');
+        $usersTable = Table::name('users');
+        $mediaTable = Table::name('media');
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.status,',
+            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
+            "FROM $contentTable c",
+            "LEFT JOIN $usersTable u ON u.id = c.author",
+            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
+            'WHERE c.id = :id AND c.status <> :status',
+            'LIMIT 1',
+        ]));
+        $stmt->execute(['id' => $id, 'status' => 'trash']);
         $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
 
         if ($item === null) {
