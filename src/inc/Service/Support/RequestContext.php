@@ -58,19 +58,11 @@ final class RequestContext
 
     public static function basePath(?string $scriptName = null, ?string $requestUri = null): string
     {
-        $requestBasePath = self::requestBasePath($scriptName, $requestUri);
-
         if (self::$websiteUrlParts !== null) {
-            $configuredPath = self::$websiteUrlParts['path'];
-            $requestParent = self::normalizeBasePath(dirname($requestBasePath));
-            if (self::queryMode($requestBasePath) && ($configuredPath === '' || $requestParent === $configuredPath)) {
-                return $requestBasePath;
-            }
-
-            return $configuredPath;
+            return self::$websiteUrlParts['path'];
         }
 
-        return $requestBasePath;
+        return self::requestBasePath($scriptName, $requestUri);
     }
 
     private static function requestBasePath(?string $scriptName = null, ?string $requestUri = null): string
