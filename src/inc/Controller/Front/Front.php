@@ -60,25 +60,6 @@ final class Front
         $this->view->singleContent($item);
     }
 
-    public function contentLegacy(callable $redirect, array $params): void
-    {
-        $id = (int)($params['id'] ?? 0);
-        $preview = $this->canPreview();
-        $item = $preview ? $this->findPreviewContent($id) : $this->findPublishedContent($id);
-
-        if ($item === null) {
-            $this->notFound();
-            return;
-        }
-
-        if ($preview) {
-            $this->view->singleContent($item);
-            return;
-        }
-
-        $redirect($this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0)), true);
-    }
-
     public function search(): void
     {
         $settings = $this->services->settings->resolved();
