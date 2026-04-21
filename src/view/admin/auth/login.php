@@ -16,7 +16,7 @@
                             <input class="field-control-with-start-icon" type="email" name="email" value="<?= $e((string)($old['email'] ?? '')) ?>" required>
                         </div>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label><?= $e($t('common.password')) ?></label>
                         <div class="field-with-icon">
                             <input class="field-control-with-end-icon" type="password" name="password" data-password-input required>

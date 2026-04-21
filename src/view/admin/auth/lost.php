@@ -11,7 +11,7 @@
                     <form method="post" action="<?= $e($url('admin/api/v1/auth/lost/reset')) ?>" data-api-submit>
                         <?= $csrfField() ?>
                         <input type="hidden" name="token" value="<?= $e((string)($token ?? '')) ?>">
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label><?= $e($t('auth.new_password')) ?></label>
                             <div class="field-with-icon">
                                 <input class="field-control-with-end-icon" type="password" name="password" data-password-input required>
@@ -28,7 +28,7 @@
                     <?php endif; ?>
                     <form method="post" action="<?= $e($url('admin/api/v1/auth/lost')) ?>" data-api-submit data-stay-on-page>
                         <?= $csrfField() ?>
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label><?= $e($t('common.email')) ?></label>
                             <div class="field-with-icon">
                                 <span class="field-overlay field-overlay-start field-icon" aria-hidden="true"><?= $icon('email') ?></span>

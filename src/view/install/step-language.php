@@ -12,7 +12,7 @@
                 <?php endif; ?>
                 <form method="post" action="<?= $e($url('install')) ?>">
                     <?= $csrfField() ?>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label><?= $e($t('install.choose_language')) ?></label>
                         <select name="lang" required>
                             <?php foreach ($locales as $locale): ?>

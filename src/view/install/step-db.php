@@ -36,11 +36,11 @@
                         <small class="text-danger"><?= $e((string)$errors['db_user']) ?></small>
                         <?php endif; ?>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label><?= $e($t('install.db_pass')) ?></label>
                         <input type="password" name="db_pass" value="<?= $e((string)($old['db_pass'] ?? '')) ?>">
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label><?= $e($t('install.db_prefix')) ?></label>
                         <input type="text" name="db_prefix" value="<?= $e((string)($old['db_prefix'] ?? 'tiny_')) ?>">
                         <?php if (!empty($errors['db_prefix'])): ?>
