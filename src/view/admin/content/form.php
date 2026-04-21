@@ -41,7 +41,6 @@ $contentId = (int)($item['id'] ?? 0);
             </div>
             <input type="hidden" name="status" value="<?= $e((string)($item['status'] ?? 'draft')) ?>" data-content-status-hidden>
             <div class="m-0">
-                <label><?= $e($t('content.body')) ?></label>
                 <textarea
                     name="body"
                     rows="14"
