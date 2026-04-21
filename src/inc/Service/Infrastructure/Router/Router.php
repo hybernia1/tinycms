@@ -46,10 +46,11 @@ final class Router
     public function dispatch(string $uri, string $method): bool
     {
         $routePath = $this->requestPath($uri);
-        $handler = $this->routes[strtoupper($method)][$routePath] ?? null;
+        $methodKey = strtoupper($method) === 'HEAD' ? 'GET' : strtoupper($method);
+        $handler = $this->routes[$methodKey][$routePath] ?? null;
 
         if ($handler === null) {
-            foreach ($this->dynamicRoutes[strtoupper($method)] ?? [] as $route) {
+            foreach ($this->dynamicRoutes[$methodKey] ?? [] as $route) {
                 if (preg_match($route['regex'], $routePath, $matches) !== 1) {
                     continue;
                 }
@@ -75,6 +76,30 @@ final class Router
         return RequestContext::path($path, $this->basePath, $this->queryMode);
     }
 
+    public function canonicalUrl(string $uri, string $method): ?string
+    {
+        if (!in_array(strtoupper($method), ['GET', 'HEAD'], true)) {
+            return null;
+        }
+
+        $parts = parse_url($uri);
+        $path = '/' . ltrim((string)($parts['path'] ?? ''), '/');
+        if ($this->isStaticPath($path)) {
+            return null;
+        }
+
+        parse_str((string)($parts['query'] ?? ''), $query);
+        $hasRoute = array_key_exists('route', $query);
+        $route = $this->normalizePath((string)($query['route'] ?? ''));
+        unset($query['route']);
+
+        $target = $this->queryMode
+            ? $this->fallbackCanonicalUrl($path, $route, $query, $hasRoute)
+            : $this->prettyCanonicalUrl($path, $route, $query, $hasRoute);
+
+        return $target !== null && $target !== $this->currentUrl($parts) ? $target : null;
+    }
+
     public function requestPath(string $uri): string
     {
         $parts = parse_url($uri);
@@ -97,6 +122,88 @@ final class Router
     private function normalizePath(string $path): string
     {
         return trim($path, '/');
+    }
+
+    private function prettyCanonicalUrl(string $path, string $route, array $query, bool $hasRoute): ?string
+    {
+        $indexPath = $this->basePath . '/index.php';
+
+        if ($hasRoute) {
+            return $this->withQuery($this->url($route), $query);
+        }
+
+        if ($path === $indexPath) {
+            return $this->withQuery($this->url(''), $query);
+        }
+
+        if (str_starts_with($path, $indexPath . '/')) {
+            return $this->withQuery($this->url(substr($path, strlen($indexPath) + 1)), $query);
+        }
+
+        return null;
+    }
+
+    private function fallbackCanonicalUrl(string $path, string $route, array $query, bool $hasRoute): ?string
+    {
+        if ($hasRoute) {
+            return $this->withQuery($this->url($route), $query);
+        }
+
+        if ($path === $this->basePath) {
+            return $this->withQuery($this->url(''), $query);
+        }
+
+        if (str_starts_with($path, $this->basePath . '/')) {
+            return $this->withQuery($this->url(substr($path, strlen($this->basePath) + 1)), $query);
+        }
+
+        $routePath = $this->normalizePath($this->stripStaticBase($path));
+        return $this->withQuery($this->url($routePath), $query);
+    }
+
+    private function withQuery(string $url, array $query): string
+    {
+        $queryString = http_build_query($query);
+        return $queryString === '' ? $url : $url . (str_contains($url, '?') ? '&' : '?') . $queryString;
+    }
+
+    private function currentUrl(array $parts): string
+    {
+        $path = '/' . ltrim((string)($parts['path'] ?? ''), '/');
+        $query = (string)($parts['query'] ?? '');
+        return $path . ($query === '' ? '' : '?' . $query);
+    }
+
+    private function isStaticPath(string $path): bool
+    {
+        if (!defined('BASE_DIR')) {
+            return false;
+        }
+        if ($path === $this->basePath || $path === $this->basePath . '/index.php') {
+            return false;
+        }
+
+        $relativePath = ltrim($this->stripStaticBase($path), '/');
+        return $relativePath !== '' && is_file(BASE_DIR . '/' . $relativePath);
+    }
+
+    private function stripStaticBase(string $path): string
+    {
+        $base = $this->staticBasePath();
+        if ($base !== '' && ($path === $base || str_starts_with($path, $base . '/'))) {
+            return (string)substr($path, strlen($base));
+        }
+
+        return $path;
+    }
+
+    private function staticBasePath(): string
+    {
+        if (str_ends_with($this->basePath, '/index.php')) {
+            return rtrim(substr($this->basePath, 0, -10), '/');
+        }
+
+        return $this->basePath;
     }
 
     private function compilePattern(string $path): array

@@ -38,6 +38,11 @@ function sendImageNotFoundFallback(string $uri): bool
 try {
     $app = require __DIR__ . '/' . INC_DIR . 'bootstrap.php';
     $router = $app['router'];
+    $canonicalUrl = $router->canonicalUrl($_SERVER['REQUEST_URI'] ?? '/', $_SERVER['REQUEST_METHOD'] ?? 'GET');
+    if ($canonicalUrl !== null) {
+        header('Location: ' . $canonicalUrl, true, 301);
+        exit;
+    }
 
     if (!$router->dispatch($_SERVER['REQUEST_URI'] ?? '/', $_SERVER['REQUEST_METHOD'] ?? 'GET')) {
         if (sendImageNotFoundFallback($_SERVER['REQUEST_URI'] ?? '/')) {
