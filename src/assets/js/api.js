@@ -242,15 +242,18 @@
             return;
         }
 
-        if (successMessage !== '') {
-            pushFlash('success', successMessage);
-        }
-
         if (form.hasAttribute('data-stay-on-page')) {
             if (successMessage !== '') {
-                setFormMessage(form, successMessage, 'success');
+                const hasInlineMessage = setFormMessage(form, successMessage, 'success');
+                if (!hasInlineMessage) {
+                    pushFlash('success', successMessage);
+                }
             }
             return;
+        }
+
+        if (successMessage !== '') {
+            pushFlash('success', successMessage);
         }
 
         window.location.reload();

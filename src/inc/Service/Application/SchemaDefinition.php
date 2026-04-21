@@ -32,6 +32,11 @@ final class SchemaDefinition
                 'key_name' => ['max' => 100, 'nullable' => false],
                 'value' => ['max' => 1000, 'nullable' => true],
             ],
+            'menu' => [
+                'label' => ['max' => 255, 'nullable' => false],
+                'url' => ['max' => 500, 'nullable' => false],
+                'link_target' => ['max' => 20, 'nullable' => false, 'allowed' => ['_self', '_blank']],
+            ],
         ];
     }
 
@@ -52,7 +57,7 @@ final class SchemaDefinition
         $fkContentMediaContent = self::constraintName($prefix, 'fk_content_media_content');
         $fkContentMediaMedia = self::constraintName($prefix, 'fk_content_media_media');
 
-        return [
+        return array_merge([
             "CREATE TABLE IF NOT EXISTS $users (
                 id INT NOT NULL AUTO_INCREMENT,
                 email VARCHAR(255) DEFAULT NULL,
@@ -128,6 +133,25 @@ final class SchemaDefinition
                 key_name VARCHAR(100) NOT NULL,
                 value VARCHAR(1000) DEFAULT NULL,
                 PRIMARY KEY (key_name)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
+        ], self::menuDdl($prefix));
+    }
+
+    public static function menuDdl(string $prefix = ''): array
+    {
+        $menu = $prefix . 'menu';
+
+        return [
+            "CREATE TABLE IF NOT EXISTS $menu (
+                id INT NOT NULL AUTO_INCREMENT,
+                label VARCHAR(255) NOT NULL,
+                url VARCHAR(500) NOT NULL,
+                link_target VARCHAR(20) NOT NULL DEFAULT '_self',
+                position INT NOT NULL DEFAULT 0,
+                created DATETIME NOT NULL DEFAULT (NOW()),
+                updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY idx_menu_position (position)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
         ];
     }

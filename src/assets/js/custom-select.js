@@ -4,13 +4,6 @@
         return;
     }
 
-    const selects = Array.from(document.querySelectorAll('.admin-content select:not([multiple]):not([size]), [data-install-content] select:not([multiple]):not([size])'));
-    if (!selects.length) {
-        return;
-    }
-
-    root.classList.add('has-custom-select');
-
     let opened = null;
     const sampleIconUse = document.querySelector('svg.icon use');
     const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : String(window.tinycmsIconSprite || '');
@@ -78,7 +71,15 @@
         closeOpened();
     };
 
-    selects.forEach((select) => {
+    const enhance = (scope = document) => {
+        const selects = Array.from(scope.querySelectorAll('.admin-content select:not([multiple]):not([size]):not(.custom-select-native), [data-install-content] select:not([multiple]):not([size]):not(.custom-select-native)'));
+        if (!selects.length) {
+            return;
+        }
+
+        root.classList.add('has-custom-select');
+
+        selects.forEach((select) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-select';
 
@@ -193,7 +194,16 @@
             syncDisabled(select, button, wrapper);
         });
         observer.observe(select, { attributes: true, attributeFilter: ['disabled'] });
-    });
+        });
+    };
+
+    enhance(document);
+
+    window.tinycms = window.tinycms || {};
+    window.tinycms.ui = window.tinycms.ui || {};
+    window.tinycms.ui.customSelect = {
+        init: enhance,
+    };
 
     document.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) {

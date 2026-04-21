@@ -20,6 +20,7 @@ if (!defined('BASE_DIR')) {
             <?php endif; ?>
             <span><?= $e($theme->siteTitle()) ?></span>
         </a>
+        <?= $menu() ?>
         <?= $searchForm('search', (string)($_GET['q'] ?? '')) ?>
     </div>
 </header>

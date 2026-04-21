@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Service\Application\Menu;
 use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
@@ -14,7 +15,7 @@ final class FrontView
     private array $settings;
     private string $theme;
 
-    public function __construct(string $rootPath, Router $router, array $settings, private AdminBar $adminBar)
+    public function __construct(string $rootPath, Router $router, array $settings, private AdminBar $adminBar, private Menu $menu)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
@@ -109,7 +110,7 @@ final class FrontView
     {
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
-        $theme = new Theme($this->router, $this->settings, $this->theme);
+        $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
         $url = fn(string $path = ''): string => $theme->url($path);
         $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
         $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
@@ -127,13 +128,15 @@ final class FrontView
             'placeholder' => $this->translate('front.search_placeholder'),
             'button' => $this->translate('front.search_button'),
         ]);
+        $menuItems = fn(): array => $theme->menuItems();
+        $menu = fn(array $options = []): string => $theme->menu($options);
         $icon = static function (string $name, string $classes = 'icon') use ($e, $themeUrl): string {
             $sprite = $e($themeUrl('assets/svg/icons.svg#icon-' . trim($name)));
             $class = trim($classes);
             return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
         };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $theme, $icon): void {
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $theme, $icon): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;

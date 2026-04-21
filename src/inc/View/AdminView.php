@@ -125,6 +125,15 @@ final class AdminView
         ]);
     }
 
+    public function adminMenuForm(array $items): void
+    {
+        $this->renderAdmin('admin/menu/form', [
+            'items' => $items,
+            'pageTitle' => I18n::t('admin.menu.menu'),
+            'headerAction' => $this->submitHeaderAction('#menu-form'),
+        ]);
+    }
+
     public function adminMediaList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/media/list', [
@@ -237,6 +246,7 @@ final class AdminView
             'content',
             'terms',
             'media',
+            'menu',
             'users',
             'editor',
             'datetime',
@@ -254,6 +264,7 @@ final class AdminView
             ['label' => I18n::t('admin.menu.content'), 'url' => 'admin/content', 'icon' => 'content'],
             ['label' => I18n::t('admin.menu.media'), 'url' => 'admin/media', 'icon' => 'media'],
             ['label' => I18n::t('admin.menu.terms'), 'url' => 'admin/terms', 'icon' => 'terms'],
+            ['label' => I18n::t('admin.menu.menu'), 'url' => 'admin/menu', 'icon' => 'menu'],
             ['label' => I18n::t('admin.menu.settings'), 'url' => 'admin/settings', 'icon' => 'settings'],
         ];
     }

@@ -5,6 +5,7 @@ namespace App\Service\Front;
 
 use App\Service\Application\Content;
 use App\Service\Application\Media;
+use App\Service\Application\Menu;
 use App\Service\Application\Settings;
 use App\Service\Application\Term;
 use App\Service\Application\User;
@@ -17,6 +18,7 @@ final class Services
         public readonly Media $media,
         public readonly Term $term,
         public readonly Settings $settings,
+        public readonly Menu $menu,
     ) {
     }
 }

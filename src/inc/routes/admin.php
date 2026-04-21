@@ -63,6 +63,9 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => 'admin/media/add', 'controller' => $adminMedia, 'action' => 'addForm'],
     ['method' => 'GET', 'path' => 'admin/media/edit', 'controller' => $adminMedia, 'action' => 'editForm'],
 
+    ['method' => 'GET', 'path' => 'admin/menu', 'controller' => $adminMenu, 'action' => 'form'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/menu', 'controller' => $apiMenu, 'action' => 'saveApiV1'],
+
     ['method' => 'GET', 'path' => 'admin/settings', 'controller' => $adminSettings, 'action' => 'form'],
     ['method' => 'POST', 'path' => 'admin/api/v1/settings', 'controller' => $apiSettings, 'action' => 'submitApiV1'],
     ['method' => 'GET', 'path' => 'admin/logout', 'controller' => $admin, 'action' => 'logout'],

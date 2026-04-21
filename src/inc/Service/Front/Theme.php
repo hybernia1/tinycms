@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service\Front;
 
+use App\Service\Application\Menu;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\Media;
@@ -14,7 +15,7 @@ final class Theme
     private string $theme;
     private Slugger $slugger;
 
-    public function __construct(private Router $router, private array $settings, string $theme)
+    public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu)
     {
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
         $this->slugger = new Slugger();
@@ -157,6 +158,48 @@ final class Theme
 
         $name = trim((string)($item['author_name'] ?? ''));
         return $this->url('author/' . $this->slugger->slug($name !== '' ? $name : 'author', $id));
+    }
+
+    public function menuItems(): array
+    {
+        return array_map(function (array $item): array {
+            $item['href'] = $this->menuItemUrl((string)($item['url'] ?? ''));
+            return $item;
+        }, $this->menu->items());
+    }
+
+    public function menu(array $options = []): string
+    {
+        $items = $this->menuItems();
+        if ($items === []) {
+            return '';
+        }
+
+        $class = trim((string)($options['class'] ?? 'site-menu'));
+        $itemClass = trim((string)($options['item_class'] ?? 'site-menu-link'));
+        $label = trim((string)($options['label'] ?? 'Menu'));
+        $links = [];
+
+        foreach ($items as $item) {
+            $target = (string)($item['link_target'] ?? '_self') === '_blank' ? '_blank' : '_self';
+            $rel = $target === '_blank' ? ' rel="noopener noreferrer"' : '';
+            $targetAttr = $target === '_blank' ? ' target="_blank"' : '';
+            $links[] = sprintf(
+                '<a class="%s" href="%s"%s%s>%s</a>',
+                $this->esc($itemClass),
+                $this->esc((string)($item['href'] ?? '')),
+                $targetAttr,
+                $rel,
+                $this->esc((string)($item['label'] ?? '')),
+            );
+        }
+
+        return sprintf(
+            '<nav class="%s" aria-label="%s">%s</nav>',
+            $this->esc($class),
+            $this->esc($label !== '' ? $label : 'Menu'),
+            implode('', $links),
+        );
     }
 
     public function mediaSrcSet(string $path): string
@@ -308,6 +351,20 @@ final class Theme
     {
         $sprite = $this->esc($this->themeUrl('assets/svg/icons.svg#icon-' . trim($name)));
         return '<svg class="icon" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
+    }
+
+    private function menuItemUrl(string $url): string
+    {
+        $value = trim($url);
+        if ($value === '') {
+            return $this->url('');
+        }
+
+        if (preg_match('#^(https?:)?//#i', $value) === 1 || preg_match('#^(mailto|tel):#i', $value) === 1 || str_starts_with($value, '#')) {
+            return $value;
+        }
+
+        return $this->url($value);
     }
 
     private function paginationUrl(string $basePath, int $page): string
