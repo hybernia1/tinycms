@@ -14,8 +14,10 @@
         var draftInitEndpoint = form.dataset.draftInitEndpoint || '';
         var editUrlBase = form.dataset.editUrlBase || '';
         var idInput = form.querySelector('[data-content-id-hidden]');
+        var nameInput = form.querySelector('input[name="name"]');
         var bodyTextarea = form.querySelector('textarea[name="body"]');
         var thumbnailTrigger = document.querySelector('[data-media-library-open]');
+        var previewLink = document.querySelector('[data-content-preview-link]');
         var headerDeleteGroup = document.querySelector('[data-content-delete-group]');
         var headerDeleteButton = document.querySelector('[data-content-action-delete]');
         var firstDraftAutosaveDelay = 30000;
@@ -55,6 +57,36 @@
         function contentApi(path) {
             var normalized = path.charAt(0) === '/' ? path : '/' + path;
             return appRoot + normalized;
+        }
+
+        function slugify(value) {
+            var normalized = String(value || '').trim().toLowerCase();
+            if (normalized === '') {
+                return '';
+            }
+            if (typeof normalized.normalize === 'function') {
+                normalized = normalized.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            }
+            normalized = normalized.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            return normalized;
+        }
+
+        function updatePreviewLink() {
+            if (!previewLink) {
+                return;
+            }
+
+            var id = contentId();
+            if (id <= 0) {
+                previewLink.hidden = true;
+                previewLink.removeAttribute('href');
+                return;
+            }
+
+            var base = slugify(nameInput ? nameInput.value : '');
+            var path = (base !== '' ? base + '-' : '') + id + '?preview=1';
+            previewLink.href = contentApi('/' + path);
+            previewLink.hidden = false;
         }
 
         function contentId() {
@@ -137,6 +169,8 @@
                     applyEditLayoutContext();
                 }
             }
+
+            updatePreviewLink();
         }
 
         function serializePayload() {
@@ -261,9 +295,13 @@
         }
 
         lastSent = signature(serializePayload());
+        updatePreviewLink();
 
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
+        if (nameInput) {
+            nameInput.addEventListener('input', updatePreviewLink);
+        }
         form.addEventListener('submit', function () {
             bypassLeaveWarning = true;
         });

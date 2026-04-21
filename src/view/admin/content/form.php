@@ -14,6 +14,7 @@ $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
 $previewSlug = $contentId > 0 ? (new \App\Service\Support\Slugger())->slug((string)($item['name'] ?? ''), $contentId) : '';
 $previewUrl = $previewSlug !== '' ? $url($previewSlug . '?preview=1') : '';
+$previewHidden = $previewUrl === '';
 ?>
 <form
     id="content-editor-form"
@@ -56,18 +57,25 @@ $previewUrl = $previewSlug !== '' ? $url($previewSlug . '?preview=1') : '';
         </div>
         <aside class="content-editor-sidebar">
             <div class="card">
-                <div class="content-box-header"><?= $e($t('content.publication')) ?></div>
+                <div class="content-box-header content-box-header-actions">
+                    <span><?= $e($t('content.publication')) ?></span>
+                    <a
+                        class="btn btn-light"
+                        href="<?= $e($previewUrl) ?>"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-content-preview-link
+                        <?= $previewHidden ? 'hidden' : '' ?>
+                    >
+                        <?= $e($t('content.preview')) ?>
+                    </a>
+                </div>
                 <div class="p-3">
                     <div class="mb-3">
                         <label><?= $e($t('content.publish_date')) ?></label>
                         <input type="datetime-local" name="created" value="<?= $e($createdAt) ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= $e((string)$errors['created']) ?></small><?php endif; ?>
                     </div>
-                    <?php if ($previewUrl !== ''): ?>
-                    <a class="btn btn-light w-100" href="<?= $e($previewUrl) ?>" target="_blank" rel="noopener noreferrer">
-                        <?= $e($t('content.preview')) ?>
-                    </a>
-                    <?php endif; ?>
                     <div class="mt-3 mb-3">
                         <label><?= $e($t('content.type')) ?></label>
                         <?php $selectedType = (string)($item['type'] ?? \App\Service\Application\Content::TYPE_ARTICLE); ?>
