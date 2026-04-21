@@ -10,6 +10,16 @@ final class Media
     private const DEFAULT_SMALL_WIDTH = 300;
     private const DEFAULT_SMALL_HEIGHT = 300;
     private const DEFAULT_MEDIUM_WIDTH = 768;
+    private static int $smallWidth = self::DEFAULT_SMALL_WIDTH;
+    private static int $smallHeight = self::DEFAULT_SMALL_HEIGHT;
+    private static int $mediumWidth = self::DEFAULT_MEDIUM_WIDTH;
+
+    public static function configure(array $settings): void
+    {
+        self::$smallWidth = self::settingInt($settings, 'media_small_width', self::DEFAULT_SMALL_WIDTH);
+        self::$smallHeight = self::settingInt($settings, 'media_small_height', self::DEFAULT_SMALL_HEIGHT);
+        self::$mediumWidth = self::settingInt($settings, 'media_medium_width', self::DEFAULT_MEDIUM_WIDTH);
+    }
 
     public static function bySize(string $path, string $size = 'origin'): string
     {
@@ -84,16 +94,22 @@ final class Media
 
     private static function smallWidth(): int
     {
-        return max(1, defined('MEDIA_SMALL_WIDTH') ? (int)MEDIA_SMALL_WIDTH : self::DEFAULT_SMALL_WIDTH);
+        return self::$smallWidth;
     }
 
     private static function smallHeight(): int
     {
-        return max(1, defined('MEDIA_SMALL_HEIGHT') ? (int)MEDIA_SMALL_HEIGHT : self::DEFAULT_SMALL_HEIGHT);
+        return self::$smallHeight;
     }
 
     private static function mediumWidth(): int
     {
-        return max(1, defined('MEDIA_MEDIUM_WIDTH') ? (int)MEDIA_MEDIUM_WIDTH : self::DEFAULT_MEDIUM_WIDTH);
+        return self::$mediumWidth;
+    }
+
+    private static function settingInt(array $settings, string $key, int $default): int
+    {
+        $value = (int)($settings[$key] ?? $default);
+        return max(1, $value > 0 ? $value : $default);
     }
 }

@@ -18,7 +18,3 @@ const DB_NAME = 'tinycms';
 const DB_USER = 'root';
 const DB_PASS = '';
 const DB_PREFIX = '';
-
-const MEDIA_SMALL_WIDTH = 300;
-const MEDIA_SMALL_HEIGHT = 300;
-const MEDIA_MEDIUM_WIDTH = 768;

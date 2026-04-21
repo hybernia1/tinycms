@@ -73,6 +73,30 @@ final class Settings
                 'min' => 1,
                 'max' => 100,
             ],
+            'media_small_width' => [
+                'label_key' => 'settings.fields.media_small_width',
+                'section' => 'media',
+                'type' => 'number',
+                'default' => '300',
+                'min' => 1,
+                'max' => 3000,
+            ],
+            'media_small_height' => [
+                'label_key' => 'settings.fields.media_small_height',
+                'section' => 'media',
+                'type' => 'number',
+                'default' => '300',
+                'min' => 1,
+                'max' => 3000,
+            ],
+            'media_medium_width' => [
+                'label_key' => 'settings.fields.media_medium_width',
+                'section' => 'media',
+                'type' => 'number',
+                'default' => '768',
+                'min' => 1,
+                'max' => 3000,
+            ],
             'front_theme' => [
                 'label_key' => 'settings.fields.front_theme',
                 'section' => 'appearance',
@@ -192,13 +216,15 @@ final class Settings
 
         $result = array_replace($result, $this->values());
         foreach ($fields as $key => $field) {
-            if (($field['type'] ?? '') !== 'select') {
-                continue;
+            $type = (string)($field['type'] ?? '');
+            if ($type === 'select') {
+                $options = (array)($field['options'] ?? []);
+                if (!array_key_exists((string)($result[$key] ?? ''), $options)) {
+                    $result[$key] = (string)($field['default'] ?? '');
+                }
             }
-
-            $options = (array)($field['options'] ?? []);
-            if (!array_key_exists((string)($result[$key] ?? ''), $options)) {
-                $result[$key] = (string)($field['default'] ?? '');
+            if ($type === 'number') {
+                $result[$key] = $this->normalizeNumber((string)($result[$key] ?? ''), $field);
             }
         }
 
@@ -225,11 +251,8 @@ final class Settings
             }
 
             $value = trim((string)$rawValue);
-            if ($key === 'front_posts_per_page') {
-                $numeric = (int)$value;
-                $min = (int)($fields[$key]['min'] ?? 1);
-                $max = (int)($fields[$key]['max'] ?? 100);
-                $value = (string)max($min, min($max, $numeric > 0 ? $numeric : $min));
+            if (($fields[$key]['type'] ?? '') === 'number') {
+                $value = $this->normalizeNumber($value, $fields[$key]);
             }
             if ($key === 'website_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 $value = '';
@@ -267,6 +290,15 @@ final class Settings
             $this->query->insert('settings', ['key_name' => $key, 'value' => $payload['value']]);
             $existingKeys[$key] = true;
         }
+    }
+
+    private function normalizeNumber(string $value, array $field): string
+    {
+        $min = (int)($field['min'] ?? 1);
+        $max = max($min, (int)($field['max'] ?? $min));
+        $numeric = (int)$value;
+
+        return (string)max($min, min($max, $numeric > 0 ? $numeric : $min));
     }
 
 }

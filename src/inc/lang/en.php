@@ -285,6 +285,7 @@ return [
             'general' => 'General',
             'localization' => 'Localization',
             'content' => 'Content',
+            'media' => 'Media',
             'appearance' => 'Appearance',
         ],
         'fields' => [
@@ -296,6 +297,9 @@ return [
             'meta_description' => 'Meta description',
             'front_home_content' => 'Home page',
             'front_posts_per_page' => 'Posts per page',
+            'media_small_width' => 'Small thumbnail width',
+            'media_small_height' => 'Small thumbnail height',
+            'media_medium_width' => 'Medium image width',
             'front_theme' => 'Theme',
             'allow_registration' => 'Allow registrations',
             'favicon' => 'Favicon',

@@ -232,10 +232,7 @@ final class Install
             . "const DB_NAME = " . var_export((string)$db['db_name'], true) . ";\n"
             . "const DB_USER = " . var_export((string)$db['db_user'], true) . ";\n"
             . "const DB_PASS = " . var_export((string)$db['db_pass'], true) . ";\n\n"
-            . "const DB_PREFIX = " . var_export($prefix, true) . ";\n\n"
-            . "const MEDIA_SMALL_WIDTH = 300;\n"
-            . "const MEDIA_SMALL_HEIGHT = 300;\n"
-            . "const MEDIA_MEDIUM_WIDTH = 768;\n";
+            . "const DB_PREFIX = " . var_export($prefix, true) . ";\n";
 
         $written = file_put_contents(BASE_DIR . '/config.php', $content, LOCK_EX);
 

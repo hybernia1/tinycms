@@ -30,6 +30,7 @@ use App\Service\Application\Term as TermService;
 use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
 use App\Service\Support\Flash;
+use App\Service\Support\Media as MediaSupport;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Application\Settings as SettingsService;
 use App\Service\Support\I18n;
@@ -50,6 +51,7 @@ $resolvedSettings = [];
 if ($isInstalled) {
     $settingsService = new SettingsService();
     $resolvedSettings = $settingsService->resolved();
+    MediaSupport::configure($resolvedSettings);
     RequestContext::setWebsiteUrl((string)($resolvedSettings['website_url'] ?? ''));
     I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
 }

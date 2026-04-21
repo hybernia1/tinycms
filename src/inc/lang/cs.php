@@ -285,6 +285,7 @@ return [
             'general' => 'Obecné',
             'localization' => 'Lokalizace',
             'content' => 'Obsah',
+            'media' => 'Média',
             'appearance' => 'Vzhled',
         ],
         'fields' => [
@@ -296,6 +297,9 @@ return [
             'meta_description' => 'Meta description',
             'front_home_content' => 'Domovská stránka',
             'front_posts_per_page' => 'Počet příspěvků na stránku',
+            'media_small_width' => 'Šířka malého thumbnailu',
+            'media_small_height' => 'Výška malého thumbnailu',
+            'media_medium_width' => 'Šířka středního obrázku',
             'front_theme' => 'Šablona',
             'allow_registration' => 'Povolit registrace',
             'favicon' => 'Favicon',
