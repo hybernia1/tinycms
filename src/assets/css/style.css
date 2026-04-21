@@ -272,6 +272,16 @@ a:focus-visible {
     margin-left: var(--space-1-5);
 }
 
+.table-col-actions .btn-icon {
+    border-color: transparent;
+    background: transparent;
+}
+
+.table-col-actions .btn-icon:hover,
+.table-col-actions .btn-icon:focus-visible {
+    background: var(--color-surface-muted);
+}
+
 label {
     display: block;
     margin-bottom: var(--space-1-5);
