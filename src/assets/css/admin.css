@@ -422,11 +422,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
-    font-size: var(--fs-sm);
-}
-
-.media-library-detail-meta input {
-    width: 100%;
 }
 
 .media-library-list {

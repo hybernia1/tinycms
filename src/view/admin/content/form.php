@@ -156,13 +156,11 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="media-library-detail">
                 <div class="media-library-detail-preview" data-media-library-detail-preview></div>
                 <div class="media-library-detail-meta">
-                    <div>
+                    <div class="mb-3">
                         <label><?= $e($t('common.name')) ?></label>
-                        <div class="d-flex gap-2">
-                            <input type="text" value="" data-media-library-detail-name-input>
-                            <button class="btn btn-light" type="button" data-media-library-rename disabled><?= $e($t('common.save')) ?></button>
-                        </div>
+                        <input type="text" value="" data-media-library-detail-name-input>
                     </div>
+                    <button class="btn btn-light" type="button" data-media-library-rename disabled><?= $e($t('common.save')) ?></button>
                 </div>
                 <small class="text-muted" data-media-library-status></small>
                 <div class="d-flex gap-2">
