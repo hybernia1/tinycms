@@ -285,8 +285,7 @@ return [
             'sitename' => 'Název webu',
             'siteauthor' => 'Autor webu',
             'meta_description' => 'Meta description',
-            'front_home_mode' => 'Výchozí domovská stránka',
-            'front_home_content' => 'Domovská stránka (obsah)',
+            'front_home_content' => 'Domovská stránka',
             'front_posts_per_page' => 'Počet příspěvků na stránku',
             'front_theme' => 'Šablona',
             'allow_registration' => 'Povolit registrace',
@@ -296,12 +295,8 @@ return [
             'website_email' => 'E-mail webu',
         ],
         'options' => [
-            'front_home_mode' => [
-                'latest' => 'Výpis posledních příspěvků',
-                'content' => 'Vybraný obsah',
-            ],
             'front_home_content' => [
-                'none' => '— Vyberte obsah —',
+                'none' => '— Výpis posledních příspěvků —',
             ],
             'allow_registration' => [
                 'disabled' => 'Ne',
