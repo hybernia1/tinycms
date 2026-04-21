@@ -43,11 +43,19 @@ use App\View\AdminView;
 use App\View\FrontView;
 use App\View\View;
 
-$scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
-$baseDir = trim(dirname($scriptName), '/.');
-$basePath = $baseDir === '' ? '' : '/' . $baseDir;
+$isInstalled = is_file(BASE_DIR . '/config.php');
+$settingsService = null;
+$resolvedSettings = [];
 
-$router = new Router($basePath);
+if ($isInstalled) {
+    $settingsService = new SettingsService();
+    $resolvedSettings = $settingsService->resolved();
+    RequestContext::setWebsiteUrl((string)($resolvedSettings['website_url'] ?? ''));
+    I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
+}
+
+$basePath = RequestContext::basePath();
+$router = new Router($basePath, RequestContext::queryMode($basePath));
 $flash = new Flash();
 $csrf = new Csrf();
 $rateLimiter = new RateLimiter();
@@ -60,8 +68,6 @@ $redirect = static function (string $path = '', bool $permanent = false) use ($r
 };
 
 $requestPath = $router->requestPath((string)($_SERVER['REQUEST_URI'] ?? '/'));
-
-$isInstalled = is_file(BASE_DIR . '/config.php');
 
 require BASE_DIR . '/' . INC_DIR . 'routes/register.php';
 
@@ -96,10 +102,7 @@ $contentService = new ContentService();
 $mediaService = new MediaService();
 $slugger = new Slugger();
 $uploadService = new UploadService(BASE_DIR, $slugger);
-$settingsService = new SettingsService();
-$resolvedSettings = $settingsService->resolved();
-RequestContext::setWebsiteUrl((string)($resolvedSettings['website_url'] ?? ''));
-I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
+$settingsService ??= new SettingsService();
 $termService = new TermService();
 $frontServices = new FrontServices($contentService, $userService, $mediaService, $termService, $settingsService);
 $frontAdminBar = new AdminBar($router, $auth);

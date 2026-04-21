@@ -3,16 +3,20 @@ declare(strict_types=1);
 
 namespace App\Service\Infrastructure\Router;
 
+use App\Service\Support\RequestContext;
+
 final class Router
 {
     private string $basePath;
     private array $routes = [];
     private array $dynamicRoutes = [];
+    private bool $queryMode;
 
-    public function __construct(string $basePath = '')
+    public function __construct(string $basePath = '', bool $queryMode = false)
     {
         $clean = trim($basePath, '/');
         $this->basePath = $clean === '' ? '' : '/' . $clean;
+        $this->queryMode = $queryMode;
     }
 
     public function get(string $path, callable $handler): void
@@ -68,25 +72,26 @@ final class Router
 
     public function url(string $path = ''): string
     {
-        $cleanPath = $this->normalizePath($path);
-
-        if ($cleanPath === '') {
-            return $this->basePath === '' ? '/' : $this->basePath . '/';
-        }
-
-        return ($this->basePath === '' ? '' : $this->basePath) . '/' . $cleanPath;
+        return RequestContext::path($path, $this->basePath, $this->queryMode);
     }
 
     public function requestPath(string $uri): string
     {
-        $raw = (string)(parse_url($uri, PHP_URL_PATH) ?? '');
+        $parts = parse_url($uri);
+        $raw = (string)($parts['path'] ?? '');
         $normalized = '/' . ltrim($raw, '/');
 
         if ($this->basePath !== '' && ($normalized === $this->basePath || str_starts_with($normalized, $this->basePath . '/'))) {
             $normalized = (string)substr($normalized, strlen($this->basePath));
         }
 
-        return $this->normalizePath($normalized);
+        $path = $this->normalizePath($normalized);
+        if ($path !== '' || !$this->queryMode) {
+            return $path;
+        }
+
+        parse_str((string)($parts['query'] ?? ''), $query);
+        return $this->normalizePath((string)($query['route'] ?? ''));
     }
 
     private function normalizePath(string $path): string

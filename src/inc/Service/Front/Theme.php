@@ -271,21 +271,36 @@ final class Theme
     {
         $placeholder = trim((string)($labels['placeholder'] ?? 'Search content'));
         $button = trim((string)($labels['button'] ?? 'Search'));
-        $formAction = $this->esc($this->url(trim($action, '/')));
+        $formAction = $this->url(trim($action, '/'));
+        $hiddenRoute = $this->hiddenRouteField($formAction);
         $queryValue = trim($query);
         $value = $this->esc($queryValue);
         $state = $queryValue !== '' ? ' is-open' : '';
 
         return sprintf(
-            '<form class="search-form search-form-expand%s" action="%s" method="get"><input type="search" name="q" value="%s" placeholder="%s" aria-label="%s"><button type="submit" aria-label="%s">%s</button></form>',
+            '<form class="search-form search-form-expand%s" action="%s" method="get">%s<input type="search" name="q" value="%s" placeholder="%s" aria-label="%s"><button type="submit" aria-label="%s">%s</button></form>',
             $state,
-            $formAction,
+            $this->esc($this->formAction($formAction)),
+            $hiddenRoute,
             $value,
             $this->esc($placeholder),
             $this->esc($button),
             $this->esc($placeholder),
             $this->icon('search'),
         );
+    }
+
+    private function formAction(string $url): string
+    {
+        return strtok($url, '?') ?: $url;
+    }
+
+    private function hiddenRouteField(string $url): string
+    {
+        parse_str((string)(parse_url($url, PHP_URL_QUERY) ?? ''), $query);
+        $route = trim((string)($query['route'] ?? ''));
+
+        return $route === '' ? '' : '<input type="hidden" name="route" value="' . $this->esc($route) . '">';
     }
 
     private function icon(string $name): string
@@ -421,7 +436,7 @@ final class Theme
             'url' => $this->absoluteUrl($this->url('')),
             'potentialAction' => [
                 '@type' => 'SearchAction',
-                'target' => $this->absoluteUrl($this->url('search')) . '?q={search_term_string}',
+                'target' => $this->absoluteUrl($this->withQuery($this->url('search'), 'q={search_term_string}')),
                 'query-input' => 'required name=search_term_string',
             ],
         ];
@@ -498,14 +513,26 @@ final class Theme
     private function currentRequestUrl(): string
     {
         $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
-        $raw = (string)(parse_url($uri, PHP_URL_PATH) ?? '/');
-        $query = (string)(parse_url($uri, PHP_URL_QUERY) ?? '');
-        $path = $this->url(trim($raw, '/'));
+        $path = $this->url($this->router->requestPath($uri));
+        $query = $this->publicQuery($uri);
         if ($query !== '') {
-            $path .= '?' . $query;
+            $path = $this->withQuery($path, $query);
         }
 
         return $this->absoluteUrl($path);
+    }
+
+    private function publicQuery(string $uri): string
+    {
+        parse_str((string)(parse_url($uri, PHP_URL_QUERY) ?? ''), $query);
+        unset($query['route']);
+        return http_build_query($query);
+    }
+
+    private function withQuery(string $url, string $query): string
+    {
+        $clean = ltrim($query, '?&');
+        return $clean === '' ? $url : $url . (str_contains($url, '?') ? '&' : '?') . $clean;
     }
 
     private function jsonEncode(array $payload): string

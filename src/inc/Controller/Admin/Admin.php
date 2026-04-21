@@ -9,6 +9,7 @@ use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
 use App\Service\Support\PaginationConfig;
+use App\Service\Support\RequestContext;
 use App\View\AdminView;
 
 class Admin
@@ -266,12 +267,7 @@ class Admin
 
     protected function buildPath(string $path): string
     {
-        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
-        $baseDir = trim(dirname($scriptName), '/.');
-        $basePath = $baseDir === '' ? '' : '/' . $baseDir;
-        $normalized = '/' . ltrim($path, '/');
-
-        return $basePath . $normalized;
+        return RequestContext::path($path);
     }
 
     protected function resolvePreviewPath(array $item): string

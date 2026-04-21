@@ -79,6 +79,7 @@ final class View
                 return [
                     'label' => (string)($item['label'] ?? ''),
                     'url' => str_starts_with($path, 'http') ? $path : $url($path),
+                    'path' => $path,
                     'icon' => (string)($item['icon'] ?? ''),
                 ];
             }, $data['adminMenu']);
@@ -96,6 +97,7 @@ final class View
         $data['media'] = $media;
         $data['lang'] = I18n::htmlLang();
         $data['flashes'] = $this->flash->consume();
+        $data['currentRoute'] = $this->router->requestPath((string)($_SERVER['REQUEST_URI'] ?? '/'));
         extract($data, EXTR_SKIP);
 
         ob_start();
@@ -110,8 +112,11 @@ final class View
         $fullPath = $this->rootPath . '/' . ltrim($relativePath, '/');
         $allowedRoot = rtrim($this->rootPath . '/' . trim($allowedPath, '/'), '/');
         $realPath = realpath($fullPath);
+        $allowedRealPath = realpath($allowedRoot);
+        $normalizedRealPath = $realPath === false ? '' : str_replace('\\', '/', $realPath);
+        $normalizedAllowedRoot = $allowedRealPath === false ? '' : str_replace('\\', '/', $allowedRealPath);
 
-        if ($realPath === false || !str_starts_with($realPath, $allowedRoot) || !is_file($realPath)) {
+        if ($normalizedRealPath === '' || $normalizedAllowedRoot === '' || !str_starts_with($normalizedRealPath, $normalizedAllowedRoot) || !is_file($realPath)) {
             http_response_code(404);
             exit('404');
         }

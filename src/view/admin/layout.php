@@ -4,7 +4,7 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
+$currentPath = trim((string)($currentRoute ?? ''), '/');
 $authUser = $_SESSION['auth'] ?? null;
 $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 ?>
@@ -55,7 +55,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
                 $itemUrl = (string)($item['url'] ?? '');
-                $itemPath = trim(parse_url($itemUrl, PHP_URL_PATH) ?? '', '/');
+                $itemPath = trim((string)($item['path'] ?? $itemUrl), '/');
                 $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
             ?>
             <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= $e((string)$item['url']) ?>">

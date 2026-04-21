@@ -48,13 +48,14 @@ final class FrontView
         ]);
     }
 
-    public function termArchive(array $term, array $pagination): void
+    public function termArchive(array $term, array $pagination, string $archivePath): void
     {
         $this->render('archive', [
             'kind' => 'archive',
             'term' => $term,
             'pagination' => $pagination,
             'archiveLabel' => $this->translate('front.archive_for'),
+            'archivePath' => trim($archivePath, '/'),
         ]);
     }
 
@@ -168,9 +169,11 @@ final class FrontView
     {
         $path = $this->themePath($this->theme) . '/' . ltrim($file, '/');
         $real = realpath($path);
-        $root = rtrim($this->themePath($this->theme), '/');
+        $root = realpath($this->themePath($this->theme));
+        $normalizedReal = $real === false ? '' : str_replace('\\', '/', $real);
+        $normalizedRoot = $root === false ? '' : str_replace('\\', '/', $root);
 
-        if ($real === false || !str_starts_with($real, $root) || !is_file($real)) {
+        if ($normalizedReal === '' || $normalizedRoot === '' || !str_starts_with($normalizedReal, $normalizedRoot) || !is_file($real)) {
             http_response_code(404);
             exit('404');
         }

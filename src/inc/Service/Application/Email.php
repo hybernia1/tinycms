@@ -41,10 +41,7 @@ final class Email
         $settings = $this->settings->resolved();
         $scheme = RequestContext::scheme();
         $authority = RequestContext::authority();
-        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
-        $baseDir = trim(dirname($scriptName), '/.');
-        $basePath = $baseDir === '' ? '' : '/' . $baseDir;
-        $siteUrl = $scheme . '://' . $authority . $basePath;
+        $siteUrl = $scheme . '://' . $authority . RequestContext::path();
         $websiteEmail = trim((string)($settings['website_email'] ?? ''));
         $supportEmail = filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : ('tinycms@' . RequestContext::domain());
 

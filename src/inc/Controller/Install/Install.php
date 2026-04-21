@@ -204,11 +204,7 @@ final class Install
             return '';
         }
 
-        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
-        $baseDir = trim(dirname($scriptName), '/.');
-        $basePath = $baseDir === '' ? '' : '/' . $baseDir;
-
-        return RequestContext::scheme() . '://' . $authority . $basePath;
+        return RequestContext::scheme() . '://' . $authority . RequestContext::path();
     }
 
     private function detectedAuthority(): string

@@ -91,7 +91,7 @@ final class Front
         $page = max(1, (int)($_GET['page'] ?? 1));
         $pagination = $this->paginateTermPublished($termId, $page, $perPage);
 
-        $this->view->termArchive($term, $pagination);
+        $this->view->termArchive($term, $pagination, 'term/' . $canonicalSlug);
     }
 
     public function authorArchive(callable $redirect, array $params): void
@@ -514,11 +514,7 @@ final class Front
 
     private function absoluteUrl(string $path): string
     {
-        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
-        $baseDir = trim(dirname($scriptName), '/.');
-        $prefix = $baseDir === '' ? '' : '/' . $baseDir;
-        $cleanPath = ltrim($path, '/');
-        return RequestContext::scheme() . '://' . RequestContext::authority() . $prefix . '/' . $cleanPath;
+        return RequestContext::scheme() . '://' . RequestContext::authority() . RequestContext::path($path);
     }
 
     private function xml(string $value): string

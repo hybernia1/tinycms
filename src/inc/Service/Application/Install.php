@@ -337,10 +337,7 @@ final class Install
     {
         $scheme = RequestContext::scheme();
         $authority = RequestContext::authority();
-        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
-        $baseDir = trim(dirname($scriptName), '/.');
-        $basePath = $baseDir === '' ? '' : '/' . $baseDir;
-        return $scheme . '://' . $authority . $basePath . $path;
+        return $scheme . '://' . $authority . RequestContext::path($path);
     }
 
     private function renderInstallTemplate(array $vars): string
