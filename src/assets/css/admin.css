@@ -248,6 +248,35 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     border-top: 1px solid var(--color-border-soft);
 }
 
+.form-field-inline {
+    display: grid;
+    grid-template-columns: minmax(8rem, 10.5rem) minmax(0, 1fr);
+    gap: var(--space-1) var(--space-2);
+    align-items: center;
+}
+
+.form-field-inline > label {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.2;
+}
+
+.form-field-inline > input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']),
+.form-field-inline > textarea,
+.form-field-inline > select,
+.form-field-inline > .custom-upload-field {
+    grid-column: 2;
+}
+
+.form-field-inline > textarea {
+    min-height: 6.5rem;
+}
+
+.form-field-inline > small {
+    grid-column: 2;
+}
+
 .admin-header-action-menu {
     position: relative;
 }
@@ -637,6 +666,18 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 @media (max-width: 768px) {
+    .form-field-inline {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .form-field-inline > input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']),
+    .form-field-inline > textarea,
+    .form-field-inline > select,
+    .form-field-inline > .custom-upload-field,
+    .form-field-inline > small {
+        grid-column: 1;
+    }
+
     .media-library-modal-layout {
         grid-template-columns: minmax(0, 1fr);
     }

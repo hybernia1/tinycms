@@ -29,18 +29,18 @@ $contentId = (int)($item['id'] ?? 0);
     <input type="hidden" name="id" value="<?= $contentId ?>" data-content-id-hidden>
     <div class="content-editor-layout">
         <div class="card p-4">
-            <div class="mb-3">
+            <div class="mb-3 form-field-inline">
                 <label><?= $e($t('common.name')) ?></label>
                 <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" required>
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
             </div>
-            <div class="mb-3">
+            <div class="mb-3 form-field-inline">
                 <label>Excerpt</label>
                 <textarea name="excerpt" rows="3"><?= $e((string)($item['excerpt'] ?? '')) ?></textarea>
                 <?php if (!empty($errors['excerpt'])): ?><small class="text-danger"><?= $e((string)$errors['excerpt']) ?></small><?php endif; ?>
             </div>
             <input type="hidden" name="status" value="<?= $e((string)($item['status'] ?? 'draft')) ?>" data-content-status-hidden>
-            <div class="m-0">
+            <div class="m-0 form-field-inline">
                 <label><?= $e($t('content.body')) ?></label>
                 <textarea
                     name="body"
@@ -57,12 +57,12 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="card">
                 <div class="content-box-header"><?= $e($t('content.publication')) ?></div>
                 <div class="p-3">
-                    <div class="m-0">
+                    <div class="m-0 form-field-inline">
                         <label><?= $e($t('content.publish_date')) ?></label>
                         <input type="datetime-local" name="created" value="<?= $e($createdAt) ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= $e((string)$errors['created']) ?></small><?php endif; ?>
                     </div>
-                    <div class="mt-3 m-0">
+                    <div class="mt-3 m-0 form-field-inline">
                         <label><?= $e($t('content.type')) ?></label>
                         <?php $selectedType = (string)($item['type'] ?? \App\Service\Application\Content::TYPE_ARTICLE); ?>
                         <select name="type" required>

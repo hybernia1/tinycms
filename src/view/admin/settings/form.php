@@ -13,7 +13,7 @@
             $fieldValue = (string)($values[$fieldKey] ?? '');
             $labelKey = (string)($field['label_key'] ?? ('settings.fields.' . $fieldKey));
         ?>
-            <div class="mb-3">
+            <div class="mb-3 form-field-inline">
                 <label><?= $e($t($labelKey, (string)$fieldKey)) ?></label>
                 <?php if ($fieldType === 'textarea'): ?>
                     <textarea name="settings[<?= $e((string)$fieldKey) ?>]" rows="4"><?= $e($fieldValue) ?></textarea>

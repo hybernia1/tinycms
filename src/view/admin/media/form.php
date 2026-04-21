@@ -41,14 +41,14 @@ if ($mode === 'edit') {
     <?= $csrfField() ?>
     <div class="content-editor-layout">
         <div class="card p-4">
-            <div class="mb-3">
+            <div class="mb-3 form-field-inline">
                 <label><?= $e($t('common.name')) ?></label>
                 <input type="text" name="name" value="<?= $e((string)($item['name'] ?? '')) ?>" required>
                 <?php if (!empty($errors['name'])): ?><small class="text-danger"><?= $e((string)$errors['name']) ?></small><?php endif; ?>
             </div>
 
             <?php if ($mode === 'add'): ?>
-                <div class="mb-3">
+                <div class="mb-3 form-field-inline">
                     <label><?= $e($t('media.file')) ?></label>
                     <div class="custom-upload-field" data-custom-upload-auto-submit>
                         <label class="btn btn-light custom-upload-button" for="media-file-upload">
@@ -117,7 +117,7 @@ if ($mode === 'edit') {
                             <label><?= $e($t('common.created')) ?></label>
                             <div class="text-muted"><?= $e($formatDateTime((string)($item['created'] ?? ''))) ?></div>
                         </div>
-                        <div class="m-0">
+                        <div class="m-0 form-field-inline">
                             <label><?= $e($t('common.author')) ?></label>
                             <select name="author">
                                 <option value=""><?= $e($t('common.no_author')) ?></option>
