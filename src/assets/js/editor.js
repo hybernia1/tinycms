@@ -359,14 +359,19 @@
 
     function createImageToolbar() {
         var toolbar = document.createElement('div');
+        var items = [
+            ['w-align-left', translate('editor.align_left', 'Left'), {'data-image-align': 'left'}],
+            ['w-align-center', translate('editor.align_center', 'Center'), {'data-image-align': 'center'}],
+            ['w-align-right', translate('editor.align_right', 'Right'), {'data-image-align': 'right'}],
+            ['w-align-justify', translate('editor.image_full_width', 'Full width'), {'data-image-action': 'full'}],
+            ['concept', translate('editor.image_replace', 'Replace image'), {'data-image-action': 'replace'}],
+            ['delete', translate('editor.image_delete', 'Delete image'), {'data-image-action': 'delete'}],
+        ];
         toolbar.className = 'image-toolbar';
         toolbar.setAttribute('contenteditable', 'false');
-        toolbar.appendChild(createImageToolButton('w-align-left', translate('editor.align_left', 'Left'), {'data-image-align': 'left'}));
-        toolbar.appendChild(createImageToolButton('w-align-center', translate('editor.align_center', 'Center'), {'data-image-align': 'center'}));
-        toolbar.appendChild(createImageToolButton('w-align-right', translate('editor.align_right', 'Right'), {'data-image-align': 'right'}));
-        toolbar.appendChild(createImageToolButton('w-align-justify', translate('editor.image_full_width', 'Full width'), {'data-image-action': 'full'}));
-        toolbar.appendChild(createImageToolButton('concept', translate('editor.image_replace', 'Replace image'), {'data-image-action': 'replace'}));
-        toolbar.appendChild(createImageToolButton('delete', translate('editor.image_delete', 'Delete image'), {'data-image-action': 'delete'}));
+        items.forEach(function (item) {
+            toolbar.appendChild(createImageToolButton(item[0], item[1], item[2]));
+        });
         return toolbar;
     }
 
