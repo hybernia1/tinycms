@@ -56,12 +56,12 @@ $contentId = (int)($item['id'] ?? 0);
             <div class="card">
                 <div class="content-box-header"><?= $e($t('content.publication')) ?></div>
                 <div class="p-3">
-                    <div class="m-0">
+                    <div class="mb-3">
                         <label><?= $e($t('content.publish_date')) ?></label>
                         <input type="datetime-local" name="created" value="<?= $e($createdAt) ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= $e((string)$errors['created']) ?></small><?php endif; ?>
                     </div>
-                    <div class="mt-3 m-0">
+                    <div class="mt-3 mb-3">
                         <label><?= $e($t('content.type')) ?></label>
                         <?php $selectedType = (string)($item['type'] ?? \App\Service\Application\Content::TYPE_ARTICLE); ?>
                         <select name="type" required>
@@ -74,7 +74,7 @@ $contentId = (int)($item['id'] ?? 0);
                         </select>
                         <?php if (!empty($errors['type'])): ?><small class="text-danger"><?= $e((string)$errors['type']) ?></small><?php endif; ?>
                     </div>
-                    <div class="mt-3 m-0">
+                    <div class="mt-3 mb-3">
                         <label><?= $e($t('common.author')) ?></label>
                         <select name="author">
                             <option value=""><?= $e($t('common.no_author')) ?></option>
