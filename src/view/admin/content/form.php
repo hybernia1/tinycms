@@ -12,7 +12,8 @@ $termsJson = $e(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APO
 $thumbnailPath = $media((string)($item['thumbnail_path'] ?? ''), 'small');
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
-$previewUrl = $contentId > 0 ? $url('content/' . $contentId . '?preview=1') : '';
+$previewSlug = $contentId > 0 ? (new \App\Service\Support\Slugger())->slug((string)($item['name'] ?? ''), $contentId) : '';
+$previewUrl = $previewSlug !== '' ? $url($previewSlug . '?preview=1') : '';
 ?>
 <form
     id="content-editor-form"
