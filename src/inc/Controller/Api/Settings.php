@@ -70,7 +70,6 @@ final class Settings extends Admin
             'sitename' => (string)($_POST['settings']['sitename'] ?? ''),
             'siteauthor' => (string)($_POST['settings']['siteauthor'] ?? ''),
             'meta_description' => (string)($_POST['settings']['meta_description'] ?? ''),
-            'front_home_mode' => (string)($_POST['settings']['front_home_mode'] ?? 'latest'),
             'front_home_content' => (string)($_POST['settings']['front_home_content'] ?? ''),
             'front_posts_per_page' => (string)($_POST['settings']['front_posts_per_page'] ?? APP_POSTS_PER_PAGE),
             'front_theme' => (string)($_POST['settings']['front_theme'] ?? 'default'),

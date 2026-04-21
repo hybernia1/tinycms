@@ -26,16 +26,13 @@ final class Front
     public function home(): void
     {
         $settings = $this->services->settings->resolved();
-        $mode = (string)($settings['front_home_mode'] ?? 'latest');
         $perPage = $this->resolvePerPage($settings);
 
-        if ($mode === 'content') {
-            $contentId = (int)($settings['front_home_content'] ?? 0);
-            $item = $contentId > 0 ? $this->findPublishedContent($contentId) : null;
-            if ($item !== null) {
-                $this->view->homeContent($item);
-                return;
-            }
+        $contentId = (int)($settings['front_home_content'] ?? 0);
+        $item = $contentId > 0 ? $this->findPublishedContent($contentId) : null;
+        if ($item !== null) {
+            $this->view->homeContent($item);
+            return;
         }
 
         $page = max(1, (int)($_GET['page'] ?? 1));

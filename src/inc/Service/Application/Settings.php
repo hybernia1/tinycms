@@ -37,15 +37,6 @@ final class Settings
             'sitename' => ['label_key' => 'settings.fields.sitename', 'type' => 'text', 'default' => 'TinyCMS'],
             'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'type' => 'text', 'default' => 'Admin'],
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
-            'front_home_mode' => [
-                'label_key' => 'settings.fields.front_home_mode',
-                'type' => 'select',
-                'default' => 'latest',
-                'options' => [
-                    'latest' => I18n::t('settings.options.front_home_mode.latest'),
-                    'content' => I18n::t('settings.options.front_home_mode.content'),
-                ],
-            ],
             'front_home_content' => [
                 'label_key' => 'settings.fields.front_home_content',
                 'type' => 'select',

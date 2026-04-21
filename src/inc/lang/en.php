@@ -285,8 +285,7 @@ return [
             'sitename' => 'Site name',
             'siteauthor' => 'Site author',
             'meta_description' => 'Meta description',
-            'front_home_mode' => 'Default home page',
-            'front_home_content' => 'Home page (content)',
+            'front_home_content' => 'Home page',
             'front_posts_per_page' => 'Posts per page',
             'front_theme' => 'Theme',
             'allow_registration' => 'Allow registrations',
@@ -296,12 +295,8 @@ return [
             'website_email' => 'Website email',
         ],
         'options' => [
-            'front_home_mode' => [
-                'latest' => 'Latest posts loop',
-                'content' => 'Selected content',
-            ],
             'front_home_content' => [
-                'none' => '— Select content —',
+                'none' => '— Latest posts loop —',
             ],
             'allow_registration' => [
                 'disabled' => 'No',
