@@ -386,22 +386,6 @@ select option {
     background: var(--color-surface);
 }
 
-.form-floating-field:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input,
-.form-floating-field:has(> label + textarea) > textarea,
-.form-floating-field:has(> label + select) > select,
-.form-floating-field:has(> label + .field-with-icon) > .field-with-icon > input,
-.mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input,
-.mb-3:has(> label + textarea) > textarea,
-.mb-3:has(> label + select) > select,
-.mb-3:has(> label + .field-with-icon) > .field-with-icon > input,
-.m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input,
-.m-0:has(> label + textarea) > textarea,
-.m-0:has(> label + select) > select,
-.m-0:has(> label + .field-with-icon) > .field-with-icon > input {
-    border-width: 2px;
-    border-radius: var(--space-1);
-}
-
 .form-floating-field:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
 .form-floating-field:has(> label + textarea) > textarea:focus,
 .form-floating-field:has(> label + select) > select:focus,
