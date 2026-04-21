@@ -237,62 +237,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     max-height: calc(100svh - 9.5rem);
 }
 
-.admin-content .mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])),
-.admin-content .mb-3:has(> label + textarea),
-.admin-content .mb-3:has(> label + select),
-.admin-content .m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])),
-.admin-content .m-0:has(> label + textarea),
-.admin-content .m-0:has(> label + select),
-.admin-content .mb-3:has(> label + .field-with-icon),
-.admin-content .m-0:has(> label + .field-with-icon) {
-    position: relative;
-    padding-top: calc(var(--space-2) + var(--space-1) / 2);
-}
-
-.admin-content .mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > label,
-.admin-content .mb-3:has(> label + textarea) > label,
-.admin-content .mb-3:has(> label + select) > label,
-.admin-content .m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > label,
-.admin-content .m-0:has(> label + textarea) > label,
-.admin-content .m-0:has(> label + select) > label,
-.admin-content .mb-3:has(> label + .field-with-icon) > label,
-.admin-content .m-0:has(> label + .field-with-icon) > label {
-    position: absolute;
-    top: 0;
-    left: var(--space-3);
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    margin: 0;
-    padding: 0 var(--space-1);
-    font-size: var(--fs-sm);
-    color: var(--color-text-muted);
-    background: var(--color-surface);
-}
-
-.admin-content .mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input,
-.admin-content .mb-3:has(> label + textarea) > textarea,
-.admin-content .mb-3:has(> label + select) > select,
-.admin-content .m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input,
-.admin-content .m-0:has(> label + textarea) > textarea,
-.admin-content .m-0:has(> label + select) > select,
-.admin-content .mb-3:has(> label + .field-with-icon) > .field-with-icon > input,
-.admin-content .m-0:has(> label + .field-with-icon) > .field-with-icon > input {
-    border-width: 2px;
-    border-radius: var(--space-1);
-}
-
-.admin-content .mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
-.admin-content .mb-3:has(> label + textarea) > textarea:focus,
-.admin-content .mb-3:has(> label + select) > select:focus,
-.admin-content .m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
-.admin-content .m-0:has(> label + textarea) > textarea:focus,
-.admin-content .m-0:has(> label + select) > select:focus,
-.admin-content .mb-3:has(> label + .field-with-icon) > .field-with-icon > input:focus,
-.admin-content .m-0:has(> label + .field-with-icon) > .field-with-icon > input:focus {
-    border-color: var(--primary);
-}
-
 .content-box-header {
     padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid var(--color-border-soft);

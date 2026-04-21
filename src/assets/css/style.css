@@ -344,6 +344,62 @@ select option {
     background: var(--color-surface);
 }
 
+
+.form-floating-field:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])),
+.form-floating-field:has(> label + textarea),
+.form-floating-field:has(> label + select),
+.form-floating-field:has(> label + .field-with-icon),
+.mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])),
+.mb-3:has(> label + textarea),
+.mb-3:has(> label + select),
+.mb-3:has(> label + .field-with-icon),
+.m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])),
+.m-0:has(> label + textarea),
+.m-0:has(> label + select),
+.m-0:has(> label + .field-with-icon) {
+    position: relative;
+    padding-top: calc(var(--space-2) + var(--space-1) / 2);
+}
+
+.form-floating-field:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > label,
+.form-floating-field:has(> label + textarea) > label,
+.form-floating-field:has(> label + select) > label,
+.form-floating-field:has(> label + .field-with-icon) > label,
+.mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > label,
+.mb-3:has(> label + textarea) > label,
+.mb-3:has(> label + select) > label,
+.mb-3:has(> label + .field-with-icon) > label,
+.m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > label,
+.m-0:has(> label + textarea) > label,
+.m-0:has(> label + select) > label,
+.m-0:has(> label + .field-with-icon) > label {
+    position: absolute;
+    top: 0;
+    left: var(--space-3);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    padding: 0 var(--space-1);
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+}
+
+.form-floating-field:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
+.form-floating-field:has(> label + textarea) > textarea:focus,
+.form-floating-field:has(> label + select) > select:focus,
+.form-floating-field:has(> label + .field-with-icon) > .field-with-icon > input:focus,
+.mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
+.mb-3:has(> label + textarea) > textarea:focus,
+.mb-3:has(> label + select) > select:focus,
+.mb-3:has(> label + .field-with-icon) > .field-with-icon > input:focus,
+.m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
+.m-0:has(> label + textarea) > textarea:focus,
+.m-0:has(> label + select) > select:focus,
+.m-0:has(> label + .field-with-icon) > .field-with-icon > input:focus {
+    border-color: var(--primary);
+}
 .has-custom-select .custom-select-native {
     position: absolute;
     width: 1px;
