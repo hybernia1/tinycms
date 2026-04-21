@@ -12,6 +12,10 @@ $termsJson = $e(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APO
 $thumbnailPath = $media((string)($item['thumbnail_path'] ?? ''), 'small');
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
+$previewSlug = $contentId > 0 ? (new \App\Service\Support\Slugger())->slug((string)($item['name'] ?? ''), $contentId) : '';
+$previewUrl = $previewSlug !== '' ? $url($previewSlug . '?preview=1') : '';
+$previewTarget = 'tinycms-content-preview' . ($contentId > 0 ? '-' . $contentId : '');
+$previewHidden = $previewUrl === '';
 ?>
 <form
     id="content-editor-form"
@@ -54,7 +58,18 @@ $contentId = (int)($item['id'] ?? 0);
         </div>
         <aside class="content-editor-sidebar">
             <div class="card">
-                <div class="content-box-header"><?= $e($t('content.publication')) ?></div>
+                <div class="content-box-header content-box-header-actions">
+                    <span><?= $e($t('content.publication')) ?></span>
+                    <a
+                        class="btn btn-light"
+                        href="<?= $e($previewUrl) ?>"
+                        target="<?= $e($previewTarget) ?>"
+                        data-content-preview-link
+                        <?= $previewHidden ? 'hidden' : '' ?>
+                    >
+                        <?= $e($t('content.preview')) ?>
+                    </a>
+                </div>
                 <div class="p-3">
                     <div class="mb-3">
                         <label><?= $e($t('content.publish_date')) ?></label>

@@ -252,6 +252,7 @@ return [
         'type' => 'Typ',
         'status' => 'Status',
         'publish_date' => 'Datum publikace',
+        'preview' => 'Náhled',
         'types' => [
             'article' => 'Článek',
             'page' => 'Stránka',
