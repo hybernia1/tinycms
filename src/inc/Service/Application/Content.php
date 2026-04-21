@@ -282,6 +282,50 @@ final class Content
         return $counts;
     }
 
+    public function searchPublished(string $query, int $page = 1, int $perPage = 15): array
+    {
+        $pagination = $this->query->paginate('content', ['id', 'name'], ['status' => self::STATUS_PUBLISHED], [
+            'page' => $page,
+            'perPage' => $perPage,
+            'orderBy' => 'id',
+            'orderByAllowed' => ['id', 'name', 'created', 'updated'],
+            'orderDir' => 'DESC',
+            'search' => $query,
+            'searchColumns' => ['name', 'excerpt', 'body'],
+        ]);
+
+        $items = array_map(static function (array $row): array {
+            $id = (int)($row['id'] ?? 0);
+            $name = trim((string)($row['name'] ?? ''));
+            return [
+                'id' => $id,
+                'label' => $name !== '' ? $name : '#' . $id,
+            ];
+        }, (array)($pagination['data'] ?? []));
+
+        return [
+            'data' => $items,
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+        ];
+    }
+
+    public function publishedLabelById(int $id): string
+    {
+        if ($id <= 0) {
+            return '';
+        }
+
+        $rows = $this->query->select('content', ['id', 'name'], ['id' => $id, 'status' => self::STATUS_PUBLISHED]);
+        if ($rows === []) {
+            return '';
+        }
+
+        $name = trim((string)($rows[0]['name'] ?? ''));
+        return $name !== '' ? $name : '#' . $id;
+    }
+
     public function attachMedia(int $contentId, int $mediaId): bool
     {
         if ($contentId <= 0 || $mediaId <= 0 || $this->find($contentId) === null) {

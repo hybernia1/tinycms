@@ -17,6 +17,22 @@
                 <label><?= $e($t($labelKey, (string)$fieldKey)) ?></label>
                 <?php if ($fieldType === 'textarea'): ?>
                     <textarea name="settings[<?= $e((string)$fieldKey) ?>]" rows="4"><?= $e($fieldValue) ?></textarea>
+                <?php elseif ($fieldType === 'entity' && $fieldKey === 'front_home_content'): ?>
+                    <div
+                        class="entity-picker"
+                        data-entity-picker
+                        data-search-endpoint="<?= $e($url('admin/api/v1/content/search')) ?>"
+                        data-initial-id="<?= (int)$fieldValue ?>"
+                        data-initial-label="<?= $e((string)($values['front_home_content_label'] ?? '')) ?>"
+                        data-empty-label="<?= $e($t('settings.options.front_home_content.none')) ?>"
+                    >
+                        <div class="entity-picker-input-wrap">
+                            <input type="text" value="" autocomplete="off" data-entity-picker-input>
+                            <button type="button" class="entity-picker-clear" data-entity-picker-clear hidden><?= $icon('cancel') ?></button>
+                        </div>
+                        <div class="entity-picker-suggestions" data-entity-picker-suggestions></div>
+                        <input type="hidden" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>" data-entity-picker-value>
+                    </div>
                 <?php elseif ($fieldType === 'select'): ?>
                     <?php $options = (array)($field['options'] ?? []); ?>
                     <select name="settings[<?= $e((string)$fieldKey) ?>]">

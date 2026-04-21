@@ -79,15 +79,21 @@ $contentId = (int)($item['id'] ?? 0);
                 <div class="card">
                     <div class="content-box-header"><?= $e($t('common.author')) ?></div>
                     <div class="p-3">
-                        <select name="author">
-                            <option value=""><?= $e($t('common.no_author')) ?></option>
-                            <?php foreach ($authors as $author): ?>
-                                <?php $authorId = (int)($author['ID'] ?? 0); ?>
-                                <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
-                                    <?= $e((string)($author['name'] ?? '')) ?> (<?= $e((string)($author['email'] ?? '')) ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div
+                            class="entity-picker"
+                            data-entity-picker
+                            data-search-endpoint="<?= $e($url('admin/api/v1/users/search')) ?>"
+                            data-initial-id="<?= (int)($item['author'] ?? 0) ?>"
+                            data-initial-label="<?= $e((string)($authorLabel ?? '')) ?>"
+                            data-empty-label="<?= $e($t('users.search_placeholder')) ?>"
+                        >
+                            <div class="entity-picker-input-wrap">
+                                <input type="text" value="" autocomplete="off" data-entity-picker-input>
+                                <button type="button" class="entity-picker-clear" data-entity-picker-clear hidden><?= $icon('cancel') ?></button>
+                            </div>
+                            <div class="entity-picker-suggestions" data-entity-picker-suggestions></div>
+                            <input type="hidden" name="author" value="<?= $e((string)($item['author'] ?? '')) ?>" data-entity-picker-value>
+                        </div>
                         <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= $e((string)$errors['author']) ?></small><?php endif; ?>
                     </div>
                 </div>

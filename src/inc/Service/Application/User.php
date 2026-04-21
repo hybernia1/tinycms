@@ -182,11 +182,54 @@ final class User
         }
     }
 
-    public function authorOptions(): array
+    public function searchAuthors(string $query, int $page = 1, int $perPage = 15): array
     {
-        $rows = $this->query->select('users', ['ID', 'name', 'email']);
-        usort($rows, static fn(array $a, array $b): int => strcmp((string)($a['name'] ?? ''), (string)($b['name'] ?? '')));
-        return $rows;
+        $pagination = $this->query->paginate('users', ['ID', 'name', 'email'], [], [
+            'page' => $page,
+            'perPage' => $perPage,
+            'orderBy' => 'name',
+            'orderByAllowed' => ['ID', 'name', 'email'],
+            'orderDir' => 'ASC',
+            'search' => $query,
+            'searchColumns' => ['name', 'email'],
+        ]);
+
+        $items = array_map(static function (array $row): array {
+            $id = (int)($row['ID'] ?? 0);
+            $name = trim((string)($row['name'] ?? ''));
+            $email = trim((string)($row['email'] ?? ''));
+            return [
+                'id' => $id,
+                'label' => $name !== '' ? ($email !== '' ? $name . ' (' . $email . ')' : $name) : ($email !== '' ? $email : '#' . $id),
+            ];
+        }, (array)($pagination['data'] ?? []));
+
+        return [
+            'data' => $items,
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? $perPage),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+        ];
+    }
+
+    public function authorLabelById(int $id): string
+    {
+        if ($id <= 0) {
+            return '';
+        }
+
+        $rows = $this->query->select('users', ['name', 'email'], ['ID' => $id]);
+        if ($rows === []) {
+            return '';
+        }
+
+        $name = trim((string)($rows[0]['name'] ?? ''));
+        $email = trim((string)($rows[0]['email'] ?? ''));
+        if ($name !== '' && $email !== '') {
+            return $name . ' (' . $email . ')';
+        }
+
+        return $name !== '' ? $name : $email;
     }
 
     public function statusCounts(): array

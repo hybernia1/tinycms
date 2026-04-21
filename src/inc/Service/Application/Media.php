@@ -171,11 +171,24 @@ final class Media
         return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function authorOptions(): array
+    public function authorLabelById(int $id): string
     {
-        $rows = $this->query->select('users', ['ID', 'name', 'email']);
-        usort($rows, static fn(array $a, array $b): int => strcmp((string)($a['name'] ?? ''), (string)($b['name'] ?? '')));
-        return $rows;
+        if ($id <= 0) {
+            return '';
+        }
+
+        $rows = $this->query->select('users', ['name', 'email'], ['ID' => $id]);
+        if ($rows === []) {
+            return '';
+        }
+
+        $name = trim((string)($rows[0]['name'] ?? ''));
+        $email = trim((string)($rows[0]['email'] ?? ''));
+        if ($name !== '' && $email !== '') {
+            return $name . ' (' . $email . ')';
+        }
+
+        return $name !== '' ? $name : $email;
     }
 
     public function editNavigation(int $id, ?int $authorId = null): array

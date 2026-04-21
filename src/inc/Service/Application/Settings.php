@@ -25,7 +25,6 @@ final class Settings
             $localeOptions[$locale] = I18n::languageLabel($locale);
         }
         $themeOptions = $this->themeOptions();
-        $homePageOptions = $this->homePageOptions();
 
         return [
             'app_lang' => [
@@ -48,9 +47,8 @@ final class Settings
             ],
             'front_home_content' => [
                 'label_key' => 'settings.fields.front_home_content',
-                'type' => 'select',
+                'type' => 'entity',
                 'default' => '',
-                'options' => $homePageOptions,
             ],
             'front_posts_per_page' => [
                 'label_key' => 'settings.fields.front_posts_per_page',
@@ -79,24 +77,6 @@ final class Settings
             'website_url' => ['label_key' => 'settings.fields.website_url', 'type' => 'text', 'default' => ''],
             'website_email' => ['label_key' => 'settings.fields.website_email', 'type' => 'text', 'default' => ''],
         ];
-    }
-
-    private function homePageOptions(): array
-    {
-        $rows = $this->query->select('content', ['id', 'name'], ['status' => 'published']);
-        $options = ['' => I18n::t('settings.options.front_home_content.none')];
-
-        foreach ($rows as $row) {
-            $id = (int)($row['id'] ?? 0);
-            if ($id <= 0) {
-                continue;
-            }
-
-            $name = trim((string)($row['name'] ?? ''));
-            $options[(string)$id] = $name !== '' ? $name : sprintf('#%d', $id);
-        }
-
-        return $options;
     }
 
     private function themeOptions(): array
@@ -214,6 +194,13 @@ final class Settings
                 $options = (array)($fields[$key]['options'] ?? []);
                 if ($value !== '' && !array_key_exists($value, $options)) {
                     $value = (string)($fields[$key]['default'] ?? '');
+                }
+            }
+            if ($key === 'front_home_content' && $value !== '') {
+                $contentId = (int)$value;
+                $exists = $contentId > 0 && $this->query->select('content', ['id'], ['id' => $contentId, 'status' => 'published']) !== [];
+                if (!$exists) {
+                    $value = '';
                 }
             }
             $payload = ['value' => $value];

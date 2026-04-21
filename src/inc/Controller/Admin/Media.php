@@ -41,7 +41,7 @@ final class Media extends Admin
         }
 
         $fallback = ['id' => null, 'name' => '', 'path' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
-        $this->pages->adminMediaForm('add', $fallback, [], $this->media->authorOptions(), []);
+        $this->pages->adminMediaForm('add', $fallback, [], $this->media->authorLabelById((int)($fallback['author'] ?? 0)), []);
     }
 
     public function editForm(callable $redirect): void
@@ -60,6 +60,6 @@ final class Media extends Admin
         }
 
         $navigation = $this->media->editNavigation($id);
-        $this->pages->adminMediaForm('edit', $item, [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
+        $this->pages->adminMediaForm('edit', $item, [], $this->media->authorLabelById((int)($item['author'] ?? 0)), $this->media->thumbnailUsages($id), $navigation);
     }
 }

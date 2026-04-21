@@ -38,6 +38,25 @@ final class Content extends Admin
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
+    public function searchApiV1(callable $_redirect): void
+    {
+        if (!$this->guardApiAdmin()) {
+            return;
+        }
+
+        $query = trim((string)($_GET['q'] ?? ''));
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = max(1, min(30, (int)($_GET['per_page'] ?? 15)));
+        $result = $this->content->searchPublished($query, $page, $perPage);
+
+        $this->apiOk((array)($result['data'] ?? []), [
+            'query' => $query,
+            'page' => (int)($result['page'] ?? $page),
+            'per_page' => (int)($result['per_page'] ?? $perPage),
+            'total_pages' => (int)($result['total_pages'] ?? 1),
+        ]);
+    }
+
     public function deleteApiV1(callable $redirect, int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
