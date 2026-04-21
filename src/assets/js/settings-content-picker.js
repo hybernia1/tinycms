@@ -1,13 +1,15 @@
-const settingsContentPickers = document.querySelectorAll('[data-settings-content-picker]');
+const entityPickers = document.querySelectorAll('[data-entity-picker]');
 
-if (settingsContentPickers.length) {
+if (entityPickers.length) {
     const requestJson = window.tinycms?.api?.http?.requestJson;
 
-    settingsContentPickers.forEach((picker) => {
+    entityPickers.forEach((picker) => {
         const endpoint = picker.getAttribute('data-search-endpoint') || '';
-        const searchInput = picker.querySelector('[data-settings-content-search]');
-        const idInput = picker.querySelector('[data-settings-content-id]');
-        const suggestions = picker.querySelector('[data-settings-content-suggestions]');
+        const searchStatus = (picker.getAttribute('data-search-status') || '').trim();
+        const labelTemplate = (picker.getAttribute('data-label-template') || '{name}').trim();
+        const searchInput = picker.querySelector('[data-entity-picker-search]');
+        const valueInput = picker.querySelector('[data-entity-picker-value]');
+        const suggestions = picker.querySelector('[data-entity-picker-suggestions]');
         let timer = null;
 
         const esc = (value) => String(value || '')
@@ -25,23 +27,38 @@ if (settingsContentPickers.length) {
             suggestions.innerHTML = '';
         };
 
+        const resolveLabel = (item) => {
+            const fallback = String(item.name || '').trim();
+            const resolved = labelTemplate
+                .replace('{name}', String(item.name || '').trim())
+                .replace('{email}', String(item.email || '').trim())
+                .trim();
+            return resolved !== '' ? resolved : fallback;
+        };
+
         const renderSuggestions = (items) => {
             if (!suggestions) {
                 return;
             }
-            if (!items.length) {
+            const rows = items
+                .map((item) => {
+                    const id = Number(item.id || 0);
+                    if (!Number.isFinite(id) || id <= 0) {
+                        return '';
+                    }
+                    const label = resolveLabel(item);
+                    if (label === '') {
+                        return '';
+                    }
+                    return `<button type="button" class="tag-picker-suggestion" data-entity-picker-select="${id}" data-entity-picker-label="${esc(label)}">${esc(label)}</button>`;
+                })
+                .filter((item) => item !== '');
+            if (!rows.length) {
                 clearSuggestions();
                 return;
             }
             suggestions.classList.add('open');
-            suggestions.innerHTML = items.map((item) => {
-                const id = Number(item.id || 0);
-                const name = String(item.name || '').trim();
-                if (!Number.isFinite(id) || id <= 0 || name === '') {
-                    return '';
-                }
-                return `<button type="button" class="tag-picker-suggestion" data-settings-content-select="${id}" data-settings-content-name="${esc(name)}">${esc(name)}</button>`;
-            }).join('');
+            suggestions.innerHTML = rows.join('');
         };
 
         const fetchSuggestions = async (query) => {
@@ -51,7 +68,9 @@ if (settingsContentPickers.length) {
             }
             const url = new URL(endpoint, window.location.origin);
             url.searchParams.set('page', '1');
-            url.searchParams.set('status', 'published');
+            if (searchStatus !== '') {
+                url.searchParams.set('status', searchStatus);
+            }
             if (query !== '') {
                 url.searchParams.set('q', query);
             }
@@ -68,9 +87,9 @@ if (settingsContentPickers.length) {
             renderSuggestions(items.slice(0, 8));
         };
 
-        if (searchInput && idInput) {
+        if (searchInput && valueInput) {
             searchInput.addEventListener('input', () => {
-                idInput.value = '';
+                valueInput.value = '';
                 if (timer) {
                     clearTimeout(timer);
                 }
@@ -89,13 +108,13 @@ if (settingsContentPickers.length) {
         }
 
         picker.addEventListener('click', (event) => {
-            const option = event.target.closest('[data-settings-content-select]');
-            if (!option || !searchInput || !idInput) {
+            const option = event.target.closest('[data-entity-picker-select]');
+            if (!option || !searchInput || !valueInput) {
                 return;
             }
             event.preventDefault();
-            idInput.value = option.getAttribute('data-settings-content-select') || '';
-            searchInput.value = option.getAttribute('data-settings-content-name') || '';
+            valueInput.value = option.getAttribute('data-entity-picker-select') || '';
+            searchInput.value = option.getAttribute('data-entity-picker-label') || '';
             clearSuggestions();
             searchInput.focus();
         });

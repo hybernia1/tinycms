@@ -171,13 +171,6 @@ final class Media
         return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function authorOptions(): array
-    {
-        $rows = $this->query->select('users', ['ID', 'name', 'email']);
-        usort($rows, static fn(array $a, array $b): int => strcmp((string)($a['name'] ?? ''), (string)($b['name'] ?? '')));
-        return $rows;
-    }
-
     public function editNavigation(int $id, ?int $authorId = null): array
     {
         $ids = $this->accessibleIds($authorId);

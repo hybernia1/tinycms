@@ -182,11 +182,24 @@ final class User
         }
     }
 
-    public function authorOptions(): array
+    public function authorLabel(int $id): string
     {
-        $rows = $this->query->select('users', ['ID', 'name', 'email']);
-        usort($rows, static fn(array $a, array $b): int => strcmp((string)($a['name'] ?? ''), (string)($b['name'] ?? '')));
-        return $rows;
+        if ($id <= 0) {
+            return '';
+        }
+
+        $rows = $this->query->select('users', ['ID', 'name', 'email'], ['ID' => $id]);
+        if ($rows === []) {
+            return '';
+        }
+
+        $name = trim((string)($rows[0]['name'] ?? ''));
+        $email = trim((string)($rows[0]['email'] ?? ''));
+        if ($name === '' && $email === '') {
+            return '';
+        }
+
+        return $email !== '' && $name !== '' ? ($name . ' (' . $email . ')') : ($name !== '' ? $name : $email);
     }
 
     public function statusCounts(): array

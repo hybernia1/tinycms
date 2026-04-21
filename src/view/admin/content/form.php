@@ -76,15 +76,13 @@ $contentId = (int)($item['id'] ?? 0);
                     </div>
                     <div class="mt-3 mb-3">
                         <label><?= $e($t('common.author')) ?></label>
-                        <select name="author">
-                            <option value=""><?= $e($t('common.no_author')) ?></option>
-                            <?php foreach ($authors as $author): ?>
-                                <?php $authorId = (int)($author['ID'] ?? 0); ?>
-                                <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
-                                    <?= $e((string)($author['name'] ?? '')) ?> (<?= $e((string)($author['email'] ?? '')) ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="tag-picker" data-entity-picker data-search-endpoint="<?= $e($url('admin/api/v1/users')) ?>" data-label-template="{name} ({email})">
+                            <div class="tag-picker-field">
+                                <input class="tag-picker-input" type="search" value="<?= $e((string)($item['author_label'] ?? '')) ?>" placeholder="<?= $e($t('users.search_placeholder')) ?>" autocomplete="off" data-entity-picker-search>
+                                <input type="hidden" name="author" value="<?= $e((string)($item['author'] ?? '')) ?>" data-entity-picker-value>
+                            </div>
+                            <div class="tag-picker-suggestions" data-entity-picker-suggestions></div>
+                        </div>
                         <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= $e((string)$errors['author']) ?></small><?php endif; ?>
                     </div>
                 </div>

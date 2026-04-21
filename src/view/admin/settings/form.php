@@ -21,15 +21,15 @@
                     <?php $selectedLabel = trim((string)($values[$fieldKey . '_label'] ?? '')); ?>
                     <div
                         class="tag-picker"
-                        data-settings-content-picker
+                        data-entity-picker
                         data-search-endpoint="<?= $e($url('admin/api/v1/content')) ?>"
-                        data-selected-id="<?= $e($fieldValue) ?>"
+                        data-search-status="published"
                     >
                         <div class="tag-picker-field">
-                            <input class="tag-picker-input" type="search" value="<?= $e($selectedLabel) ?>" placeholder="<?= $e($t('content.search_placeholder')) ?>" autocomplete="off" data-settings-content-search>
-                            <input type="hidden" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>" data-settings-content-id>
+                            <input class="tag-picker-input" type="search" value="<?= $e($selectedLabel) ?>" placeholder="<?= $e($t('content.search_placeholder')) ?>" autocomplete="off" data-entity-picker-search>
+                            <input type="hidden" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>" data-entity-picker-value>
                         </div>
-                        <div class="tag-picker-suggestions" data-settings-content-suggestions></div>
+                        <div class="tag-picker-suggestions" data-entity-picker-suggestions></div>
                     </div>
                 <?php elseif ($fieldType === 'select'): ?>
                     <?php $options = (array)($field['options'] ?? []); ?>

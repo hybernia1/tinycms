@@ -89,7 +89,7 @@ final class AdminView
         ]);
     }
 
-    public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $contentTypes, array $authors, array $selectedTerms = []): void
+    public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $contentTypes, array $selectedTerms = []): void
     {
         $this->renderAdmin('admin/content/form', [
             'mode' => $mode,
@@ -97,7 +97,6 @@ final class AdminView
             'errors' => $errors,
             'availableStatuses' => $availableStatuses,
             'contentTypes' => $contentTypes,
-            'authors' => $authors,
             'selectedTerms' => $selectedTerms,
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_content') : I18n::t('admin.edit_content'),
             'headerAction' => $this->contentMenuHeaderAction($mode === 'edit'),
@@ -147,13 +146,12 @@ final class AdminView
         ];
     }
 
-    public function adminMediaForm(string $mode, array $item, array $errors, array $authors, array $usages = [], array $navigation = []): void
+    public function adminMediaForm(string $mode, array $item, array $errors, array $usages = [], array $navigation = []): void
     {
         $this->renderAdmin('admin/media/form', [
             'mode' => $mode,
             'item' => $item,
             'errors' => $errors,
-            'authors' => $authors,
             'usages' => $usages,
             'navigation' => $navigation,
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media') : I18n::t('admin.edit_media'),
