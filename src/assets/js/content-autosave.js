@@ -86,6 +86,7 @@
             var base = slugify(nameInput ? nameInput.value : '');
             var path = (base !== '' ? base + '-' : '') + id + '?preview=1';
             previewLink.href = contentApi('/' + path);
+            previewLink.target = 'tinycms-content-preview-' + id;
             previewLink.hidden = false;
         }
 

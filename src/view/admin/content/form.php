@@ -14,6 +14,7 @@ $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
 $previewSlug = $contentId > 0 ? (new \App\Service\Support\Slugger())->slug((string)($item['name'] ?? ''), $contentId) : '';
 $previewUrl = $previewSlug !== '' ? $url($previewSlug . '?preview=1') : '';
+$previewTarget = 'tinycms-content-preview' . ($contentId > 0 ? '-' . $contentId : '');
 $previewHidden = $previewUrl === '';
 ?>
 <form
@@ -62,7 +63,7 @@ $previewHidden = $previewUrl === '';
                     <a
                         class="btn btn-light"
                         href="<?= $e($previewUrl) ?>"
-                        target="tinycms-content-preview"
+                        target="<?= $e($previewTarget) ?>"
                         rel="noopener noreferrer"
                         data-content-preview-link
                         <?= $previewHidden ? 'hidden' : '' ?>
