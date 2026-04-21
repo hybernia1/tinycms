@@ -152,6 +152,21 @@ final class Settings
         return array_replace($this->defaults(), $this->values());
     }
 
+    public function frontHomeContentLabelById(int $id): string
+    {
+        if ($id <= 0) {
+            return '';
+        }
+
+        $rows = $this->query->select('content', ['id', 'name'], ['id' => $id, 'status' => 'published']);
+        if ($rows === []) {
+            return '';
+        }
+
+        $name = trim((string)($rows[0]['name'] ?? ''));
+        return $name !== '' ? $name : '#' . $id;
+    }
+
     public function save(array $input): void
     {
         $fields = $this->fields();
