@@ -252,6 +252,7 @@ return [
         'type' => 'Type',
         'status' => 'Status',
         'publish_date' => 'Publish date',
+        'preview' => 'Preview',
         'types' => [
             'article' => 'Article',
             'page' => 'Page',

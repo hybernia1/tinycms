@@ -12,6 +12,7 @@ $termsJson = $e(json_encode($initialTerms, JSON_UNESCAPED_UNICODE | JSON_HEX_APO
 $thumbnailPath = $media((string)($item['thumbnail_path'] ?? ''), 'small');
 $thumbnailUrl = $thumbnailPath !== '' ? $url($thumbnailPath) : '';
 $contentId = (int)($item['id'] ?? 0);
+$previewUrl = $contentId > 0 ? $url('content/' . $contentId . '?preview=1') : '';
 ?>
 <form
     id="content-editor-form"
@@ -61,6 +62,11 @@ $contentId = (int)($item['id'] ?? 0);
                         <input type="datetime-local" name="created" value="<?= $e($createdAt) ?>">
                         <?php if (!empty($errors['created'])): ?><small class="text-danger"><?= $e((string)$errors['created']) ?></small><?php endif; ?>
                     </div>
+                    <?php if ($previewUrl !== ''): ?>
+                    <a class="btn btn-light w-100" href="<?= $e($previewUrl) ?>" target="_blank" rel="noopener noreferrer">
+                        <?= $e($t('content.preview')) ?>
+                    </a>
+                    <?php endif; ?>
                     <div class="mt-3 mb-3">
                         <label><?= $e($t('content.type')) ?></label>
                         <?php $selectedType = (string)($item['type'] ?? \App\Service\Application\Content::TYPE_ARTICLE); ?>

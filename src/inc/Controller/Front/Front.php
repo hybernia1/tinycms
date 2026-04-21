@@ -44,7 +44,8 @@ final class Front
     {
         $slug = trim((string)($params['slug'] ?? ''));
         $id = $this->slugger->extractId($slug);
-        $item = $this->findPublishedContent($id);
+        $preview = $this->canPreview();
+        $item = $preview ? $this->findPreviewContent($id) : $this->findPublishedContent($id);
 
         if ($item === null) {
             $this->notFound();
@@ -52,7 +53,7 @@ final class Front
         }
 
         $canonicalSlug = $this->slugger->slug((string)($item['name'] ?? ''), (int)($item['id'] ?? 0));
-        if ($slug !== $canonicalSlug) {
+        if (!$preview && $slug !== $canonicalSlug) {
             $redirect($canonicalSlug, true);
         }
 
@@ -62,10 +63,16 @@ final class Front
     public function contentLegacy(callable $redirect, array $params): void
     {
         $id = (int)($params['id'] ?? 0);
-        $item = $this->findPublishedContent($id);
+        $preview = $this->canPreview();
+        $item = $preview ? $this->findPreviewContent($id) : $this->findPublishedContent($id);
 
         if ($item === null) {
             $this->notFound();
+            return;
+        }
+
+        if ($preview) {
+            $this->view->singleContent($item);
             return;
         }
 
@@ -220,6 +227,16 @@ final class Front
 
     private function findPublishedContent(int $id): ?array
     {
+        return $this->findContent($id, false);
+    }
+
+    private function findPreviewContent(int $id): ?array
+    {
+        return $this->findContent($id, true);
+    }
+
+    private function findContent(int $id, bool $includeUnpublished): ?array
+    {
         if ($id <= 0) {
             return null;
         }
@@ -227,16 +244,29 @@ final class Front
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
         $mediaTable = Table::name('media');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
-            "FROM $contentTable c",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE c.id = :id AND c.status = :status AND c.created <= :now',
-            'LIMIT 1',
-        ]));
-        $stmt->execute(['id' => $id, 'status' => 'published', 'now' => $this->now()]);
+        if (!$includeUnpublished) {
+            $stmt = $this->pdo->prepare(implode("\n", [
+                'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
+                "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
+                "FROM $contentTable c",
+                "LEFT JOIN $usersTable u ON u.id = c.author",
+                "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
+                'WHERE c.id = :id AND c.status = :status AND c.created <= :now',
+                'LIMIT 1',
+            ]));
+            $stmt->execute(['id' => $id, 'status' => 'published', 'now' => $this->now()]);
+        } else {
+            $stmt = $this->pdo->prepare(implode("\n", [
+                'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
+                "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
+                "FROM $contentTable c",
+                "LEFT JOIN $usersTable u ON u.id = c.author",
+                "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
+                'WHERE c.id = :id',
+                'LIMIT 1',
+            ]));
+            $stmt->execute(['id' => $id]);
+        }
         $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
 
         if ($item === null) {
@@ -246,6 +276,12 @@ final class Front
         $item = $this->withThumbnail($item);
         $item['terms'] = $this->services->term->listByContent((int)$item['id']);
         return $item;
+    }
+
+    private function canPreview(): bool
+    {
+        $preview = trim((string)($_GET['preview'] ?? ''));
+        return $preview !== '' && $preview !== '0' && $this->auth->isAdmin();
     }
 
     private function paginatePublished(int $page, int $perPage, string $search = ''): array
