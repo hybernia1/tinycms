@@ -71,7 +71,12 @@ final class Term
 
     public function save(array $input, ?int $id = null): array
     {
-        $name = trim((string)($input['name'] ?? ''));
+        $name = $this->schemaConstraintValidator->truncate(
+            'terms',
+            'name',
+            trim((string)($input['name'] ?? '')),
+            255
+        );
         $errors = [];
 
         if ($name === '') {
@@ -283,7 +288,12 @@ final class Term
             if ($value === '') {
                 continue;
             }
-            $value = mb_substr($value, 0, 255);
+            $value = $this->schemaConstraintValidator->truncate(
+                'terms',
+                'name',
+                $value,
+                255
+            );
             $key = mb_strtolower($value);
             $terms[$key] = $value;
         }

@@ -145,10 +145,20 @@ final class Content
 
     public function save(array $input, int $defaultAuthorId, ?int $id = null): array
     {
-        $name = trim((string)($input['name'] ?? ''));
+        $name = $this->schemaConstraintValidator->truncate(
+            'content',
+            'name',
+            trim((string)($input['name'] ?? '')),
+            255
+        );
         $status = trim((string)($input['status'] ?? 'draft'));
         $type = trim((string)($input['type'] ?? self::TYPE_ARTICLE));
-        $excerpt = $this->sanitizeExcerpt((string)($input['excerpt'] ?? ''));
+        $excerpt = $this->schemaConstraintValidator->truncate(
+            'content',
+            'excerpt',
+            $this->sanitizeExcerpt((string)($input['excerpt'] ?? '')),
+            500
+        );
         $body = trim((string)($input['body'] ?? ''));
         $author = $this->resolveAuthorId($input, $defaultAuthorId);
         $created = $this->resolveDateTime((string)($input['created'] ?? ''));
@@ -203,7 +213,7 @@ final class Content
             'name' => $name,
             'status' => $status,
             'type' => $type,
-            'excerpt' => $excerpt === '' ? null : mb_substr($excerpt, 0, 500),
+            'excerpt' => $excerpt === '' ? null : $excerpt,
             'body' => $body,
             'author' => $author,
         ];

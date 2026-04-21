@@ -97,7 +97,12 @@ final class User
 
     public function save(array $input, ?int $id = null): array
     {
-        $name = trim((string)($input['name'] ?? ''));
+        $name = $this->columnLimitValidator->truncate(
+            'users',
+            'name',
+            trim((string)($input['name'] ?? '')),
+            255
+        );
         $email = mb_strtolower(trim((string)($input['email'] ?? '')));
         $role = trim((string)($input['role'] ?? 'user'));
         $suspend = (int)($input['suspend'] ?? 0) === 1 ? 1 : 0;

@@ -21,6 +21,12 @@ final class SchemaConstraintValidator
         return is_int($max) ? $max : null;
     }
 
+    public function truncate(string $table, string $column, string $value, ?int $fallback = null): string
+    {
+        $max = $this->maxLength($table, $column) ?? $fallback;
+        return $max === null ? $value : mb_substr($value, 0, $max);
+    }
+
     public function validate(string $table, array $input, array $fieldToColumn): array
     {
         $errors = [];

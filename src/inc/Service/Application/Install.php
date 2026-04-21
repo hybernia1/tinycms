@@ -79,7 +79,12 @@ final class Install
 
     public function validateAdminInput(array $input): array
     {
-        $name = trim((string)($input['name'] ?? ''));
+        $name = $this->schemaValidator->truncate(
+            'users',
+            'name',
+            trim((string)($input['name'] ?? '')),
+            255
+        );
         $email = mb_strtolower(trim((string)($input['email'] ?? '')));
         $websiteUrl = trim((string)($input['website_url'] ?? ''));
         $password = (string)($input['password'] ?? '');

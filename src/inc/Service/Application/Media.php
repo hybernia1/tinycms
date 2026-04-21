@@ -91,7 +91,12 @@ final class Media
 
     public function save(array $input, ?int $id = null): array
     {
-        $name = trim((string)($input['name'] ?? ''));
+        $name = $this->schemaConstraintValidator->truncate(
+            'media',
+            'name',
+            trim((string)($input['name'] ?? '')),
+            255
+        );
         $path = trim((string)($input['path'] ?? ''));
         $author = $this->resolveAuthor($input);
         $errors = [];
