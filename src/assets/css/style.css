@@ -572,7 +572,7 @@ input[type='week']::-webkit-calendar-picker-indicator {
     position: absolute;
     top: calc(100% + var(--space-1));
     left: 0;
-    width: min(26rem, calc(100vw - 2rem));
+    width: 100%;
     z-index: 30;
     border: 1px solid var(--color-border);
     background: var(--color-surface);
