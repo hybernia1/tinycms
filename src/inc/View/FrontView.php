@@ -112,10 +112,7 @@ final class FrontView
         $url = fn(string $path = ''): string => $theme->url($path);
         $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
         $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-        $setting = fn(string $key, string $default = ''): string => $theme->setting($key, $default);
         $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
-        $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);
-        $mediaSrcSet = fn(string $path): string => $theme->mediaSrcSet($path);
         $contentThumbnail = fn(array $item, array $options = []): string => $theme->contentThumbnail($item, $options);
         $contentAuthor = fn(array $item, string $fallback = ''): string => $theme->contentAuthor($item, $fallback);
         $contentDate = fn(array $item, string $fallback = ''): string => $theme->contentDate($item, $fallback);
@@ -132,7 +129,7 @@ final class FrontView
             return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
         };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $theme, $icon): void {
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $t, $lang, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $icon): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;
