@@ -262,6 +262,10 @@
     max-width: 100%;
 }
 
+.wysiwyg-editor .block.block-image.is-selected {
+    z-index: 6;
+}
+
 .image-upload-loading {
     width: 8rem;
     height: 8rem;
@@ -304,55 +308,62 @@
     margin: 0 0 var(--space-2) var(--space-3);
 }
 
-.image-controls {
+.image-toolbar {
     display: none;
     position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    gap: 0.25rem;
-    z-index: 2;
+    top: -2.35rem;
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    gap: 0.1rem;
+    padding: 0.2rem;
+    border: 1px solid var(--color-border-soft);
+    background: var(--color-surface);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.12);
+    z-index: 8;
 }
 
-.wysiwyg-editor .block.block-image.is-selected .image-controls {
+.wysiwyg-editor .block.block-image.image-toolbar-below .image-toolbar {
+    top: auto;
+    bottom: -2.35rem;
+}
+
+.wysiwyg-editor .block.block-image.is-selected .image-toolbar {
     display: inline-flex;
 }
 
-.image-size-controls {
-    display: none;
-    position: absolute;
-    right: 1.1rem;
-    bottom: 0.45rem;
-    gap: 0.25rem;
-    z-index: 2;
-}
-
-.wysiwyg-editor .block.block-image.is-selected .image-size-controls {
+.image-toolbar-btn {
+    width: 1.85rem;
+    height: 1.85rem;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text);
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
-.image-controls .btn {
-    padding: 0.15rem 0.35rem;
-    min-height: auto;
-    font-size: 0.75rem;
+.image-toolbar-btn:hover,
+.image-toolbar-btn.is-active {
+    border-color: var(--color-border-soft);
+    background: var(--color-surface-muted);
 }
 
-.image-size-controls .btn {
-    padding: 0.15rem 0.35rem;
-    min-height: auto;
-    font-size: 0.7rem;
+.image-toolbar-btn svg {
+    width: 1rem;
+    height: 1rem;
 }
 
 .image-resize-handle {
     display: none;
     position: absolute;
-    right: -0.3rem;
-    bottom: -0.3rem;
     width: 0.6rem;
     height: 0.6rem;
     border: 1px solid var(--color-primary);
     background: var(--color-surface);
-    cursor: nwse-resize;
-    z-index: 4;
+    z-index: 6;
 }
 
 .wysiwyg-editor .block.block-image.is-selected .image-resize-handle {
@@ -365,39 +376,63 @@
     inset: 0;
     border: 1px solid var(--color-primary);
     pointer-events: none;
-    z-index: 3;
+    z-index: 5;
 }
 
 .wysiwyg-editor .block.block-image.is-selected .image-selection-frame {
     display: block;
 }
 
-.image-selection-corner {
-    position: absolute;
-    width: 0.5rem;
-    height: 0.5rem;
-    border: 1px solid var(--color-primary);
-    background: var(--color-surface);
-}
-
-.image-selection-corner-tl {
+.image-resize-handle-tl {
     top: -0.3rem;
     left: -0.3rem;
+    cursor: nwse-resize;
 }
 
-.image-selection-corner-tr {
+.image-resize-handle-t {
+    top: -0.3rem;
+    left: 50%;
+    cursor: ns-resize;
+    transform: translateX(-50%);
+}
+
+.image-resize-handle-tr {
     top: -0.3rem;
     right: -0.3rem;
+    cursor: nesw-resize;
 }
 
-.image-selection-corner-bl {
+.image-resize-handle-r {
+    top: 50%;
+    right: -0.3rem;
+    cursor: ew-resize;
+    transform: translateY(-50%);
+}
+
+.image-resize-handle-br {
+    right: -0.3rem;
+    bottom: -0.3rem;
+    cursor: nwse-resize;
+}
+
+.image-resize-handle-b {
+    bottom: -0.3rem;
+    left: 50%;
+    cursor: ns-resize;
+    transform: translateX(-50%);
+}
+
+.image-resize-handle-bl {
     bottom: -0.3rem;
     left: -0.3rem;
+    cursor: nesw-resize;
 }
 
-.image-selection-corner-br {
-    bottom: -0.3rem;
-    right: -0.3rem;
+.image-resize-handle-l {
+    top: 50%;
+    left: -0.3rem;
+    cursor: ew-resize;
+    transform: translateY(-50%);
 }
 
 body.is-image-resizing {
