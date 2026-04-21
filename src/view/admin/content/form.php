@@ -62,7 +62,7 @@ $previewHidden = $previewUrl === '';
                     <a
                         class="btn btn-light"
                         href="<?= $e($previewUrl) ?>"
-                        target="_blank"
+                        target="tinycms-content-preview"
                         rel="noopener noreferrer"
                         data-content-preview-link
                         <?= $previewHidden ? 'hidden' : '' ?>
