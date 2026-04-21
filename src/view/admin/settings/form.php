@@ -17,6 +17,20 @@
                 <label><?= $e($t($labelKey, (string)$fieldKey)) ?></label>
                 <?php if ($fieldType === 'textarea'): ?>
                     <textarea name="settings[<?= $e((string)$fieldKey) ?>]" rows="4"><?= $e($fieldValue) ?></textarea>
+                <?php elseif ($fieldType === 'content_search'): ?>
+                    <?php $selectedLabel = trim((string)($values[$fieldKey . '_label'] ?? '')); ?>
+                    <div
+                        class="tag-picker"
+                        data-settings-content-picker
+                        data-search-endpoint="<?= $e($url('admin/api/v1/content')) ?>"
+                        data-selected-id="<?= $e($fieldValue) ?>"
+                    >
+                        <div class="tag-picker-field">
+                            <input class="tag-picker-input" type="search" value="<?= $e($selectedLabel) ?>" placeholder="<?= $e($t('content.search_placeholder')) ?>" autocomplete="off" data-settings-content-search>
+                            <input type="hidden" name="settings[<?= $e((string)$fieldKey) ?>]" value="<?= $e($fieldValue) ?>" data-settings-content-id>
+                        </div>
+                        <div class="tag-picker-suggestions" data-settings-content-suggestions></div>
+                    </div>
                 <?php elseif ($fieldType === 'select'): ?>
                     <?php $options = (array)($field['options'] ?? []); ?>
                     <select name="settings[<?= $e((string)$fieldKey) ?>]">

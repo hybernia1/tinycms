@@ -25,7 +25,6 @@ final class Settings
             $localeOptions[$locale] = I18n::languageLabel($locale);
         }
         $themeOptions = $this->themeOptions();
-        $homePageOptions = $this->homePageOptions();
 
         return [
             'app_lang' => [
@@ -39,9 +38,8 @@ final class Settings
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'type' => 'textarea', 'default' => ''],
             'front_home_content' => [
                 'label_key' => 'settings.fields.front_home_content',
-                'type' => 'select',
+                'type' => 'content_search',
                 'default' => '',
-                'options' => $homePageOptions,
             ],
             'front_posts_per_page' => [
                 'label_key' => 'settings.fields.front_posts_per_page',
@@ -72,22 +70,20 @@ final class Settings
         ];
     }
 
-    private function homePageOptions(): array
+    public function homePageContentLabel(string $contentId): string
     {
-        $rows = $this->query->select('content', ['id', 'name'], ['status' => 'published']);
-        $options = ['' => I18n::t('settings.options.front_home_content.none')];
-
-        foreach ($rows as $row) {
-            $id = (int)($row['id'] ?? 0);
-            if ($id <= 0) {
-                continue;
-            }
-
-            $name = trim((string)($row['name'] ?? ''));
-            $options[(string)$id] = $name !== '' ? $name : sprintf('#%d', $id);
+        $id = (int)$contentId;
+        if ($id <= 0) {
+            return '';
         }
 
-        return $options;
+        $rows = $this->query->select('content', ['id', 'name'], ['id' => $id, 'status' => 'published']);
+        if ($rows === []) {
+            return '';
+        }
+
+        $name = trim((string)($rows[0]['name'] ?? ''));
+        return $name !== '' ? $name : sprintf('#%d', $id);
     }
 
     private function themeOptions(): array
@@ -201,6 +197,9 @@ final class Settings
                     $value = $currentUrl;
                 }
             }
+            if ($key === 'front_home_content') {
+                $value = $this->normalizeHomePageContentValue($value);
+            }
             if (($fields[$key]['type'] ?? '') === 'select') {
                 $options = (array)($fields[$key]['options'] ?? []);
                 if ($value !== '' && !array_key_exists($value, $options)) {
@@ -219,4 +218,14 @@ final class Settings
         }
     }
 
+    private function normalizeHomePageContentValue(string $value): string
+    {
+        $id = (int)$value;
+        if ($id <= 0) {
+            return '';
+        }
+
+        $rows = $this->query->select('content', ['id'], ['id' => $id, 'status' => 'published']);
+        return $rows !== [] ? (string)$id : '';
+    }
 }
