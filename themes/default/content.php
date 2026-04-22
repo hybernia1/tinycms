@@ -6,32 +6,13 @@ if (!defined('BASE_DIR')) {
 
 ?>
 <article class="content-single">
-    <h1><?= esc_html((string)($item['name'] ?? '')) ?></h1>
-    <?php $date = $contentDate($item); ?>
-    <?php $author = $contentAuthor($item); ?>
-    <?php $authorLink = $authorUrl($item); ?>
-    <?php if ($date !== '' || $author !== ''): ?>
-        <p class="text-muted small content-card-meta">
-            <?php if ($date !== ''): ?>
-                <span class="content-card-meta-item"><?= icon('calendar') ?><span><?= esc_html($date) ?></span></span>
-            <?php endif; ?>
-            <?php if ($author !== ''): ?>
-                <span class="content-card-meta-item"><?= icon('users') ?><span><?php if ($authorLink !== ''): ?><a href="<?= esc_url($authorLink) ?>"><?= esc_html($author) ?></a><?php else: ?><?= esc_html($author) ?><?php endif; ?></span></span>
-            <?php endif; ?>
-        </p>
-    <?php endif; ?>
-    <?php $excerpt = trim((string)($item['excerpt'] ?? '')); ?>
+    <h1><?= esc_html(get_title($item)) ?></h1>
+    <?= get_content_meta($item) ?>
+    <?php $excerpt = get_excerpt($item); ?>
     <?php if ($excerpt !== ''): ?>
         <p class="content-excerpt-lead"><strong><?= esc_html($excerpt) ?></strong></p>
     <?php endif; ?>
-    <?= $contentThumbnail($item, ['sizes' => '(max-width: 1024px) 100vw, 1024px', 'loading' => 'eager']) ?>
-    <?php $terms = (array)($item['terms'] ?? []); ?>
-    <?php if ($terms !== []): ?>
-        <ul class="term-list">
-            <?php foreach ($terms as $term): ?>
-                <li><a href="<?= esc_url($termUrl($term)) ?>"><?= esc_html((string)($term['name'] ?? '')) ?></a></li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-    <div class="content-body"><?= esc_content($item['body'] ?? '') ?></div>
+    <?= get_thumbnail($item, ['sizes' => '(max-width: 1024px) 100vw, 1024px', 'loading' => 'eager']) ?>
+    <?= get_term_links($item) ?>
+    <div class="content-body"><?= get_content($item) ?></div>
 </article>

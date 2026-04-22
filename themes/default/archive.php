@@ -12,5 +12,5 @@ if (!defined('BASE_DIR')) {
     <p><?= esc_html(t('front.empty')) ?></p>
 <?php else: ?>
     <?php $includePartial('content-loop', ['items' => $items]); ?>
-    <?php $includePartial('pagination', ['pagination' => $pagination ?? [], 'basePath' => $basePath]); ?>
+    <?= get_pagination($pagination ?? [], $basePath) ?>
 <?php endif; ?>

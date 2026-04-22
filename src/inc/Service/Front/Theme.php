@@ -6,19 +6,32 @@ namespace App\Service\Front;
 use App\Service\Application\Menu;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Date;
+use App\Service\Support\I18n;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
 
 final class Theme
 {
+    private static ?self $current = null;
     private string $theme;
     private Slugger $slugger;
+    private array $context = [];
 
     public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu)
     {
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
         $this->slugger = new Slugger();
+    }
+
+    public static function setCurrent(?self $theme): void
+    {
+        self::$current = $theme;
+    }
+
+    public static function current(): ?self
+    {
+        return self::$current;
     }
 
     public function setting(string $key, string $default = ''): string
@@ -36,6 +49,12 @@ final class Theme
         return $this->setting('logo');
     }
 
+    public function language(): string
+    {
+        $lang = trim((string)($this->settings['app_lang'] ?? ''));
+        return $lang !== '' ? $lang : I18n::htmlLang();
+    }
+
     public function pageTitle(?string $value = null): string
     {
         if ($value !== null && trim($value) !== '') {
@@ -45,13 +64,23 @@ final class Theme
         return $this->siteTitle();
     }
 
+    public function setContext(array $context): void
+    {
+        $this->context = $context;
+    }
+
+    public function getHead(): string
+    {
+        return $this->head($this->context);
+    }
+
     public function head(array $context = []): string
     {
         $kind = trim((string)($context['kind'] ?? 'home'));
         $item = is_array($context['item'] ?? null) ? $context['item'] : [];
         $term = is_array($context['term'] ?? null) ? $context['term'] : [];
         $query = trim((string)($context['query'] ?? ''));
-        $title = $this->resolveHeadTitle($kind, $item, $term, isset($context['pageTitle']) ? (string)$context['pageTitle'] : null);
+        $title = $this->resolveHeadTitle($kind, $item, $term, isset($context['pageTitle']) ? (string)$context['pageTitle'] : null, $query);
         $description = $this->resolveHeadDescription($kind, $item, $term, $query);
         $ogType = $this->resolveOgType($kind, $item);
         $url = $this->currentRequestUrl();
@@ -160,6 +189,11 @@ final class Theme
         return $this->url('author/' . $this->slugger->slug($name !== '' ? $name : 'author', $id));
     }
 
+    public function contentTitle(array $item): string
+    {
+        return trim((string)($item['name'] ?? ''));
+    }
+
     public function menuItems(): array
     {
         return array_map(function (array $item): array {
@@ -244,20 +278,48 @@ final class Theme
         $sizes = trim((string)($options['sizes'] ?? '(max-width: 1024px) 100vw, 1024px'));
         $loading = trim((string)($options['loading'] ?? 'lazy'));
         $class = trim((string)($options['class'] ?? 'content-cover'));
+        $wrapped = (bool)($options['wrap'] ?? true);
         $name = trim((string)($item['thumbnail_name'] ?? ''));
         if ($name === '') {
-            $name = trim((string)($item['name'] ?? ''));
+            $name = $this->contentTitle($item);
         }
 
-        return sprintf(
-            '<figure class="%s"><img src="%s" srcset="%s" sizes="%s" alt="%s" loading="%s" decoding="async"></figure>',
-            esc_attr($class),
+        $img = sprintf(
+            '<img%s src="%s" srcset="%s" sizes="%s" alt="%s" loading="%s" decoding="async">',
+            $this->classAttr($class, $wrapped),
             esc_url($this->mediaUrl($thumbnail, $size)),
             esc_attr($this->mediaSrcSet($thumbnail)),
             esc_attr($sizes),
             esc_attr($name),
             esc_attr($loading),
         );
+
+        if (!$wrapped) {
+            return $img;
+        }
+
+        return '<figure class="' . esc_attr($class !== '' ? $class : 'content-cover') . '">' . $img . '</figure>';
+    }
+
+    public function contentThumbnailUrl(array $item, string $size = 'webp'): string
+    {
+        $thumbnail = trim((string)($item['thumbnail'] ?? ''));
+        return $thumbnail !== '' ? $this->mediaUrl($thumbnail, $size) : '';
+    }
+
+    public function contentExcerpt(array $item, int $limit = 0): string
+    {
+        $excerpt = $this->plainText((string)($item['excerpt'] ?? ''), $limit);
+        if ($excerpt !== '') {
+            return $excerpt;
+        }
+
+        return $limit > 0 ? $this->plainText((string)($item['body'] ?? ''), $limit) : '';
+    }
+
+    public function contentBody(array $item): string
+    {
+        return esc_content($item['body'] ?? '');
     }
 
     public function contentAuthor(array $item, string $fallback = ''): string
@@ -286,6 +348,52 @@ final class Theme
         return date($format, $timestamp);
     }
 
+    public function contentTerms(array $item): array
+    {
+        return array_values(array_filter((array)($item['terms'] ?? []), static fn(mixed $term): bool => is_array($term)));
+    }
+
+    public function contentMeta(array $item): string
+    {
+        $date = $this->contentDate($item);
+        $author = $this->contentAuthor($item);
+        if ($date === '' && $author === '') {
+            return '';
+        }
+
+        $items = [];
+        if ($date !== '') {
+            $items[] = '<span class="content-card-meta-item">' . icon('calendar') . '<span>' . esc_html($date) . '</span></span>';
+        }
+        if ($author !== '') {
+            $authorUrl = $this->authorUrl($item);
+            $authorHtml = $authorUrl !== '' ? '<a href="' . esc_url($authorUrl) . '">' . esc_html($author) . '</a>' : esc_html($author);
+            $items[] = '<span class="content-card-meta-item">' . icon('users') . '<span>' . $authorHtml . '</span></span>';
+        }
+
+        return '<p class="text-muted small content-card-meta">' . implode('', $items) . '</p>';
+    }
+
+    public function termLinks(array $item, string $class = 'term-list'): string
+    {
+        $terms = $this->contentTerms($item);
+        if ($terms === []) {
+            return '';
+        }
+
+        $items = [];
+        foreach ($terms as $term) {
+            $name = trim((string)($term['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $items[] = '<li><a href="' . esc_url($this->termUrl($term)) . '">' . esc_html($name) . '</a></li>';
+        }
+
+        return $items !== [] ? '<ul class="' . esc_attr($class) . '">' . implode('', $items) . '</ul>' : '';
+    }
+
     public function pagination(array $pagination, string $basePath = '', array $labels = []): string
     {
         $totalPages = (int)($pagination['total_pages'] ?? 1);
@@ -295,8 +403,8 @@ final class Theme
         }
 
         $current = max(1, min($page, $totalPages));
-        $prevLabel = trim((string)($labels['prev'] ?? 'Previous'));
-        $nextLabel = trim((string)($labels['next'] ?? 'Next'));
+        $prevLabel = trim((string)($labels['prev'] ?? t('front.prev', 'Previous')));
+        $nextLabel = trim((string)($labels['next'] ?? t('front.next', 'Next')));
         $items = [];
 
         if ($current > 1) {
@@ -356,6 +464,11 @@ final class Theme
         return $route === '' ? '' : '<input type="hidden" name="route" value="' . esc_attr($route) . '">';
     }
 
+    private function classAttr(string $class, bool $wrapped): string
+    {
+        return !$wrapped && $class !== '' ? ' class="' . esc_attr($class) . '"' : '';
+    }
+
     private function menuIconName(string $name): string
     {
         $icon = trim(str_starts_with($name, 'icon-') ? substr($name, 5) : $name);
@@ -384,7 +497,7 @@ final class Theme
         return $this->url($base . $suffix);
     }
 
-    private function resolveHeadTitle(string $kind, array $item, array $term, ?string $customTitle): string
+    private function resolveHeadTitle(string $kind, array $item, array $term, ?string $customTitle, string $query = ''): string
     {
         $custom = trim((string)$customTitle);
         if ($custom !== '') {
@@ -397,6 +510,12 @@ final class Theme
 
         if ($kind === 'archive' && trim((string)($term['name'] ?? '')) !== '') {
             return trim((string)$term['name']) . ' | ' . $this->siteTitle();
+        }
+
+        if ($kind === 'search') {
+            $title = t('front.search_results', 'Search results');
+            $query = trim($query);
+            return ($query !== '' ? $title . ': ' . $query : $title) . ' | ' . $this->siteTitle();
         }
 
         return $this->pageTitle(null);

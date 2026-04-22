@@ -19,5 +19,5 @@ if (!defined('BASE_DIR')) {
     <?php if ($queryText !== ''): ?>
         <?php $basePath .= '?q=' . rawurlencode($queryText); ?>
     <?php endif; ?>
-    <?php $includePartial('pagination', ['pagination' => $pagination ?? [], 'basePath' => $basePath]); ?>
+    <?= get_pagination($pagination ?? [], $basePath) ?>
 <?php endif; ?>

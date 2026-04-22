@@ -75,16 +75,10 @@ final class FrontView
 
     public function searchResults(array $pagination, string $query): void
     {
-        $title = $this->themeText('front.search_results');
-        if (trim($query) !== '') {
-            $title .= ': ' . $query;
-        }
-
         $this->render('search', [
             'kind' => 'search',
             'pagination' => $pagination,
             'query' => $query,
-            'pageTitle' => $title,
         ]);
     }
 
@@ -112,35 +106,17 @@ final class FrontView
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
         $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
-        $url = fn(string $path = ''): string => $theme->url($path);
-        $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
-        $setting = fn(string $key, string $default = ''): string => $theme->setting($key, $default);
-        $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);
-        $mediaSrcSet = fn(string $path): string => $theme->mediaSrcSet($path);
-        $contentThumbnail = fn(array $item, array $options = []): string => $theme->contentThumbnail($item, $options);
-        $contentAuthor = fn(array $item, string $fallback = ''): string => $theme->contentAuthor($item, $fallback);
-        $contentDate = fn(array $item, string $fallback = ''): string => $theme->contentDate($item, $fallback);
-        $contentUrl = fn(array $item): string => $theme->contentUrl($item);
-        $termUrl = fn(array $term): string => $theme->termUrl($term);
-        $authorUrl = fn(array $item): string => $theme->authorUrl($item);
-        $searchForm = fn(string $action = 'search', string $query = ''): string => $theme->searchForm($action, $query, [
-            'placeholder' => t('front.search_placeholder'),
-            'button' => t('front.search_button'),
-        ]);
-        $menuItems = fn(): array => $theme->menuItems();
-        $menu = fn(array $options = []): string => $theme->menu($options);
-        $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($url, $themeUrl, $setting, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $theme): void {
+        $includePartial = function (string $name, array $context = []): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;
         };
 
+        Theme::setCurrent($theme);
         I18n::pushCataloguePath($this->themeLangPath());
 
         try {
-            $pageTitle = $theme->pageTitle(isset($data['pageTitle']) ? (string)$data['pageTitle'] : null);
-            $head = $theme->head($data);
+            $theme->setContext($data);
             extract($data, EXTR_SKIP);
 
             ob_start();
@@ -154,6 +130,7 @@ final class FrontView
             echo $this->adminBar->inject($output, $data);
         } finally {
             I18n::popCataloguePath();
+            Theme::setCurrent(null);
         }
     }
 
@@ -205,9 +182,4 @@ final class FrontView
         }
     }
 
-    private function resolvedLanguage(): string
-    {
-        $lang = trim((string)($this->settings['app_lang'] ?? 'en'));
-        return $lang !== '' ? $lang : 'en';
-    }
 }
