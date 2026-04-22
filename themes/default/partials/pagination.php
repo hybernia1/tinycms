@@ -5,7 +5,7 @@ if (!defined('BASE_DIR')) {
 }
 
 ?>
-<?= $pagination(
+<?= $renderPagination(
     (array)($pagination ?? []),
     (string)($basePath ?? ''),
     [

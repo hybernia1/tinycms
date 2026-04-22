@@ -137,8 +137,8 @@ final class FrontView
         $lang = $this->resolvedLanguage();
         $siteTitle = fn(): string => themes_site_title($themeCtx);
         $siteLogo = fn(): string => themes_site_logo($themeCtx);
-        $pagination = fn(array $paginationData, string $basePath = '', array $labels = []): string => themes_pagination($themeCtx, $paginationData, $basePath, $labels);
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $icon, $siteTitle, $siteLogo, $pagination): void {
+        $renderPagination = fn(array $paginationData, string $basePath = '', array $labels = []): string => themes_pagination($themeCtx, $paginationData, $basePath, $labels);
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $icon, $siteTitle, $siteLogo, $renderPagination): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;
