@@ -40,10 +40,10 @@ final class Theme
     {
         $footer = trim($this->setting('site_footer'));
         if ($footer !== '') {
-            return $footer;
+            return $this->sanitizeFooterHtml($footer);
         }
 
-        return sprintf('© %s %s', date('Y'), $this->siteTitle());
+        return $this->esc(sprintf('© %s %s', date('Y'), $this->siteTitle()));
     }
 
     public function pageTitle(?string $value = null): string
@@ -622,6 +622,88 @@ final class Theme
     {
         $payload = array_filter($payload, static fn(mixed $value): bool => $value !== null && $value !== '');
         return (string)json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
+    }
+
+    private function sanitizeFooterHtml(string $value): string
+    {
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $previous = libxml_use_internal_errors(true);
+        $dom->loadHTML('<div>' . $value . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        $root = $dom->documentElement;
+        if (!$root instanceof \DOMElement) {
+            return $this->esc($value);
+        }
+
+        $this->sanitizeFooterNode($root);
+        $html = '';
+        foreach ($root->childNodes as $child) {
+            $html .= $dom->saveHTML($child);
+        }
+
+        return $html;
+    }
+
+    private function sanitizeFooterNode(\DOMNode $node): void
+    {
+        $allowedTags = ['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'span', 'small', 'ul', 'ol', 'li', 'a'];
+        $children = [];
+        foreach ($node->childNodes as $child) {
+            $children[] = $child;
+        }
+
+        foreach ($children as $child) {
+            if (!$child instanceof \DOMElement) {
+                continue;
+            }
+
+            $tag = strtolower($child->tagName);
+            if (!in_array($tag, $allowedTags, true)) {
+                while ($child->firstChild !== null) {
+                    $child->parentNode?->insertBefore($child->firstChild, $child);
+                }
+                $child->parentNode?->removeChild($child);
+                continue;
+            }
+
+            $this->sanitizeFooterAttributes($child);
+            $this->sanitizeFooterNode($child);
+        }
+    }
+
+    private function sanitizeFooterAttributes(\DOMElement $element): void
+    {
+        $allowed = strtolower($element->tagName) === 'a' ? ['href', 'target', 'rel'] : [];
+        $attributes = [];
+        foreach ($element->attributes as $attribute) {
+            $attributes[] = $attribute->name;
+        }
+
+        foreach ($attributes as $attribute) {
+            if (!in_array($attribute, $allowed, true)) {
+                $element->removeAttribute($attribute);
+            }
+        }
+
+        if (strtolower($element->tagName) !== 'a') {
+            return;
+        }
+
+        $href = trim((string)$element->getAttribute('href'));
+        if ($href === '' || preg_match('#^(https?://|mailto:|tel:|/|#)#i', $href) !== 1) {
+            $element->removeAttribute('href');
+        }
+
+        $target = strtolower(trim((string)$element->getAttribute('target')));
+        if ($target !== '_blank') {
+            $element->removeAttribute('target');
+            $element->removeAttribute('rel');
+            return;
+        }
+
+        $element->setAttribute('rel', 'noopener noreferrer');
     }
 
     private function esc(string $value): string
