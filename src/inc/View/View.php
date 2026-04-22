@@ -7,6 +7,7 @@ use App\Service\Support\Flash;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\Escaper;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
@@ -40,8 +41,9 @@ final class View
 
     private function renderFiles(string $templateFile, string $layoutFile, string $layout, array $data = []): void
     {
+        $escaper = new Escaper();
         $url = fn(string $path = ''): string => $this->router->url($path);
-        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $e = fn(mixed $value): string => $escaper->html($value);
         $absoluteUrl = static function (string $path = '') use ($url): string {
             $value = trim($path);
             if ($value === '') {

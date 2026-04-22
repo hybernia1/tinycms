@@ -6,6 +6,7 @@ namespace App\Service\Front;
 use App\Service\Application\Menu;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\Escaper;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
@@ -14,11 +15,13 @@ final class Theme
 {
     private string $theme;
     private Slugger $slugger;
+    private Escaper $escaper;
 
     public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu)
     {
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
         $this->slugger = new Slugger();
+        $this->escaper = new Escaper();
     }
 
     public function setting(string $key, string $default = ''): string
@@ -708,6 +711,6 @@ final class Theme
 
     private function esc(string $value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        return $this->escaper->html($value);
     }
 }

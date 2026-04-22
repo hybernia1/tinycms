@@ -6,6 +6,12 @@ namespace App\Service\Support;
 final class Csrf
 {
     private const SESSION_KEY = '_csrf_token';
+    private Escaper $escaper;
+
+    public function __construct()
+    {
+        $this->escaper = new Escaper();
+    }
 
     public function token(): string
     {
@@ -20,7 +26,7 @@ final class Csrf
 
     public function field(string $name = '_csrf'): string
     {
-        return '<input type="hidden" name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" value="' . htmlspecialchars($this->token(), ENT_QUOTES, 'UTF-8') . '">';
+        return '<input type="hidden" name="' . $this->escaper->attr($name) . '" value="' . $this->escaper->attr($this->token()) . '">';
     }
 
     public function verify(?string $token): bool

@@ -7,6 +7,7 @@ use App\Service\Application\Menu;
 use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
+use App\Service\Support\Escaper;
 
 final class FrontView
 {
@@ -108,12 +109,13 @@ final class FrontView
 
     private function render(string $template, array $data): void
     {
+        $escaper = new Escaper();
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
         $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
         $url = fn(string $path = ''): string => $theme->url($path);
         $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
-        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $e = fn(mixed $value): string => $escaper->html($value);
         $setting = fn(string $key, string $default = ''): string => $theme->setting($key, $default);
         $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
         $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);

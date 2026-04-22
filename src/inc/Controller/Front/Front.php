@@ -7,6 +7,7 @@ use App\Service\Auth\Auth;
 use App\Service\Front\Services;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
+use App\Service\Support\Escaper;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
 use App\View\FrontView;
@@ -16,11 +17,13 @@ final class Front
     private const SITEMAP_CHUNK_SIZE = 5000;
     private \PDO $pdo;
     private Slugger $slugger;
+    private Escaper $escaper;
 
     public function __construct(private FrontView $view, private Services $services, private Auth $auth)
     {
         $this->pdo = Connection::get();
         $this->slugger = new Slugger();
+        $this->escaper = new Escaper();
     }
 
     public function home(): void
@@ -519,7 +522,7 @@ final class Front
 
     private function xml(string $value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+        return $this->escaper->xml($value);
     }
 
     private function sitemapDate(string $value): string
