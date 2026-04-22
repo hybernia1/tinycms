@@ -27,6 +27,11 @@ if (!defined('BASE_DIR')) {
 <main class="container">
     <?= $content ?>
 </main>
+<footer class="site-footer">
+    <div class="container">
+        <?= $e($theme->siteFooter()) ?>
+    </div>
+</footer>
 <script src="<?= $e($themeUrl('assets/js/main.js')) ?>" defer></script>
 </body>
 </html>

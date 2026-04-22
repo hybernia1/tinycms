@@ -104,6 +104,12 @@ final class Settings
                 'default' => 'default',
                 'options' => $themeOptions,
             ],
+            'site_footer' => [
+                'label_key' => 'settings.fields.site_footer',
+                'section' => 'appearance',
+                'type' => 'textarea',
+                'default' => '',
+            ],
             'allow_registration' => [
                 'label_key' => 'settings.fields.allow_registration',
                 'section' => 'content',
@@ -272,7 +278,7 @@ final class Settings
                     $value = (string)($fields[$key]['default'] ?? '');
                 }
             }
-            if (in_array($key, ['sitename', 'siteauthor', 'meta_description'], true)) {
+            if (in_array($key, ['sitename', 'siteauthor', 'meta_description', 'site_footer'], true)) {
                 $value = $this->schemaConstraintValidator->truncate(
                     'settings',
                     'value',

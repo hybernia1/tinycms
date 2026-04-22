@@ -36,6 +36,16 @@ final class Theme
         return $this->setting('logo');
     }
 
+    public function siteFooter(): string
+    {
+        $footer = trim($this->setting('site_footer'));
+        if ($footer !== '') {
+            return $footer;
+        }
+
+        return sprintf('© %s %s', date('Y'), $this->siteTitle());
+    }
+
     public function pageTitle(?string $value = null): string
     {
         if ($value !== null && trim($value) !== '') {
