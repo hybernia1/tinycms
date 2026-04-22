@@ -15,10 +15,10 @@ if (!defined('BASE_DIR')) {
 <header class="site-header">
     <div class="container">
         <a href="<?= $e($url('')) ?>" class="site-title">
-            <?php if (trim($theme->siteLogo()) !== ''): ?>
-                <img src="<?= $e($url($theme->siteLogo())) ?>" alt="<?= $e($theme->siteTitle()) ?>" class="site-logo">
+            <?php if (trim($siteLogo()) !== ''): ?>
+                <img src="<?= $e($url($siteLogo())) ?>" alt="<?= $e($siteTitle()) ?>" class="site-logo">
             <?php endif; ?>
-            <span><?= $e($theme->siteTitle()) ?></span>
+            <span><?= $e($siteTitle()) ?></span>
         </a>
         <?= $menu() ?>
         <?= $searchForm('search', (string)($_GET['q'] ?? '')) ?>

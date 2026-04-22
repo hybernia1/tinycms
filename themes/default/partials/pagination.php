@@ -5,7 +5,7 @@ if (!defined('BASE_DIR')) {
 }
 
 ?>
-<?= $theme->pagination(
+<?= $pagination(
     (array)($pagination ?? []),
     (string)($basePath ?? ''),
     [

@@ -63,3 +63,7 @@ spl_autoload_register(function (string $class): void {
         require_once $file;
     }
 });
+
+if (is_file(__DIR__ . '/' . INC_DIR . 'functions/themes.php')) {
+    require_once __DIR__ . '/' . INC_DIR . 'functions/themes.php';
+}

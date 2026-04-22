@@ -5,7 +5,6 @@ namespace App\View;
 
 use App\Service\Application\Menu;
 use App\Service\Front\AdminBar;
-use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
 
 final class FrontView
@@ -110,40 +109,43 @@ final class FrontView
     {
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
-        $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
-        $url = fn(string $path = ''): string => $theme->url($path);
-        $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
+        $themeCtx = themes_init($this->router, $this->settings, $this->theme, $this->menu);
+        $url = fn(string $path = ''): string => themes_url($themeCtx, $path);
+        $themeUrl = fn(string $path = ''): string => themes_theme_url($themeCtx, $path);
         $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-        $setting = fn(string $key, string $default = ''): string => $theme->setting($key, $default);
+        $setting = fn(string $key, string $default = ''): string => themes_setting($themeCtx, $key, $default);
         $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
-        $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);
-        $mediaSrcSet = fn(string $path): string => $theme->mediaSrcSet($path);
-        $contentThumbnail = fn(array $item, array $options = []): string => $theme->contentThumbnail($item, $options);
-        $contentAuthor = fn(array $item, string $fallback = ''): string => $theme->contentAuthor($item, $fallback);
-        $contentDate = fn(array $item, string $fallback = ''): string => $theme->contentDate($item, $fallback);
-        $contentUrl = fn(array $item): string => $theme->contentUrl($item);
-        $termUrl = fn(array $term): string => $theme->termUrl($term);
-        $authorUrl = fn(array $item): string => $theme->authorUrl($item);
-        $searchForm = fn(string $action = 'search', string $query = ''): string => $theme->searchForm($action, $query, [
+        $mediaUrl = fn(string $path = '', string $size = 'origin'): string => themes_media_url($themeCtx, $path, $size);
+        $mediaSrcSet = fn(string $path): string => themes_media_srcset($themeCtx, $path);
+        $contentThumbnail = fn(array $item, array $options = []): string => themes_content_thumbnail($themeCtx, $item, $options);
+        $contentAuthor = fn(array $item, string $fallback = ''): string => themes_content_author($item, $fallback);
+        $contentDate = fn(array $item, string $fallback = ''): string => themes_content_date($themeCtx, $item, $fallback);
+        $contentUrl = fn(array $item): string => themes_content_url($themeCtx, $item);
+        $termUrl = fn(array $term): string => themes_term_url($themeCtx, $term);
+        $authorUrl = fn(array $item): string => themes_author_url($themeCtx, $item);
+        $searchForm = fn(string $action = 'search', string $query = ''): string => themes_search_form($themeCtx, $action, $query, [
             'placeholder' => $this->translate('front.search_placeholder'),
             'button' => $this->translate('front.search_button'),
         ]);
-        $menuItems = fn(): array => $theme->menuItems();
-        $menu = fn(array $options = []): string => $theme->menu($options);
+        $menuItems = fn(): array => themes_menu_items($themeCtx);
+        $menu = fn(array $options = []): string => themes_menu($themeCtx, $options);
         $icon = static function (string $name, string $classes = 'icon') use ($e, $url): string {
             $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
             $class = trim($classes);
             return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
         };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $theme, $icon): void {
+        $siteTitle = fn(): string => themes_site_title($themeCtx);
+        $siteLogo = fn(): string => themes_site_logo($themeCtx);
+        $pagination = fn(array $paginationData, string $basePath = '', array $labels = []): string => themes_pagination($themeCtx, $paginationData, $basePath, $labels);
+        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $icon, $siteTitle, $siteLogo, $pagination): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;
         };
 
-        $pageTitle = $theme->pageTitle(isset($data['pageTitle']) ? (string)$data['pageTitle'] : null);
-        $head = $theme->head($data);
+        $pageTitle = themes_page_title($themeCtx, isset($data['pageTitle']) ? (string)$data['pageTitle'] : null);
+        $head = themes_head($themeCtx, $data);
         extract($data, EXTR_SKIP);
 
         ob_start();
