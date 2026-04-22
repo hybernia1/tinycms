@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service\Support;
 
-final class DateTimeFormatter
+final class Date
 {
     private const FALLBACK_DATE_FORMAT = 'd.m.Y';
     private const FALLBACK_DATETIME_FORMAT = 'd.m.Y H:i';

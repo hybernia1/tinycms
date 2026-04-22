@@ -31,7 +31,7 @@ use App\Service\Application\Menu as MenuService;
 use App\Service\Application\Upload as UploadService;
 use App\Service\Application\Term as TermService;
 use App\Service\Support\Csrf;
-use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\Date;
 use App\Service\Support\Flash;
 use App\Service\Support\Media as MediaSupport;
 use App\Service\Infrastructure\Router\Router;
@@ -64,13 +64,13 @@ $router = new Router($basePath, RequestContext::queryMode($basePath));
 $flash = new Flash();
 $csrf = new Csrf();
 $rateLimiter = new RateLimiter();
-DateTimeFormatter::configure(
+Date::configure(
     (string)($resolvedSettings['app_date_format'] ?? APP_DATE_FORMAT),
     (string)($resolvedSettings['app_datetime_format'] ?? APP_DATETIME_FORMAT),
 );
-$dateTimeFormatter = new DateTimeFormatter(
-    DateTimeFormatter::defaultDateFormat(),
-    DateTimeFormatter::defaultDateTimeFormat(),
+$dateTimeFormatter = new Date(
+    Date::defaultDateFormat(),
+    Date::defaultDateTimeFormat(),
 );
 $view = new View(BASE_DIR, $router, $flash, $csrf, $dateTimeFormatter);
 
