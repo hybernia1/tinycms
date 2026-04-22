@@ -6,7 +6,7 @@ namespace App\Service\Application;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaConstraintValidator;
-use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\Date;
 use App\Service\Support\I18n;
 use App\Service\Support\RequestContext;
 
@@ -43,15 +43,15 @@ final class Settings
                 'label_key' => 'settings.fields.app_date_format',
                 'section' => 'localization',
                 'type' => 'select',
-                'default' => DateTimeFormatter::normalizeDateFormat((string)(defined('APP_DATE_FORMAT') ? APP_DATE_FORMAT : '')),
-                'options' => DateTimeFormatter::dateFormatOptions(),
+                'default' => Date::normalizeDateFormat((string)(defined('APP_DATE_FORMAT') ? APP_DATE_FORMAT : '')),
+                'options' => Date::dateFormatOptions(),
             ],
             'app_datetime_format' => [
                 'label_key' => 'settings.fields.app_datetime_format',
                 'section' => 'localization',
                 'type' => 'select',
-                'default' => DateTimeFormatter::normalizeDateTimeFormat((string)(defined('APP_DATETIME_FORMAT') ? APP_DATETIME_FORMAT : '')),
-                'options' => DateTimeFormatter::dateTimeFormatOptions(),
+                'default' => Date::normalizeDateTimeFormat((string)(defined('APP_DATETIME_FORMAT') ? APP_DATETIME_FORMAT : '')),
+                'options' => Date::dateTimeFormatOptions(),
             ],
             'sitename' => ['label_key' => 'settings.fields.sitename', 'section' => 'general', 'type' => 'text', 'default' => 'TinyCMS'],
             'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'section' => 'general', 'type' => 'text', 'default' => 'Admin'],

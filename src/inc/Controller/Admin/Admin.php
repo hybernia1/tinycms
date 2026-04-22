@@ -5,11 +5,10 @@ namespace App\Controller\Admin;
 
 use App\Service\Application\Auth;
 use App\Service\Support\Csrf;
-use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\Date;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
-use App\Service\Support\PaginationConfig;
 use App\Service\Support\RequestContext;
 use App\View\AdminView;
 
@@ -191,7 +190,7 @@ class Admin
 
     protected function formatDateTime(string $value): string
     {
-        return DateTimeFormatter::formatDateTimeValue($value);
+        return Date::formatDateTimeValue($value);
     }
 
     protected function hasUpload(string $field): bool
@@ -202,7 +201,7 @@ class Admin
     protected function resolvePaginationQuery(): array
     {
         $page = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = PaginationConfig::perPage();
+        $perPage = defined('APP_POSTS_PER_PAGE') ? (int)APP_POSTS_PER_PAGE : 10;
         $query = trim((string)($_GET['q'] ?? ''));
 
         return [$page, $perPage, $query];

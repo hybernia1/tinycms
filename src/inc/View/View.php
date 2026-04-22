@@ -6,7 +6,7 @@ namespace App\View;
 use App\Service\Support\Flash;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Csrf;
-use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\Date;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
@@ -17,9 +17,9 @@ final class View
     private Router $router;
     private Flash $flash;
     private Csrf $csrf;
-    private DateTimeFormatter $dateTimeFormatter;
+    private Date $dateTimeFormatter;
 
-    public function __construct(string $rootPath, Router $router, Flash $flash, Csrf $csrf, DateTimeFormatter $dateTimeFormatter)
+    public function __construct(string $rootPath, Router $router, Flash $flash, Csrf $csrf, Date $dateTimeFormatter)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
