@@ -184,13 +184,22 @@ final class Theme
             $target = (string)($item['link_target'] ?? '_self') === '_blank' ? '_blank' : '_self';
             $rel = $target === '_blank' ? ' rel="noopener noreferrer"' : '';
             $targetAttr = $target === '_blank' ? ' target="_blank"' : '';
+            $labelText = (string)($item['label'] ?? '');
+            $iconName = $this->menuIconName((string)($item['icon'] ?? ''));
+            $hasLabel = trim($labelText) !== '';
+            $ariaLabel = $iconName !== '' && !$hasLabel ? ' aria-label="' . $this->esc($iconName) . '"' : '';
+            $content = $iconName !== '' ? $this->icon($iconName) : '';
+            if ($hasLabel) {
+                $content .= $this->esc($labelText);
+            }
             $links[] = sprintf(
-                '<a class="%s" href="%s"%s%s>%s</a>',
+                '<a class="%s" href="%s"%s%s%s>%s</a>',
                 $this->esc($itemClass),
                 $this->esc((string)($item['href'] ?? '')),
                 $targetAttr,
                 $rel,
-                $this->esc((string)($item['label'] ?? '')),
+                $ariaLabel,
+                $content,
             );
         }
 
@@ -349,8 +358,14 @@ final class Theme
 
     private function icon(string $name): string
     {
-        $sprite = $this->esc($this->themeUrl('assets/svg/icons.svg#icon-' . trim($name)));
+        $sprite = $this->esc($this->url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
         return '<svg class="icon" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
+    }
+
+    private function menuIconName(string $name): string
+    {
+        $icon = trim(str_starts_with($name, 'icon-') ? substr($name, 5) : $name);
+        return preg_match('/^[a-z0-9_-]+$/i', $icon) === 1 ? $icon : '';
     }
 
     private function menuItemUrl(string $url): string

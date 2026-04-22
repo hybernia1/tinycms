@@ -168,6 +168,8 @@ return [
         'items' => 'Items',
         'add_item' => 'Add item',
         'empty' => 'This menu has no items yet.',
+        'item_icon' => 'Icon',
+        'no_icon' => 'No icon',
         'item_label' => 'Label',
         'item_url' => 'URL',
         'item_target' => 'Target',

@@ -35,6 +35,7 @@ final class SchemaDefinition
             'menu' => [
                 'label' => ['max' => 255, 'nullable' => false],
                 'url' => ['max' => 500, 'nullable' => false],
+                'icon' => ['max' => 100, 'nullable' => true],
                 'link_target' => ['max' => 20, 'nullable' => false, 'allowed' => ['_self', '_blank']],
             ],
         ];
@@ -146,6 +147,7 @@ final class SchemaDefinition
                 id INT NOT NULL AUTO_INCREMENT,
                 label VARCHAR(255) NOT NULL,
                 url VARCHAR(500) NOT NULL,
+                icon VARCHAR(100) DEFAULT NULL,
                 link_target VARCHAR(20) NOT NULL DEFAULT '_self',
                 position INT NOT NULL DEFAULT 0,
                 created DATETIME NOT NULL DEFAULT (NOW()),

@@ -168,6 +168,8 @@ return [
         'items' => 'Položky',
         'add_item' => 'Přidat položku',
         'empty' => 'Toto menu zatím nemá žádné položky.',
+        'item_icon' => 'Ikona',
+        'no_icon' => 'Bez ikony',
         'item_label' => 'Popisek',
         'item_url' => 'URL',
         'item_target' => 'Cíl',

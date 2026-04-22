@@ -4,13 +4,54 @@ if (!defined('BASE_DIR')) {
 }
 
 $items = is_array($items ?? null) ? $items : [];
+$icons = array_values(array_filter(array_map('strval', is_array($icons ?? null) ? $icons : [])));
 
-$renderItem = static function (array $item) use ($e, $t, $icon): void {
+$renderItem = static function (array $item) use ($e, $t, $icon, $icons): void {
     $target = (string)($item['link_target'] ?? '_self');
+    $selectedIcon = (string)($item['icon'] ?? '');
     ?>
     <div class="menu-builder-row" data-menu-item>
         <div class="menu-builder-position" data-menu-item-index>1</div>
         <div class="menu-builder-fields">
+            <div class="menu-builder-field menu-builder-field-icon">
+                <div class="menu-builder-icon-picker" data-menu-icon-picker>
+                    <input type="hidden" name="item_icon[]" value="<?= $e($selectedIcon) ?>" data-menu-icon-value>
+                    <button
+                        class="menu-builder-icon-trigger"
+                        type="button"
+                        data-menu-icon-trigger
+                        aria-label="<?= $e($t('menu.item_icon')) ?>"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                    >
+                        <span class="menu-builder-icon-preview" data-menu-icon-preview aria-hidden="true">
+                            <?= $selectedIcon !== '' ? $icon($selectedIcon) : $icon('cancel') ?>
+                        </span>
+                    </button>
+                    <div class="menu-builder-icon-options" data-menu-icon-options hidden>
+                        <button
+                            class="menu-builder-icon-option<?= $selectedIcon === '' ? ' selected' : '' ?>"
+                            type="button"
+                            data-menu-icon-option
+                            data-icon=""
+                            aria-label="<?= $e($t('menu.no_icon')) ?>"
+                        >
+                            <?= $icon('cancel') ?>
+                        </button>
+                        <?php foreach ($icons as $name): ?>
+                            <button
+                                class="menu-builder-icon-option<?= $selectedIcon === $name ? ' selected' : '' ?>"
+                                type="button"
+                                data-menu-icon-option
+                                data-icon="<?= $e($name) ?>"
+                                aria-label="<?= $e($name) ?>"
+                            >
+                                <?= $icon($name) ?>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
             <div class="menu-builder-field menu-builder-field-label">
                 <div class="field-with-icon">
                     <span class="field-overlay field-overlay-start field-icon field-icon-soft" aria-hidden="true"><?= $icon('menu') ?></span>
@@ -84,6 +125,6 @@ $renderItem = static function (array $item) use ($e, $t, $icon): void {
     </div>
 
     <template data-menu-item-template>
-        <?php $renderItem(['label' => '', 'url' => '', 'link_target' => '_self']); ?>
+        <?php $renderItem(['label' => '', 'url' => '', 'icon' => '', 'link_target' => '_self']); ?>
     </template>
 </form>

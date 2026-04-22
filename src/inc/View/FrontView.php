@@ -130,8 +130,8 @@ final class FrontView
         ]);
         $menuItems = fn(): array => $theme->menuItems();
         $menu = fn(array $options = []): string => $theme->menu($options);
-        $icon = static function (string $name, string $classes = 'icon') use ($e, $themeUrl): string {
-            $sprite = $e($themeUrl('assets/svg/icons.svg#icon-' . trim($name)));
+        $icon = static function (string $name, string $classes = 'icon') use ($e, $url): string {
+            $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
             $class = trim($classes);
             return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
         };

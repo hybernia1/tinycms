@@ -125,10 +125,11 @@ final class AdminView
         ]);
     }
 
-    public function adminMenuForm(array $items): void
+    public function adminMenuForm(array $items, array $icons): void
     {
         $this->renderAdmin('admin/menu/form', [
             'items' => $items,
+            'icons' => $icons,
             'pageTitle' => I18n::t('admin.menu.menu'),
             'headerAction' => $this->submitHeaderAction('#menu-form'),
         ]);

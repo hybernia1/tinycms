@@ -684,7 +684,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
 .menu-builder-fields {
     display: grid;
-    grid-template-columns: minmax(160px, 1fr) minmax(220px, 1.5fr) minmax(150px, 0.65fr);
+    grid-template-columns: 2.25rem minmax(160px, 1fr) minmax(220px, 1.5fr) minmax(150px, .65fr);
     gap: var(--space-2);
     align-items: center;
 }
@@ -699,6 +699,79 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
 .menu-builder-field .custom-select {
     width: 100%;
+}
+
+.menu-builder-icon-picker {
+    position: relative;
+}
+
+.menu-builder-icon-trigger,
+.menu-builder-icon-option {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-builder-icon-trigger {
+    border: 1px solid var(--color-border-soft);
+    color: var(--color-text-muted);
+    background: var(--color-surface-muted);
+    cursor: pointer;
+}
+
+.menu-builder-icon-trigger:hover,
+.menu-builder-icon-trigger:focus-visible {
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.menu-builder-icon-preview,
+.menu-builder-icon-preview .icon,
+.menu-builder-icon-option .icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.menu-builder-icon-options {
+    position: absolute;
+    left: 0;
+    top: calc(100% + var(--space-1));
+    z-index: 20;
+    width: 14rem;
+    max-height: 15rem;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: repeat(5, 2.25rem);
+    gap: var(--space-1);
+    padding: var(--space-2);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-soft);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+}
+
+.menu-builder-icon-options[hidden] {
+    display: none;
+}
+
+.menu-builder-icon-option {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.menu-builder-icon-option:hover,
+.menu-builder-icon-option:focus-visible,
+.menu-builder-icon-option.selected {
+    color: var(--color-text);
+    background: var(--color-surface-muted);
+    border-color: var(--color-border);
+}
+
+.menu-builder-icon-option.selected {
+    border-color: var(--primary);
 }
 
 .menu-builder-field-target select,

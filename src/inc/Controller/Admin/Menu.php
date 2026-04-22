@@ -27,6 +27,6 @@ final class Menu extends Admin
             return;
         }
 
-        $this->pages->adminMenuForm($this->menu->items());
+        $this->pages->adminMenuForm($this->menu->items(), $this->menu->icons());
     }
 }
