@@ -64,6 +64,7 @@ $previewHidden = $previewUrl === '';
                         class="btn btn-light"
                         href="<?= $e($previewUrl) ?>"
                         target="<?= $e($previewTarget) ?>"
+                        rel="noopener noreferrer"
                         data-content-preview-link
                         <?= $previewHidden ? 'hidden' : '' ?>
                     >
