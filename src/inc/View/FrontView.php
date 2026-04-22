@@ -113,7 +113,7 @@ final class FrontView
         $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
         $url = fn(string $path = ''): string => $theme->url($path);
         $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
-        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $e = static fn(mixed $value): string => View::escape($value);
         $setting = fn(string $key, string $default = ''): string => $theme->setting($key, $default);
         $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
         $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);
@@ -130,11 +130,7 @@ final class FrontView
         ]);
         $menuItems = fn(): array => $theme->menuItems();
         $menu = fn(array $options = []): string => $theme->menu($options);
-        $icon = static function (string $name, string $classes = 'icon') use ($e, $url): string {
-            $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
-            $class = trim($classes);
-            return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
-        };
+        $icon = static fn(string $name, string $classes = 'icon'): string => View::iconMarkup($url, $name, $classes);
         $lang = $this->resolvedLanguage();
         $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $theme, $icon): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
@@ -170,24 +166,20 @@ final class FrontView
 
     private function resolveThemeFile(string $file): string
     {
-        $path = $this->themePath($this->theme) . '/' . ltrim($file, '/');
-        $real = realpath($path);
-        $root = realpath($this->themePath($this->theme));
-        $normalizedReal = $real === false ? '' : str_replace('\\', '/', $real);
-        $normalizedRoot = $root === false ? '' : str_replace('\\', '/', $root);
-
-        if ($normalizedReal === '' || $normalizedRoot === '' || !str_starts_with($normalizedReal, $normalizedRoot) || !is_file($real)) {
-            http_response_code(404);
-            exit('404');
-        }
-
-        return $real;
+        $allowedPath = $this->themeRelativePath($this->theme);
+        return View::resolveFile($this->rootPath, $allowedPath . '/' . ltrim($file, '/'), $allowedPath);
     }
 
     private function themePath(string $theme): string
     {
         $themeDir = trim((string)(defined('THEMES_DIR') ? THEMES_DIR : 'themes/'), '/');
         return $this->rootPath . '/' . $themeDir . '/' . trim($theme, '/');
+    }
+
+    private function themeRelativePath(string $theme): string
+    {
+        $themeDir = trim((string)(defined('THEMES_DIR') ? THEMES_DIR : 'themes/'), '/');
+        return $themeDir . '/' . trim($theme, '/');
     }
 
     private function translate(string $key, ?string $fallback = null): string

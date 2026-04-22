@@ -41,7 +41,7 @@ final class View
     private function renderFiles(string $templateFile, string $layoutFile, string $layout, array $data = []): void
     {
         $url = fn(string $path = ''): string => $this->router->url($path);
-        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $e = static fn(mixed $value): string => self::escape($value);
         $absoluteUrl = static function (string $path = '') use ($url): string {
             $value = trim($path);
             if ($value === '') {
@@ -59,11 +59,7 @@ final class View
 
             return RequestContext::scheme() . '://' . RequestContext::authority() . $resolved;
         };
-        $icon = static function (string $name, string $classes = 'icon') use ($url, $e): string {
-            $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . $name));
-            $classAttr = $e($classes);
-            return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
-        };
+        $icon = static fn(string $name, string $classes = 'icon'): string => self::iconMarkup($url, $name, $classes, true);
         $csrfField = fn(string $name = '_csrf'): string => $this->csrf->field($name);
         $formatDate = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDate($value, $fallback);
         $formatDateTime = fn(?string $value, string $fallback = ''): string => $this->dateTimeFormatter->formatDateTime($value, $fallback);
@@ -109,8 +105,14 @@ final class View
 
     private function resolve(string $relativePath, string $allowedPath): string
     {
-        $fullPath = $this->rootPath . '/' . ltrim($relativePath, '/');
-        $allowedRoot = rtrim($this->rootPath . '/' . trim($allowedPath, '/'), '/');
+        return self::resolveFile($this->rootPath, $relativePath, $allowedPath);
+    }
+
+    public static function resolveFile(string $rootPath, string $relativePath, string $allowedPath): string
+    {
+        $normalizedRootPath = rtrim($rootPath, '/');
+        $fullPath = $normalizedRootPath . '/' . ltrim($relativePath, '/');
+        $allowedRoot = rtrim($normalizedRootPath . '/' . trim($allowedPath, '/'), '/');
         $realPath = realpath($fullPath);
         $allowedRealPath = realpath($allowedRoot);
         $normalizedRealPath = $realPath === false ? '' : str_replace('\\', '/', $realPath);
@@ -122,5 +124,18 @@ final class View
         }
 
         return $realPath;
+    }
+
+    public static function escape(mixed $value): string
+    {
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public static function iconMarkup(callable $url, string $name, string $classes = 'icon', bool $focusable = false): string
+    {
+        $sprite = self::escape($url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
+        $className = trim($classes);
+        $focusableAttr = $focusable ? ' focusable="false"' : '';
+        return '<svg class="' . self::escape($className !== '' ? $className : 'icon') . '" aria-hidden="true"' . $focusableAttr . '><use href="' . $sprite . '"></use></svg>';
     }
 }
