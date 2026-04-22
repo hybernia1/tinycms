@@ -6,6 +6,7 @@ namespace App\Service\Front;
 use App\Service\Application\Menu;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\Escape;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
@@ -616,6 +617,6 @@ final class Theme
 
     private function esc(string $value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        return Escape::escAttr($value);
     }
 }

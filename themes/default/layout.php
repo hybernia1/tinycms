@@ -6,19 +6,19 @@ if (!defined('BASE_DIR')) {
 
 ?>
 <!doctype html>
-<html lang="<?= $e($lang) ?>">
+<html lang="<?= $escHtml($lang) ?>">
 <head>
     <?= $head ?>
-    <link rel="stylesheet" href="<?= $e($themeUrl('assets/css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= $escUrl($themeUrl('assets/css/style.css')) ?>">
 </head>
 <body>
 <header class="site-header">
     <div class="container">
-        <a href="<?= $e($url('')) ?>" class="site-title">
+        <a href="<?= $escUrl($url('')) ?>" class="site-title">
             <?php if (trim($theme->siteLogo()) !== ''): ?>
-                <img src="<?= $e($url($theme->siteLogo())) ?>" alt="<?= $e($theme->siteTitle()) ?>" class="site-logo">
+                <img src="<?= $escUrl($url($theme->siteLogo())) ?>" alt="<?= $escHtml($theme->siteTitle()) ?>" class="site-logo">
             <?php endif; ?>
-            <span><?= $e($theme->siteTitle()) ?></span>
+            <span><?= $escHtml($theme->siteTitle()) ?></span>
         </a>
         <?= $menu() ?>
         <?= $searchForm('search', (string)($_GET['q'] ?? '')) ?>
@@ -27,6 +27,6 @@ if (!defined('BASE_DIR')) {
 <main class="container">
     <?= $content ?>
 </main>
-<script src="<?= $e($themeUrl('assets/js/main.js')) ?>" defer></script>
+<script src="<?= $escUrl($themeUrl('assets/js/main.js')) ?>" defer></script>
 </body>
 </html>

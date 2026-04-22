@@ -9,38 +9,38 @@ $authUser = $_SESSION['auth'] ?? null;
 $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 ?>
 <!doctype html>
-<html lang="<?= $e((string)$lang) ?>">
+<html lang="<?= $escHtml((string)$lang) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title><?= $e((string)$pageTitle) ?> | <?= $e($t('admin.title_suffix')) ?></title>
+    <title><?= $escHtml((string)$pageTitle) ?> | <?= $escHtml($t('admin.title_suffix')) ?></title>
     <?php if (!empty($siteFavicon)): ?>
-        <link rel="icon" href="<?= $e($url((string)$siteFavicon)) ?>">
+        <link rel="icon" href="<?= $escUrl($url((string)$siteFavicon)) ?>">
     <?php endif; ?>
-    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/style.css')) ?>">
-    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/admin.css')) ?>">
-    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/editor.css')) ?>">
+    <link rel="stylesheet" href="<?= $escUrl($url(ASSETS_DIR . 'css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= $escUrl($url(ASSETS_DIR . 'css/admin.css')) ?>">
+    <link rel="stylesheet" href="<?= $escUrl($url(ASSETS_DIR . 'css/editor.css')) ?>">
     <script>window.tinycmsI18n = <?= json_encode($adminI18n ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/flash.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/loader.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/admin-menu.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/settings-tabs.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-select.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-datetime.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/custom-upload.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/media-library-modal.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/tag-picker.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/menu-builder.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/editor.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/heartbeat.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/flash.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/loader.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/admin-menu.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/settings-tabs.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/custom-select.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/custom-datetime.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/custom-upload.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/media-library-modal.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/tag-picker.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/menu-builder.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/editor.js')) ?>"></script>
+    <script defer src="<?= $escUrl($url(ASSETS_DIR . 'js/heartbeat.js')) ?>"></script>
 </head>
-<body data-heartbeat-endpoint="<?= $e($url('admin/api/v1/heartbeat')) ?>" data-heartbeat-login-endpoint="<?= $e($url('admin/api/v1/auth/login')) ?>">
+<body data-heartbeat-endpoint="<?= $escHtml($url('admin/api/v1/heartbeat')) ?>" data-heartbeat-login-endpoint="<?= $escHtml($url('admin/api/v1/auth/login')) ?>">
 <script>
     (function () {
         var collapsed = (document.cookie.split(';').map(function (part) { return part.trim(); }).indexOf('tinycms_admin_sidebar=collapsed') !== -1);
@@ -51,8 +51,8 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 </script>
 <div class="admin-shell">
     <aside class="admin-sidebar">
-        <a class="admin-brand" href="<?= $e($url('admin/dashboard')) ?>" aria-label="<?= $e($t('admin.brand')) ?>">
-            <img src="<?= $e($url(ASSETS_DIR . 'svg/logo.svg')) ?>" alt="">
+        <a class="admin-brand" href="<?= $escUrl($url('admin/dashboard')) ?>" aria-label="<?= $escHtml($t('admin.brand')) ?>">
+            <img src="<?= $escUrl($url(ASSETS_DIR . 'svg/logo.svg')) ?>" alt="">
         </a>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
@@ -60,23 +60,23 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 $itemPath = trim((string)($item['path'] ?? $itemUrl), '/');
                 $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
             ?>
-            <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= $e((string)$item['url']) ?>">
+            <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= $escUrl((string)$item['url']) ?>">
                 <?php if (!empty($item['icon'])): ?>
                 <?= $icon((string)$item['icon'], 'icon admin-nav-link-icon') ?>
                 <?php endif; ?>
-                <span><?= $e((string)$item['label']) ?></span>
+                <span><?= $escHtml((string)$item['label']) ?></span>
             </a>
             <?php endforeach; ?>
         </nav>
         <div class="admin-sidebar-bottom">
             <?php if (is_array($authUser)): ?>
             <div class="admin-user-meta">
-                <div class="admin-user-name"><?= $e((string)($authUser['name'] ?? '')) ?></div>
+                <div class="admin-user-name"><?= $escHtml((string)($authUser['name'] ?? '')) ?></div>
             </div>
             <?php endif; ?>
-            <a class="admin-nav-link" href="<?= $e($url('admin/logout')) ?>">
+            <a class="admin-nav-link" href="<?= $escUrl($url('admin/logout')) ?>">
                 <?= $icon('logout') ?>
-                <span><?= $e($t('admin.logout')) ?></span>
+                <span><?= $escHtml($t('admin.logout')) ?></span>
             </a>
         </div>
     </aside>
@@ -84,44 +84,44 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <main class="admin-main">
         <div class="admin-header-spacer d-flex justify-between align-center p-2">
             <div class="d-flex align-center gap-2">
-                <button class="btn btn-light btn-icon admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-label="<?= $e($t('admin.open_menu')) ?>" title="<?= $e($t('admin.open_menu')) ?>">
+                <button class="btn btn-light btn-icon admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-label="<?= $escHtml($t('admin.open_menu')) ?>" title="<?= $escHtml($t('admin.open_menu')) ?>">
                     <?= $icon('menu') ?>
-                    <span class="sr-only"><?= $e($t('admin.open_menu')) ?></span>
+                    <span class="sr-only"><?= $escHtml($t('admin.open_menu')) ?></span>
                 </button>
-                <button class="btn btn-light btn-icon admin-menu-toggle" type="button" data-admin-menu-toggle aria-label="<?= $e($t('admin.open_menu')) ?>" title="<?= $e($t('admin.open_menu')) ?>">
+                <button class="btn btn-light btn-icon admin-menu-toggle" type="button" data-admin-menu-toggle aria-label="<?= $escHtml($t('admin.open_menu')) ?>" title="<?= $escHtml($t('admin.open_menu')) ?>">
                     <?= $icon('menu') ?>
-                    <span class="sr-only"><?= $e($t('admin.open_menu')) ?></span>
+                    <span class="sr-only"><?= $escHtml($t('admin.open_menu')) ?></span>
                 </button>
-                <strong data-admin-page-title><?= $e((string)$pageTitle) ?></strong>
+                <strong data-admin-page-title><?= $escHtml((string)$pageTitle) ?></strong>
             </div>
             <?php if (($headerAction['type'] ?? '') === 'submit'): ?>
-                <button class="btn btn-primary" type="button" data-save-action-form-submit="<?= $e((string)($headerAction['form'] ?? '')) ?>">
-                    <span><?= $e((string)($headerAction['label'] ?? $t('common.save'))) ?></span>
+                <button class="btn btn-primary" type="button" data-save-action-form-submit="<?= $escHtml((string)($headerAction['form'] ?? '')) ?>">
+                    <span><?= $escHtml((string)($headerAction['label'] ?? $t('common.save'))) ?></span>
                 </button>
             <?php elseif (($headerAction['type'] ?? '') === 'link'): ?>
-                <a class="btn btn-primary" href="<?= $e($url((string)($headerAction['href'] ?? ''))) ?>">
+                <a class="btn btn-primary" href="<?= $escUrl($url((string)($headerAction['href'] ?? ''))) ?>">
                     <?= $icon((string)($headerAction['icon'] ?? 'add')) ?>
-                    <span><?= $e((string)($headerAction['label'] ?? '')) ?></span>
+                    <span><?= $escHtml((string)($headerAction['label'] ?? '')) ?></span>
                 </a>
             <?php elseif (($headerAction['type'] ?? '') === 'save-menu'): ?>
-                <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="<?= $e((string)($headerAction['form'] ?? '')) ?>">
+                <div class="admin-header-action-menu" data-save-action-menu data-save-action-form="<?= $escHtml((string)($headerAction['form'] ?? '')) ?>">
                     <div class="admin-header-action-split">
                         <button class="btn btn-primary admin-header-action-main" type="button" data-save-action-primary>
-                            <span><?= $e($t('common.save')) ?></span>
+                            <span><?= $escHtml($t('common.save')) ?></span>
                         </button>
-                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-save-action-toggle aria-expanded="false" aria-label="<?= $e($t('common.actions')) ?>">
+                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-save-action-toggle aria-expanded="false" aria-label="<?= $escHtml($t('common.actions')) ?>">
                             <?= $icon('next', 'icon content-action-summary-arrow') ?>
                         </button>
                     </div>
                     <div class="admin-header-action-options" hidden>
                         <div class="admin-header-action-group">
                             <button class="btn btn-light admin-header-action-option" type="button" data-save-action-submit>
-                                <span><?= $e($t('common.save')) ?></span>
+                                <span><?= $escHtml($t('common.save')) ?></span>
                             </button>
                         </div>
                         <div class="admin-header-action-group admin-header-action-group-danger">
-                            <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete data-modal-open data-modal-target="<?= $e((string)($headerAction['delete_modal_target'] ?? '')) ?>">
-                                <span><?= $e($t('common.delete')) ?></span>
+                            <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete data-modal-open data-modal-target="<?= $escHtml((string)($headerAction['delete_modal_target'] ?? '')) ?>">
+                                <span><?= $escHtml($t('common.delete')) ?></span>
                                 <?= $icon('delete') ?>
                             </button>
                         </div>
@@ -131,20 +131,20 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 <div class="admin-header-action-menu" data-content-action-menu>
                     <div class="admin-header-action-split">
                         <button class="btn btn-primary admin-header-action-main" type="button" data-content-action-primary>
-                            <span data-content-action-label><?= $e($t('content.statuses.draft')) ?></span>
+                            <span data-content-action-label><?= $escHtml($t('content.statuses.draft')) ?></span>
                         </button>
-                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-content-action-toggle aria-expanded="false" aria-label="<?= $e($t('common.actions')) ?>">
+                        <button class="btn btn-primary btn-icon admin-header-action-toggle" type="button" data-content-action-toggle aria-expanded="false" aria-label="<?= $escHtml($t('common.actions')) ?>">
                             <?= $icon('next', 'icon content-action-summary-arrow') ?>
                         </button>
                     </div>
                     <div class="admin-header-action-options" hidden>
                         <div class="admin-header-action-group">
                             <button class="btn btn-light admin-header-action-option" type="button" data-content-action-submit="published">
-                                <span><?= $e($t('content.publish')) ?></span>
+                                <span><?= $escHtml($t('content.publish')) ?></span>
                                 <span data-content-action-check="published"><?= $icon('success') ?></span>
                             </button>
                             <button class="btn btn-light admin-header-action-option" type="button" data-content-action-submit="draft">
-                                <span><?= $e($t('content.statuses.draft')) ?></span>
+                                <span><?= $escHtml($t('content.statuses.draft')) ?></span>
                                 <span data-content-action-check="draft"><?= $icon('success') ?></span>
                             </button>
                         </div>
@@ -158,9 +158,9 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                                 type="button"
                                 data-content-action-delete
                                 data-modal-open
-                                data-modal-target="<?= $e((string)($headerAction['delete_modal_target'] ?? '#content-delete-modal')) ?>"
+                                data-modal-target="<?= $escHtml((string)($headerAction['delete_modal_target'] ?? '#content-delete-modal')) ?>"
                             >
-                                <span><?= $e($t('common.delete')) ?></span>
+                                <span><?= $escHtml($t('common.delete')) ?></span>
                                 <?= $icon('delete') ?>
                             </button>
                         </div>
@@ -172,9 +172,9 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
             <?php foreach ($flashes as $flash): ?>
             <?php $flashType = (string)($flash['type'] ?? 'warning'); ?>
             <?php $flashIcon = $flashType === 'success' ? 'success' : ($flashType === 'error' ? 'error' : 'warning'); ?>
-            <div class="flash flash-<?= $e($flashType === 'info' ? 'warning' : $flashType) ?>">
-                <span class="d-flex align-center gap-2"><?= $icon($flashIcon) ?><span><?= $e((string)($flash['message'] ?? '')) ?></span></span>
-                <button type="button" data-flash-close aria-label="<?= $e($t('admin.close_notice')) ?>" title="<?= $e($t('admin.close_notice')) ?>">
+            <div class="flash flash-<?= $escHtml($flashType === 'info' ? 'warning' : $flashType) ?>">
+                <span class="d-flex align-center gap-2"><?= $icon($flashIcon) ?><span><?= $escHtml((string)($flash['message'] ?? '')) ?></span></span>
+                <button type="button" data-flash-close aria-label="<?= $escHtml($t('admin.close_notice')) ?>" title="<?= $escHtml($t('admin.close_notice')) ?>">
                     <?= $icon('cancel') ?>
                 </button>
             </div>
@@ -182,17 +182,17 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
             <?= $content ?>
         </section>
     </main>
-    <div class="admin-version-corner">TinyCMS <?= $e((string)($appVersion ?? '0.9.0')) ?></div>
+    <div class="admin-version-corner">TinyCMS <?= $escHtml((string)($appVersion ?? '0.9.0')) ?></div>
 </div>
 <div class="modal-overlay" id="session-login-modal" data-session-login-modal>
     <div class="modal session-login-modal">
-        <h3 class="m-0 mb-3"><?= $e($t('auth.login')) ?></h3>
-        <p class="m-0 mb-3"><?= $e($t('auth.session_expired')) ?></p>
+        <h3 class="m-0 mb-3"><?= $escHtml($t('auth.login')) ?></h3>
+        <p class="m-0 mb-3"><?= $escHtml($t('auth.session_expired')) ?></p>
         <p class="m-0 mb-3 text-danger" data-session-login-message hidden></p>
-        <form method="post" action="<?= $e($url('admin/api/v1/auth/login')) ?>" data-session-login-form>
+        <form method="post" action="<?= $escUrl($url('admin/api/v1/auth/login')) ?>" data-session-login-form>
             <?= $csrfField() ?>
             <div class="mb-3">
-                <label><?= $e($t('common.email')) ?></label>
+                <label><?= $escHtml($t('common.email')) ?></label>
                 <div class="field-with-icon">
                     <span class="field-overlay field-overlay-start field-icon" aria-hidden="true"><?= $icon('email') ?></span>
                     <input class="field-control-with-start-icon" type="email" name="email" data-session-login-email required>
@@ -200,27 +200,27 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 <small class="text-danger" data-session-login-error="email" hidden></small>
             </div>
             <div class="mb-3">
-                <label><?= $e($t('common.password')) ?></label>
+                <label><?= $escHtml($t('common.password')) ?></label>
                 <div class="field-with-icon">
                     <input class="field-control-with-end-icon" type="password" name="password" data-password-input required>
-                    <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= $e($t('auth.show_password')) ?>" title="<?= $e($t('auth.show_password')) ?>">
+                    <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= $escHtml($t('auth.show_password')) ?>" title="<?= $escHtml($t('auth.show_password')) ?>">
                         <?= $icon('show') ?>
                     </button>
                 </div>
                 <small class="text-danger" data-session-login-error="password" hidden></small>
             </div>
             <div class="mb-4">
-                <label><input type="checkbox" name="remember" value="1"> <?= $e($t('auth.remember')) ?></label>
+                <label><input type="checkbox" name="remember" value="1"> <?= $escHtml($t('auth.remember')) ?></label>
             </div>
-            <button class="btn btn-primary" type="submit" data-session-login-submit><?= $e($t('auth.login')) ?></button>
+            <button class="btn btn-primary" type="submit" data-session-login-submit><?= $escHtml($t('auth.login')) ?></button>
         </form>
     </div>
 </div>
 <div class="modal-overlay" id="connection-lost-modal" data-connection-lost-modal>
     <div class="modal session-login-modal">
-        <h3 class="m-0 mb-3"><?= $e($t('common.connection_lost')) ?></h3>
-        <p class="m-0 mb-4"><?= $e($t('auth.connection_lost')) ?></p>
-        <button class="btn btn-primary" type="button" data-connection-lost-retry><?= $e($t('common.retry')) ?></button>
+        <h3 class="m-0 mb-3"><?= $escHtml($t('common.connection_lost')) ?></h3>
+        <p class="m-0 mb-4"><?= $escHtml($t('auth.connection_lost')) ?></p>
+        <button class="btn btn-primary" type="button" data-connection-lost-retry><?= $escHtml($t('common.retry')) ?></button>
     </div>
 </div>
 </body>

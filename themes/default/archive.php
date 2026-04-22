@@ -5,11 +5,11 @@ if (!defined('BASE_DIR')) {
 }
 
 ?>
-<h1><?= $e((string)($archiveLabel ?? $t('front.archive_for'))) ?>: <?= $e((string)($term['name'] ?? '')) ?></h1>
+<h1><?= $escHtml((string)($archiveLabel ?? $t('front.archive_for'))) ?>: <?= $escHtml((string)($term['name'] ?? '')) ?></h1>
 <?php $items = (array)(($pagination ?? [])['data'] ?? []); ?>
 <?php $basePath = trim((string)($archivePath ?? ''), '/'); ?>
 <?php if ($items === []): ?>
-    <p><?= $e($t('front.empty')) ?></p>
+    <p><?= $escHtml($t('front.empty')) ?></p>
 <?php else: ?>
     <?php $includePartial('content-loop', ['items' => $items]); ?>
     <?php $includePartial('pagination', ['pagination' => $pagination ?? [], 'basePath' => $basePath]); ?>

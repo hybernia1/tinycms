@@ -6,7 +6,7 @@ if (!defined('BASE_DIR')) {
 
 ?>
 <article class="content-single">
-    <h1><?= $e($t('front.account_title')) ?></h1>
-    <p><?= $e($t('front.account_welcome')) ?> <strong><?= $e((string)($user['name'] ?? '')) ?></strong></p>
-    <p class="text-muted"><?= $e((string)($user['email'] ?? '')) ?></p>
+    <h1><?= $escHtml($t('front.account_title')) ?></h1>
+    <p><?= $escHtml($t('front.account_welcome')) ?> <strong><?= $escHtml((string)($user['name'] ?? '')) ?></strong></p>
+    <p class="text-muted"><?= $escHtml((string)($user['email'] ?? '')) ?></p>
 </article>

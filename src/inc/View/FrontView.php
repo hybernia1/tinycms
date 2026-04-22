@@ -7,6 +7,7 @@ use App\Service\Application\Menu;
 use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
+use App\Service\Support\Escape;
 
 final class FrontView
 {
@@ -113,7 +114,10 @@ final class FrontView
         $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
         $url = fn(string $path = ''): string => $theme->url($path);
         $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
-        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $escHtml = static fn(mixed $value): string => Escape::escHtml($value);
+        $escAttr = static fn(mixed $value): string => Escape::escAttr($value);
+        $escUrl = static fn(mixed $value): string => Escape::escUrl($value);
+        $escJs = static fn(mixed $value): string => Escape::escJs($value);
         $setting = fn(string $key, string $default = ''): string => $theme->setting($key, $default);
         $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
         $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);
@@ -130,13 +134,13 @@ final class FrontView
         ]);
         $menuItems = fn(): array => $theme->menuItems();
         $menu = fn(array $options = []): string => $theme->menu($options);
-        $icon = static function (string $name, string $classes = 'icon') use ($e, $url): string {
-            $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
+        $icon = static function (string $name, string $classes = 'icon') use ($escAttr, $escUrl, $url): string {
+            $sprite = $escUrl($url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
             $class = trim($classes);
-            return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
+            return '<svg class="' . $escAttr($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
         };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $theme, $icon): void {
+        $includePartial = function (string $name, array $context = []) use ($escHtml, $escAttr, $escUrl, $escJs, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $theme, $icon): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;

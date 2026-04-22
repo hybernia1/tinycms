@@ -33,15 +33,15 @@ foreach ($listRootAttrs as $attr => $value) {
 ?>
 <div
 <?php foreach ($rootAttrs as $attr => $value): ?>
-    <?= $e((string)$attr) ?><?= $value === null ? '' : '="' . $e((string)$value) . '"' ?>
+    <?= $escHtml((string)$attr) ?><?= $value === null ? '' : '="' . $escHtml((string)$value) . '"' ?>
 <?php endforeach; ?>
 >
-    <div data-<?= $e($listName) ?>-csrf class="d-none"><?= $csrfMarkup ?></div>
+    <div data-<?= $escHtml($listName) ?>-csrf class="d-none"><?= $csrfMarkup ?></div>
     <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
         <?php if ($statusEnabled): ?>
             <nav class="filter-nav">
                 <?php foreach ($statusLinks as $key => $label): ?>
-                    <button class="filter-link<?= $statusCurrent === (string)$key ? ' active' : '' ?>" type="button" data-<?= $e($listName) ?>-status="<?= $e((string)$key) ?>"><?= $e((string)$label) ?></button>
+                    <button class="filter-link<?= $statusCurrent === (string)$key ? ' active' : '' ?>" type="button" data-<?= $escHtml($listName) ?>-status="<?= $escHtml((string)$key) ?>"><?= $escHtml((string)$label) ?></button>
                 <?php endforeach; ?>
             </nav>
         <?php else: ?>
@@ -49,7 +49,7 @@ foreach ($listRootAttrs as $attr => $value) {
         <?php endif; ?>
         <div class="search-form">
             <div class="search-field field-with-icon">
-                <input class="search-input" type="search" value="<?= $e($listQuery) ?>" placeholder="<?= $e($searchPlaceholder) ?>" data-<?= $e($listName) ?>-search>
+                <input class="search-input" type="search" value="<?= $escHtml($listQuery) ?>" placeholder="<?= $escHtml($searchPlaceholder) ?>" data-<?= $escHtml($listName) ?>-search>
                 <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= $icon('search') ?></span>
             </div>
         </div>
@@ -65,11 +65,11 @@ foreach ($listRootAttrs as $attr => $value) {
                         $label = (string)($column['label'] ?? '');
                         $class = trim((string)($column['class'] ?? ''));
                         ?>
-                        <th<?= $class !== '' ? ' class="' . $e($class) . '"' : '' ?>><?= $e($label) ?></th>
+                        <th<?= $class !== '' ? ' class="' . $escHtml($class) . '"' : '' ?>><?= $escHtml($label) ?></th>
                     <?php endforeach; ?>
                 </tr>
                 </thead>
-                <tbody data-<?= $e($listName) ?>-list-body>
+                <tbody data-<?= $escHtml($listName) ?>-list-body>
                 <?php foreach ($items as $row): ?>
                     <?= $rowRenderer !== null ? $rowRenderer((array)$row) : '' ?>
                 <?php endforeach; ?>
@@ -80,8 +80,8 @@ foreach ($listRootAttrs as $attr => $value) {
         <div class="d-flex justify-between align-center mt-4">
             <?php if ($listTotalPages > 1): ?>
                 <div class="pagination">
-                    <button class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" type="button" data-<?= $e($listName) ?>-prev<?= $listPage <= 1 ? ' disabled aria-disabled="true"' : '' ?>><?= $icon('prev') ?><span><?= $e($t('common.previous')) ?></span></button>
-                    <button class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" type="button" data-<?= $e($listName) ?>-next<?= $listPage >= $listTotalPages ? ' disabled aria-disabled="true"' : '' ?>><span><?= $e($t('common.next')) ?></span><?= $icon('next') ?></button>
+                    <button class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" type="button" data-<?= $escHtml($listName) ?>-prev<?= $listPage <= 1 ? ' disabled aria-disabled="true"' : '' ?>><?= $icon('prev') ?><span><?= $escHtml($t('common.previous')) ?></span></button>
+                    <button class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" type="button" data-<?= $escHtml($listName) ?>-next<?= $listPage >= $listTotalPages ? ' disabled aria-disabled="true"' : '' ?>><span><?= $escHtml($t('common.next')) ?></span><?= $icon('next') ?></button>
                 </div>
             <?php else: ?>
                 <div></div>
@@ -91,12 +91,12 @@ foreach ($listRootAttrs as $attr => $value) {
         </div>
     </div>
 
-    <div class="modal-overlay" data-modal data-<?= $e($listName) ?>-delete-modal>
+    <div class="modal-overlay" data-modal data-<?= $escHtml($listName) ?>-delete-modal>
         <div class="modal">
-            <p data-modal-text><?= $e($deleteConfirmText) ?></p>
+            <p data-modal-text><?= $escHtml($deleteConfirmText) ?></p>
             <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
-                <button class="btn btn-primary" type="button" data-modal-confirm><?= $e($t('common.confirm')) ?></button>
+                <button class="btn btn-light" type="button" data-modal-close><?= $escHtml($t('common.cancel')) ?></button>
+                <button class="btn btn-primary" type="button" data-modal-confirm><?= $escHtml($t('common.confirm')) ?></button>
             </div>
         </div>
     </div>

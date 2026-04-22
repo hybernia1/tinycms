@@ -20,7 +20,7 @@ final class Csrf
 
     public function field(string $name = '_csrf'): string
     {
-        return '<input type="hidden" name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" value="' . htmlspecialchars($this->token(), ENT_QUOTES, 'UTF-8') . '">';
+        return '<input type="hidden" name="' . Escape::escAttr($name) . '" value="' . Escape::escAttr($this->token()) . '">';
     }
 
     public function verify(?string $token): bool

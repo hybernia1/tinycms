@@ -7,6 +7,7 @@ use App\Service\Support\Flash;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Csrf;
 use App\Service\Support\DateTimeFormatter;
+use App\Service\Support\Escape;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
@@ -41,7 +42,10 @@ final class View
     private function renderFiles(string $templateFile, string $layoutFile, string $layout, array $data = []): void
     {
         $url = fn(string $path = ''): string => $this->router->url($path);
-        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+        $escHtml = static fn(mixed $value): string => Escape::escHtml($value);
+        $escAttr = static fn(mixed $value): string => Escape::escAttr($value);
+        $escUrl = static fn(mixed $value): string => Escape::escUrl($value);
+        $escJs = static fn(mixed $value): string => Escape::escJs($value);
         $absoluteUrl = static function (string $path = '') use ($url): string {
             $value = trim($path);
             if ($value === '') {
@@ -59,9 +63,9 @@ final class View
 
             return RequestContext::scheme() . '://' . RequestContext::authority() . $resolved;
         };
-        $icon = static function (string $name, string $classes = 'icon') use ($url, $e): string {
-            $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . $name));
-            $classAttr = $e($classes);
+        $icon = static function (string $name, string $classes = 'icon') use ($url, $escAttr, $escUrl): string {
+            $sprite = $escUrl($url(ASSETS_DIR . 'svg/icons.svg#icon-' . $name));
+            $classAttr = $escAttr($classes);
             return '<svg class="' . $classAttr . '" aria-hidden="true" focusable="false"><use href="' . $sprite . '"></use></svg>';
         };
         $csrfField = fn(string $name = '_csrf'): string => $this->csrf->field($name);
@@ -87,7 +91,10 @@ final class View
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
         $data['icon'] = $icon;
-        $data['e'] = $e;
+        $data['escHtml'] = $escHtml;
+        $data['escAttr'] = $escAttr;
+        $data['escUrl'] = $escUrl;
+        $data['escJs'] = $escJs;
         $data['csrfField'] = $csrfField;
         $data['formatDate'] = $formatDate;
         $data['formatDateTime'] = $formatDateTime;
