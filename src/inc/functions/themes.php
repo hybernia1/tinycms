@@ -13,6 +13,71 @@ function themes_init(Router $router, array $settings, string $theme, Menu $menu)
     return ['router' => $router, 'settings' => $settings, 'theme' => trim($theme) !== '' ? trim($theme) : 'default', 'menu' => $menu, 'slugger' => new Slugger()];
 }
 
+function themes_resolved_language(array $settings): string
+{
+    $lang = trim((string)($settings['app_lang'] ?? 'en'));
+    return $lang !== '' ? $lang : 'en';
+}
+
+function themes_path(string $rootPath, string $theme): string
+{
+    $themeDir = trim((string)(defined('THEMES_DIR') ? THEMES_DIR : 'themes/'), '/');
+    return rtrim($rootPath, '/') . '/' . $themeDir . '/' . trim($theme, '/');
+}
+
+function themes_resolve_name(string $rootPath, string $theme): string
+{
+    $clean = trim($theme);
+    if ($clean === '') {
+        return 'default';
+    }
+
+    return is_dir(themes_path($rootPath, $clean)) ? $clean : 'default';
+}
+
+function themes_resolve_file(string $rootPath, string $theme, string $file): string
+{
+    $path = themes_path($rootPath, $theme) . '/' . ltrim($file, '/');
+    $real = realpath($path);
+    $root = realpath(themes_path($rootPath, $theme));
+    $normalizedReal = $real === false ? '' : str_replace('\\', '/', $real);
+    $normalizedRoot = $root === false ? '' : str_replace('\\', '/', $root);
+
+    if ($normalizedReal === '' || $normalizedRoot === '' || !str_starts_with($normalizedReal, $normalizedRoot) || !is_file($real)) {
+        http_response_code(404);
+        exit('404');
+    }
+
+    return $real;
+}
+
+function themes_load_lang(string $rootPath, string $theme, string $lang): array
+{
+    $file = themes_path($rootPath, $theme) . '/lang/' . $lang . '.php';
+    if (!is_file($file)) {
+        return [];
+    }
+
+    $payload = require $file;
+    return is_array($payload) ? $payload : [];
+}
+
+function themes_translate(string $rootPath, string $theme, array $settings, string $key, ?string $fallback = null): string
+{
+    static $cache = [];
+
+    $lang = themes_resolved_language($settings);
+    $cacheKey = md5($rootPath . '|' . $theme);
+    if (!isset($cache[$cacheKey][$lang])) {
+        $cache[$cacheKey][$lang] = themes_load_lang($rootPath, $theme, $lang);
+    }
+    if (!isset($cache[$cacheKey]['en'])) {
+        $cache[$cacheKey]['en'] = themes_load_lang($rootPath, $theme, 'en');
+    }
+
+    return (string)($cache[$cacheKey][$lang][$key] ?? $cache[$cacheKey]['en'][$key] ?? $fallback ?? $key);
+}
+
 function themes_setting(array $ctx, string $key, string $default = ''): string { return (string)($ctx['settings'][$key] ?? $default); }
 function themes_site_title(array $ctx): string { return themes_setting($ctx, 'sitename', 'TinyCMS'); }
 function themes_site_logo(array $ctx): string { return themes_setting($ctx, 'logo'); }
