@@ -12,8 +12,7 @@ if (tagPickers.length) {
 
         let tags = [];
         let timer = null;
-        const iconUse = document.querySelector('svg use[href*="#icon-"]');
-        const iconSprite = iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
+        const icon = window.tinycms?.icons?.icon || (() => '');
 
         try {
             const initial = JSON.parse(initialRaw);
@@ -40,7 +39,7 @@ if (tagPickers.length) {
             chips.innerHTML = tags.map((tag) => `
                 <button type="button" class="tag-picker-chip" data-tag-remove="${esc(tag)}">
                     <span>${esc(tag)}</span>
-                    <span aria-hidden="true">${iconSprite !== "" ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${esc(iconSprite)}#icon-cancel"></use></svg>` : ""}</span>
+                    <span aria-hidden="true">${icon('cancel')}</span>
                 </button>
             `).join('');
             valueField.value = tags.join(', ');

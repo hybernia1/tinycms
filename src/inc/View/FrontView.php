@@ -7,6 +7,7 @@ use App\Service\Application\Menu;
 use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
+use App\Service\Support\I18n;
 
 final class FrontView
 {
@@ -55,7 +56,7 @@ final class FrontView
             'kind' => 'archive',
             'term' => $term,
             'pagination' => $pagination,
-            'archiveLabel' => $this->translate('front.archive_for'),
+            'archiveLabel' => $this->themeText('front.archive_for'),
             'archivePath' => trim($archivePath, '/'),
         ]);
     }
@@ -67,14 +68,14 @@ final class FrontView
             'term' => $author,
             'user' => $author,
             'pagination' => $pagination,
-            'archiveLabel' => $this->translate('front.archive_for_author'),
+            'archiveLabel' => $this->themeText('front.archive_for_author'),
             'archivePath' => trim($archivePath, '/'),
         ]);
     }
 
     public function searchResults(array $pagination, string $query): void
     {
-        $title = $this->translate('front.search_results');
+        $title = $this->themeText('front.search_results');
         if (trim($query) !== '') {
             $title .= ': ' . $query;
         }
@@ -92,7 +93,7 @@ final class FrontView
         $this->render('account', [
             'kind' => 'account',
             'user' => $user,
-            'pageTitle' => $this->translate('front.account_title'),
+            'pageTitle' => $this->themeText('front.account_title'),
         ]);
     }
 
@@ -102,7 +103,7 @@ final class FrontView
         http_response_code(404);
         $this->render('404', [
             'kind' => '404',
-            'pageTitle' => $this->translate('front.not_found_title'),
+            'pageTitle' => $this->themeText('front.not_found_title'),
         ]);
     }
 
@@ -113,9 +114,7 @@ final class FrontView
         $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
         $url = fn(string $path = ''): string => $theme->url($path);
         $themeUrl = fn(string $path = ''): string => $theme->themeUrl($path);
-        $e = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
         $setting = fn(string $key, string $default = ''): string => $theme->setting($key, $default);
-        $t = fn(string $key, ?string $fallback = null): string => $this->translate($key, $fallback);
         $mediaUrl = fn(string $path = '', string $size = 'origin'): string => $theme->mediaUrl($path, $size);
         $mediaSrcSet = fn(string $path): string => $theme->mediaSrcSet($path);
         $contentThumbnail = fn(array $item, array $options = []): string => $theme->contentThumbnail($item, $options);
@@ -125,36 +124,37 @@ final class FrontView
         $termUrl = fn(array $term): string => $theme->termUrl($term);
         $authorUrl = fn(array $item): string => $theme->authorUrl($item);
         $searchForm = fn(string $action = 'search', string $query = ''): string => $theme->searchForm($action, $query, [
-            'placeholder' => $this->translate('front.search_placeholder'),
-            'button' => $this->translate('front.search_button'),
+            'placeholder' => t('front.search_placeholder'),
+            'button' => t('front.search_button'),
         ]);
         $menuItems = fn(): array => $theme->menuItems();
         $menu = fn(array $options = []): string => $theme->menu($options);
-        $icon = static function (string $name, string $classes = 'icon') use ($e, $url): string {
-            $sprite = $e($url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
-            $class = trim($classes);
-            return '<svg class="' . $e($class !== '' ? $class : 'icon') . '" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
-        };
         $lang = $this->resolvedLanguage();
-        $includePartial = function (string $name, array $context = []) use ($e, $url, $themeUrl, $setting, $t, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $theme, $icon): void {
+        $includePartial = function (string $name, array $context = []) use ($url, $themeUrl, $setting, $lang, $mediaUrl, $mediaSrcSet, $contentThumbnail, $contentAuthor, $contentDate, $contentUrl, $termUrl, $authorUrl, $searchForm, $menuItems, $menu, $theme): void {
             $file = $this->resolveThemeFile('partials/' . $name . '.php');
             extract($context, EXTR_SKIP);
             require $file;
         };
 
-        $pageTitle = $theme->pageTitle(isset($data['pageTitle']) ? (string)$data['pageTitle'] : null);
-        $head = $theme->head($data);
-        extract($data, EXTR_SKIP);
+        I18n::pushCataloguePath($this->themeLangPath());
 
-        ob_start();
-        require $templateFile;
-        $content = (string)ob_get_clean();
+        try {
+            $pageTitle = $theme->pageTitle(isset($data['pageTitle']) ? (string)$data['pageTitle'] : null);
+            $head = $theme->head($data);
+            extract($data, EXTR_SKIP);
 
-        ob_start();
-        require $layoutFile;
-        $output = (string)ob_get_clean();
+            ob_start();
+            require $templateFile;
+            $content = (string)ob_get_clean();
 
-        echo $this->adminBar->inject($output, $data);
+            ob_start();
+            require $layoutFile;
+            $output = (string)ob_get_clean();
+
+            echo $this->adminBar->inject($output, $data);
+        } finally {
+            I18n::popCataloguePath();
+        }
     }
 
     private function resolveTheme(string $theme): string
@@ -190,30 +190,19 @@ final class FrontView
         return $this->rootPath . '/' . $themeDir . '/' . trim($theme, '/');
     }
 
-    private function translate(string $key, ?string $fallback = null): string
+    private function themeLangPath(): string
     {
-        static $cache = [];
-
-        $lang = $this->resolvedLanguage();
-        if (!isset($cache[$lang])) {
-            $cache[$lang] = $this->loadLang($lang);
-        }
-        if (!isset($cache['en'])) {
-            $cache['en'] = $this->loadLang('en');
-        }
-
-        return (string)($cache[$lang][$key] ?? $cache['en'][$key] ?? $fallback ?? $key);
+        return $this->themePath($this->theme) . '/lang';
     }
 
-    private function loadLang(string $lang): array
+    private function themeText(string $key, ?string $fallback = null): string
     {
-        $file = $this->themePath($this->theme) . '/lang/' . $lang . '.php';
-        if (!is_file($file)) {
-            return [];
+        I18n::pushCataloguePath($this->themeLangPath());
+        try {
+            return t($key, $fallback);
+        } finally {
+            I18n::popCataloguePath();
         }
-
-        $payload = require $file;
-        return is_array($payload) ? $payload : [];
     }
 
     private function resolvedLanguage(): string

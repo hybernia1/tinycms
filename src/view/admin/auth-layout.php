@@ -6,20 +6,22 @@ if (!defined('BASE_DIR')) {
 
 ?>
 <!doctype html>
-<html lang="<?= $e((string)$lang) ?>">
+<html lang="<?= esc_attr((string)$lang) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title><?= $e((string)$pageTitle) ?> | <?= $e($t('admin.title_suffix')) ?></title>
+    <title><?= esc_html((string)$pageTitle) ?> | <?= esc_html(t('admin.title_suffix')) ?></title>
     <?php if (!empty($siteFavicon)): ?>
-        <link rel="icon" href="<?= $e($url((string)$siteFavicon)) ?>">
+        <link rel="icon" href="<?= esc_url($url((string)$siteFavicon)) ?>">
     <?php endif; ?>
-    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/style.css')) ?>">
-    <link rel="stylesheet" href="<?= $e($url(ASSETS_DIR . 'css/admin.css')) ?>">
-    <script>window.tinycmsI18n = <?= json_encode($adminI18n ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
-    <script defer src="<?= $e($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
+    <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/admin.css')) ?>">
+    <script>window.tinycmsI18n = <?= esc_json($adminI18n ?? []) ?>;</script>
+    <script>window.tinycmsIconSprite = <?= esc_json(icon_sprite()) ?>;</script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/icons.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
 </head>
 <body>
 <?= $content ?>

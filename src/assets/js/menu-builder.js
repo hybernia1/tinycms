@@ -8,8 +8,7 @@
     const template = root.querySelector('[data-menu-item-template]');
     const empty = root.querySelector('[data-menu-empty]');
     const addButton = root.querySelector('[data-menu-add-item]');
-    const sampleIconUse = document.querySelector('svg.icon use');
-    const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '/src/assets/svg/icons.svg';
+    const iconBase = String(window.tinycms?.icons?.sprite?.() || window.tinycmsIconSprite || '');
 
     if (!items || !template) {
         return;
@@ -17,7 +16,7 @@
 
     const rows = () => Array.from(items.querySelectorAll('[data-menu-item]'));
     const iconPickers = () => Array.from(root.querySelectorAll('[data-menu-icon-picker]'));
-    const iconSvg = (name) => `<svg class="icon" aria-hidden="true"><use href="${iconBase}#icon-${name}"></use></svg>`;
+    const iconSvg = (name) => window.tinycms?.icons?.icon?.(name) || `<svg class="icon" aria-hidden="true"><use href="${iconBase}#icon-${name}"></use></svg>`;
     const closeIconPickers = (except = null) => {
         iconPickers().forEach((picker) => {
             if (picker === except) {

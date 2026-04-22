@@ -11,6 +11,10 @@
         return t(key, fallback) || fallback;
     }
 
+    function iconSvg(name) {
+        return window.tinycms?.icons?.icon?.(name, '') || '';
+    }
+
     function normalizeHtml(html) {
         return html === '<br>' ? '' : html;
     }
@@ -340,7 +344,7 @@
     function createLoadingImageBlock() {
         var block = document.createElement('div');
         block.className = 'block block-image align-center is-loading';
-        block.innerHTML = '<div class="image-upload-loading" contenteditable="false"><svg class="icon" aria-hidden="true"><use href="/src/assets/svg/icons.svg#icon-loader"></use></svg></div>';
+        block.innerHTML = '<div class="image-upload-loading" contenteditable="false">' + iconSvg('loader') + '</div>';
         return block;
     }
 
@@ -353,7 +357,7 @@
         Object.keys(attributes || {}).forEach(function (name) {
             button.setAttribute(name, attributes[name]);
         });
-        button.innerHTML = '<svg aria-hidden="true"><use href="/src/assets/svg/icons.svg#icon-' + icon + '"></use></svg>';
+        button.innerHTML = iconSvg(icon);
         return button;
     }
 
@@ -659,7 +663,7 @@
         button.setAttribute('data-command', command);
         button.setAttribute('aria-label', title);
         button.title = title;
-        button.innerHTML = '<svg aria-hidden="true"><use href="/src/assets/svg/icons.svg#icon-' + icon + '"></use></svg>';
+        button.innerHTML = iconSvg(icon);
         return button;
     }
 
@@ -668,7 +672,7 @@
         item.type = 'button';
         item.className = 'wysiwyg-menu-item';
         item.setAttribute('data-command', command);
-        item.innerHTML = '<svg aria-hidden="true"><use href="/src/assets/svg/icons.svg#icon-' + icon + '"></use></svg><span>' + label + '</span>';
+        item.innerHTML = iconSvg(icon) + '<span>' + label + '</span>';
         return item;
     }
 
@@ -679,7 +683,7 @@
         button.setAttribute('data-role', role);
         button.setAttribute('aria-label', title);
         button.title = title;
-        button.innerHTML = '<svg aria-hidden="true"><use href="/src/assets/svg/icons.svg#icon-' + icon + '"></use></svg>';
+        button.innerHTML = iconSvg(icon);
         return button;
     }
 

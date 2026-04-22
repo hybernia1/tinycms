@@ -18,7 +18,7 @@ final class ErrorHandler
             return;
         }
 
-        echo htmlspecialchars($this->friendlyMessage($e), ENT_QUOTES, 'UTF-8');
+        echo esc_html($this->friendlyMessage($e));
     }
 
     private function isDebug(): bool
@@ -52,8 +52,8 @@ final class ErrorHandler
 
     private function renderDebug(Throwable $e): void
     {
-        $message = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
-        $trace = htmlspecialchars($e->getTraceAsString(), ENT_QUOTES, 'UTF-8');
+        $message = esc_html($e->getMessage());
+        $trace = esc_html($e->getTraceAsString());
 
         echo '<h1>Application Error</h1>';
         echo '<p><strong>' . $message . '</strong></p>';

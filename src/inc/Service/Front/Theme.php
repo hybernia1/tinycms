@@ -60,41 +60,41 @@ final class Theme
         $tags = [
             '<meta charset="utf-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1">',
-            '<title>' . $this->esc($title) . '</title>',
-            '<meta name="description" content="' . $this->esc($description) . '">',
-            '<link rel="canonical" href="' . $this->esc($url) . '">',
-            '<meta property="og:title" content="' . $this->esc($title) . '">',
-            '<meta property="og:description" content="' . $this->esc($description) . '">',
-            '<meta property="og:type" content="' . $this->esc($ogType) . '">',
-            '<meta property="og:url" content="' . $this->esc($url) . '">',
-            '<meta property="og:site_name" content="' . $this->esc($this->siteTitle()) . '">',
-            '<meta name="twitter:card" content="' . $this->esc($image !== '' ? 'summary_large_image' : 'summary') . '">',
-            '<meta name="twitter:title" content="' . $this->esc($title) . '">',
-            '<meta name="twitter:description" content="' . $this->esc($description) . '">',
+            '<title>' . esc_html($title) . '</title>',
+            '<meta name="description" content="' . esc_attr($description) . '">',
+            '<link rel="canonical" href="' . esc_url($url) . '">',
+            '<meta property="og:title" content="' . esc_attr($title) . '">',
+            '<meta property="og:description" content="' . esc_attr($description) . '">',
+            '<meta property="og:type" content="' . esc_attr($ogType) . '">',
+            '<meta property="og:url" content="' . esc_url($url) . '">',
+            '<meta property="og:site_name" content="' . esc_attr($this->siteTitle()) . '">',
+            '<meta name="twitter:card" content="' . esc_attr($image !== '' ? 'summary_large_image' : 'summary') . '">',
+            '<meta name="twitter:title" content="' . esc_attr($title) . '">',
+            '<meta name="twitter:description" content="' . esc_attr($description) . '">',
         ];
 
         $contentType = trim((string)($item['type'] ?? ''));
         if ($contentType !== '') {
-            $tags[] = '<meta name="content:type" content="' . $this->esc($contentType) . '">';
+            $tags[] = '<meta name="content:type" content="' . esc_attr($contentType) . '">';
         }
         if ($author !== '') {
-            $tags[] = '<meta name="author" content="' . $this->esc($author) . '">';
+            $tags[] = '<meta name="author" content="' . esc_attr($author) . '">';
         }
         if ($image !== '') {
-            $tags[] = '<meta property="og:image" content="' . $this->esc($image) . '">';
-            $tags[] = '<meta name="twitter:image" content="' . $this->esc($image) . '">';
+            $tags[] = '<meta property="og:image" content="' . esc_url($image) . '">';
+            $tags[] = '<meta name="twitter:image" content="' . esc_url($image) . '">';
         }
         if (($kind === 'content' || $kind === 'home-content') && $this->isArticleType((string)($item['type'] ?? ''))) {
             $published = $this->isoDate((string)($item['created'] ?? ''));
             $updated = $this->isoDate((string)($item['updated'] ?? ''));
             if ($published !== '') {
-                $tags[] = '<meta property="article:published_time" content="' . $this->esc($published) . '">';
+                $tags[] = '<meta property="article:published_time" content="' . esc_attr($published) . '">';
             }
             if ($updated !== '') {
-                $tags[] = '<meta property="article:modified_time" content="' . $this->esc($updated) . '">';
+                $tags[] = '<meta property="article:modified_time" content="' . esc_attr($updated) . '">';
             }
             if ($author !== '') {
-                $tags[] = '<meta property="article:author" content="' . $this->esc($author) . '">';
+                $tags[] = '<meta property="article:author" content="' . esc_attr($author) . '">';
             }
         }
         if ($kind === 'search') {
@@ -102,7 +102,7 @@ final class Theme
         }
         $favicon = trim($this->setting('favicon'));
         if ($favicon !== '') {
-            $tags[] = '<link rel="icon" href="' . $this->esc($this->url($favicon)) . '">';
+            $tags[] = '<link rel="icon" href="' . esc_url($this->url($favicon)) . '">';
         }
 
         $jsonLd = $this->jsonLd($kind, $item, $term, $title, $description, $url, $image, $author, $query);
@@ -187,15 +187,15 @@ final class Theme
             $labelText = (string)($item['label'] ?? '');
             $iconName = $this->menuIconName((string)($item['icon'] ?? ''));
             $hasLabel = trim($labelText) !== '';
-            $ariaLabel = $iconName !== '' && !$hasLabel ? ' aria-label="' . $this->esc($iconName) . '"' : '';
-            $content = $iconName !== '' ? $this->icon($iconName) : '';
+            $ariaLabel = $iconName !== '' && !$hasLabel ? ' aria-label="' . esc_attr($iconName) . '"' : '';
+            $content = $iconName !== '' ? icon($iconName) : '';
             if ($hasLabel) {
-                $content .= $this->esc($labelText);
+                $content .= esc_html($labelText);
             }
             $links[] = sprintf(
                 '<a class="%s" href="%s"%s%s%s>%s</a>',
-                $this->esc($itemClass),
-                $this->esc((string)($item['href'] ?? '')),
+                esc_attr($itemClass),
+                esc_url((string)($item['href'] ?? '')),
                 $targetAttr,
                 $rel,
                 $ariaLabel,
@@ -205,8 +205,8 @@ final class Theme
 
         return sprintf(
             '<nav class="%s" aria-label="%s">%s</nav>',
-            $this->esc($class),
-            $this->esc($label !== '' ? $label : 'Menu'),
+            esc_attr($class),
+            esc_attr($label !== '' ? $label : 'Menu'),
             implode('', $links),
         );
     }
@@ -251,12 +251,12 @@ final class Theme
 
         return sprintf(
             '<figure class="%s"><img src="%s" srcset="%s" sizes="%s" alt="%s" loading="%s" decoding="async"></figure>',
-            $this->esc($class),
-            $this->esc($this->mediaUrl($thumbnail, $size)),
-            $this->esc($this->mediaSrcSet($thumbnail)),
-            $this->esc($sizes),
-            $this->esc($name),
-            $this->esc($loading),
+            esc_attr($class),
+            esc_url($this->mediaUrl($thumbnail, $size)),
+            esc_attr($this->mediaSrcSet($thumbnail)),
+            esc_attr($sizes),
+            esc_attr($name),
+            esc_attr($loading),
         );
     }
 
@@ -302,8 +302,8 @@ final class Theme
         if ($current > 1) {
             $items[] = sprintf(
                 '<a href="%s">%s</a>',
-                $this->esc($this->paginationUrl($basePath, $current - 1)),
-                $this->esc($prevLabel !== '' ? $prevLabel : 'Previous'),
+                esc_url($this->paginationUrl($basePath, $current - 1)),
+                esc_html($prevLabel !== '' ? $prevLabel : 'Previous'),
             );
         }
 
@@ -312,8 +312,8 @@ final class Theme
         if ($current < $totalPages) {
             $items[] = sprintf(
                 '<a href="%s">%s</a>',
-                $this->esc($this->paginationUrl($basePath, $current + 1)),
-                $this->esc($nextLabel !== '' ? $nextLabel : 'Next'),
+                esc_url($this->paginationUrl($basePath, $current + 1)),
+                esc_html($nextLabel !== '' ? $nextLabel : 'Next'),
             );
         }
 
@@ -327,19 +327,19 @@ final class Theme
         $formAction = $this->url(trim($action, '/'));
         $hiddenRoute = $this->hiddenRouteField($formAction);
         $queryValue = trim($query);
-        $value = $this->esc($queryValue);
+        $value = esc_attr($queryValue);
         $state = $queryValue !== '' ? ' is-open' : '';
 
         return sprintf(
             '<form class="search-form search-form-expand%s" action="%s" method="get">%s<input type="search" name="q" value="%s" placeholder="%s" aria-label="%s"><button type="submit" aria-label="%s">%s</button></form>',
             $state,
-            $this->esc($this->formAction($formAction)),
+            esc_url($this->formAction($formAction)),
             $hiddenRoute,
             $value,
-            $this->esc($placeholder),
-            $this->esc($button),
-            $this->esc($placeholder),
-            $this->icon('search'),
+            esc_attr($placeholder),
+            esc_attr($button),
+            esc_attr($placeholder),
+            icon('search'),
         );
     }
 
@@ -353,13 +353,7 @@ final class Theme
         parse_str((string)(parse_url($url, PHP_URL_QUERY) ?? ''), $query);
         $route = trim((string)($query['route'] ?? ''));
 
-        return $route === '' ? '' : '<input type="hidden" name="route" value="' . $this->esc($route) . '">';
-    }
-
-    private function icon(string $name): string
-    {
-        $sprite = $this->esc($this->url(ASSETS_DIR . 'svg/icons.svg#icon-' . trim($name)));
-        return '<svg class="icon" aria-hidden="true"><use href="' . $sprite . '"></use></svg>';
+        return $route === '' ? '' : '<input type="hidden" name="route" value="' . esc_attr($route) . '">';
     }
 
     private function menuIconName(string $name): string
@@ -611,11 +605,6 @@ final class Theme
     private function jsonEncode(array $payload): string
     {
         $payload = array_filter($payload, static fn(mixed $value): bool => $value !== null && $value !== '');
-        return (string)json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
-    }
-
-    private function esc(string $value): string
-    {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        return esc_json($payload);
     }
 }

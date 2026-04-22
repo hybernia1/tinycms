@@ -1,13 +1,7 @@
 (() => {
 const modal = document.querySelector('[data-media-library-modal]');
 const t = window.tinycms?.i18n?.t || (() => '');
-const iconSprite = (() => {
-    const iconUse = document.querySelector('svg use[href*="#icon-"]');
-    return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
-})();
-const icon = (name) => iconSprite !== ''
-    ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${iconSprite}#icon-${name}"></use></svg>`
-    : '';
+const icon = window.tinycms?.icons?.icon || (() => '');
 const openTrigger = Array.prototype.find.call(
     document.querySelectorAll('[data-media-library-open]'),
     (node) => node.getAttribute('data-media-library-mode') !== 'editor',

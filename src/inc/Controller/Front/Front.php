@@ -519,7 +519,7 @@ final class Front
 
     private function xml(string $value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+        return esc_xml($value);
     }
 
     private function sitemapDate(string $value): string

@@ -33,15 +33,19 @@ foreach ($listRootAttrs as $attr => $value) {
 ?>
 <div
 <?php foreach ($rootAttrs as $attr => $value): ?>
-    <?= $e((string)$attr) ?><?= $value === null ? '' : '="' . $e((string)$value) . '"' ?>
+    <?php $attrName = preg_replace('/[^a-z0-9_:-]/i', '', (string)$attr); ?>
+    <?php if ($attrName !== ''): ?>
+    <?= esc_attr($attrName) ?><?= $value === null ? '' : '="' . esc_attr((string)$value) . '"' ?>
+    <?php endif; ?>
 <?php endforeach; ?>
 >
-    <div data-<?= $e($listName) ?>-csrf class="d-none"><?= $csrfMarkup ?></div>
+    <?php $listAttr = preg_replace('/[^a-z0-9_-]/i', '', $listName) ?: 'list'; ?>
+    <div data-<?= esc_attr($listAttr) ?>-csrf class="d-none"><?= $csrfMarkup ?></div>
     <div class="d-flex justify-between align-center mb-3 admin-list-toolbar">
         <?php if ($statusEnabled): ?>
             <nav class="filter-nav">
                 <?php foreach ($statusLinks as $key => $label): ?>
-                    <button class="filter-link<?= $statusCurrent === (string)$key ? ' active' : '' ?>" type="button" data-<?= $e($listName) ?>-status="<?= $e((string)$key) ?>"><?= $e((string)$label) ?></button>
+                    <button class="filter-link<?= $statusCurrent === (string)$key ? ' active' : '' ?>" type="button" data-<?= esc_attr($listAttr) ?>-status="<?= esc_attr((string)$key) ?>"><?= esc_html((string)$label) ?></button>
                 <?php endforeach; ?>
             </nav>
         <?php else: ?>
@@ -49,8 +53,8 @@ foreach ($listRootAttrs as $attr => $value) {
         <?php endif; ?>
         <div class="search-form">
             <div class="search-field field-with-icon">
-                <input class="search-input" type="search" value="<?= $e($listQuery) ?>" placeholder="<?= $e($searchPlaceholder) ?>" data-<?= $e($listName) ?>-search>
-                <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= $icon('search') ?></span>
+                <input class="search-input" type="search" value="<?= esc_attr($listQuery) ?>" placeholder="<?= esc_attr($searchPlaceholder) ?>" data-<?= esc_attr($listAttr) ?>-search>
+                <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= icon('search') ?></span>
             </div>
         </div>
     </div>
@@ -65,11 +69,11 @@ foreach ($listRootAttrs as $attr => $value) {
                         $label = (string)($column['label'] ?? '');
                         $class = trim((string)($column['class'] ?? ''));
                         ?>
-                        <th<?= $class !== '' ? ' class="' . $e($class) . '"' : '' ?>><?= $e($label) ?></th>
+                        <th<?= $class !== '' ? ' class="' . esc_attr($class) . '"' : '' ?>><?= esc_html($label) ?></th>
                     <?php endforeach; ?>
                 </tr>
                 </thead>
-                <tbody data-<?= $e($listName) ?>-list-body>
+                <tbody data-<?= esc_attr($listAttr) ?>-list-body>
                 <?php foreach ($items as $row): ?>
                     <?= $rowRenderer !== null ? $rowRenderer((array)$row) : '' ?>
                 <?php endforeach; ?>
@@ -80,8 +84,8 @@ foreach ($listRootAttrs as $attr => $value) {
         <div class="d-flex justify-between align-center mt-4">
             <?php if ($listTotalPages > 1): ?>
                 <div class="pagination">
-                    <button class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" type="button" data-<?= $e($listName) ?>-prev<?= $listPage <= 1 ? ' disabled aria-disabled="true"' : '' ?>><?= $icon('prev') ?><span><?= $e($t('common.previous')) ?></span></button>
-                    <button class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" type="button" data-<?= $e($listName) ?>-next<?= $listPage >= $listTotalPages ? ' disabled aria-disabled="true"' : '' ?>><span><?= $e($t('common.next')) ?></span><?= $icon('next') ?></button>
+                    <button class="pagination-link<?= $listPage <= 1 ? ' disabled' : '' ?>" type="button" data-<?= esc_attr($listAttr) ?>-prev<?= $listPage <= 1 ? ' disabled aria-disabled="true"' : '' ?>><?= icon('prev') ?><span><?= esc_html(t('common.previous')) ?></span></button>
+                    <button class="pagination-link<?= $listPage >= $listTotalPages ? ' disabled' : '' ?>" type="button" data-<?= esc_attr($listAttr) ?>-next<?= $listPage >= $listTotalPages ? ' disabled aria-disabled="true"' : '' ?>><span><?= esc_html(t('common.next')) ?></span><?= icon('next') ?></button>
                 </div>
             <?php else: ?>
                 <div></div>
@@ -91,12 +95,12 @@ foreach ($listRootAttrs as $attr => $value) {
         </div>
     </div>
 
-    <div class="modal-overlay" data-modal data-<?= $e($listName) ?>-delete-modal>
+    <div class="modal-overlay" data-modal data-<?= esc_attr($listAttr) ?>-delete-modal>
         <div class="modal">
-            <p data-modal-text><?= $e($deleteConfirmText) ?></p>
+            <p data-modal-text><?= esc_html($deleteConfirmText) ?></p>
             <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-modal-close><?= $e($t('common.cancel')) ?></button>
-                <button class="btn btn-primary" type="button" data-modal-confirm><?= $e($t('common.confirm')) ?></button>
+                <button class="btn btn-light" type="button" data-modal-close><?= esc_html(t('common.cancel')) ?></button>
+                <button class="btn btn-primary" type="button" data-modal-confirm><?= esc_html(t('common.confirm')) ?></button>
             </div>
         </div>
     </div>

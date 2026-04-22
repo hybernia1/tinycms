@@ -5,14 +5,14 @@ if (!defined('BASE_DIR')) {
 }
 
 ?>
-<h1><?= $e($t('front.search_results')) ?></h1>
+<h1><?= esc_html(t('front.search_results')) ?></h1>
 <?php $queryText = trim((string)($query ?? '')); ?>
 <?php if ($queryText !== ''): ?>
-    <p class="text-muted small"><?= $e($t('front.search_results_for')) ?>: <?= $e($queryText) ?></p>
+    <p class="text-muted small"><?= esc_html(t('front.search_results_for')) ?>: <?= esc_html($queryText) ?></p>
 <?php endif; ?>
 <?php $items = (array)(($pagination ?? [])['data'] ?? []); ?>
 <?php if ($items === []): ?>
-    <p><?= $e($t('front.empty')) ?></p>
+    <p><?= esc_html(t('front.empty')) ?></p>
 <?php else: ?>
     <?php $includePartial('content-loop', ['items' => $items]); ?>
     <?php $basePath = 'search'; ?>

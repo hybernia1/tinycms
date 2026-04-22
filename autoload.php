@@ -49,6 +49,8 @@ if (!defined('DB_PREFIX')) {
     define('DB_PREFIX', '');
 }
 
+require_once __DIR__ . '/' . INC_DIR . 'functions.php';
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
 

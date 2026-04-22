@@ -8,14 +8,7 @@
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 
-    const iconSprite = (() => {
-        const iconUse = document.querySelector('svg use[href*="#icon-"]');
-        return iconUse ? String(iconUse.getAttribute('href') || '').split('#')[0] : '';
-    })();
-
-    const icon = (name) => iconSprite !== ''
-        ? `<svg class="icon" aria-hidden="true" focusable="false"><use href="${esc(iconSprite)}#icon-${esc(name)}"></use></svg>`
-        : '';
+    const icon = window.tinycms?.icons?.icon || (() => '');
 
     const pushFlash = (type, message) => {
         const text = String(message || '').trim();

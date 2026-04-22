@@ -24,9 +24,7 @@
     root.classList.add('has-custom-datetime');
 
     let opened = null;
-    const sampleIconUse = document.querySelector('svg.icon use');
-    const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : '';
-    const iconHref = (name) => `${iconBase}#icon-${name}`;
+    const iconHref = (name) => window.tinycms?.icons?.href?.(name) || '';
 
     const parseValue = (value) => {
         if (!value || !value.includes('T')) {

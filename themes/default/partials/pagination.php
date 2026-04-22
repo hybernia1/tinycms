@@ -9,7 +9,7 @@ if (!defined('BASE_DIR')) {
     (array)($pagination ?? []),
     (string)($basePath ?? ''),
     [
-        'prev' => $t('front.prev'),
-        'next' => $t('front.next'),
+        'prev' => t('front.prev'),
+        'next' => t('front.next'),
     ],
 ) ?>

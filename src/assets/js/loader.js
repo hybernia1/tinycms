@@ -1,10 +1,6 @@
 (function () {
     function iconSpritePath() {
-        var iconUse = document.querySelector('svg use[href*="#icon-"]');
-        if (!iconUse) {
-            return '/src/assets/svg/icons.svg';
-        }
-        return String(iconUse.getAttribute('href') || '').split('#')[0] || '/src/assets/svg/icons.svg';
+        return String(window.tinycms?.icons?.sprite?.() || window.tinycmsIconSprite || '');
     }
 
     function createOverlay() {
@@ -14,7 +10,7 @@
         if (!scope) {
             overlay.classList.add('is-fixed');
         }
-        overlay.innerHTML = '<svg class="icon" aria-hidden="true"><use href="' + iconSpritePath() + '#icon-loader"></use></svg>';
+        overlay.innerHTML = window.tinycms?.icons?.icon?.('loader') || '<svg class="icon" aria-hidden="true"><use href="' + iconSpritePath() + '#icon-loader"></use></svg>';
         (scope || document.body).appendChild(overlay);
         return overlay;
     }

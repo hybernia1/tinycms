@@ -5,9 +5,7 @@
     }
 
     let opened = null;
-    const sampleIconUse = document.querySelector('svg.icon use');
-    const iconBase = sampleIconUse ? (sampleIconUse.getAttribute('href') || '').split('#')[0] : String(window.tinycmsIconSprite || '');
-    const arrowIconHref = `${iconBase}#icon-chevron-down`;
+    const arrowIconHref = window.tinycms?.icons?.href?.('chevron-down') || '';
 
     const closeOpened = () => {
         if (!opened) {
