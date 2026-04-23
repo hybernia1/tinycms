@@ -198,10 +198,12 @@ a:focus-visible {
 }
 
 .btn:hover {
+    color: var(--btn-text, var(--color-text));
     text-decoration: none;
 }
 
 .btn:focus-visible {
+    color: var(--btn-text, var(--color-text));
     outline: 0;
     box-shadow: var(--focus-ring);
 }

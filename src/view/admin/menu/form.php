@@ -51,7 +51,7 @@ $renderItem = static function (array $item) use ($renderIconPicker): void {
     ?>
     <div class="menu-builder-row" data-menu-item>
         <div class="menu-builder-fields">
-            <div class="menu-builder-field menu-builder-field-label">
+            <div class="menu-builder-field form-floating-field menu-builder-field-label">
                 <label><?= esc_html(t('menu.item_label')) ?></label>
                 <div class="field-with-icon menu-builder-label-control">
                     <?php $renderIconPicker((string)($item['icon'] ?? ''), 'item_icon[]'); ?>
@@ -64,7 +64,7 @@ $renderItem = static function (array $item) use ($renderIconPicker): void {
                     >
                 </div>
             </div>
-            <div class="menu-builder-field menu-builder-field-url">
+            <div class="menu-builder-field form-floating-field menu-builder-field-url">
                 <label><?= esc_html(t('menu.item_url')) ?></label>
                 <div class="field-with-icon">
                     <span class="field-overlay field-overlay-start field-icon field-icon-soft" aria-hidden="true"><?= icon('w-link') ?></span>
@@ -77,7 +77,7 @@ $renderItem = static function (array $item) use ($renderIconPicker): void {
                     >
                 </div>
             </div>
-            <div class="menu-builder-field menu-builder-field-target">
+            <div class="menu-builder-field form-floating-field menu-builder-field-target">
                 <label><?= esc_html(t('menu.item_target')) ?></label>
                 <select name="item_target[]" aria-label="<?= esc_attr(t('menu.item_target')) ?>">
                     <option value="_self"<?= $target === '_self' ? ' selected' : '' ?>><?= esc_html(t('menu.target_self')) ?></option>
@@ -128,21 +128,21 @@ $renderItem = static function (array $item) use ($renderIconPicker): void {
             <div class="card" data-menu-draft>
                 <div class="content-box-header"><?= esc_html(t('menu.add_item')) ?></div>
                 <div class="p-3 menu-builder-add-fields">
-                    <div class="menu-builder-field">
+                    <div class="menu-builder-field form-floating-field">
                         <label><?= esc_html(t('menu.item_label')) ?></label>
                         <div class="field-with-icon menu-builder-label-control">
                             <?php $renderIconPicker('', '', 'data-menu-draft-icon'); ?>
                             <input class="menu-builder-label-input" type="text" data-menu-draft-label>
                         </div>
                     </div>
-                    <div class="menu-builder-field">
+                    <div class="menu-builder-field form-floating-field">
                         <label><?= esc_html(t('menu.item_url')) ?></label>
                         <div class="field-with-icon">
                             <span class="field-overlay field-overlay-start field-icon field-icon-soft" aria-hidden="true"><?= icon('w-link') ?></span>
                             <input class="field-control-with-start-icon" type="text" data-menu-draft-url>
                         </div>
                     </div>
-                    <div class="menu-builder-field">
+                    <div class="menu-builder-field form-floating-field">
                         <label><?= esc_html(t('menu.item_target')) ?></label>
                         <select data-menu-draft-target>
                             <option value="_self"><?= esc_html(t('menu.target_self')) ?></option>

@@ -53,7 +53,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 </script>
 <div class="admin-shell">
     <aside class="admin-sidebar">
-        <a class="admin-brand" href="<?= esc_url($url('admin/dashboard')) ?>" aria-label="<?= esc_attr(t('admin.brand')) ?>">
+        <a class="admin-brand" href="<?= esc_url($url('')) ?>" aria-label="<?= esc_attr(site_title()) ?>">
             <img src="<?= esc_url($url(ASSETS_DIR . 'svg/logo.svg')) ?>" alt="">
         </a>
         <nav class="admin-nav">

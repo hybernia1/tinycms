@@ -814,13 +814,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     min-width: 0;
 }
 
-.menu-builder-field label {
-    display: block;
-    margin-bottom: var(--space-1);
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-}
-
 .menu-builder-field input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']),
 .menu-builder-field select,
 .menu-builder-field .custom-select-button {
@@ -907,7 +900,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     display: flex;
     gap: var(--space-1);
     align-self: start;
-    padding-top: calc(1.3125rem + var(--space-1));
+    padding-top: calc(var(--space-2) + var(--space-1) / 2);
 }
 
 .menu-builder-add-submit {
@@ -918,12 +911,13 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .menu-builder-action,
 .menu-builder-icon-trigger,
 .menu-builder-icon-option {
+    --admin-control-text: var(--color-text-muted);
     min-width: 2.25rem;
     height: 2.25rem;
     padding: var(--space-1);
     border: 1px solid var(--color-border-soft);
     background: var(--color-surface-muted);
-    color: var(--color-text-muted);
+    color: var(--admin-control-text);
     border-radius: var(--radius-sm);
     transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
 }
@@ -938,7 +932,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .menu-builder-icon-option:focus-visible {
     background: var(--admin-control-hover-bg);
     border-color: var(--color-border);
-    color: var(--color-text);
+    color: var(--admin-control-text);
 }
 
 .table-col-actions .btn-icon:focus-visible,
