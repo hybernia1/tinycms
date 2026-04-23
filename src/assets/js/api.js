@@ -745,8 +745,8 @@ initListApi({
                     <span class="d-flex align-center gap-2">
                         ${statusIcon !== '' ? icon(statusIcon) : ''}
                         ${canEdit
-        ? `<a href="${esc(editBase)}${Number(item.id || 0)}">${esc(item.name)}</a>`
-        : `<span>${esc(item.name)}</span>`}
+        ? `<a class="admin-list-truncate" href="${esc(editBase)}${Number(item.id || 0)}" title="${esc(item.name)}">${esc(item.name)}</a>`
+        : `<span class="admin-list-truncate" title="${esc(item.name)}">${esc(item.name)}</span>`}
                     </span>
                     <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                 </td>
@@ -822,8 +822,8 @@ initListApi({
         ? `<div class="media-list-thumb"><img src="${esc(img)}" alt="${esc(item.name)}"></div>`
         : '<div class="media-list-thumb media-list-thumb-empty"></div>'}
                         <div>
-                            ${canEdit ? `<a href="${esc(editBase)}${id}">${esc(item.name)}</a>` : `<span>${esc(item.name)}</span>`}
-                            <div class="text-muted small">${esc(item.path)}</div>
+                            ${canEdit ? `<a class="admin-list-truncate" href="${esc(editBase)}${id}" title="${esc(item.name)}">${esc(item.name)}</a>` : `<span class="admin-list-truncate" title="${esc(item.name)}">${esc(item.name)}</span>`}
+                            <div class="text-muted small admin-list-truncate" title="${esc(item.path)}">${esc(item.path)}</div>
                             <div class="text-muted small">${esc(item.created_label || item.created)}</div>
                         </div>
                     </div>
