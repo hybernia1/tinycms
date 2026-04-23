@@ -56,6 +56,7 @@ if ($isInstalled) {
     $resolvedSettings = $settingsService->resolved();
     MediaSupport::configure($resolvedSettings);
     RequestContext::setWebsiteUrl((string)($resolvedSettings['website_url'] ?? ''));
+    RequestContext::setRoutingMode((string)($resolvedSettings['routing_mode'] ?? 'auto'));
     I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
 }
 

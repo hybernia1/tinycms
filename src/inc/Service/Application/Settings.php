@@ -58,6 +58,17 @@ final class Settings
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'section' => 'general', 'type' => 'textarea', 'default' => ''],
             'website_url' => ['label_key' => 'settings.fields.website_url', 'section' => 'general', 'type' => 'text', 'default' => ''],
             'website_email' => ['label_key' => 'settings.fields.website_email', 'section' => 'general', 'type' => 'text', 'default' => ''],
+            'routing_mode' => [
+                'label_key' => 'settings.fields.routing_mode',
+                'section' => 'general',
+                'type' => 'select',
+                'default' => 'auto',
+                'options' => [
+                    'auto' => I18n::t('settings.options.routing_mode.auto'),
+                    'rewrite' => I18n::t('settings.options.routing_mode.rewrite'),
+                    'query' => I18n::t('settings.options.routing_mode.query'),
+                ],
+            ],
             'front_home_content' => [
                 'label_key' => 'settings.fields.front_home_content',
                 'section' => 'content',

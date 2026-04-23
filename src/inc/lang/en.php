@@ -328,6 +328,7 @@ return [
             'footer_text' => 'Footer text',
             'website_url' => 'Website URL',
             'website_email' => 'Website email',
+            'routing_mode' => 'Routing mode',
         ],
         'options' => [
             'front_home_content' => [
@@ -336,6 +337,11 @@ return [
             'allow_registration' => [
                 'disabled' => 'No',
                 'enabled' => 'Yes',
+            ],
+            'routing_mode' => [
+                'auto' => 'Automatic (detect)',
+                'rewrite' => 'SEO URLs (rewrite)',
+                'query' => 'Query URLs (?route=...)',
             ],
         ],
     ],

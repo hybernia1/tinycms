@@ -172,7 +172,7 @@ final class Install
         }
 
         $websiteUrl = trim((string)($admin['website_url'] ?? ''));
-        $settingsResult = $this->saveWebsiteUrlSetting($pdo, $websiteUrl, $prefix);
+        $settingsResult = $this->saveInitialSettings($pdo, $websiteUrl, $prefix);
         if ($settingsResult !== null) {
             return ['success' => false, 'message' => $settingsResult];
         }
@@ -249,16 +249,21 @@ final class Install
         }
     }
 
-    private function saveWebsiteUrlSetting(PDO $pdo, string $websiteUrl, string $prefix = ''): ?string
+    private function saveInitialSettings(PDO $pdo, string $websiteUrl, string $prefix = ''): ?string
     {
         $prefix = $this->normalizePrefix($prefix);
         $settings = $prefix . 'settings';
+        $routingMode = RequestContext::queryMode() ? 'query' : 'rewrite';
 
         try {
             $insert = $pdo->prepare("INSERT INTO $settings (key_name, value) VALUES (:key_name, :value)");
             $insert->execute([
                 'key_name' => 'website_url',
                 'value' => $websiteUrl,
+            ]);
+            $insert->execute([
+                'key_name' => 'routing_mode',
+                'value' => $routingMode,
             ]);
             return null;
         } catch (PDOException $e) {

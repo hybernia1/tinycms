@@ -111,7 +111,11 @@ final class Router
         }
 
         $path = $this->normalizePath($normalized);
-        if ($path !== '' || !$this->queryMode) {
+        if (!$this->queryMode) {
+            return $path;
+        }
+
+        if ($path !== '' && $path !== 'index.php') {
             return $path;
         }
 

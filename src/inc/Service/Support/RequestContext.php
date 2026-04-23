@@ -6,10 +6,17 @@ namespace App\Service\Support;
 final class RequestContext
 {
     private static ?array $websiteUrlParts = null;
+    private static string $routingMode = 'auto';
 
     public static function setWebsiteUrl(?string $url): void
     {
         self::$websiteUrlParts = self::parseWebsiteUrl($url);
+    }
+
+    public static function setRoutingMode(?string $mode): void
+    {
+        $value = strtolower(trim((string)$mode));
+        self::$routingMode = in_array($value, ['auto', 'rewrite', 'query'], true) ? $value : 'auto';
     }
 
     public static function isValidWebsiteUrl(string $value): bool
@@ -84,7 +91,19 @@ final class RequestContext
 
     public static function queryMode(?string $basePath = null): bool
     {
-        return str_ends_with($basePath ?? self::basePath(), '/index.php');
+        if (self::$routingMode === 'query') {
+            return true;
+        }
+
+        if (self::$routingMode === 'rewrite') {
+            return false;
+        }
+
+        if (str_ends_with($basePath ?? self::basePath(), '/index.php')) {
+            return true;
+        }
+
+        return str_ends_with(self::requestBasePath(), '/index.php');
     }
 
     public static function path(string $path = '', ?string $basePath = null, ?bool $queryMode = null): string

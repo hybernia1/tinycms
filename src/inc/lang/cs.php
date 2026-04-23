@@ -328,6 +328,7 @@ return [
             'footer_text' => 'Text patičky',
             'website_url' => 'URL webu',
             'website_email' => 'E-mail webu',
+            'routing_mode' => 'Režim routování',
         ],
         'options' => [
             'front_home_content' => [
@@ -336,6 +337,11 @@ return [
             'allow_registration' => [
                 'disabled' => 'Ne',
                 'enabled' => 'Ano',
+            ],
+            'routing_mode' => [
+                'auto' => 'Automaticky (detekce)',
+                'rewrite' => 'SEO URL (rewrite)',
+                'query' => 'Query URL (?route=...)',
             ],
         ],
     ],
