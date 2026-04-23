@@ -58,18 +58,11 @@ final class RequestContext
 
     public static function basePath(?string $scriptName = null, ?string $requestUri = null): string
     {
-        $requestBasePath = self::requestBasePath($scriptName, $requestUri);
-
         if (self::$websiteUrlParts !== null) {
-            $configuredPath = self::$websiteUrlParts['path'];
-            if (str_ends_with($requestBasePath, '/index.php') && !str_ends_with($configuredPath, '/index.php')) {
-                return $requestBasePath;
-            }
-
-            return $configuredPath;
+            return self::$websiteUrlParts['path'];
         }
 
-        return $requestBasePath;
+        return self::requestBasePath($scriptName, $requestUri);
     }
 
     private static function requestBasePath(?string $scriptName = null, ?string $requestUri = null): string
@@ -102,6 +95,16 @@ final class RequestContext
 
         $basePath ??= self::basePath();
         $queryMode ??= self::queryMode($basePath);
+
+        if (!$queryMode) {
+            $requestBasePath = self::requestBasePath();
+            parse_str((string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY) ?? ''), $requestQuery);
+            if (str_ends_with($requestBasePath, '/index.php') || array_key_exists('route', $requestQuery)) {
+                $queryMode = true;
+                $basePath = str_ends_with($basePath, '/index.php') ? $basePath : $requestBasePath;
+            }
+        }
+
         $cleanPath = trim($path, '/');
 
         if ($cleanPath === '') {

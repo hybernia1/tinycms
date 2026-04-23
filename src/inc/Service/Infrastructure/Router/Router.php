@@ -111,12 +111,22 @@ final class Router
         }
 
         $path = $this->normalizePath($normalized);
-        if ($path !== '' || !$this->queryMode) {
+        parse_str((string)($parts['query'] ?? ''), $query);
+        $queryRoute = $this->normalizePath((string)($query['route'] ?? ''));
+
+        if (!$this->queryMode) {
+            if (($path === '' || $path === 'index.php') && $queryRoute !== '') {
+                return $queryRoute;
+            }
+
             return $path;
         }
 
-        parse_str((string)($parts['query'] ?? ''), $query);
-        return $this->normalizePath((string)($query['route'] ?? ''));
+        if ($path !== '' && $path !== 'index.php') {
+            return $path;
+        }
+
+        return $queryRoute;
     }
 
     private function normalizePath(string $path): string
