@@ -6,17 +6,10 @@ namespace App\Service\Support;
 final class RequestContext
 {
     private static ?array $websiteUrlParts = null;
-    private static string $routingMode = 'auto';
 
     public static function setWebsiteUrl(?string $url): void
     {
         self::$websiteUrlParts = self::parseWebsiteUrl($url);
-    }
-
-    public static function setRoutingMode(?string $mode): void
-    {
-        $value = strtolower(trim((string)$mode));
-        self::$routingMode = in_array($value, ['auto', 'rewrite', 'query'], true) ? $value : 'auto';
     }
 
     public static function isValidWebsiteUrl(string $value): bool
@@ -65,11 +58,18 @@ final class RequestContext
 
     public static function basePath(?string $scriptName = null, ?string $requestUri = null): string
     {
+        $requestBasePath = self::requestBasePath($scriptName, $requestUri);
+
         if (self::$websiteUrlParts !== null) {
-            return self::$websiteUrlParts['path'];
+            $configuredPath = self::$websiteUrlParts['path'];
+            if (str_ends_with($requestBasePath, '/index.php') && !str_ends_with($configuredPath, '/index.php')) {
+                return $requestBasePath;
+            }
+
+            return $configuredPath;
         }
 
-        return self::requestBasePath($scriptName, $requestUri);
+        return $requestBasePath;
     }
 
     private static function requestBasePath(?string $scriptName = null, ?string $requestUri = null): string
@@ -91,33 +91,7 @@ final class RequestContext
 
     public static function queryMode(?string $basePath = null): bool
     {
-        if (self::$routingMode === 'query') {
-            return true;
-        }
-
-        if (self::$routingMode === 'rewrite') {
-            return false;
-        }
-
-        if (str_ends_with($basePath ?? self::basePath(), '/index.php')) {
-            return true;
-        }
-
-        $requestPath = '/' . ltrim(str_replace('\\', '/', (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?? '')), '/');
-        if (str_contains($requestPath, '/index.php')) {
-            return true;
-        }
-
-        parse_str((string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY) ?? ''), $query);
-        if (array_key_exists('route', $query)) {
-            return true;
-        }
-
-        if (basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php' && ($requestPath === '/' || $requestPath === '')) {
-            return !defined('BASE_DIR') || !is_file(BASE_DIR . '/.htaccess');
-        }
-
-        return false;
+        return str_ends_with($basePath ?? self::basePath(), '/index.php');
     }
 
     public static function path(string $path = '', ?string $basePath = null, ?bool $queryMode = null): string
