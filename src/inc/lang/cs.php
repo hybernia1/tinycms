@@ -117,7 +117,6 @@ return [
         'role' => 'Role',
         'suspend' => 'Suspendovat',
         'unsuspend' => 'Odsuspendovat',
-        'admin_cannot_suspend' => 'Admin účet nelze suspendovat.',
         'search_placeholder' => 'Hledat jméno nebo email',
         'user' => 'Uživatel',
         'delete' => 'Smazat uživatele',
