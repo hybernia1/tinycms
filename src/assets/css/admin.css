@@ -91,10 +91,10 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: margin-left .2s ease-in-out;
+    transition: margin-left .5s ease-in-out;
 }
 
-.admin-sidebar { transition: transform .2s ease-in-out; }
+.admin-sidebar { transition: width .5s ease-in-out, transform .5s ease-in-out; }
 
 @media (min-width: 768px) {
     body.admin-sidebar-collapsed .admin-sidebar {
@@ -863,7 +863,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     .admin-sidebar {
         height: 100%;
         transform: translateX(-100%);
-        transition: transform 0.2s ease-in-out;
+        transition: transform .5s ease-in-out;
         z-index: var(--admin-z-sidebar);
     }
 
