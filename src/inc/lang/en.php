@@ -134,6 +134,7 @@ return [
         'unsuspended' => 'User unsuspended.',
         'suspend_failed' => 'Could not suspend user.',
         'unsuspend_failed' => 'Could not unsuspend user.',
+        'last_admin_protected' => 'Cannot remove administrator role from the last administrator.',
         'status' => [
             'all' => 'All',
             'active' => 'Active',

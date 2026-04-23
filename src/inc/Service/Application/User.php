@@ -149,6 +149,10 @@ final class User
             $errors['email'] = I18n::t('validation.email_already_used');
         }
 
+        if ($id !== null && $role !== 'admin' && !$this->canDemoteAdmin($id)) {
+            $errors['role'] = I18n::t('users.last_admin_protected');
+        }
+
         if ($errors !== []) {
             return ['success' => false, 'errors' => $errors];
         }
@@ -213,6 +217,28 @@ final class User
         }
 
         return $counts;
+    }
+
+    private function canDemoteAdmin(int $id): bool
+    {
+        $user = $this->find($id);
+        if ($user === null || (string)($user['role'] ?? '') !== 'admin') {
+            return true;
+        }
+
+        return $this->hasAnotherActiveAdmin($id);
+    }
+
+    private function hasAnotherActiveAdmin(int $excludedId): bool
+    {
+        $admins = $this->query->select('users', ['ID'], ['role' => 'admin', 'suspend' => 0]);
+        foreach ($admins as $admin) {
+            if ((int)($admin['ID'] ?? 0) !== $excludedId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
