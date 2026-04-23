@@ -117,7 +117,6 @@ return [
         'role' => 'Role',
         'suspend' => 'Suspend',
         'unsuspend' => 'Unsuspend',
-        'admin_cannot_suspend' => 'Admin account cannot be suspended.',
         'search_placeholder' => 'Search name or email',
         'user' => 'User',
         'delete' => 'Delete user',
@@ -134,6 +133,7 @@ return [
         'unsuspended' => 'User unsuspended.',
         'suspend_failed' => 'Could not suspend user.',
         'unsuspend_failed' => 'Could not unsuspend user.',
+        'last_admin_protected' => 'Cannot remove administrator role from the last active administrator.',
         'status' => [
             'all' => 'All',
             'active' => 'Active',

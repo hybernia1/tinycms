@@ -117,7 +117,6 @@ return [
         'role' => 'Role',
         'suspend' => 'Suspendovat',
         'unsuspend' => 'Odsuspendovat',
-        'admin_cannot_suspend' => 'Admin účet nelze suspendovat.',
         'search_placeholder' => 'Hledat jméno nebo email',
         'user' => 'Uživatel',
         'delete' => 'Smazat uživatele',
@@ -134,6 +133,7 @@ return [
         'unsuspended' => 'Uživatel odsuspendován.',
         'suspend_failed' => 'Uživatele se nepodařilo suspendovat.',
         'unsuspend_failed' => 'Uživatele se nepodařilo odsuspendovat.',
+        'last_admin_protected' => 'Poslednímu administrátorovi nelze odebrat roli administrátora.',
         'status' => [
             'all' => 'Všichni',
             'active' => 'Aktivní',
