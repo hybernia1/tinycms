@@ -38,9 +38,9 @@ if (!defined('BASE_DIR')) {
         </div>
         <div class="mb-3">
             <label><?= esc_html(t('users.role')) ?></label>
-            <?php if ($mode === 'edit' && $isAdmin): ?>
+            <?php if ($mode === 'edit' && $isAdmin && (int)($user['is_last_admin'] ?? 0) === 1): ?>
                 <input type="hidden" name="role" value="admin">
-                <p class="text-muted m-0"><?= esc_html(t('users.admin_role_locked')) ?></p>
+                <p class="text-muted m-0"><?= esc_html(t('users.last_admin_protected')) ?></p>
             <?php else: ?>
                 <select name="role">
                     <option value="user" <?= (($user['role'] ?? 'user') === 'user') ? 'selected' : '' ?>><?= esc_html(t('users.roles.user')) ?></option>

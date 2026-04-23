@@ -134,7 +134,7 @@ return [
         'unsuspended' => 'Uživatel odsuspendován.',
         'suspend_failed' => 'Uživatele se nepodařilo suspendovat.',
         'unsuspend_failed' => 'Uživatele se nepodařilo odsuspendovat.',
-        'admin_role_locked' => 'Roli administrátora nelze při editaci měnit.',
+        'last_admin_protected' => 'Poslednímu administrátorovi nelze odebrat roli administrátora.',
         'status' => [
             'all' => 'Všichni',
             'active' => 'Aktivní',

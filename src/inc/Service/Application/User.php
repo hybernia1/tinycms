@@ -41,7 +41,13 @@ final class User
     public function find(int $id): ?array
     {
         $rows = $this->query->select('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $id]);
-        return $rows[0] ?? null;
+        $user = $rows[0] ?? null;
+        if (!is_array($user)) {
+            return null;
+        }
+
+        $user['is_last_admin'] = (string)($user['role'] ?? '') === 'admin' && !$this->hasAnotherActiveAdmin((int)($user['ID'] ?? 0)) ? 1 : 0;
+        return $user;
     }
 
     public function delete(int $id): bool
@@ -149,8 +155,8 @@ final class User
             $errors['email'] = I18n::t('validation.email_already_used');
         }
 
-        if ($id !== null && $role !== 'admin' && $this->isAdminUser($id)) {
-            $errors['role'] = I18n::t('users.admin_role_locked');
+        if ($id !== null && $role !== 'admin' && !$this->canDemoteAdmin($id)) {
+            $errors['role'] = I18n::t('users.last_admin_protected');
         }
 
         if ($errors !== []) {
@@ -219,10 +225,26 @@ final class User
         return $counts;
     }
 
-    private function isAdminUser(int $id): bool
+    private function canDemoteAdmin(int $id): bool
     {
         $user = $this->find($id);
-        return $user !== null && (string)($user['role'] ?? '') === 'admin';
+        if ($user === null || (string)($user['role'] ?? '') !== 'admin') {
+            return true;
+        }
+
+        return $this->hasAnotherActiveAdmin($id);
+    }
+
+    private function hasAnotherActiveAdmin(int $excludedId): bool
+    {
+        $admins = $this->query->select('users', ['ID'], ['role' => 'admin', 'suspend' => 0]);
+        foreach ($admins as $admin) {
+            if ((int)($admin['ID'] ?? 0) !== $excludedId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
