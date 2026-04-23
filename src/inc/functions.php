@@ -77,7 +77,7 @@ function get_menu(array $options = []): string
 
 function get_footer(): string
 {
-    return Theme::current()?->footerText() ?? '';
+    return esc_content(Theme::current()?->footerText() ?? '');
 }
 
 function get_search_form(string $action = 'search', ?string $query = null): string
