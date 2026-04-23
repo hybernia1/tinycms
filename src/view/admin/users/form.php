@@ -38,10 +38,15 @@ if (!defined('BASE_DIR')) {
         </div>
         <div class="mb-3">
             <label><?= esc_html(t('users.role')) ?></label>
-            <select name="role">
-                <option value="user" <?= (($user['role'] ?? 'user') === 'user') ? 'selected' : '' ?>><?= esc_html(t('users.roles.user')) ?></option>
-                <option value="admin" <?= (($user['role'] ?? '') === 'admin') ? 'selected' : '' ?>><?= esc_html(t('users.roles.admin')) ?></option>
-            </select>
+            <?php if ($mode === 'edit' && $isAdmin): ?>
+                <input type="hidden" name="role" value="admin">
+                <p class="text-muted m-0"><?= esc_html(t('users.admin_role_locked')) ?></p>
+            <?php else: ?>
+                <select name="role">
+                    <option value="user" <?= (($user['role'] ?? 'user') === 'user') ? 'selected' : '' ?>><?= esc_html(t('users.roles.user')) ?></option>
+                    <option value="admin" <?= (($user['role'] ?? '') === 'admin') ? 'selected' : '' ?>><?= esc_html(t('users.roles.admin')) ?></option>
+                </select>
+            <?php endif; ?>
             <?php if (!empty($errors['role'])): ?><small class="text-danger"><?= esc_html((string)$errors['role']) ?></small><?php endif; ?>
         </div>
         <div class="mb-4">
