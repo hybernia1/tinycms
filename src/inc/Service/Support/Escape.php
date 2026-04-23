@@ -217,7 +217,12 @@ final class Escape
         }
 
         if (str_contains($class, ' block-embed-youtube ')) {
-            $node->setAttribute('class', 'block block-embed block-embed-youtube');
+            $align = str_contains($class, ' align-left ') ? 'left' : (str_contains($class, ' align-right ') ? 'right' : 'center');
+            $node->setAttribute('class', 'block block-embed block-embed-youtube align-' . $align);
+            $style = self::safeWidthStyle((string)($attributes['style'] ?? ''));
+            if ($style !== '') {
+                $node->setAttribute('style', $style);
+            }
             return;
         }
 
