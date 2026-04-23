@@ -35,6 +35,8 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fafafa; color: #1
 .content-excerpt-lead { margin: 0 0 1rem; }
 .term-list { list-style: none; padding: 0; display: flex; gap: .5rem; flex-wrap: wrap; }
 .pagination { display: flex; gap: .75rem; align-items: center; margin: 1.5rem 0 3rem; }
+.site-footer { border-top: 1px solid #e5e7eb; margin-top: 2rem; padding: 1.25rem 0 2rem; color: #6b7280; }
+.site-footer p { margin: 0; }
 .text-muted { color: #6b7280; }
 .small { font-size: .875rem; }
 

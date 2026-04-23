@@ -49,6 +49,11 @@ final class Theme
         return $this->setting('logo');
     }
 
+    public function footerText(): string
+    {
+        return trim($this->setting('footer_text'));
+    }
+
     public function language(): string
     {
         $lang = trim((string)($this->settings['app_lang'] ?? ''));

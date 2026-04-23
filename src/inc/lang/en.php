@@ -325,6 +325,7 @@ return [
             'allow_registration' => 'Allow registrations',
             'favicon' => 'Favicon',
             'logo' => 'Logo',
+            'footer_text' => 'Footer text',
             'website_url' => 'Website URL',
             'website_email' => 'Website email',
         ],

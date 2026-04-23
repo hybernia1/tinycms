@@ -116,6 +116,7 @@ final class Settings
             ],
             'logo' => ['label_key' => 'settings.fields.logo', 'section' => 'appearance', 'type' => 'file', 'default' => ''],
             'favicon' => ['label_key' => 'settings.fields.favicon', 'section' => 'appearance', 'type' => 'file', 'default' => ''],
+            'footer_text' => ['label_key' => 'settings.fields.footer_text', 'section' => 'appearance', 'type' => 'textarea', 'default' => ''],
         ];
     }
 
