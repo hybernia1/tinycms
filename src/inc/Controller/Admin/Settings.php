@@ -23,11 +23,42 @@ final class Settings extends Admin
 
     public function form(callable $redirect): void
     {
+        $this->renderForm($redirect, 'general');
+    }
+
+    public function sectionForm(callable $redirect, string $section): void
+    {
+        $this->renderForm($redirect, $section);
+    }
+
+    private function renderForm(callable $redirect, string $section): void
+    {
         if (!$this->guardAdmin($redirect, false)) {
             return;
         }
 
+        $fields = $this->settings->fields();
+        $normalizedSection = strtolower(trim($section));
+        if ($normalizedSection === '') {
+            $normalizedSection = 'general';
+        }
+        if (!$this->sectionExists($fields, $normalizedSection)) {
+            $redirect('admin/settings');
+            return;
+        }
+
         $resolved = $this->settings->resolved();
-        $this->pages->adminSettingsForm($this->settings->fields(), $resolved);
+        $this->pages->adminSettingsForm($fields, $resolved, $normalizedSection);
+    }
+
+    private function sectionExists(array $fields, string $section): bool
+    {
+        foreach ($fields as $field) {
+            if ((string)($field['section'] ?? 'general') === $section) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

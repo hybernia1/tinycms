@@ -58,11 +58,12 @@ final class AdminView
         ]);
     }
 
-    public function adminSettingsForm(array $fields, array $values): void
+    public function adminSettingsForm(array $fields, array $values, string $section): void
     {
         $this->renderAdmin('admin/settings/form', [
             'fields' => $fields,
             'values' => $values,
+            'section' => $section,
             'pageTitle' => I18n::t('admin.menu.settings'),
             'headerAction' => $this->submitHeaderAction('#settings-form'),
         ]);
