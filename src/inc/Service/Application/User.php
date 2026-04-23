@@ -6,6 +6,7 @@ namespace App\Service\Application;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
@@ -197,11 +198,55 @@ final class User
         }
     }
 
-    public function authorOptions(): array
+    public function authorLabel(int $id): string
     {
-        $rows = $this->query->select('users', ['ID', 'name', 'email']);
-        usort($rows, static fn(array $a, array $b): int => strcmp((string)($a['name'] ?? ''), (string)($b['name'] ?? '')));
-        return $rows;
+        if ($id <= 0) {
+            return '';
+        }
+
+        $user = $this->find($id);
+        if (!is_array($user)) {
+            return '';
+        }
+
+        $name = trim((string)($user['name'] ?? ''));
+        $email = trim((string)($user['email'] ?? ''));
+        if ($name !== '' && $email !== '') {
+            return $name . ' (' . $email . ')';
+        }
+        if ($name !== '') {
+            return $name;
+        }
+        if ($email !== '') {
+            return $email;
+        }
+
+        return '#' . $id;
+    }
+
+    public function search(string $query, int $limit = 15): array
+    {
+        $needle = trim($query);
+        $limit = max(1, min(50, $limit));
+        $usersTable = Table::name('users');
+
+        if ($needle === '') {
+            $stmt = Connection::get()->prepare("SELECT ID, name, email FROM $usersTable ORDER BY ID DESC LIMIT :limit");
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->execute();
+        } else {
+            $stmt = Connection::get()->prepare("SELECT ID, name, email FROM $usersTable WHERE name LIKE :search OR email LIKE :search ORDER BY name ASC, ID ASC LIMIT :limit");
+            $stmt->bindValue(':search', '%' . $needle . '%');
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->execute();
+        }
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        return array_map(static fn(array $row): array => [
+            'id' => (int)($row['ID'] ?? 0),
+            'name' => trim((string)($row['name'] ?? '')),
+            'email' => trim((string)($row['email'] ?? '')),
+        ], $rows);
     }
 
     public function statusCounts(): array

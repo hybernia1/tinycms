@@ -35,6 +35,17 @@ final class User extends Admin
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
+    public function searchApiV1(callable $_redirect): void
+    {
+        if (!$this->guardApiAdmin()) {
+            return;
+        }
+
+        $query = trim((string)($_GET['q'] ?? ''));
+        $limit = (int)($_GET['limit'] ?? 15);
+        $this->apiOk($this->users->search($query, $limit));
+    }
+
     public function deleteApiV1(callable $redirect, int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {

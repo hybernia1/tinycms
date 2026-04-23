@@ -35,7 +35,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/custom-upload.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library-modal.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/tag-picker.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/picker.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/menu-builder.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>

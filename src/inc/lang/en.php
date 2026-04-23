@@ -9,6 +9,7 @@ return [
         'back' => 'Back',
         'cancel' => 'Cancel',
         'confirm' => 'Confirm',
+        'search_placeholder' => 'Search...',
         'next' => 'Next',
         'previous' => 'Previous',
         'retry' => 'Retry',
@@ -105,6 +106,11 @@ return [
         ],
     ],
     'front' => [
+        'prev' => 'Previous',
+        'next' => 'Next',
+        'search_results' => 'Search results',
+        'search_placeholder' => 'Search content',
+        'search_button' => 'Search',
         'login' => [
             'title' => 'Login',
             'show_password' => 'Show password',
@@ -332,6 +338,7 @@ return [
         'options' => [
             'front_home_content' => [
                 'none' => '— Latest posts loop —',
+                'search_placeholder' => 'Search content',
             ],
             'allow_registration' => [
                 'disabled' => 'No',

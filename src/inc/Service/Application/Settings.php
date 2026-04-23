@@ -29,7 +29,6 @@ final class Settings
             $localeOptions[$locale] = I18n::languageLabel($locale);
         }
         $themeOptions = $this->themeOptions();
-        $homePageOptions = $this->homePageOptions();
 
         return [
             'app_lang' => [
@@ -61,9 +60,9 @@ final class Settings
             'front_home_content' => [
                 'label_key' => 'settings.fields.front_home_content',
                 'section' => 'content',
-                'type' => 'select',
+                'type' => 'content_picker',
                 'default' => '',
-                'options' => $homePageOptions,
+                'empty_label' => I18n::t('settings.options.front_home_content.none'),
             ],
             'front_posts_per_page' => [
                 'label_key' => 'settings.fields.front_posts_per_page',
@@ -120,22 +119,19 @@ final class Settings
         ];
     }
 
-    private function homePageOptions(): array
+    public function publishedContentLabel(int $id): string
     {
-        $rows = $this->query->select('content', ['id', 'name'], ['status' => 'published']);
-        $options = ['' => I18n::t('settings.options.front_home_content.none')];
-
-        foreach ($rows as $row) {
-            $id = (int)($row['id'] ?? 0);
-            if ($id <= 0) {
-                continue;
-            }
-
-            $name = trim((string)($row['name'] ?? ''));
-            $options[(string)$id] = $name !== '' ? $name : sprintf('#%d', $id);
+        if ($id <= 0) {
+            return '';
         }
 
-        return $options;
+        $rows = $this->query->select('content', ['id', 'name'], ['id' => $id, 'status' => 'published']);
+        if ($rows === []) {
+            return '';
+        }
+
+        $name = trim((string)($rows[0]['name'] ?? ''));
+        return $name !== '' ? $name : sprintf('#%d', $id);
     }
 
     private function themeOptions(): array
@@ -224,6 +220,9 @@ final class Settings
                     $result[$key] = (string)($field['default'] ?? '');
                 }
             }
+            if ($type === 'content_picker') {
+                $result[$key] = $this->normalizePublishedContentId((string)($result[$key] ?? ''));
+            }
             if ($type === 'number') {
                 $result[$key] = $this->normalizeNumber((string)($result[$key] ?? ''), $field);
             }
@@ -254,6 +253,9 @@ final class Settings
             $value = trim((string)$rawValue);
             if (($fields[$key]['type'] ?? '') === 'number') {
                 $value = $this->normalizeNumber($value, $fields[$key]);
+            }
+            if ($key === 'front_home_content') {
+                $value = $this->normalizePublishedContentId($value);
             }
             if ($key === 'website_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 $value = '';
@@ -300,6 +302,21 @@ final class Settings
         $numeric = (int)$value;
 
         return (string)max($min, min($max, $numeric > 0 ? $numeric : $min));
+    }
+
+    private function normalizePublishedContentId(string $value): string
+    {
+        $id = (int)$value;
+        if ($id <= 0) {
+            return '';
+        }
+
+        $rows = $this->query->select('content', ['id'], ['id' => $id, 'status' => 'published']);
+        if ($rows === []) {
+            return '';
+        }
+
+        return (string)$id;
     }
 
 }

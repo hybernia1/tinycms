@@ -59,6 +59,35 @@ $activeFields = (array)($sections[$activeSection] ?? []);
                             </option>
                         <?php endforeach; ?>
                     </select>
+                <?php elseif ($fieldType === 'content_picker'): ?>
+                    <?php
+                        $loopLabel = (string)($field['empty_label'] ?? t('settings.options.front_home_content.none'));
+                        $selectedLabel = (string)($field['selected_label'] ?? '');
+                    ?>
+                    <div
+                        class="tag-picker"
+                        data-picker
+                        data-picker-mode="single"
+                        data-search-endpoint="<?= esc_attr($url('admin/api/v1/content')) ?>"
+                        data-search-status="published"
+                        data-empty-label="<?= esc_attr($loopLabel) ?>"
+                        data-no-results-label="<?= esc_attr(t('common.no_results')) ?>"
+                        data-search-placeholder="<?= esc_attr(t('settings.options.front_home_content.search_placeholder')) ?>"
+                        data-selected-label="<?= esc_attr($selectedLabel) ?>"
+                    >
+                        <input type="hidden" name="settings[<?= esc_attr((string)$fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>" data-picker-value>
+                        <div class="tag-picker-field">
+                            <div class="tag-picker-chips" data-picker-chips></div>
+                            <input
+                                type="text"
+                                class="tag-picker-input"
+                                data-picker-input
+                                autocomplete="off"
+                                placeholder="<?= esc_attr(t('settings.options.front_home_content.search_placeholder')) ?>"
+                            >
+                        </div>
+                        <div class="tag-picker-suggestions" data-picker-suggestions></div>
+                    </div>
                 <?php elseif ($fieldType === 'file'): ?>
                     <?php $inputName = $fieldKey === 'logo' ? 'logo_file' : 'favicon_file'; ?>
                     <?php $fileInputId = 'settings-file-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>

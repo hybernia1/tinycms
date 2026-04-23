@@ -119,15 +119,30 @@ if ($mode === 'edit') {
                         </div>
                         <div class="m-0">
                             <label><?= esc_html(t('common.author')) ?></label>
-                            <select name="author">
-                                <option value=""><?= esc_html(t('common.no_author')) ?></option>
-                                <?php foreach ($authors as $author): ?>
-                                    <?php $authorId = (int)($author['ID'] ?? 0); ?>
-                                    <option value="<?= $authorId ?>" <?= (int)($item['author'] ?? 0) === $authorId ? 'selected' : '' ?>>
-                                        <?= esc_html((string)($author['name'] ?? '')) ?> (<?= esc_html((string)($author['email'] ?? '')) ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <div
+                                class="tag-picker"
+                                data-picker
+                                data-picker-mode="single"
+                                data-search-endpoint="<?= esc_attr($url('admin/api/v1/users/search')) ?>"
+                                data-allow-empty="false"
+                                data-empty-label="<?= esc_attr(t('common.no_author')) ?>"
+                                data-no-results-label="<?= esc_attr(t('common.no_results')) ?>"
+                                data-search-placeholder="<?= esc_attr(t('users.search_placeholder')) ?>"
+                                data-selected-label="<?= esc_attr((string)($authorLabel ?? '')) ?>"
+                            >
+                                <input type="hidden" name="author" value="<?= esc_attr((string)($item['author'] ?? '')) ?>" data-picker-value>
+                                <div class="tag-picker-field">
+                                    <div class="tag-picker-chips" data-picker-chips></div>
+                                    <input
+                                        type="text"
+                                        class="tag-picker-input"
+                                        data-picker-input
+                                        autocomplete="off"
+                                        placeholder="<?= esc_attr(t('users.search_placeholder')) ?>"
+                                    >
+                                </div>
+                                <div class="tag-picker-suggestions" data-picker-suggestions></div>
+                            </div>
                             <?php if (!empty($errors['author'])): ?><small class="text-danger"><?= esc_html((string)$errors['author']) ?></small><?php endif; ?>
                         </div>
                     </div>

@@ -9,6 +9,7 @@ return [
         'back' => 'Zpět',
         'cancel' => 'Zrušit',
         'confirm' => 'Potvrdit',
+        'search_placeholder' => 'Hledat...',
         'next' => 'Další',
         'previous' => 'Předchozí',
         'retry' => 'Zkusit znovu',
@@ -105,6 +106,11 @@ return [
         ],
     ],
     'front' => [
+        'prev' => 'Predchozi',
+        'next' => 'Dalsi',
+        'search_results' => 'Vysledky hledani',
+        'search_placeholder' => 'Hledat obsah',
+        'search_button' => 'Hledat',
         'login' => [
             'title' => 'Login',
             'show_password' => 'Zobrazit heslo',
@@ -332,6 +338,7 @@ return [
         'options' => [
             'front_home_content' => [
                 'none' => '— Výpis posledních příspěvků —',
+                'search_placeholder' => 'Hledat obsah',
             ],
             'allow_registration' => [
                 'disabled' => 'Ne',

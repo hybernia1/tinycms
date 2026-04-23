@@ -504,9 +504,26 @@ select:focus,
     list-style: none;
 }
 
+.custom-select-search-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: var(--space-2);
+    border-bottom: 1px solid var(--color-border-soft);
+    background: var(--color-surface);
+}
+
+.custom-select-search {
+    min-height: calc(var(--size-touch) - var(--space-2));
+}
+
 .custom-select-option {
     padding: var(--control-padding-y) var(--control-padding-x);
     cursor: pointer;
+}
+
+.custom-select-option[hidden] {
+    display: none;
 }
 
 .custom-select-option:hover,

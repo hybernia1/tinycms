@@ -51,7 +51,7 @@ final class Content extends Admin
         $types = $this->content->types();
         $item = $fallback;
         $selectedTerms = $this->resolveSelectedTerms($item, null);
-        $this->pages->adminContentForm('add', $item, [], $statuses, $types, $this->users->authorOptions(), $selectedTerms);
+        $this->pages->adminContentForm('add', $item, [], $statuses, $types, $this->users->authorLabel((int)($item['author'] ?? 0)), $selectedTerms);
     }
 
     public function editForm(callable $redirect): void
@@ -77,7 +77,7 @@ final class Content extends Admin
         }
         $formItem = $item;
         $selectedTerms = $this->resolveSelectedTerms($formItem, $id);
-        $this->pages->adminContentForm('edit', $formItem, [], $statuses, $types, $this->users->authorOptions(), $selectedTerms);
+        $this->pages->adminContentForm('edit', $formItem, [], $statuses, $types, $this->users->authorLabel((int)($formItem['author'] ?? 0)), $selectedTerms);
     }
 
     private function resolveSelectedTerms(array $item, ?int $contentId): array

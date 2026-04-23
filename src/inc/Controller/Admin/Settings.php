@@ -48,6 +48,9 @@ final class Settings extends Admin
         }
 
         $resolved = $this->settings->resolved();
+        if (isset($fields['front_home_content'])) {
+            $fields['front_home_content']['selected_label'] = $this->settings->publishedContentLabel((int)($resolved['front_home_content'] ?? 0));
+        }
         $this->pages->adminSettingsForm($fields, $resolved, $normalizedSection);
     }
 

@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 
 use App\Service\Application\Auth;
 use App\Service\Application\Media as MediaService;
+use App\Service\Application\User as UserService;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
@@ -16,6 +17,7 @@ final class Media extends Admin
         private AdminView $pages,
         Auth $authService,
         private MediaService $media,
+        private UserService $users,
         Flash $flash,
         Csrf $csrf
     ) {
@@ -41,7 +43,7 @@ final class Media extends Admin
         }
 
         $fallback = ['id' => null, 'name' => '', 'path' => '', 'author' => (int)($this->authService->auth()->id() ?? 0)];
-        $this->pages->adminMediaForm('add', $fallback, [], $this->media->authorOptions(), []);
+        $this->pages->adminMediaForm('add', $fallback, [], $this->users->authorLabel((int)($fallback['author'] ?? 0)), []);
     }
 
     public function editForm(callable $redirect): void
@@ -60,6 +62,6 @@ final class Media extends Admin
         }
 
         $navigation = $this->media->editNavigation($id);
-        $this->pages->adminMediaForm('edit', $item, [], $this->media->authorOptions(), $this->media->thumbnailUsages($id), $navigation);
+        $this->pages->adminMediaForm('edit', $item, [], $this->users->authorLabel((int)($item['author'] ?? 0)), $this->media->thumbnailUsages($id), $navigation);
     }
 }

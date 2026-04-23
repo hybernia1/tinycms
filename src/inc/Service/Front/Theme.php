@@ -410,15 +410,23 @@ final class Theme
         }
 
         $current = max(1, min($page, $totalPages));
-        $prevLabel = trim((string)($labels['prev'] ?? t('front.prev', 'Previous')));
-        $nextLabel = trim((string)($labels['next'] ?? t('front.next', 'Next')));
+        $defaultPrevLabel = t('front.prev');
+        $defaultNextLabel = t('front.next');
+        $prevLabel = trim((string)($labels['prev'] ?? $defaultPrevLabel));
+        $nextLabel = trim((string)($labels['next'] ?? $defaultNextLabel));
+        if ($prevLabel === '') {
+            $prevLabel = $defaultPrevLabel;
+        }
+        if ($nextLabel === '') {
+            $nextLabel = $defaultNextLabel;
+        }
         $items = [];
 
         if ($current > 1) {
             $items[] = sprintf(
                 '<a href="%s">%s</a>',
                 esc_url($this->paginationUrl($basePath, $current - 1)),
-                esc_html($prevLabel !== '' ? $prevLabel : 'Previous'),
+                esc_html($prevLabel),
             );
         }
 
@@ -428,7 +436,7 @@ final class Theme
             $items[] = sprintf(
                 '<a href="%s">%s</a>',
                 esc_url($this->paginationUrl($basePath, $current + 1)),
-                esc_html($nextLabel !== '' ? $nextLabel : 'Next'),
+                esc_html($nextLabel),
             );
         }
 
@@ -520,7 +528,7 @@ final class Theme
         }
 
         if ($kind === 'search') {
-            $title = t('front.search_results', 'Search results');
+            $title = t('front.search_results');
             $query = trim($query);
             return ($query !== '' ? $title . ': ' . $query : $title) . ' | ' . $this->siteTitle();
         }

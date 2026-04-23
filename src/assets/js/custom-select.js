@@ -6,6 +6,27 @@
 
     let opened = null;
     const arrowIconHref = window.tinycms?.icons?.href?.('chevron-down') || '';
+    const searchMinOptions = 8;
+    const typeAheadResetMs = 650;
+    const normalize = (value) => String(value || '')
+        .toLocaleLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    const isTypeKey = (event) => event.key.length === 1 && event.key !== ' ' && !event.ctrlKey && !event.metaKey && !event.altKey;
+    const filterItems = (list, query) => {
+        const needle = normalize(query);
+        let firstMatch = null;
+        list.querySelectorAll('.custom-select-option').forEach((item) => {
+            const haystack = item.dataset.searchLabel || '';
+            const visible = needle === '' || haystack.includes(needle);
+            item.hidden = !visible;
+            if (!firstMatch && visible && !item.classList.contains('disabled')) {
+                firstMatch = item;
+            }
+        });
+        return firstMatch;
+    };
 
     const closeOpened = () => {
         if (!opened) {
@@ -18,6 +39,11 @@
         }
         const list = opened.querySelector('.custom-select-list');
         if (list) {
+            const searchInput = opened.querySelector('.custom-select-search');
+            if (searchInput instanceof HTMLInputElement && searchInput.value !== '') {
+                searchInput.value = '';
+                filterItems(list, '');
+            }
             setActiveItem(list, null);
         }
         opened = null;
@@ -36,8 +62,8 @@
         }
     };
 
-    const getEnabledItems = (list) => Array.from(list.querySelectorAll('.custom-select-option:not(.disabled)'));
-    const getCurrentItem = (list) => list.querySelector('.custom-select-option.selected:not(.disabled)') || getEnabledItems(list)[0] || null;
+    const getEnabledItems = (list) => Array.from(list.querySelectorAll('.custom-select-option:not(.disabled)')).filter((item) => !item.hidden);
+    const getCurrentItem = (list) => list.querySelector('.custom-select-option.selected:not(.disabled):not([hidden])') || getEnabledItems(list)[0] || null;
     const setActiveItem = (list, item) => {
         list.querySelectorAll('.custom-select-option').forEach((el) => {
             el.classList.toggle('active', el === item);
@@ -46,7 +72,27 @@
             item.scrollIntoView({ block: 'nearest' });
         }
     };
-    const getActiveItem = (list) => list.querySelector('.custom-select-option.active:not(.disabled)');
+    const getActiveItem = (list) => list.querySelector('.custom-select-option.active:not(.disabled):not([hidden])');
+    const findByPrefix = (list, prefix) => {
+        const needle = normalize(prefix);
+        if (!needle) {
+            return null;
+        }
+        const enabledItems = getEnabledItems(list);
+        if (!enabledItems.length) {
+            return null;
+        }
+        const current = getActiveItem(list) || getCurrentItem(list);
+        const startIndex = Math.max(-1, enabledItems.indexOf(current));
+        for (let step = 1; step <= enabledItems.length; step += 1) {
+            const item = enabledItems[(startIndex + step) % enabledItems.length];
+            const label = item.dataset.searchLabel || '';
+            if (label.startsWith(needle)) {
+                return item;
+            }
+        }
+        return null;
+    };
     const moveActiveItem = (list, direction) => {
         const enabledItems = getEnabledItems(list);
         if (!enabledItems.length) {
@@ -68,6 +114,16 @@
         sync(select, buttonLabel);
         closeOpened();
     };
+    const searchPlaceholder = () => {
+        const t = window.tinycms?.i18n?.t;
+        if (typeof t === 'function') {
+            const translated = t('common.search_placeholder');
+            if (translated) {
+                return translated;
+            }
+        }
+        return 'Search...';
+    };
 
     const enhance = (scope = document) => {
         const selects = Array.from(scope.querySelectorAll('.admin-content select:not([multiple]):not([size]):not(.custom-select-native), [data-install-content] select:not([multiple]):not([size]):not(.custom-select-native)'));
@@ -80,6 +136,8 @@
         selects.forEach((select) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-select';
+        let typeAheadBuffer = '';
+        let typeAheadTimer = null;
 
         const button = document.createElement('button');
         button.type = 'button';
@@ -104,8 +162,20 @@
         const list = document.createElement('ul');
         list.className = 'custom-select-list';
         list.setAttribute('role', 'listbox');
+        let searchInput = null;
         if (select.options.length > 5) {
             wrapper.classList.add('is-scrollable');
+        }
+        if (select.options.length >= searchMinOptions) {
+            const searchWrap = document.createElement('div');
+            searchWrap.className = 'custom-select-search-wrap';
+            searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'custom-select-search';
+            searchInput.placeholder = searchPlaceholder();
+            searchInput.autocomplete = 'off';
+            searchWrap.appendChild(searchInput);
+            dropdown.appendChild(searchWrap);
         }
 
         Array.from(select.options).forEach((option) => {
@@ -121,6 +191,7 @@
             item.setAttribute('role', 'option');
             item.setAttribute('aria-selected', option.selected ? 'true' : 'false');
             item.dataset.value = option.value;
+            item.dataset.searchLabel = normalize(option.textContent || '');
 
             item.addEventListener('click', () => {
                 selectItem(select, list, item, buttonLabel);
@@ -136,34 +207,80 @@
         select.classList.add('custom-select-native');
         syncDisabled(select, button, wrapper);
 
+        const resetTypeAhead = () => {
+            typeAheadBuffer = '';
+            if (typeAheadTimer) {
+                window.clearTimeout(typeAheadTimer);
+                typeAheadTimer = null;
+            }
+        };
+        const pushTypeAhead = (key) => {
+            typeAheadBuffer += key;
+            if (typeAheadTimer) {
+                window.clearTimeout(typeAheadTimer);
+            }
+            typeAheadTimer = window.setTimeout(resetTypeAhead, typeAheadResetMs);
+            return typeAheadBuffer;
+        };
+        const openDropdown = (seed = '') => {
+            closeOpened();
+            wrapper.classList.add('open');
+            button.setAttribute('aria-expanded', 'true');
+            opened = wrapper;
+            if (searchInput) {
+                searchInput.value = seed;
+                filterItems(list, searchInput.value);
+                setActiveItem(list, getCurrentItem(list));
+                searchInput.focus();
+                searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+                return;
+            }
+            setActiveItem(list, getCurrentItem(list));
+            if (seed) {
+                const matched = findByPrefix(list, seed);
+                if (matched) {
+                    setActiveItem(list, matched);
+                }
+            }
+        };
+
         button.addEventListener('click', () => {
             if (button.disabled) {
                 return;
             }
             const isOpen = wrapper.classList.contains('open');
-            closeOpened();
-            if (!isOpen) {
-                wrapper.classList.add('open');
-                button.setAttribute('aria-expanded', 'true');
-                opened = wrapper;
-                setActiveItem(list, getCurrentItem(list));
+            if (isOpen) {
+                closeOpened();
+                return;
             }
+            openDropdown();
         });
 
         button.addEventListener('keydown', (event) => {
             if (button.disabled) {
                 return;
             }
-            if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {
+            if (isTypeKey(event)) {
+                event.preventDefault();
+                if (searchInput) {
+                    openDropdown(event.key);
+                    return;
+                }
+                if (!wrapper.classList.contains('open')) {
+                    openDropdown();
+                }
+                const matched = findByPrefix(list, pushTypeAhead(event.key));
+                if (matched) {
+                    setActiveItem(list, matched);
+                }
+                return;
+            }
+            if (!['ArrowDown', 'ArrowUp', 'Enter', ' ', 'Escape'].includes(event.key)) {
                 return;
             }
             event.preventDefault();
             if (!wrapper.classList.contains('open')) {
-                closeOpened();
-                wrapper.classList.add('open');
-                button.setAttribute('aria-expanded', 'true');
-                opened = wrapper;
-                setActiveItem(list, getCurrentItem(list));
+                openDropdown();
                 return;
             }
             if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -172,8 +289,38 @@
             }
             if (event.key === 'Enter' || event.key === ' ') {
                 selectItem(select, list, getActiveItem(list) || getCurrentItem(list), buttonLabel);
+                return;
+            }
+            if (event.key === 'Escape') {
+                closeOpened();
             }
         });
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                filterItems(list, searchInput.value);
+                setActiveItem(list, getCurrentItem(list));
+            });
+            searchInput.addEventListener('keydown', (event) => {
+                if (!['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(event.key)) {
+                    return;
+                }
+                if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    moveActiveItem(list, event.key === 'ArrowDown' ? 'next' : 'prev');
+                    return;
+                }
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    selectItem(select, list, getActiveItem(list) || getCurrentItem(list), buttonLabel);
+                    return;
+                }
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeOpened();
+                    button.focus();
+                }
+            });
+        }
 
         select.addEventListener('change', () => {
             sync(select, buttonLabel);
@@ -186,6 +333,7 @@
                 setActiveItem(list, null);
             }
             syncDisabled(select, button, wrapper);
+            resetTypeAhead();
         });
 
         const observer = new MutationObserver(() => {
