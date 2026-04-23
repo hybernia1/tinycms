@@ -103,6 +103,15 @@ if (!$isInstalled) {
     ];
 }
 
+if ($requestPath === 'install/done') {
+    $install = new InstallController($view, $csrf, new InstallService());
+    require BASE_DIR . '/' . INC_DIR . 'routes/install.php';
+
+    return [
+        'router' => $router,
+    ];
+}
+
 if (str_starts_with($requestPath, 'install')) {
     $redirect('admin/dashboard');
 }
