@@ -5,7 +5,7 @@
     var editorCounter = 0;
     var imageResizePositions = ['tl', 't', 'tr', 'r', 'br', 'b', 'bl', 'l'];
     var blockedCleanTags = ['script', 'style', 'object', 'embed', 'form', 'input', 'button', 'textarea', 'select', 'option'];
-    var allowedCleanTags = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe'];
+    var allowedCleanTags = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col'];
 
     function translate(key, fallback) {
         return t(key, fallback) || fallback;
@@ -192,6 +192,18 @@
             node.setAttribute('allowfullscreen', '');
             node.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
             node.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+            return;
+        }
+
+        if (tag === 'th' || tag === 'td') {
+            var colspan = String(values.colspan || '').trim();
+            var rowspan = String(values.rowspan || '').trim();
+            if (/^\d+$/.test(colspan) && Number(colspan) > 1) {
+                node.setAttribute('colspan', colspan);
+            }
+            if (/^\d+$/.test(rowspan) && Number(rowspan) > 1) {
+                node.setAttribute('rowspan', rowspan);
+            }
             return;
         }
 
