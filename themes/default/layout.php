@@ -25,6 +25,14 @@ if (!defined('BASE_DIR')) {
 <main class="container">
     <?= $content ?>
 </main>
+<?php $footerText = get_footer(); ?>
+<?php if ($footerText !== ''): ?>
+<footer class="site-footer">
+    <div class="container">
+        <p><?= esc_html($footerText) ?></p>
+    </div>
+</footer>
+<?php endif; ?>
 <script src="<?= esc_url(theme_url('assets/js/main.js')) ?>" defer></script>
 </body>
 </html>
