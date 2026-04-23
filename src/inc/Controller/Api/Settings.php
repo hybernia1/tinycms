@@ -29,6 +29,7 @@ final class Settings extends Admin
             return;
         }
 
+        $fields = $this->settings->fields();
         $current = $this->settings->resolved();
         $faviconPath = (string)($current['favicon'] ?? '');
         $logoPath = (string)($current['logo'] ?? '');
@@ -66,17 +67,37 @@ final class Settings extends Admin
         }
 
         $input = (array)($_POST['settings'] ?? []);
-        $payload = [];
-        foreach (array_keys($this->settings->fields()) as $key) {
-            $payload[$key] = (string)($input[$key] ?? '');
+        $payload = $current;
+        foreach ($input as $key => $rawValue) {
+            if (!isset($fields[$key])) {
+                continue;
+            }
+
+            $payload[$key] = (string)$rawValue;
         }
         $payload['favicon'] = $faviconPath;
         $payload['logo'] = $logoPath;
 
+        $section = strtolower(trim((string)($_POST['settings_section'] ?? 'general')));
+        if (!$this->sectionExists($fields, $section)) {
+            $section = 'general';
+        }
+
         $this->settings->save($payload);
         $this->apiOk([
             'message' => I18n::t('settings.saved'),
-            'redirect' => $this->buildPath('admin/settings'),
+            'redirect' => $this->buildPath('admin/settings/' . $section),
         ]);
+    }
+
+    private function sectionExists(array $fields, string $section): bool
+    {
+        foreach ($fields as $field) {
+            if ((string)($field['section'] ?? 'general') === $section) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
