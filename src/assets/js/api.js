@@ -10,13 +10,31 @@
 
     const icon = window.tinycms?.icons?.icon || (() => '');
 
+    const resolveFlashContainer = () => {
+        const existing = document.querySelector('.admin-flash-stack');
+        if (existing) {
+            return existing;
+        }
+
+        const main = document.querySelector('.admin-main');
+        if (main) {
+            const stack = document.createElement('div');
+            stack.className = 'admin-flash-stack';
+            stack.setAttribute('aria-live', 'polite');
+            main.prepend(stack);
+            return stack;
+        }
+
+        return document.querySelector('.admin-content') || document.body;
+    };
+
     const pushFlash = (type, message) => {
         const text = String(message || '').trim();
         if (text === '') {
             return;
         }
 
-        const container = document.querySelector('.admin-content');
+        const container = resolveFlashContainer();
         if (!container) {
             return;
         }

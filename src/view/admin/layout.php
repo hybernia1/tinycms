@@ -170,7 +170,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 </div>
             <?php endif; ?>
         </div>
-        <section class="admin-content p-2">
+        <div class="admin-flash-stack" aria-live="polite">
             <?php foreach ($flashes as $flash): ?>
             <?php $flashType = (string)($flash['type'] ?? 'warning'); ?>
             <?php $flashIcon = $flashType === 'success' ? 'success' : ($flashType === 'error' ? 'error' : 'warning'); ?>
@@ -181,6 +181,8 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                 </button>
             </div>
             <?php endforeach; ?>
+        </div>
+        <section class="admin-content p-2">
             <?= $content ?>
         </section>
     </main>

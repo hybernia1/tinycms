@@ -1,4 +1,4 @@
-const FLASH_AUTO_CLOSE_MS = 2000;
+const FLASH_AUTO_CLOSE_MS = 3500;
 
 const closeFlash = (flash) => {
     if (flash instanceof HTMLElement) {
