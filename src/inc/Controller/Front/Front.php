@@ -7,6 +7,7 @@ use App\Service\Auth\Auth;
 use App\Service\Front\Services;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
+use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
 use App\View\FrontView;
@@ -160,11 +161,14 @@ final class Front
         $buildDate = '';
 
         header('Content-Type: application/rss+xml; charset=utf-8');
-        echo '<?xml version="1.0" encoding="UTF-8"?>';
-        echo '<rss version="2.0"><channel>';
-        echo '<title>' . $this->xml($title !== '' ? $title : 'TinyCMS') . '</title>';
-        echo '<link>' . $this->xml($link) . '</link>';
-        echo '<description>' . $this->xml($description !== '' ? $description : ($title !== '' ? $title : 'TinyCMS')) . '</description>';
+        $xml = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">',
+            '  <channel>',
+            '    <title>' . $this->xml($title !== '' ? $title : 'TinyCMS') . '</title>',
+            '    <link>' . $this->xml($link) . '</link>',
+            '    <description>' . $this->xml($description !== '' ? $description : ($title !== '' ? $title : 'TinyCMS')) . '</description>',
+        ];
 
         foreach ($items as $item) {
             $id = (int)($item['id'] ?? 0);
@@ -177,27 +181,33 @@ final class Front
             if ($buildDate === '' && $date !== '') {
                 $buildDate = $date;
             }
-            echo '<item>';
-            echo '<title>' . $this->xml(trim((string)($item['name'] ?? ''))) . '</title>';
-            echo '<link>' . $this->xml($url) . '</link>';
-            echo '<guid isPermaLink="true">' . $this->xml($url) . '</guid>';
+            $xml[] = '    <item>';
+            $xml[] = '      <title>' . $this->xml(trim((string)($item['name'] ?? ''))) . '</title>';
+            $xml[] = '      <link>' . $this->xml($url) . '</link>';
+            $xml[] = '      <guid isPermaLink="true">' . $this->xml($url) . '</guid>';
             if ($date !== '') {
-                echo '<pubDate>' . $this->xml($date) . '</pubDate>';
+                $xml[] = '      <pubDate>' . $this->xml($date) . '</pubDate>';
             }
             $excerpt = $this->plainText((string)($item['excerpt'] ?? ''));
             if ($excerpt === '') {
                 $excerpt = $this->plainText((string)($item['body'] ?? ''));
             }
             if ($excerpt !== '') {
-                echo '<description>' . $this->xml($excerpt) . '</description>';
+                $xml[] = '      <description>' . $this->xml($excerpt) . '</description>';
             }
-            echo '</item>';
+            $thumbnail = $this->feedThumbnailUrl((string)($item['thumbnail'] ?? ''));
+            if ($thumbnail !== '') {
+                $xml[] = '      <media:thumbnail url="' . $this->xml($thumbnail) . '" />';
+            }
+            $xml[] = '    </item>';
         }
 
         if ($buildDate !== '') {
-            echo '<lastBuildDate>' . $this->xml($buildDate) . '</lastBuildDate>';
+            $xml[] = '    <lastBuildDate>' . $this->xml($buildDate) . '</lastBuildDate>';
         }
-        echo '</channel></rss>';
+        $xml[] = '  </channel>';
+        $xml[] = '</rss>';
+        echo implode("\n", $xml);
     }
 
     public function sitemapIndex(): void
@@ -602,5 +612,15 @@ final class Front
     private function plainText(string $value): string
     {
         return trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
+    }
+
+    private function feedThumbnailUrl(string $path): string
+    {
+        $trimmed = trim($path);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        return $this->absoluteUrl(Media::bySize($trimmed, 'medium'));
     }
 }
