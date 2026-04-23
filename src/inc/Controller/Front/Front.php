@@ -149,6 +149,57 @@ final class Front
         echo 'Sitemap: ' . $this->absoluteUrl('sitemap.xml') . "\n";
     }
 
+    public function feed(): void
+    {
+        $settings = $this->services->settings->resolved();
+        $perPage = $this->resolvePerPage($settings);
+        $items = $this->paginatePublished(1, $perPage)['data'] ?? [];
+        $title = trim((string)($settings['sitename'] ?? 'TinyCMS'));
+        $description = trim((string)($settings['meta_description'] ?? ''));
+        $link = $this->absoluteUrl('');
+        $buildDate = '';
+
+        header('Content-Type: application/rss+xml; charset=utf-8');
+        echo '<?xml version="1.0" encoding="UTF-8"?>';
+        echo '<rss version="2.0"><channel>';
+        echo '<title>' . $this->xml($title !== '' ? $title : 'TinyCMS') . '</title>';
+        echo '<link>' . $this->xml($link) . '</link>';
+        echo '<description>' . $this->xml($description !== '' ? $description : ($title !== '' ? $title : 'TinyCMS')) . '</description>';
+
+        foreach ($items as $item) {
+            $id = (int)($item['id'] ?? 0);
+            if ($id <= 0) {
+                continue;
+            }
+            $slug = $this->slugger->slug((string)($item['name'] ?? ''), $id);
+            $url = $this->absoluteUrl($slug);
+            $date = $this->rssDate((string)($item['updated'] ?? $item['created'] ?? ''));
+            if ($buildDate === '' && $date !== '') {
+                $buildDate = $date;
+            }
+            echo '<item>';
+            echo '<title>' . $this->xml(trim((string)($item['name'] ?? ''))) . '</title>';
+            echo '<link>' . $this->xml($url) . '</link>';
+            echo '<guid isPermaLink="true">' . $this->xml($url) . '</guid>';
+            if ($date !== '') {
+                echo '<pubDate>' . $this->xml($date) . '</pubDate>';
+            }
+            $excerpt = $this->plainText((string)($item['excerpt'] ?? ''));
+            if ($excerpt === '') {
+                $excerpt = $this->plainText((string)($item['body'] ?? ''));
+            }
+            if ($excerpt !== '') {
+                echo '<description>' . $this->xml($excerpt) . '</description>';
+            }
+            echo '</item>';
+        }
+
+        if ($buildDate !== '') {
+            echo '<lastBuildDate>' . $this->xml($buildDate) . '</lastBuildDate>';
+        }
+        echo '</channel></rss>';
+    }
+
     public function sitemapIndex(): void
     {
         $contentChunks = $this->sitemapContentChunkCount();
@@ -533,5 +584,23 @@ final class Front
             return '';
         }
         return gmdate('c', $timestamp);
+    }
+
+    private function rssDate(string $value): string
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return '';
+        }
+        $timestamp = strtotime($trimmed);
+        if ($timestamp === false) {
+            return '';
+        }
+        return gmdate(\DATE_RSS, $timestamp);
+    }
+
+    private function plainText(string $value): string
+    {
+        return trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
     }
 }
