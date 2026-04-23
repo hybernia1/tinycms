@@ -112,7 +112,7 @@ final class Escape
             return;
         }
 
-        if (!in_array($tag, ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe'], true)) {
+        if (!in_array($tag, ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col'], true)) {
             self::unwrap($node);
             return;
         }
@@ -126,6 +126,7 @@ final class Escape
             'a' => self::cleanLink($node, $attributes),
             'img' => self::cleanImage($node, $attributes),
             'iframe' => self::cleanIframe($node, $attributes),
+            'th', 'td' => self::cleanTableCell($node, $attributes),
             'div' => self::cleanDiv($node, $attributes),
             default => null,
         };
@@ -226,6 +227,19 @@ final class Escape
         }
 
         self::unwrap($node);
+    }
+
+    private static function cleanTableCell(\DOMElement $node, array $attributes): void
+    {
+        $colspan = trim((string)($attributes['colspan'] ?? ''));
+        if (preg_match('/^\d+$/', $colspan) === 1 && (int)$colspan > 1) {
+            $node->setAttribute('colspan', $colspan);
+        }
+
+        $rowspan = trim((string)($attributes['rowspan'] ?? ''));
+        if (preg_match('/^\d+$/', $rowspan) === 1 && (int)$rowspan > 1) {
+            $node->setAttribute('rowspan', $rowspan);
+        }
     }
 
     private static function safeHref(string $url): string
