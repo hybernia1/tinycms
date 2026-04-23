@@ -138,6 +138,8 @@ final class Theme
         if ($favicon !== '') {
             $tags[] = '<link rel="icon" href="' . esc_url($this->url($favicon)) . '">';
         }
+        $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/block.css')) . '">';
+        $tags[] = '<link rel="stylesheet" href="' . esc_url($this->themeUrl('assets/css/style.css')) . '">';
 
         $jsonLd = $this->jsonLd($kind, $item, $term, $title, $description, $url, $image, $author, $query);
         if ($jsonLd !== '') {

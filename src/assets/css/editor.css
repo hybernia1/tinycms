@@ -192,65 +192,22 @@
     color: var(--color-text-muted);
 }
 
-.wysiwyg-editor .block {
-    margin: 0 0 var(--space-2);
-}
-
-.wysiwyg-editor .block.block-embed {
-    position: relative;
-    margin: 0 0 var(--space-2);
-    width: min(100%, 42rem);
-    max-width: 100%;
-    clear: both;
-}
-
 .wysiwyg-editor .block.block-embed.is-selected {
     z-index: 6;
 }
 
 .wysiwyg-editor .block.block-embed .embed-frame {
-    position: relative;
-    width: 100%;
-    padding-top: 56.25%;
-    background: #000;
     cursor: pointer;
 }
 
 .wysiwyg-editor .block.block-embed iframe {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
+    cursor: pointer;
     pointer-events: none;
 }
 
 .wysiwyg-editor .block.block-list ul,
 .wysiwyg-editor .block.block-list ol {
     margin: 0;
-}
-
-.wysiwyg-editor p.block-image-break {
-    clear: both;
-    min-height: 1.25rem;
-}
-
-.wysiwyg-editor .block.block-embed.align-left {
-    float: left;
-    clear: none;
-    margin: 0 var(--space-3) var(--space-2) 0;
-}
-
-.wysiwyg-editor .block.block-embed.align-center {
-    float: none;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.wysiwyg-editor .block.block-embed.align-right {
-    float: right;
-    clear: none;
-    margin: 0 0 var(--space-2) var(--space-3);
 }
 
 .wysiwyg-editor ul,
@@ -275,23 +232,8 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 14a4 4 0 0 1 0-5.66l2.34-2.34a4 4 0 0 1 5.66 5.66L15.66 14M14 10a4 4 0 0 1 0 5.66l-2.34 2.34a4 4 0 1 1-5.66-5.66L8.34 10M9 12h6' fill='none' stroke='%231d4ed8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
-.wysiwyg-editor img {
-    max-width: 100%;
-    height: auto;
-}
-
-.wysiwyg-editor .block.block-image {
-    position: relative;
-    margin: 0 0 var(--space-2);
-    display: block;
-    width: fit-content;
-    max-width: 100%;
-    clear: both;
-}
-
 .wysiwyg-editor .block.block-image img {
-    display: block;
-    max-width: 100%;
+    cursor: pointer;
 }
 
 .wysiwyg-editor .block.block-image.is-selected {
@@ -320,24 +262,6 @@
     to {
         transform: rotate(360deg);
     }
-}
-
-.wysiwyg-editor .block.block-image.align-left {
-    float: left;
-    clear: none;
-    margin: 0 var(--space-3) var(--space-2) 0;
-}
-
-.wysiwyg-editor .block.block-image.align-center {
-    float: none;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.wysiwyg-editor .block.block-image.align-right {
-    float: right;
-    clear: none;
-    margin: 0 0 var(--space-2) var(--space-3);
 }
 
 .image-toolbar,
