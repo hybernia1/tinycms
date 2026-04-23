@@ -196,11 +196,24 @@
     margin: 0 0 var(--space-2);
 }
 
+.wysiwyg-editor .block.block-embed {
+    position: relative;
+    margin: 0 0 var(--space-2);
+    width: min(100%, 42rem);
+    max-width: 100%;
+    clear: both;
+}
+
+.wysiwyg-editor .block.block-embed.is-selected {
+    z-index: 6;
+}
+
 .wysiwyg-editor .block.block-embed .embed-frame {
     position: relative;
     width: 100%;
     padding-top: 56.25%;
     background: #000;
+    cursor: pointer;
 }
 
 .wysiwyg-editor .block.block-embed iframe {
@@ -209,6 +222,7 @@
     width: 100%;
     height: 100%;
     border: 0;
+    pointer-events: none;
 }
 
 .wysiwyg-editor .block.block-list ul,
@@ -219,6 +233,24 @@
 .wysiwyg-editor p.block-image-break {
     clear: both;
     min-height: 1.25rem;
+}
+
+.wysiwyg-editor .block.block-embed.align-left {
+    float: left;
+    clear: none;
+    margin: 0 var(--space-3) var(--space-2) 0;
+}
+
+.wysiwyg-editor .block.block-embed.align-center {
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.wysiwyg-editor .block.block-embed.align-right {
+    float: right;
+    clear: none;
+    margin: 0 0 var(--space-2) var(--space-3);
 }
 
 .wysiwyg-editor ul,
@@ -308,7 +340,8 @@
     margin: 0 0 var(--space-2) var(--space-3);
 }
 
-.image-toolbar {
+.image-toolbar,
+.embed-toolbar {
     display: none;
     position: absolute;
     top: -2.35rem;
@@ -324,12 +357,14 @@
     z-index: 8;
 }
 
-.wysiwyg-editor .block.block-image.image-toolbar-below .image-toolbar {
+.wysiwyg-editor .block.block-image.image-toolbar-below .image-toolbar,
+.wysiwyg-editor .block.block-embed.embed-toolbar-below .embed-toolbar {
     top: auto;
     bottom: -2.35rem;
 }
 
-.wysiwyg-editor .block.block-image.is-selected .image-toolbar {
+.wysiwyg-editor .block.block-image.is-selected .image-toolbar,
+.wysiwyg-editor .block.block-embed.is-selected .embed-toolbar {
     display: inline-flex;
 }
 
@@ -370,7 +405,8 @@
     display: block;
 }
 
-.image-selection-frame {
+.image-selection-frame,
+.embed-selection-frame {
     display: none;
     position: absolute;
     inset: 0;
@@ -379,7 +415,8 @@
     z-index: 5;
 }
 
-.wysiwyg-editor .block.block-image.is-selected .image-selection-frame {
+.wysiwyg-editor .block.block-image.is-selected .image-selection-frame,
+.wysiwyg-editor .block.block-embed.is-selected .embed-selection-frame {
     display: block;
 }
 

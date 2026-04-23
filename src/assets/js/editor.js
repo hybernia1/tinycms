@@ -223,7 +223,12 @@
                 return;
             }
             if (className.indexOf(' block-embed-youtube ') >= 0) {
-                node.className = 'block block-embed block-embed-youtube';
+                var embedAlign = className.indexOf(' align-left ') >= 0 ? 'left' : (className.indexOf(' align-right ') >= 0 ? 'right' : 'center');
+                node.className = 'block block-embed block-embed-youtube align-' + embedAlign;
+                var embedStyle = safeWidthStyle(values.style || '');
+                if (embedStyle) {
+                    node.setAttribute('style', embedStyle);
+                }
                 return;
             }
             if (className.indexOf(' embed-frame ') >= 0) {
@@ -360,7 +365,7 @@
         return block;
     }
 
-    function createImageToolButton(icon, title, attributes) {
+    function createBlockToolButton(icon, title, attributes) {
         var button = document.createElement('button');
         button.type = 'button';
         button.className = 'image-toolbar-btn';
@@ -386,7 +391,24 @@
         toolbar.className = 'image-toolbar';
         toolbar.setAttribute('contenteditable', 'false');
         items.forEach(function (item) {
-            toolbar.appendChild(createImageToolButton(item[0], item[1], item[2]));
+            toolbar.appendChild(createBlockToolButton(item[0], item[1], item[2]));
+        });
+        return toolbar;
+    }
+
+    function createEmbedToolbar() {
+        var toolbar = document.createElement('div');
+        var items = [
+            ['w-align-left', translate('editor.align_left', 'Left'), {'data-embed-align': 'left'}],
+            ['w-align-center', translate('editor.align_center', 'Center'), {'data-embed-align': 'center'}],
+            ['w-align-right', translate('editor.align_right', 'Right'), {'data-embed-align': 'right'}],
+            ['w-align-justify', translate('editor.image_full_width', 'Full width'), {'data-embed-action': 'full'}],
+            ['delete', translate('editor.image_delete', 'Delete'), {'data-embed-action': 'delete'}],
+        ];
+        toolbar.className = 'embed-toolbar';
+        toolbar.setAttribute('contenteditable', 'false');
+        items.forEach(function (item) {
+            toolbar.appendChild(createBlockToolButton(item[0], item[1], item[2]));
         });
         return toolbar;
     }
@@ -406,7 +428,14 @@
         return frame;
     }
 
-    function imageAlignment(block) {
+    function createEmbedSelectionFrame() {
+        var frame = document.createElement('span');
+        frame.className = 'embed-selection-frame';
+        frame.setAttribute('contenteditable', 'false');
+        return frame;
+    }
+
+    function blockAlignment(block) {
         if (block.classList.contains('align-left')) {
             return 'left';
         }
@@ -416,41 +445,68 @@
         return 'center';
     }
 
-    function syncImageToolbarState(block) {
-        block.querySelectorAll('[data-image-align]').forEach(function (button) {
-            var active = button.getAttribute('data-image-align') === imageAlignment(block);
+    function syncToolbarState(block, alignAttribute, fullAttribute) {
+        block.querySelectorAll('[' + alignAttribute + ']').forEach(function (button) {
+            var active = button.getAttribute(alignAttribute) === blockAlignment(block);
             button.classList.toggle('is-active', active);
             button.setAttribute('aria-pressed', active ? 'true' : 'false');
         });
-        block.querySelectorAll('[data-image-action="full"]').forEach(function (button) {
+        block.querySelectorAll('[' + fullAttribute + '="full"]').forEach(function (button) {
             var active = String(block.style.width || '').trim() === '100%';
             button.classList.toggle('is-active', active);
             button.setAttribute('aria-pressed', active ? 'true' : 'false');
         });
     }
 
-    function placeImageToolbar(block, editor) {
+    function syncImageToolbarState(block) {
+        syncToolbarState(block, 'data-image-align', 'data-image-action');
+    }
+
+    function syncEmbedToolbarState(block) {
+        syncToolbarState(block, 'data-embed-align', 'data-embed-action');
+    }
+
+    function placeToolbar(block, editor, selector, belowClass) {
         if (!block || !editor) {
             return;
         }
-        var toolbar = block.querySelector('.image-toolbar');
+        var toolbar = block.querySelector(selector);
         if (!toolbar) {
             return;
         }
-        block.classList.remove('image-toolbar-below');
+        block.classList.remove(belowClass);
         var blockRect = block.getBoundingClientRect();
         var editorRect = editor.getBoundingClientRect();
         var toolbarHeight = toolbar.offsetHeight || 38;
         var gap = 8;
         var hasTopSpace = blockRect.top - toolbarHeight - gap >= editorRect.top;
-        block.classList.toggle('image-toolbar-below', !hasTopSpace);
+        block.classList.toggle(belowClass, !hasTopSpace);
     }
 
-    function applyImageAlignment(block, align) {
+    function placeImageToolbar(block, editor) {
+        placeToolbar(block, editor, '.image-toolbar', 'image-toolbar-below');
+    }
+
+    function placeEmbedToolbar(block, editor) {
+        placeToolbar(block, editor, '.embed-toolbar', 'embed-toolbar-below');
+    }
+
+    function applyBlockAlignment(block, align, syncState) {
+        if (!block) {
+            return;
+        }
         var value = ['left', 'center', 'right'].indexOf(align) >= 0 ? align : 'center';
         block.classList.remove('align-left', 'align-center', 'align-right');
         block.classList.add('align-' + value);
-        syncImageToolbarState(block);
+        syncState(block);
+    }
+
+    function applyImageAlignment(block, align) {
+        applyBlockAlignment(block, align, syncImageToolbarState);
+    }
+
+    function applyEmbedAlignment(block, align) {
+        applyBlockAlignment(block, align, syncEmbedToolbarState);
     }
 
     function ensureImageBlock(block) {
@@ -486,6 +542,25 @@
         syncImageToolbarState(block);
     }
 
+    function ensureEmbedBlock(block) {
+        if (!block.classList.contains('block-embed')) {
+            block.classList.add('block-embed');
+        }
+        if (!block.classList.contains('align-left') && !block.classList.contains('align-center') && !block.classList.contains('align-right')) {
+            applyEmbedAlignment(block, 'center');
+        }
+
+        if (!block.querySelector('.embed-toolbar')) {
+            block.appendChild(createEmbedToolbar());
+        }
+
+        if (!block.querySelector('.embed-selection-frame')) {
+            block.appendChild(createEmbedSelectionFrame());
+        }
+
+        syncEmbedToolbarState(block);
+    }
+
     function enhanceImageBlocks(editor) {
         var images = Array.prototype.slice.call(editor.querySelectorAll('img[data-media-id]'));
         images.forEach(function (image) {
@@ -509,12 +584,18 @@
         });
     }
 
+    function enhanceEmbedBlocks(editor) {
+        editor.querySelectorAll('.block.block-embed').forEach(function (block) {
+            ensureEmbedBlock(block);
+        });
+    }
+
     function serializeEditorHtml(editor) {
         var clone = editor.cloneNode(true);
-        clone.querySelectorAll('.image-toolbar, .image-resize-handle, .image-selection-frame').forEach(function (node) {
+        clone.querySelectorAll('.image-toolbar, .image-resize-handle, .image-selection-frame, .embed-toolbar, .embed-selection-frame').forEach(function (node) {
             node.remove();
         });
-        clone.querySelectorAll('.block.block-image').forEach(function (block) {
+        clone.querySelectorAll('.block.block-image, .block.block-embed').forEach(function (block) {
             block.classList.remove('is-selected');
         });
         return cleanSerializedHtml(clone.innerHTML);
@@ -580,6 +661,7 @@
                 }
 
                 if (node.classList.contains('block') && node.classList.contains('block-embed')) {
+                    ensureEmbedBlock(node);
                     return;
                 }
 
@@ -1227,24 +1309,27 @@
         function persistEditorState(withFormatState) {
             normalizeBlocks(editor);
             enhanceImageBlocks(editor);
+            enhanceEmbedBlocks(editor);
             sync(textarea, editor);
             if (withFormatState) {
                 updateFormatState();
             }
         }
 
-        function removeImageBlock(block) {
+        function removeBlock(block, removeImageBreak) {
             if (!block || !block.parentNode) {
                 return null;
             }
             var nextNode = block.nextElementSibling;
             var prevNode = block.previousElementSibling;
-            if (nextNode && nextNode.classList.contains('block-image-break')) {
-                nextNode.remove();
-                nextNode = block.nextElementSibling;
-            } else if (prevNode && prevNode.classList.contains('block-image-break')) {
-                prevNode.remove();
-                prevNode = block.previousElementSibling;
+            if (removeImageBreak) {
+                if (nextNode && nextNode.classList.contains('block-image-break')) {
+                    nextNode.remove();
+                    nextNode = block.nextElementSibling;
+                } else if (prevNode && prevNode.classList.contains('block-image-break')) {
+                    prevNode.remove();
+                    prevNode = block.previousElementSibling;
+                }
             }
             block.remove();
 
@@ -1257,7 +1342,7 @@
                 caretTarget = createImageBreakParagraph();
                 editor.appendChild(caretTarget);
             }
-            if (caretTarget.classList && caretTarget.classList.contains('block') && caretTarget.classList.contains('block-image')) {
+            if (caretTarget.classList && caretTarget.classList.contains('block') && (caretTarget.classList.contains('block-image') || caretTarget.classList.contains('block-embed'))) {
                 var spacer = createImageBreakParagraph();
                 editor.insertBefore(spacer, caretTarget);
                 caretTarget = spacer;
@@ -1265,14 +1350,38 @@
             return caretTarget;
         }
 
-        function selectImageBlock(block) {
+        function removeImageBlock(block) {
+            return removeBlock(block, true);
+        }
+
+        function removeEmbedBlock(block) {
+            return removeBlock(block, false);
+        }
+
+        function clearSelectedBlocks() {
             editor.querySelectorAll('.block.block-image.is-selected').forEach(function (node) {
                 node.classList.remove('is-selected');
                 node.classList.remove('image-toolbar-below');
             });
+            editor.querySelectorAll('.block.block-embed.is-selected').forEach(function (node) {
+                node.classList.remove('is-selected');
+                node.classList.remove('embed-toolbar-below');
+            });
+        }
+
+        function selectImageBlock(block) {
+            clearSelectedBlocks();
             if (block) {
                 block.classList.add('is-selected');
                 placeImageToolbar(block, editor);
+            }
+        }
+
+        function selectEmbedBlock(block) {
+            clearSelectedBlocks();
+            if (block) {
+                block.classList.add('is-selected');
+                placeEmbedToolbar(block, editor);
             }
         }
 
@@ -1302,6 +1411,41 @@
             }
             syncImageToolbarState(block);
             placeImageToolbar(block, editor);
+        }
+
+        function setEmbedBlockWidth(block, width) {
+            block.style.width = width;
+            syncEmbedToolbarState(block);
+            placeEmbedToolbar(block, editor);
+        }
+
+        function placeCaretAfterBlock(block) {
+            if (!block || !block.parentNode) {
+                return;
+            }
+            var next = block.nextElementSibling;
+            var target = next && next.tagName === 'P' ? next : createImageBreakParagraph();
+            if (target !== next) {
+                block.parentNode.insertBefore(target, block.nextSibling);
+            }
+            if (target.classList.contains('block-image-break')) {
+                target.classList.remove('block-image-break');
+            }
+            placeCaret(target);
+        }
+
+        function toggleBlockFullWidth(block, setWidth, applyAlign) {
+            if (!block) {
+                return;
+            }
+            if (String(block.style.width || '').trim() === '100%') {
+                setWidth(block, '');
+                return;
+            }
+            if (typeof applyAlign === 'function') {
+                applyAlign(block, 'center');
+            }
+            setWidth(block, '100%');
         }
 
         function replaceImageBlock(block, detail, mediaId) {
@@ -1376,6 +1520,7 @@
             textarea.value = cleanSerializedHtml(textarea.value);
             editor.innerHTML = textarea.value.trim();
             enhanceImageBlocks(editor);
+            enhanceEmbedBlocks(editor);
             textarea.style.display = 'none';
             sync(textarea, editor);
         }
@@ -1388,6 +1533,7 @@
             editor.innerHTML = textarea.value.trim();
             normalizeBlocks(editor);
             enhanceImageBlocks(editor);
+            enhanceEmbedBlocks(editor);
             updateFormatState();
         }
 
@@ -1608,6 +1754,7 @@
                 showLinkTools(activeLink);
             }
             placeImageToolbar(editor.querySelector('.block.block-image.is-selected'), editor);
+            placeEmbedToolbar(editor.querySelector('.block.block-embed.is-selected'), editor);
         });
 
         document.addEventListener('selectionchange', function () {
@@ -1697,6 +1844,18 @@
                 activeLink = null;
             }
 
+            var embedAlignButton = event.target.closest('[data-embed-align]');
+            if (embedAlignButton) {
+                event.preventDefault();
+                var embedBlock = embedAlignButton.closest('.block.block-embed');
+                if (!embedBlock) {
+                    return;
+                }
+                applyEmbedAlignment(embedBlock, embedAlignButton.getAttribute('data-embed-align') || 'center');
+                sync(textarea, editor);
+                return;
+            }
+
             var alignButton = event.target.closest('[data-image-align]');
             if (alignButton) {
                 event.preventDefault();
@@ -1709,6 +1868,27 @@
                 return;
             }
 
+            var embedActionButton = event.target.closest('[data-embed-action]');
+            if (embedActionButton) {
+                event.preventDefault();
+                var embedActionBlock = embedActionButton.closest('.block.block-embed');
+                if (!embedActionBlock) {
+                    return;
+                }
+                var embedAction = embedActionButton.getAttribute('data-embed-action') || '';
+                if (embedAction === 'full') {
+                    toggleBlockFullWidth(embedActionBlock, setEmbedBlockWidth, applyEmbedAlignment);
+                    sync(textarea, editor);
+                    return;
+                }
+                if (embedAction === 'delete') {
+                    var embedCaretTarget = removeEmbedBlock(embedActionBlock);
+                    placeCaret(embedCaretTarget);
+                    persistEditorState(false);
+                }
+                return;
+            }
+
             var imageActionButton = event.target.closest('[data-image-action]');
             if (imageActionButton) {
                 event.preventDefault();
@@ -1718,8 +1898,7 @@
                 }
                 var imageAction = imageActionButton.getAttribute('data-image-action') || '';
                 if (imageAction === 'full') {
-                    applyImageAlignment(actionBlock, 'center');
-                    setImageBlockWidth(actionBlock, '100%');
+                    toggleBlockFullWidth(actionBlock, setImageBlockWidth, applyImageAlignment);
                     sync(textarea, editor);
                     return;
                 }
@@ -1737,7 +1916,12 @@
                 return;
             }
 
-            selectImageBlock(event.target.closest('.block.block-image'));
+            var clickedImage = event.target.closest('.block.block-image');
+            if (clickedImage) {
+                selectImageBlock(clickedImage);
+                return;
+            }
+            selectEmbedBlock(event.target.closest('.block.block-embed'));
         });
 
         document.addEventListener('tinycms:media-library-selected', function (event) {
@@ -1775,17 +1959,40 @@
                     persistEditorState(false);
                     return;
                 }
+                var selectedEmbedForDelete = editor.querySelector('.block.block-embed.is-selected');
+                if (selectedEmbedForDelete) {
+                    event.preventDefault();
+                    var embedCaretTarget = removeEmbedBlock(selectedEmbedForDelete);
+                    placeCaret(embedCaretTarget);
+                    persistEditorState(false);
+                    return;
+                }
             }
 
-            function handleEnterOnSelectedImage() {
+            function handleEnterOnSelectedBlock() {
                 var selectedImageBlock = editor.querySelector('.block.block-image.is-selected');
-                if (!selectedImageBlock) {
+                if (selectedImageBlock) {
+                    var nextImage = selectedImageBlock.nextElementSibling;
+                    var imageTarget = nextImage && nextImage.classList.contains('block-image-break') ? nextImage : createImageBreakParagraph();
+                    if (imageTarget !== nextImage) {
+                        selectedImageBlock.parentNode.insertBefore(imageTarget, selectedImageBlock.nextSibling);
+                    }
+                    placeCaret(imageTarget);
+                    persistEditorState(false);
+                    return true;
+                }
+
+                var selectedEmbedBlock = editor.querySelector('.block.block-embed.is-selected');
+                if (!selectedEmbedBlock) {
                     return false;
                 }
-                var next = selectedImageBlock.nextElementSibling;
-                var target = next && next.classList.contains('block-image-break') ? next : createImageBreakParagraph();
+                var next = selectedEmbedBlock.nextElementSibling;
+                var target = next && next.tagName === 'P' ? next : createImageBreakParagraph();
                 if (target !== next) {
-                    selectedImageBlock.parentNode.insertBefore(target, selectedImageBlock.nextSibling);
+                    selectedEmbedBlock.parentNode.insertBefore(target, selectedEmbedBlock.nextSibling);
+                }
+                if (target.classList.contains('block-image-break')) {
+                    target.classList.remove('block-image-break');
                 }
                 placeCaret(target);
                 persistEditorState(false);
@@ -1836,7 +2043,7 @@
                     return false;
                 }
                 event.preventDefault();
-                if (handleEnterOnSelectedImage()) {
+                if (handleEnterOnSelectedBlock()) {
                     resetTypingInlineFormats();
                     updateFormatState();
                     return true;
@@ -1928,8 +2135,14 @@
             }
             event.preventDefault();
             ensureSelectionInsideEditor();
-            var embedHtml = '<div class="block block-embed block-embed-youtube"><div class="embed-frame"><iframe src="https://www.youtube.com/embed/' + videoId + '" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe></div></div><p><br></p>';
+            var embedInsertId = 'embed-insert-' + editorId + '-' + Date.now();
+            var embedHtml = '<div class="block block-embed block-embed-youtube align-center" data-embed-insert-id="' + embedInsertId + '"><div class="embed-frame"><iframe src="https://www.youtube.com/embed/' + videoId + '" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe></div></div><p><br></p>';
             document.execCommand('insertHTML', false, embedHtml);
+            var insertedEmbed = editor.querySelector('[data-embed-insert-id="' + embedInsertId + '"]');
+            if (insertedEmbed) {
+                insertedEmbed.removeAttribute('data-embed-insert-id');
+                placeCaretAfterBlock(insertedEmbed);
+            }
             persistEditorState(true);
         });
 
@@ -1970,6 +2183,7 @@
         document.execCommand('defaultParagraphSeparator', false, 'p');
         normalizeBlocks(editor);
         enhanceImageBlocks(editor);
+        enhanceEmbedBlocks(editor);
         sync(textarea, editor);
         updateFormatState();
         updateLinkApplyState();
