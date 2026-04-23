@@ -1,0 +1,70 @@
+:where(.wysiwyg-editor, .content-body) .block {
+    margin: 0 0 var(--space-2, 0.5rem);
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-image,
+:where(.wysiwyg-editor, .content-body) .block.block-embed {
+    position: relative;
+    max-width: 100%;
+    clear: both;
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-image {
+    display: block;
+    width: fit-content;
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-image img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-embed {
+    width: min(100%, 42rem);
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-embed .embed-frame {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    background: #000;
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-image.align-left,
+:where(.wysiwyg-editor, .content-body) .block.block-embed.align-left {
+    float: left;
+    clear: none;
+    margin: 0 var(--space-3, 0.75rem) var(--space-2, 0.5rem) 0;
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-image.align-center,
+:where(.wysiwyg-editor, .content-body) .block.block-embed.align-center {
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+:where(.wysiwyg-editor, .content-body) .block.block-image.align-right,
+:where(.wysiwyg-editor, .content-body) .block.block-embed.align-right {
+    float: right;
+    clear: none;
+    margin: 0 0 var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+:where(.wysiwyg-editor, .content-body) p.block-image-break {
+    clear: both;
+    min-height: 1.25rem;
+}
+
+.content-body {
+    display: flow-root;
+}

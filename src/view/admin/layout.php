@@ -19,6 +19,7 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <?php endif; ?>
     <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/style.css')) ?>">
     <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/admin.css')) ?>">
+    <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/block.css')) ?>">
     <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/editor.css')) ?>">
     <script>window.tinycmsI18n = <?= esc_json($adminI18n ?? []) ?>;</script>
     <script>window.tinycmsIconSprite = <?= esc_json(icon_sprite()) ?>;</script>
