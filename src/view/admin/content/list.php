@@ -22,10 +22,11 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $csrfFie
     ?>
     <tr>
         <td>
+            <?php $name = (string)($row['name'] ?? ''); ?>
             <?php $statusIcon = $isPlanned ? 'calendar' : ($statusValue === 'published' ? 'success' : ($statusValue === 'draft' ? 'concept' : 'warning')); ?>
             <span class="d-flex align-center gap-2">
                 <?php if ($statusIcon !== ''): ?><?= icon($statusIcon) ?><?php endif; ?>
-                <a href="<?= esc_url($url('admin/content/edit?id=' . $id)) ?>"><?= esc_html((string)($row['name'] ?? '')) ?></a>
+                <a class="admin-list-truncate" href="<?= esc_url($url('admin/content/edit?id=' . $id)) ?>" title="<?= esc_attr($name) ?>"><?= esc_html($name) ?></a>
             </span>
             <div class="text-muted small"><?= esc_html($createdAt) ?></div>
         </td>
@@ -61,8 +62,9 @@ $list['searchPlaceholder'] = t('content.search_placeholder');
 $list['columns'] = [
     ['label' => t('common.name')],
     ['label' => t('common.author'), 'class' => 'mobile-hide'],
-    ['label' => t('common.actions'), 'class' => 'table-col-actions'],
+    ['label' => t('common.actions'), 'class' => 'table-col-actions table-col-actions-wide'],
 ];
+$list['tableClass'] = 'admin-list-table';
 $list['deleteConfirmText'] = t('content.delete_confirm_move_to_trash');
 $list['rowRenderer'] = $rowRenderer;
 

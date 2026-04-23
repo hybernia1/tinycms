@@ -26,8 +26,10 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime, $media):
                     <div class="media-list-thumb media-list-thumb-empty"></div>
                 <?php endif; ?>
                 <div>
-                    <a href="<?= esc_url($url('admin/media/edit?id=' . $id)) ?>"><?= esc_html((string)($row['name'] ?? '')) ?></a>
-                    <div class="text-muted small"><?= esc_html((string)($row['path'] ?? '')) ?></div>
+                    <?php $name = (string)($row['name'] ?? ''); ?>
+                    <?php $path = (string)($row['path'] ?? ''); ?>
+                    <a class="admin-list-truncate" href="<?= esc_url($url('admin/media/edit?id=' . $id)) ?>" title="<?= esc_attr($name) ?>"><?= esc_html($name) ?></a>
+                    <div class="text-muted small admin-list-truncate" title="<?= esc_attr($path) ?>"><?= esc_html($path) ?></div>
                     <div class="text-muted small"><?= esc_html($formatDateTime((string)($row['created'] ?? ''))) ?></div>
                 </div>
             </div>
@@ -50,6 +52,7 @@ $list['columns'] = [
     ['label' => t('common.author'), 'class' => 'mobile-hide'],
     ['label' => t('common.actions'), 'class' => 'table-col-actions'],
 ];
+$list['tableClass'] = 'admin-list-table';
 $list['deleteConfirmText'] = t('media.delete_confirm');
 $list['rowRenderer'] = $rowRenderer;
 

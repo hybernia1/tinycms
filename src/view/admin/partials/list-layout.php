@@ -21,6 +21,7 @@ $statusEnabled = (bool)($list['statusEnabled'] ?? $statusLinks !== []);
 $rowRenderer = is_callable($list['rowRenderer'] ?? null) ? $list['rowRenderer'] : null;
 $deleteConfirmText = (string)($list['deleteConfirmText'] ?? '');
 $csrfMarkup = (string)($list['csrfMarkup'] ?? $csrfField());
+$tableClass = trim((string)($list['tableClass'] ?? ''));
 
 $rootAttrs = [
     'data-' . $listName . '-list' => null,
@@ -61,7 +62,7 @@ foreach ($listRootAttrs as $attr => $value) {
 
     <div class="card p-2">
         <div class="table-responsive">
-            <table class="table">
+            <table class="table<?= $tableClass !== '' ? ' ' . esc_attr($tableClass) : '' ?>">
                 <thead>
                 <tr>
                     <?php foreach ($listColumns as $column): ?>
