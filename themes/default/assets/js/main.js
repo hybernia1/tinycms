@@ -4,9 +4,15 @@
     const forms = document.querySelectorAll('.search-form-expand');
     for (const form of forms) {
         const input = form.querySelector('input[type="search"]');
-        if (!(input instanceof HTMLInputElement)) {
+        const toggle = form.querySelector('button[type="button"]');
+        if (!(input instanceof HTMLInputElement) || !(toggle instanceof HTMLButtonElement)) {
             continue;
         }
+
+        toggle.addEventListener('click', () => {
+            form.classList.add('is-open');
+            input.focus();
+        });
 
         form.addEventListener('submit', (event) => {
             if (form.classList.contains('is-open')) {

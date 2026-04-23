@@ -439,7 +439,7 @@ final class Theme
         $state = $queryValue !== '' ? ' is-open' : '';
 
         return sprintf(
-            '<form class="search-form search-form-expand%s" action="%s" method="get">%s<input type="search" name="q" value="%s" placeholder="%s" aria-label="%s"><button type="submit" aria-label="%s">%s</button></form>',
+            '<form class="search-form search-form-expand%s" action="%s" method="get">%s<input type="search" name="q" value="%s" placeholder="%s" aria-label="%s"><button type="button" aria-label="%s">%s</button></form>',
             $state,
             esc_url($this->formAction($formAction)),
             $hiddenRoute,
