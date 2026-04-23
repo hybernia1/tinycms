@@ -103,7 +103,21 @@ final class RequestContext
             return true;
         }
 
-        return str_ends_with(self::requestBasePath(), '/index.php');
+        $requestPath = '/' . ltrim(str_replace('\\', '/', (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?? '')), '/');
+        if (str_contains($requestPath, '/index.php')) {
+            return true;
+        }
+
+        parse_str((string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY) ?? ''), $query);
+        if (array_key_exists('route', $query)) {
+            return true;
+        }
+
+        if (basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php' && ($requestPath === '/' || $requestPath === '')) {
+            return !defined('BASE_DIR') || !is_file(BASE_DIR . '/.htaccess');
+        }
+
+        return false;
     }
 
     public static function path(string $path = '', ?string $basePath = null, ?bool $queryMode = null): string
