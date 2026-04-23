@@ -8,6 +8,8 @@
     const template = root.querySelector('[data-menu-item-template]');
     const empty = root.querySelector('[data-menu-empty]');
     const addButton = root.querySelector('[data-menu-add-item]');
+    const count = root.querySelector('[data-menu-count]');
+    const draft = root.querySelector('[data-menu-draft]');
     const iconBase = String(window.tinycms?.icons?.sprite?.() || window.tinycmsIconSprite || '');
 
     if (!items || !template) {
@@ -34,30 +36,79 @@
         });
     };
 
-    const syncIconPreview = (row) => {
-        const input = row.querySelector('[data-menu-icon-value]');
-        const preview = row.querySelector('[data-menu-icon-preview]');
+    const syncIconPreview = (scope) => {
+        const input = scope.querySelector('[data-menu-icon-value]');
+        const preview = scope.querySelector('[data-menu-icon-preview]');
         if (!input || !preview) {
             return;
         }
 
         const icon = String(input.value || '').replace(/[^a-z0-9_-]/gi, '');
-        preview.innerHTML = iconSvg(icon || 'cancel');
+        preview.innerHTML = icon !== '' ? iconSvg(icon) : '';
 
-        row.querySelectorAll('[data-menu-icon-option]').forEach((option) => {
+        scope.querySelectorAll('[data-menu-icon-option]').forEach((option) => {
             option.classList.toggle('selected', String(option.dataset.icon || '') === icon);
         });
+    };
+
+    const setSelectValue = (select, value) => {
+        if (!(select instanceof HTMLSelectElement)) {
+            return;
+        }
+        select.value = value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const draftValues = () => ({
+        label: draft?.querySelector('[data-menu-draft-label]')?.value.trim() || '',
+        url: draft?.querySelector('[data-menu-draft-url]')?.value.trim() || '',
+        icon: draft?.querySelector('[data-menu-draft-icon]')?.value || '',
+        target: draft?.querySelector('[data-menu-draft-target]')?.value || '_self',
+    });
+    const hasDraftValues = (values) => values.label !== '' || values.url !== '' || values.icon !== '';
+
+    const clearDraft = () => {
+        if (!draft) {
+            return;
+        }
+        const label = draft.querySelector('[data-menu-draft-label]');
+        const url = draft.querySelector('[data-menu-draft-url]');
+        const icon = draft.querySelector('[data-menu-draft-icon]');
+        if (label) {
+            label.value = '';
+        }
+        if (url) {
+            url.value = '';
+        }
+        if (icon) {
+            icon.value = '';
+        }
+        setSelectValue(draft.querySelector('[data-menu-draft-target]'), '_self');
+        syncIconPreview(draft);
+        label?.focus();
+    };
+
+    const fillRow = (row, values) => {
+        const label = row.querySelector('input[name="item_label[]"]');
+        const url = row.querySelector('input[name="item_url[]"]');
+        const icon = row.querySelector('input[name="item_icon[]"]');
+        if (label) {
+            label.value = values.label;
+        }
+        if (url) {
+            url.value = values.url;
+        }
+        if (icon) {
+            icon.value = values.icon;
+        }
+        setSelectValue(row.querySelector('select[name="item_target[]"]'), values.target);
+        syncIconPreview(row);
     };
 
     const syncRows = () => {
         const currentRows = rows();
         currentRows.forEach((row, index) => {
             syncIconPreview(row);
-
-            const position = row.querySelector('[data-menu-item-index]');
-            if (position) {
-                position.textContent = String(index + 1);
-            }
 
             const up = row.querySelector('[data-menu-item-up]');
             const down = row.querySelector('[data-menu-item-down]');
@@ -72,15 +123,22 @@
         if (empty) {
             empty.hidden = currentRows.length > 0;
         }
+        if (count) {
+            count.textContent = String(currentRows.length);
+        }
     };
 
     const addRow = () => {
+        const values = draftValues();
         const fragment = template.content.cloneNode(true);
         items.appendChild(fragment);
-        syncRows();
         const last = rows().at(-1);
+        if (last) {
+            fillRow(last, values);
+        }
         window.tinycms?.ui?.customSelect?.init(last || document);
-        last?.querySelector('input')?.focus();
+        syncRows();
+        clearDraft();
     };
 
     const moveRow = (row, direction) => {
@@ -95,22 +153,33 @@
 
     addButton?.addEventListener('click', addRow);
 
+    draft?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+            event.preventDefault();
+            addRow();
+        }
+    });
+
+    root.addEventListener('submit', () => {
+        const values = draftValues();
+        if (hasDraftValues(values)) {
+            addRow();
+        }
+    });
+
     root.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) {
             return;
         }
 
-        const row = event.target.closest('[data-menu-item]');
-        if (!row) {
-            return;
-        }
-
         const option = event.target.closest('[data-menu-icon-option]');
         if (option) {
-            const input = row.querySelector('[data-menu-icon-value]');
+            const picker = option.closest('[data-menu-icon-picker]');
+            const scope = option.closest('[data-menu-item], [data-menu-draft]');
+            const input = picker?.querySelector('[data-menu-icon-value]');
             if (input) {
                 input.value = String(option.dataset.icon || '');
-                syncIconPreview(row);
+                syncIconPreview(scope || picker);
             }
             closeIconPickers();
             return;
@@ -126,6 +195,11 @@
                 options.hidden = !willOpen;
                 trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
             }
+            return;
+        }
+
+        const row = event.target.closest('[data-menu-item]');
+        if (!row) {
             return;
         }
 

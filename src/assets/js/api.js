@@ -183,6 +183,12 @@
             return direct;
         }
 
+        const indexed = normalized.match(/^([a-zA-Z0-9_-]+)\[(\d+)\]$/);
+        if (indexed) {
+            const fields = form.querySelectorAll(`[name="${escapeSelector(indexed[1])}[]"]`);
+            return fields[Number(indexed[2])] || null;
+        }
+
         if (!normalized.includes('[')) {
             const bracketed = form.querySelector(`[name="settings[${escapeSelector(normalized)}]"]`);
             if (bracketed) {
@@ -198,6 +204,13 @@
             return;
         }
 
+        const errorAnchor = (field) => {
+            if (field.nextElementSibling?.classList.contains('custom-select')) {
+                return field.nextElementSibling;
+            }
+            return field.closest('.field-with-icon') || field;
+        };
+
         Object.entries(errors).forEach(([name, message]) => {
             const field = findField(form, name);
             const text = String(message || '').trim();
@@ -209,7 +222,7 @@
             const error = document.createElement('small');
             error.className = 'text-danger api-field-error';
             error.textContent = text;
-            field.insertAdjacentElement('afterend', error);
+            errorAnchor(field).insertAdjacentElement('afterend', error);
         });
     };
 

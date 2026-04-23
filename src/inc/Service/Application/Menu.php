@@ -99,11 +99,11 @@ final class Menu
             }
 
             if ($label === '' && $icon === '') {
-                $errors['item_label[]'] = I18n::t('menu.item_label_required');
+                $errors["item_label[$index]"] = I18n::t('menu.item_label_required');
             }
 
             if ($url === '') {
-                $errors['item_url[]'] = I18n::t('menu.item_url_required');
+                $errors["item_url[$index]"] = I18n::t('menu.item_url_required');
             }
 
             $items[] = [
