@@ -1786,7 +1786,7 @@
             document.body.style.cursor = '';
         }
 
-        editor.addEventListener('mousedown', function (event) {
+        editor.addEventListener('pointerdown', function (event) {
             var handle = event.target.closest('.image-resize-handle');
             if (!handle) {
                 return;
@@ -1800,6 +1800,7 @@
             var position = handle.getAttribute('data-image-resize') || 'br';
             var rect = image.getBoundingClientRect();
             resizingState = {
+                pointerId: event.pointerId,
                 block: block,
                 image: image,
                 editorWidth: Math.max(1, editor.clientWidth),
@@ -1809,12 +1810,13 @@
                 startHeight: rect.height,
                 position: position,
             };
+            handle.setPointerCapture(event.pointerId);
             document.body.classList.add('is-image-resizing');
             document.body.style.cursor = resizeCursor(position);
         });
 
-        document.addEventListener('mousemove', function (event) {
-            if (!resizingState) {
+        document.addEventListener('pointermove', function (event) {
+            if (!resizingState || event.pointerId !== resizingState.pointerId) {
                 return;
             }
             event.preventDefault();
@@ -1830,8 +1832,13 @@
             sync(textarea, editor);
         });
 
-        document.addEventListener('mouseup', function () {
-            stopResize();
+        ['pointerup', 'pointercancel'].forEach(function (type) {
+            document.addEventListener(type, function (event) {
+                if (!resizingState || event.pointerId !== resizingState.pointerId) {
+                    return;
+                }
+                stopResize();
+            });
         });
 
         editor.addEventListener('click', function (event) {
