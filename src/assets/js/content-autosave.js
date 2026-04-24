@@ -1,6 +1,7 @@
 (function () {
     var t = window.tinycms?.i18n?.t || function () { return ''; };
     var postForm = window.tinycms?.api?.http?.postForm;
+    var pushFlash = window.tinycms?.api?.pushFlash || function () {};
     var confirmModal = window.tinycms?.ui?.modal?.confirm || function () { return Promise.resolve(false); };
     if (typeof postForm !== 'function') {
         return;
@@ -25,8 +26,8 @@
         var firstDraftAutosaveDelay = 30000;
         var autosaveDelay = 60000;
         var saveTimer = null;
-        var saving = false;
         var pending = false;
+        var savePromise = null;
         var lastSent = '';
         var bypassLeaveWarning = false;
         var leaveConfirmOpen = false;
@@ -79,8 +80,8 @@
 
             var id = contentId();
             if (id <= 0) {
-                previewLink.hidden = true;
-                previewLink.removeAttribute('href');
+                previewLink.href = '#';
+                previewLink.hidden = false;
                 return;
             }
 
@@ -187,35 +188,54 @@
         }
 
         async function runAutosave() {
-            if (saving || !autosaveEndpoint) {
+            if (savePromise) {
                 pending = true;
-                return;
+                await savePromise.catch(function () { return null; });
+                return runAutosave();
             }
 
-            saving = true;
+            if (!autosaveEndpoint) {
+                pending = true;
+                return { success: false };
+            }
+
             pending = false;
-            var data = serializePayload();
-            var currentSignature = signature(data);
-            if (currentSignature === lastSent) {
-                saving = false;
-                return;
-            }
-
-            var autosaveResult = await postForm(autosaveEndpoint, data);
-            var response = autosaveResult.response;
-            var normalized = autosaveResult.data;
-            if (response.ok && normalized.success) {
-                lastSent = currentSignature;
-                var id = Number(normalized.data?.id || 0);
-                if (id > 0) {
-                    setContentId(id);
+            savePromise = (async function () {
+                var data = serializePayload();
+                var currentSignature = signature(data);
+                if (currentSignature === lastSent) {
+                    return { success: true };
                 }
+
+                var autosaveResult = await postForm(autosaveEndpoint, data);
+                var response = autosaveResult.response;
+                var normalized = autosaveResult.data;
+                if (response.ok && normalized.success) {
+                    var id = Number(normalized.data?.id || 0);
+                    if (id > 0) {
+                        setContentId(id);
+                    }
+                    lastSent = signature(serializePayload());
+                    return { success: true };
+                }
+
+                pushFlash('error', normalized.message || t('content.autosave_failed'));
+                return { success: false };
+            })();
+
+            var result = { success: false };
+            try {
+                result = await savePromise;
+            } finally {
+                savePromise = null;
             }
 
-            saving = false;
             if (pending) {
-                runAutosave().catch(function () { return null; });
+                pending = false;
+                return runAutosave();
             }
+
+            return result;
         }
 
         function scheduleAutosave() {
@@ -230,6 +250,56 @@
 
         function hasUnsavedChanges() {
             return signature(serializePayload()) !== lastSent;
+        }
+
+        function previewUrl() {
+            updatePreviewLink();
+            var href = previewLink ? String(previewLink.getAttribute('href') || '').trim() : '';
+            return href !== '#' ? href : '';
+        }
+
+        function closePreviewWindow(previewWindow, openedBlank) {
+            if (previewWindow && openedBlank) {
+                previewWindow.close();
+            }
+        }
+
+        function openPreview(url, previewWindow, openedBlank) {
+            if (url === '') {
+                pushFlash('error', t('content.autosave_failed'));
+                closePreviewWindow(previewWindow, openedBlank);
+                return;
+            }
+
+            if (previewWindow) {
+                previewWindow.location.href = url;
+                previewWindow.focus();
+                return;
+            }
+
+            window.open(url, previewLink ? previewLink.target || '_blank' : '_blank');
+        }
+
+        async function handlePreviewClick(event) {
+            if (!previewLink) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            var target = previewLink.target || '_blank';
+            var previewWindow = window.open('', target);
+            var openedBlank = false;
+            try {
+                openedBlank = !!previewWindow && previewWindow.location.href === 'about:blank';
+            } catch (_) {
+            }
+            var result = await runAutosave();
+            if (!result.success) {
+                closePreviewWindow(previewWindow, openedBlank);
+                return;
+            }
+            openPreview(previewUrl(), previewWindow, openedBlank);
         }
 
         function confirmLeave() {
@@ -258,6 +328,9 @@
 
         lastSent = signature(serializePayload());
         updatePreviewLink();
+        if (previewLink) {
+            previewLink.addEventListener('click', handlePreviewClick);
+        }
 
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
@@ -286,6 +359,9 @@
         });
 
         document.addEventListener('click', function (event) {
+            if (event.defaultPrevented) {
+                return;
+            }
             if (bypassLeaveWarning || !hasUnsavedChanges()) {
                 return;
             }
