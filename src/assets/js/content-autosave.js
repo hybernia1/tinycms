@@ -1,5 +1,7 @@
 (function () {
+    var t = window.tinycms?.i18n?.t || function () { return ''; };
     var postForm = window.tinycms?.api?.http?.postForm;
+    var confirmModal = window.tinycms?.ui?.modal?.confirm || function () { return Promise.resolve(false); };
     if (typeof postForm !== 'function') {
         return;
     }
@@ -27,8 +29,7 @@
         var pending = false;
         var lastSent = '';
         var bypassLeaveWarning = false;
-        var pendingNavigation = '';
-        var pendingReload = false;
+        var leaveConfirmOpen = false;
         var editLayoutApplied = false;
         var appRoot = '';
         if (autosaveEndpoint.indexOf('/admin/api/v1/content/autosave') >= 0) {
@@ -115,40 +116,11 @@
 
             if (thumbnailTrigger) {
                 thumbnailTrigger.setAttribute('data-media-library-endpoint', contentApi('/admin/api/v1/content/' + value + '/media'));
-            }
-
-            var attachForm = document.querySelector('[data-media-library-attach-form]');
-            if (attachForm) {
-                attachForm.action = contentApi('/admin/api/v1/content/' + value + '/media/0/attach');
-                attachForm.setAttribute('data-action-template', contentApi('/admin/api/v1/content/' + value + '/media/{mediaId}/attach'));
-            }
-
-            var deleteForm = document.getElementById('media-library-delete-form');
-            if (deleteForm) {
-                deleteForm.action = contentApi('/admin/api/v1/content/' + value + '/media/0/delete');
-                deleteForm.setAttribute('data-action-template', contentApi('/admin/api/v1/content/' + value + '/media/{mediaId}/delete'));
-            }
-
-            var renameForm = document.querySelector('[data-media-library-rename-form]');
-            if (renameForm) {
-                renameForm.action = contentApi('/admin/api/v1/content/' + value + '/media/0/rename');
-                renameForm.setAttribute('data-action-template', contentApi('/admin/api/v1/content/' + value + '/media/{mediaId}/rename'));
-            }
-
-            var detachForm = document.querySelector('[data-media-library-detach-form]');
-            if (detachForm) {
-                detachForm.action = contentApi('/admin/api/v1/content/' + value + '/thumbnail/detach');
-            }
-
-            var uploadForm = document.querySelector('[data-media-library-upload-form]');
-            if (uploadForm) {
-                uploadForm.action = contentApi('/admin/api/v1/content/' + value + '/media/upload');
-            }
-
-            var selectForm = document.querySelector('[data-media-library-select-form]');
-            if (selectForm) {
-                selectForm.action = contentApi('/admin/api/v1/content/' + value + '/thumbnail/0/select');
-                selectForm.setAttribute('data-action-template', contentApi('/admin/api/v1/content/' + value + '/thumbnail/{mediaId}/select'));
+                thumbnailTrigger.setAttribute('data-media-select-template', contentApi('/admin/api/v1/content/' + value + '/thumbnail/{mediaId}/select'));
+                thumbnailTrigger.setAttribute('data-media-delete-template', contentApi('/admin/api/v1/content/' + value + '/media/{mediaId}/delete'));
+                thumbnailTrigger.setAttribute('data-media-rename-template', contentApi('/admin/api/v1/content/' + value + '/media/{mediaId}/rename'));
+                thumbnailTrigger.setAttribute('data-media-attach-template', contentApi('/admin/api/v1/content/' + value + '/media/{mediaId}/attach'));
+                thumbnailTrigger.setAttribute('data-media-detach-endpoint', contentApi('/admin/api/v1/content/' + value + '/thumbnail/detach'));
             }
 
             var contentDeleteForm = document.getElementById('content-delete-form');
@@ -156,7 +128,7 @@
                 contentDeleteForm.action = contentApi('/admin/api/v1/content/' + value + '/delete');
             }
             if (headerDeleteButton) {
-                headerDeleteButton.setAttribute('data-modal-target', '#content-delete-modal');
+                headerDeleteButton.setAttribute('data-ui-confirm-form', 'content-delete-form');
             }
             if (headerDeleteGroup) {
                 headerDeleteGroup.hidden = false;
@@ -260,25 +232,14 @@
             return signature(serializePayload()) !== lastSent;
         }
 
-        function leaveModal() {
-            return document.querySelector('[data-content-leave-modal]');
-        }
-
-        function closeLeaveModal() {
-            var modal = leaveModal();
-            if (modal) {
-                modal.classList.remove('open');
+        function confirmLeave() {
+            if (leaveConfirmOpen) {
+                return Promise.resolve(false);
             }
-            pendingNavigation = '';
-            pendingReload = false;
-        }
-
-        function openLeaveModal() {
-            var modal = leaveModal();
-            if (!modal) {
-                return;
-            }
-            modal.classList.add('open');
+            leaveConfirmOpen = true;
+            return confirmModal({ message: t('content.leave_page_confirm') }).finally(function () {
+                leaveConfirmOpen = false;
+            });
         }
 
         function shouldGuardLink(link) {
@@ -315,35 +276,16 @@
                 return;
             }
             event.preventDefault();
-            pendingNavigation = '';
-            pendingReload = true;
-            openLeaveModal();
+            confirmLeave().then(function (confirmed) {
+                if (!confirmed) {
+                    return;
+                }
+                bypassLeaveWarning = true;
+                window.location.reload();
+            });
         });
 
         document.addEventListener('click', function (event) {
-            var cancelLeave = event.target.closest('[data-content-leave-cancel]');
-            if (cancelLeave) {
-                event.preventDefault();
-                closeLeaveModal();
-                return;
-            }
-
-            var confirmLeave = event.target.closest('[data-content-leave-confirm]');
-            if (confirmLeave) {
-                event.preventDefault();
-                bypassLeaveWarning = true;
-                if (pendingReload) {
-                    window.location.reload();
-                    return;
-                }
-                if (pendingNavigation !== '') {
-                    window.location.href = pendingNavigation;
-                    return;
-                }
-                closeLeaveModal();
-                return;
-            }
-
             if (bypassLeaveWarning || !hasUnsavedChanges()) {
                 return;
             }
@@ -354,9 +296,13 @@
             }
 
             event.preventDefault();
-            pendingNavigation = String(link.href || '');
-            pendingReload = false;
-            openLeaveModal();
+            confirmLeave().then(function (confirmed) {
+                if (!confirmed) {
+                    return;
+                }
+                bypassLeaveWarning = true;
+                window.location.href = String(link.href || '');
+            });
         });
 
         document.addEventListener('tinycms:content-ensure-draft', function () {

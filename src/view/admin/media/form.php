@@ -192,13 +192,4 @@ if ($mode === 'edit') {
     >
         <?= $csrfField() ?>
     </form>
-    <div class="modal-overlay" data-modal id="media-delete-modal">
-        <div class="modal">
-            <p data-modal-text><?= esc_html(t('media.delete_confirm')) ?></p>
-            <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-modal-close><?= esc_html(t('common.cancel')) ?></button>
-                <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="media-delete-form"><?= esc_html(t('common.confirm')) ?></button>
-            </div>
-        </div>
-    </div>
 <?php endif; ?>

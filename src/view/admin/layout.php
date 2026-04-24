@@ -25,21 +25,27 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script>window.tinycmsIconSprite = <?= esc_json(icon_sprite()) ?>;</script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/icons.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/flash.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/loader.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/admin-menu.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/custom-select.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/custom-datetime.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/custom-upload.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library-modal.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/template.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/transport.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/renderer.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/helpers.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/modal.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/picker.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/menu-builder.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/link-modal.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/main.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/session/template.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/heartbeat.js')) ?>"></script>
 </head>
 <body data-heartbeat-endpoint="<?= esc_attr($url('admin/api/v1/heartbeat')) ?>" data-heartbeat-login-endpoint="<?= esc_attr($url('admin/api/v1/auth/login')) ?>">
@@ -122,7 +128,13 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                             </button>
                         </div>
                         <div class="admin-header-action-group admin-header-action-group-danger">
-                            <button class="btn btn-danger admin-header-action-option" type="button" data-save-action-delete data-modal-open data-modal-target="<?= esc_attr((string)($headerAction['delete_modal_target'] ?? '')) ?>">
+                            <button
+                                class="btn btn-danger admin-header-action-option"
+                                type="button"
+                                data-save-action-delete
+                                data-ui-confirm-form="<?= esc_attr((string)($headerAction['delete_form'] ?? '')) ?>"
+                                data-ui-confirm-message="<?= esc_attr((string)($headerAction['delete_confirm'] ?? '')) ?>"
+                            >
                                 <span><?= esc_html(t('common.delete')) ?></span>
                                 <?= icon('delete') ?>
                             </button>
@@ -153,14 +165,14 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
                         <div
                             class="admin-header-action-group admin-header-action-group-danger"
                             data-content-delete-group
-                            <?= empty($headerAction['delete_modal_target']) ? 'hidden' : '' ?>
+                            <?= empty($headerAction['delete_form']) ? 'hidden' : '' ?>
                         >
                             <button
                                 class="btn btn-danger admin-header-action-option"
                                 type="button"
                                 data-content-action-delete
-                                data-modal-open
-                                data-modal-target="<?= esc_attr((string)($headerAction['delete_modal_target'] ?? '#content-delete-modal')) ?>"
+                                data-ui-confirm-form="<?= esc_attr((string)($headerAction['delete_form'] ?? '')) ?>"
+                                data-ui-confirm-message="<?= esc_attr((string)($headerAction['delete_confirm'] ?? '')) ?>"
                             >
                                 <span><?= esc_html(t('common.delete')) ?></span>
                                 <?= icon('delete') ?>
@@ -187,45 +199,6 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
         </section>
     </main>
     <div class="admin-version-corner">TinyCMS <?= esc_html((string)($appVersion ?? '0.9.0')) ?></div>
-</div>
-<div class="modal-overlay" id="session-login-modal" data-session-login-modal>
-    <div class="modal session-login-modal">
-        <h3 class="m-0 mb-3"><?= esc_html(t('auth.login')) ?></h3>
-        <p class="m-0 mb-3"><?= esc_html(t('auth.session_expired')) ?></p>
-        <p class="m-0 mb-3 text-danger" data-session-login-message hidden></p>
-        <form method="post" action="<?= esc_url($url('admin/api/v1/auth/login')) ?>" data-session-login-form>
-            <?= $csrfField() ?>
-            <div class="mb-3">
-                <label><?= esc_html(t('common.email')) ?></label>
-                <div class="field-with-icon">
-                    <span class="field-overlay field-overlay-start field-icon" aria-hidden="true"><?= icon('email') ?></span>
-                    <input class="field-control-with-start-icon" type="email" name="email" data-session-login-email required>
-                </div>
-                <small class="text-danger" data-session-login-error="email" hidden></small>
-            </div>
-            <div class="mb-3">
-                <label><?= esc_html(t('common.password')) ?></label>
-                <div class="field-with-icon">
-                    <input class="field-control-with-end-icon" type="password" name="password" data-password-input required>
-                    <button class="field-overlay field-overlay-end field-icon-button" type="button" data-password-toggle aria-label="<?= esc_attr(t('auth.show_password')) ?>" title="<?= esc_attr(t('auth.show_password')) ?>">
-                        <?= icon('show') ?>
-                    </button>
-                </div>
-                <small class="text-danger" data-session-login-error="password" hidden></small>
-            </div>
-            <div class="mb-4">
-                <label><input type="checkbox" name="remember" value="1"> <?= esc_html(t('auth.remember')) ?></label>
-            </div>
-            <button class="btn btn-primary" type="submit" data-session-login-submit><?= esc_html(t('auth.login')) ?></button>
-        </form>
-    </div>
-</div>
-<div class="modal-overlay" id="connection-lost-modal" data-connection-lost-modal>
-    <div class="modal session-login-modal">
-        <h3 class="m-0 mb-3"><?= esc_html(t('common.connection_lost')) ?></h3>
-        <p class="m-0 mb-4"><?= esc_html(t('auth.connection_lost')) ?></p>
-        <button class="btn btn-primary" type="button" data-connection-lost-retry><?= esc_html(t('common.retry')) ?></button>
-    </div>
 </div>
 </body>
 </html>

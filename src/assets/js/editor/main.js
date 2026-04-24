@@ -1,5 +1,9 @@
 (function () {
     var t = window.tinycms?.i18n?.t || function () { return ""; };
+    var modalUi = window.tinycms?.ui?.modal || {
+        open: function (modal) { if (modal) { modal.classList.add('open'); } },
+        close: function (modal) { if (modal) { modal.classList.remove('open'); } }
+    };
     var requestJson = window.tinycms?.api?.http?.requestJson;
     var postForm = window.tinycms?.api?.http?.postForm;
     var editorCounter = 0;
@@ -836,87 +840,6 @@
         return group;
     }
 
-    function createLinkModal() {
-        var modal = document.createElement('div');
-        modal.className = 'modal-overlay wysiwyg-link-modal';
-        modal.setAttribute('data-modal', '');
-
-        var dialog = document.createElement('div');
-        dialog.className = 'modal wysiwyg-link-dialog';
-
-        var title = document.createElement('h3');
-        title.className = 'wysiwyg-link-title';
-        title.textContent = '' + t('editor.insert_link') + '';
-
-        var input = document.createElement('input');
-        input.type = 'url';
-        input.placeholder = 'https://';
-        input.className = 'wysiwyg-link-input';
-        input.setAttribute('data-role', 'link-input');
-
-        var textInput = document.createElement('input');
-        textInput.type = 'text';
-        textInput.placeholder = t('editor.link_text');
-        textInput.className = 'wysiwyg-link-input';
-        textInput.setAttribute('data-role', 'link-text-input');
-
-        var options = document.createElement('div');
-        options.className = 'wysiwyg-link-options';
-
-        var targetOption = document.createElement('label');
-        targetOption.className = 'wysiwyg-link-option';
-        var targetInput = document.createElement('input');
-        targetInput.type = 'checkbox';
-        targetInput.setAttribute('data-role', 'link-target-blank');
-        targetOption.appendChild(targetInput);
-        targetOption.appendChild(document.createTextNode(' ' + t('editor.open_new_window')));
-
-        var nofollowOption = document.createElement('label');
-        nofollowOption.className = 'wysiwyg-link-option';
-        var nofollowInput = document.createElement('input');
-        nofollowInput.type = 'checkbox';
-        nofollowInput.setAttribute('data-role', 'link-nofollow');
-        nofollowOption.appendChild(nofollowInput);
-        nofollowOption.appendChild(document.createTextNode(' ' + t('editor.add_nofollow')));
-
-        var actions = document.createElement('div');
-        actions.className = 'modal-actions wysiwyg-link-actions';
-
-        var cancel = document.createElement('button');
-        cancel.type = 'button';
-        cancel.className = 'btn btn-light';
-        cancel.setAttribute('data-role', 'link-cancel');
-        cancel.setAttribute('data-modal-close', '');
-        cancel.textContent = '' + t('editor.cancel') + '';
-
-        var remove = document.createElement('button');
-        remove.type = 'button';
-        remove.className = 'btn btn-light';
-        remove.setAttribute('data-role', 'link-remove');
-        remove.textContent = t('editor.remove_link');
-
-        var confirm = document.createElement('button');
-        confirm.type = 'button';
-        confirm.className = 'btn btn-primary';
-        confirm.setAttribute('data-role', 'link-apply');
-        confirm.setAttribute('data-modal-confirm', '');
-        confirm.setAttribute('data-modal-confirm-manual', '');
-        confirm.textContent = '' + t('editor.save') + '';
-
-        actions.appendChild(cancel);
-        actions.appendChild(remove);
-        actions.appendChild(confirm);
-        options.appendChild(targetOption);
-        options.appendChild(nofollowOption);
-        dialog.appendChild(title);
-        dialog.appendChild(input);
-        dialog.appendChild(textInput);
-        dialog.appendChild(options);
-        dialog.appendChild(actions);
-        modal.appendChild(dialog);
-        return modal;
-    }
-
     function init(textarea) {
         editorCounter += 1;
         var editorId = 'wysiwyg-' + editorCounter;
@@ -938,7 +861,7 @@
         var alignGroup = createAlignGroup();
         var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
-        var linkModal = createLinkModal();
+        var linkModal = window.tinycms.editor.linkModal.create();
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
         linkTools.setAttribute('contenteditable', 'false');
@@ -1222,7 +1145,7 @@
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
-            linkModal.classList.add('open');
+            modalUi.open(linkModal);
             wrapper.classList.remove('is-list-open');
 
             if (linkInput) {
@@ -1240,6 +1163,14 @@
                 linkNoFollow.checked = relValues.indexOf('nofollow') !== -1;
             }
             updateLinkApplyState();
+        }
+
+        function closeLinkModal() {
+            modalUi.close(linkModal);
+        }
+
+        function isLinkModalOpen() {
+            return linkModal.classList.contains('open');
         }
 
         function setFocusMode(enabled) {
@@ -1294,14 +1225,14 @@
                 }
                 wrapper.classList.remove(className);
             });
-            linkModal.classList.remove('open');
+            closeLinkModal();
         }
 
         function closeMenus() {
             wrapper.classList.remove('is-heading-open');
             wrapper.classList.remove('is-list-open');
             wrapper.classList.remove('is-align-open');
-            linkModal.classList.remove('open');
+            closeLinkModal();
             hideLinkTools();
             activeLink = null;
         }
@@ -1596,7 +1527,7 @@
                     linkRange = rememberSelection();
                     activeLink = getCurrentLink(editor);
                 }
-                if (linkModal.classList.contains('open')) {
+                if (isLinkModalOpen()) {
                     closeMenus();
                 } else {
                     openLinkModal();
@@ -1704,6 +1635,21 @@
             if (event.target && event.target.matches('[data-role="link-input"], [data-role="link-text-input"]')) {
                 updateLinkApplyState();
             }
+        });
+
+        linkModal.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                resetLinkModalFields();
+                activeLink = null;
+                closeMenus();
+                return;
+            }
+            if (event.key !== 'Enter' || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+                return;
+            }
+            event.preventDefault();
+            linkModal.querySelector('[data-role="link-apply"]')?.click();
         });
 
         linkTools.addEventListener('mousedown', function (event) {
@@ -1847,7 +1793,7 @@
             }
 
             hideLinkTools();
-            if (!linkModal.classList.contains('open')) {
+            if (!isLinkModalOpen()) {
                 activeLink = null;
             }
 
