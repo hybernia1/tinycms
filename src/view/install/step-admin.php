@@ -33,7 +33,7 @@
                         <small class="text-danger"><?= esc_html((string)$errors['website_url']) ?></small>
                         <?php endif; ?>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label><?= esc_html(t('install.password')) ?></label>
                         <input type="password" name="password" required>
                         <?php if (!empty($errors['password'])): ?>
