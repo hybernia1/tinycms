@@ -34,7 +34,6 @@ $list['columns'] = [
     ['label' => t('common.name')],
     ['label' => t('common.actions'), 'class' => 'table-col-actions'],
 ];
-$list['deleteConfirmText'] = t('terms.delete_confirm');
 $list['rowRenderer'] = $rowRenderer;
 
 require BASE_DIR . '/' . VIEW_DIR . 'admin/partials/list-layout.php';

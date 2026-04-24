@@ -359,6 +359,7 @@ const pushFlash = window.tinycms?.api?.pushFlash || (() => {});
 const sessionStore = window.tinycms?.api?.sessionStore || { get: () => '', set: () => {} };
 const requestJson = window.tinycms?.api?.http?.requestJson;
 const postForm = window.tinycms?.api?.http?.postForm;
+const confirmModal = window.tinycms?.ui?.modal?.confirm || (() => Promise.resolve(false));
 
 const normalizeListResponse = (payload) => {
     const meta = payload && typeof payload.meta === 'object' ? payload.meta : {};
@@ -387,11 +388,6 @@ const initListApi = (config) => {
     const body = root.querySelector(`[data-${config.name}-list-body]`);
     const prevLink = root.querySelector(`[data-${config.name}-prev]`);
     const nextLink = root.querySelector(`[data-${config.name}-next]`);
-    const deleteModal = root.querySelector(`[data-${config.name}-delete-modal]`)
-        || document.querySelector(`[data-${config.name}-delete-modal]`);
-    const deleteCancel = deleteModal?.querySelector('[data-modal-close]');
-    const deleteConfirm = deleteModal?.querySelector('[data-modal-confirm]');
-    const deleteModalText = deleteModal?.querySelector('[data-modal-text]');
     const filterLinks = config.withStatus
         ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
         : [];
@@ -409,10 +405,6 @@ const initListApi = (config) => {
     const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
     const loader = window.tinycmsLoader || null;
 
-    if (deleteModal && deleteModal.parentElement !== document.body) {
-        document.body.appendChild(deleteModal);
-    }
-
     let state = {
         page: 1,
         query: searchField?.value.trim() || '',
@@ -428,8 +420,6 @@ const initListApi = (config) => {
         sessionStore.set(statusStorageKey, state.status);
     }
 
-    let pendingDeleteId = 0;
-    let pendingDeleteMode = 'soft';
     let searchTimer = null;
     let fetchController = null;
 
@@ -648,54 +638,30 @@ const initListApi = (config) => {
         const delOpen = event.target.closest(`[data-${config.name}-delete-open]`);
         if (delOpen) {
             event.preventDefault();
-            pendingDeleteId = Number(delOpen.getAttribute(`data-${config.name}-delete-open`) || '0');
-            pendingDeleteMode = delOpen.getAttribute(`data-${config.name}-delete-mode`) === 'hard' ? 'hard' : 'soft';
-            if (deleteModalText && config.messages?.deleteConfirm) {
-                deleteModalText.textContent = pendingDeleteMode === 'hard'
-                    ? config.messages.deleteConfirm.hard
-                    : config.messages.deleteConfirm.soft;
-            }
-            if (deleteModal) {
-                deleteModal.classList.add('open');
-            }
-        }
-    });
-
-    if (deleteCancel) {
-        deleteCancel.addEventListener('click', () => {
-            pendingDeleteId = 0;
-            pendingDeleteMode = 'soft';
-            if (deleteModal) {
-                deleteModal.classList.remove('open');
-            }
-        });
-    }
-
-    if (deleteConfirm) {
-        deleteConfirm.addEventListener('click', async () => {
-            if (pendingDeleteId <= 0) {
+            const deleteId = Number(delOpen.getAttribute(`data-${config.name}-delete-open`) || '0');
+            const deleteMode = delOpen.getAttribute(`data-${config.name}-delete-mode`) === 'hard' ? 'hard' : 'soft';
+            if (deleteId <= 0) {
                 return;
             }
 
-            deleteConfirm.disabled = true;
+            const message = config.messages?.deleteConfirm
+                ? (deleteMode === 'hard' ? config.messages.deleteConfirm.hard : config.messages.deleteConfirm.soft)
+                : t(`${config.name}.delete_confirm`);
+            if (!await confirmModal({ message })) {
+                return;
+            }
             const deletePath = typeof config.deletePath === 'function'
-                ? config.deletePath(endpointBase, pendingDeleteId)
+                ? config.deletePath(endpointBase, deleteId)
                 : `${endpointBase}/delete`;
-            const result = await postAction(deletePath, { id: pendingDeleteId });
-            deleteConfirm.disabled = false;
+            const result = await postAction(deletePath, { id: deleteId });
             if (result.success === true) {
-                pendingDeleteId = 0;
-                pendingDeleteMode = 'soft';
-                if (deleteModal) {
-                    deleteModal.classList.remove('open');
-                }
                 if (config.messages?.deleteSuccess) {
                     pushFlash('success', result.message || config.messages.deleteSuccess);
                 }
                 await fetchList();
             }
-        });
-    }
+        }
+    });
 
     if (searchField) {
         searchField.addEventListener('input', () => {

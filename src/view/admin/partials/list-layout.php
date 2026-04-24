@@ -19,7 +19,6 @@ $listTotalPages = (int)($list['totalPages'] ?? 1);
 $statusLinks = is_array($list['statusLinks'] ?? null) ? $list['statusLinks'] : [];
 $statusEnabled = (bool)($list['statusEnabled'] ?? $statusLinks !== []);
 $rowRenderer = is_callable($list['rowRenderer'] ?? null) ? $list['rowRenderer'] : null;
-$deleteConfirmText = (string)($list['deleteConfirmText'] ?? '');
 $csrfMarkup = (string)($list['csrfMarkup'] ?? $csrfField());
 $tableClass = trim((string)($list['tableClass'] ?? ''));
 
@@ -96,13 +95,4 @@ foreach ($listRootAttrs as $attr => $value) {
         </div>
     </div>
 
-    <div class="modal-overlay" data-modal data-<?= esc_attr($listAttr) ?>-delete-modal>
-        <div class="modal">
-            <p data-modal-text><?= esc_html($deleteConfirmText) ?></p>
-            <div class="modal-actions">
-                <button class="btn btn-light" type="button" data-modal-close><?= esc_html(t('common.cancel')) ?></button>
-                <button class="btn btn-primary" type="button" data-modal-confirm><?= esc_html(t('common.confirm')) ?></button>
-            </div>
-        </div>
-    </div>
 </div>

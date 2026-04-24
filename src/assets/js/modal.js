@@ -1,115 +1,125 @@
 (() => {
 const t = window.tinycms?.i18n?.t || (() => '');
 
-const getModal = (trigger) => {
-    const target = trigger?.getAttribute('data-modal-target') || '';
-    if (target) {
-        return document.querySelector(target);
+let confirmModal = null;
+let confirmResolve = null;
+
+const open = (modal) => {
+    if (modal) {
+        modal.classList.add('open');
     }
-    return document.querySelector('[data-modal]');
 };
 
-const closeModal = (modal) => {
+const close = (modal) => {
     if (modal) {
         modal.classList.remove('open');
     }
 };
 
-const hoistModalsToBody = () => {
-    document.querySelectorAll('[data-modal], [data-content-leave-modal], [data-media-library-modal]').forEach((modal) => {
-        if (modal.parentElement !== document.body) {
-            document.body.appendChild(modal);
-        }
-    });
-};
-
-hoistModalsToBody();
-
-const openModal = (trigger) => {
-    const modal = getModal(trigger);
-    if (!modal) {
+const submitForm = (form) => {
+    if (!form) {
         return;
     }
-
-    const type = trigger.getAttribute('data-type') || t('modal.default_type');
-    const formId = trigger.getAttribute('data-form-id') || '';
-    const text = modal.querySelector('[data-modal-text]');
-    const confirm = modal.querySelector('[data-modal-confirm]');
-
-    if (text && trigger.hasAttribute('data-type')) {
-        text.textContent = t('modal.confirm_delete_type').replace('%s', type);
+    if (form.hasAttribute('data-api-submit')) {
+        form.requestSubmit();
+        return;
     }
-
-    if (confirm && formId) {
-        confirm.setAttribute('data-form-id', formId);
-    }
-
-    modal.classList.add('open');
+    form.submit();
 };
 
-const getOpenConfirmModal = () => {
-    const modals = document.querySelectorAll('[data-modal].open');
-    for (let index = modals.length - 1; index >= 0; index -= 1) {
-        const modal = modals[index];
-        if (modal.querySelector('[data-modal-confirm]')) {
-            return modal;
-        }
+const ensureConfirmModal = () => {
+    if (confirmModal) {
+        return confirmModal;
     }
-    return null;
+
+    confirmModal = document.createElement('div');
+    confirmModal.className = 'modal-overlay';
+    confirmModal.setAttribute('data-ui-confirm-modal', '');
+    confirmModal.innerHTML = `
+        <div class="modal">
+            <p data-ui-confirm-text></p>
+            <div class="modal-actions">
+                <button class="btn btn-light" type="button" data-ui-confirm-cancel></button>
+                <button class="btn btn-primary" type="button" data-ui-confirm-ok></button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(confirmModal);
+    return confirmModal;
 };
 
-document.addEventListener('click', (event) => {
-    const openTrigger = event.target.closest('[data-modal-open]');
-    if (openTrigger) {
+const resolveConfirm = (value) => {
+    if (typeof confirmResolve === 'function') {
+        confirmResolve(value);
+    }
+    confirmResolve = null;
+    close(confirmModal);
+};
+
+const confirm = (options = {}) => new Promise((resolve) => {
+    const modal = ensureConfirmModal();
+    const text = modal.querySelector('[data-ui-confirm-text]');
+    const cancel = modal.querySelector('[data-ui-confirm-cancel]');
+    const ok = modal.querySelector('[data-ui-confirm-ok]');
+    const message = String(options.message || t('modal.confirm_delete_type').replace('%s', t('modal.default_type')) || '').trim();
+
+    confirmResolve = resolve;
+    if (text) {
+        text.textContent = message;
+    }
+    if (cancel) {
+        cancel.textContent = String(options.cancelLabel || t('common.cancel'));
+    }
+    if (ok) {
+        ok.textContent = String(options.confirmLabel || t('common.confirm'));
+    }
+    open(modal);
+    if (ok) {
+        ok.focus();
+    }
+});
+
+document.addEventListener('click', async (event) => {
+    const cancel = event.target.closest('[data-ui-confirm-cancel]');
+    if (cancel) {
         event.preventDefault();
-        openModal(openTrigger);
+        resolveConfirm(false);
         return;
     }
 
-    const closeTrigger = event.target.closest('[data-modal-close]');
-    if (closeTrigger) {
-        closeModal(closeTrigger.closest('[data-modal]'));
+    const ok = event.target.closest('[data-ui-confirm-ok]');
+    if (ok) {
+        event.preventDefault();
+        resolveConfirm(true);
         return;
     }
 
-    const confirmTrigger = event.target.closest('[data-modal-confirm]');
-    if (!confirmTrigger) {
+    const closeButton = event.target.closest('[data-ui-modal-close]');
+    if (closeButton) {
+        close(closeButton.closest('.modal-overlay'));
         return;
     }
 
-    if (confirmTrigger.hasAttribute('data-modal-confirm-manual')) {
+    const confirmButton = event.target.closest('[data-ui-confirm-form]');
+    if (!confirmButton) {
         return;
     }
 
-    const formId = confirmTrigger.getAttribute('data-form-id') || '';
-    const form = formId ? document.getElementById(formId) : null;
-
-    if (form) {
-        if (form.hasAttribute('data-api-submit')) {
-            closeModal(confirmTrigger.closest('[data-modal]'));
-            form.requestSubmit();
-            return;
-        }
-        form.submit();
+    event.preventDefault();
+    const formId = confirmButton.getAttribute('data-ui-confirm-form') || '';
+    if (formId && await confirm({ message: confirmButton.getAttribute('data-ui-confirm-message') || '' })) {
+        submitForm(document.getElementById(formId));
     }
-
-    closeModal(confirmTrigger.closest('[data-modal]'));
 });
 
 document.addEventListener('keydown', (event) => {
-    const modal = getOpenConfirmModal();
-    if (!modal) {
+    if (!confirmModal?.classList.contains('open')) {
         return;
     }
 
     if (event.key === 'Escape') {
         event.preventDefault();
-        const closeTrigger = modal.querySelector('[data-modal-close]');
-        if (closeTrigger) {
-            closeTrigger.click();
-            return;
-        }
-        closeModal(modal);
+        resolveConfirm(false);
         return;
     }
 
@@ -117,17 +127,19 @@ document.addEventListener('keydown', (event) => {
         return;
     }
 
-    const activeElement = document.activeElement;
-    if (activeElement instanceof HTMLTextAreaElement) {
-        return;
-    }
-
-    const confirmTrigger = modal.querySelector('[data-modal-confirm]');
-    if (!confirmTrigger) {
+    if (document.activeElement instanceof HTMLTextAreaElement) {
         return;
     }
 
     event.preventDefault();
-    confirmTrigger.click();
+    resolveConfirm(true);
 });
+
+window.tinycms = window.tinycms || {};
+window.tinycms.ui = window.tinycms.ui || {};
+window.tinycms.ui.modal = {
+    open,
+    close,
+    confirm,
+};
 })();

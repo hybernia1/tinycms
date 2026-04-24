@@ -2,17 +2,22 @@
 const t = window.tinycms?.i18n?.t || (() => '');
 const postForm = window.tinycms?.api?.http?.postForm;
 const requestJson = window.tinycms?.api?.http?.requestJson;
+const modalUi = window.tinycms?.ui?.modal || {
+    open: (modal) => modal?.classList.add('open'),
+    close: (modal) => modal?.classList.remove('open'),
+};
+const template = window.tinycms?.session?.template || {};
+const heartbeatEndpoint = document.body.getAttribute('data-heartbeat-endpoint') || '';
+const loginEndpoint = document.body.getAttribute('data-heartbeat-login-endpoint') || '';
 
-const modal = document.querySelector('[data-session-login-modal]');
+const modal = template.ensureSessionModal?.(loginEndpoint) || document.querySelector('[data-session-login-modal]');
 const form = modal?.querySelector('[data-session-login-form]');
 const message = modal?.querySelector('[data-session-login-message]');
 const submit = form?.querySelector('[data-session-login-submit]');
 const emailInput = form?.querySelector('[data-session-login-email]');
 const errorFields = form ? Array.from(form.querySelectorAll('[data-session-login-error]')) : [];
-const connectionModal = document.querySelector('[data-connection-lost-modal]');
+const connectionModal = template.ensureConnectionModal?.() || document.querySelector('[data-connection-lost-modal]');
 const retryButton = connectionModal?.querySelector('[data-connection-lost-retry]');
-const heartbeatEndpoint = document.body.getAttribute('data-heartbeat-endpoint') || '';
-const loginEndpoint = document.body.getAttribute('data-heartbeat-login-endpoint') || '';
 let heartbeatInFlight = false;
 let loginInFlight = false;
 let connectionLost = false;
@@ -54,24 +59,24 @@ const openModal = (payload) => {
     clearErrors();
     updateCsrfToken(payload?.error?.csrf || payload?.data?.csrf);
     setMessage(payload?.error?.message || '');
-    modal.classList.add('open');
+    modalUi.open(modal);
     if (emailInput) {
         emailInput.focus();
     }
 };
 
 const closeModal = () => {
-    modal.classList.remove('open');
+    modalUi.close(modal);
     clearErrors();
     form.reset();
 };
 
 const openConnectionModal = () => {
-    connectionModal.classList.add('open');
+    modalUi.open(connectionModal);
 };
 
 const closeConnectionModal = () => {
-    connectionModal.classList.remove('open');
+    modalUi.close(connectionModal);
 };
 
 const setLoading = (loading) => {

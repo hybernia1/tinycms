@@ -169,7 +169,7 @@ final class AdminView
             'navigation' => $navigation,
             'pageTitle' => $mode === 'add' ? I18n::t('admin.add_media') : I18n::t('admin.edit_media'),
             'headerAction' => $mode === 'edit'
-                ? $this->saveMenuHeaderAction('#media-form', '#media-delete-modal')
+                ? $this->saveMenuHeaderAction('#media-form', 'media-delete-form', I18n::t('media.delete_confirm'))
                 : $this->submitHeaderAction('#media-form'),
         ]);
     }
@@ -184,16 +184,17 @@ final class AdminView
         return ['type' => 'link', 'href' => $href, 'label' => $label, 'icon' => 'add'];
     }
 
-    private function saveMenuHeaderAction(string $formSelector, string $deleteModalTarget): array
+    private function saveMenuHeaderAction(string $formSelector, string $deleteFormId, string $deleteConfirm): array
     {
-        return ['type' => 'save-menu', 'form' => $formSelector, 'delete_modal_target' => $deleteModalTarget];
+        return ['type' => 'save-menu', 'form' => $formSelector, 'delete_form' => $deleteFormId, 'delete_confirm' => $deleteConfirm];
     }
 
     private function contentMenuHeaderAction(bool $canDelete): array
     {
         return [
             'type' => 'content-menu',
-            'delete_modal_target' => $canDelete ? '#content-delete-modal' : '',
+            'delete_form' => $canDelete ? 'content-delete-form' : '',
+            'delete_confirm' => I18n::t('content.delete_confirm'),
         ];
     }
 

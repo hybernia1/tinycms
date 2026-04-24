@@ -149,6 +149,14 @@ $previewHidden = $previewUrl === '';
                         data-media-library-endpoint="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/media')) ?>"
                         data-media-base-url="<?= esc_attr($url('')) ?>"
                         data-current-media-id="<?= (int)($item['thumbnail'] ?? 0) ?>"
+                        data-media-library-per-page="<?= defined('APP_POSTS_PER_PAGE') ? (int)APP_POSTS_PER_PAGE : 10 ?>"
+                        data-media-upload-accept="<?= esc_attr((string)($imageUploadAccept ?? '')) ?>"
+                        data-media-upload-types-label="<?= esc_attr((string)($imageUploadTypesLabel ?? '')) ?>"
+                        data-media-select-template="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/thumbnail/{mediaId}/select')) ?>"
+                        data-media-delete-template="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/delete')) ?>"
+                        data-media-rename-template="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/rename')) ?>"
+                        data-media-attach-template="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/attach')) ?>"
+                        data-media-detach-endpoint="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/thumbnail/detach')) ?>"
                     >
                         <?php if ($thumbnailUrl !== ''): ?>
                             <div class="content-thumbnail-preview">
@@ -172,120 +180,3 @@ $previewHidden = $previewUrl === '';
 >
     <?= $csrfField() ?>
 </form>
-<div class="media-library-modal modal-overlay" data-media-library-modal data-modal data-media-library-per-page="<?= defined('APP_POSTS_PER_PAGE') ? (int)APP_POSTS_PER_PAGE : 10 ?>">
-    <div class="media-library-modal-dialog modal">
-        <div class="media-library-modal-header">
-            <strong>Media library</strong>
-            <button class="btn btn-light btn-icon" type="button" data-modal-close aria-label="<?= esc_attr(t('common.close')) ?>">
-                <?= icon('cancel') ?>
-            </button>
-        </div>
-        <div class="media-library-modal-layout">
-            <div class="media-library-detail">
-                <div class="media-library-detail-preview" data-media-library-detail-preview></div>
-                <div class="media-library-detail-meta">
-                    <div>
-                        <label><?= esc_html(t('common.name')) ?></label>
-                        <div class="d-flex gap-2">
-                            <input type="text" value="" data-media-library-detail-name-input>
-                            <button class="btn btn-light" type="button" data-media-library-rename disabled><?= esc_html(t('common.save')) ?></button>
-                        </div>
-                    </div>
-                </div>
-                <small class="text-muted" data-media-library-status></small>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" type="button" data-media-library-choose disabled><?= esc_html(t('content.choose')) ?></button>
-                    <button
-                        class="btn btn-danger"
-                        type="button"
-                        data-media-library-delete-open
-                        data-modal-open
-                        data-modal-target="#media-library-delete-modal"
-                        data-type="<?= esc_attr(t('content.image')) ?>"
-                        disabled
-                    >
-                        <?= esc_html(t('common.delete')) ?>
-                    </button>
-                </div>
-            </div>
-            <div class="media-library-list">
-                <form class="media-library-search" data-media-library-search>
-                    <div class="search-field field-with-icon">
-                        <input class="search-input" type="search" name="q" placeholder="<?= esc_attr(t('content.search_image')) ?>">
-                        <span class="field-overlay field-overlay-end field-icon field-icon-soft" aria-hidden="true"><?= icon('search') ?></span>
-                    </div>
-                </form>
-                <form class="media-library-upload" method="post" enctype="multipart/form-data" action="<?= esc_url($url('admin/api/v1/content/' . $contentId . '/media/upload')) ?>" data-media-library-upload-form>
-                    <?= $csrfField() ?>
-                    <input type="hidden" name="content_id" value="<?= $contentId ?>">
-                    <div class="custom-upload-field" data-media-library-upload-field>
-                        <label class="btn btn-light custom-upload-button" for="content-thumbnail-upload">
-                            <span class="custom-upload-main-icon" data-custom-upload-icon><?= icon('upload') ?></span>
-                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= esc_attr(t('common.upload_add_files')) ?>"><?= esc_html(t('common.upload_add_files')) ?></span>
-                            <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true"><?= icon('loader') ?></span>
-                        </label>
-                        <input id="content-thumbnail-upload" type="file" name="thumbnail" accept="<?= esc_attr((string)($imageUploadAccept ?? '')) ?>" required>
-                    </div>
-                    <small class="text-muted d-block mt-2"><?= esc_html(sprintf(t('common.allowed_upload_types'), (string)($imageUploadTypesLabel ?? ''))) ?></small>
-                </form>
-                <div class="media-library-grid" data-media-library-grid></div>
-                <div class="pagination pagination-centered">
-                    <a class="pagination-link disabled" href="#" data-media-library-prev aria-disabled="true" tabindex="-1"><?= icon('prev') ?><span><?= esc_html(t('common.previous')) ?></span></a>
-                    <a class="pagination-link disabled" href="#" data-media-library-next aria-disabled="true" tabindex="-1"><span><?= esc_html(t('common.next')) ?></span><?= icon('next') ?></a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<form method="post" action="<?= esc_url($url('admin/api/v1/content/' . $contentId . '/thumbnail/0/select')) ?>" data-media-library-select-form data-action-template="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/thumbnail/{mediaId}/select')) ?>">
-    <?= $csrfField() ?>
-    <input type="hidden" name="id" value="<?= $contentId ?>">
-    <input type="hidden" name="media_id" value="" data-media-library-media-id>
-</form>
-<form method="post" action="<?= esc_url($url('admin/api/v1/content/' . $contentId . '/media/0/delete')) ?>" id="media-library-delete-form" data-action-template="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/delete')) ?>">
-    <?= $csrfField() ?>
-    <input type="hidden" name="content_id" value="<?= $contentId ?>">
-    <input type="hidden" name="media_id" value="" data-media-library-delete-media-id>
-</form>
-<form method="post" action="<?= esc_url($url('admin/api/v1/content/' . $contentId . '/thumbnail/detach')) ?>" data-media-library-detach-form>
-    <?= $csrfField() ?>
-    <input type="hidden" name="id" value="<?= $contentId ?>">
-</form>
-<form method="post" action="<?= esc_url($url('admin/api/v1/content/' . $contentId . '/media/0/rename')) ?>" data-media-library-rename-form data-action-template="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/rename')) ?>">
-    <?= $csrfField() ?>
-    <input type="hidden" name="content_id" value="<?= $contentId ?>">
-    <input type="hidden" name="media_id" value="" data-media-library-rename-media-id>
-    <input type="hidden" name="name" value="" data-media-library-rename-name>
-</form>
-<form method="post" action="<?= esc_url($url('admin/api/v1/content/' . $contentId . '/media/0/attach')) ?>" data-media-library-attach-form data-action-template="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/media/{mediaId}/attach')) ?>">
-    <?= $csrfField() ?>
-    <input type="hidden" name="content_id" value="<?= $contentId ?>">
-    <input type="hidden" name="media_id" value="" data-media-library-attach-media-id>
-</form>
-<div class="modal-overlay" data-modal id="media-library-delete-modal">
-    <div class="modal">
-        <p data-modal-text><?= esc_html(t('content.delete_image_confirm')) ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= esc_html(t('common.cancel')) ?></button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-modal-confirm-manual><?= esc_html(t('common.confirm')) ?></button>
-        </div>
-    </div>
-</div>
-<div class="modal-overlay" data-content-leave-modal>
-    <div class="modal">
-        <p><?= esc_html(t('content.leave_page_confirm')) ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-content-leave-cancel><?= esc_html(t('common.cancel')) ?></button>
-            <button class="btn btn-primary" type="button" data-content-leave-confirm><?= esc_html(t('common.confirm')) ?></button>
-        </div>
-    </div>
-</div>
-<div class="modal-overlay" data-modal id="content-delete-modal">
-    <div class="modal">
-        <p data-modal-text><?= esc_html(t('content.delete_confirm')) ?></p>
-        <div class="modal-actions">
-            <button class="btn btn-light" type="button" data-modal-close><?= esc_html(t('common.cancel')) ?></button>
-            <button class="btn btn-primary" type="button" data-modal-confirm data-form-id="content-delete-form"><?= esc_html(t('common.confirm')) ?></button>
-        </div>
-    </div>
-</div>

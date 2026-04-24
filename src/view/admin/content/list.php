@@ -65,7 +65,6 @@ $list['columns'] = [
     ['label' => t('common.actions'), 'class' => 'table-col-actions table-col-actions-wide'],
 ];
 $list['tableClass'] = 'admin-list-table';
-$list['deleteConfirmText'] = t('content.delete_confirm_move_to_trash');
 $list['rowRenderer'] = $rowRenderer;
 
 require BASE_DIR . '/' . VIEW_DIR . 'admin/partials/list-layout.php';
