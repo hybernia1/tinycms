@@ -43,6 +43,10 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/menu-builder.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/sanitize.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/selection.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/toolbar.js')) ?>"></script>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/blocks.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/link-modal.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/main.js')) ?>"></script>
     <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/session/template.js')) ?>"></script>
