@@ -262,6 +262,38 @@ const createImageBreakParagraph = () => {
     return paragraph;
 };
 
+const isEditableTextBlock = (node) => {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+    }
+    if (/^(P|H1|H2|H3|H4|H5|H6|BLOCKQUOTE)$/.test(node.tagName)) {
+        return true;
+    }
+    return node.classList.contains('block') && node.classList.contains('block-list');
+};
+
+const isStandaloneBlock = (node) => {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+    }
+    if (node.tagName === 'HR') {
+        return true;
+    }
+    return node.classList.contains('block')
+        && (node.classList.contains('block-image') || node.classList.contains('block-embed'));
+};
+
+const ensureStandaloneBlockParagraphs = (editor) => {
+    Array.prototype.slice.call(editor.children).forEach((node) => {
+        if (!isStandaloneBlock(node) || isEditableTextBlock(node.nextElementSibling)) {
+            return;
+        }
+        const paragraph = document.createElement('p');
+        paragraph.innerHTML = '<br>';
+        editor.insertBefore(paragraph, node.nextSibling);
+    });
+};
+
 const normalizeBlocks = (editor) => {
     const nodes = Array.prototype.slice.call(editor.childNodes);
     nodes.forEach((node) => {
@@ -312,6 +344,7 @@ const normalizeBlocks = (editor) => {
         paragraph.innerHTML = node.innerHTML;
         editor.replaceChild(paragraph, node);
     });
+    ensureStandaloneBlockParagraphs(editor);
 };
 
 editor.blocks = {
