@@ -32,6 +32,15 @@ final class Media extends Admin
         [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(['all', 'unassigned']);
         $pagination = $this->media->paginate($page, $perPage, $query, $status);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+        $currentPath = trim((string)($_GET['current_media_path'] ?? ''));
+        if ($currentPath !== '') {
+            $current = $this->media->findByPath($currentPath);
+            if ($current !== null) {
+                $currentId = (int)($current['id'] ?? 0);
+                $items = array_values(array_filter($items, static fn(array $row): bool => (int)($row['id'] ?? 0) !== $currentId));
+                array_unshift($items, $this->mapListItem($current));
+            }
+        }
         $statusCounts = $this->media->statusCounts();
 
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));

@@ -7,9 +7,16 @@
     const currentCsrf = app.support?.currentCsrf || (() => '');
 
     const uploadAction = (openTrigger) => {
+        const explicit = openTrigger?.getAttribute('data-media-upload-endpoint') || '';
+        if (explicit !== '') {
+            return explicit;
+        }
+
         const endpoint = openTrigger?.getAttribute('data-media-library-endpoint') || '';
         return endpoint.replace(/\/media(?:\?.*)?$/, '/media/upload');
     };
+
+    const uploadName = (openTrigger) => openTrigger?.getAttribute('data-media-upload-name') || 'thumbnail';
 
     const createModal = (openTrigger) => {
         if (!openTrigger) {
@@ -67,7 +74,7 @@
                                 <span class="custom-upload-label" data-custom-upload-label data-default-label="${esc(t('common.upload_add_files'))}">${esc(t('common.upload_add_files'))}</span>
                                 <span class="custom-upload-spinner" data-custom-upload-spinner aria-hidden="true">${icon('loader')}</span>
                             </label>
-                            <input id="${uploadId}" type="file" name="thumbnail" accept="${esc(openTrigger.getAttribute('data-media-upload-accept') || '')}" required>
+                            <input id="${uploadId}" type="file" name="${esc(uploadName(openTrigger))}" accept="${esc(openTrigger.getAttribute('data-media-upload-accept') || '')}" required>
                         </div>
                         ${allowedTypes !== '' ? `<small class="text-muted d-block mt-2">${esc(allowedTypes)}</small>` : ''}
                     </form>
@@ -87,6 +94,8 @@
     mediaLibrary.template = {
         createModal,
         currentCsrf,
+        uploadAction,
+        uploadName,
     };
 })();
 
@@ -331,10 +340,14 @@
     });
 
     const thumbnailDetail = (trigger, contentId) => ({
-        mode: 'thumbnail',
+        mode: trigger.getAttribute('data-media-library-mode') || 'thumbnail',
         endpoint: trigger.getAttribute('data-media-library-endpoint') || '',
         baseUrl: trigger.getAttribute('data-media-base-url') || '',
         currentMediaId: Number(trigger.getAttribute('data-current-media-id') || '0'),
+        currentMediaPath: trigger.getAttribute('data-current-media-path') || '',
+        targetInput: trigger.getAttribute('data-media-target-input') || '',
+        allowDelete: trigger.getAttribute('data-media-library-allow-delete') !== '0',
+        allowRename: trigger.getAttribute('data-media-library-allow-rename') !== '0',
         contentId,
     });
 

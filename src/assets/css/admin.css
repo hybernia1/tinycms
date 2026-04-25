@@ -413,6 +413,25 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     color: var(--color-text-muted);
 }
 
+.settings-media-trigger {
+    width: auto;
+    min-width: 120px;
+    min-height: 82px;
+}
+
+.settings-media-trigger.empty {
+    min-height: 82px;
+    padding: var(--space-3);
+}
+
+.settings-media-preview img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    display: block;
+    border: 1px solid var(--color-border-soft);
+}
+
 .admin-content .table th,
 .admin-content .table td {
     border-bottom: 0;
@@ -667,20 +686,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     height: 1px;
     opacity: 0;
     pointer-events: none;
-}
-
-.settings-file-preview {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-top: var(--space-2);
-}
-
-.settings-file-preview img {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    border: 1px solid var(--color-border-soft);
 }
 
 .media-library-search .search-field {

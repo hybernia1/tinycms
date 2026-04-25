@@ -21,7 +21,6 @@ $activeFields = (array)($sections[$activeSection] ?? []);
 <form
     id="settings-form"
     method="post"
-    enctype="multipart/form-data"
     action="<?= esc_url($url('admin/api/v1/settings')) ?>"
     data-api-submit
 >
@@ -89,22 +88,33 @@ $activeFields = (array)($sections[$activeSection] ?? []);
                         <div class="tag-picker-suggestions" data-picker-suggestions></div>
                     </div>
                 <?php elseif ($fieldType === 'file'): ?>
-                    <?php $inputName = $fieldKey === 'logo' ? 'logo_file' : 'favicon_file'; ?>
-                    <?php $fileInputId = 'settings-file-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>
-                    <div class="custom-upload-field">
-                        <label class="btn btn-light custom-upload-button" for="<?= esc_attr($fileInputId) ?>">
-                            <?= icon('upload') ?>
-                            <span class="custom-upload-label" data-custom-upload-label data-default-label="<?= esc_attr(t('common.upload_add_files')) ?>"><?= esc_html(t('common.upload_add_files')) ?></span>
-                        </label>
-                        <input id="<?= esc_attr($fileInputId) ?>" type="file" name="<?= esc_attr($inputName) ?>" accept="<?= esc_attr((string)($siteImageUploadAccept ?? '')) ?>">
-                    </div>
-                    <small class="text-muted d-block mt-2"><?= esc_html(sprintf(t('common.allowed_upload_types'), (string)($siteImageUploadTypesLabel ?? ''))) ?></small>
-                    <?php if ($fieldValue !== ''): ?>
-                        <div class="settings-file-preview">
-                            <div class="text-muted"><?= esc_html($fieldValue) ?></div>
-                            <img src="<?= esc_url($url($fieldValue)) ?>" alt="<?= esc_attr((string)$fieldKey) ?> preview">
-                        </div>
-                    <?php endif; ?>
+                    <?php $inputId = 'settings-media-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>
+                    <input id="<?= esc_attr($inputId) ?>" type="hidden" name="settings[<?= esc_attr((string)$fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>">
+                    <button
+                        class="content-thumbnail-trigger settings-media-trigger<?= $fieldValue === '' ? ' empty' : '' ?>"
+                        type="button"
+                        data-media-library-open
+                        data-media-library-mode="settings"
+                        data-media-library-endpoint="<?= esc_attr($url('admin/api/v1/media')) ?>"
+                        data-media-base-url="<?= esc_attr($url('')) ?>"
+                        data-media-target-input="#<?= esc_attr($inputId) ?>"
+                        data-current-media-path="<?= esc_attr($fieldValue) ?>"
+                        data-media-library-per-page="<?= defined('APP_POSTS_PER_PAGE') ? (int)APP_POSTS_PER_PAGE : 10 ?>"
+                        data-media-upload-endpoint="<?= esc_attr($url('admin/api/v1/media/add')) ?>"
+                        data-media-upload-name="file"
+                        data-media-upload-accept="<?= esc_attr((string)($imageUploadAccept ?? '')) ?>"
+                        data-media-upload-types-label="<?= esc_attr((string)($imageUploadTypesLabel ?? '')) ?>"
+                        data-media-library-allow-delete="0"
+                        data-media-library-allow-rename="0"
+                    >
+                        <?php if ($fieldValue !== ''): ?>
+                            <div class="settings-media-preview">
+                                <img src="<?= esc_url($url($fieldValue)) ?>" alt="<?= esc_attr((string)$fieldKey) ?> preview">
+                            </div>
+                        <?php else: ?>
+                            <span><?= esc_html(t('content.choose_image')) ?></span>
+                        <?php endif; ?>
+                    </button>
                 <?php elseif ($fieldType === 'number'): ?>
                     <?php $min = (int)($field['min'] ?? 1); ?>
                     <?php $max = (int)($field['max'] ?? 100); ?>

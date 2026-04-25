@@ -84,6 +84,17 @@ final class Media
         return $rows[0] ?? null;
     }
 
+    public function findByPath(string $path): ?array
+    {
+        $normalized = trim($path);
+        if ($normalized === '') {
+            return null;
+        }
+
+        $rows = $this->query->select('media', ['id', 'author', 'name', 'path', 'created', 'updated'], ['path' => $normalized]);
+        return $rows[0] ?? null;
+    }
+
     public function delete(int $id): bool
     {
         return $this->query->delete('media', ['id' => $id]) > 0;

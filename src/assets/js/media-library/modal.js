@@ -13,15 +13,16 @@ const template = mediaLibrary.template || {};
 const transport = mediaLibrary.transport || {};
 const renderer = mediaLibrary.renderer || {};
 const helpers = mediaLibrary.helpers || {};
-const openTrigger = Array.prototype.find.call(
+const firstTrigger = Array.prototype.find.call(
     document.querySelectorAll('[data-media-library-open]'),
     (node) => node.getAttribute('data-media-library-mode') !== 'editor',
 ) || null;
+let openTrigger = firstTrigger;
 const requestJson = app.api?.http?.requestJson;
 const postForm = app.api?.http?.postForm;
 
 if (!modal) {
-    modal = template.createModal?.(openTrigger) || null;
+    modal = template.createModal?.(firstTrigger) || null;
 }
 
 if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm === 'function') {
@@ -48,6 +49,10 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     let mode = 'thumbnail';
     let editorId = '';
     let contentId = 0;
+    let currentMediaPath = '';
+    let targetInput = '';
+    let allowDelete = true;
+    let allowRename = true;
     let page = 1;
     let totalPages = 1;
     let query = '';
@@ -65,7 +70,9 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         }
 
         contentId = numericId;
-        endpoint = transport.syncContentContext(openTrigger, uploadForm, endpoint, numericId);
+        if (openTrigger) {
+            endpoint = transport.syncContentContext(openTrigger, uploadForm, endpoint, numericId);
+        }
     };
 
     const setStatus = (message) => {
@@ -96,6 +103,44 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         currentMediaId = Number(media.id || 0);
     };
 
+    const setSettingValue = (media) => {
+        if (!openTrigger || !media) {
+            return;
+        }
+
+        const path = String(media.path || '');
+        const imagePath = absoluteUrl(media.previewPath || path);
+        const input = targetInput !== '' ? document.querySelector(targetInput) : null;
+        if (input) {
+            input.value = path;
+        }
+        openTrigger.classList.toggle('empty', imagePath === '');
+        openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
+        openTrigger.setAttribute('data-current-media-path', path);
+        if (imagePath !== '') {
+            openTrigger.innerHTML = '<div class="settings-media-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
+        }
+        currentMediaId = Number(media.id || 0);
+        currentMediaPath = path;
+    };
+
+    const detachSetting = () => {
+        if (!openTrigger) {
+            return;
+        }
+
+        const input = targetInput !== '' ? document.querySelector(targetInput) : null;
+        if (input) {
+            input.value = '';
+        }
+        currentMediaId = 0;
+        currentMediaPath = '';
+        openTrigger.classList.add('empty');
+        openTrigger.setAttribute('data-current-media-id', '0');
+        openTrigger.setAttribute('data-current-media-path', '');
+        openTrigger.innerHTML = `<span>${t('content.choose_image')}</span>`;
+    };
+
     const absoluteUrl = (path) => helpers.absoluteUrl?.(path, baseUrl) || '';
 
     const selectCard = (target) => {
@@ -109,6 +154,8 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         }
 
         selectedMedia = helpers.mediaFromCard(target, t('media.untitled'));
+        selectedMedia.canDelete = selectedMedia.canDelete && allowDelete;
+        selectedMedia.canEdit = selectedMedia.canEdit && allowRename;
 
         grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
         target.classList.add('selected');
@@ -126,6 +173,9 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     };
 
     const detachCurrent = async () => {
+        if (!openTrigger) {
+            return false;
+        }
         const action = transport.mediaAction(openTrigger, contentId, 'detach');
         if (action === '') {
             return false;
@@ -162,6 +212,9 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         if (currentMediaId > 0) {
             url.searchParams.set('current_media_id', String(currentMediaId));
         }
+        if (currentMediaPath !== '') {
+            url.searchParams.set('current_media_path', currentMediaPath);
+        }
 
         try {
             const { response, data: normalized, raw } = await requestJson(url.toString(), {
@@ -182,6 +235,13 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
                     selectCard(currentCard);
                 }
             }
+            if (!selectedMedia && currentMediaPath !== '' && grid) {
+                const currentCard = Array.from(grid.querySelectorAll('[data-media-library-select]'))
+                    .find((card) => card.dataset.mediaPath === currentMediaPath);
+                if (currentCard) {
+                    selectCard(currentCard);
+                }
+            }
             renderer.updatePager(prevButton, nextButton, page, totalPages);
         } finally {
             if (grid && loader) {
@@ -197,6 +257,17 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         editorId = String(detail.editorId || '');
         contentId = Number(detail.contentId || 0);
         currentMediaId = Number(detail.currentMediaId || 0);
+        currentMediaPath = String(detail.currentMediaPath || '');
+        targetInput = String(detail.targetInput || '');
+        allowDelete = detail.allowDelete !== false;
+        allowRename = detail.allowRename !== false;
+        if (uploadForm && openTrigger) {
+            uploadForm.action = template.uploadAction?.(openTrigger) || uploadForm.action;
+        }
+        if (uploadInput && openTrigger) {
+            uploadInput.name = template.uploadName?.(openTrigger) || uploadInput.name;
+            uploadInput.accept = openTrigger.getAttribute('data-media-upload-accept') || '';
+        }
         syncContentContext(contentId);
     };
 
@@ -231,21 +302,27 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         modalUi.close(modal);
     };
 
-    if (openTrigger) {
-        openTrigger.addEventListener('click', async () => {
+    document.querySelectorAll('[data-media-library-open]').forEach((trigger) => {
+        if (trigger.getAttribute('data-media-library-mode') === 'editor') {
+            return;
+        }
+
+        trigger.addEventListener('click', async () => {
+            openTrigger = trigger;
             const contentInput = document.querySelector('[data-content-id-hidden]');
             let resolvedId = Number(contentInput ? contentInput.value : '0');
-            if (resolvedId <= 0) {
+            const triggerMode = trigger.getAttribute('data-media-library-mode') || 'thumbnail';
+            if (resolvedId <= 0 && triggerMode !== 'settings') {
                 resolvedId = await waitForDraftId();
             }
             syncContentContext(resolvedId);
-            open(helpers.thumbnailDetail(openTrigger, resolvedId));
+            open(helpers.thumbnailDetail(trigger, resolvedId));
         });
-    }
+    });
 
     document.addEventListener('tinycms:media-library-open', async (event) => {
         const detail = event.detail || {};
-        if (Number(detail.contentId || 0) <= 0) {
+        if (Number(detail.contentId || 0) <= 0 && String(detail.mode || '') !== 'settings') {
             const resolvedId = await waitForDraftId();
             detail.contentId = resolvedId;
             detail.endpoint = transport.endpointWithContentId(detail.endpoint || '', resolvedId);
@@ -307,6 +384,10 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             const isSameSelection = !!(selectedMedia && selectedMedia.id === mediaId);
             if (isSameSelection) {
                 clearSelected();
+                if (mode === 'settings') {
+                    detachSetting();
+                    setStatus(t('media.detached'));
+                }
                 if (mode === 'thumbnail' && mediaId > 0 && mediaId === currentMediaId) {
                     await detachCurrent();
                 }
@@ -323,13 +404,19 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
                 return;
             }
 
+            if (mode === 'settings') {
+                setSettingValue(selectedMedia);
+                close();
+                return;
+            }
+
             if (mode === 'editor') {
                 const imageUrl = absoluteUrl(selectedMedia.webpPath || selectedMedia.previewPath || '');
                 if (imageUrl === '') {
                     setStatus(t('media.invalid_url'));
                     return;
                 }
-                const attachAction = transport.mediaAction(openTrigger, contentId, 'attach', selectedMedia.id);
+                const attachAction = openTrigger ? transport.mediaAction(openTrigger, contentId, 'attach', selectedMedia.id) : '';
                 if (attachAction !== '' && contentId > 0) {
                     await postForm(attachAction, transport.csrfData({
                         content_id: contentId,
@@ -349,6 +436,9 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
                 return;
             }
 
+            if (!openTrigger) {
+                return;
+            }
             const selectAction = transport.mediaAction(openTrigger, contentId, 'select', selectedMedia.id);
             const { response, data } = await postForm(selectAction, transport.csrfData({
                 id: contentId,
@@ -377,7 +467,10 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
                 return;
             }
 
-            const renameAction = transport.mediaAction(openTrigger, contentId, 'rename', selectedMedia.id);
+            const renameAction = openTrigger ? transport.mediaAction(openTrigger, contentId, 'rename', selectedMedia.id) : '';
+            if (renameAction === '') {
+                return;
+            }
             const { response, data } = await postForm(renameAction, transport.csrfData({
                 content_id: contentId,
                 media_id: selectedMedia.id,
@@ -408,7 +501,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
 
             setStatus('');
 
-            if (contentId <= 0) {
+            if (contentId <= 0 && mode !== 'settings') {
                 contentId = await waitForDraftId();
                 if (contentId <= 0) {
                     setStatus(t('content.draft_required'));
@@ -464,7 +557,10 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
                 return;
             }
 
-            const deleteAction = transport.mediaAction(openTrigger, contentId, 'delete', selectedMedia.id);
+            const deleteAction = openTrigger ? transport.mediaAction(openTrigger, contentId, 'delete', selectedMedia.id) : '';
+            if (deleteAction === '') {
+                return;
+            }
             const { response, data } = await postForm(deleteAction, transport.csrfData({
                 content_id: contentId,
                 media_id: selectedMedia.id,
