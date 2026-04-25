@@ -53,7 +53,24 @@
         }
     }
 
-    function shouldHandleLink(link) {
+    function deferPageStart(event, shouldStart) {
+        var run = function () {
+            if (event.defaultPrevented || !shouldStart()) {
+                return;
+            }
+            startPage();
+        };
+        if (typeof window.queueMicrotask === 'function') {
+            window.queueMicrotask(run);
+            return;
+        }
+        Promise.resolve().then(run);
+    }
+
+    function shouldHandleLink(event, link) {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return false;
+        }
         if (!link || link.target === '_blank' || link.hasAttribute('download') || link.hasAttribute('data-no-loader')) {
             return false;
         }
@@ -81,10 +98,12 @@
             return;
         }
         var link = event.target.closest('a[href]');
-        if (!shouldHandleLink(link)) {
+        if (!shouldHandleLink(event, link)) {
             return;
         }
-        startPage();
+        deferPageStart(event, function () {
+            return shouldHandleLink(event, link);
+        });
     });
 
     document.addEventListener('submit', function (event) {
@@ -92,10 +111,12 @@
             return;
         }
         var form = event.target;
-        if (!form || form.hasAttribute('data-no-loader')) {
+        if (!form || form.hasAttribute('data-no-loader') || form.hasAttribute('data-api-submit')) {
             return;
         }
-        startPage();
+        deferPageStart(event, function () {
+            return !form.hasAttribute('data-no-loader') && !form.hasAttribute('data-api-submit');
+        });
     });
 
     app.loader = {
