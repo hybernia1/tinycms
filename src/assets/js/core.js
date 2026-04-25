@@ -10,7 +10,36 @@
 
     const currentCsrf = () => document.querySelector('input[name="_csrf"]')?.value || '';
 
-    app.support = { esc, currentCsrf };
+    const scriptBaseUrl = (script) => String(script?.src || '').replace(/[^/]+(?:\?.*)?$/, '');
+
+    const scriptLoaded = (attr, src) => Array.prototype.some.call(
+        document.scripts,
+        (script) => script.getAttribute(attr) === src,
+    );
+
+    const loadScript = (src, attr) => new Promise((resolve, reject) => {
+        if (scriptLoaded(attr, src)) {
+            resolve();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = src;
+        script.defer = true;
+        script.setAttribute(attr, src);
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+
+    const loadScripts = (currentScript, modules, attr) => {
+        const root = scriptBaseUrl(currentScript);
+        return modules.reduce((chain, module) => (
+            chain.then(() => loadScript(root + module, attr))
+        ), Promise.resolve());
+    };
+
+    app.support = { esc, currentCsrf, loadScripts };
 })();
 
 (() => {

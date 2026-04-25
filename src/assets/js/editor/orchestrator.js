@@ -2,6 +2,7 @@
     var app = window.tinycms = window.tinycms || {};
     var editor = app.editor = app.editor || {};
     var currentScript = document.currentScript;
+    var loadScripts = app.support && app.support.loadScripts;
     var modules = [
         'sanitize.js',
         'selection.js',
@@ -13,47 +14,16 @@
         'runtime.js',
     ];
 
-    function baseUrl() {
-        var source = currentScript ? String(currentScript.src || '') : '';
-        return source.replace(/orchestrator\.js(?:\?.*)?$/, '');
-    }
-
-    function loadScript(src) {
-        return new Promise(function (resolve, reject) {
-            var existing = document.querySelector('script[data-editor-module="' + src + '"]');
-            if (existing) {
-                resolve();
-                return;
-            }
-            var script = document.createElement('script');
-            script.src = src;
-            script.defer = true;
-            script.setAttribute('data-editor-module', src);
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    }
-
     function boot() {
         if (typeof editor.initAll === 'function') {
             editor.initAll(document);
         }
     }
 
-    function loadModules() {
-        var root = baseUrl();
-        return modules.reduce(function (chain, module) {
-            return chain.then(function () {
-                return loadScript(root + module);
-            });
-        }, Promise.resolve());
-    }
-
-    if (editor.loading) {
+    if (editor.loading || typeof loadScripts !== 'function') {
         return;
     }
-    editor.loading = loadModules().then(boot).catch(function (error) {
+    editor.loading = loadScripts(currentScript, modules, 'data-editor-module').then(boot).catch(function (error) {
         window.setTimeout(function () {
             throw error;
         }, 0);

@@ -11,10 +11,7 @@ $scriptGroups = [
     ['core.js'],
     ['ui.js', 'loader.js', 'api.js'],
     ['admin-menu.js', 'custom-select.js', 'custom-datetime.js', 'password-toggle.js', 'custom-upload.js'],
-    [
-        'media-library/core.js',
-        'media-library/modal.js',
-    ],
+    ['media-library/orchestrator.js'],
     ['picker.js', 'menu-builder.js', 'content-autosave.js', 'action-menu.js'],
     ['editor/orchestrator.js'],
     ['session.js'],
