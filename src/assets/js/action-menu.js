@@ -1,4 +1,7 @@
 (() => {
+    const app = window.tinycms = window.tinycms || {};
+    const t = app.i18n?.t || ((key, fallback) => fallback || '');
+
     const bindFormSubmitButtons = () => {
         document.querySelectorAll('[data-save-action-form-submit]').forEach((button) => {
             const formSelector = String(button.getAttribute('data-save-action-form-submit') || '').trim();
@@ -113,9 +116,8 @@
         const checks = menu.querySelectorAll('[data-content-action-check]');
 
         const resolveStatusLabel = (value) => {
-            const statuses = window.tinycmsI18n?.content?.statuses || {};
             const key = String(value || 'draft');
-            return statuses[key] || key;
+            return t('content.statuses.' + key, key) || key;
         };
 
         const syncState = (value) => {

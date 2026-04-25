@@ -439,6 +439,7 @@ return [
         'list_numbered' => 'Číslování',
         'alignment' => 'Zarovnání',
         'insert_link' => 'Vložit odkaz',
+        'edit_link' => 'Upravit odkaz',
         'link_title' => 'Titulek odkazu',
         'link_text' => 'Text odkazu',
         'open_new_window' => 'Otevřít v novém okně',

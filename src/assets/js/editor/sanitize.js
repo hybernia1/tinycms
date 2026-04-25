@@ -1,4 +1,7 @@
 (() => {
+const app = window.tinycms = window.tinycms || {};
+const editor = app.editor = app.editor || {};
+
 const normalizeHtml = (html) => html === '<br>' ? '' : html;
 
 const unwrapNode = (node) => {
@@ -301,11 +304,7 @@ const extractYoutubeVideoId = (value) => {
     return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
 };
 
-const escapeHtml = (value) => String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+const escapeHtml = app.support?.esc || ((value) => String(value || ''));
 
 const extractPastedUrl = (value) => {
     const raw = String(value || '').trim();
@@ -338,9 +337,7 @@ const findPastedImageFile = (event) => {
     return null;
 };
 
-window.tinycms = window.tinycms || {};
-window.tinycms.editor = window.tinycms.editor || {};
-window.tinycms.editor.sanitize = {
+editor.sanitize = {
     cleanSerializedHtml,
     escapeHtml,
     extractPastedUrl,

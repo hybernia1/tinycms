@@ -1,5 +1,7 @@
 (() => {
-const t = window.tinycms?.i18n?.t || (() => '');
+const app = window.tinycms = window.tinycms || {};
+const t = app.i18n?.t || (() => '');
+const iconHref = app.icons?.href || (() => '');
 
 document.addEventListener('click', (event) => {
     const button = event.target.closest('[data-password-toggle]');
@@ -17,11 +19,11 @@ document.addEventListener('click', (event) => {
 
     const show = input.getAttribute('type') === 'password';
     input.setAttribute('type', show ? 'text' : 'password');
-    const iconHref = icon.getAttribute('href') || icon.getAttribute('xlink:href') || '';
-    const iconBase = iconHref.includes('#') ? iconHref.split('#')[0] : '';
-    const nextIcon = `${iconBase}#icon-${show ? 'hide' : 'show'}`;
-    icon.setAttribute('href', nextIcon);
-    icon.setAttribute('xlink:href', nextIcon);
+    const nextIcon = iconHref(show ? 'hide' : 'show') || '';
+    if (nextIcon !== '') {
+        icon.setAttribute('href', nextIcon);
+        icon.setAttribute('xlink:href', nextIcon);
+    }
 
     const label = show ? t('auth.hide_password') : t('auth.show_password');
     button.setAttribute('aria-label', label);

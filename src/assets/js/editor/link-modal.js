@@ -1,5 +1,7 @@
 (() => {
-const t = window.tinycms?.i18n?.t || (() => '');
+const app = window.tinycms = window.tinycms || {};
+const editor = app.editor = app.editor || {};
+const t = app.i18n?.t || (() => '');
 
 const create = () => {
     const modal = document.createElement('div');
@@ -78,7 +80,5 @@ const create = () => {
     return modal;
 };
 
-window.tinycms = window.tinycms || {};
-window.tinycms.editor = window.tinycms.editor || {};
-window.tinycms.editor.linkModal = { create };
+editor.linkModal = { create };
 })();

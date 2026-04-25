@@ -1,11 +1,14 @@
 (() => {
+    const app = window.tinycms = window.tinycms || {};
+    const ui = app.ui = app.ui || {};
     const root = document.body;
     if (!root) {
         return;
     }
 
     let opened = null;
-    const arrowIconHref = window.tinycms?.icons?.href?.('chevron-down') || '';
+    let initialized = false;
+    const icon = app.icons?.icon || (() => '');
     const searchMinOptions = 8;
     const typeAheadResetMs = 650;
     const normalize = (value) => String(value || '')
@@ -115,7 +118,7 @@
         closeOpened();
     };
     const searchPlaceholder = () => {
-        const t = window.tinycms?.i18n?.t;
+        const t = app.i18n?.t;
         if (typeof t === 'function') {
             const translated = t('common.search_placeholder');
             if (translated) {
@@ -151,7 +154,7 @@
 
         const buttonIcon = document.createElement('span');
         buttonIcon.className = 'field-overlay field-overlay-end field-icon';
-        buttonIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${arrowIconHref}"></use></svg>`;
+        buttonIcon.innerHTML = icon('chevron-down');
 
         button.appendChild(buttonLabel);
         button.appendChild(buttonIcon);
@@ -343,26 +346,32 @@
         });
     };
 
-    enhance(document);
-
-    window.tinycms = window.tinycms || {};
-    window.tinycms.ui = window.tinycms.ui || {};
-    window.tinycms.ui.customSelect = {
-        init: enhance,
-    };
-
-    document.addEventListener('click', (event) => {
+    const handleDocumentClick = (event) => {
         if (!(event.target instanceof Element)) {
             return;
         }
         if (!event.target.closest('.custom-select')) {
             closeOpened();
         }
-    });
+    };
 
-    document.addEventListener('keydown', (event) => {
+    const handleDocumentKeydown = (event) => {
         if (event.key === 'Escape') {
             closeOpened();
         }
-    });
+    };
+
+    const init = (scope = document) => {
+        enhance(scope);
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+        document.addEventListener('click', handleDocumentClick);
+        document.addEventListener('keydown', handleDocumentKeydown);
+    };
+
+    ui.customSelect = { init };
+
+    init();
 })();

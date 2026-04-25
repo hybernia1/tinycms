@@ -7,6 +7,26 @@ if (!defined('BASE_DIR')) {
 $currentPath = trim((string)($currentRoute ?? ''), '/');
 $authUser = $_SESSION['auth'] ?? null;
 $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
+$scriptGroups = [
+    ['core.js'],
+    ['ui.js', 'loader.js', 'api.js'],
+    ['admin-menu.js', 'custom-select.js', 'custom-datetime.js', 'password-toggle.js', 'custom-upload.js'],
+    [
+        'media-library/core.js',
+        'media-library/modal.js',
+    ],
+    ['picker.js', 'menu-builder.js', 'content-autosave.js', 'action-menu.js'],
+    [
+        'editor/sanitize.js',
+        'editor/selection.js',
+        'editor/toolbar.js',
+        'editor/blocks.js',
+        'editor/link-modal.js',
+        'editor/main.js',
+    ],
+    ['session.js'],
+];
+$scripts = array_merge(...$scriptGroups);
 ?>
 <!doctype html>
 <html lang="<?= esc_attr((string)$lang) ?>">
@@ -23,34 +43,9 @@ $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
     <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/editor.css')) ?>">
     <script>window.tinycmsI18n = <?= esc_json($adminI18n ?? []) ?>;</script>
     <script>window.tinycmsIconSprite = <?= esc_json(icon_sprite()) ?>;</script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/icons.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/flash.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/loader.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/admin-menu.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/custom-select.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/custom-datetime.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/custom-upload.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/template.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/transport.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/renderer.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/helpers.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/media-library/modal.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/picker.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/menu-builder.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/content-autosave.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/action-menu.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/sanitize.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/selection.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/toolbar.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/blocks.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/link-modal.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/editor/main.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/session/template.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/heartbeat.js')) ?>"></script>
+    <?php foreach ($scripts as $script): ?>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/' . $script)) ?>"></script>
+    <?php endforeach; ?>
 </head>
 <body data-heartbeat-endpoint="<?= esc_attr($url('admin/api/v1/heartbeat')) ?>" data-heartbeat-login-endpoint="<?= esc_attr($url('admin/api/v1/auth/login')) ?>">
 <script>

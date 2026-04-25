@@ -1,13 +1,10 @@
 (() => {
-    const t = window.tinycms?.i18n?.t || (() => '');
+    const app = window.tinycms = window.tinycms || {};
+    const ui = app.ui = app.ui || {};
+    const t = app.i18n?.t || (() => '');
 
     const root = document.body;
     if (!root) {
-        return;
-    }
-
-    const inputs = Array.from(document.querySelectorAll('.admin-content input[type="datetime-local"]'));
-    if (!inputs.length) {
         return;
     }
 
@@ -21,10 +18,9 @@
         monthFormatter.format(new Date(Date.UTC(2021, index, 1)))
     ));
 
-    root.classList.add('has-custom-datetime');
-
     let opened = null;
-    const iconHref = (name) => window.tinycms?.icons?.href?.(name) || '';
+    let initialized = false;
+    const iconSvg = app.icons?.icon || (() => '');
 
     const parseValue = (value) => {
         if (!value || !value.includes('T')) {
@@ -92,13 +88,21 @@
         button.className = 'btn btn-light btn-icon';
         button.setAttribute('aria-label', label);
         button.setAttribute('title', label);
-        button.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${iconHref(icon)}"></use></svg>`;
+        button.innerHTML = iconSvg(icon);
         return button;
     };
 
     const monthStart = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
 
-    inputs.forEach((hiddenInput) => {
+    const enhance = (scope = document) => {
+        const inputs = Array.from(scope.querySelectorAll('.admin-content input[type="datetime-local"]:not(.custom-datetime-native)'));
+        if (!inputs.length) {
+            return;
+        }
+
+        root.classList.add('has-custom-datetime');
+
+        inputs.forEach((hiddenInput) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-datetime';
 
@@ -114,7 +118,7 @@
 
         const triggerIcon = document.createElement('span');
         triggerIcon.className = 'field-overlay field-overlay-end field-icon';
-        triggerIcon.innerHTML = `<svg class="icon" aria-hidden="true" focusable="false"><use href="${iconHref('calendar')}"></use></svg>`;
+        triggerIcon.innerHTML = iconSvg('calendar');
 
         trigger.appendChild(triggerLabel);
         trigger.appendChild(triggerIcon);
@@ -330,20 +334,35 @@
         wrapper.appendChild(panel);
         hiddenInput.insertAdjacentElement('afterend', wrapper);
         hiddenInput.classList.add('custom-datetime-native');
-    });
+        });
+    };
 
-    document.addEventListener('click', (event) => {
+    const handleDocumentClick = (event) => {
         if (!(event.target instanceof Element)) {
             return;
         }
         if (!event.target.closest('.custom-datetime')) {
             closeOpened();
         }
-    });
+    };
 
-    document.addEventListener('keydown', (event) => {
+    const handleDocumentKeydown = (event) => {
         if (event.key === 'Escape') {
             closeOpened();
         }
-    });
+    };
+
+    const init = (scope = document) => {
+        enhance(scope);
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+        document.addEventListener('click', handleDocumentClick);
+        document.addEventListener('keydown', handleDocumentKeydown);
+    };
+
+    ui.customDateTime = { init };
+
+    init();
 })();

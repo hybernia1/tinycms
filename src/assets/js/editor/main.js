@@ -1,12 +1,13 @@
 (function () {
-    var t = window.tinycms?.i18n?.t || function () { return ""; };
-    var modalUi = window.tinycms?.ui?.modal || {
+    var app = window.tinycms = window.tinycms || {};
+    var t = app.i18n?.t || function () { return ""; };
+    var modalUi = app.ui?.modal || {
         open: function (modal) { if (modal) { modal.classList.add('open'); } },
         close: function (modal) { if (modal) { modal.classList.remove('open'); } }
     };
-    var requestJson = window.tinycms?.api?.http?.requestJson;
-    var postForm = window.tinycms?.api?.http?.postForm;
-    var editorModules = window.tinycms?.editor || {};
+    var requestJson = app.api?.http?.requestJson;
+    var postForm = app.api?.http?.postForm;
+    var editorModules = app.editor || {};
     var sanitize = editorModules.sanitize || {};
     var blocks = editorModules.blocks || {};
     var selection = editorModules.selection || {};
@@ -64,7 +65,7 @@
         var bold = createIconButton('w-bold', 'bold', ''+ t('editor.bold') + '');
         var italic = createIconButton('w-italic', 'italic', ''+ t('editor.italic') + '');
         var quote = createIconButton('w-quote', 'formatBlock:blockquote', t('editor.quote'));
-        var link = createIconButton('w-link', 'toggleLinkPanel', 'Odkaz');
+        var link = createIconButton('w-link', 'toggleLinkPanel', t('editor.insert_link'));
         var listGroup = createListGroup();
         var html = createIconButton('w-html', 'toggleHtml', 'HTML');
         var media = createIconButton('w-image', 'openMediaLibrary', ''+ t('editor.insert_image') + '');
@@ -72,11 +73,11 @@
         var alignGroup = createAlignGroup();
         var focus = createIconButton('w-focus', 'toggleFocusMode', ''+ t('editor.focus_mode') + '');
         focus.classList.add('wysiwyg-btn-focus');
-        var linkModal = window.tinycms.editor.linkModal.create();
+        var linkModal = editorModules.linkModal.create();
         var linkTools = document.createElement('div');
         linkTools.className = 'wysiwyg-link-tools';
         linkTools.setAttribute('contenteditable', 'false');
-        linkTools.appendChild(createLinkToolButton('w-link-edit', 'link-inline-edit', 'Upravit odkaz'));
+        linkTools.appendChild(createLinkToolButton('w-link-edit', 'link-inline-edit', t('editor.edit_link')));
         linkTools.appendChild(createLinkToolButton('w-link-unlink', 'link-inline-remove', t('editor.unlink')));
 
         toolbar.appendChild(headingGroup);
@@ -111,6 +112,145 @@
             toggleAlignMenu: 'is-align-open'
         };
 
+        function editorForm() {
+            return textarea.closest('form');
+        }
+
+        function csrfValue() {
+            var input = editorForm()?.querySelector('input[name="_csrf"]');
+            return input ? input.value || '' : '';
+        }
+
+        function linkModalNodes() {
+            return {
+                input: linkModal.querySelector('[data-role="link-input"]'),
+                textInput: linkModal.querySelector('[data-role="link-text-input"]'),
+                targetBlank: linkModal.querySelector('[data-role="link-target-blank"]'),
+                noFollow: linkModal.querySelector('[data-role="link-nofollow"]'),
+                apply: linkModal.querySelector('[data-role="link-apply"]')
+            };
+        }
+
+        function unwrapLink(linkNode) {
+            if (!linkNode || !linkNode.parentNode) {
+                return;
+            }
+            var parent = linkNode.parentNode;
+            while (linkNode.firstChild) {
+                parent.insertBefore(linkNode.firstChild, linkNode);
+            }
+            parent.removeChild(linkNode);
+        }
+
+        function imageHtml(url, name, mediaId) {
+            return '<img src="' + escapeHtml(url) + '" alt="' + escapeHtml(String(name || '')) + '" data-media-id="' + Number(mediaId || 0) + '">';
+        }
+
+        function imageBlockHtml(url, name, mediaId) {
+            return '<div class="block block-image align-center">' + imageHtml(url, name, mediaId) + '</div><p><br></p>';
+        }
+
+        function applyLinkOptions(linkNode, targetBlank, noFollow) {
+            if (targetBlank) {
+                linkNode.setAttribute('target', '_blank');
+            } else {
+                linkNode.removeAttribute('target');
+            }
+
+            var relTokens = [];
+            if (targetBlank) {
+                relTokens.push('noopener');
+                relTokens.push('noreferrer');
+            }
+            if (noFollow) {
+                relTokens.push('nofollow');
+            }
+            if (relTokens.length) {
+                linkNode.setAttribute('rel', relTokens.join(' '));
+                return;
+            }
+            linkNode.removeAttribute('rel');
+        }
+
+        function pasteLinkHtml(url, id) {
+            return '<a href="' + escapeHtml(url) + '" data-paste-link-id="' + escapeHtml(id) + '">' + escapeHtml(url) + '</a>';
+        }
+
+        function refreshPastedLinkTitle(linkId, url) {
+            var endpoint = (textarea.dataset.linkTitleEndpoint || '').trim();
+            if (!endpoint || typeof requestJson !== 'function') {
+                return;
+            }
+            requestJson(endpoint + '?url=' + encodeURIComponent(url), {
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(function (result) {
+                if (!result || !result.response || !result.response.ok) {
+                    return null;
+                }
+                return result.data;
+            }).then(function (payload) {
+                var title = payload && payload.success && payload.data ? String(payload.data.title || '').trim() : '';
+                if (!title) {
+                    return;
+                }
+                var linkNode = editor.querySelector('a[data-paste-link-id="' + linkId + '"]');
+                if (!linkNode) {
+                    return;
+                }
+                linkNode.textContent = title;
+                linkNode.removeAttribute('data-paste-link-id');
+                sync(textarea, editor);
+            }).catch(function () {});
+        }
+
+        function insertPastedLink(url) {
+            ensureSelectionInsideEditor();
+            linkPasteSeq += 1;
+            var linkId = 'paste-link-' + editorId + '-' + linkPasteSeq;
+            document.execCommand('insertHTML', false, pasteLinkHtml(url, linkId));
+            persistEditorState(true);
+            refreshPastedLinkTitle(linkId, url);
+        }
+
+        function youtubeEmbedHtml(videoId, insertId) {
+            return '<div class="block block-embed block-embed-youtube align-center" data-embed-insert-id="' + escapeHtml(insertId) + '"><div class="embed-frame"><iframe src="https://www.youtube.com/embed/' + escapeHtml(videoId) + '" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe></div></div><p><br></p>';
+        }
+
+        function insertYoutubeEmbed(videoId) {
+            ensureSelectionInsideEditor();
+            var embedInsertId = 'embed-insert-' + editorId + '-' + Date.now();
+            document.execCommand('insertHTML', false, youtubeEmbedHtml(videoId, embedInsertId));
+            var insertedEmbed = editor.querySelector('[data-embed-insert-id="' + embedInsertId + '"]');
+            if (insertedEmbed) {
+                insertedEmbed.removeAttribute('data-embed-insert-id');
+                placeCaretAfterBlock(insertedEmbed);
+            }
+            persistEditorState(true);
+        }
+
+        function insertLoadingImageBlock() {
+            var imageRange = isSelectionInside(editor) ? rememberSelection() : null;
+            if (!imageRange) {
+                focusEditorEnd(editor);
+                imageRange = rememberSelection();
+            }
+            var loadingBlock = createLoadingImageBlock();
+            if (!imageRange) {
+                editor.appendChild(loadingBlock);
+                return loadingBlock;
+            }
+            restoreSelection(imageRange, editor);
+            imageRange.deleteContents();
+            imageRange.insertNode(loadingBlock);
+            imageRange.setStartAfter(loadingBlock);
+            imageRange.collapse(true);
+            restoreSelection(imageRange, editor);
+            return loadingBlock;
+        }
+
         function absoluteMediaUrl(path) {
             var value = String(path || '').trim();
             if (!value) {
@@ -125,7 +265,8 @@
         }
 
         function contentApiBase() {
-            var draftEndpoint = String((textarea.closest('form') || {}).dataset ? textarea.closest('form').dataset.draftInitEndpoint || '' : '').trim();
+            var form = editorForm();
+            var draftEndpoint = String(form && form.dataset ? form.dataset.draftInitEndpoint || '' : '').trim();
             if (!draftEndpoint) {
                 return '';
             }
@@ -156,7 +297,7 @@
             if (value <= 0) {
                 return;
             }
-            var form = textarea.closest('form');
+            var form = editorForm();
             if (form) {
                 form.querySelectorAll('input[name="id"]').forEach(function (node) {
                     node.value = String(value);
@@ -180,10 +321,10 @@
             if (draftInitPromise) {
                 return draftInitPromise;
             }
-            var form = textarea.closest('form');
+            var form = editorForm();
             var endpoint = String(form && form.dataset ? form.dataset.draftInitEndpoint || '' : '').trim();
-            var csrfInput = form ? form.querySelector('input[name="_csrf"]') : null;
-            if (!endpoint || !csrfInput || typeof requestJson !== 'function') {
+            var csrf = csrfValue();
+            if (!endpoint || !csrf || typeof requestJson !== 'function') {
                 return Promise.resolve(0);
             }
 
@@ -194,7 +335,7 @@
                     'Accept': 'application/json',
                     'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
                 },
-                body: '_csrf=' + encodeURIComponent(csrfInput.value || '')
+                body: '_csrf=' + encodeURIComponent(csrf)
             }).then(function (result) {
                 var response = result && result.response ? result.response : null;
                 var normalized = result && result.data ? result.data : null;
@@ -255,13 +396,12 @@
                 if (!endpoint) {
                     return null;
                 }
-                var form = textarea.closest('form');
-                var csrfInput = form ? form.querySelector('input[name="_csrf"]') : null;
-                if (!csrfInput) {
+                var csrf = csrfValue();
+                if (!csrf) {
                     return null;
                 }
                 var data = new FormData();
-                data.append('_csrf', csrfInput.value || '');
+                data.append('_csrf', csrf);
                 data.append('content_id', String(contentId));
                 data.append('thumbnail', file, file.name || 'clipboard-image.png');
                 if (typeof postForm !== 'function') {
@@ -295,7 +435,7 @@
                         return;
                     }
                     loadingBlock.classList.remove('is-loading');
-                    loadingBlock.innerHTML = '<img src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(String(media.name || '')) + '" data-media-id="' + mediaId + '">';
+                    loadingBlock.innerHTML = imageHtml(imageUrl, media.name, mediaId);
                     ensureImageBlock(loadingBlock);
                     if (!loadingBlock.nextElementSibling || loadingBlock.nextElementSibling.tagName !== 'P') {
                         loadingBlock.parentNode.insertBefore(createImageBreakParagraph(), loadingBlock.nextSibling);
@@ -349,29 +489,26 @@
         }
 
         function openLinkModal() {
-            var linkInput = linkModal.querySelector('[data-role="link-input"]');
-            var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
-            var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
-            var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
+            var fields = linkModalNodes();
             var relValues = (activeLink ? (activeLink.getAttribute('rel') || '') : '').split(/\s+/).filter(Boolean);
             var selectedText = linkRange && !linkRange.collapsed ? linkRange.toString().replace(/\s+/g, ' ').trim() : '';
 
             modalUi.open(linkModal);
             wrapper.classList.remove('is-list-open');
 
-            if (linkInput) {
-                linkInput.value = activeLink ? (activeLink.getAttribute('href') || '') : '';
-                linkInput.focus();
-                linkInput.select();
+            if (fields.input) {
+                fields.input.value = activeLink ? (activeLink.getAttribute('href') || '') : '';
+                fields.input.focus();
+                fields.input.select();
             }
-            if (linkTextInput) {
-                linkTextInput.value = activeLink ? (activeLink.textContent || '').trim() : selectedText;
+            if (fields.textInput) {
+                fields.textInput.value = activeLink ? (activeLink.textContent || '').trim() : selectedText;
             }
-            if (linkTargetBlank) {
-                linkTargetBlank.checked = !!(activeLink && activeLink.getAttribute('target') === '_blank');
+            if (fields.targetBlank) {
+                fields.targetBlank.checked = !!(activeLink && activeLink.getAttribute('target') === '_blank');
             }
-            if (linkNoFollow) {
-                linkNoFollow.checked = relValues.indexOf('nofollow') !== -1;
+            if (fields.noFollow) {
+                fields.noFollow.checked = relValues.indexOf('nofollow') !== -1;
             }
             updateLinkApplyState();
         }
@@ -396,34 +533,29 @@
         setFocusMode(document.body.classList.contains('admin-focus-mode'));
 
         function updateLinkApplyState() {
-            var linkInput = linkModal.querySelector('[data-role="link-input"]');
-            var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
-            var applyButton = linkModal.querySelector('[data-role="link-apply"]');
-            if (!applyButton) {
+            var fields = linkModalNodes();
+            if (!fields.apply) {
                 return;
             }
-            var inputUrl = linkInput ? linkInput.value.trim() : '';
+            var inputUrl = fields.input ? fields.input.value.trim() : '';
             var existingUrl = activeLink && editor.contains(activeLink) ? String(activeLink.getAttribute('href') || '').trim() : '';
-            var textValue = linkTextInput ? linkTextInput.value.trim() : '';
-            applyButton.disabled = inputUrl === '' && existingUrl === '' && textValue === '';
+            var textValue = fields.textInput ? fields.textInput.value.trim() : '';
+            fields.apply.disabled = inputUrl === '' && existingUrl === '' && textValue === '';
         }
 
         function resetLinkModalFields() {
-            var linkInput = linkModal.querySelector('[data-role="link-input"]');
-            var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
-            var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
-            var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
-            if (linkInput) {
-                linkInput.value = '';
+            var fields = linkModalNodes();
+            if (fields.input) {
+                fields.input.value = '';
             }
-            if (linkTextInput) {
-                linkTextInput.value = '';
+            if (fields.textInput) {
+                fields.textInput.value = '';
             }
-            if (linkTargetBlank) {
-                linkTargetBlank.checked = false;
+            if (fields.targetBlank) {
+                fields.targetBlank.checked = false;
             }
-            if (linkNoFollow) {
-                linkNoFollow.checked = false;
+            if (fields.noFollow) {
+                fields.noFollow.checked = false;
             }
             updateLinkApplyState();
         }
@@ -527,6 +659,19 @@
             }
         }
 
+        function selectedImageBlock() {
+            return editor.querySelector('.block.block-image.is-selected');
+        }
+
+        function selectedEmbedBlock() {
+            return editor.querySelector('.block.block-embed.is-selected');
+        }
+
+        function syncSelectedToolbars() {
+            placeImageToolbar(selectedImageBlock(), editor);
+            placeEmbedToolbar(selectedEmbedBlock(), editor);
+        }
+
         function imageMediaId(block) {
             var image = block ? block.querySelector('img[data-media-id]') : null;
             return Number(image ? image.getAttribute('data-media-id') || '0' : '0');
@@ -590,6 +735,101 @@
             setWidth(block, '100%');
         }
 
+        function deleteBlock(block, remove) {
+            var caretTarget = remove(block);
+            placeCaret(caretTarget);
+            persistEditorState(false);
+        }
+
+        function deleteSelectedBlock() {
+            var imageBlock = selectedImageBlock();
+            if (imageBlock) {
+                deleteBlock(imageBlock, removeImageBlock);
+                return true;
+            }
+
+            var embedBlock = selectedEmbedBlock();
+            if (!embedBlock) {
+                return false;
+            }
+            deleteBlock(embedBlock, removeEmbedBlock);
+            return true;
+        }
+
+        function handleEmbedToolbarClick(event) {
+            var alignButton = event.target.closest('[data-embed-align]');
+            if (alignButton) {
+                event.preventDefault();
+                var alignBlock = alignButton.closest('.block.block-embed');
+                if (!alignBlock) {
+                    return true;
+                }
+                applyEmbedAlignment(alignBlock, alignButton.getAttribute('data-embed-align') || 'center');
+                sync(textarea, editor);
+                return true;
+            }
+
+            var actionButton = event.target.closest('[data-embed-action]');
+            if (!actionButton) {
+                return false;
+            }
+            event.preventDefault();
+            var block = actionButton.closest('.block.block-embed');
+            if (!block) {
+                return true;
+            }
+            var action = actionButton.getAttribute('data-embed-action') || '';
+            if (action === 'full') {
+                toggleBlockFullWidth(block, setEmbedBlockWidth, applyEmbedAlignment);
+                sync(textarea, editor);
+                return true;
+            }
+            if (action === 'delete') {
+                deleteBlock(block, removeEmbedBlock);
+            }
+            return true;
+        }
+
+        function handleImageToolbarClick(event) {
+            var alignButton = event.target.closest('[data-image-align]');
+            if (alignButton) {
+                event.preventDefault();
+                var alignBlock = alignButton.closest('.block.block-image');
+                if (!alignBlock) {
+                    return true;
+                }
+                applyImageAlignment(alignBlock, alignButton.getAttribute('data-image-align') || 'center');
+                sync(textarea, editor);
+                return true;
+            }
+
+            var actionButton = event.target.closest('[data-image-action]');
+            if (!actionButton) {
+                return false;
+            }
+            event.preventDefault();
+            var block = actionButton.closest('.block.block-image');
+            if (!block) {
+                return true;
+            }
+            var action = actionButton.getAttribute('data-image-action') || '';
+            if (action === 'full') {
+                toggleBlockFullWidth(block, setImageBlockWidth, applyImageAlignment);
+                sync(textarea, editor);
+                return true;
+            }
+            if (action === 'replace') {
+                mediaRange = null;
+                mediaReplaceBlock = block;
+                openEditorMediaLibrary(imageMediaId(block));
+                return true;
+            }
+            if (action === 'delete') {
+                deleteBlock(block, removeImageBlock);
+            }
+            return true;
+        }
+
         function replaceImageBlock(block, detail, mediaId) {
             var image = block ? block.querySelector('img[data-media-id]') : null;
             if (!image) {
@@ -647,6 +887,136 @@
             document.execCommand('defaultParagraphSeparator', false, 'p');
             document.execCommand('insertParagraph', false, null);
             resetTypingInlineFormats();
+        }
+
+        function blankParagraph() {
+            var paragraph = document.createElement('p');
+            paragraph.innerHTML = '<br>';
+            return paragraph;
+        }
+
+        function handleEnterOnSelectedBlock() {
+            var imageBlock = selectedImageBlock();
+            if (imageBlock) {
+                var nextImage = imageBlock.nextElementSibling;
+                var imageTarget = nextImage && nextImage.classList.contains('block-image-break') ? nextImage : createImageBreakParagraph();
+                if (imageTarget !== nextImage) {
+                    imageBlock.parentNode.insertBefore(imageTarget, imageBlock.nextSibling);
+                }
+                placeCaret(imageTarget);
+                persistEditorState(false);
+                return true;
+            }
+
+            var embedBlock = selectedEmbedBlock();
+            if (!embedBlock) {
+                return false;
+            }
+            var next = embedBlock.nextElementSibling;
+            var target = next && next.tagName === 'P' ? next : createImageBreakParagraph();
+            if (target !== next) {
+                embedBlock.parentNode.insertBefore(target, embedBlock.nextSibling);
+            }
+            if (target.classList.contains('block-image-break')) {
+                target.classList.remove('block-image-break');
+            }
+            placeCaret(target);
+            persistEditorState(false);
+            return true;
+        }
+
+        function handleEnterInQuote() {
+            var quoteContainer = getSelectionContainer(editor);
+            var quoteBlock = quoteContainer ? quoteContainer.closest('blockquote') : null;
+            if (!quoteBlock) {
+                return false;
+            }
+
+            var currentBlock = quoteContainer.closest('p, h1, h2, h3, h4, h5, h6, li, div');
+            if (currentBlock && quoteBlock.contains(currentBlock) && isEmptyTextBlock(currentBlock)) {
+                currentBlock.remove();
+                var paragraph = blankParagraph();
+                var quoteParent = quoteBlock.parentNode;
+                var quoteNextSibling = quoteBlock.nextSibling;
+                if (quoteBlock.textContent.replace(/\u00a0/g, ' ').trim() === '' && !quoteBlock.querySelector('img, iframe, hr, video, audio, table')) {
+                    quoteBlock.remove();
+                }
+                if (quoteParent) {
+                    quoteParent.insertBefore(paragraph, quoteNextSibling);
+                } else {
+                    editor.appendChild(paragraph);
+                }
+                placeCaret(paragraph);
+                persistEditorState(true);
+                return true;
+            }
+
+            var nextParagraph = blankParagraph();
+            if (currentBlock && quoteBlock.contains(currentBlock) && currentBlock !== quoteBlock) {
+                currentBlock.parentNode.insertBefore(nextParagraph, currentBlock.nextSibling);
+            } else {
+                quoteBlock.appendChild(nextParagraph);
+            }
+            placeCaret(nextParagraph);
+            persistEditorState(true);
+            return true;
+        }
+
+        function handleEnterKey(event) {
+            if (event.key !== 'Enter' || event.shiftKey) {
+                return false;
+            }
+            event.preventDefault();
+            if (handleEnterOnSelectedBlock()) {
+                resetTypingInlineFormats();
+                updateFormatState();
+                return true;
+            }
+            if (handleEnterInQuote()) {
+                resetTypingInlineFormats();
+                updateFormatState();
+                return true;
+            }
+            insertParagraphAndResetFormats();
+            persistEditorState(true);
+            return true;
+        }
+
+        function handleEditorKeydown(event) {
+            if ((event.key === 'Backspace' || event.key === 'Delete') && deleteSelectedBlock()) {
+                event.preventDefault();
+                return;
+            }
+
+            handleEnterKey(event);
+        }
+
+        function handleEditorPaste(event) {
+            if (htmlMode) {
+                return;
+            }
+            var pastedImage = findPastedImageFile(event);
+            if (pastedImage) {
+                event.preventDefault();
+                var loadingBlock = insertLoadingImageBlock();
+                sync(textarea, editor);
+                uploadPastedImage(pastedImage, loadingBlock);
+                return;
+            }
+            var clipboard = event.clipboardData;
+            var text = clipboard ? clipboard.getData('text/plain') : '';
+            var videoId = extractYoutubeVideoId(text);
+            if (!videoId) {
+                var pastedUrl = extractPastedUrl(text);
+                if (!pastedUrl) {
+                    return;
+                }
+                event.preventDefault();
+                insertPastedLink(pastedUrl);
+                return;
+            }
+            event.preventDefault();
+            insertYoutubeEmbed(videoId);
         }
 
         function setHtmlMode(enabled) {
@@ -761,18 +1131,11 @@
         });
 
         linkModal.addEventListener('click', function (event) {
-            var linkInput = linkModal.querySelector('[data-role="link-input"]');
-            var linkTextInput = linkModal.querySelector('[data-role="link-text-input"]');
-            var linkTargetBlank = linkModal.querySelector('[data-role="link-target-blank"]');
-            var linkNoFollow = linkModal.querySelector('[data-role="link-nofollow"]');
+            var fields = linkModalNodes();
 
             if (event.target.closest('[data-role="link-remove"]')) {
                 if (activeLink && editor.contains(activeLink)) {
-                    var parent = activeLink.parentNode;
-                    while (activeLink.firstChild) {
-                        parent.insertBefore(activeLink.firstChild, activeLink);
-                    }
-                    parent.removeChild(activeLink);
+                    unwrapLink(activeLink);
                 } else if (linkRange) {
                     restoreSelection(linkRange, editor);
                     document.execCommand('unlink', false, null);
@@ -786,13 +1149,13 @@
 
             var apply = event.target.closest('[data-role="link-apply"]');
             if (apply) {
-                var url = normalizeLinkUrl(linkInput ? linkInput.value : '');
+                var url = normalizeLinkUrl(fields.input ? fields.input.value : '');
                 if (!url && activeLink && editor.contains(activeLink)) {
                     url = normalizeLinkUrl(activeLink.getAttribute('href') || '');
                 }
-                var textValue = linkTextInput ? linkTextInput.value.trim() : '';
-                var withTargetBlank = !!(linkTargetBlank && linkTargetBlank.checked);
-                var withNoFollow = !!(linkNoFollow && linkNoFollow.checked);
+                var textValue = fields.textInput ? fields.textInput.value.trim() : '';
+                var withTargetBlank = !!(fields.targetBlank && fields.targetBlank.checked);
+                var withNoFollow = !!(fields.noFollow && fields.noFollow.checked);
                 if (url) {
                     var linkNode = null;
                     if (activeLink && editor.contains(activeLink) && (!linkRange || linkRange.collapsed)) {
@@ -805,24 +1168,7 @@
                         linkNode = getCurrentLink(editor);
                     }
                     if (linkNode && editor.contains(linkNode)) {
-                        if (withTargetBlank) {
-                            linkNode.setAttribute('target', '_blank');
-                        } else {
-                            linkNode.removeAttribute('target');
-                        }
-                        var relTokens = [];
-                        if (withTargetBlank) {
-                            relTokens.push('noopener');
-                            relTokens.push('noreferrer');
-                        }
-                        if (withNoFollow) {
-                            relTokens.push('nofollow');
-                        }
-                        if (relTokens.length) {
-                            linkNode.setAttribute('rel', relTokens.join(' '));
-                        } else {
-                            linkNode.removeAttribute('rel');
-                        }
+                        applyLinkOptions(linkNode, withTargetBlank, withNoFollow);
                         if (textValue) {
                             linkNode.textContent = textValue;
                         }
@@ -860,7 +1206,7 @@
                 return;
             }
             event.preventDefault();
-            linkModal.querySelector('[data-role="link-apply"]')?.click();
+            linkModalNodes().apply?.click();
         });
 
         linkTools.addEventListener('mousedown', function (event) {
@@ -889,11 +1235,7 @@
             if (!removeButton || !activeLink || !editor.contains(activeLink)) {
                 return;
             }
-            var parent = activeLink.parentNode;
-            while (activeLink.firstChild) {
-                parent.insertBefore(activeLink.firstChild, activeLink);
-            }
-            parent.removeChild(activeLink);
+            unwrapLink(activeLink);
             persistEditorState(true);
             hideLinkTools();
             activeLink = null;
@@ -910,8 +1252,7 @@
             if (activeLink && linkTools.classList.contains('is-visible')) {
                 showLinkTools(activeLink);
             }
-            placeImageToolbar(editor.querySelector('.block.block-image.is-selected'), editor);
-            placeEmbedToolbar(editor.querySelector('.block.block-embed.is-selected'), editor);
+            syncSelectedToolbars();
         });
 
         document.addEventListener('selectionchange', function () {
@@ -943,15 +1284,15 @@
             document.body.style.cursor = '';
         }
 
-        editor.addEventListener('pointerdown', function (event) {
+        function startImageResize(event) {
             var handle = event.target.closest('.image-resize-handle');
             if (!handle) {
-                return;
+                return false;
             }
             var block = handle.closest('.block.block-image');
             var image = block ? block.querySelector('img[data-media-id]') : null;
             if (!block || !image) {
-                return;
+                return false;
             }
             event.preventDefault();
             var position = handle.getAttribute('data-image-resize') || 'br';
@@ -970,32 +1311,44 @@
             handle.setPointerCapture(event.pointerId);
             document.body.classList.add('is-image-resizing');
             document.body.style.cursor = resizeCursor(position);
-        });
+            return true;
+        }
 
-        document.addEventListener('pointermove', function (event) {
+        function resizeDelta(state, event) {
+            var position = state.position;
+            var dx = position.indexOf('l') >= 0 ? state.startX - event.clientX : (position.indexOf('r') >= 0 ? event.clientX - state.startX : 0);
+            var dy = position.indexOf('t') >= 0 ? state.startY - event.clientY : (position.indexOf('b') >= 0 ? event.clientY - state.startY : 0);
+            var ratio = state.startWidth / Math.max(1, state.startHeight);
+            var verticalDelta = dy * ratio;
+            return Math.abs(verticalDelta) > Math.abs(dx) ? verticalDelta : dx;
+        }
+
+        function updateImageResize(event) {
             if (!resizingState || event.pointerId !== resizingState.pointerId) {
-                return;
+                return false;
             }
             event.preventDefault();
-            var position = resizingState.position;
-            var dx = position.indexOf('l') >= 0 ? resizingState.startX - event.clientX : (position.indexOf('r') >= 0 ? event.clientX - resizingState.startX : 0);
-            var dy = position.indexOf('t') >= 0 ? resizingState.startY - event.clientY : (position.indexOf('b') >= 0 ? event.clientY - resizingState.startY : 0);
-            var ratio = resizingState.startWidth / Math.max(1, resizingState.startHeight);
-            var verticalDelta = dy * ratio;
-            var delta = Math.abs(verticalDelta) > Math.abs(dx) ? verticalDelta : dx;
-            var width = Math.max(80, resizingState.startWidth + delta);
+            var width = Math.max(80, resizingState.startWidth + resizeDelta(resizingState, event));
             var percent = Math.min(100, Math.max(10, (width / resizingState.editorWidth) * 100));
             setImageBlockWidth(resizingState.block, percent.toFixed(2).replace(/\.00$/, '') + '%');
             sync(textarea, editor);
-        });
+            return true;
+        }
+
+        function stopImageResize(event) {
+            if (!resizingState || event.pointerId !== resizingState.pointerId) {
+                return false;
+            }
+            stopResize();
+            return true;
+        }
+
+        editor.addEventListener('pointerdown', startImageResize);
+
+        document.addEventListener('pointermove', updateImageResize);
 
         ['pointerup', 'pointercancel'].forEach(function (type) {
-            document.addEventListener(type, function (event) {
-                if (!resizingState || event.pointerId !== resizingState.pointerId) {
-                    return;
-                }
-                stopResize();
-            });
+            document.addEventListener(type, stopImageResize);
         });
 
         editor.addEventListener('click', function (event) {
@@ -1008,75 +1361,11 @@
                 activeLink = null;
             }
 
-            var embedAlignButton = event.target.closest('[data-embed-align]');
-            if (embedAlignButton) {
-                event.preventDefault();
-                var embedBlock = embedAlignButton.closest('.block.block-embed');
-                if (!embedBlock) {
-                    return;
-                }
-                applyEmbedAlignment(embedBlock, embedAlignButton.getAttribute('data-embed-align') || 'center');
-                sync(textarea, editor);
+            if (handleEmbedToolbarClick(event)) {
                 return;
             }
 
-            var alignButton = event.target.closest('[data-image-align]');
-            if (alignButton) {
-                event.preventDefault();
-                var block = alignButton.closest('.block.block-image');
-                if (!block) {
-                    return;
-                }
-                applyImageAlignment(block, alignButton.getAttribute('data-image-align') || 'center');
-                sync(textarea, editor);
-                return;
-            }
-
-            var embedActionButton = event.target.closest('[data-embed-action]');
-            if (embedActionButton) {
-                event.preventDefault();
-                var embedActionBlock = embedActionButton.closest('.block.block-embed');
-                if (!embedActionBlock) {
-                    return;
-                }
-                var embedAction = embedActionButton.getAttribute('data-embed-action') || '';
-                if (embedAction === 'full') {
-                    toggleBlockFullWidth(embedActionBlock, setEmbedBlockWidth, applyEmbedAlignment);
-                    sync(textarea, editor);
-                    return;
-                }
-                if (embedAction === 'delete') {
-                    var embedCaretTarget = removeEmbedBlock(embedActionBlock);
-                    placeCaret(embedCaretTarget);
-                    persistEditorState(false);
-                }
-                return;
-            }
-
-            var imageActionButton = event.target.closest('[data-image-action]');
-            if (imageActionButton) {
-                event.preventDefault();
-                var actionBlock = imageActionButton.closest('.block.block-image');
-                if (!actionBlock) {
-                    return;
-                }
-                var imageAction = imageActionButton.getAttribute('data-image-action') || '';
-                if (imageAction === 'full') {
-                    toggleBlockFullWidth(actionBlock, setImageBlockWidth, applyImageAlignment);
-                    sync(textarea, editor);
-                    return;
-                }
-                if (imageAction === 'replace') {
-                    mediaRange = null;
-                    mediaReplaceBlock = actionBlock;
-                    openEditorMediaLibrary(imageMediaId(actionBlock));
-                    return;
-                }
-                if (imageAction === 'delete') {
-                    var caretTarget = removeImageBlock(actionBlock);
-                    placeCaret(caretTarget);
-                    persistEditorState(false);
-                }
+            if (handleImageToolbarClick(event)) {
                 return;
             }
 
@@ -1109,206 +1398,12 @@
             } else {
                 focusEditorEnd(editor);
             }
-            document.execCommand('insertHTML', false, '<div class="block block-image align-center"><img src="' + escapeHtml(detail.url) + '" alt="' + escapeHtml(String(detail.name || '')) + '" data-media-id="' + mediaId + '"></div><p><br></p>');
+            document.execCommand('insertHTML', false, imageBlockHtml(detail.url, detail.name, mediaId));
             persistEditorState(true);
         });
 
-        editor.addEventListener('keydown', function (event) {
-            if (event.key === 'Backspace' || event.key === 'Delete') {
-                var selectedImageForDelete = editor.querySelector('.block.block-image.is-selected');
-                if (selectedImageForDelete) {
-                    event.preventDefault();
-                    var caretTarget = removeImageBlock(selectedImageForDelete);
-                    placeCaret(caretTarget);
-                    persistEditorState(false);
-                    return;
-                }
-                var selectedEmbedForDelete = editor.querySelector('.block.block-embed.is-selected');
-                if (selectedEmbedForDelete) {
-                    event.preventDefault();
-                    var embedCaretTarget = removeEmbedBlock(selectedEmbedForDelete);
-                    placeCaret(embedCaretTarget);
-                    persistEditorState(false);
-                    return;
-                }
-            }
-
-            function handleEnterOnSelectedBlock() {
-                var selectedImageBlock = editor.querySelector('.block.block-image.is-selected');
-                if (selectedImageBlock) {
-                    var nextImage = selectedImageBlock.nextElementSibling;
-                    var imageTarget = nextImage && nextImage.classList.contains('block-image-break') ? nextImage : createImageBreakParagraph();
-                    if (imageTarget !== nextImage) {
-                        selectedImageBlock.parentNode.insertBefore(imageTarget, selectedImageBlock.nextSibling);
-                    }
-                    placeCaret(imageTarget);
-                    persistEditorState(false);
-                    return true;
-                }
-
-                var selectedEmbedBlock = editor.querySelector('.block.block-embed.is-selected');
-                if (!selectedEmbedBlock) {
-                    return false;
-                }
-                var next = selectedEmbedBlock.nextElementSibling;
-                var target = next && next.tagName === 'P' ? next : createImageBreakParagraph();
-                if (target !== next) {
-                    selectedEmbedBlock.parentNode.insertBefore(target, selectedEmbedBlock.nextSibling);
-                }
-                if (target.classList.contains('block-image-break')) {
-                    target.classList.remove('block-image-break');
-                }
-                placeCaret(target);
-                persistEditorState(false);
-                return true;
-            }
-
-            function handleEnterInQuote() {
-                var quoteContainer = getSelectionContainer(editor);
-                var quoteBlock = quoteContainer ? quoteContainer.closest('blockquote') : null;
-                if (!quoteBlock) {
-                    return false;
-                }
-
-                var currentBlock = quoteContainer.closest('p, h1, h2, h3, h4, h5, h6, li, div');
-                if (currentBlock && quoteBlock.contains(currentBlock) && isEmptyTextBlock(currentBlock)) {
-                    currentBlock.remove();
-                    var paragraph = document.createElement('p');
-                    paragraph.innerHTML = '<br>';
-                    var quoteParent = quoteBlock.parentNode;
-                    var quoteNextSibling = quoteBlock.nextSibling;
-                    if (quoteBlock.textContent.replace(/\u00a0/g, ' ').trim() === '' && !quoteBlock.querySelector('img, iframe, hr, video, audio, table')) {
-                        quoteBlock.remove();
-                    }
-                    if (quoteParent) {
-                        quoteParent.insertBefore(paragraph, quoteNextSibling);
-                    } else {
-                        editor.appendChild(paragraph);
-                    }
-                    placeCaret(paragraph);
-                    persistEditorState(true);
-                    return true;
-                }
-
-                var nextParagraph = document.createElement('p');
-                nextParagraph.innerHTML = '<br>';
-                if (currentBlock && quoteBlock.contains(currentBlock) && currentBlock !== quoteBlock) {
-                    currentBlock.parentNode.insertBefore(nextParagraph, currentBlock.nextSibling);
-                } else {
-                    quoteBlock.appendChild(nextParagraph);
-                }
-                placeCaret(nextParagraph);
-                persistEditorState(true);
-                return true;
-            }
-
-            function handleEnterKey() {
-                if (event.key !== 'Enter' || event.shiftKey) {
-                    return false;
-                }
-                event.preventDefault();
-                if (handleEnterOnSelectedBlock()) {
-                    resetTypingInlineFormats();
-                    updateFormatState();
-                    return true;
-                }
-                if (handleEnterInQuote()) {
-                    resetTypingInlineFormats();
-                    updateFormatState();
-                    return true;
-                }
-                insertParagraphAndResetFormats();
-                persistEditorState(true);
-                return true;
-            }
-            if (handleEnterKey()) {
-                return;
-            }
-
-        });
-
-        editor.addEventListener('paste', function (event) {
-            if (htmlMode) {
-                return;
-            }
-            var pastedImage = findPastedImageFile(event);
-            if (pastedImage) {
-                event.preventDefault();
-                var imageRange = isSelectionInside(editor) ? rememberSelection() : null;
-                if (!imageRange) {
-                    focusEditorEnd(editor);
-                    imageRange = rememberSelection();
-                }
-                var loadingBlock = createLoadingImageBlock();
-                if (imageRange) {
-                    restoreSelection(imageRange, editor);
-                    imageRange.deleteContents();
-                    imageRange.insertNode(loadingBlock);
-                    imageRange.setStartAfter(loadingBlock);
-                    imageRange.collapse(true);
-                    restoreSelection(imageRange, editor);
-                } else {
-                    editor.appendChild(loadingBlock);
-                }
-                sync(textarea, editor);
-                uploadPastedImage(pastedImage, loadingBlock);
-                return;
-            }
-            var clipboard = event.clipboardData;
-            var text = clipboard ? clipboard.getData('text/plain') : '';
-            var videoId = extractYoutubeVideoId(text);
-            if (!videoId) {
-                var pastedUrl = extractPastedUrl(text);
-                if (!pastedUrl) {
-                    return;
-                }
-                event.preventDefault();
-                ensureSelectionInsideEditor();
-                linkPasteSeq += 1;
-                var linkId = 'paste-link-' + editorId + '-' + linkPasteSeq;
-                document.execCommand('insertHTML', false, '<a href="' + escapeHtml(pastedUrl) + '" data-paste-link-id="' + linkId + '">' + escapeHtml(pastedUrl) + '</a>');
-                persistEditorState(true);
-                var endpoint = (textarea.dataset.linkTitleEndpoint || '').trim();
-                if (!endpoint || typeof requestJson !== 'function') {
-                    return;
-                }
-                requestJson(endpoint + '?url=' + encodeURIComponent(pastedUrl), {
-                    credentials: 'same-origin',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                }).then(function (result) {
-                    if (!result || !result.response || !result.response.ok) {
-                        return null;
-                    }
-                    return result.data;
-                }).then(function (payload) {
-                    var title = payload && payload.success && payload.data ? String(payload.data.title || '').trim() : '';
-                    if (!title) {
-                        return;
-                    }
-                    var linkNode = editor.querySelector('a[data-paste-link-id="' + linkId + '"]');
-                    if (!linkNode) {
-                        return;
-                    }
-                    linkNode.textContent = title;
-                    linkNode.removeAttribute('data-paste-link-id');
-                    sync(textarea, editor);
-                }).catch(function () {});
-                return;
-            }
-            event.preventDefault();
-            ensureSelectionInsideEditor();
-            var embedInsertId = 'embed-insert-' + editorId + '-' + Date.now();
-            var embedHtml = '<div class="block block-embed block-embed-youtube align-center" data-embed-insert-id="' + embedInsertId + '"><div class="embed-frame"><iframe src="https://www.youtube.com/embed/' + videoId + '" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe></div></div><p><br></p>';
-            document.execCommand('insertHTML', false, embedHtml);
-            var insertedEmbed = editor.querySelector('[data-embed-insert-id="' + embedInsertId + '"]');
-            if (insertedEmbed) {
-                insertedEmbed.removeAttribute('data-embed-insert-id');
-                placeCaretAfterBlock(insertedEmbed);
-            }
-            persistEditorState(true);
-        });
+        editor.addEventListener('keydown', handleEditorKeydown);
+        editor.addEventListener('paste', handleEditorPaste);
 
         editor.addEventListener('input', function () {
             sync(textarea, editor);
@@ -1333,7 +1428,7 @@
         wrapper.appendChild(linkTools);
         wrapper.appendChild(editor);
         wrapper.appendChild(textarea);
-        var form = textarea.closest('form');
+        var form = editorForm();
         if (form) {
             form.addEventListener('submit', function () {
                 if (htmlMode) {

@@ -4,6 +4,7 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
+$scripts = ['core.js', 'api.js', 'password-toggle.js'];
 ?>
 <!doctype html>
 <html lang="<?= esc_attr((string)$lang) ?>">
@@ -18,10 +19,9 @@ if (!defined('BASE_DIR')) {
     <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/admin.css')) ?>">
     <script>window.tinycmsI18n = <?= esc_json($adminI18n ?? []) ?>;</script>
     <script>window.tinycmsIconSprite = <?= esc_json(icon_sprite()) ?>;</script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/icons.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/i18n.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/api.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
+    <?php foreach ($scripts as $script): ?>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/' . $script)) ?>"></script>
+    <?php endforeach; ?>
 </head>
 <body>
 <?= $content ?>

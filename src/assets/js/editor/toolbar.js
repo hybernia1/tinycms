@@ -1,6 +1,8 @@
 (() => {
-const t = window.tinycms?.i18n?.t || (() => '');
-const iconSvg = (name) => window.tinycms?.icons?.icon?.(name, '') || '';
+const app = window.tinycms = window.tinycms || {};
+const editor = app.editor = app.editor || {};
+const t = app.i18n?.t || (() => '');
+const iconSvg = (name) => app.icons?.icon?.(name, '') || '';
 
 const createIconButton = (icon, command, title) => {
     const button = document.createElement('button');
@@ -88,9 +90,7 @@ const createAlignGroup = () => {
     return group;
 };
 
-window.tinycms = window.tinycms || {};
-window.tinycms.editor = window.tinycms.editor || {};
-window.tinycms.editor.toolbar = {
+editor.toolbar = {
     createAlignGroup,
     createHeadingGroup,
     createIconButton,
