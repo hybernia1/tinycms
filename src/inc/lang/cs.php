@@ -314,6 +314,7 @@ return [
             'content' => 'Obsah',
             'media' => 'Média',
             'appearance' => 'Vzhled',
+            'mail' => 'Mail',
         ],
         'fields' => [
             'app_lang' => 'Jazyk aplikace',
@@ -334,6 +335,12 @@ return [
             'footer_text' => 'Text patičky',
             'website_url' => 'URL webu',
             'website_email' => 'E-mail webu',
+            'mail_driver' => 'Odesílání',
+            'smtp_host' => 'SMTP host',
+            'smtp_port' => 'SMTP port',
+            'smtp_secure' => 'SMTP zabezpečení',
+            'smtp_username' => 'SMTP uživatel',
+            'smtp_password' => 'SMTP heslo',
         ],
         'options' => [
             'front_home_content' => [
@@ -343,6 +350,15 @@ return [
             'allow_registration' => [
                 'disabled' => 'Ne',
                 'enabled' => 'Ano',
+            ],
+            'mail_driver' => [
+                'php' => 'PHP mail',
+                'smtp' => 'SMTP',
+            ],
+            'smtp_secure' => [
+                'none' => 'Žádné',
+                'tls' => 'TLS',
+                'ssl' => 'SSL',
             ],
         ],
     ],

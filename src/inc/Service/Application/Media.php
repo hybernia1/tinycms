@@ -194,22 +194,6 @@ final class Media
         ];
     }
 
-    public function nextIdAfterDelete(int $id, ?int $authorId = null): ?int
-    {
-        $ids = array_values(array_filter($this->accessibleIds($authorId), static fn(int $itemId): bool => $itemId !== $id));
-        if ($ids === []) {
-            return null;
-        }
-
-        foreach ($ids as $itemId) {
-            if ($itemId > $id) {
-                return $itemId;
-            }
-        }
-
-        return $ids[count($ids) - 1] ?? null;
-    }
-
     private function accessibleIds(?int $authorId): array
     {
         $where = $authorId !== null ? ['author' => $authorId] : [];

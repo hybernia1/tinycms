@@ -21,7 +21,7 @@ final class Menu extends Admin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function saveApiV1(callable $_redirect): void
+    public function saveApiV1(): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;

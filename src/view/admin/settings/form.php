@@ -5,7 +5,7 @@ foreach ($fields as $fieldKey => $field) {
     $sections[$sectionKey][$fieldKey] = $field;
 }
 $orderedSections = [];
-foreach (['general', 'localization', 'content', 'media', 'appearance'] as $sectionKey) {
+foreach (['general', 'localization', 'content', 'media', 'appearance', 'mail'] as $sectionKey) {
     if (isset($sections[$sectionKey])) {
         $orderedSections[$sectionKey] = $sections[$sectionKey];
         unset($sections[$sectionKey]);
@@ -109,6 +109,8 @@ $activeFields = (array)($sections[$activeSection] ?? []);
                     <?php $min = (int)($field['min'] ?? 1); ?>
                     <?php $max = (int)($field['max'] ?? 100); ?>
                     <input type="number" name="settings[<?= esc_attr((string)$fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>" min="<?= $min ?>" max="<?= $max ?>" step="1">
+                <?php elseif ($fieldType === 'password'): ?>
+                    <input type="password" name="settings[<?= esc_attr((string)$fieldKey) ?>]" value="" autocomplete="new-password">
                 <?php else: ?>
                     <input type="text" name="settings[<?= esc_attr((string)$fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>">
                 <?php endif; ?>

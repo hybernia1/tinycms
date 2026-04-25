@@ -20,10 +20,11 @@ final class Email
 
     public function send(string $to, string $templateKey, array $vars = []): bool
     {
-        $resolvedVars = array_replace($this->defaultVars($to), $this->normalizeVars($vars));
+        $settings = $this->settings->resolved();
+        $resolvedVars = array_replace($this->defaultVars($to, $settings), $this->normalizeVars($vars));
         [$subject, $body] = $this->templateParts($templateKey, $resolvedVars);
 
-        return $this->mailer->send($to, $subject, $body, $this->senderFromSettings());
+        return $this->mailer->send($to, $subject, $body, $this->senderFromSettings($settings), $settings);
     }
 
     private function template(string $message, array $vars): string
@@ -36,14 +37,13 @@ final class Email
         return strtr($message, $replace);
     }
 
-    private function defaultVars(string $to): array
+    private function defaultVars(string $to, array $settings): array
     {
-        $settings = $this->settings->resolved();
         $scheme = RequestContext::scheme();
         $authority = RequestContext::authority();
         $siteUrl = $scheme . '://' . $authority . RequestContext::path();
-        $websiteEmail = trim((string)($settings['website_email'] ?? ''));
-        $supportEmail = filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : ('tinycms@' . RequestContext::domain());
+        $senderEmail = $this->senderFromSettings($settings);
+        $supportEmail = $senderEmail ?? ('tinycms@' . RequestContext::domain());
 
         $siteName = (string)($settings['sitename'] ?? 'TinyCMS');
 
@@ -89,9 +89,9 @@ final class Email
         return [$subject, $body];
     }
 
-    private function senderFromSettings(): ?string
+    private function senderFromSettings(array $settings): ?string
     {
-        $websiteEmail = trim((string)($this->settings->resolved()['website_email'] ?? ''));
+        $websiteEmail = trim((string)($settings['website_email'] ?? ''));
         return filter_var($websiteEmail, FILTER_VALIDATE_EMAIL) ? $websiteEmail : null;
     }
 }

@@ -21,7 +21,7 @@ final class User extends Admin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function listApiV1(callable $_redirect): void
+    public function listApiV1(): void
     {
         if (!$this->guardApiAdmin()) {
             return;
@@ -35,7 +35,7 @@ final class User extends Admin
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
-    public function searchApiV1(callable $_redirect): void
+    public function searchApiV1(): void
     {
         if (!$this->guardApiAdmin()) {
             return;
@@ -46,7 +46,7 @@ final class User extends Admin
         $this->apiOk($this->users->search($query, $limit));
     }
 
-    public function deleteApiV1(callable $redirect, int $id): void
+    public function deleteApiV1(int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -64,7 +64,7 @@ final class User extends Admin
         ]);
     }
 
-    public function suspendApiV1(callable $redirect, int $id): void
+    public function suspendApiV1(int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -98,7 +98,7 @@ final class User extends Admin
         ]);
     }
 
-    public function addApiV1(callable $redirect): void
+    public function addApiV1(): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -119,7 +119,7 @@ final class User extends Admin
         ]);
     }
 
-    public function editApiV1(callable $redirect, int $id): void
+    public function editApiV1(int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
