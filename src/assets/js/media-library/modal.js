@@ -1,29 +1,31 @@
 (() => {
+const app = window.tinycms = window.tinycms || {};
+const mediaLibrary = app.mediaLibrary = app.mediaLibrary || {};
 let modal = document.querySelector('[data-media-library-modal]');
-const t = window.tinycms?.i18n?.t || (() => '');
-const modalUi = window.tinycms?.ui?.modal || {
+const t = app.i18n?.t || (() => '');
+const modalUi = app.ui?.modal || {
     open: (node) => node?.classList.add('open'),
     close: (node) => node?.classList.remove('open'),
     confirm: () => Promise.resolve(false),
 };
 const confirmModal = modalUi.confirm;
-const template = window.tinycms?.mediaLibrary?.template || {};
-const transport = window.tinycms?.mediaLibrary?.transport || {};
-const renderer = window.tinycms?.mediaLibrary?.renderer || {};
-const helpers = window.tinycms?.mediaLibrary?.helpers || {};
+const template = mediaLibrary.template || {};
+const transport = mediaLibrary.transport || {};
+const renderer = mediaLibrary.renderer || {};
+const helpers = mediaLibrary.helpers || {};
 const openTrigger = Array.prototype.find.call(
     document.querySelectorAll('[data-media-library-open]'),
     (node) => node.getAttribute('data-media-library-mode') !== 'editor',
 ) || null;
-const requestJson = window.tinycms?.api?.http?.requestJson;
-const postForm = window.tinycms?.api?.http?.postForm;
+const requestJson = app.api?.http?.requestJson;
+const postForm = app.api?.http?.postForm;
 
 if (!modal) {
     modal = template.createModal?.(openTrigger) || null;
 }
 
 if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm === 'function') {
-    const loader = window.tinycmsLoader || null;
+    const loader = app.loader || null;
     const grid = modal.querySelector('[data-media-library-grid]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
     const nextButton = modal.querySelector('[data-media-library-next]');

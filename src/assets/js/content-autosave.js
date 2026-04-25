@@ -1,8 +1,9 @@
 (function () {
-    var t = window.tinycms?.i18n?.t || function () { return ''; };
-    var postForm = window.tinycms?.api?.http?.postForm;
-    var pushFlash = window.tinycms?.api?.pushFlash || function () {};
-    var confirmModal = window.tinycms?.ui?.modal?.confirm || function () { return Promise.resolve(false); };
+    var app = window.tinycms = window.tinycms || {};
+    var t = app.i18n?.t || function () { return ''; };
+    var postForm = app.api?.http?.postForm;
+    var pushFlash = app.api?.pushFlash || function () {};
+    var confirmModal = app.ui?.modal?.confirm || function () { return Promise.resolve(false); };
     if (typeof postForm !== 'function') {
         return;
     }
@@ -42,7 +43,7 @@
                 return;
             }
             editLayoutApplied = true;
-            var editLabel = window.tinycmsI18n?.admin?.edit_content || '';
+            var editLabel = t('admin.edit_content');
             if (editLabel === '') {
                 return;
             }

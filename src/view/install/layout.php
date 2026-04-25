@@ -4,6 +4,7 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
+$scripts = ['core.js', 'ui.js', 'custom-select.js', 'password-toggle.js'];
 ?>
 <!doctype html>
 <html lang="<?= esc_attr((string)$lang) ?>">
@@ -13,11 +14,9 @@ if (!defined('BASE_DIR')) {
     <title><?= esc_html((string)($pageTitle ?? 'TinyCMS')) ?></title>
     <link rel="stylesheet" href="<?= esc_url($url(ASSETS_DIR . 'css/style.css')) ?>">
     <script>window.tinycmsIconSprite = <?= esc_json(icon_sprite()) ?>;</script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/icons.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/flash.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/modal.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/custom-select.js')) ?>"></script>
-    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/password-toggle.js')) ?>"></script>
+    <?php foreach ($scripts as $script): ?>
+    <script defer src="<?= esc_url($url(ASSETS_DIR . 'js/' . $script)) ?>"></script>
+    <?php endforeach; ?>
 </head>
 <body>
 <div class="container mt-4">

@@ -1,7 +1,9 @@
 (() => {
-const t = window.tinycms?.i18n?.t || (() => '');
-const iconSvg = (name) => window.tinycms?.icons?.icon?.(name, '') || '';
-const cleanSerializedHtml = window.tinycms?.editor?.sanitize?.cleanSerializedHtml || ((html) => String(html || '').trim());
+const app = window.tinycms = window.tinycms || {};
+const editor = app.editor = app.editor || {};
+const t = app.i18n?.t || (() => '');
+const iconSvg = (name) => app.icons?.icon?.(name, '') || '';
+const cleanSerializedHtml = editor.sanitize?.cleanSerializedHtml || ((html) => String(html || '').trim());
 const imageResizePositions = ['tl', 't', 'tr', 'r', 'br', 'b', 'bl', 'l'];
 
 const translate = (key, fallback) => t(key, fallback) || fallback;
@@ -312,9 +314,7 @@ const normalizeBlocks = (editor) => {
     });
 };
 
-window.tinycms = window.tinycms || {};
-window.tinycms.editor = window.tinycms.editor || {};
-window.tinycms.editor.blocks = {
+editor.blocks = {
     applyEmbedAlignment,
     applyImageAlignment,
     createImageBreakParagraph,

@@ -1,7 +1,6 @@
 (function () {
-    function iconSpritePath() {
-        return String(window.tinycms?.icons?.sprite?.() || window.tinycmsIconSprite || '');
-    }
+    var app = window.tinycms = window.tinycms || {};
+    var icon = app.icons?.icon || function () { return ''; };
 
     function createOverlay() {
         var scope = document.querySelector('.admin-content');
@@ -10,7 +9,7 @@
         if (!scope) {
             overlay.classList.add('is-fixed');
         }
-        overlay.innerHTML = window.tinycms?.icons?.icon?.('loader') || '<svg class="icon" aria-hidden="true"><use href="' + iconSpritePath() + '#icon-loader"></use></svg>';
+        overlay.innerHTML = icon('loader');
         (scope || document.body).appendChild(overlay);
         return overlay;
     }
@@ -99,7 +98,7 @@
         startPage();
     });
 
-    window.tinycmsLoader = {
+    app.loader = {
         set: setTargetLoading,
         startPage: startPage,
         stopPage: stopPage

@@ -1,3 +1,4 @@
+(() => {
 const body = document.body;
 const mobileMedia = window.matchMedia('(max-width: 900px)');
 const sidebarCookieName = 'tinycms_admin_sidebar';
@@ -51,3 +52,4 @@ mobileMedia.addEventListener('change', () => {
         closeMobileMenu();
     }
 });
+})();

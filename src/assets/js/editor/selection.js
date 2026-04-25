@@ -1,4 +1,7 @@
 (() => {
+const app = window.tinycms = window.tinycms || {};
+const editor = app.editor = app.editor || {};
+
 const eventElement = (event) => {
     const target = event && event.target ? event.target : null;
     return target && target.nodeType === Node.TEXT_NODE ? target.parentElement : target;
@@ -92,9 +95,7 @@ const placeCaret = (paragraph) => {
     selection.addRange(range);
 };
 
-window.tinycms = window.tinycms || {};
-window.tinycms.editor = window.tinycms.editor || {};
-window.tinycms.editor.selection = {
+editor.selection = {
     eventElement,
     focusEditorEnd,
     getCurrentLink,

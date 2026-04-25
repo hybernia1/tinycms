@@ -1,17 +1,13 @@
 (() => {
+    const app = window.tinycms = window.tinycms || {};
     const pickers = document.querySelectorAll('[data-picker]');
     if (!pickers.length) {
         return;
     }
 
-    const requestJson = window.tinycms?.api?.http?.requestJson;
-    const icon = window.tinycms?.icons?.icon || (() => '');
-    const esc = (value) => String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    const requestJson = app.api?.http?.requestJson;
+    const icon = app.icons?.icon || (() => '');
+    const esc = app.support?.esc || ((value) => String(value || ''));
     const normalize = (value) => String(value || '').trim().toLowerCase();
 
     const resolveNodes = (picker) => ({

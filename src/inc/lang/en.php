@@ -439,6 +439,7 @@ return [
         'list_numbered' => 'Numbered list',
         'alignment' => 'Alignment',
         'insert_link' => 'Insert link',
+        'edit_link' => 'Edit link',
         'link_title' => 'Link title',
         'link_text' => 'Link text',
         'open_new_window' => 'Open in new window',

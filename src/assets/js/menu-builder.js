@@ -1,4 +1,5 @@
 (() => {
+    const app = window.tinycms = window.tinycms || {};
     const root = document.querySelector('[data-menu-builder]');
     if (!root) {
         return;
@@ -10,7 +11,6 @@
     const addButton = root.querySelector('[data-menu-add-item]');
     const count = root.querySelector('[data-menu-count]');
     const draft = root.querySelector('[data-menu-draft]');
-    const iconBase = String(window.tinycms?.icons?.sprite?.() || window.tinycmsIconSprite || '');
 
     if (!items || !template) {
         return;
@@ -18,7 +18,8 @@
 
     const rows = () => Array.from(items.querySelectorAll('[data-menu-item]'));
     const iconPickers = () => Array.from(root.querySelectorAll('[data-menu-icon-picker]'));
-    const iconSvg = (name) => window.tinycms?.icons?.icon?.(name) || `<svg class="icon" aria-hidden="true"><use href="${iconBase}#icon-${name}"></use></svg>`;
+    const iconSvg = app.icons?.icon || (() => '');
+    const customSelect = app.ui?.customSelect;
     const closeIconPickers = (except = null) => {
         iconPickers().forEach((picker) => {
             if (picker === except) {
@@ -136,7 +137,7 @@
         if (last) {
             fillRow(last, values);
         }
-        window.tinycms?.ui?.customSelect?.init(last || document);
+        customSelect?.init(last || document);
         syncRows();
         clearDraft();
     };
