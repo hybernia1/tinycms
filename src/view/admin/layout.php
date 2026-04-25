@@ -16,16 +16,7 @@ $scriptGroups = [
         'media-library/modal.js',
     ],
     ['picker.js', 'menu-builder.js', 'content-autosave.js', 'action-menu.js'],
-    [
-        'editor/sanitize.js',
-        'editor/selection.js',
-        'editor/toolbar.js',
-        'editor/blocks.js',
-        'editor/link-modal.js',
-        'editor/links.js',
-        'editor/media.js',
-        'editor/main.js',
-    ],
+    ['editor/orchestrator.js'],
     ['session.js'],
 ];
 $scripts = array_merge(...$scriptGroups);
