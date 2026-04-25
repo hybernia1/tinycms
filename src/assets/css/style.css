@@ -322,17 +322,6 @@ a:focus-visible {
     margin-left: var(--space-1-5);
 }
 
-.table-col-actions .btn-icon {
-    border-color: transparent;
-    background: transparent;
-}
-
-.table-col-actions .btn-icon:hover,
-.table-col-actions .btn-icon:focus-visible {
-    background: var(--color-surface-muted);
-    border-radius: var(--radius-sm);
-}
-
 label {
     display: block;
     margin-bottom: var(--space-1-5);
@@ -342,7 +331,8 @@ input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='r
 textarea,
 select,
 .custom-select-button,
-.custom-datetime-trigger {
+.custom-datetime-trigger,
+.tag-picker {
     border-width: 1px;
     border-style: solid;
     border-color: var(--color-border);
@@ -401,41 +391,32 @@ input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='r
 textarea:focus,
 select:focus,
 .custom-select-button:focus-visible,
-.custom-datetime-trigger:focus-visible {
+.custom-datetime-trigger:focus-visible,
+.tag-picker:has(.tag-picker-input:focus) {
     border-color: var(--primary);
     box-shadow: var(--focus-ring);
     outline: 0;
 }
 
 
-.form-floating-field:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])),
-.form-floating-field:has(> label + textarea),
-.form-floating-field:has(> label + select),
-.form-floating-field:has(> label + .field-with-icon),
-.mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])),
-.mb-3:has(> label + textarea),
-.mb-3:has(> label + select),
-.mb-3:has(> label + .field-with-icon),
-.m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])),
-.m-0:has(> label + textarea),
-.m-0:has(> label + select),
-.m-0:has(> label + .field-with-icon) {
+:where(.form-floating-field, .mb-3, .m-0):has(> label + :is(
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']),
+    textarea,
+    select,
+    .tag-picker,
+    .field-with-icon
+)) {
     position: relative;
     padding-top: calc(var(--space-2) + var(--space-1) / 2);
 }
 
-.form-floating-field:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > label,
-.form-floating-field:has(> label + textarea) > label,
-.form-floating-field:has(> label + select) > label,
-.form-floating-field:has(> label + .field-with-icon) > label,
-.mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > label,
-.mb-3:has(> label + textarea) > label,
-.mb-3:has(> label + select) > label,
-.mb-3:has(> label + .field-with-icon) > label,
-.m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > label,
-.m-0:has(> label + textarea) > label,
-.m-0:has(> label + select) > label,
-.m-0:has(> label + .field-with-icon) > label {
+:where(.form-floating-field, .mb-3, .m-0):has(> label + :is(
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']),
+    textarea,
+    select,
+    .tag-picker,
+    .field-with-icon
+)) > label {
     position: absolute;
     top: 0;
     left: var(--space-3);
@@ -449,18 +430,16 @@ select:focus,
     background: var(--color-surface);
 }
 
-.form-floating-field:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
-.form-floating-field:has(> label + textarea) > textarea:focus,
-.form-floating-field:has(> label + select) > select:focus,
-.form-floating-field:has(> label + .field-with-icon) > .field-with-icon > input:focus,
-.mb-3:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
-.mb-3:has(> label + textarea) > textarea:focus,
-.mb-3:has(> label + select) > select:focus,
-.mb-3:has(> label + .field-with-icon) > .field-with-icon > input:focus,
-.m-0:has(> label + input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color'])) > input:focus,
-.m-0:has(> label + textarea) > textarea:focus,
-.m-0:has(> label + select) > select:focus,
-.m-0:has(> label + .field-with-icon) > .field-with-icon > input:focus {
+:where(.form-floating-field, .mb-3, .m-0):has(> label + :is(
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']),
+    textarea,
+    select
+)) > :is(
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']):focus,
+    textarea:focus,
+    select:focus
+),
+:where(.form-floating-field, .mb-3, .m-0):has(> label + .field-with-icon) > .field-with-icon > input:focus {
     border-color: var(--primary);
 }
 .has-custom-select .custom-select-native {
@@ -789,7 +768,11 @@ input[type='week']::-webkit-calendar-picker-indicator {
     gap: var(--space-1);
     padding: var(--space-2) var(--space-3);
     border: 1px solid var(--color-border);
+    appearance: none;
+    font: inherit;
+    line-height: var(--lh-tight);
     text-decoration: none;
+    cursor: pointer;
     color: var(--color-text);
     background: var(--color-surface);
     border-radius: var(--radius-sm);
@@ -797,9 +780,15 @@ input[type='week']::-webkit-calendar-picker-indicator {
 }
 
 .pagination-link:hover,
-.filter-link:hover {
+.filter-link:hover,
+.filter-link:focus-visible {
     background: var(--color-surface-muted);
     border-color: var(--color-border-soft);
+}
+
+.filter-link:focus-visible {
+    outline: 0;
+    box-shadow: var(--focus-ring);
 }
 
 .pagination-link.active,

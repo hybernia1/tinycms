@@ -11,7 +11,7 @@ $renderIconPicker = static function (string $selectedIcon, string $inputName = '
     <div class="menu-builder-icon-picker" data-menu-icon-picker>
         <input type="hidden"<?= $inputName !== '' ? ' name="' . esc_attr($inputName) . '"' : '' ?> value="<?= esc_attr($selectedIcon) ?>" data-menu-icon-value<?= $inputAttr !== '' ? ' ' . $inputAttr : '' ?>>
         <button
-            class="menu-builder-icon-trigger"
+            class="btn btn-light btn-icon menu-builder-icon-trigger"
             type="button"
             data-menu-icon-trigger
             aria-label="<?= esc_attr(t('menu.item_icon')) ?>"
@@ -24,7 +24,7 @@ $renderIconPicker = static function (string $selectedIcon, string $inputName = '
         </button>
         <div class="menu-builder-icon-options" data-menu-icon-options hidden>
             <button
-                class="menu-builder-icon-option<?= $selectedIcon === '' ? ' selected' : '' ?>"
+                class="btn btn-light btn-icon menu-builder-icon-option<?= $selectedIcon === '' ? ' selected' : '' ?>"
                 type="button"
                 data-menu-icon-option
                 data-icon=""
@@ -32,7 +32,7 @@ $renderIconPicker = static function (string $selectedIcon, string $inputName = '
             ></button>
             <?php foreach ($icons as $name): ?>
                 <button
-                    class="menu-builder-icon-option<?= $selectedIcon === $name ? ' selected' : '' ?>"
+                    class="btn btn-light btn-icon menu-builder-icon-option<?= $selectedIcon === $name ? ' selected' : '' ?>"
                     type="button"
                     data-menu-icon-option
                     data-icon="<?= esc_attr($name) ?>"

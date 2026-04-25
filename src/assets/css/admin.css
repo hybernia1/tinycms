@@ -24,7 +24,6 @@
     --btn-primary-hover-border: #345276;
     --btn-danger-hover-bg: #853d3d;
     --btn-danger-hover-border: #853d3d;
-    --admin-control-hover-bg: var(--btn-light-hover-bg);
     --sidebar-bg: #1f2937;
     --sidebar-text: var(--color-inverse);
     --sidebar-link: #d1d9e6;
@@ -851,10 +850,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .menu-builder-icon-option {
     width: 2.25rem;
     height: 2.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
 }
 
 .menu-builder-icon-preview,
@@ -885,12 +880,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     display: none;
 }
 
-.menu-builder-icon-option.selected {
-    color: var(--color-text);
-    background: var(--admin-control-hover-bg);
-    border-color: var(--primary);
-}
-
 .menu-builder-field-target select,
 .menu-builder-field-target .custom-select-button {
     color: var(--color-text-muted);
@@ -911,15 +900,11 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .menu-builder-action,
 .menu-builder-icon-trigger,
 .menu-builder-icon-option {
-    --admin-control-text: var(--color-text-muted);
+    --btn-border: var(--color-border-soft);
+    --btn-text: var(--color-text-muted);
     min-width: 2.25rem;
     height: 2.25rem;
     padding: var(--space-1);
-    border: 1px solid var(--color-border-soft);
-    background: var(--color-surface-muted);
-    color: var(--admin-control-text);
-    border-radius: var(--radius-sm);
-    transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
 }
 
 .table-col-actions .btn-icon:hover,
@@ -930,38 +915,30 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .menu-builder-icon-trigger:focus-visible,
 .menu-builder-icon-option:hover,
 .menu-builder-icon-option:focus-visible {
-    background: var(--admin-control-hover-bg);
-    border-color: var(--color-border);
-    color: var(--admin-control-text);
+    --btn-border: var(--color-border);
 }
 
-.table-col-actions .btn-icon:focus-visible,
-.menu-builder-action:focus-visible,
-.menu-builder-icon-trigger:focus-visible,
-.menu-builder-icon-option:focus-visible {
-    outline: 0;
-    box-shadow: var(--focus-ring);
+.menu-builder-icon-option.selected {
+    --btn-bg: var(--btn-light-hover-bg);
+    --btn-border: var(--primary);
+    --btn-text: var(--color-text);
 }
 
 .menu-builder-label-control .menu-builder-icon-trigger {
+    --btn-bg: transparent;
+    --btn-border: transparent;
     min-width: 2rem;
     width: 2rem;
     height: 2rem;
     padding: var(--space-1);
-    border-color: transparent;
-    background: transparent;
     box-shadow: none;
 }
 
 .menu-builder-label-control .menu-builder-icon-trigger:hover,
 .menu-builder-label-control .menu-builder-icon-trigger:focus-visible {
-    border-color: transparent;
-    background: var(--color-surface-muted);
-    color: var(--color-text);
-}
-
-.menu-builder-action {
-    justify-content: center;
+    --btn-bg: var(--color-surface-muted);
+    --btn-border: transparent;
+    --btn-text: var(--color-text);
 }
 
 .menu-builder-action-danger:hover,
@@ -1071,9 +1048,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
 .tag-picker {
     position: relative;
-    border: 1px solid var(--color-border);
     padding: var(--space-2);
-    background: var(--color-surface);
 }
 
 .tag-picker-field {
@@ -1108,6 +1083,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     min-width: 120px;
     width: auto;
     min-height: 0;
+    box-shadow: none;
 }
 
 .tag-picker-suggestions {
