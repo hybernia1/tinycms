@@ -4,7 +4,7 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$scripts = ['core.js', 'api.js', 'password-toggle.js'];
+$scripts = ['core.js', 'api.js', 'admin-ui/orchestrator.js'];
 ?>
 <!doctype html>
 <html lang="<?= esc_attr((string)$lang) ?>">
