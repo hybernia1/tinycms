@@ -112,6 +112,37 @@ const normalizeTextNodes = (root) => {
     });
 };
 
+const hasContentBefore = (node) => {
+    let current = node.previousSibling;
+    while (current) {
+        if (current.nodeType === Node.TEXT_NODE && current.textContent.trim() !== '') {
+            return true;
+        }
+        if (current.nodeType === Node.ELEMENT_NODE && (current.tagName === 'BR' || current.textContent.trim() !== '' || current.querySelector('img, iframe, hr, table'))) {
+            return true;
+        }
+        current = current.previousSibling;
+    }
+    return false;
+};
+
+const normalizeBlockquotes = (root) => {
+    root.querySelectorAll('blockquote').forEach((quote) => {
+        Array.prototype.slice.call(quote.children).forEach((child) => {
+            if (child.tagName !== 'P') {
+                return;
+            }
+            if (hasContentBefore(child)) {
+                quote.insertBefore(document.createElement('br'), child);
+            }
+            while (child.firstChild) {
+                quote.insertBefore(child.firstChild, child);
+            }
+            child.remove();
+        });
+    });
+};
+
 const blockedCleanTags = ['script', 'style', 'object', 'embed', 'form', 'input', 'button', 'textarea', 'select', 'option'];
 const allowedCleanTags = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col'];
 
@@ -246,6 +277,7 @@ const cleanSerializedHtml = (html) => {
         }
     });
     normalizeTextNodes(template.content);
+    normalizeBlockquotes(template.content);
     template.content.querySelectorAll('p.block-image-break').forEach((node) => {
         node.removeAttribute('class');
     });

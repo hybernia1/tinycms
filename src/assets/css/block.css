@@ -65,6 +65,25 @@
     min-height: 1.25rem;
 }
 
+:where(.wysiwyg-editor, .content-body) table {
+    width: 100%;
+    margin: 0 0 var(--space-3, 0.75rem);
+    border-collapse: collapse;
+}
+
+:where(.wysiwyg-editor, .content-body) th,
+:where(.wysiwyg-editor, .content-body) td {
+    padding: 0.5rem 0.625rem;
+    border: 1px solid var(--border-color, #d1d5db);
+    vertical-align: top;
+}
+
+:where(.wysiwyg-editor, .content-body) th {
+    font-weight: 600;
+    text-align: left;
+    background: var(--surface-muted, #f3f4f6);
+}
+
 .content-body {
     display: flow-root;
 }

@@ -22,6 +22,8 @@ $scriptGroups = [
         'editor/toolbar.js',
         'editor/blocks.js',
         'editor/link-modal.js',
+        'editor/links.js',
+        'editor/media.js',
         'editor/main.js',
     ],
     ['session.js'],
