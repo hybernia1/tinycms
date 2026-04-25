@@ -23,7 +23,7 @@ final class Settings extends Admin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function submitApiV1(callable $redirect): void
+    public function submitApiV1(): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;

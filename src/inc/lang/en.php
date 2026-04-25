@@ -314,6 +314,7 @@ return [
             'content' => 'Content',
             'media' => 'Media',
             'appearance' => 'Appearance',
+            'mail' => 'Mail',
         ],
         'fields' => [
             'app_lang' => 'Application language',
@@ -334,6 +335,12 @@ return [
             'footer_text' => 'Footer text',
             'website_url' => 'Website URL',
             'website_email' => 'Website email',
+            'mail_driver' => 'Mailer',
+            'smtp_host' => 'SMTP host',
+            'smtp_port' => 'SMTP port',
+            'smtp_secure' => 'SMTP security',
+            'smtp_username' => 'SMTP username',
+            'smtp_password' => 'SMTP password',
         ],
         'options' => [
             'front_home_content' => [
@@ -343,6 +350,15 @@ return [
             'allow_registration' => [
                 'disabled' => 'No',
                 'enabled' => 'Yes',
+            ],
+            'mail_driver' => [
+                'php' => 'PHP mail',
+                'smtp' => 'SMTP',
+            ],
+            'smtp_secure' => [
+                'none' => 'None',
+                'tls' => 'TLS',
+                'ssl' => 'SSL',
             ],
         ],
     ],

@@ -20,7 +20,7 @@ if (!function_exists('register_routes')) {
             } else {
                 $controller = $route['controller'] ?? null;
                 $action = (string)($route['action'] ?? '');
-                $withRedirect = (bool)($route['with_redirect'] ?? true);
+                $withRedirect = (bool)($route['with_redirect'] ?? !str_contains('/' . trim($path, '/') . '/', '/api/'));
                 $rawParams = (bool)($route['raw_params'] ?? false);
                 $params = (array)($route['params'] ?? []);
 

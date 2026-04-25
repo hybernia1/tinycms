@@ -56,7 +56,39 @@ final class Settings
             'siteauthor' => ['label_key' => 'settings.fields.siteauthor', 'section' => 'general', 'type' => 'text', 'default' => 'Admin'],
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'section' => 'general', 'type' => 'textarea', 'default' => ''],
             'website_url' => ['label_key' => 'settings.fields.website_url', 'section' => 'general', 'type' => 'text', 'default' => ''],
-            'website_email' => ['label_key' => 'settings.fields.website_email', 'section' => 'general', 'type' => 'text', 'default' => ''],
+            'website_email' => ['label_key' => 'settings.fields.website_email', 'section' => 'mail', 'type' => 'text', 'default' => ''],
+            'mail_driver' => [
+                'label_key' => 'settings.fields.mail_driver',
+                'section' => 'mail',
+                'type' => 'select',
+                'default' => 'php',
+                'options' => [
+                    'php' => I18n::t('settings.options.mail_driver.php'),
+                    'smtp' => I18n::t('settings.options.mail_driver.smtp'),
+                ],
+            ],
+            'smtp_host' => ['label_key' => 'settings.fields.smtp_host', 'section' => 'mail', 'type' => 'text', 'default' => ''],
+            'smtp_port' => [
+                'label_key' => 'settings.fields.smtp_port',
+                'section' => 'mail',
+                'type' => 'number',
+                'default' => '587',
+                'min' => 1,
+                'max' => 65535,
+            ],
+            'smtp_secure' => [
+                'label_key' => 'settings.fields.smtp_secure',
+                'section' => 'mail',
+                'type' => 'select',
+                'default' => 'tls',
+                'options' => [
+                    '' => I18n::t('settings.options.smtp_secure.none'),
+                    'tls' => I18n::t('settings.options.smtp_secure.tls'),
+                    'ssl' => I18n::t('settings.options.smtp_secure.ssl'),
+                ],
+            ],
+            'smtp_username' => ['label_key' => 'settings.fields.smtp_username', 'section' => 'mail', 'type' => 'text', 'default' => ''],
+            'smtp_password' => ['label_key' => 'settings.fields.smtp_password', 'section' => 'mail', 'type' => 'password', 'default' => ''],
             'front_home_content' => [
                 'label_key' => 'settings.fields.front_home_content',
                 'section' => 'content',
@@ -251,7 +283,11 @@ final class Settings
             }
 
             $value = trim((string)$rawValue);
-            if (($fields[$key]['type'] ?? '') === 'number') {
+            $type = (string)($fields[$key]['type'] ?? '');
+            if ($type === 'password' && $value === '' && isset($currentValues[$key])) {
+                $value = (string)$currentValues[$key];
+            }
+            if ($type === 'number') {
                 $value = $this->normalizeNumber($value, $fields[$key]);
             }
             if ($key === 'front_home_content') {
@@ -269,13 +305,13 @@ final class Settings
                     $value = $currentUrl;
                 }
             }
-            if (($fields[$key]['type'] ?? '') === 'select') {
+            if ($type === 'select') {
                 $options = (array)($fields[$key]['options'] ?? []);
                 if ($value !== '' && !array_key_exists($value, $options)) {
                     $value = (string)($fields[$key]['default'] ?? '');
                 }
             }
-            if (in_array($key, ['sitename', 'siteauthor', 'meta_description'], true)) {
+            if (in_array($key, ['sitename', 'siteauthor', 'meta_description', 'smtp_host', 'smtp_username', 'smtp_password'], true)) {
                 $value = $this->schemaConstraintValidator->truncate(
                     'settings',
                     'value',

@@ -27,7 +27,7 @@ final class ContentMedia extends Admin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function thumbnailDetachApiV1(callable $redirect, int $id): void
+    public function thumbnailDetachApiV1(int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -49,7 +49,7 @@ final class ContentMedia extends Admin
         ]);
     }
 
-    public function thumbnailSelectApiV1(callable $redirect, int $contentId, int $mediaId): void
+    public function thumbnailSelectApiV1(int $contentId, int $mediaId): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -78,7 +78,7 @@ final class ContentMedia extends Admin
         ]);
     }
 
-    public function mediaLibraryApiV1(callable $_redirect, int $contentId): void
+    public function mediaLibraryApiV1(int $contentId): void
     {
         if (!$this->guardApiAdmin()) {
             return;
@@ -109,7 +109,7 @@ final class ContentMedia extends Admin
         ]);
     }
 
-    public function mediaLibraryDeleteApiV1(callable $redirect, int $contentId, int $mediaId): void
+    public function mediaLibraryDeleteApiV1(int $contentId, int $mediaId): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -138,7 +138,7 @@ final class ContentMedia extends Admin
         ]);
     }
 
-    public function mediaLibraryUploadApiV1(callable $redirect, int $contentId): void
+    public function mediaLibraryUploadApiV1(int $contentId): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -182,7 +182,7 @@ final class ContentMedia extends Admin
         ]);
     }
 
-    public function mediaLibraryRenameApiV1(callable $redirect, int $contentId, int $mediaId): void
+    public function mediaLibraryRenameApiV1(int $contentId, int $mediaId): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -221,7 +221,7 @@ final class ContentMedia extends Admin
         ]);
     }
 
-    public function mediaAttachApiV1(callable $redirect, int $contentId, int $mediaId): void
+    public function mediaAttachApiV1(int $contentId, int $mediaId): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;

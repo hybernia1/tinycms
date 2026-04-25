@@ -23,7 +23,7 @@ final class Media extends Admin
         parent::__construct($authService, $flash, $csrf);
     }
 
-    public function listApiV1(callable $_redirect): void
+    public function listApiV1(): void
     {
         if (!$this->guardApiAdmin()) {
             return;
@@ -37,7 +37,7 @@ final class Media extends Admin
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
-    public function addApiV1(callable $redirect): void
+    public function addApiV1(): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -78,7 +78,7 @@ final class Media extends Admin
         ]);
     }
 
-    public function editApiV1(callable $redirect, int $id): void
+    public function editApiV1(int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
@@ -108,7 +108,7 @@ final class Media extends Admin
         ]);
     }
 
-    public function deleteApiV1(callable $redirect, int $id): void
+    public function deleteApiV1(int $id): void
     {
         if (!$this->guardApiAdminCsrf()) {
             return;
