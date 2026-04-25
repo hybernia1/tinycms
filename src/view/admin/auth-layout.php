@@ -4,7 +4,14 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$scripts = ['core.js', 'api/flash.js', 'api/http.js', 'api/forms.js', 'admin-ui/orchestrator.js'];
+$contentHtml = (string)($content ?? '');
+$scripts = ['core.js', 'api/flash.js', 'api/http.js'];
+if (str_contains($contentHtml, 'data-api-submit')) {
+    $scripts[] = 'api/forms.js';
+}
+if (str_contains($contentHtml, 'data-password-toggle')) {
+    $scripts[] = 'admin-ui/password-toggle.js';
+}
 ?>
 <!doctype html>
 <html lang="<?= esc_attr((string)$lang) ?>">

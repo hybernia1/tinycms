@@ -7,14 +7,47 @@ if (!defined('BASE_DIR')) {
 $currentPath = trim((string)($currentRoute ?? ''), '/');
 $authUser = $_SESSION['auth'] ?? null;
 $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
+$contentHtml = (string)($content ?? '');
+$headerActionType = (string)($headerAction['type'] ?? '');
+$hasApiForm = str_contains($contentHtml, 'data-api-submit');
+$hasApiList = str_contains($contentHtml, 'data-content-list')
+    || str_contains($contentHtml, 'data-terms-list')
+    || str_contains($contentHtml, 'data-media-list')
+    || str_contains($contentHtml, 'data-users-list');
+$hasEditor = str_contains($contentHtml, 'data-wysiwyg');
+$hasMediaLibrary = $hasEditor || str_contains($contentHtml, 'data-media-library-open');
+$hasPicker = str_contains($contentHtml, 'data-picker');
+$hasMenuBuilder = str_contains($contentHtml, 'data-menu-builder');
+$hasContentAutosave = str_contains($contentHtml, 'data-autosave-endpoint');
+$needsActionMenu = in_array($headerActionType, ['submit', 'save-menu', 'content-menu'], true);
+$adminUiScripts = ['admin-ui/admin-menu.js'];
+
+if (str_contains($contentHtml, '<select')) {
+    $adminUiScripts[] = 'admin-ui/custom-select.js';
+}
+if (str_contains($contentHtml, 'datetime-local')) {
+    $adminUiScripts[] = 'admin-ui/custom-datetime.js';
+}
+if (str_contains($contentHtml, 'data-password-toggle')) {
+    $adminUiScripts[] = 'admin-ui/password-toggle.js';
+}
+if (str_contains($contentHtml, 'custom-upload-field')) {
+    $adminUiScripts[] = 'admin-ui/custom-upload.js';
+}
+
 $scriptGroups = [
     ['core.js'],
     ['ui.js', 'loader.js'],
-    ['api/flash.js', 'api/http.js', 'api/forms.js', 'api/list-renderers.js', 'api/list.js'],
-    ['admin-ui/orchestrator.js'],
-    ['media-library/orchestrator.js'],
-    ['picker.js', 'menu-builder.js', 'content-autosave.js', 'action-menu.js'],
-    ['editor/orchestrator.js'],
+    ['api/flash.js', 'api/http.js'],
+    $hasApiForm ? ['api/forms.js'] : [],
+    $hasApiList ? ['api/list-renderers.js', 'api/list.js'] : [],
+    $adminUiScripts,
+    $hasMediaLibrary ? ['media-library/orchestrator.js'] : [],
+    $hasPicker ? ['picker.js'] : [],
+    $hasMenuBuilder ? ['menu-builder.js'] : [],
+    $hasContentAutosave ? ['content-autosave.js'] : [],
+    $needsActionMenu ? ['action-menu.js'] : [],
+    $hasEditor ? ['editor/orchestrator.js'] : [],
     ['session.js'],
 ];
 $scripts = array_merge(...$scriptGroups);
