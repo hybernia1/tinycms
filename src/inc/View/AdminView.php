@@ -207,9 +207,7 @@ final class AdminView
                 'adminMenu' => $this->adminMenu(),
                 'adminI18n' => $this->adminI18n(),
                 'imageUploadAccept' => Upload::imageAccept(),
-                'siteImageUploadAccept' => Upload::siteImageAccept(),
                 'imageUploadTypesLabel' => Upload::imageExtensionsLabel(),
-                'siteImageUploadTypesLabel' => Upload::siteImageExtensionsLabel(),
             ]
         ));
     }

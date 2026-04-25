@@ -144,7 +144,7 @@ $apiContent = new ApiContentController($authService, $contentService, $termServi
 $apiContentMedia = new ApiContentMediaController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
 $apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, $flash, $csrf);
 $apiMenu = new ApiMenuController($authService, $menuService, $flash, $csrf);
-$apiSettings = new ApiSettingsController($authService, $settingsService, $uploadService, $flash, $csrf);
+$apiSettings = new ApiSettingsController($authService, $settingsService, $flash, $csrf);
 $apiTerm = new ApiTermController($authService, $termService, $flash, $csrf);
 
 require BASE_DIR . '/' . INC_DIR . 'routes/front.php';

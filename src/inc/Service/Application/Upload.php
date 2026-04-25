@@ -10,20 +10,10 @@ use App\Service\Support\Media;
 final class Upload
 {
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-    private const SITE_IMAGE_EXTENSIONS = ['png', 'ico', 'svg', 'jpg', 'jpeg', 'webp', 'gif'];
     private const MAX_WEBP_WIDTH = 1024;
     private const MIME_TO_EXTENSION = [
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
-        'image/webp' => 'webp',
-        'image/gif' => 'gif',
-    ];
-    private const SITE_IMAGE_MIME_TO_EXTENSION = [
-        'image/png' => 'png',
-        'image/x-icon' => 'ico',
-        'image/vnd.microsoft.icon' => 'ico',
-        'image/svg+xml' => 'svg',
-        'image/jpeg' => 'jpg',
         'image/webp' => 'webp',
         'image/gif' => 'gif',
     ];
@@ -141,16 +131,6 @@ final class Upload
         }
     }
 
-    public function uploadFavicon(array $file): array
-    {
-        return $this->uploadSiteImage($file, 'favicon');
-    }
-
-    public function uploadLogo(array $file): array
-    {
-        return $this->uploadSiteImage($file, 'logo');
-    }
-
     public static function imageAccept(): string
     {
         return self::buildAccept(self::ALLOWED_EXTENSIONS, self::MIME_TO_EXTENSION);
@@ -159,63 +139,6 @@ final class Upload
     public static function imageExtensionsLabel(): string
     {
         return self::buildExtensionsLabel(self::ALLOWED_EXTENSIONS);
-    }
-
-    public static function siteImageAccept(): string
-    {
-        return self::buildAccept(self::SITE_IMAGE_EXTENSIONS, self::SITE_IMAGE_MIME_TO_EXTENSION);
-    }
-
-    public static function siteImageExtensionsLabel(): string
-    {
-        return self::buildExtensionsLabel(self::SITE_IMAGE_EXTENSIONS);
-    }
-
-    public function deleteRelativeFile(string $path): void
-    {
-        $trimmedPath = trim($path);
-        if ($trimmedPath === '') {
-            return;
-        }
-
-        $absolute = $this->rootPath . '/' . ltrim($trimmedPath, '/');
-        if (is_file($absolute)) {
-            @unlink($absolute);
-        }
-    }
-
-    private function uploadSiteImage(array $file, string $prefix): array
-    {
-        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            return ['success' => false, 'error' => I18n::t('upload.file_upload_failed')];
-        }
-
-        $tmpPath = (string)($file['tmp_name'] ?? '');
-        if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
-            return ['success' => false, 'error' => I18n::t('upload.invalid_upload')];
-        }
-
-        $mime = $this->detectMime($tmpPath);
-        $extension = self::SITE_IMAGE_MIME_TO_EXTENSION[$mime] ?? '';
-        if ($extension === '') {
-            return ['success' => false, 'error' => I18n::t('upload.unsupported_file_type')];
-        }
-
-        $subdir = 'uploads/img';
-        $absDir = $this->rootPath . '/' . $subdir;
-        if (!is_dir($absDir) && !mkdir($absDir, 0775, true) && !is_dir($absDir)) {
-            return ['success' => false, 'error' => I18n::t('upload.target_dir_create_failed')];
-        }
-
-        $name = $prefix . '-' . date('YmdHis') . '-' . random_int(1000, 9999) . '.' . $extension;
-        $path = $subdir . '/' . $name;
-        $absolute = $this->rootPath . '/' . $path;
-
-        if (!move_uploaded_file($tmpPath, $absolute)) {
-            return ['success' => false, 'error' => I18n::t('upload.save_to_disk_failed')];
-        }
-
-        return ['success' => true, 'data' => ['path' => $path]];
     }
 
     private function detectMime(string $path): string
