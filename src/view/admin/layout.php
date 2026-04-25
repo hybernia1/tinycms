@@ -9,7 +9,8 @@ $authUser = $_SESSION['auth'] ?? null;
 $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 $scriptGroups = [
     ['core.js'],
-    ['ui.js', 'loader.js', 'api.js'],
+    ['ui.js', 'loader.js'],
+    ['api/flash.js', 'api/http.js', 'api/forms.js', 'api/list-renderers.js', 'api/list.js'],
     ['admin-ui/orchestrator.js'],
     ['media-library/orchestrator.js'],
     ['picker.js', 'menu-builder.js', 'content-autosave.js', 'action-menu.js'],
