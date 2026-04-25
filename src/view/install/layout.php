@@ -4,7 +4,14 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$scripts = ['core.js', 'ui.js', 'admin-ui/orchestrator.js'];
+$contentHtml = (string)($content ?? '');
+$scripts = ['core.js', 'ui.js'];
+if (str_contains($contentHtml, '<select')) {
+    $scripts[] = 'admin-ui/custom-select.js';
+}
+if (str_contains($contentHtml, 'data-password-toggle')) {
+    $scripts[] = 'admin-ui/password-toggle.js';
+}
 ?>
 <!doctype html>
 <html lang="<?= esc_attr((string)$lang) ?>">
