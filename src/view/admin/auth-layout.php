@@ -4,7 +4,7 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$scripts = ['core.js', 'api.js', 'password-toggle.js'];
+$scripts = ['core.js', 'api/flash.js', 'api/http.js', 'api/forms.js', 'admin-ui/orchestrator.js'];
 ?>
 <!doctype html>
 <html lang="<?= esc_attr((string)$lang) ?>">

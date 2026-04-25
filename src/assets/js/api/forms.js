@@ -1,0 +1,168 @@
+(() => {
+    const app = window.tinycms = window.tinycms || {};
+    const api = app.api = app.api || {};
+    const pushFlash = api.pushFlash || (() => {});
+    const storeFlash = api.storeFlash || (() => {});
+    const updateCsrfFields = api.http?.updateCsrfFields || (() => {});
+
+    const showError = (message) => {
+        const text = String(message || '').trim();
+        if (text !== '') {
+            pushFlash('error', text);
+        }
+    };
+
+    const setFormMessage = (form, message, tone = 'error') => {
+        const container = form.querySelector('[data-api-form-message]')
+            || form.parentElement?.querySelector('[data-api-form-message]');
+        if (!container) {
+            return false;
+        }
+
+        const text = String(message || '').trim();
+        container.textContent = text;
+        container.hidden = text === '';
+        container.classList.remove('text-danger', 'text-success');
+        if (text !== '') {
+            container.classList.add(tone === 'success' ? 'text-success' : 'text-danger');
+        }
+        return true;
+    };
+
+    const escapeSelector = (value) => {
+        if (window.CSS && typeof window.CSS.escape === 'function') {
+            return window.CSS.escape(value);
+        }
+        return String(value).replace(/["\\]/g, '\\$&');
+    };
+
+    const clearFieldErrors = (form) => {
+        form.querySelectorAll('.api-field-error').forEach((node) => node.remove());
+        form.querySelectorAll('[aria-invalid="true"]').forEach((node) => node.removeAttribute('aria-invalid'));
+    };
+
+    const findField = (form, name) => {
+        const normalized = String(name || '').trim();
+        if (normalized === '') {
+            return null;
+        }
+
+        const direct = form.querySelector(`[name="${escapeSelector(normalized)}"]`);
+        if (direct) {
+            return direct;
+        }
+
+        const indexed = normalized.match(/^([a-zA-Z0-9_-]+)\[(\d+)\]$/);
+        if (indexed) {
+            const fields = form.querySelectorAll(`[name="${escapeSelector(indexed[1])}[]"]`);
+            return fields[Number(indexed[2])] || null;
+        }
+
+        if (!normalized.includes('[')) {
+            const bracketed = form.querySelector(`[name="settings[${escapeSelector(normalized)}]"]`);
+            if (bracketed) {
+                return bracketed;
+            }
+        }
+
+        return null;
+    };
+
+    const applyFieldErrors = (form, errors) => {
+        if (!errors || typeof errors !== 'object') {
+            return;
+        }
+
+        const errorAnchor = (field) => {
+            if (field.nextElementSibling?.classList.contains('custom-select')) {
+                return field.nextElementSibling;
+            }
+            return field.closest('.field-with-icon') || field;
+        };
+
+        Object.entries(errors).forEach(([name, message]) => {
+            const field = findField(form, name);
+            const text = String(message || '').trim();
+            if (!field || text === '') {
+                return;
+            }
+
+            field.setAttribute('aria-invalid', 'true');
+            const error = document.createElement('small');
+            error.className = 'text-danger api-field-error';
+            error.textContent = text;
+            errorAnchor(field).insertAdjacentElement('afterend', error);
+        });
+    };
+
+    const submitApiForm = async (form) => {
+        const response = await fetch(form.action, {
+            method: (form.method || 'POST').toUpperCase(),
+            body: new FormData(form),
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        const payload = await response.json().catch(() => null);
+        updateCsrfFields(payload);
+        if (!response.ok || payload?.ok !== true) {
+            clearFieldErrors(form);
+            applyFieldErrors(form, payload?.error?.errors || {});
+            const errorMessage = payload?.error?.message || '';
+            const hasInlineMessage = setFormMessage(form, errorMessage, 'error');
+            if (!hasInlineMessage) {
+                showError(errorMessage);
+            }
+            return;
+        }
+
+        clearFieldErrors(form);
+        setFormMessage(form, '');
+
+        const redirect = String(payload?.data?.redirect || '').trim();
+        const successMessage = String(payload?.data?.message || '').trim();
+        if (redirect !== '') {
+            if (successMessage !== '') {
+                storeFlash('success', successMessage);
+            }
+            const target = /^https?:\/\//i.test(redirect) || redirect.startsWith('/')
+                ? redirect
+                : '/' + redirect.replace(/^\/+/, '');
+            window.location.href = target;
+            return;
+        }
+
+        if (form.hasAttribute('data-stay-on-page')) {
+            if (successMessage !== '') {
+                const hasInlineMessage = setFormMessage(form, successMessage, 'success');
+                if (!hasInlineMessage) {
+                    pushFlash('success', successMessage);
+                }
+            }
+            return;
+        }
+
+        if (successMessage !== '') {
+            pushFlash('success', successMessage);
+        }
+
+        window.location.reload();
+    };
+
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || !form.hasAttribute('data-api-submit')) {
+            return;
+        }
+
+        event.preventDefault();
+        submitApiForm(form);
+    });
+
+    api.form = {
+        submit: submitApiForm,
+        init: () => {},
+    };
+})();

@@ -9,23 +9,12 @@ $authUser = $_SESSION['auth'] ?? null;
 $headerAction = is_array($headerAction ?? null) ? $headerAction : [];
 $scriptGroups = [
     ['core.js'],
-    ['ui.js', 'loader.js', 'api.js'],
-    ['admin-menu.js', 'custom-select.js', 'custom-datetime.js', 'password-toggle.js', 'custom-upload.js'],
-    [
-        'media-library/core.js',
-        'media-library/modal.js',
-    ],
+    ['ui.js', 'loader.js'],
+    ['api/flash.js', 'api/http.js', 'api/forms.js', 'api/list-renderers.js', 'api/list.js'],
+    ['admin-ui/orchestrator.js'],
+    ['media-library/orchestrator.js'],
     ['picker.js', 'menu-builder.js', 'content-autosave.js', 'action-menu.js'],
-    [
-        'editor/sanitize.js',
-        'editor/selection.js',
-        'editor/toolbar.js',
-        'editor/blocks.js',
-        'editor/link-modal.js',
-        'editor/links.js',
-        'editor/media.js',
-        'editor/main.js',
-    ],
+    ['editor/orchestrator.js'],
     ['session.js'],
 ];
 $scripts = array_merge(...$scriptGroups);

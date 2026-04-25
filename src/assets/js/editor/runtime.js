@@ -7,7 +7,7 @@
     };
     var requestJson = app.api?.http?.requestJson;
     var postForm = app.api?.http?.postForm;
-    var editorModules = app.editor || {};
+    var editorModules = app.editor = app.editor || {};
     var sanitize = editorModules.sanitize || {};
     var blocks = editorModules.blocks || {};
     var selection = editorModules.selection || {};
@@ -49,6 +49,10 @@
     var createLinkToolButton = toolbarModule.createLinkToolButton;
     var createListGroup = toolbarModule.createListGroup;
     function init(textarea) {
+        if (!textarea || textarea.dataset.wysiwygReady === '1') {
+            return;
+        }
+        textarea.dataset.wysiwygReady = '1';
         editorCounter += 1;
         var editorId = 'wysiwyg-' + editorCounter;
         var wrapper = document.createElement('div');
@@ -957,8 +961,20 @@
         linkController.updateApplyState();
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var textareas = document.querySelectorAll('textarea[data-wysiwyg]');
+    function initAll(root) {
+        var scope = root || document;
+        var textareas = scope.matches && scope.matches('textarea[data-wysiwyg]')
+            ? [scope]
+            : scope.querySelectorAll('textarea[data-wysiwyg]');
         textareas.forEach(init);
-    });
+    }
+
+    editorModules.init = init;
+    editorModules.initAll = initAll;
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+            initAll(document);
+        });
+    }
 })();
