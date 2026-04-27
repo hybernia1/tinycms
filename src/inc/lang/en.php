@@ -102,8 +102,17 @@ return [
             'media' => 'Media',
             'terms' => 'Tags',
             'menu' => 'Menu',
+            'widgets' => 'Widgets',
             'settings' => 'Settings',
         ],
+    ],
+    'widgets' => [
+        'add_widget' => 'Add widget',
+        'move_down' => 'Move down',
+        'move_up' => 'Move up',
+        'remove' => 'Remove',
+        'saved' => 'Widgets saved.',
+        'empty' => 'No widgets available.',
     ],
     'front' => [
         'prev' => 'Previous',

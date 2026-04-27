@@ -9,6 +9,7 @@ final class I18n
     private static ?string $locale = null;
     private static array $catalogues = [];
     private static array $cataloguePaths = [];
+    private static array $sharedCataloguePaths = [];
 
     public static function setLocale(string $locale): void
     {
@@ -51,6 +52,14 @@ final class I18n
         $clean = rtrim(str_replace('\\', '/', trim($path)), '/');
         if ($clean !== '') {
             self::$cataloguePaths[] = $clean;
+        }
+    }
+
+    public static function addCataloguePath(string $path): void
+    {
+        $clean = rtrim(str_replace('\\', '/', trim($path)), '/');
+        if ($clean !== '' && !in_array($clean, self::$sharedCataloguePaths, true)) {
+            self::$sharedCataloguePaths[] = $clean;
         }
     }
 
@@ -137,7 +146,7 @@ final class I18n
 
     private static function cataloguePaths(): array
     {
-        return array_merge(array_reverse(self::$cataloguePaths), [self::baseLangPath()]);
+        return array_merge(array_reverse(self::$cataloguePaths), array_reverse(self::$sharedCataloguePaths), [self::baseLangPath()]);
     }
 
     private static function baseLangPath(): string

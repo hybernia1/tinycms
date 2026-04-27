@@ -102,8 +102,17 @@ return [
             'media' => 'Média',
             'terms' => 'Štítky',
             'menu' => 'Menu',
+            'widgets' => 'Widgety',
             'settings' => 'Nastavení',
         ],
+    ],
+    'widgets' => [
+        'add_widget' => 'Přidat widget',
+        'move_down' => 'Posunout dolů',
+        'move_up' => 'Posunout nahoru',
+        'remove' => 'Odebrat',
+        'saved' => 'Widgety byly uloženy.',
+        'empty' => 'Nejsou dostupné žádné widgety.',
     ],
     'front' => [
         'prev' => 'Predchozi',

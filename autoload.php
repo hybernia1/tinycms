@@ -25,6 +25,14 @@ if (!defined('ASSETS_DIR')) {
     define('ASSETS_DIR', SRC_DIR . 'assets/');
 }
 
+if (!defined('EXTENSIONS_DIR')) {
+    define('EXTENSIONS_DIR', 'extensions/');
+}
+
+if (!defined('THEMES_DIR')) {
+    define('THEMES_DIR', EXTENSIONS_DIR . 'themes/');
+}
+
 if (!defined('APP_DEBUG')) {
     define('APP_DEBUG', false);
 }

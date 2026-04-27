@@ -38,6 +38,12 @@ final class SchemaDefinition
                 'icon' => ['max' => 100, 'nullable' => true],
                 'link_target' => ['max' => 20, 'nullable' => false, 'allowed' => ['_self', '_blank']],
             ],
+            'extensions' => [
+                'extension_type' => ['max' => 50, 'nullable' => false],
+                'name' => ['max' => 100, 'nullable' => false],
+                'area' => ['max' => 100, 'nullable' => true],
+                'instance_key' => ['max' => 100, 'nullable' => false],
+            ],
         ];
     }
 
@@ -50,6 +56,7 @@ final class SchemaDefinition
         $contentTerms = $prefix . 'content_terms';
         $contentMedia = $prefix . 'content_media';
         $settings = $prefix . 'settings';
+        $extensions = $prefix . 'extensions';
         $fkMediaAuthorUser = self::constraintName($prefix, 'fk_media_author_user');
         $fkContentAuthorUser = self::constraintName($prefix, 'fk_content_author_user');
         $fkContentThumbnailMedia = self::constraintName($prefix, 'fk_content_thumbnail_media');
@@ -134,6 +141,22 @@ final class SchemaDefinition
                 key_name VARCHAR(100) NOT NULL,
                 value VARCHAR(1000) DEFAULT NULL,
                 PRIMARY KEY (key_name)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
+            "CREATE TABLE IF NOT EXISTS $extensions (
+                id INT NOT NULL AUTO_INCREMENT,
+                extension_type VARCHAR(50) NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                area VARCHAR(100) DEFAULT NULL,
+                instance_key VARCHAR(100) NOT NULL,
+                enabled TINYINT(1) NOT NULL DEFAULT 1,
+                position INT NOT NULL DEFAULT 0,
+                settings TEXT DEFAULT NULL,
+                created DATETIME NOT NULL DEFAULT (NOW()),
+                updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                UNIQUE KEY uq_extensions_type_instance (extension_type, instance_key),
+                KEY idx_extensions_type_area_position (extension_type, area, position),
+                KEY idx_extensions_type_name (extension_type, name)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
         ], self::menuDdl($prefix));
     }

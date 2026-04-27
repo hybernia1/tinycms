@@ -20,4 +20,6 @@ return [
     'front.not_found_title' => 'Stránka nebyla nalezena',
     'front.not_found_text' => 'Požadovaná stránka neexistuje.',
     'front.not_found_home' => 'Zpět na úvod',
+    'theme.sidebar.left' => 'Levý sidebar',
+    'theme.sidebar.right' => 'Pravý sidebar',
 ];

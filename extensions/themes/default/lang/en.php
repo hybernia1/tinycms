@@ -20,4 +20,6 @@ return [
     'front.not_found_title' => 'Page not found',
     'front.not_found_text' => 'The requested page does not exist.',
     'front.not_found_home' => 'Back to homepage',
+    'theme.sidebar.left' => 'Left sidebar',
+    'theme.sidebar.right' => 'Right sidebar',
 ];

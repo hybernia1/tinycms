@@ -6,6 +6,7 @@ namespace App\Service\Front;
 use App\Service\Application\Menu;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Date;
+use App\Service\Support\ExtensionPaths;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
@@ -20,7 +21,8 @@ final class Theme
 
     public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu)
     {
-        $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
+        $clean = trim($theme, '/\\');
+        $this->theme = preg_match('/^[a-z0-9_-]+$/i', $clean) === 1 ? $clean : 'default';
         $this->slugger = new Slugger();
     }
 
@@ -156,8 +158,7 @@ final class Theme
 
     public function themeUrl(string $path = ''): string
     {
-        $themeDir = trim((string)(defined('THEMES_DIR') ? THEMES_DIR : 'themes/'), '/');
-        return $this->url(trim($themeDir . '/' . $this->theme . '/' . ltrim($path, '/'), '/'));
+        return $this->url(ExtensionPaths::themeUrlPath($this->theme, $path));
     }
 
     public function mediaUrl(string $path = '', string $size = 'origin'): string

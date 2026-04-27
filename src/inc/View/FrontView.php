@@ -4,9 +4,12 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Service\Application\Menu;
+use App\Service\Application\Widgets as WidgetSettings;
 use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
+use App\Service\Front\WidgetExtensions;
 use App\Service\Infrastructure\Router\Router;
+use App\Service\Support\ExtensionPaths;
 use App\Service\Support\I18n;
 
 final class FrontView
@@ -91,7 +94,6 @@ final class FrontView
         ]);
     }
 
-
     public function notFound(): void
     {
         http_response_code(404);
@@ -116,6 +118,10 @@ final class FrontView
         I18n::pushCataloguePath($this->themeLangPath());
 
         try {
+            WidgetExtensions::load($this->rootPath);
+            $this->loadThemeFunctions();
+            do_action('theme_loaded', $this->theme, $theme);
+            (new WidgetSettings())->apply();
             $theme->setContext($data);
             extract($data, EXTR_SKIP);
 
@@ -136,24 +142,20 @@ final class FrontView
 
     private function resolveTheme(string $theme): string
     {
-        $clean = trim($theme);
-        if ($clean === '') {
+        $clean = trim($theme, '/\\');
+        if ($clean === '' || preg_match('/^[a-z0-9_-]+$/i', $clean) !== 1) {
             return 'default';
         }
 
-        $path = $this->themePath($clean);
-        return is_dir($path) ? $clean : 'default';
+        return $this->themeExists($clean) ? $clean : 'default';
     }
 
     private function resolveThemeFile(string $file): string
     {
-        $path = $this->themePath($this->theme) . '/' . ltrim($file, '/');
-        $real = realpath($path);
-        $root = realpath($this->themePath($this->theme));
-        $normalizedReal = $real === false ? '' : str_replace('\\', '/', $real);
-        $normalizedRoot = $root === false ? '' : str_replace('\\', '/', $root);
+        $themePath = $this->themePath($this->theme);
+        $real = ExtensionPaths::safeFile($themePath . '/' . ltrim($file, '/'), $themePath);
 
-        if ($normalizedReal === '' || $normalizedRoot === '' || !str_starts_with($normalizedReal, $normalizedRoot) || !is_file($real)) {
+        if ($real === '') {
             http_response_code(404);
             exit('404');
         }
@@ -161,10 +163,27 @@ final class FrontView
         return $real;
     }
 
+    private function loadThemeFunctions(): void
+    {
+        $themePath = $this->themePath($this->theme);
+        $real = ExtensionPaths::safeFile($themePath . '/functions.php', $themePath);
+
+        if ($real === '') {
+            return;
+        }
+
+        require_once $real;
+    }
+
     private function themePath(string $theme): string
     {
-        $themeDir = trim((string)(defined('THEMES_DIR') ? THEMES_DIR : 'themes/'), '/');
-        return $this->rootPath . '/' . $themeDir . '/' . trim($theme, '/');
+        return ExtensionPaths::themePath($this->rootPath, $theme);
+    }
+
+    private function themeExists(string $theme): bool
+    {
+        $path = $this->themePath($theme);
+        return is_dir($path) && ExtensionPaths::safeFile($path . '/layout.php', $path) !== '';
     }
 
     private function themeLangPath(): string
@@ -181,5 +200,4 @@ final class FrontView
             I18n::popCataloguePath();
         }
     }
-
 }

@@ -2,9 +2,72 @@
 declare(strict_types=1);
 
 use App\Service\Front\Theme;
+use App\Service\Front\Widgets;
+use App\Service\Support\Hooks;
 use App\Service\Support\Escape;
 use App\Service\Support\I18n;
 use App\Service\Support\RequestContext;
+
+function add_action(string $hook, callable $callback, int $priority = 10, int $acceptedArgs = 99): void
+{
+    Hooks::add($hook, $callback, $priority, $acceptedArgs);
+}
+
+function do_action(string $hook, mixed ...$args): void
+{
+    Hooks::action($hook, ...$args);
+}
+
+function add_filter(string $hook, callable $callback, int $priority = 10, int $acceptedArgs = 99): void
+{
+    Hooks::add($hook, $callback, $priority, $acceptedArgs);
+}
+
+function apply_filters(string $hook, mixed $value, mixed ...$args): mixed
+{
+    return Hooks::filter($hook, $value, ...$args);
+}
+
+function register_sidebar(string $id, array $options = []): void
+{
+    Widgets::registerSidebar($id, $options);
+}
+
+function register_widget(string $id, callable $callback, array $options = []): void
+{
+    Widgets::define($id, $callback, $options);
+}
+
+function add_widget(string $sidebar, callable $callback, int $priority = 10, int $acceptedArgs = 0): void
+{
+    Widgets::add($sidebar, $callback, $priority, $acceptedArgs);
+}
+
+function add_widget_instance(string $sidebar, string $widget, array $settings = [], int $priority = 10): void
+{
+    Widgets::addDefined($sidebar, $widget, $settings, $priority);
+}
+
+function has_widgets(string $sidebar): bool
+{
+    return Widgets::has($sidebar);
+}
+
+function get_widgets(string $sidebar): string
+{
+    return (string)apply_filters('sidebar_html', Widgets::render($sidebar), $sidebar);
+}
+
+function widget_box(string $title, string $content, string $class = ''): string
+{
+    $clean = trim($content);
+    if ($clean === '') {
+        return '';
+    }
+
+    $classes = trim('widget ' . $class);
+    return '<section class="' . esc_attr($classes) . '"><h2 class="widget-title">' . esc_html($title) . '</h2>' . $clean . '</section>';
+}
 
 function t(string $key, ?string $fallback = null): string
 {
@@ -30,7 +93,7 @@ function icon_sprite(): string
 
 function site_title(): string
 {
-    return Theme::current()?->siteTitle() ?? 'TinyCMS';
+    return (string)apply_filters('site_title', Theme::current()?->siteTitle() ?? 'TinyCMS');
 }
 
 function site_url(string $path = ''): string
@@ -67,56 +130,58 @@ function theme_url(string $path = ''): string
 
 function get_head(): string
 {
-    return Theme::current()?->getHead() ?? '';
+    return (string)apply_filters('head', Theme::current()?->getHead() ?? '');
 }
 
 function get_menu(array $options = []): string
 {
-    return Theme::current()?->menu($options) ?? '';
+    return (string)apply_filters('menu_html', Theme::current()?->menu($options) ?? '', $options);
 }
 
 function get_footer(): string
 {
-    return esc_content(Theme::current()?->footerText() ?? '');
+    return esc_content(apply_filters('footer_text', Theme::current()?->footerText() ?? ''));
 }
 
 function get_search_form(string $action = 'search', ?string $query = null): string
 {
     $query ??= (string)($_GET['q'] ?? '');
-    return Theme::current()?->searchForm($action, $query, [
+    $form = Theme::current()?->searchForm($action, $query, [
         'placeholder' => t('front.search_placeholder'),
         'button' => t('front.search_button'),
     ]) ?? '';
+
+    return (string)apply_filters('search_form', $form, $action, $query);
 }
 
 function get_title(array $item): string
 {
-    return Theme::current()?->contentTitle($item) ?? trim((string)($item['name'] ?? ''));
+    return (string)apply_filters('content_title', Theme::current()?->contentTitle($item) ?? trim((string)($item['name'] ?? '')), $item);
 }
 
 function get_excerpt(array $item, int $limit = 0): string
 {
-    return Theme::current()?->contentExcerpt($item, $limit) ?? trim(strip_tags((string)($item['excerpt'] ?? '')));
+    return (string)apply_filters('content_excerpt', Theme::current()?->contentExcerpt($item, $limit) ?? trim(strip_tags((string)($item['excerpt'] ?? ''))), $item, $limit);
 }
 
 function get_content(array $item): string
 {
-    return Theme::current()?->contentBody($item) ?? esc_content($item['body'] ?? '');
+    return esc_content(apply_filters('content_body', Theme::current()?->contentBody($item) ?? ($item['body'] ?? ''), $item));
 }
 
 function get_permalink(array $item): string
 {
-    return Theme::current()?->contentUrl($item) ?? '';
+    return (string)apply_filters('content_url', Theme::current()?->contentUrl($item) ?? '', $item);
 }
 
 function get_thumbnail(array $item, array $options = []): string
 {
-    return Theme::current()?->contentThumbnail($item, $options) ?? '';
+    return (string)apply_filters('content_thumbnail', Theme::current()?->contentThumbnail($item, $options) ?? '', $item, $options);
 }
 
 function get_thumbnail_url(array $item, string $size = 'webp'): string
 {
-    return Theme::current()?->contentThumbnailUrl($item, $size) ?? '';
+    return (string)apply_filters('content_thumbnail_url', Theme::current()?->contentThumbnailUrl($item, $size) ?? '', $item, $size);
 }
 
 function get_author(array $item, string $fallback = ''): string

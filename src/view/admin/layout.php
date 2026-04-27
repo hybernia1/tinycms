@@ -18,6 +18,7 @@ $hasEditor = str_contains($contentHtml, 'data-wysiwyg');
 $hasMediaLibrary = $hasEditor || str_contains($contentHtml, 'data-media-library-open');
 $hasPicker = str_contains($contentHtml, 'data-picker');
 $hasMenuBuilder = str_contains($contentHtml, 'data-menu-builder');
+$hasWidgetManager = str_contains($contentHtml, 'data-widget-manager');
 $hasContentAutosave = str_contains($contentHtml, 'data-autosave-endpoint');
 $needsActionMenu = in_array($headerActionType, ['submit', 'save-menu', 'content-menu'], true);
 $adminUiScripts = ['admin-ui/admin-menu.js'];
@@ -45,6 +46,7 @@ $scriptGroups = [
     $hasMediaLibrary ? ['media-library/orchestrator.js'] : [],
     $hasPicker ? ['picker.js'] : [],
     $hasMenuBuilder ? ['menu-builder.js'] : [],
+    $hasWidgetManager ? ['widget-manager.js'] : [],
     $hasContentAutosave ? ['content-autosave.js'] : [],
     $needsActionMenu ? ['action-menu.js'] : [],
     $hasEditor ? ['editor/orchestrator.js'] : [],

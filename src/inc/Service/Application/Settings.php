@@ -7,6 +7,7 @@ use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Support\Date;
+use App\Service\Support\ExtensionPaths;
 use App\Service\Support\I18n;
 use App\Service\Support\RequestContext;
 
@@ -168,8 +169,7 @@ final class Settings
 
     private function themeOptions(): array
     {
-        $themesDir = defined('THEMES_DIR') ? (string)THEMES_DIR : 'themes/';
-        $path = rtrim(BASE_DIR . '/' . trim($themesDir, '/'), '/');
+        $path = ExtensionPaths::themesPath(BASE_DIR);
         if (!is_dir($path)) {
             return ['default' => 'default'];
         }
@@ -186,12 +186,12 @@ final class Settings
             }
 
             $fullPath = $path . '/' . $item;
-            if (!is_dir($fullPath)) {
+            if (!is_dir($fullPath) || !is_file($fullPath . '/layout.php')) {
                 continue;
             }
 
             $key = trim($item);
-            if ($key === '') {
+            if ($key === '' || preg_match('/^[a-z0-9_-]+$/i', $key) !== 1) {
                 continue;
             }
             $options[$key] = $key;

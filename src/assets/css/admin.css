@@ -315,6 +315,85 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     border-top: 1px solid var(--color-border-soft);
 }
 
+.widget-manager-grid {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.widget-manager-area {
+    overflow: visible;
+    position: relative;
+}
+
+.widget-manager-area:focus-within {
+    z-index: 5;
+}
+
+.widget-manager-list {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-3);
+}
+
+.widget-manager-item {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+}
+
+.widget-manager-item-header,
+.widget-manager-add,
+.widget-manager-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.widget-manager-item-header {
+    justify-content: space-between;
+}
+
+.widget-manager-actions {
+    flex: 0 0 auto;
+}
+
+.widget-manager-add {
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.widget-manager-add .custom-select,
+.widget-manager-add select {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.widget-manager-add .custom-select-dropdown {
+    z-index: 80;
+}
+
+.widget-manager-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+}
+
+.widget-manager-field {
+    display: grid;
+    gap: var(--space-1);
+}
+
+@media (min-width: 900px) {
+    .widget-manager-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 .admin-header-action-menu {
     position: relative;
 }
