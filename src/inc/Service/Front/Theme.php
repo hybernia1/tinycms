@@ -17,6 +17,7 @@ final class Theme
     private string $theme;
     private Slugger $slugger;
     private array $context = [];
+    private ?\Closure $includeThemeFile = null;
 
     public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu)
     {
@@ -72,6 +73,47 @@ final class Theme
     public function setContext(array $context): void
     {
         $this->context = $context;
+    }
+
+    public function setIncludeThemeFile(callable $includeThemeFile): void
+    {
+        $this->includeThemeFile = \Closure::fromCallable($includeThemeFile);
+    }
+
+    public function include(string $name, array $context = []): void
+    {
+        if ($this->includeThemeFile === null) {
+            return;
+        }
+
+        $previous = $this->context;
+        $this->context = array_replace($this->context, $context);
+
+        try {
+            ($this->includeThemeFile)($name, $this->context);
+        } finally {
+            $this->context = $previous;
+        }
+    }
+
+    public function item(): array
+    {
+        return is_array($this->context['item'] ?? null) ? $this->context['item'] : [];
+    }
+
+    public function setItem(array $item): void
+    {
+        $this->context['item'] = $item;
+    }
+
+    public function paginationContext(): array
+    {
+        return is_array($this->context['pagination'] ?? null) ? $this->context['pagination'] : [];
+    }
+
+    public function paginationPath(): string
+    {
+        return trim((string)($this->context['paginationPath'] ?? ''));
     }
 
     public function getHead(): string
@@ -358,27 +400,6 @@ final class Theme
     public function contentTerms(array $item): array
     {
         return array_values(array_filter((array)($item['terms'] ?? []), static fn(mixed $term): bool => is_array($term)));
-    }
-
-    public function contentMeta(array $item): string
-    {
-        $date = $this->contentDate($item);
-        $author = $this->contentAuthor($item);
-        if ($date === '' && $author === '') {
-            return '';
-        }
-
-        $items = [];
-        if ($date !== '') {
-            $items[] = '<span class="content-card-meta-item">' . icon('calendar') . '<span>' . esc_html($date) . '</span></span>';
-        }
-        if ($author !== '') {
-            $authorUrl = $this->authorUrl($item);
-            $authorHtml = $authorUrl !== '' ? '<a href="' . esc_url($authorUrl) . '">' . esc_html($author) . '</a>' : esc_html($author);
-            $items[] = '<span class="content-card-meta-item">' . icon('users') . '<span>' . $authorHtml . '</span></span>';
-        }
-
-        return '<p class="text-muted small content-card-meta">' . implode('', $items) . '</p>';
     }
 
     public function termLinks(array $item, string $class = 'term-list'): string

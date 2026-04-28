@@ -10,14 +10,9 @@ if (!defined('BASE_DIR')) {
 <?php if ($queryText !== ''): ?>
     <p class="text-muted small"><?= esc_html(t('front.search_results_for')) ?>: <?= esc_html($queryText) ?></p>
 <?php endif; ?>
-<?php $items = (array)(($pagination ?? [])['data'] ?? []); ?>
 <?php if ($items === []): ?>
     <p><?= esc_html(t('front.empty')) ?></p>
 <?php else: ?>
-    <?php $includePartial('content-loop', ['items' => $items]); ?>
-    <?php $basePath = 'search'; ?>
-    <?php if ($queryText !== ''): ?>
-        <?php $basePath .= '?q=' . rawurlencode($queryText); ?>
-    <?php endif; ?>
-    <?= get_pagination($pagination ?? [], $basePath) ?>
+    <?php include_partial('content-loop'); ?>
+    <?= get_pagination() ?>
 <?php endif; ?>

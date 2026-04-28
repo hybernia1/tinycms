@@ -89,53 +89,63 @@ function get_search_form(string $action = 'search', ?string $query = null): stri
     ]) ?? '';
 }
 
-function get_title(array $item): string
+function get_title(): string
 {
+    $item = current_content_item();
     return Theme::current()?->contentTitle($item) ?? trim((string)($item['name'] ?? ''));
 }
 
-function get_excerpt(array $item, int $limit = 0): string
+function get_excerpt(int $limit = 0): string
 {
+    $item = current_content_item();
     return Theme::current()?->contentExcerpt($item, $limit) ?? trim(strip_tags((string)($item['excerpt'] ?? '')));
 }
 
-function get_content(array $item): string
+function get_content(): string
 {
+    $item = current_content_item();
     return Theme::current()?->contentBody($item) ?? esc_content($item['body'] ?? '');
 }
 
-function get_permalink(array $item): string
+function get_permalink(): string
 {
+    $item = current_content_item();
     return Theme::current()?->contentUrl($item) ?? '';
 }
 
-function get_thumbnail(array $item, array $options = []): string
+function get_thumbnail(array $options = []): string
 {
+    $item = current_content_item();
     return Theme::current()?->contentThumbnail($item, $options) ?? '';
 }
 
-function get_thumbnail_url(array $item, string $size = 'webp'): string
+function get_thumbnail_url(string $size = 'webp'): string
 {
+    $item = current_content_item();
     return Theme::current()?->contentThumbnailUrl($item, $size) ?? '';
 }
 
-function get_author(array $item, string $fallback = ''): string
+function get_author(string $fallback = ''): string
 {
+    $item = current_content_item();
     return Theme::current()?->contentAuthor($item, $fallback) ?? trim($fallback);
 }
 
-function get_author_url(array $item): string
+function get_author_url(): string
 {
+    $item = current_content_item();
     return Theme::current()?->authorUrl($item) ?? '';
 }
 
-function get_date(array $item, string $fallback = ''): string
+function get_date(string $fallback = ''): string
 {
+    $item = current_content_item();
     return Theme::current()?->contentDate($item, $fallback) ?? trim($fallback);
 }
 
-function get_terms(array $item): array
+function get_terms(): array
 {
+    $item = current_content_item();
     return Theme::current()?->contentTerms($item) ?? [];
 }
 
@@ -144,19 +154,38 @@ function get_term_url(array $term): string
     return Theme::current()?->termUrl($term) ?? '';
 }
 
-function get_content_meta(array $item): string
+function get_term_links(string $class = 'term-list'): string
 {
-    return Theme::current()?->contentMeta($item) ?? '';
-}
-
-function get_term_links(array $item, string $class = 'term-list'): string
-{
+    $item = current_content_item();
     return Theme::current()?->termLinks($item, $class) ?? '';
 }
 
-function get_pagination(array $pagination, string $basePath = ''): string
+function get_pagination(array|string|null $pagination = null, string $basePath = ''): string
 {
+    if (is_string($pagination)) {
+        $basePath = $pagination;
+        $pagination = null;
+    }
+
+    $pagination ??= Theme::current()?->paginationContext() ?? [];
+    $basePath = $basePath !== '' ? $basePath : (Theme::current()?->paginationPath() ?? '');
+
     return Theme::current()?->pagination($pagination, $basePath) ?? '';
+}
+
+function include_partial(string $name, array $context = []): void
+{
+    Theme::current()?->include($name, $context);
+}
+
+function current_content_item(): array
+{
+    return Theme::current()?->item() ?? [];
+}
+
+function use_content_item(array $item): void
+{
+    Theme::current()?->setItem($item);
 }
 
 function esc_html(mixed $value): string
