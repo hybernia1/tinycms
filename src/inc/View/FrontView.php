@@ -75,10 +75,12 @@ final class FrontView
 
     public function searchResults(array $pagination, string $query): void
     {
+        $query = trim($query);
         $this->render('search', [
             'kind' => 'search',
             'pagination' => $pagination,
             'query' => $query,
+            'paginationPath' => $query !== '' ? 'search?q=' . rawurlencode($query) : 'search',
         ]);
     }
 
@@ -103,14 +105,19 @@ final class FrontView
 
     private function render(string $template, array $data): void
     {
+        if (is_array($data['pagination'] ?? null)) {
+            $data['items'] = (array)($data['pagination']['data'] ?? []);
+            $data['paginationPath'] = (string)($data['paginationPath'] ?? $data['archivePath'] ?? '');
+        }
+
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
         $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
-        $includePartial = function (string $name, array $context = []): void {
-            $file = $this->resolveThemeFile('partials/' . $name . '.php');
+        $theme->setIncludeThemeFile(function (string $name, array $context = []): void {
+            $file = $this->resolveThemeFile($this->partialPath($name));
             extract($context, EXTR_SKIP);
             require $file;
-        };
+        });
 
         Theme::setCurrent($theme);
         I18n::pushCataloguePath($this->themeLangPath());
@@ -159,6 +166,11 @@ final class FrontView
         }
 
         return $real;
+    }
+
+    private function partialPath(string $name): string
+    {
+        return 'partials/' . trim($name, '/\\') . '.php';
     }
 
     private function themePath(string $theme): string

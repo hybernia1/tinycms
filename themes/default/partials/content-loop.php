@@ -6,17 +6,19 @@ if (!defined('BASE_DIR')) {
 
 ?>
 <section class="content-loop">
-    <?php foreach ($items as $loopItem): ?>
+    <?php foreach ($items as $content): ?>
+        <?php use_content_item($content); ?>
+        <?php $permalink = get_permalink(); ?>
         <article class="content-card">
-            <a href="<?= esc_url(get_permalink($loopItem)) ?>" class="content-card-thumb">
-                <?= get_thumbnail($loopItem, ['size' => 'small', 'sizes' => '120px', 'class' => '', 'wrap' => false]) ?>
+            <a href="<?= esc_url($permalink) ?>" class="content-card-thumb">
+                <?= get_thumbnail(['size' => 'small', 'sizes' => '120px', 'class' => '', 'wrap' => false]) ?>
             </a>
             <div class="content-card-body">
                 <h2>
-                    <a href="<?= esc_url(get_permalink($loopItem)) ?>"><?= esc_html(get_title($loopItem)) ?></a>
+                    <a href="<?= esc_url($permalink) ?>"><?= esc_html(get_title()) ?></a>
                 </h2>
-                <?= get_content_meta($loopItem) ?>
-                <?php $excerpt = get_excerpt($loopItem); ?>
+                <?php include_partial('content-meta'); ?>
+                <?php $excerpt = get_excerpt(); ?>
                 <?php if ($excerpt !== ''): ?>
                     <p><?= esc_html($excerpt) ?></p>
                 <?php endif; ?>
