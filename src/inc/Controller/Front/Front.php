@@ -328,124 +328,79 @@ final class Front
 
     private function paginatePublished(int $page, int $perPage, string $search = ''): array
     {
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
-        $mediaTable = Table::name('media');
         $search = $this->sanitizeSearch($search);
-        $page = max(1, $page);
-        $perPage = max(1, $perPage);
-        $offset = ($page - 1) * $perPage;
-
-        $where = 'WHERE c.status = :status AND c.created <= :now';
-        if ($search !== '') {
-            $where .= ' AND (c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)';
-        }
-
-        $countStmt = $this->pdo->prepare(implode("\n", [
-            'SELECT COUNT(*)',
-            "FROM $contentTable c",
-            $where,
-        ]));
-        $countStmt->bindValue(':status', 'published');
-        $countStmt->bindValue(':now', $this->now());
-        if ($search !== '') {
-            $countStmt->bindValue(':search', '%' . $search . '%');
-        }
-        $countStmt->execute();
-        $total = (int)($countStmt->fetchColumn() ?: 0);
-
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
-            "FROM $contentTable c",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            $where,
-            'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
-            'LIMIT :limit OFFSET :offset',
-        ]));
-        $stmt->bindValue(':status', 'published');
-        $stmt->bindValue(':now', $this->now());
-        if ($search !== '') {
-            $stmt->bindValue(':search', '%' . $search . '%');
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $this->paginationPayload($this->withThumbnails($stmt->fetchAll(\PDO::FETCH_ASSOC)), $page, $perPage, $total);
+        return $this->paginatePublishedContent(
+            $page,
+            $perPage,
+            [],
+            $search !== '' ? ['(c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)'] : [],
+            $search !== '' ? ['search' => '%' . $search . '%'] : []
+        );
     }
 
     private function paginateTermPublished(int $termId, int $page, int $perPage): array
     {
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
         $contentTermsTable = Table::name('content_terms');
-        $mediaTable = Table::name('media');
-        $page = max(1, $page);
-        $perPage = max(1, $perPage);
-        $offset = ($page - 1) * $perPage;
-
-        $countStmt = $this->pdo->prepare(implode("\n", [
-            'SELECT COUNT(*)',
-            "FROM $contentTable c",
-            "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
-            'WHERE c.status = :status AND ct.term = :term AND c.created <= :now',
-        ]));
-        $countStmt->execute(['status' => 'published', 'term' => $termId, 'now' => $this->now()]);
-        $total = (int)($countStmt->fetchColumn() ?: 0);
-
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
-            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
-            "FROM $contentTable c",
-            "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE c.status = :status AND ct.term = :term AND c.created <= :now',
-            'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
-            'LIMIT :limit OFFSET :offset',
-        ]));
-        $stmt->bindValue(':status', 'published');
-        $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
-        $stmt->bindValue(':now', $this->now());
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $this->paginationPayload($this->withThumbnails($stmt->fetchAll(\PDO::FETCH_ASSOC)), $page, $perPage, $total);
+        return $this->paginatePublishedContent(
+            $page,
+            $perPage,
+            ["INNER JOIN $contentTermsTable ct ON ct.content = c.id"],
+            ['ct.term = :term'],
+            ['term' => $termId],
+            ['term']
+        );
     }
 
     private function paginateAuthorPublished(int $authorId, int $page, int $perPage): array
     {
+        return $this->paginatePublishedContent(
+            $page,
+            $perPage,
+            [],
+            ['c.author = :author'],
+            ['author' => $authorId],
+            ['author']
+        );
+    }
+
+    private function paginatePublishedContent(
+        int $page,
+        int $perPage,
+        array $joins = [],
+        array $conditions = [],
+        array $params = [],
+        array $intParams = []
+    ): array {
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
         $mediaTable = Table::name('media');
         $page = max(1, $page);
         $perPage = max(1, $perPage);
-        $offset = ($page - 1) * $perPage;
+        $params = array_merge(['status' => 'published', 'now' => $this->now()], $params);
+        $where = 'WHERE ' . implode(' AND ', array_merge(['c.status = :status', 'c.created <= :now'], $conditions));
 
-        $countStmt = $this->pdo->prepare(implode("\n", [
+        $countStmt = $this->pdo->prepare(implode("\n", array_merge([
             'SELECT COUNT(*)',
             "FROM $contentTable c",
-            'WHERE c.status = :status AND c.author = :author AND c.created <= :now',
-        ]));
-        $countStmt->execute(['status' => 'published', 'author' => $authorId, 'now' => $this->now()]);
+        ], $joins, [$where])));
+        $this->bindParams($countStmt, $params, $intParams);
+        $countStmt->execute();
         $total = (int)($countStmt->fetchColumn() ?: 0);
+        $page = min($page, max(1, (int)ceil($total / $perPage)));
+        $offset = ($page - 1) * $perPage;
 
-        $stmt = $this->pdo->prepare(implode("\n", [
+        $stmt = $this->pdo->prepare(implode("\n", array_merge([
             'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
             "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
             "FROM $contentTable c",
+        ], $joins, [
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE c.status = :status AND c.author = :author AND c.created <= :now',
+            $where,
             'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
             'LIMIT :limit OFFSET :offset',
-        ]));
-        $stmt->bindValue(':status', 'published');
-        $stmt->bindValue(':author', $authorId, \PDO::PARAM_INT);
-        $stmt->bindValue(':now', $this->now());
+        ])));
+        $this->bindParams($stmt, $params, $intParams);
         $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
@@ -459,11 +414,19 @@ final class Front
 
         return [
             'data' => $rows,
-            'page' => min($page, $totalPages),
+            'page' => $page,
             'per_page' => $perPage,
             'total' => $total,
             'total_pages' => $totalPages,
         ];
+    }
+
+    private function bindParams(\PDOStatement $stmt, array $params, array $intParams = []): void
+    {
+        foreach ($params as $key => $value) {
+            $type = in_array($key, $intParams, true) ? \PDO::PARAM_INT : \PDO::PARAM_STR;
+            $stmt->bindValue(':' . $key, $value, $type);
+        }
     }
 
     private function withThumbnails(array $rows): array
