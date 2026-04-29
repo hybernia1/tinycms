@@ -6,6 +6,7 @@ return [
         'social_media' => [
             'name' => 'Social media',
             'title' => 'Title',
+            'description' => 'Description',
             'facebook' => 'Facebook URL',
             'instagram' => 'Instagram URL',
             'x' => 'X URL',

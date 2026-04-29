@@ -20,13 +20,20 @@ final class AdminBar
         }
 
         $assetHref = esc_url($this->router->url(ASSETS_DIR . 'css/admin-bar.css'));
-        $injection = '<link rel="stylesheet" href="' . $assetHref . '">' . $this->html($context);
+        $stylesheet = '<link rel="stylesheet" href="' . $assetHref . '">';
+        $bar = $this->html($context);
 
-        if (str_contains($output, '</body>')) {
-            return str_replace('</body>', $injection . '</body>', $output);
+        if (str_contains($output, '</head>')) {
+            $output = str_replace('</head>', $stylesheet . '</head>', $output);
+        } else {
+            $bar = $stylesheet . $bar;
         }
 
-        return $output . $injection;
+        if (str_contains($output, '</body>')) {
+            return str_replace('</body>', $bar . '</body>', $output);
+        }
+
+        return $output . $bar;
     }
 
     private function html(array $context): string

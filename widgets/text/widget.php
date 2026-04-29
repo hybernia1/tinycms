@@ -19,7 +19,7 @@ return [
             return '';
         }
 
-        $html = $title !== '' ? '<h2 class="widget-title">' . esc_html($title) . '</h2>' : '';
+        $html = widget_title($title, 'document');
         if ($body !== '') {
             $html .= '<div class="widget-content">' . esc_content($body) . '</div>';
         }

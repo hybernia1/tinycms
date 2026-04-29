@@ -7,3 +7,4 @@
 5. Žádné legacy kody, vždy smaž to co již není uživáno, je například nahrazeno
 6. Aplikace je vývoji, čili není třeba zachovávat zpětnou kompatibilitu
 7. Aplikace je ve fázi redukce kodu, čištění duplicit, je nutné na toto brát zřetel 
+8. Pro lokální konfiguraci a dostupné nástroje používej `.env.local`; nespouštěj vlastní server, pokud o to uživatel výslovně nepožádá.

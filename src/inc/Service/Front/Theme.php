@@ -5,6 +5,8 @@ namespace App\Service\Front;
 
 use App\Service\Application\Menu;
 use App\Service\Application\Widget;
+use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Table;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Date;
 use App\Service\Support\I18n;
@@ -18,6 +20,7 @@ final class Theme
     private string $theme;
     private Slugger $slugger;
     private array $context = [];
+    private array $contentPathCache = [];
     private ?\Closure $includeThemeFile = null;
 
     public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu, private Widget $widgets)
@@ -262,6 +265,8 @@ final class Theme
         $class = trim((string)($options['class'] ?? 'site-menu'));
         $itemClass = trim((string)($options['item_class'] ?? 'site-menu-link'));
         $label = trim((string)($options['label'] ?? 'Menu'));
+        $showIcons = (bool)($options['show_icons'] ?? true);
+        $currentPath = $this->router->requestPath((string)($_SERVER['REQUEST_URI'] ?? '/'));
         $links = [];
 
         foreach ($items as $item) {
@@ -271,14 +276,16 @@ final class Theme
             $labelText = (string)($item['label'] ?? '');
             $iconName = $this->menuIconName((string)($item['icon'] ?? ''));
             $hasLabel = trim($labelText) !== '';
-            $ariaLabel = $iconName !== '' && !$hasLabel ? ' aria-label="' . esc_attr($iconName) . '"' : '';
-            $content = $iconName !== '' ? icon($iconName) : '';
+            $ariaLabel = $showIcons && $iconName !== '' && !$hasLabel ? ' aria-label="' . esc_attr($iconName) . '"' : '';
+            $content = $showIcons && $iconName !== '' ? icon($iconName) : '';
             if ($hasLabel) {
                 $content .= esc_html($labelText);
             }
+            $itemPath = $this->menuItemCurrentPath((string)($item['url'] ?? ''));
+            $classes = trim($itemClass . ($itemPath !== null && $itemPath === $currentPath ? ' is-current' : ''));
             $links[] = sprintf(
                 '<a class="%s" href="%s"%s%s%s>%s</a>',
-                esc_attr($itemClass),
+                esc_attr($classes),
                 esc_url((string)($item['href'] ?? '')),
                 $targetAttr,
                 $rel,
@@ -437,35 +444,40 @@ final class Theme
         }
 
         $current = max(1, min($page, $totalPages));
-        $defaultPrevLabel = t('front.prev');
-        $defaultNextLabel = t('front.next');
-        $prevLabel = trim((string)($labels['prev'] ?? $defaultPrevLabel));
-        $nextLabel = trim((string)($labels['next'] ?? $defaultNextLabel));
-        if ($prevLabel === '') {
-            $prevLabel = $defaultPrevLabel;
-        }
-        if ($nextLabel === '') {
-            $nextLabel = $defaultNextLabel;
-        }
         $items = [];
+        $link = function (int $target, string $label, string $class = '', string $aria = '') use ($basePath): string {
+            $classAttr = $class !== '' ? ' class="' . esc_attr($class) . '"' : '';
+            $ariaAttr = $aria !== '' ? ' aria-label="' . esc_attr($aria) . '"' : '';
 
-        if ($current > 1) {
-            $items[] = sprintf(
-                '<a href="%s">%s</a>',
-                esc_url($this->paginationUrl($basePath, $current - 1)),
-                esc_html($prevLabel),
-            );
+            return '<a' . $classAttr . ' href="' . esc_url($this->paginationUrl($basePath, $target)) . '"' . $ariaAttr . '>' . $label . '</a>';
+        };
+        $disabled = static function (string $label, string $class = ''): string {
+            $classAttr = trim('pagination-disabled ' . $class);
+
+            return '<span class="' . esc_attr($classAttr) . '">' . $label . '</span>';
+        };
+
+        $items[] = $current > 1 ? $link(1, '&laquo;', '', t('front.first_page', 'First page')) : $disabled('&laquo;');
+        $items[] = $current > 1 ? $link($current - 1, '&lsaquo;', '', t('front.prev')) : $disabled('&lsaquo;');
+
+        $pages = [1, $current - 1, $current, $current + 1, $totalPages];
+        $pages = array_values(array_unique(array_filter($pages, static fn(int $item): bool => $item >= 1 && $item <= $totalPages)));
+        sort($pages);
+        $last = 0;
+
+        foreach ($pages as $item) {
+            if ($last > 0 && $item > $last + 1) {
+                $items[] = '<span class="pagination-gap">...</span>';
+            }
+
+            $items[] = $item === $current
+                ? '<span class="is-current" aria-current="page">' . $item . '</span>'
+                : $link($item, (string)$item, '', t('front.page', 'Page') . ' ' . $item);
+            $last = $item;
         }
 
-        $items[] = sprintf('<span>%d / %d</span>', $current, $totalPages);
-
-        if ($current < $totalPages) {
-            $items[] = sprintf(
-                '<a href="%s">%s</a>',
-                esc_url($this->paginationUrl($basePath, $current + 1)),
-                esc_html($nextLabel),
-            );
-        }
+        $items[] = $current < $totalPages ? $link($current + 1, '&rsaquo;', '', t('front.next')) : $disabled('&rsaquo;');
+        $items[] = $current < $totalPages ? $link($totalPages, '&raquo;', '', t('front.last_page', 'Last page')) : $disabled('&raquo;');
 
         return '<nav class="pagination" aria-label="Pagination">' . implode('', $items) . '</nav>';
     }
@@ -528,7 +540,51 @@ final class Theme
             return $value;
         }
 
+        $contentPath = $this->contentPathFromMenuUrl($value);
+        if ($contentPath !== null) {
+            return $this->url($contentPath);
+        }
+
         return $this->url($value);
+    }
+
+    private function menuItemCurrentPath(string $url): ?string
+    {
+        $value = trim($url);
+        if ($value === '') {
+            return '';
+        }
+
+        if (str_starts_with($value, '#') || preg_match('#^(https?:)?//#i', $value) === 1 || preg_match('#^(mailto|tel):#i', $value) === 1) {
+            return null;
+        }
+
+        return $this->router->requestPath($this->url($this->contentPathFromMenuUrl($value) ?? $value));
+    }
+
+    private function contentPathFromMenuUrl(string $url): ?string
+    {
+        $path = trim((string)(parse_url(trim($url), PHP_URL_PATH) ?? ''), '/');
+        if ($path === '' || !ctype_digit($path)) {
+            return null;
+        }
+
+        $id = (int)$path;
+        if ($id <= 0) {
+            return null;
+        }
+
+        if (array_key_exists($id, $this->contentPathCache)) {
+            return $this->contentPathCache[$id];
+        }
+
+        $contentTable = Table::name('content');
+        $stmt = Connection::get()->prepare("SELECT id, name FROM $contentTable WHERE id = :id AND status = :status AND created <= :now LIMIT 1");
+        $stmt->execute(['id' => $id, 'status' => 'published', 'now' => date('Y-m-d H:i:s')]);
+        $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        $this->contentPathCache[$id] = is_array($item) ? $this->slugger->slug((string)($item['name'] ?? ''), $id) : null;
+
+        return $this->contentPathCache[$id];
     }
 
     private function paginationUrl(string $basePath, int $page): string

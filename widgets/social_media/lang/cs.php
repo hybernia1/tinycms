@@ -6,6 +6,7 @@ return [
         'social_media' => [
             'name' => 'Sociální sítě',
             'title' => 'Název',
+            'description' => 'Popis',
             'facebook' => 'Facebook URL',
             'instagram' => 'Instagram URL',
             'x' => 'X URL',

@@ -83,7 +83,7 @@ return [
         }, $items);
         $links = array_values(array_filter($links));
 
-        $html = $title !== '' ? '<h2 class="widget-title">' . esc_html($title) . '</h2>' : '';
+        $html = widget_title($title, 'tag');
 
         if ($display === 'list') {
             return $html . '<ul class="popular-terms popular-terms-list"><li>' . implode('</li><li>', $links) . '</li></ul>';

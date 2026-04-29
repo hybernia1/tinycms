@@ -33,4 +33,33 @@
             });
         });
     }
+
+    const menuToggle = document.querySelector('[data-menu-toggle]');
+    const menuPanel = document.querySelector('[data-menu-panel]');
+    const menuClose = document.querySelectorAll('[data-menu-close]');
+
+    if (menuToggle instanceof HTMLButtonElement && menuPanel instanceof HTMLElement) {
+        const setMenu = (open) => {
+            document.documentElement.classList.toggle('is-menu-open', open);
+            menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+
+        menuToggle.addEventListener('click', () => {
+            setMenu(!document.documentElement.classList.contains('is-menu-open'));
+        });
+
+        menuClose.forEach((button) => {
+            button.addEventListener('click', () => setMenu(false));
+        });
+
+        menuPanel.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => setMenu(false));
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                setMenu(false);
+            }
+        });
+    }
 })();
