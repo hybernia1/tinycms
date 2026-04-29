@@ -22,7 +22,6 @@ final class Widget
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
         $this->pdo = Connection::get();
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
-        $this->ensureTable();
         $this->loadThemeFunctions();
     }
 
@@ -301,13 +300,6 @@ final class Widget
     {
         $decoded = json_decode($data, true);
         return is_array($decoded) ? $decoded : [];
-    }
-
-    private function ensureTable(): void
-    {
-        foreach (SchemaDefinition::widgetsDdl(Table::prefix()) as $query) {
-            $this->pdo->exec($query);
-        }
     }
 
     private function loadThemeFunctions(): void
