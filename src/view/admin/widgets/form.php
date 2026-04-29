@@ -80,6 +80,9 @@ $renderRow = static function (array $item, string $index) use ($widgets, $render
         <input type="hidden" name="item_area[<?= esc_attr($index) ?>]" value="<?= esc_attr($area) ?>" data-widget-item-area>
         <input type="hidden" name="item_active[<?= esc_attr($index) ?>]" value="1">
         <div class="widget-builder-summary">
+            <button class="btn btn-light btn-icon builder-drag-handle" type="button" draggable="true" data-builder-drag-handle aria-label="<?= esc_attr(t('widgets.move_item')) ?>" title="<?= esc_attr(t('widgets.move_item')) ?>">
+                <?= icon('menu') ?>
+            </button>
             <button class="btn btn-light btn-icon widget-builder-toggle" type="button" data-widget-item-toggle aria-expanded="false" aria-label="<?= esc_attr(t('widgets.configure')) ?>" title="<?= esc_attr(t('widgets.configure')) ?>">
                 <?= icon('next', 'icon widget-builder-toggle-icon') ?>
             </button>

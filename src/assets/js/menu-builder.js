@@ -21,6 +21,7 @@
     const iconPickers = () => Array.from(root.querySelectorAll('[data-menu-icon-picker]'));
     const iconSvg = app.icons?.icon || (() => '');
     const customSelect = app.ui?.customSelect;
+    const builderDnd = app.builderDnd;
 
     const setAddOpen = (open) => {
         const form = draft?.querySelector('[data-menu-add-form]');
@@ -204,6 +205,15 @@
     };
 
     addButton?.addEventListener('click', addRow);
+
+    builderDnd?.init({
+        root,
+        itemSelector: '[data-menu-item]',
+        containerSelector: '[data-menu-items]',
+        fallbackSelector: '[data-menu-builder]',
+        handleSelector: '[data-builder-drag-handle]',
+        onChange: syncRows,
+    });
 
     draft?.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {

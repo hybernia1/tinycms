@@ -21,7 +21,7 @@ return [
 
         $html = $title !== '' ? '<h2 class="widget-title">' . esc_html($title) . '</h2>' : '';
         if ($body !== '') {
-            $html .= '<div class="widget-content">' . nl2br(esc_html($body)) . '</div>';
+            $html .= '<div class="widget-content">' . esc_content($body) . '</div>';
         }
 
         return $html;

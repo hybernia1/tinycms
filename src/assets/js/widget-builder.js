@@ -6,6 +6,7 @@
     }
 
     const customSelect = app.ui?.customSelect;
+    const builderDnd = app.builderDnd;
 
     const rows = () => Array.from(root.querySelectorAll('[data-widget-item]'));
     const areas = () => Array.from(root.querySelectorAll('[data-widget-area]'));
@@ -154,6 +155,15 @@
     };
 
     root.addEventListener('submit', renumber);
+
+    builderDnd?.init({
+        root,
+        itemSelector: '[data-widget-item]',
+        containerSelector: '[data-widget-items]',
+        fallbackSelector: '[data-widget-area]',
+        handleSelector: '[data-builder-drag-handle]',
+        onChange: syncRows,
+    });
 
     root.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) {
