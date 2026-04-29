@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Service\Application\Widget;
 use App\Service\Front\Theme;
 use App\Service\Support\Escape;
 use App\Service\Support\I18n;
@@ -73,6 +74,16 @@ function get_head(): string
 function get_menu(array $options = []): string
 {
     return Theme::current()?->menu($options) ?? '';
+}
+
+function get_widget_area(string $area): string
+{
+    return Theme::current()?->widgetArea($area) ?? '';
+}
+
+function register_widget_area(string $area, string $label = ''): void
+{
+    Widget::current()?->registerArea($area, $label);
 }
 
 function get_footer(): string

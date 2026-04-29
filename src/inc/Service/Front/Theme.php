@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service\Front;
 
 use App\Service\Application\Menu;
+use App\Service\Application\Widget;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Date;
 use App\Service\Support\I18n;
@@ -19,7 +20,7 @@ final class Theme
     private array $context = [];
     private ?\Closure $includeThemeFile = null;
 
-    public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu)
+    public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu, private Widget $widgets)
     {
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
         $this->slugger = new Slugger();
@@ -292,6 +293,11 @@ final class Theme
             esc_attr($label !== '' ? $label : 'Menu'),
             implode('', $links),
         );
+    }
+
+    public function widgetArea(string $area): string
+    {
+        return $this->widgets->renderArea($area);
     }
 
     public function mediaSrcSet(string $path): string

@@ -11,6 +11,7 @@
     const addButton = root.querySelector('[data-menu-add-item]');
     const count = root.querySelector('[data-menu-count]');
     const draft = root.querySelector('[data-menu-draft]');
+    const t = app.i18n?.t || ((key, fallback) => fallback || '');
 
     if (!items || !template) {
         return;
@@ -20,6 +21,24 @@
     const iconPickers = () => Array.from(root.querySelectorAll('[data-menu-icon-picker]'));
     const iconSvg = app.icons?.icon || (() => '');
     const customSelect = app.ui?.customSelect;
+
+    const setAddOpen = (open) => {
+        const form = draft?.querySelector('[data-menu-add-form]');
+        const toggle = draft?.querySelector('[data-menu-add-toggle]');
+        if (form) {
+            form.hidden = !open;
+        }
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        draft?.classList.toggle('is-open', open);
+
+        if (open) {
+            customSelect?.init(draft);
+            draft?.querySelector('[data-menu-draft-label]')?.focus();
+        }
+    };
+
     const closeIconPickers = (except = null) => {
         iconPickers().forEach((picker) => {
             if (picker === except) {
@@ -68,6 +87,36 @@
     });
     const hasDraftValues = (values) => values.label !== '' || values.url !== '' || values.icon !== '';
 
+    const syncRowSummary = (row) => {
+        const label = row.querySelector('[data-menu-item-label]');
+        const url = row.querySelector('[data-menu-item-url]');
+        const labelValue = row.querySelector('[data-menu-label-input]')?.value.trim() || '';
+        const urlValue = row.querySelector('[data-menu-url-input]')?.value.trim() || '';
+        if (label) {
+            label.textContent = labelValue || t('menu.add_item', 'Add item');
+        }
+        if (url) {
+            url.textContent = urlValue;
+            url.hidden = urlValue === '';
+        }
+    };
+
+    const setItemOpen = (row, open) => {
+        const details = row.querySelector('[data-menu-item-details]');
+        const toggle = row.querySelector('[data-menu-item-toggle]');
+        if (details) {
+            details.hidden = !open;
+        }
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        row.classList.toggle('is-open', open);
+
+        if (open) {
+            customSelect?.init(row);
+        }
+    };
+
     const clearDraft = () => {
         if (!draft) {
             return;
@@ -86,7 +135,6 @@
         }
         setSelectValue(draft.querySelector('[data-menu-draft-target]'), '_self');
         syncIconPreview(draft);
-        label?.focus();
     };
 
     const fillRow = (row, values) => {
@@ -110,6 +158,7 @@
         const currentRows = rows();
         currentRows.forEach((row, index) => {
             syncIconPreview(row);
+            syncRowSummary(row);
 
             const up = row.querySelector('[data-menu-item-up]');
             const down = row.querySelector('[data-menu-item-down]');
@@ -136,10 +185,12 @@
         const last = rows().at(-1);
         if (last) {
             fillRow(last, values);
+            setItemOpen(last, true);
         }
         customSelect?.init(last || document);
         syncRows();
         clearDraft();
+        setAddOpen(false);
     };
 
     const moveRow = (row, direction) => {
@@ -170,6 +221,17 @@
 
     root.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) {
+            return;
+        }
+
+        if (event.target.closest('[data-menu-add-toggle]')) {
+            setAddOpen(draft?.querySelector('[data-menu-add-form]')?.hidden !== false);
+            return;
+        }
+
+        if (event.target.closest('[data-menu-add-cancel]')) {
+            clearDraft();
+            setAddOpen(false);
             return;
         }
 
@@ -204,6 +266,11 @@
             return;
         }
 
+        if (event.target.closest('[data-menu-item-toggle]')) {
+            setItemOpen(row, row.querySelector('[data-menu-item-details]')?.hidden !== false);
+            return;
+        }
+
         if (event.target.closest('[data-menu-item-remove]')) {
             row.remove();
             syncRows();
@@ -219,6 +286,17 @@
         if (event.target.closest('[data-menu-item-down]')) {
             moveRow(row, 1);
             syncRows();
+        }
+    });
+
+    root.addEventListener('input', (event) => {
+        if (!(event.target instanceof Element) || !event.target.matches('[data-menu-label-input], [data-menu-url-input]')) {
+            return;
+        }
+
+        const row = event.target.closest('[data-menu-item]');
+        if (row) {
+            syncRowSummary(row);
         }
     });
 

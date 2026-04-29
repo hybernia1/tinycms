@@ -21,8 +21,12 @@ if (!defined('BASE_DIR')) {
             <?= get_search_form() ?>
         </div>
     </header>
-    <main class="container">
-        <?= $content ?>
+    <main class="container site-main">
+        <section class="site-widgets site-widgets-before"><?= get_widget_area('before_content') ?></section>
+        <aside class="site-widgets site-widgets-left"><?= get_widget_area('left') ?></aside>
+        <div class="site-content"><?= $content ?></div>
+        <aside class="site-widgets site-widgets-right"><?= get_widget_area('right') ?></aside>
+        <section class="site-widgets site-widgets-after"><?= get_widget_area('after_content') ?></section>
     </main>
     <footer class="site-footer">
         <div class="container">

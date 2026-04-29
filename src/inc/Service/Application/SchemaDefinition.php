@@ -38,6 +38,10 @@ final class SchemaDefinition
                 'icon' => ['max' => 100, 'nullable' => true],
                 'link_target' => ['max' => 20, 'nullable' => false, 'allowed' => ['_self', '_blank']],
             ],
+            'widgets' => [
+                'area' => ['max' => 100, 'nullable' => false],
+                'widget' => ['max' => 100, 'nullable' => false],
+            ],
         ];
     }
 
@@ -135,7 +139,7 @@ final class SchemaDefinition
                 value VARCHAR(1000) DEFAULT NULL,
                 PRIMARY KEY (key_name)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
-        ], self::menuDdl($prefix));
+        ], self::menuDdl($prefix), self::widgetsDdl($prefix));
     }
 
     public static function menuDdl(string $prefix = ''): array
@@ -154,6 +158,27 @@ final class SchemaDefinition
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (id),
                 KEY idx_menu_position (position)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
+        ];
+    }
+
+    public static function widgetsDdl(string $prefix = ''): array
+    {
+        $widgets = $prefix . 'widgets';
+
+        return [
+            "CREATE TABLE IF NOT EXISTS $widgets (
+                id INT NOT NULL AUTO_INCREMENT,
+                area VARCHAR(100) NOT NULL,
+                widget VARCHAR(100) NOT NULL,
+                data LONGTEXT,
+                active TINYINT(1) NOT NULL DEFAULT 1,
+                position INT NOT NULL DEFAULT 0,
+                created DATETIME NOT NULL DEFAULT (NOW()),
+                updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY idx_widgets_area_position (area, position),
+                KEY idx_widgets_widget (widget)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
         ];
     }
