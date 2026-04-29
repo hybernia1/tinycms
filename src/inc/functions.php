@@ -24,6 +24,17 @@ function icon(string $name, string $classes = 'icon'): string
     return '<svg class="' . esc_attr($class !== '' ? $class : 'icon') . '" aria-hidden="true" focusable="false"><use href="' . $href . '"></use></svg>';
 }
 
+function widget_title(string $title, string $icon = ''): string
+{
+    $title = trim($title);
+    if ($title === '') {
+        return '';
+    }
+
+    $iconHtml = trim($icon) !== '' ? icon($icon, 'widget-title-icon icon') : '';
+    return '<h2 class="widget-title">' . $iconHtml . '<span>' . esc_html($title) . '</span></h2>';
+}
+
 function icon_sprite(): string
 {
     return RequestContext::path(ASSETS_DIR . 'svg/icons.svg');

@@ -75,6 +75,24 @@
     <symbol id="icon-menu" viewBox="0 0 16 16">
         <path d="M2 3.75A.75.75 0 0 1 2.75 3h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75Zm0 4.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 8Zm0 4.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z"/>
     </symbol>
+    <symbol id="icon-home" viewBox="0 0 16 16">
+        <path d="M2.25 7.5 8 2.75l5.75 4.75M4 6.25v6.5c0 .41.34.75.75.75h2.5V10h1.5v3.5h2.5c.41 0 .75-.34.75-.75v-6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-question" viewBox="0 0 16 16">
+        <path d="M8 14.25A6.25 6.25 0 1 0 8 1.75a6.25 6.25 0 0 0 0 12.5Zm-1.6-7.9A1.75 1.75 0 1 1 8.9 7.94c-.74.43-1.15.82-1.15 1.56m.02 2.25h.01" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-tag" viewBox="0 0 16 16">
+        <path d="M2.75 3.25h4.9c.2 0 .39.08.53.22l5.09 5.1a1.5 1.5 0 0 1 0 2.12l-2.58 2.58a1.5 1.5 0 0 1-2.12 0l-5.1-5.09a.75.75 0 0 1-.22-.53v-4.4Zm2.5 2.5h.01" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-document" viewBox="0 0 16 16">
+        <path d="M4 2.25h5.25L12 5v8.75H4V2.25Zm5.25 0V5H12M6 7.25h4M6 10h4M6 12.75h2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-image" viewBox="0 0 16 16">
+        <path d="M2.75 3.25h10.5v9.5H2.75v-9.5Zm2 7.5 2.1-2.35 1.6 1.75 1.75-2.05 1.55 2.65m-2-5h.01" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-share" viewBox="0 0 16 16">
+        <path d="M5.6 5.1 10.4 2m-4.8 8.9 4.8 3.1M4.25 6.5a2 2 0 1 0 0 3.99 2 2 0 0 0 0-4Zm7.5-5.25a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 9.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
     <symbol id="icon-loader" viewBox="0 0 16 16">
         <path d="M8 1.5a6.5 6.5 0 1 0 6.5 6.5.75.75 0 0 0-1.5 0A5 5 0 1 1 8 3a.75.75 0 0 0 0-1.5Z"/>
     </symbol>

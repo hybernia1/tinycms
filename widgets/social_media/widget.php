@@ -38,6 +38,7 @@ $services = [
 
 $fields = [
     ['name' => 'title', 'type' => 'text', 'label' => t('widgets.social_media.title')],
+    ['name' => 'description', 'type' => 'text', 'label' => t('widgets.social_media.description', 'Description')],
 ];
 foreach ($services as $name => $service) {
     $fields[] = ['name' => $name, 'type' => 'text', 'label' => $service['field']];
@@ -48,6 +49,7 @@ return [
     'fields' => $fields,
     'render' => static function (array $data) use ($services): string {
         $title = trim((string)($data['title'] ?? ''));
+        $description = trim((string)($data['description'] ?? ''));
         $links = [];
 
         foreach ($services as $name => $service) {
@@ -61,11 +63,15 @@ return [
             $links[] = '<a class="social-link social-link-' . esc_attr($name) . '" href="' . esc_url($href) . '"' . $target . ' aria-label="' . esc_attr($label) . '" title="' . esc_attr($label) . '">' . icon((string)$service['icon']) . '<span>' . esc_html($label) . '</span></a>';
         }
 
-        if ($title === '' && $links === []) {
+        if ($title === '' && $description === '' && $links === []) {
             return '';
         }
 
-        $html = $title !== '' ? '<h2 class="widget-title">' . esc_html($title) . '</h2>' : '';
+        $html = widget_title($title, 'share');
+        if ($description !== '') {
+            $html .= '<p class="widget-description">' . esc_html($description) . '</p>';
+        }
+
         return $html . ($links !== [] ? '<div class="social-links">' . implode('', $links) . '</div>' : '');
     },
 ];

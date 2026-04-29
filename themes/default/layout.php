@@ -17,10 +17,23 @@ if (!defined('BASE_DIR')) {
                 <?= site_logo() ?>
                 <span><?= esc_html(site_title()) ?></span>
             </a>
-            <?= get_menu() ?>
+            <div class="site-desktop-nav">
+                <?= get_menu() ?>
+            </div>
             <?= get_search_form() ?>
+            <button class="site-menu-toggle" type="button" aria-label="Menu" aria-expanded="false" data-menu-toggle>
+                <?= icon('menu') ?>
+            </button>
         </div>
     </header>
+    <div class="site-nav-panel" data-menu-panel>
+        <div class="site-nav-panel-header">
+            <span><?= esc_html(site_title()) ?></span>
+            <button type="button" aria-label="Close menu" data-menu-close><?= icon('cancel') ?></button>
+        </div>
+        <?= get_menu(['class' => 'site-menu site-menu-mobile']) ?>
+    </div>
+    <button class="site-nav-backdrop" type="button" aria-label="Close menu" data-menu-close></button>
     <main class="container site-main">
         <section class="site-widgets site-widgets-before"><?= get_widget_area('before_content') ?></section>
         <aside class="site-widgets site-widgets-left"><?= get_widget_area('left') ?></aside>
