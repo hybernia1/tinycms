@@ -67,6 +67,9 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => 'admin/menu', 'controller' => $adminMenu, 'action' => 'form'],
     ['method' => 'POST', 'path' => 'admin/api/v1/menu', 'controller' => $apiMenu, 'action' => 'saveApiV1'],
 
+    ['method' => 'GET', 'path' => 'admin/widgets', 'controller' => $adminWidgets, 'action' => 'form'],
+    ['method' => 'POST', 'path' => 'admin/api/v1/widgets', 'controller' => $apiWidget, 'action' => 'saveApiV1'],
+
     ['method' => 'GET', 'path' => 'admin/settings', 'controller' => $adminSettings, 'action' => 'form'],
     ['method' => 'GET', 'path' => 'admin/settings/{section}', 'controller' => $adminSettings, 'action' => 'sectionForm', 'params' => ['section' => 'string']],
     ['method' => 'POST', 'path' => 'admin/api/v1/settings', 'controller' => $apiSettings, 'action' => 'submitApiV1'],

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Service\Application\Menu;
+use App\Service\Application\Widget;
 use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
@@ -16,7 +17,7 @@ final class FrontView
     private array $settings;
     private string $theme;
 
-    public function __construct(string $rootPath, Router $router, array $settings, private AdminBar $adminBar, private Menu $menu)
+    public function __construct(string $rootPath, Router $router, array $settings, private AdminBar $adminBar, private Menu $menu, private Widget $widgets)
     {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
@@ -112,7 +113,7 @@ final class FrontView
 
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
-        $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu);
+        $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu, $this->widgets);
         $theme->setIncludeThemeFile(function (string $name, array $context = []): void {
             $file = $this->resolveThemeFile($this->partialPath($name));
             extract($context, EXTR_SKIP);
