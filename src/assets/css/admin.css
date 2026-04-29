@@ -897,8 +897,8 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .widget-builder-summary,
 .menu-builder-summary {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) max-content;
-    gap: var(--space-3);
+    grid-template-columns: auto auto minmax(0, 1fr) max-content;
+    gap: var(--space-2);
     align-items: center;
     padding: var(--space-2) var(--space-3);
 }
@@ -920,6 +920,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
 .widget-builder-toggle,
 .menu-builder-toggle,
+.builder-drag-handle,
 .table-col-actions.widget-builder-actions .btn-icon {
     --btn-bg: transparent;
     --btn-border: transparent;
@@ -931,11 +932,34 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .widget-builder-toggle:focus-visible,
 .menu-builder-toggle:hover,
 .menu-builder-toggle:focus-visible,
+.builder-drag-handle:hover,
+.builder-drag-handle:focus-visible,
 .table-col-actions.widget-builder-actions .btn-icon:hover,
 .table-col-actions.widget-builder-actions .btn-icon:focus-visible {
     --btn-bg: var(--color-surface);
     --btn-border: transparent;
     --btn-text: var(--color-text);
+}
+
+.builder-drag-handle {
+    cursor: grab;
+}
+
+.builder-drag-handle:active {
+    cursor: grabbing;
+}
+
+.widget-builder-row.is-dragging,
+.menu-builder-row.is-dragging {
+    opacity: .45;
+}
+
+.builder-drag-placeholder {
+    min-height: 2.75rem;
+    border: 1px dashed var(--primary);
+    border-radius: var(--radius-sm);
+    background: #eef2f7;
+    background: color-mix(in srgb, var(--primary) 10%, var(--color-surface));
 }
 
 .widget-builder-actions {
@@ -1235,12 +1259,12 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
     .widget-builder-summary,
     .menu-builder-summary {
-        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-columns: auto auto minmax(0, 1fr);
     }
 
     .widget-builder-actions,
     .menu-builder-summary .menu-builder-actions {
-        grid-column: 2;
+        grid-column: 3;
     }
 
     .widget-builder-add-form {

@@ -45,6 +45,7 @@ $scriptGroups = [
     $adminUiScripts,
     $hasMediaLibrary ? ['media-library/orchestrator.js'] : [],
     $hasPicker ? ['picker.js'] : [],
+    $hasMenuBuilder || $hasWidgetBuilder ? ['builder-dnd.js'] : [],
     $hasMenuBuilder ? ['menu-builder.js'] : [],
     $hasWidgetBuilder ? ['widget-builder.js'] : [],
     $hasContentAutosave ? ['content-autosave.js'] : [],

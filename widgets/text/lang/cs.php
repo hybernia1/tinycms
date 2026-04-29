@@ -4,9 +4,9 @@ declare(strict_types=1);
 return [
     'widgets' => [
         'text' => [
-            'name' => 'Text',
+            'name' => 'HTML',
             'title' => 'Nadpis',
-            'body' => 'Text',
+            'body' => 'HTML',
         ],
     ],
 ];

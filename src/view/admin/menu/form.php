@@ -53,6 +53,9 @@ $renderItem = static function (array $item) use ($renderIconPicker): void {
     ?>
     <div class="menu-builder-row" data-menu-item>
         <div class="menu-builder-summary">
+            <button class="btn btn-light btn-icon builder-drag-handle" type="button" draggable="true" data-builder-drag-handle aria-label="<?= esc_attr(t('menu.move_item')) ?>" title="<?= esc_attr(t('menu.move_item')) ?>">
+                <?= icon('menu') ?>
+            </button>
             <button class="btn btn-light btn-icon menu-builder-toggle" type="button" data-menu-item-toggle aria-expanded="false" aria-label="<?= esc_attr(t('menu.item_label')) ?>" title="<?= esc_attr(t('menu.item_label')) ?>">
                 <?= icon('next', 'icon menu-builder-toggle-icon') ?>
             </button>
