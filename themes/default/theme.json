@@ -1,0 +1,41 @@
+{
+  "name": "Default",
+  "version": "1.0.0",
+  "author": "TinyCMS",
+  "description": "Clean default TinyCMS theme.",
+  "features": [
+    "responsive",
+    "widgets",
+    "menu",
+    "search",
+    "logo",
+    "favicon"
+  ],
+  "settings": {
+    "show_logo": {
+      "type": "checkbox",
+      "label_key": "themes.fields.show_logo",
+      "default": "1"
+    },
+    "logo": {
+      "type": "file",
+      "label_key": "themes.fields.logo",
+      "default": ""
+    },
+    "favicon": {
+      "type": "file",
+      "label_key": "themes.fields.favicon",
+      "default": ""
+    },
+    "enable_widgets": {
+      "type": "checkbox",
+      "label_key": "themes.fields.enable_widgets",
+      "default": "1"
+    },
+    "footer_text": {
+      "type": "textarea",
+      "label_key": "themes.fields.footer_text",
+      "default": ""
+    }
+  }
+}

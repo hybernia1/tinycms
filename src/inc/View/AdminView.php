@@ -12,7 +12,7 @@ final class AdminView
     private View $view;
     private Settings $settings;
 
-    public function __construct(View $view, Settings $settings)
+    public function __construct(View $view, Settings $settings, private array $themeSettings = [])
     {
         $this->view = $view;
         $this->settings = $settings;
@@ -148,6 +148,19 @@ final class AdminView
         ]);
     }
 
+    public function adminThemeForm(array $themes, string $activeTheme, array $values, array $fields, string $section): void
+    {
+        $this->renderAdmin('admin/themes/form', [
+            'themes' => $themes,
+            'activeTheme' => $activeTheme,
+            'values' => $values,
+            'fields' => $fields,
+            'section' => $section,
+            'pageTitle' => I18n::t('admin.menu.themes'),
+            'headerAction' => $this->submitHeaderAction('#themes-form'),
+        ]);
+    }
+
     public function adminMediaList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/media/list', [
@@ -237,7 +250,7 @@ final class AdminView
 
     private function adminBranding(): array
     {
-        $settings = $this->settings->resolved();
+        $settings = array_replace($this->settings->resolved(), $this->themeSettings);
         return [
             'siteName' => (string)($settings['sitename'] ?? 'TinyCMS'),
             'siteFavicon' => (string)($settings['favicon'] ?? ''),
@@ -261,6 +274,7 @@ final class AdminView
             'media',
             'menu',
             'widgets',
+            'themes',
             'users',
             'editor',
             'datetime',
@@ -280,6 +294,7 @@ final class AdminView
             ['label' => I18n::t('admin.menu.terms'), 'url' => 'admin/terms', 'icon' => 'terms'],
             ['label' => I18n::t('admin.menu.menu'), 'url' => 'admin/menu', 'icon' => 'menu'],
             ['label' => I18n::t('admin.menu.widgets'), 'url' => 'admin/widgets', 'icon' => 'widgets'],
+            ['label' => I18n::t('admin.menu.themes'), 'url' => 'admin/themes', 'icon' => 'image'],
             ['label' => I18n::t('admin.menu.settings'), 'url' => 'admin/settings', 'icon' => 'settings'],
         ];
     }
