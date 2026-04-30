@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace App\Controller\Front;
 
 use App\Service\Auth\Auth;
-use App\Service\Front\Services;
+use App\Service\Application\Settings;
+use App\Service\Application\Term;
+use App\Service\Application\User;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\Media;
@@ -18,15 +20,20 @@ final class Front
     private \PDO $pdo;
     private Slugger $slugger;
 
-    public function __construct(private FrontView $view, private Services $services, private Auth $auth)
-    {
+    public function __construct(
+        private FrontView $view,
+        private Settings $settings,
+        private Term $terms,
+        private User $users,
+        private Auth $auth
+    ) {
         $this->pdo = Connection::get();
         $this->slugger = new Slugger();
     }
 
     public function home(): void
     {
-        $settings = $this->services->settings->resolved();
+        $settings = $this->settings->resolved();
         $perPage = $this->resolvePerPage($settings);
 
         $contentId = (int)($settings['front_home_content'] ?? 0);
@@ -63,7 +70,7 @@ final class Front
 
     public function search(): void
     {
-        $settings = $this->services->settings->resolved();
+        $settings = $this->settings->resolved();
         $perPage = $this->resolvePerPage($settings);
         $page = max(1, (int)($_GET['page'] ?? 1));
         $query = $this->sanitizeSearch((string)($_GET['q'] ?? ''));
@@ -75,7 +82,7 @@ final class Front
     {
         $slug = trim((string)($params['slug'] ?? ''));
         $termId = $this->slugger->extractId($slug);
-        $term = $termId > 0 ? $this->services->term->find($termId) : null;
+        $term = $termId > 0 ? $this->terms->find($termId) : null;
 
         if ($term === null) {
             $this->notFound();
@@ -87,7 +94,7 @@ final class Front
             $redirect('term/' . $canonicalSlug, true);
         }
 
-        $settings = $this->services->settings->resolved();
+        $settings = $this->settings->resolved();
         $perPage = $this->resolvePerPage($settings);
         $page = max(1, (int)($_GET['page'] ?? 1));
         $pagination = $this->paginateTermPublished($termId, $page, $perPage);
@@ -99,7 +106,7 @@ final class Front
     {
         $slug = trim((string)($params['slug'] ?? ''));
         $authorId = $this->slugger->extractId($slug);
-        $author = $authorId > 0 ? $this->services->user->find($authorId) : null;
+        $author = $authorId > 0 ? $this->users->find($authorId) : null;
 
         if ($author === null) {
             $this->notFound();
@@ -111,7 +118,7 @@ final class Front
             $redirect('author/' . $canonicalSlug, true);
         }
 
-        $settings = $this->services->settings->resolved();
+        $settings = $this->settings->resolved();
         $perPage = $this->resolvePerPage($settings);
         $page = max(1, (int)($_GET['page'] ?? 1));
         $pagination = $this->paginateAuthorPublished($authorId, $page, $perPage);
@@ -152,7 +159,7 @@ final class Front
 
     public function feed(): void
     {
-        $settings = $this->services->settings->resolved();
+        $settings = $this->settings->resolved();
         $perPage = $this->resolvePerPage($settings);
         $items = $this->paginatePublished(1, $perPage)['data'] ?? [];
         $title = trim((string)($settings['sitename'] ?? 'TinyCMS'));
@@ -316,7 +323,7 @@ final class Front
         }
 
         $item = $this->withThumbnail($item);
-        $item['terms'] = $this->services->term->listByContent((int)$item['id']);
+        $item['terms'] = $this->terms->listByContent((int)$item['id']);
         return $item;
     }
 

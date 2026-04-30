@@ -5,7 +5,7 @@ foreach ($fields as $fieldKey => $field) {
     $sections[$sectionKey][$fieldKey] = $field;
 }
 $orderedSections = [];
-foreach (['general', 'localization', 'content', 'media', 'appearance', 'mail'] as $sectionKey) {
+foreach (['general', 'localization', 'content', 'media', 'appearance'] as $sectionKey) {
     if (isset($sections[$sectionKey])) {
         $orderedSections[$sectionKey] = $sections[$sectionKey];
         unset($sections[$sectionKey]);

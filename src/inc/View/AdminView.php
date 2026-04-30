@@ -255,18 +255,13 @@ final class AdminView
             'siteName' => (string)($settings['sitename'] ?? 'TinyCMS'),
             'siteFavicon' => (string)($settings['favicon'] ?? ''),
             'siteLogo' => (string)($settings['logo'] ?? ''),
-            'appVersion' => $this->appVersion(),
+            'appVersion' => defined('APP_VERSION') ? (string)APP_VERSION : '0.9.0',
         ];
-    }
-
-    private function appVersion(): string
-    {
-        return defined('APP_VERSION') ? (string)APP_VERSION : '0.9.0';
     }
 
     private function adminI18n(): array
     {
-        $payload = I18n::subset([
+        return I18n::subset([
             'common',
             'admin',
             'content',
@@ -281,7 +276,6 @@ final class AdminView
             'modal',
             'auth',
         ]);
-        return $payload;
     }
 
     private function adminMenu(): array

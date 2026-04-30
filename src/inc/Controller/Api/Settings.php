@@ -40,7 +40,7 @@ final class Settings extends Admin
         }
 
         $section = strtolower(trim((string)($_POST['settings_section'] ?? 'general')));
-        if (!$this->sectionExists($fields, $section)) {
+        if (!$this->settings->hasSection($section)) {
             $section = 'general';
         }
 
@@ -49,16 +49,5 @@ final class Settings extends Admin
             'message' => I18n::t('settings.saved'),
             'redirect' => $this->buildPath('admin/settings/' . $section),
         ]);
-    }
-
-    private function sectionExists(array $fields, string $section): bool
-    {
-        foreach ($fields as $field) {
-            if ((string)($field['section'] ?? 'general') === $section) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

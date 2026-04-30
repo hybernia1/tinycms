@@ -30,7 +30,7 @@ final class Theme extends Admin
         $result = $this->themes->save((array)($_POST['theme'] ?? []));
         if (($result['success'] ?? false) === true) {
             $section = strtolower(trim((string)($_POST['theme_section'] ?? 'overview')));
-            $section = in_array($section, ['overview', 'settings'], true) ? $section : 'overview';
+            $section = $this->themes->hasSection($section) ? $section : 'overview';
             $this->apiOk([
                 'message' => I18n::t('themes.saved'),
                 'redirect' => $this->buildPath('admin/themes/' . $section),

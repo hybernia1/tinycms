@@ -34,11 +34,6 @@ final class Escape
         return self::attr($url);
     }
 
-    public static function js(mixed $value): string
-    {
-        return trim(self::json((string)$value), '"');
-    }
-
     public static function json(mixed $value): string
     {
         return (string)json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);

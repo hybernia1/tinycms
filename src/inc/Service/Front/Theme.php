@@ -320,28 +320,6 @@ final class Theme
         return $this->setting('enable_widgets', '1') === '1';
     }
 
-    public function mediaSrcSet(string $path): string
-    {
-        $trimmed = trim($path);
-        if ($trimmed === '') {
-            return '';
-        }
-
-        $sources = [];
-        foreach (Media::variants() as $variant) {
-            $name = trim((string)($variant['name'] ?? ''));
-            $width = (int)($variant['width'] ?? 0);
-            if ($name === '' || $width <= 0) {
-                continue;
-            }
-
-            $sources[] = $this->mediaUrl($trimmed, $name) . ' ' . $width . 'w';
-        }
-
-        $sources[] = $this->mediaUrl($trimmed, 'webp') . ' 1024w';
-        return implode(', ', $sources);
-    }
-
     public function contentThumbnail(array $item, array $options = []): string
     {
         $thumbnail = trim((string)($item['thumbnail'] ?? ''));
@@ -374,12 +352,6 @@ final class Theme
         }
 
         return '<figure class="' . esc_attr($class !== '' ? $class : 'content-cover') . '">' . $img . '</figure>';
-    }
-
-    public function contentThumbnailUrl(array $item, string $size = 'webp'): string
-    {
-        $thumbnail = trim((string)($item['thumbnail'] ?? ''));
-        return $thumbnail !== '' ? $this->mediaUrl($thumbnail, $size) : '';
     }
 
     public function contentExcerpt(array $item, int $limit = 0): string
@@ -419,13 +391,8 @@ final class Theme
             return trim($fallback);
         }
 
-        $format = Date::normalizeDateTimeFormat($this->setting('app_datetime_format', Date::defaultDateTimeFormat()));
+        $format = Date::normalizeDateTimeFormat($this->setting('app_datetime_format', APP_DATETIME_FORMAT));
         return date($format, $timestamp);
-    }
-
-    public function contentTerms(array $item): array
-    {
-        return array_values(array_filter((array)($item['terms'] ?? []), static fn(mixed $term): bool => is_array($term)));
     }
 
     public function termLinks(array $item, string $class = 'term-list'): string
@@ -448,7 +415,7 @@ final class Theme
         return $items !== [] ? '<ul class="' . esc_attr($class) . '">' . implode('', $items) . '</ul>' : '';
     }
 
-    public function pagination(array $pagination, string $basePath = '', array $labels = []): string
+    public function pagination(array $pagination, string $basePath = ''): string
     {
         $totalPages = (int)($pagination['total_pages'] ?? 1);
         $page = (int)($pagination['page'] ?? 1);
@@ -529,6 +496,33 @@ final class Theme
         $route = trim((string)($query['route'] ?? ''));
 
         return $route === '' ? '' : '<input type="hidden" name="route" value="' . esc_attr($route) . '">';
+    }
+
+    private function mediaSrcSet(string $path): string
+    {
+        $trimmed = trim($path);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        $sources = [];
+        foreach (Media::variants() as $variant) {
+            $name = trim((string)($variant['name'] ?? ''));
+            $width = (int)($variant['width'] ?? 0);
+            if ($name === '' || $width <= 0) {
+                continue;
+            }
+
+            $sources[] = $this->mediaUrl($trimmed, $name) . ' ' . $width . 'w';
+        }
+
+        $sources[] = $this->mediaUrl($trimmed, 'webp') . ' 1024w';
+        return implode(', ', $sources);
+    }
+
+    private function contentTerms(array $item): array
+    {
+        return array_values(array_filter((array)($item['terms'] ?? []), static fn(mixed $term): bool => is_array($term)));
     }
 
     private function classAttr(string $class, bool $wrapped): string

@@ -55,15 +55,10 @@ function site_language(): string
     return Theme::current()?->language() ?? I18n::htmlLang();
 }
 
-function site_logo_url(): string
-{
-    $logo = trim((string)(Theme::current()?->siteLogo() ?? ''));
-    return $logo !== '' ? site_url($logo) : '';
-}
-
 function site_logo(string $class = 'site-logo'): string
 {
-    $url = site_logo_url();
+    $logo = trim((string)(Theme::current()?->siteLogo() ?? ''));
+    $url = $logo !== '' ? site_url($logo) : '';
     if ($url === '') {
         return '';
     }
@@ -146,12 +141,6 @@ function get_thumbnail(array $options = []): string
     return Theme::current()?->contentThumbnail($item, $options) ?? '';
 }
 
-function get_thumbnail_url(string $size = 'webp'): string
-{
-    $item = current_content_item();
-    return Theme::current()?->contentThumbnailUrl($item, $size) ?? '';
-}
-
 function get_author(string $fallback = ''): string
 {
     $item = current_content_item();
@@ -168,17 +157,6 @@ function get_date(string $fallback = ''): string
 {
     $item = current_content_item();
     return Theme::current()?->contentDate($item, $fallback) ?? trim($fallback);
-}
-
-function get_terms(): array
-{
-    $item = current_content_item();
-    return Theme::current()?->contentTerms($item) ?? [];
-}
-
-function get_term_url(array $term): string
-{
-    return Theme::current()?->termUrl($term) ?? '';
 }
 
 function get_term_links(string $class = 'term-list'): string
@@ -228,11 +206,6 @@ function esc_attr(mixed $value): string
 function esc_url(mixed $value): string
 {
     return Escape::url($value);
-}
-
-function esc_js(mixed $value): string
-{
-    return Escape::js($value);
 }
 
 function esc_json(mixed $value): string
