@@ -84,7 +84,7 @@ final class Content
         return $rows[0] ?? null;
     }
 
-    public function delete(int $id): bool
+    private function delete(int $id): bool
     {
         return $this->query->delete('content', ['id' => $id]) > 0;
     }

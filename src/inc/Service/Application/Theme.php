@@ -3,21 +3,19 @@ declare(strict_types=1);
 
 namespace App\Service\Application;
 
-use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaConstraintValidator;
 use App\Service\Support\I18n;
 
 final class Theme
 {
-    private Query $query;
     private SchemaConstraintValidator $schemaConstraintValidator;
+    private Settings $settings;
     private ?array $themes = null;
 
     public function __construct(private string $rootPath)
     {
         $this->rootPath = rtrim($rootPath, '/\\');
-        $this->query = new Query(Connection::get());
+        $this->settings = new Settings();
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
@@ -57,14 +55,14 @@ final class Theme
 
     public function active(): string
     {
-        $active = $this->slug((string)($this->values()['front_theme'] ?? 'default'));
+        $active = $this->slug((string)($this->settings->values()['front_theme'] ?? 'default'));
         return isset($this->themes()[$active]) ? $active : 'default';
     }
 
     public function resolved(): array
     {
         $active = $this->active();
-        $values = $this->values();
+        $values = $this->settings->values();
         $resolved = ['front_theme' => $active];
 
         foreach ($this->fields($active) as $key => $field) {
@@ -79,6 +77,11 @@ final class Theme
         $theme = $this->slug($theme ?? $this->active());
         $manifest = $this->themes()[$theme] ?? $this->themes()[$this->active()] ?? [];
         return is_array($manifest['settings'] ?? null) ? $manifest['settings'] : [];
+    }
+
+    public function hasSection(string $section): bool
+    {
+        return in_array(strtolower(trim($section)), ['overview', 'settings'], true);
     }
 
     public function save(array $input): array
@@ -100,7 +103,7 @@ final class Theme
             $payload[$key] = $this->normalizeValue($key, (string)$input[$key], $field);
         }
 
-        $this->saveValues($payload);
+        $this->settings->saveValues($this->filterValues($payload));
         return ['success' => true, 'errors' => []];
     }
 
@@ -224,31 +227,9 @@ final class Theme
         return $this->schemaConstraintValidator->truncate('settings', 'value', trim($value), $limit);
     }
 
-    private function values(): array
+    private function filterValues(array $values): array
     {
-        $rows = $this->query->select('settings', ['key_name', 'value']);
-        $values = [];
-
-        foreach ($rows as $row) {
-            $key = (string)($row['key_name'] ?? '');
-            if ($key !== '') {
-                $values[$key] = trim((string)($row['value'] ?? ''));
-            }
-        }
-
-        return $values;
-    }
-
-    private function saveValues(array $values): void
-    {
-        $existingRows = $this->query->select('settings', ['key_name']);
-        $existing = [];
-        foreach ($existingRows as $row) {
-            $key = (string)($row['key_name'] ?? '');
-            if ($key !== '') {
-                $existing[$key] = true;
-            }
-        }
+        $payload = [];
 
         foreach ($values as $key => $value) {
             $key = $this->fieldName((string)$key);
@@ -256,15 +237,10 @@ final class Theme
                 continue;
             }
 
-            $payload = ['value' => (string)$value];
-            if (isset($existing[$key])) {
-                $this->query->update('settings', $payload, ['key_name' => $key]);
-                continue;
-            }
-
-            $this->query->insert('settings', ['key_name' => $key, 'value' => $payload['value']]);
-            $existing[$key] = true;
+            $payload[$key] = (string)$value;
         }
+
+        return $payload;
     }
 
     private function themesPath(): string

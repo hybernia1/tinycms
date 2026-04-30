@@ -11,7 +11,6 @@ final class Date
     private const DATETIME_FORMATS = ['d.m.Y H:i', 'j.n.Y H:i', 'Y-m-d H:i', 'd/m/Y H:i', 'm/d/Y h:i A', 'F j, Y H:i'];
     private const EXAMPLE_TIME = 1776803400;
 
-    private static string $defaultDateFormat = self::FALLBACK_DATE_FORMAT;
     private static string $defaultDateTimeFormat = self::FALLBACK_DATETIME_FORMAT;
 
     private string $dateFormat;
@@ -23,20 +22,9 @@ final class Date
         $this->dateTimeFormat = self::normalizeDateTimeFormat($dateTimeFormat);
     }
 
-    public static function configure(string $dateFormat, string $dateTimeFormat): void
+    public static function configure(string $dateTimeFormat): void
     {
-        self::$defaultDateFormat = self::normalizeDateFormat($dateFormat);
         self::$defaultDateTimeFormat = self::normalizeDateTimeFormat($dateTimeFormat);
-    }
-
-    public static function defaultDateFormat(): string
-    {
-        return self::$defaultDateFormat;
-    }
-
-    public static function defaultDateTimeFormat(): string
-    {
-        return self::$defaultDateTimeFormat;
     }
 
     public static function dateFormatOptions(): array

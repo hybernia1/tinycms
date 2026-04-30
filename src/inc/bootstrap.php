@@ -48,13 +48,11 @@ use App\Service\Support\RateLimiter;
 use App\Service\Support\Slugger;
 use App\Service\Application\User as UserService;
 use App\Service\Front\AdminBar;
-use App\Service\Front\Services as FrontServices;
 use App\View\AdminView;
 use App\View\FrontView;
 use App\View\View;
 
 $isInstalled = is_file(BASE_DIR . '/config.php');
-$settingsService = null;
 $resolvedSettings = [];
 
 if ($isInstalled) {
@@ -71,14 +69,10 @@ $router = new Router($basePath, RequestContext::queryMode($basePath));
 $flash = new Flash();
 $csrf = new Csrf();
 $rateLimiter = new RateLimiter();
-Date::configure(
-    (string)($resolvedSettings['app_date_format'] ?? APP_DATE_FORMAT),
-    (string)($resolvedSettings['app_datetime_format'] ?? APP_DATETIME_FORMAT),
-);
-$dateTimeFormatter = new Date(
-    Date::defaultDateFormat(),
-    Date::defaultDateTimeFormat(),
-);
+$dateFormat = (string)($resolvedSettings['app_date_format'] ?? APP_DATE_FORMAT);
+$dateTimeFormat = (string)($resolvedSettings['app_datetime_format'] ?? APP_DATETIME_FORMAT);
+Date::configure($dateTimeFormat);
+$dateTimeFormatter = new Date($dateFormat, $dateTimeFormat);
 $view = new View(BASE_DIR, $router, $flash, $csrf, $dateTimeFormatter);
 
 $redirect = static function (string $path = '', bool $permanent = false) use ($router): void {
@@ -132,13 +126,10 @@ $menuService = new MenuService();
 $widgetService = new WidgetService(BASE_DIR, (string)($resolvedSettings['front_theme'] ?? 'default'));
 $slugger = new Slugger();
 $uploadService = new UploadService(BASE_DIR, $slugger);
-$settingsService ??= new SettingsService();
-$themeService ??= new ThemeService(BASE_DIR);
 $termService = new TermService();
-$frontServices = new FrontServices($contentService, $userService, $mediaService, $termService, $settingsService, $menuService);
 $frontAdminBar = new AdminBar($router, $auth);
 $frontView = new FrontView(BASE_DIR, $router, $resolvedSettings, $frontAdminBar, $menuService, $widgetService);
-$front = new FrontController($frontView, $frontServices, $auth);
+$front = new FrontController($frontView, $settingsService, $termService, $userService, $auth);
 $adminView = new AdminView($view, $settingsService, $themeService->resolved());
 $admin = new AdminController($authService, $flash, $csrf, $adminView);
 $apiSessions = new SessionsController($authService, $flash, $csrf, $rateLimiter);

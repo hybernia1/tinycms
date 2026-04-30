@@ -21,16 +21,6 @@ final class Media
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
-    public function create(?int $author, string $name, string $path): int
-    {
-        $result = $this->save([
-            'author' => $author,
-            'name' => $name,
-            'path' => $path,
-        ]);
-        return $result['success'] === true ? (int)($result['id'] ?? 0) : 0;
-    }
-
     public function paginate(int $page = 1, int $perPage = 10, string $search = '', string $status = 'all'): array
     {
         if ($status === 'unassigned') {

@@ -191,13 +191,6 @@ final class Term
         return array_values(array_filter(array_map(static fn(array $row): string => trim((string)($row['name'] ?? '')), $rows)));
     }
 
-    public function totalCount(): int
-    {
-        $termsTable = Table::name('terms');
-        $stmt = $this->pdo->query("SELECT COUNT(*) FROM $termsTable");
-        return (int)$stmt->fetchColumn();
-    }
-
     public function syncContentTerms(int $contentId, string $rawTerms): void
     {
         if ($contentId <= 0) {

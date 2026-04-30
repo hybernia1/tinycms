@@ -156,13 +156,14 @@ final class ContentMedia extends Admin
 
         $author = (int)($this->authService->auth()->id() ?? 0);
         $data = (array)($upload['data'] ?? []);
-        $mediaId = $this->media->create(
-            $author > 0 ? $author : null,
-            (string)($data['name'] ?? ''),
-            (string)($data['path'] ?? '')
-        );
+        $result = $this->media->save([
+            'author' => $author > 0 ? (string)$author : '',
+            'name' => (string)($data['name'] ?? ''),
+            'path' => (string)($data['path'] ?? ''),
+        ]);
+        $mediaId = (int)($result['id'] ?? 0);
 
-        if ($mediaId <= 0) {
+        if (($result['success'] ?? false) !== true || $mediaId <= 0) {
             $this->upload->deleteMediaFiles($data);
             $this->apiError('SAVE_FAILED', I18n::t('media.save_failed'));
             return;

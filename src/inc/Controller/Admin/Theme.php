@@ -38,7 +38,7 @@ final class Theme extends Admin
         }
 
         $section = strtolower(trim($section));
-        if (!in_array($section, ['overview', 'settings'], true)) {
+        if (!$this->themes->hasSection($section)) {
             $redirect('admin/themes');
             return;
         }
