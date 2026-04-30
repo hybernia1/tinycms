@@ -38,6 +38,7 @@
     const requestJson = async (url, options = {}) => {
         const response = await fetch(url, options);
         const raw = await response.json().catch(() => ({}));
+        updateCsrfFields(raw);
         return { response, data: normalizePayload(raw), raw };
     };
 
@@ -56,9 +57,7 @@
     };
 
     api.http = {
-        normalizePayload,
         postForm,
         requestJson,
-        updateCsrfFields,
     };
 })();

@@ -1,12 +1,19 @@
 (() => {
     const app = window.tinycms = window.tinycms || {};
-    const session = app.session = app.session || {};
     const t = app.i18n?.t || (() => '');
     const icon = app.icons?.icon || (() => '');
     const esc = app.support?.esc || ((value) => String(value || ''));
     const currentCsrf = app.support?.currentCsrf || (() => '');
+    const postForm = app.api?.http?.postForm;
+    const requestJson = app.api?.http?.requestJson;
+    const modalUi = app.ui?.modal || {
+        open: (modal) => modal?.classList.add('open'),
+        close: (modal) => modal?.classList.remove('open'),
+    };
+    const heartbeatEndpoint = document.body.getAttribute('data-heartbeat-endpoint') || '';
+    const loginEndpoint = document.body.getAttribute('data-heartbeat-login-endpoint') || '';
 
-    const ensureSessionModal = (loginEndpoint) => {
+    const ensureSessionModal = () => {
         let modal = document.querySelector('[data-session-login-modal]');
         if (modal) {
             return modal;
@@ -73,207 +80,168 @@
         return modal;
     };
 
-    session.template = {
-        ensureConnectionModal,
-        ensureSessionModal,
-    };
-})();
+    const modal = ensureSessionModal();
+    const form = modal?.querySelector('[data-session-login-form]');
+    const message = modal?.querySelector('[data-session-login-message]');
+    const submit = form?.querySelector('[data-session-login-submit]');
+    const emailInput = form?.querySelector('[data-session-login-email]');
+    const errorFields = form ? Array.from(form.querySelectorAll('[data-session-login-error]')) : [];
+    const connectionModal = ensureConnectionModal();
+    const retryButton = connectionModal?.querySelector('[data-connection-lost-retry]');
+    let heartbeatInFlight = false;
+    let loginInFlight = false;
+    let connectionLost = false;
 
-(() => {
-const app = window.tinycms = window.tinycms || {};
-const t = app.i18n?.t || (() => '');
-const postForm = app.api?.http?.postForm;
-const requestJson = app.api?.http?.requestJson;
-const modalUi = app.ui?.modal || {
-    open: (modal) => modal?.classList.add('open'),
-    close: (modal) => modal?.classList.remove('open'),
-};
-const template = app.session?.template || {};
-const heartbeatEndpoint = document.body.getAttribute('data-heartbeat-endpoint') || '';
-const loginEndpoint = document.body.getAttribute('data-heartbeat-login-endpoint') || '';
-
-const modal = template.ensureSessionModal?.(loginEndpoint) || document.querySelector('[data-session-login-modal]');
-const form = modal?.querySelector('[data-session-login-form]');
-const message = modal?.querySelector('[data-session-login-message]');
-const submit = form?.querySelector('[data-session-login-submit]');
-const emailInput = form?.querySelector('[data-session-login-email]');
-const errorFields = form ? Array.from(form.querySelectorAll('[data-session-login-error]')) : [];
-const connectionModal = template.ensureConnectionModal?.() || document.querySelector('[data-connection-lost-modal]');
-const retryButton = connectionModal?.querySelector('[data-connection-lost-retry]');
-let heartbeatInFlight = false;
-let loginInFlight = false;
-let connectionLost = false;
-
-if (!modal || !form || !connectionModal || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
-    return;
-}
-
-const updateCsrfToken = (token) => {
-    const value = String(token || '').trim();
-    if (value === '') {
-        return;
-    }
-    document.querySelectorAll('input[name="_csrf"]').forEach((input) => {
-        input.value = value;
-    });
-};
-
-const clearErrors = () => {
-    errorFields.forEach((field) => {
-        field.textContent = '';
-        field.hidden = true;
-    });
-    if (message) {
-        message.textContent = '';
-        message.hidden = true;
-    }
-};
-
-const setMessage = (text) => {
-    if (!message) {
-        return;
-    }
-    message.textContent = String(text || '');
-    message.hidden = message.textContent.trim() === '';
-};
-
-const openModal = (payload) => {
-    clearErrors();
-    updateCsrfToken(payload?.error?.csrf || payload?.data?.csrf);
-    setMessage(payload?.error?.message || '');
-    modalUi.open(modal);
-    if (emailInput) {
-        emailInput.focus();
-    }
-};
-
-const closeModal = () => {
-    modalUi.close(modal);
-    clearErrors();
-    form.reset();
-};
-
-const openConnectionModal = () => {
-    modalUi.open(connectionModal);
-};
-
-const closeConnectionModal = () => {
-    modalUi.close(connectionModal);
-};
-
-const setLoading = (loading) => {
-    form.querySelectorAll('input:not([type="hidden"]), button').forEach((field) => {
-        field.disabled = loading;
-    });
-    if (submit) {
-        submit.textContent = loading ? t('common.loading') : t('auth.login');
-    }
-};
-
-const refreshCsrfToken = async () => {
-    try {
-        const { raw } = await requestJson(heartbeatEndpoint, {
-            credentials: 'same-origin',
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-        });
-        updateCsrfToken(raw?.data?.csrf || raw?.error?.csrf);
-    } catch (_) {
-    }
-};
-
-const heartbeat = async (ignoreConnectionModal = false) => {
-    if (modal.classList.contains('open') || (!ignoreConnectionModal && connectionModal.classList.contains('open')) || heartbeatInFlight || loginInFlight) {
+    if (!modal || !form || !connectionModal || typeof postForm !== 'function' || typeof requestJson !== 'function' || heartbeatEndpoint === '' || loginEndpoint === '') {
         return;
     }
 
-    heartbeatInFlight = true;
-    try {
-        const { response, raw } = await requestJson(heartbeatEndpoint, {
-            credentials: 'same-origin',
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-        });
-
-        updateCsrfToken(raw?.data?.csrf || raw?.error?.csrf);
-        connectionLost = false;
-        closeConnectionModal();
-
-        if (response.ok && raw?.ok === true) {
-            return;
-        }
-
-        if (response.status === 401 || response.status === 403 || raw?.error?.code === 'UNAUTHENTICATED') {
-            openModal(raw);
-        }
-    } catch (_) {
-        if (connectionLost || modal.classList.contains('open')) {
-            return;
-        }
-        connectionLost = true;
-        openConnectionModal();
-    } finally {
-        heartbeatInFlight = false;
-    }
-};
-
-retryButton?.addEventListener('click', () => {
-    heartbeat(true);
-});
-
-form.addEventListener('submit', async (event) => {
-    if (loginInFlight) {
-        return;
-    }
-
-    event.preventDefault();
-    clearErrors();
-    const payload = new FormData(form);
-    setLoading(true);
-    loginInFlight = true;
-
-    try {
-        const { response, raw } = await postForm(loginEndpoint, payload, {
-            credentials: 'same-origin',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-        });
-
-        setLoading(false);
-        updateCsrfToken(raw?.data?.csrf || raw?.error?.csrf);
-
-        if (response.ok && raw?.ok === true) {
-            closeModal();
-            return;
-        }
-
-        if (response.status === 419) {
-            await refreshCsrfToken();
-            setMessage(t('auth.session_expired'));
-            return;
-        }
-
-        const errors = raw?.error?.errors && typeof raw.error.errors === 'object' ? raw.error.errors : {};
+    const clearErrors = () => {
         errorFields.forEach((field) => {
-            const name = field.getAttribute('data-session-login-error') || '';
-            const text = String(errors[name] || '').trim();
-            field.textContent = text;
-            field.hidden = text === '';
+            field.textContent = '';
+            field.hidden = true;
         });
-        setMessage(raw?.error?.message || t('auth.login_failed'));
-    } catch (_) {
-        setLoading(false);
-        setMessage(t('auth.login_failed'));
-    } finally {
-        loginInFlight = false;
-    }
-});
+        if (message) {
+            message.textContent = '';
+            message.hidden = true;
+        }
+    };
 
-heartbeat();
-window.setInterval(heartbeat, 30000);
+    const setMessage = (text) => {
+        if (!message) {
+            return;
+        }
+        message.textContent = String(text || '');
+        message.hidden = message.textContent.trim() === '';
+    };
+
+    const openModal = (payload) => {
+        clearErrors();
+        setMessage(payload?.error?.message || '');
+        modalUi.open(modal);
+        if (emailInput) {
+            emailInput.focus();
+        }
+    };
+
+    const closeModal = () => {
+        modalUi.close(modal);
+        clearErrors();
+        form.reset();
+    };
+
+    const setConnectionOpen = (open) => {
+        modalUi[open ? 'open' : 'close'](connectionModal);
+    };
+
+    const setLoading = (loading) => {
+        form.querySelectorAll('input:not([type="hidden"]), button').forEach((field) => {
+            field.disabled = loading;
+        });
+        if (submit) {
+            submit.textContent = loading ? t('common.loading') : t('auth.login');
+        }
+    };
+
+    const refreshCsrfToken = async () => {
+        try {
+            await requestJson(heartbeatEndpoint, {
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+        } catch (_) {
+        }
+    };
+
+    const heartbeat = async (ignoreConnectionModal = false) => {
+        if (modal.classList.contains('open') || (!ignoreConnectionModal && connectionModal.classList.contains('open')) || heartbeatInFlight || loginInFlight) {
+            return;
+        }
+
+        heartbeatInFlight = true;
+        try {
+            const { response, raw } = await requestJson(heartbeatEndpoint, {
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            connectionLost = false;
+            setConnectionOpen(false);
+
+            if (response.ok && raw?.ok === true) {
+                return;
+            }
+
+            if (response.status === 401 || response.status === 403 || raw?.error?.code === 'UNAUTHENTICATED') {
+                openModal(raw);
+            }
+        } catch (_) {
+            if (connectionLost || modal.classList.contains('open')) {
+                return;
+            }
+            connectionLost = true;
+            setConnectionOpen(true);
+        } finally {
+            heartbeatInFlight = false;
+        }
+    };
+
+    retryButton?.addEventListener('click', () => {
+        heartbeat(true);
+    });
+
+    form.addEventListener('submit', async (event) => {
+        if (loginInFlight) {
+            return;
+        }
+
+        event.preventDefault();
+        clearErrors();
+        const payload = new FormData(form);
+        setLoading(true);
+        loginInFlight = true;
+
+        try {
+            const { response, raw } = await postForm(loginEndpoint, payload, {
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            setLoading(false);
+
+            if (response.ok && raw?.ok === true) {
+                closeModal();
+                return;
+            }
+
+            if (response.status === 419) {
+                await refreshCsrfToken();
+                setMessage(t('auth.session_expired'));
+                return;
+            }
+
+            const errors = raw?.error?.errors && typeof raw.error.errors === 'object' ? raw.error.errors : {};
+            errorFields.forEach((field) => {
+                const name = field.getAttribute('data-session-login-error') || '';
+                const text = String(errors[name] || '').trim();
+                field.textContent = text;
+                field.hidden = text === '';
+            });
+            setMessage(raw?.error?.message || t('auth.login_failed'));
+        } catch (_) {
+            setLoading(false);
+            setMessage(t('auth.login_failed'));
+        } finally {
+            loginInFlight = false;
+        }
+    });
+
+    heartbeat();
+    window.setInterval(heartbeat, 30000);
 })();

@@ -4,7 +4,7 @@
     const t = app.i18n?.t || (() => '');
     const esc = app.support?.esc || ((value) => String(value || ''));
     const icon = app.icons?.icon || (() => '');
-    const currentCsrf = app.support?.currentCsrf || (() => '');
+    const sessionStore = app.support?.sessionStore || { get: () => '', set: () => {}, remove: () => {} };
 
     const resolveFlashContainer = () => {
         const existing = document.querySelector('.admin-flash-stack');
@@ -51,28 +51,6 @@
         container.prepend(flash);
     };
 
-    const sessionStore = {
-        get(key) {
-            try {
-                return window.sessionStorage.getItem(key) || '';
-            } catch (_) {
-                return '';
-            }
-        },
-        set(key, value) {
-            try {
-                window.sessionStorage.setItem(key, value);
-            } catch (_) {
-            }
-        },
-        remove(key) {
-            try {
-                window.sessionStorage.removeItem(key);
-            } catch (_) {
-            }
-        },
-    };
-
     const storeFlash = (type, message) => {
         const text = String(message || '').trim();
         if (text === '') {
@@ -99,12 +77,8 @@
     };
 
     Object.assign(api, {
-        esc,
-        icon,
-        currentCsrf,
         pushFlash,
         storeFlash,
-        sessionStore,
         flash: {
             push: pushFlash,
             store: storeFlash,

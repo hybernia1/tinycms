@@ -1,6 +1,37 @@
 (() => {
     const app = window.tinycms = window.tinycms || {};
     const t = app.i18n?.t || ((key, fallback) => fallback || '');
+    let openMenu = null;
+
+    const closeMenu = (menu = openMenu) => {
+        if (!menu) {
+            return;
+        }
+
+        const toggle = menu.querySelector('[data-save-action-toggle], [data-content-action-toggle]');
+        const options = menu.querySelector('.admin-header-action-options');
+        menu.classList.remove('open');
+        if (options) {
+            options.hidden = true;
+        }
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+        if (openMenu === menu) {
+            openMenu = null;
+        }
+    };
+
+    const openSplitMenu = (menu, toggle, options) => {
+        if (openMenu && openMenu !== menu) {
+            closeMenu(openMenu);
+        }
+
+        openMenu = menu;
+        menu.classList.add('open');
+        options.hidden = false;
+        toggle.setAttribute('aria-expanded', 'true');
+    };
 
     const bindFormSubmitButtons = () => {
         document.querySelectorAll('[data-save-action-form-submit]').forEach((button) => {
@@ -32,18 +63,6 @@
             return;
         }
 
-        const close = () => {
-            menu.classList.remove('open');
-            options.hidden = true;
-            toggleButton.setAttribute('aria-expanded', 'false');
-        };
-
-        const open = () => {
-            menu.classList.add('open');
-            options.hidden = false;
-            toggleButton.setAttribute('aria-expanded', 'true');
-        };
-
         primaryButton.addEventListener('click', () => {
             form.requestSubmit();
         });
@@ -52,24 +71,10 @@
             event.preventDefault();
             event.stopPropagation();
             if (options.hidden) {
-                open();
+                openSplitMenu(menu, toggleButton, options);
                 return;
             }
-            close();
-        });
-
-        const handleOutside = (event) => {
-            if (!menu.contains(event.target)) {
-                close();
-            }
-        };
-
-        document.addEventListener('click', handleOutside, true);
-        document.addEventListener('pointerdown', handleOutside, true);
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                close();
-            }
+            closeMenu(menu);
         });
 
         submitButtons.forEach((button) => {
@@ -77,18 +82,18 @@
                 if (typeof onOptionClick === 'function') {
                     onOptionClick(button);
                 }
-                close();
+                closeMenu(menu);
                 form.requestSubmit();
             });
         });
 
         if (deleteButton) {
             deleteButton.addEventListener('click', () => {
-                close();
+                closeMenu(menu);
             });
         }
 
-        close();
+        closeMenu(menu);
     };
 
     const initSaveMenus = () => {
@@ -147,4 +152,19 @@
     bindFormSubmitButtons();
     initSaveMenus();
     initContentMenu();
+
+    const handleOutside = (event) => {
+        if (!openMenu || !(event.target instanceof Node) || openMenu.contains(event.target)) {
+            return;
+        }
+        closeMenu(openMenu);
+    };
+
+    document.addEventListener('click', handleOutside, true);
+    document.addEventListener('pointerdown', handleOutside, true);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeMenu(openMenu);
+        }
+    });
 })();
