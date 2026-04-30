@@ -7,17 +7,10 @@
 
     const customSelect = app.ui?.customSelect;
     const builderDnd = app.builderDnd;
+    const escapeSelector = app.support?.escapeSelector || ((value) => String(value || '').replace(/["\\]/g, '\\$&'));
 
     const rows = () => Array.from(root.querySelectorAll('[data-widget-item]'));
     const areas = () => Array.from(root.querySelectorAll('[data-widget-area]'));
-
-    const escapeSelector = (value) => {
-        if (window.CSS && typeof window.CSS.escape === 'function') {
-            return window.CSS.escape(value);
-        }
-
-        return String(value).replace(/["\\]/g, '\\$&');
-    };
 
     const renumber = () => {
         rows().forEach((row, index) => {

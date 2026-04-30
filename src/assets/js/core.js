@@ -10,6 +10,35 @@
 
     const currentCsrf = () => document.querySelector('input[name="_csrf"]')?.value || '';
 
+    const escapeSelector = (value) => {
+        if (window.CSS && typeof window.CSS.escape === 'function') {
+            return window.CSS.escape(String(value || ''));
+        }
+        return String(value || '').replace(/["\\]/g, '\\$&');
+    };
+
+    const sessionStore = {
+        get(key) {
+            try {
+                return window.sessionStorage.getItem(key) || '';
+            } catch (_) {
+                return '';
+            }
+        },
+        set(key, value) {
+            try {
+                window.sessionStorage.setItem(key, value);
+            } catch (_) {
+            }
+        },
+        remove(key) {
+            try {
+                window.sessionStorage.removeItem(key);
+            } catch (_) {
+            }
+        },
+    };
+
     const scriptBaseUrl = (script) => String(script?.src || '').replace(/[^/]+(?:\?.*)?$/, '');
 
     const scriptLoaded = (attr, src) => Array.prototype.some.call(
@@ -39,7 +68,7 @@
         ), Promise.resolve());
     };
 
-    app.support = { esc, currentCsrf, loadScripts };
+    app.support = { esc, escapeSelector, currentCsrf, loadScripts, sessionStore };
 })();
 
 (() => {

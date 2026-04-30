@@ -3,7 +3,8 @@
     const api = app.api = app.api || {};
     const pushFlash = api.pushFlash || (() => {});
     const storeFlash = api.storeFlash || (() => {});
-    const updateCsrfFields = api.http?.updateCsrfFields || (() => {});
+    const postForm = api.http?.postForm;
+    const escapeSelector = app.support?.escapeSelector || ((value) => String(value || '').replace(/["\\]/g, '\\$&'));
 
     const showError = (message) => {
         const text = String(message || '').trim();
@@ -27,13 +28,6 @@
             container.classList.add(tone === 'success' ? 'text-success' : 'text-danger');
         }
         return true;
-    };
-
-    const escapeSelector = (value) => {
-        if (window.CSS && typeof window.CSS.escape === 'function') {
-            return window.CSS.escape(value);
-        }
-        return String(value).replace(/["\\]/g, '\\$&');
     };
 
     const clearFieldErrors = (form) => {
@@ -96,21 +90,19 @@
     };
 
     const submitApiForm = async (form) => {
-        const response = await fetch(form.action, {
-            method: (form.method || 'POST').toUpperCase(),
-            body: new FormData(form),
+        if (typeof postForm !== 'function') {
+            return;
+        }
+
+        const { response, data: normalized } = await postForm(form.action, form, {
             credentials: 'same-origin',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
 
-        const payload = await response.json().catch(() => null);
-        updateCsrfFields(payload);
-        if (!response.ok || payload?.ok !== true) {
+        if (!response.ok || !normalized.success) {
             clearFieldErrors(form);
-            applyFieldErrors(form, payload?.error?.errors || {});
-            const errorMessage = payload?.error?.message || '';
+            applyFieldErrors(form, normalized.errors || {});
+            const errorMessage = normalized.message || '';
             const hasInlineMessage = setFormMessage(form, errorMessage, 'error');
             if (!hasInlineMessage) {
                 showError(errorMessage);
@@ -121,8 +113,8 @@
         clearFieldErrors(form);
         setFormMessage(form, '');
 
-        const redirect = String(payload?.data?.redirect || '').trim();
-        const successMessage = String(payload?.data?.message || '').trim();
+        const redirect = String(normalized.data?.redirect || '').trim();
+        const successMessage = String(normalized.message || '').trim();
         if (redirect !== '') {
             if (successMessage !== '') {
                 storeFlash('success', successMessage);
@@ -161,8 +153,4 @@
         submitApiForm(form);
     });
 
-    api.form = {
-        submit: submitApiForm,
-        init: () => {},
-    };
 })();

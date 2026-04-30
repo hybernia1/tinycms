@@ -5,7 +5,7 @@
     const requestJson = api.http?.requestJson;
     const postForm = api.http?.postForm;
     const pushFlash = api.pushFlash || (() => {});
-    const sessionStore = api.sessionStore || { get: () => '', set: () => {} };
+    const sessionStore = app.support?.sessionStore || { get: () => '', set: () => {} };
     const confirmModal = app.ui?.modal?.confirm || (() => Promise.resolve(false));
 
     const normalizeListResponse = (payload) => {
@@ -384,11 +384,6 @@
             mediaListConfig,
             usersListConfig,
         ].forEach((config) => initListApi(config()));
-    };
-
-    api.list = {
-        init: initListApi,
-        initAll: initLists,
     };
 
     initLists();
