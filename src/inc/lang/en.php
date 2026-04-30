@@ -32,6 +32,7 @@ return [
         'loading' => 'Loading...',
         'close_notice' => 'Close notification',
         'connection_lost' => 'Connection lost',
+        'no_results' => 'No results.',
     ],
     'install' => [
         'title' => 'Installation',
