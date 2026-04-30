@@ -92,6 +92,11 @@ function get_widget_area(string $area): string
     return Theme::current()?->widgetArea($area) ?? '';
 }
 
+function widgets_enabled(): bool
+{
+    return Theme::current()?->widgetsEnabled() ?? false;
+}
+
 function register_widget_area(string $area, string $label = ''): void
 {
     Widget::current()?->registerArea($area, $label);

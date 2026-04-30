@@ -2,3 +2,4 @@ config.php
 /uploads
 .env.local
 .codex-workspace/
+AGENTS.md

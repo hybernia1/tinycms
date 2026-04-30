@@ -28,8 +28,6 @@ final class Settings
         foreach ($locales as $locale) {
             $localeOptions[$locale] = I18n::languageLabel($locale);
         }
-        $themeOptions = $this->themeOptions();
-
         return [
             'app_lang' => [
                 'label_key' => 'settings.fields.app_lang',
@@ -128,13 +126,6 @@ final class Settings
                 'min' => 1,
                 'max' => 3000,
             ],
-            'front_theme' => [
-                'label_key' => 'settings.fields.front_theme',
-                'section' => 'appearance',
-                'type' => 'select',
-                'default' => 'default',
-                'options' => $themeOptions,
-            ],
             'allow_registration' => [
                 'label_key' => 'settings.fields.allow_registration',
                 'section' => 'content',
@@ -145,9 +136,6 @@ final class Settings
                     '1' => I18n::t('settings.options.allow_registration.enabled'),
                 ],
             ],
-            'logo' => ['label_key' => 'settings.fields.logo', 'section' => 'appearance', 'type' => 'file', 'default' => ''],
-            'favicon' => ['label_key' => 'settings.fields.favicon', 'section' => 'appearance', 'type' => 'file', 'default' => ''],
-            'footer_text' => ['label_key' => 'settings.fields.footer_text', 'section' => 'appearance', 'type' => 'textarea', 'default' => ''],
         ];
     }
 
@@ -164,45 +152,6 @@ final class Settings
 
         $name = trim((string)($rows[0]['name'] ?? ''));
         return $name !== '' ? $name : sprintf('#%d', $id);
-    }
-
-    private function themeOptions(): array
-    {
-        $themesDir = defined('THEMES_DIR') ? (string)THEMES_DIR : 'themes/';
-        $path = rtrim(BASE_DIR . '/' . trim($themesDir, '/'), '/');
-        if (!is_dir($path)) {
-            return ['default' => 'default'];
-        }
-
-        $items = scandir($path);
-        if (!is_array($items)) {
-            return ['default' => 'default'];
-        }
-
-        $options = [];
-        foreach ($items as $item) {
-            if ($item === '.' || $item === '..') {
-                continue;
-            }
-
-            $fullPath = $path . '/' . $item;
-            if (!is_dir($fullPath)) {
-                continue;
-            }
-
-            $key = trim($item);
-            if ($key === '') {
-                continue;
-            }
-            $options[$key] = $key;
-        }
-
-        if ($options === []) {
-            return ['default' => 'default'];
-        }
-
-        ksort($options);
-        return $options;
     }
 
     public function values(): array
