@@ -7,7 +7,7 @@
 }
 
 .tinycms-admin-bar {
-    --tinycms-admin-bar-height: 32px;
+    --tinycms-admin-bar-height: 50px;
     --tinycms-admin-bar-bg: #1f2937;
     --tinycms-admin-bar-border: rgba(255, 255, 255, 0.12);
     --tinycms-admin-bar-hover: rgba(255, 255, 255, 0.06);
