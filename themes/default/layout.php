@@ -4,6 +4,7 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
+$widgetsEnabled = widgets_enabled();
 ?>
 <!doctype html>
 <html lang="<?= esc_attr(site_language()) ?>">
@@ -35,11 +36,15 @@ if (!defined('BASE_DIR')) {
     </div>
     <button class="site-nav-backdrop" type="button" aria-label="Close menu" data-menu-close></button>
     <main class="container site-main">
+        <?php if ($widgetsEnabled): ?>
         <section class="site-widgets site-widgets-before"><?= get_widget_area('before_content') ?></section>
         <aside class="site-widgets site-widgets-left"><?= get_widget_area('left') ?></aside>
+        <?php endif; ?>
         <div class="site-content"><?= $content ?></div>
+        <?php if ($widgetsEnabled): ?>
         <aside class="site-widgets site-widgets-right"><?= get_widget_area('right') ?></aside>
         <section class="site-widgets site-widgets-after"><?= get_widget_area('after_content') ?></section>
+        <?php endif; ?>
     </main>
     <footer class="site-footer">
         <div class="container">

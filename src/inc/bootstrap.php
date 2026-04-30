@@ -11,6 +11,7 @@ use App\Controller\Admin\Media as MediaController;
 use App\Controller\Admin\Menu as MenuController;
 use App\Controller\Admin\Settings as SettingsController;
 use App\Controller\Admin\Term as TermController;
+use App\Controller\Admin\Theme as ThemeController;
 use App\Controller\Admin\User as UserController;
 use App\Controller\Admin\Widget as WidgetController;
 use App\Controller\Front\Front as FrontController;
@@ -21,6 +22,7 @@ use App\Controller\Api\Menu as ApiMenuController;
 use App\Controller\Api\Sessions as SessionsController;
 use App\Controller\Api\Settings as ApiSettingsController;
 use App\Controller\Api\Term as ApiTermController;
+use App\Controller\Api\Theme as ApiThemeController;
 use App\Controller\Api\User as ApiUserController;
 use App\Controller\Api\Widget as ApiWidgetController;
 use App\Controller\Install\Install as InstallController;
@@ -39,6 +41,7 @@ use App\Service\Support\Flash;
 use App\Service\Support\Media as MediaSupport;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Application\Settings as SettingsService;
+use App\Service\Application\Theme as ThemeService;
 use App\Service\Support\I18n;
 use App\Service\Support\RequestContext;
 use App\Service\Support\RateLimiter;
@@ -56,7 +59,8 @@ $resolvedSettings = [];
 
 if ($isInstalled) {
     $settingsService = new SettingsService();
-    $resolvedSettings = $settingsService->resolved();
+    $themeService = new ThemeService(BASE_DIR);
+    $resolvedSettings = array_replace($settingsService->resolved(), $themeService->resolved());
     MediaSupport::configure($resolvedSettings);
     RequestContext::setWebsiteUrl((string)($resolvedSettings['website_url'] ?? ''));
     I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
@@ -129,12 +133,13 @@ $widgetService = new WidgetService(BASE_DIR, (string)($resolvedSettings['front_t
 $slugger = new Slugger();
 $uploadService = new UploadService(BASE_DIR, $slugger);
 $settingsService ??= new SettingsService();
+$themeService ??= new ThemeService(BASE_DIR);
 $termService = new TermService();
 $frontServices = new FrontServices($contentService, $userService, $mediaService, $termService, $settingsService, $menuService);
 $frontAdminBar = new AdminBar($router, $auth);
 $frontView = new FrontView(BASE_DIR, $router, $resolvedSettings, $frontAdminBar, $menuService, $widgetService);
 $front = new FrontController($frontView, $frontServices, $auth);
-$adminView = new AdminView($view, $settingsService);
+$adminView = new AdminView($view, $settingsService, $themeService->resolved());
 $admin = new AdminController($authService, $flash, $csrf, $adminView);
 $apiSessions = new SessionsController($authService, $flash, $csrf, $rateLimiter);
 $apiUser = new ApiUserController($authService, $userService, $flash, $csrf);
@@ -144,6 +149,7 @@ $adminMedia = new MediaController($adminView, $authService, $mediaService, $user
 $adminMenu = new MenuController($adminView, $authService, $menuService, $flash, $csrf);
 $adminWidgets = new WidgetController($adminView, $authService, $widgetService, $flash, $csrf);
 $adminSettings = new SettingsController($adminView, $authService, $settingsService, $flash, $csrf);
+$adminThemes = new ThemeController($adminView, $authService, $themeService, $flash, $csrf);
 $adminTerms = new TermController($adminView, $authService, $termService, $flash, $csrf);
 $apiContent = new ApiContentController($authService, $contentService, $termService, $flash, $csrf);
 $apiContentMedia = new ApiContentMediaController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
@@ -151,6 +157,7 @@ $apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, 
 $apiMenu = new ApiMenuController($authService, $menuService, $flash, $csrf);
 $apiWidget = new ApiWidgetController($authService, $widgetService, $flash, $csrf);
 $apiSettings = new ApiSettingsController($authService, $settingsService, $flash, $csrf);
+$apiTheme = new ApiThemeController($authService, $themeService, $flash, $csrf);
 $apiTerm = new ApiTermController($authService, $termService, $flash, $csrf);
 
 require BASE_DIR . '/' . INC_DIR . 'routes/front.php';

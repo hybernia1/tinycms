@@ -51,6 +51,10 @@ final class Theme
 
     public function siteLogo(): string
     {
+        if ($this->setting('show_logo', '1') !== '1') {
+            return '';
+        }
+
         return $this->setting('logo');
     }
 
@@ -304,7 +308,16 @@ final class Theme
 
     public function widgetArea(string $area): string
     {
+        if (!$this->widgetsEnabled()) {
+            return '';
+        }
+
         return $this->widgets->renderArea($area);
+    }
+
+    public function widgetsEnabled(): bool
+    {
+        return $this->setting('enable_widgets', '1') === '1';
     }
 
     public function mediaSrcSet(string $path): string
