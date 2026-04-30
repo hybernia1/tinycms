@@ -32,6 +32,7 @@ return [
         'loading' => 'Načítám...',
         'close_notice' => 'Zavřít notifikaci',
         'connection_lost' => 'Připojení ztraceno',
+        'no_results' => 'Žádné výsledky.',
     ],
     'install' => [
         'title' => 'Instalace',
