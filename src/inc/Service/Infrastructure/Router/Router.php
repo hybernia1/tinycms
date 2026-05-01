@@ -10,6 +10,7 @@ final class Router
     private string $basePath;
     private array $routes = [];
     private array $dynamicRoutes = [];
+    private array $dynamicRoutesByPrefix = [];
     private bool $queryMode;
 
     public function __construct(string $basePath = '', bool $queryMode = false)
@@ -36,7 +37,10 @@ final class Router
 
         if (str_contains($normalizedPath, '{')) {
             [$regex, $params] = $this->compilePattern($normalizedPath);
-            $this->dynamicRoutes[$methodKey][] = ['regex' => $regex, 'params' => $params, 'handler' => $handler];
+            $route = ['regex' => $regex, 'params' => $params, 'handler' => $handler];
+            $this->dynamicRoutes[$methodKey][] = $route;
+            $prefix = $this->firstStaticSegment($normalizedPath);
+            $this->dynamicRoutesByPrefix[$methodKey][$prefix][] = $route;
             return;
         }
 
@@ -50,7 +54,7 @@ final class Router
         $handler = $this->routes[$methodKey][$routePath] ?? null;
 
         if ($handler === null) {
-            foreach ($this->dynamicRoutes[$methodKey] ?? [] as $route) {
+            foreach ($this->dynamicCandidates($methodKey, $routePath) as $route) {
                 if (preg_match($route['regex'], $routePath, $matches) !== 1) {
                     continue;
                 }
@@ -69,6 +73,23 @@ final class Router
 
         $handler();
         return true;
+    }
+
+    private function dynamicCandidates(string $methodKey, string $routePath): array
+    {
+        $firstSegment = strtok($routePath, '/');
+        $prefix = $firstSegment === false ? '' : $firstSegment;
+        $prefixed = $this->dynamicRoutesByPrefix[$methodKey][$prefix] ?? [];
+        $fallback = $this->dynamicRoutesByPrefix[$methodKey][''] ?? [];
+
+        if ($prefixed === []) {
+            return $fallback;
+        }
+        if ($fallback === []) {
+            return $prefixed;
+        }
+
+        return [...$prefixed, ...$fallback];
     }
 
     public function url(string $path = ''): string
@@ -225,7 +246,7 @@ final class Router
             $segmentRegex = '';
             $offset = 0;
 
-            if (preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', $segment, $matches, PREG_OFFSET_CAPTURE) === 0) {
+            if (preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)(?::([a-zA-Z_][a-zA-Z0-9_]*))?\}/', $segment, $matches, PREG_OFFSET_CAPTURE) === 0) {
                 $parts[] = preg_quote($segment, '#');
                 continue;
             }
@@ -234,12 +255,13 @@ final class Router
                 $name = (string)$match[0];
                 $tokenOffset = (int)$matches[0][$index][1];
                 $tokenLength = strlen((string)$matches[0][$index][0]);
+                $type = (string)($matches[2][$index][0] ?? '');
                 $literal = substr($segment, $offset, $tokenOffset - $offset);
                 if ($literal !== false && $literal !== '') {
                     $segmentRegex .= preg_quote($literal, '#');
                 }
                 $params[] = $name;
-                $segmentRegex .= '(?<' . $name . '>[^/]+)';
+                $segmentRegex .= '(?<' . $name . '>' . $this->constraintPattern($type) . ')';
                 $offset = $tokenOffset + $tokenLength;
             }
 
@@ -252,5 +274,33 @@ final class Router
         }
 
         return ['#^' . implode('/', $parts) . '$#', $params];
+    }
+
+    private function firstStaticSegment(string $path): string
+    {
+        foreach (explode('/', $path) as $segment) {
+            if ($segment === '') {
+                continue;
+            }
+            if (!str_contains($segment, '{')) {
+                return $segment;
+            }
+
+            break;
+        }
+
+        return '';
+    }
+
+    private function constraintPattern(string $type): string
+    {
+        return match ($type) {
+            'int' => '\d+',
+            'slug' => '[a-z0-9]+(?:-[a-z0-9]+)*',
+            'alpha' => '[a-zA-Z]+',
+            'alnum' => '[a-zA-Z0-9]+',
+            'uuid' => '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}',
+            default => '[^/]+',
+        };
     }
 }
