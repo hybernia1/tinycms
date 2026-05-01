@@ -85,11 +85,11 @@
 ## Šablony
 
 - Šablony jsou v `themes/<theme>/`.
-- Každá šablona může mít manifest `theme.json`.
-- Theme metadata a nastavení řeší `Service\Application\Theme`.
+- Každá šablona registruje metadata, nastavení, sekce customizeru a widget areas v `functions.php`.
+- Theme metadata a nastavení řeší `Service\Application\Theme` a `ThemeDefinition`.
 - Admin UI pro šablony je na `admin/themes`.
 - Theme nastavení se ukládá do existující tabulky `settings`, ale nepatří do globálního settings formuláře.
-- Default theme má `show_logo`, `logo`, `favicon`, `enable_widgets`, `footer_text`.
+- Default theme má mimo jiné `brand_display`, `logo`, `favicon`, `enable_search`, `enable_widgets`, `front_home_content`, `layout_width`, meta přepínače, barvy, `custom_css` a `footer_text`.
 - Vypnutí widgetů nesmí být jen CSS hack: šablona nemá generovat widget markup, když jsou widgety vypnuté.
 - Pro šablony používej helpery `site_url()`, `theme_url()`, `get_head()`, `get_menu()`, `get_widget_area()`, `widgets_enabled()`, `include_partial()`.
 
