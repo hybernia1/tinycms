@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use App\Service\Application\Widget;
+use App\Service\Application\ThemeDefinition;
 use App\Service\Front\Theme;
 use App\Service\Support\Avatar;
 use App\Service\Support\Escape;
@@ -134,9 +134,24 @@ function layout_width(): string
     return Theme::current()?->layoutWidth() ?? 'default';
 }
 
+function register_theme(array $manifest): void
+{
+    ThemeDefinition::current()?->registerTheme($manifest);
+}
+
+function register_theme_setting(string $key, array $field): void
+{
+    ThemeDefinition::current()?->registerSetting($key, $field);
+}
+
+function register_theme_section(string $key, string $label = '', array $fields = []): void
+{
+    ThemeDefinition::current()?->registerCustomizerSection($key, $label, $fields);
+}
+
 function register_widget_area(string $area, string $label = ''): void
 {
-    Widget::current()?->registerArea($area, $label);
+    ThemeDefinition::current()?->registerWidgetArea($area, $label);
 }
 
 function get_footer(): string
