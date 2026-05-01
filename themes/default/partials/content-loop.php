@@ -18,7 +18,7 @@ if (!defined('BASE_DIR')) {
                 <h2>
                     <a href="<?= esc_url($permalink) ?>"><?= esc_html(get_title()) ?></a>
                 </h2>
-                <?php include_partial('content-meta'); ?>
+                <?php include_partial('content-meta', ['show_comments_count' => true]); ?>
                 <?php $excerpt = get_excerpt(); ?>
                 <?php if ($excerpt !== ''): ?>
                     <p><?= esc_html($excerpt) ?></p>

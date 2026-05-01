@@ -24,6 +24,7 @@ final class Theme
     private Slugger $slugger;
     private array $context = [];
     private array $contentPathCache = [];
+    private array $commentCountCache = [];
     private ?\Closure $includeThemeFile = null;
 
     public function __construct(
@@ -409,6 +410,20 @@ final class Theme
         return $html . '</ol></div>';
     }
 
+    public function commentsCount(array $item): int
+    {
+        $contentId = (int)($item['id'] ?? 0);
+        if ($contentId <= 0) {
+            return 0;
+        }
+
+        if (!array_key_exists($contentId, $this->commentCountCache)) {
+            $this->commentCountCache[$contentId] = $this->comments->countForContent($contentId);
+        }
+
+        return $this->commentCountCache[$contentId];
+    }
+
     public function commentsForm(array $item, ?int $parentId = null, ?int $replyToId = null): string
     {
         if (!$this->commentsEnabled($item)) {
@@ -620,10 +635,19 @@ final class Theme
             $html .= '<p class="comment-reply-context"><a href="#comment-' . (int)$comment['reply_to'] . '">' . esc_html(sprintf(t('front.comments_replying_to', 'Replying to %s'), $replyAuthor)) . '</a></p>';
         }
         $html .= '<div class="comment-body">' . esc_content($comment['body'] ?? '') . '</div>';
+        $replyButton = '';
+        $replyForm = '';
         if ($allowReply && $this->auth->check()) {
-            $html .= '<button class="comment-reply" type="button" data-comment-reply data-comment-reply-target="comment-reply-form-' . $commentId . '" aria-controls="comment-reply-form-' . $commentId . '" aria-expanded="false">' . esc_html(t('front.comments_reply_title', 'Reply')) . '</button>';
-            $html .= $this->commentsForm($item, $threadParentId, $commentId !== $threadParentId ? $commentId : null);
+            $replyButton = '<button class="comment-reply" type="button" data-comment-reply data-comment-reply-target="comment-reply-form-' . $commentId . '" aria-controls="comment-reply-form-' . $commentId . '" aria-expanded="false">' . esc_html(t('front.comments_reply_title', 'Reply')) . '</button>';
+            $replyForm = $this->commentsForm($item, $threadParentId, $commentId !== $threadParentId ? $commentId : null);
         }
+
+        $adminActions = $this->commentAdminActions($comment);
+        $adminEditForm = $this->commentAdminEditForm($comment);
+        if ($replyButton !== '' || $adminActions !== '') {
+            $html .= '<div class="comment-actions">' . $replyButton . $adminActions . '</div>' . $replyForm;
+        }
+        $html .= $adminEditForm;
         $html .= '</article>';
 
         $children = array_values(array_filter((array)($comment['children'] ?? []), static fn(mixed $child): bool => is_array($child)));
@@ -638,6 +662,66 @@ final class Theme
         return $html . '</li>';
     }
 
+    private function commentAdminActions(array $comment): string
+    {
+        if (!$this->auth->isAdmin()) {
+            return '';
+        }
+
+        $commentId = (int)($comment['id'] ?? 0);
+        if ($commentId <= 0) {
+            return '';
+        }
+
+        $deleteAction = $this->url('comments/' . $commentId . '/delete');
+        $editLabel = esc_attr(t('front.comments_edit', 'Edit'));
+        $deleteLabel = esc_attr(t('front.comments_delete', 'Delete'));
+
+        return sprintf(
+            '<button class="comment-admin-action comment-admin-edit-toggle" type="button" data-comment-edit data-comment-edit-target="comment-edit-form-%d" aria-controls="comment-edit-form-%d" aria-expanded="false" aria-label="%s" title="%s">%s</button><form class="comment-admin-delete" action="%s" method="post">%s<input type="hidden" name="return" value="%s"><button class="comment-admin-action comment-admin-action-danger" type="submit" aria-label="%s" title="%s">%s</button></form>',
+            $commentId,
+            $commentId,
+            $editLabel,
+            $editLabel,
+            icon('concept'),
+            esc_url($this->formAction($deleteAction)),
+            $this->hiddenRouteField($deleteAction) . $this->csrf->field(),
+            esc_attr($this->commentReturnPath()),
+            $deleteLabel,
+            $deleteLabel,
+            icon('delete'),
+        );
+    }
+
+    private function commentAdminEditForm(array $comment): string
+    {
+        if (!$this->auth->isAdmin()) {
+            return '';
+        }
+
+        $commentId = (int)($comment['id'] ?? 0);
+        if ($commentId <= 0) {
+            return '';
+        }
+
+        $editAction = $this->url('comments/' . $commentId . '/edit');
+        $return = $this->commentReturnPath($commentId);
+        $saveLabel = esc_attr(t('front.comments_save', 'Save'));
+
+        return sprintf(
+            '<form class="comment-admin-form" id="comment-edit-form-%d" action="%s" method="post" hidden>%s<input type="hidden" name="return" value="%s"><textarea name="body" rows="4" aria-label="%s" required>%s</textarea><button class="comment-admin-action" type="submit" aria-label="%s" title="%s">%s</button></form>',
+            $commentId,
+            esc_url($this->formAction($editAction)),
+            $this->hiddenRouteField($editAction) . $this->csrf->field(),
+            esc_attr($return),
+            esc_attr(t('comments.body', 'Comment body')),
+            esc_html((string)($comment['body'] ?? '')),
+            $saveLabel,
+            $saveLabel,
+            icon('save'),
+        );
+    }
+
     private function commentDate(string $value): string
     {
         $timestamp = $this->timestamp($value);
@@ -649,11 +733,12 @@ final class Theme
         return date($format, $timestamp);
     }
 
-    private function commentReturnPath(): string
+    private function commentReturnPath(?int $commentId = null): string
     {
         $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
         $path = strtok($uri, '#');
-        return ($path !== false && $path !== '' ? $path : '/') . '#comments';
+        $fragment = $commentId !== null && $commentId > 0 ? '#comment-' . $commentId : '#comments';
+        return ($path !== false && $path !== '' ? $path : '/') . $fragment;
     }
 
     private function classAttr(string $class, bool $wrapped): string

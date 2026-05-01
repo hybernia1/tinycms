@@ -141,6 +141,12 @@ function get_comments_list(): string
     return Theme::current()?->commentsList($item) ?? '';
 }
 
+function get_comments_count(): int
+{
+    $item = current_content_item();
+    return Theme::current()?->commentsCount($item) ?? 0;
+}
+
 function get_comments_form(?int $parentId = null, ?int $replyToId = null): string
 {
     $item = current_content_item();

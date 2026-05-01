@@ -83,6 +83,28 @@ final class Comment
         return array_values($parents);
     }
 
+    public function countForContent(int $contentId): int
+    {
+        if ($contentId <= 0) {
+            return 0;
+        }
+
+        $commentsTable = Table::name('comments');
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT COUNT(*)',
+            "FROM $commentsTable c",
+            "LEFT JOIN $commentsTable parent_comment ON parent_comment.id = c.parent",
+            'WHERE c.content = :content AND c.status = :status',
+            'AND (c.parent IS NULL OR parent_comment.status = :status)',
+        ]));
+        $stmt->execute([
+            'content' => $contentId,
+            'status' => self::STATUS_PUBLISHED,
+        ]);
+
+        return (int)($stmt->fetchColumn() ?: 0);
+    }
+
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
     {
         $commentsTable = Table::name('comments');
@@ -246,6 +268,16 @@ final class Comment
         }
 
         return $this->setStatus($id, self::STATUS_DRAFT);
+    }
+
+    public function trash(int $id): bool
+    {
+        $item = $this->find($id);
+        if ($item === null || (string)($item['status'] ?? '') === self::STATUS_TRASH) {
+            return false;
+        }
+
+        return $this->setStatus($id, self::STATUS_TRASH);
     }
 
     public function setStatus(int $id, string $status): bool

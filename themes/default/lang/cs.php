@@ -28,4 +28,8 @@ return [
     'front.comments_submit' => 'Odeslat komentář',
     'front.comments_login_required' => 'Pro komentování se prosím %spřihlaste%s.',
     'front.comments_no_author' => 'Bez autora',
+    'front.comments_edit' => 'Upravit',
+    'front.comments_delete' => 'Smazat',
+    'front.comments_save' => 'Uložit',
+    'front.comments_count' => 'Komentářů: %d',
 ];

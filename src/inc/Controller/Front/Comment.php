@@ -33,6 +33,47 @@ final class Comment
         $this->redirectBack($redirect);
     }
 
+    public function edit(callable $redirect, int $commentId): void
+    {
+        if (!$this->guardAdmin($redirect)) {
+            return;
+        }
+
+        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            $this->comments->update($commentId, $_POST);
+        }
+
+        $this->redirectBack($redirect);
+    }
+
+    public function delete(callable $redirect, int $commentId): void
+    {
+        if (!$this->guardAdmin($redirect)) {
+            return;
+        }
+
+        if ($this->csrf->verify((string)($_POST['_csrf'] ?? ''))) {
+            $this->comments->trash($commentId);
+        }
+
+        $this->redirectBack($redirect);
+    }
+
+    private function guardAdmin(callable $redirect): bool
+    {
+        if (!$this->auth->check()) {
+            $redirect('auth/login');
+            return false;
+        }
+
+        if (!$this->auth->isAdmin()) {
+            $this->redirectBack($redirect);
+            return false;
+        }
+
+        return true;
+    }
+
     private function redirectBack(callable $redirect): void
     {
         $path = trim((string)($_POST['return'] ?? ''));
