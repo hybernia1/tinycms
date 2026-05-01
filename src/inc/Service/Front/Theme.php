@@ -206,8 +206,8 @@ final class Theme
         if ($favicon !== '') {
             $tags[] = '<link rel="icon" href="' . esc_url($this->url($favicon)) . '">';
         }
-        $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/block.css')) . '">';
         $tags[] = '<link rel="stylesheet" href="' . esc_url($this->themeUrl('assets/css/style.css')) . '">';
+        $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/block.css')) . '">';
         if ($this->customizerPreview()) {
             $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/customizer-preview.css')) . '">';
         }
