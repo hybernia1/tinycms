@@ -5,6 +5,7 @@ const t = app.i18n?.t || (() => '');
 const iconSvg = (name) => app.icons?.icon?.(name, '') || '';
 const cleanSerializedHtml = editor.sanitize?.cleanSerializedHtml || ((html) => String(html || '').trim());
 const imageResizePositions = ['tl', 't', 'tr', 'r', 'br', 'b', 'bl', 'l'];
+const shortcodeBlockPattern = /^(?:\[(?:year|date|login|logout|search)\]|\[content=\d+\]|\[user\][\s\S]*\[\/user\]|\[code(?:=[a-z0-9_+.#-]{1,30})?\][\s\S]*\[\/code\])$/i;
 
 const translate = (key, fallback) => t(key, fallback) || fallback;
 
@@ -240,10 +241,78 @@ const enhanceEmbedBlocks = (editor) => {
     });
 };
 
+const isShortcodeBlock = (node) => {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE || node.tagName !== 'P') {
+        return false;
+    }
+
+    const text = String(node.textContent || '').replace(/\u00a0/g, ' ').trim();
+    return shortcodeBlockPattern.test(text);
+};
+
+const wrapShortcodeTextNodes = (editor) => {
+    Array.prototype.slice.call(editor.childNodes).forEach((node) => {
+        if (node.nodeType !== Node.TEXT_NODE) {
+            return;
+        }
+
+        const text = String(node.textContent || '').replace(/\u00a0/g, ' ').trim();
+        if (!/^\[(?:year|date|login|logout|search|content=\d+|user\]|code(?:=[a-z0-9_+.#-]{1,30})?\])/i.test(text)) {
+            return;
+        }
+
+        const paragraph = document.createElement('p');
+        paragraph.textContent = node.textContent;
+        editor.replaceChild(paragraph, node);
+    });
+};
+
+const enhanceShortcodeBlocks = (editor) => {
+    let inCodeBlock = false;
+
+    wrapShortcodeTextNodes(editor);
+
+    editor.querySelectorAll('p').forEach((node) => {
+        node.classList.remove('block-shortcode', 'block-shortcode-start', 'block-shortcode-middle', 'block-shortcode-end');
+    });
+
+    editor.querySelectorAll('p').forEach((node) => {
+        const text = String(node.textContent || '').replace(/\u00a0/g, ' ').trim();
+        const startsCodeBlock = /^\[code(?:=[a-z0-9_+.#-]{1,30})?\]/i.test(text);
+        const endsCodeBlock = /\[\/code\]$/i.test(text);
+        const active = inCodeBlock || startsCodeBlock || isShortcodeBlock(node);
+
+        if (active) {
+            node.classList.add('block-shortcode');
+        }
+
+        if (startsCodeBlock && !endsCodeBlock) {
+            node.classList.add('block-shortcode-start');
+            inCodeBlock = true;
+            return;
+        }
+        if (inCodeBlock && endsCodeBlock) {
+            node.classList.add('block-shortcode-end');
+            inCodeBlock = false;
+            return;
+        }
+        if (inCodeBlock) {
+            node.classList.add('block-shortcode-middle');
+            return;
+        }
+        if (active) {
+            node.classList.add('block-shortcode-start', 'block-shortcode-end');
+        }
+    });
+};
+
 const serializeEditorHtml = (editor) => {
     const clone = editor.cloneNode(true);
     clone.querySelectorAll('.image-toolbar, .image-resize-handle, .image-selection-frame, .embed-toolbar, .embed-selection-frame').forEach((node) => {
         node.remove();
+    });
+    clone.querySelectorAll('.block-shortcode').forEach((block) => {
+        block.classList.remove('block-shortcode', 'block-shortcode-start', 'block-shortcode-middle', 'block-shortcode-end');
     });
     clone.querySelectorAll('.block.block-image, .block.block-embed').forEach((block) => {
         block.classList.remove('is-selected');
@@ -345,6 +414,7 @@ const normalizeBlocks = (editor) => {
         editor.replaceChild(paragraph, node);
     });
     ensureStandaloneBlockParagraphs(editor);
+    enhanceShortcodeBlocks(editor);
 };
 
 editor.blocks = {
@@ -354,6 +424,7 @@ editor.blocks = {
     createLoadingImageBlock,
     enhanceEmbedBlocks,
     enhanceImageBlocks,
+    enhanceShortcodeBlocks,
     ensureEmbedBlock,
     ensureImageBlock,
     normalizeBlocks,

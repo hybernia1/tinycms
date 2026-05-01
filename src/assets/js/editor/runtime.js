@@ -24,6 +24,7 @@
     var createImageBreakParagraph = blocks.createImageBreakParagraph;
     var enhanceEmbedBlocks = blocks.enhanceEmbedBlocks;
     var enhanceImageBlocks = blocks.enhanceImageBlocks;
+    var enhanceShortcodeBlocks = blocks.enhanceShortcodeBlocks;
     var ensureImageBlock = blocks.ensureImageBlock;
     var normalizeBlocks = blocks.normalizeBlocks;
     var placeEmbedToolbar = blocks.placeEmbedToolbar;
@@ -919,6 +920,7 @@
         editor.addEventListener('paste', handleEditorPaste);
 
         editor.addEventListener('input', function () {
+            enhanceShortcodeBlocks(editor);
             sync(textarea, editor);
             updateFormatState();
         });

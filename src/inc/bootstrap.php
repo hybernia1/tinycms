@@ -50,6 +50,7 @@ use App\Service\Application\Theme as ThemeService;
 use App\Service\Support\I18n;
 use App\Service\Support\RequestContext;
 use App\Service\Support\RateLimiter;
+use App\Service\Support\Shortcode;
 use App\Service\Support\Slugger;
 use App\Service\Support\Avatar as AvatarService;
 use App\Service\Application\User as UserService;
@@ -124,6 +125,7 @@ if (str_starts_with($requestPath, 'install')) {
 }
 
 $auth = new SessionAuth();
+Shortcode::configure($router, $auth, $resolvedSettings);
 $authService = new AppAuth($auth);
 $userService = new UserService();
 $contentService = new ContentService();

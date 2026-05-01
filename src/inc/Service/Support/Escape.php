@@ -41,12 +41,13 @@ final class Escape
 
     public static function content(mixed $value): string
     {
-        $html = trim((string)$value);
+        $trustedBlocks = [];
+        $html = trim(Shortcode::render((string)$value, $trustedBlocks));
         if ($html === '') {
             return '';
         }
         if (!class_exists(\DOMDocument::class)) {
-            return self::html(strip_tags($html));
+            return strtr(self::html(strip_tags($html)), $trustedBlocks);
         }
 
         $previous = libxml_use_internal_errors(true);
@@ -70,7 +71,7 @@ final class Escape
             $output .= $document->saveHTML($child);
         }
 
-        return trim($output);
+        return trim(strtr($output, $trustedBlocks));
     }
 
     public static function xml(mixed $value): string
@@ -107,7 +108,7 @@ final class Escape
             return;
         }
 
-        if (!in_array($tag, ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col'], true)) {
+        if (!in_array($tag, ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe', 'pre', 'code', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col'], true)) {
             self::unwrap($node);
             return;
         }
@@ -121,6 +122,7 @@ final class Escape
             'a' => self::cleanLink($node, $attributes),
             'img' => self::cleanImage($node, $attributes),
             'iframe' => self::cleanIframe($node, $attributes),
+            'pre' => self::cleanCodeBlock($node, $attributes),
             'th', 'td' => self::cleanTableCell($node, $attributes),
             'div' => self::cleanDiv($node, $attributes),
             default => null,
@@ -191,6 +193,18 @@ final class Escape
         $node->setAttribute('allowfullscreen', '');
         $node->setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
         $node->setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+    }
+
+    private static function cleanCodeBlock(\DOMElement $node, array $attributes): void
+    {
+        if (str_contains(' ' . (string)($attributes['class'] ?? '') . ' ', ' code-block ')) {
+            $node->setAttribute('class', 'code-block');
+        }
+
+        $language = self::safeCodeLanguage((string)($attributes['data-language'] ?? ''));
+        if ($language !== '') {
+            $node->setAttribute('data-language', $language);
+        }
     }
 
     private static function cleanDiv(\DOMElement $node, array $attributes): void
@@ -283,6 +297,12 @@ final class Escape
         }
 
         return 'https://www.youtube.com/embed/' . $match[1];
+    }
+
+    private static function safeCodeLanguage(string $language): string
+    {
+        $clean = strtolower(trim($language));
+        return preg_match('/^[a-z0-9][a-z0-9_+.#-]{0,29}$/', $clean) === 1 ? $clean : '';
     }
 
     private static function safeWidthStyle(string $style): string

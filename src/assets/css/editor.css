@@ -192,6 +192,31 @@
     color: var(--color-text-muted);
 }
 
+.wysiwyg-editor .block-shortcode {
+    position: relative;
+    margin: 0;
+    border: 1px dashed var(--color-border-soft);
+    border-top: 0;
+    border-bottom: 0;
+    background: var(--color-surface-muted);
+    padding: 0.25rem var(--space-3);
+    color: var(--color-text-muted);
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    font-size: var(--fs-sm);
+}
+
+.wysiwyg-editor .block-shortcode-start {
+    margin-top: 0;
+    border-top: 1px dashed var(--color-border-soft);
+    padding-top: var(--space-2);
+}
+
+.wysiwyg-editor .block-shortcode-end {
+    margin-bottom: var(--space-2);
+    border-bottom: 1px dashed var(--color-border-soft);
+    padding-bottom: var(--space-2);
+}
+
 .wysiwyg-editor .block.block-embed.is-selected {
     z-index: 6;
 }

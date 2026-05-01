@@ -65,6 +65,83 @@
     min-height: 1.25rem;
 }
 
+.wysiwyg-editor pre.code-block,
+.content-body pre.code-block,
+.widget-content pre.code-block,
+.comment-body pre.code-block,
+pre.code-block {
+    display: block;
+    position: relative;
+    overflow: auto;
+    margin: 0 0 var(--space-3, 0.75rem);
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border, var(--border-color, #d1d5db));
+    background: var(--surface-alt, var(--surface-muted, #f3f4f6));
+    color: var(--text, var(--text-color, #111827));
+    white-space: pre;
+}
+
+.wysiwyg-editor pre.code-block[data-language],
+.content-body pre.code-block[data-language],
+.widget-content pre.code-block[data-language],
+.comment-body pre.code-block[data-language],
+pre.code-block[data-language] {
+    padding-top: 1.75rem;
+}
+
+.wysiwyg-editor pre.code-block[data-language]::before,
+.content-body pre.code-block[data-language]::before,
+.widget-content pre.code-block[data-language]::before,
+.comment-body pre.code-block[data-language]::before,
+pre.code-block[data-language]::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 0.45rem;
+    left: 0.75rem;
+    color: var(--muted, var(--text-muted, #6b7280));
+    font: 600 0.72rem/1 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    text-transform: uppercase;
+}
+
+.wysiwyg-editor .code-copy-button,
+.content-body .code-copy-button,
+.widget-content .code-copy-button,
+.comment-body .code-copy-button,
+.code-copy-button {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.45rem;
+    min-height: 1.6rem;
+    border: 1px solid var(--border, var(--border-color, #d1d5db));
+    background: var(--surface, #fff);
+    color: var(--text, var(--text-color, #111827));
+    padding: 0.2rem 0.45rem;
+    font: 600 0.72rem/1 ui-sans-serif, system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.wysiwyg-editor .code-copy-button:hover,
+.wysiwyg-editor .code-copy-button:focus-visible,
+.content-body .code-copy-button:hover,
+.content-body .code-copy-button:focus-visible,
+.widget-content .code-copy-button:hover,
+.widget-content .code-copy-button:focus-visible,
+.comment-body .code-copy-button:hover,
+.comment-body .code-copy-button:focus-visible,
+.code-copy-button:hover,
+.code-copy-button:focus-visible {
+    background: var(--surface-alt, var(--surface-muted, #f3f4f6));
+    outline: 0;
+}
+
+.wysiwyg-editor pre.code-block code,
+.content-body pre.code-block code,
+.widget-content pre.code-block code,
+.comment-body pre.code-block code,
+pre.code-block code {
+    font: 0.9rem/1.55 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+}
+
 :where(.wysiwyg-editor, .content-body) table {
     width: 100%;
     margin: 0 0 var(--space-3, 0.75rem);
