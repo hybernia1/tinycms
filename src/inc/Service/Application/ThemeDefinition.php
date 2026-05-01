@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Service\Application;
 
+use App\Service\Support\I18n;
+
 final class ThemeDefinition
 {
     private static ?self $current = null;
@@ -110,10 +112,12 @@ final class ThemeDefinition
 
         $previous = self::$current;
         self::$current = $this;
+        I18n::pushCataloguePath($this->themePath() . '/lang');
 
         try {
             require $file;
         } finally {
+            I18n::popCataloguePath();
             self::$current = $previous;
         }
     }

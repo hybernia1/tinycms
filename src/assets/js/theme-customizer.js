@@ -73,6 +73,11 @@
         timer = window.setTimeout(refresh, 250);
     };
 
+    const activeForm = () => {
+        const active = customizerRoot.querySelector('[data-customizer-screen].is-active');
+        return active?.closest('form') || active?.querySelector('form') || form;
+    };
+
     const setPreviewBase = (value, reload = true) => {
         const target = localUrl(value);
         if (!target) {
@@ -215,6 +220,11 @@
     form.addEventListener('change', scheduleRefresh);
     customizerRoot.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) {
+            return;
+        }
+
+        if (event.target.closest('[data-customizer-save]')) {
+            activeForm().requestSubmit();
             return;
         }
 

@@ -5,6 +5,9 @@ if (!defined('BASE_DIR')) {
 
 $items = is_array($items ?? null) ? $items : [];
 $icons = array_values(array_filter(array_map('strval', is_array($icons ?? null) ? $icons : [])));
+$formId = trim((string)($formId ?? 'menu-form'));
+$formAttrs = trim((string)($formAttrs ?? ''));
+$layoutClass = trim((string)($layoutClass ?? 'content-editor-layout'));
 
 $renderIconPicker = static function (string $selectedIcon, string $inputName = '', string $inputAttr = '') use ($icons): void {
     ?>
@@ -121,16 +124,17 @@ $renderItem = static function (array $item) use ($renderIconPicker): void {
 };
 ?>
 <form
-    id="menu-form"
+    id="<?= esc_attr($formId !== '' ? $formId : 'menu-form') ?>"
     method="post"
     action="<?= esc_url($url('admin/api/v1/menu')) ?>"
     data-api-submit
     data-stay-on-page
     data-menu-builder
+    <?= $formAttrs !== '' ? $formAttrs : '' ?>
 >
     <?= $csrfField() ?>
 
-    <div class="content-editor-layout">
+    <div class="<?= esc_attr($layoutClass !== '' ? $layoutClass : 'content-editor-layout') ?>">
         <div class="card p-4 builder-card">
             <div class="d-flex justify-between align-center gap-2 mb-3 builder-toolbar builder-card-header">
                 <h2 class="m-0"><?= esc_html(t('menu.items')) ?></h2>

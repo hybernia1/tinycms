@@ -118,8 +118,9 @@
 .customizer-subhead {
     border-bottom: 1px solid #e1e6ed;
     padding-bottom: .85rem;
-    display: grid;
-    gap: .65rem;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
 }
 
 .customizer-subhead h2 {
@@ -128,11 +129,13 @@
 }
 
 .customizer-subhead-back {
-    width: max-content;
+    width: 1.75rem;
+    height: 1.75rem;
     border: 0;
     padding: 0;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: .4rem;
     background: transparent;
     color: #344054;
@@ -219,10 +222,12 @@
     background: #ffffff;
 }
 
+.customizer-menu-fields,
 .customizer-widget-fields {
     display: block;
 }
 
+.customizer-menu-fields .customizer-menu-layout,
 .customizer-widget-fields .builder-areas {
     display: block;
 }
@@ -231,33 +236,40 @@
     gap: .75rem;
 }
 
+.customizer-menu-fields .builder-card,
 .customizer-widget-fields .builder-card {
     border-radius: 0;
     padding: .75rem !important;
     box-shadow: none;
 }
 
+.customizer-menu-fields .builder-card-header,
 .customizer-widget-fields .builder-card-header {
     display: none;
 }
 
+.customizer-menu-fields .builder-card-header h2,
 .customizer-widget-fields .builder-card-header h2 {
     font-size: .92rem;
 }
 
+.customizer-menu-fields .builder-summary,
 .customizer-widget-fields .builder-summary {
     grid-template-columns: auto auto minmax(0, 1fr) max-content;
 }
 
+.customizer-menu-fields .builder-actions,
 .customizer-widget-fields .builder-actions {
     grid-column: auto;
     justify-content: flex-end;
 }
 
+.customizer-menu-fields .builder-form,
 .customizer-widget-fields .builder-form {
     grid-template-columns: 1fr;
 }
 
+.customizer-menu-fields .builder-add-form,
 .customizer-widget-fields .builder-add-form {
     grid-template-columns: minmax(0, 1fr) auto auto;
 }

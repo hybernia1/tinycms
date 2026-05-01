@@ -6,11 +6,16 @@ if (!defined('BASE_DIR')) {
 
 $contentHtml = (string)($content ?? '');
 $hasMediaLibrary = str_contains($contentHtml, 'data-media-library-open');
+$hasPicker = str_contains($contentHtml, 'data-picker');
+$hasMenuBuilder = str_contains($contentHtml, 'data-menu-builder');
 $hasWidgetBuilder = str_contains($contentHtml, 'data-widget-builder');
 $scripts = array_merge(
     ['core.js', 'ui.js', 'api/flash.js', 'api/http.js', 'api/forms.js', 'admin-ui/custom-select.js'],
     $hasMediaLibrary ? ['media-library/orchestrator.js'] : [],
-    $hasWidgetBuilder ? ['builder-dnd.js', 'widget-builder.js'] : [],
+    $hasPicker ? ['picker.js'] : [],
+    $hasMenuBuilder || $hasWidgetBuilder ? ['builder-dnd.js'] : [],
+    $hasMenuBuilder ? ['menu-builder.js'] : [],
+    $hasWidgetBuilder ? ['widget-builder.js'] : [],
     ['theme-customizer.js']
 );
 ?>

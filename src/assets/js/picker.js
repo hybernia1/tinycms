@@ -95,8 +95,11 @@
         let timer = null;
         let requestToken = 0;
 
-        const syncValue = () => {
+        const syncValue = (emit = false) => {
             valueField.value = selectedId;
+            if (emit) {
+                valueField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
         };
 
         const renderChips = () => {
@@ -125,7 +128,7 @@
                 selectedId = '';
                 selectedLabel = '';
             }
-            syncValue();
+            syncValue(true);
             renderChips();
         };
 

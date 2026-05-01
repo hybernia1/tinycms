@@ -161,7 +161,7 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
         <?php if ($builderAreaScreensPrefix !== ''): ?>
         <section class="customizer-screen customizer-area-screen" data-customizer-screen="<?= esc_attr($builderAreaScreensPrefix . $area) ?>">
             <div class="customizer-subhead">
-                <button class="customizer-subhead-back" type="button" data-customizer-back="widgets"><?= icon('prev') ?><span><?= esc_html(t('common.back')) ?></span></button>
+                <button class="customizer-subhead-back" type="button" data-customizer-back="widgets" aria-label="<?= esc_attr(t('common.back')) ?>" title="<?= esc_attr(t('common.back')) ?>"><?= icon('prev') ?></button>
                 <h2><?= esc_html((string)($areaLabels[$area] ?? $area)) ?></h2>
             </div>
         <?php endif; ?>

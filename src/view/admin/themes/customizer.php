@@ -8,6 +8,8 @@ $activeTheme = (string)($activeTheme ?? 'default');
 $values = is_array($values ?? null) ? $values : [];
 $fields = is_array($fields ?? null) ? $fields : [];
 $customizerSections = is_array($customizerSections ?? null) ? $customizerSections : [];
+$menuItems = is_array($menuItems ?? null) ? $menuItems : [];
+$menuIcons = is_array($menuIcons ?? null) ? $menuIcons : [];
 $widgetItems = is_array($widgetItems ?? null) ? $widgetItems : [];
 $widgetAreas = is_array($widgetAreas ?? null) ? $widgetAreas : [];
 $widgetAreaLabels = is_array($widgetAreaLabels ?? null) ? $widgetAreaLabels : [];
@@ -15,18 +17,23 @@ $activeManifest = is_array($themes[$activeTheme] ?? null) ? $themes[$activeTheme
 $previewUrl = trim((string)($previewUrl ?? ''));
 $previewBase = $previewUrl !== '' ? $previewUrl : $absoluteUrl('');
 
+$translateThemeLabel = static function (string $value, string $fallback): string {
+    $value = trim($value);
+    return str_contains($value, '.') ? t($value, $fallback) : $value;
+};
+
 $fieldLabel = static function (string $key, array $field): string {
     $label = trim((string)($field['label'] ?? ''));
-    return $label !== '' ? $label : $key;
+    return $label !== '' ? (str_contains($label, '.') ? t($label, $key) : $label) : $key;
 };
 
-$renderOptionLabel = static function (string $value, string $label): string {
-    return str_starts_with($label, 'themes.') ? t($label, $value) : $label;
+$renderOptionLabel = static function (string $value, string $label) use ($translateThemeLabel): string {
+    return $translateThemeLabel($label, $value);
 };
 
-$sectionLabel = static function (string $key, array $section): string {
+$sectionLabel = static function (string $key, array $section) use ($translateThemeLabel): string {
     $label = trim((string)($section['label'] ?? ''));
-    return $label !== '' ? $label : $key;
+    return $label !== '' ? $translateThemeLabel($label, $key) : $key;
 };
 
 $renderField = static function (string $fieldKey, array $field, string $fieldValue) use ($url, $imageUploadAccept, $imageUploadTypesLabel, $fieldLabel, $renderOptionLabel): void {
@@ -81,6 +88,35 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
                     <span><?= esc_html(t('content.choose_image')) ?></span>
                     <?php endif; ?>
                 </button>
+            <?php elseif ($fieldType === 'content_picker'): ?>
+                <?php
+                    $loopLabel = (string)($field['empty_label'] ?? t('settings.options.front_home_content.none'));
+                    $selectedLabel = (string)($field['selected_label'] ?? '');
+                ?>
+                <div
+                    class="tag-picker"
+                    data-picker
+                    data-picker-mode="single"
+                    data-search-endpoint="<?= esc_attr($url('admin/api/v1/content')) ?>"
+                    data-search-status="published"
+                    data-empty-label="<?= esc_attr($loopLabel) ?>"
+                    data-no-results-label="<?= esc_attr(t('common.no_results')) ?>"
+                    data-search-placeholder="<?= esc_attr(t('settings.options.front_home_content.search_placeholder')) ?>"
+                    data-selected-label="<?= esc_attr($selectedLabel) ?>"
+                >
+                    <input type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>" data-picker-value>
+                    <div class="tag-picker-field">
+                        <div class="tag-picker-chips" data-picker-chips></div>
+                        <input
+                            type="text"
+                            class="tag-picker-input"
+                            data-picker-input
+                            autocomplete="off"
+                            placeholder="<?= esc_attr(t('settings.options.front_home_content.search_placeholder')) ?>"
+                        >
+                    </div>
+                    <div class="tag-picker-suggestions" data-picker-suggestions></div>
+                </div>
             <?php elseif ($fieldType === 'number'): ?>
                 <input
                     type="number"
@@ -128,7 +164,7 @@ foreach ($customizerSections as $sectionKey => $section) {
 $extraFields = array_values(array_diff(array_keys($fields), array_keys($assignedFields)));
 if ($extraFields !== []) {
     $sections['other'] = [
-        'label' => t('themes.customizer_sections.other'),
+        'label' => 'Other settings',
         'fields' => $extraFields,
     ];
 }
@@ -141,7 +177,7 @@ if ($extraFields !== []) {
                 <h1><?= esc_html(t('themes.customizer')) ?></h1>
                 <p><?= esc_html((string)($activeManifest['name'] ?? $activeTheme)) ?></p>
             </div>
-            <button class="btn btn-primary btn-icon customizer-save" type="submit" form="theme-customizer-form" aria-label="<?= esc_attr(t('common.save')) ?>" title="<?= esc_attr(t('common.save')) ?>">
+            <button class="btn btn-primary btn-icon customizer-save" type="button" data-customizer-save aria-label="<?= esc_attr(t('common.save')) ?>" title="<?= esc_attr(t('common.save')) ?>">
                 <?= icon('save') ?>
             </button>
         </div>
@@ -170,6 +206,10 @@ if ($extraFields !== []) {
                                 <?= icon('next') ?>
                             </button>
                         <?php endforeach; ?>
+                        <button class="customizer-nav-item" type="button" data-customizer-open="menu">
+                            <span><?= esc_html(t('admin.menu.menu')) ?></span>
+                            <?= icon('next') ?>
+                        </button>
                         <button class="customizer-nav-item" type="button" data-customizer-open="widgets">
                             <span><?= esc_html(t('admin.menu.widgets')) ?></span>
                             <?= icon('next') ?>
@@ -180,7 +220,7 @@ if ($extraFields !== []) {
                 <?php foreach ($sections as $sectionKey => $customizerSection): ?>
                     <section class="customizer-screen" data-customizer-screen="<?= esc_attr('theme-' . $sectionKey) ?>">
                         <div class="customizer-subhead">
-                            <button class="customizer-subhead-back" type="button" data-customizer-back="main"><?= icon('prev') ?><span><?= esc_html(t('common.back')) ?></span></button>
+                            <button class="customizer-subhead-back" type="button" data-customizer-back="main" aria-label="<?= esc_attr(t('common.back')) ?>" title="<?= esc_attr(t('common.back')) ?>"><?= icon('prev') ?></button>
                             <h2><?= esc_html((string)$customizerSection['label']) ?></h2>
                         </div>
                         <div class="customizer-section-fields">
@@ -192,6 +232,23 @@ if ($extraFields !== []) {
                     </section>
                 <?php endforeach; ?>
             </form>
+
+            <section class="customizer-screen" data-customizer-screen="menu">
+                <div class="customizer-subhead">
+                    <button class="customizer-subhead-back" type="button" data-customizer-back="main" aria-label="<?= esc_attr(t('common.back')) ?>" title="<?= esc_attr(t('common.back')) ?>"><?= icon('prev') ?></button>
+                    <h2><?= esc_html(t('admin.menu.menu')) ?></h2>
+                </div>
+                <div class="customizer-menu-fields">
+                    <?php
+                        $items = $menuItems;
+                        $icons = $menuIcons;
+                        $formId = 'customizer-menu-form';
+                        $formAttrs = 'data-preview-refresh-on-success';
+                        $layoutClass = 'customizer-menu-layout';
+                        require BASE_DIR . '/' . VIEW_DIR . 'admin/menu/form.php';
+                    ?>
+                </div>
+            </section>
 
             <form
                 id="customizer-widgets-form"
@@ -206,7 +263,7 @@ if ($extraFields !== []) {
                 <?= $csrfField() ?>
                 <section class="customizer-screen" data-customizer-screen="widgets" data-customizer-widget-section>
                     <div class="customizer-subhead">
-                        <button class="customizer-subhead-back" type="button" data-customizer-back="main"><?= icon('prev') ?><span><?= esc_html(t('common.back')) ?></span></button>
+                        <button class="customizer-subhead-back" type="button" data-customizer-back="main" aria-label="<?= esc_attr(t('common.back')) ?>" title="<?= esc_attr(t('common.back')) ?>"><?= icon('prev') ?></button>
                         <h2><?= esc_html(t('admin.menu.widgets')) ?></h2>
                     </div>
                     <?php if ($widgetAreas !== [] && $widgets !== []): ?>

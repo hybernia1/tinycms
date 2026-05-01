@@ -69,7 +69,8 @@ final class Theme
         $fields = $this->fields($active);
 
         foreach ($fields as $key => $field) {
-            $resolved[$key] = $this->normalizeValue($key, (string)($values[$key] ?? ($field['default'] ?? '')), $field);
+            $rawValue = array_key_exists($key, $values) ? (string)$values[$key] : $this->defaultValue($field);
+            $resolved[$key] = $this->normalizeValue($key, $rawValue, $field);
         }
 
         return $resolved;
@@ -155,10 +156,21 @@ final class Theme
         }
 
         foreach ($fields as $key => $field) {
-            $payload[$key] = $this->normalizeValue($key, (string)($themeValues[$key] ?? ($field['default'] ?? '')), $field);
+            $rawValue = array_key_exists($key, $themeValues) ? (string)$themeValues[$key] : $this->defaultValue($field);
+            $payload[$key] = $this->normalizeValue($key, $rawValue, $field);
         }
 
         return $payload;
+    }
+
+    private function defaultValue(array $field): string
+    {
+        $settingKey = trim((string)($field['default_setting'] ?? ''));
+        if ($settingKey !== '') {
+            return (string)($this->settings->resolved()[$settingKey] ?? ($field['default'] ?? ''));
+        }
+
+        return (string)($field['default'] ?? '');
     }
 
     private function manifest(string $slug): array
@@ -197,7 +209,7 @@ final class Theme
     private function normalizeFields(array $fields): array
     {
         $result = [];
-        $allowedTypes = ['text', 'textarea', 'select', 'checkbox', 'number', 'file', 'color'];
+        $allowedTypes = ['text', 'textarea', 'select', 'checkbox', 'number', 'file', 'color', 'content_picker'];
 
         foreach ($fields as $key => $field) {
             if (!is_array($field)) {
@@ -221,6 +233,8 @@ final class Theme
                 'options' => $this->normalizeOptions((array)($field['options'] ?? [])),
                 'min' => (int)($field['min'] ?? 0),
                 'max' => (int)($field['max'] ?? 1000),
+                'empty_label' => trim((string)($field['empty_label'] ?? '')),
+                'default_setting' => $this->fieldName((string)($field['default_setting'] ?? '')),
             ];
         }
 
@@ -273,6 +287,10 @@ final class Theme
             return array_key_exists($value, $options) ? $value : $default;
         }
 
+        if ($type === 'content_picker') {
+            return $this->normalizePublishedContentId($value);
+        }
+
         if ($type === 'color') {
             return $this->normalizeColor($value, $default);
         }
@@ -294,6 +312,12 @@ final class Theme
 
         $default = strtolower(trim($default));
         return preg_match('/^#[0-9a-f]{6}$/', $default) === 1 ? $default : '';
+    }
+
+    private function normalizePublishedContentId(string $value): string
+    {
+        $id = (int)$value;
+        return $id > 0 && $this->settings->publishedContentLabel($id) !== '' ? (string)$id : '';
     }
 
     private function themeValues(string $theme, ?array $themeSettings = null): array

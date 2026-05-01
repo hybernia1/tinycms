@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Service\Application\Auth;
+use App\Service\Application\Menu as MenuService;
 use App\Service\Application\Theme as ThemeService;
 use App\Service\Application\Widget as WidgetService;
 use App\Service\Support\Csrf;
@@ -17,6 +18,7 @@ final class Theme extends Admin
         private AdminView $pages,
         Auth $authService,
         private ThemeService $themes,
+        private MenuService $menu,
         private WidgetService $widgets,
         Flash $flash,
         Csrf $csrf
@@ -48,6 +50,8 @@ final class Theme extends Admin
             $this->themes->resolved(),
             $this->themes->fields(),
             $this->themes->customizerSections(),
+            $this->menu->items(),
+            $this->menu->icons(),
             $this->widgets->items(),
             $this->widgets->definitions(),
             $this->widgets->areas(),

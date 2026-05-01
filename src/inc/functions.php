@@ -134,6 +134,11 @@ function layout_width(): string
     return Theme::current()?->layoutWidth() ?? 'default';
 }
 
+function theme_setting(string $key, string $default = ''): string
+{
+    return Theme::current()?->setting($key, $default) ?? $default;
+}
+
 function register_theme(array $manifest): void
 {
     ThemeDefinition::current()?->registerTheme($manifest);
