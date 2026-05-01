@@ -46,8 +46,8 @@ final class Avatar
         $muzzle = $colors[2];
         $background = $colors[3];
         $accent = $colors[4];
-        $detail = $this->detail($hash, $accent, $background);
         $ears = $this->ears($hash, $fur, $muzzle, $dark);
+        $head = $this->head($hash, $fur, $dark);
         $markings = $this->markings($hash, $dark, $accent);
         $eyes = $this->eyes($hash, $dark, $accent);
         $nose = $this->nose($hash, $accent, $dark);
@@ -58,10 +58,10 @@ final class Avatar
 <svg xmlns="http://www.w3.org/2000/svg" width="$size" height="$size" viewBox="0 0 128 128" role="img" aria-label="$title">
 <title>$title</title>
 <rect width="128" height="128" rx="28" fill="$background"/>
-$detail
 <g>
+<ellipse cx="64" cy="90" rx="44" ry="24" fill="$accent" opacity=".12"/>
 $ears
-<circle cx="64" cy="68" r="39" fill="$fur"/>
+$head
 $markings
 <ellipse cx="50" cy="78" rx="14" ry="12" fill="$muzzle"/>
 <ellipse cx="78" cy="78" rx="14" ry="12" fill="$muzzle"/>
@@ -99,11 +99,11 @@ SVG;
     private function eyes(string $hash, string $dark, string $accent): string
     {
         return match ($this->byte($hash, 4) % 5) {
-            0 => '<ellipse cx="48" cy="64" rx="7" ry="9" fill="' . $accent . '"/><ellipse cx="80" cy="64" rx="7" ry="9" fill="' . $accent . '"/><path d="M48 58v12M80 58v12" stroke="' . $dark . '" stroke-width="3" stroke-linecap="round"/>',
-            1 => '<circle cx="48" cy="64" r="7" fill="' . $dark . '"/><circle cx="80" cy="64" r="7" fill="' . $dark . '"/><circle cx="45" cy="61" r="2" fill="#fff"/><circle cx="77" cy="61" r="2" fill="#fff"/>',
-            2 => '<path d="M41 62c5-6 11-6 16 0M71 62c5-6 11-6 16 0" fill="none" stroke="' . $dark . '" stroke-width="4" stroke-linecap="round"/>',
-            3 => '<ellipse cx="48" cy="64" rx="8" ry="5" fill="' . $dark . '"/><ellipse cx="80" cy="64" rx="8" ry="5" fill="' . $dark . '"/>',
-            default => '<ellipse cx="48" cy="64" rx="6" ry="8" fill="' . $dark . '"/><ellipse cx="80" cy="64" rx="6" ry="8" fill="' . $dark . '"/><path d="M46 61h4M78 61h4" stroke="#fff" stroke-width="2" stroke-linecap="round"/>',
+            0 => '<ellipse cx="48" cy="64" rx="8" ry="10" fill="#f2cf66"/><ellipse cx="80" cy="64" rx="8" ry="10" fill="#f2cf66"/><ellipse cx="48" cy="64" rx="2" ry="8" fill="' . $dark . '"/><ellipse cx="80" cy="64" rx="2" ry="8" fill="' . $dark . '"/><circle cx="46" cy="61" r="1.8" fill="#fff"/><circle cx="78" cy="61" r="1.8" fill="#fff"/>',
+            1 => '<ellipse cx="48" cy="64" rx="8" ry="8" fill="#82cfff"/><ellipse cx="80" cy="64" rx="8" ry="8" fill="#82cfff"/><circle cx="48" cy="64" r="4" fill="' . $dark . '"/><circle cx="80" cy="64" r="4" fill="' . $dark . '"/><circle cx="46" cy="62" r="1.5" fill="#fff"/><circle cx="78" cy="62" r="1.5" fill="#fff"/>',
+            2 => '<path d="M40 64c5-7 11-7 16 0M72 64c5-7 11-7 16 0" fill="none" stroke="' . $dark . '" stroke-width="4" stroke-linecap="round"/><path d="M42 62c3-3 9-3 12 0M74 62c3-3 9-3 12 0" fill="none" stroke="' . $accent . '" stroke-width="2" stroke-linecap="round" opacity=".7"/>',
+            3 => '<ellipse cx="48" cy="64" rx="9" ry="6" fill="#9de27f"/><ellipse cx="80" cy="64" rx="9" ry="6" fill="#9de27f"/><path d="M42 64h12M74 64h12" stroke="' . $dark . '" stroke-width="3" stroke-linecap="round"/><circle cx="45" cy="62" r="1.5" fill="#fff"/><circle cx="77" cy="62" r="1.5" fill="#fff"/>',
+            default => '<ellipse cx="48" cy="64" rx="8" ry="9" fill="' . $accent . '" opacity=".8"/><ellipse cx="80" cy="64" rx="8" ry="9" fill="' . $accent . '" opacity=".8"/><ellipse cx="48" cy="64" rx="3" ry="6" fill="' . $dark . '"/><ellipse cx="80" cy="64" rx="3" ry="6" fill="' . $dark . '"/><circle cx="46" cy="61" r="1.5" fill="#fff"/><circle cx="78" cy="61" r="1.5" fill="#fff"/>',
         };
     }
 
@@ -129,13 +129,13 @@ SVG;
             . '<path d="M55 74 25 67M73 74l30-7" stroke="' . $dark . '" stroke-width="3" stroke-linecap="round" opacity=".45"/>';
     }
 
-    private function detail(string $hash, string $accent, string $background): string
+    private function head(string $hash, string $fur, string $dark): string
     {
         return match ($this->byte($hash, 7) % 4) {
-            0 => '<path d="M18 92h34" stroke="' . $accent . '" stroke-width="8" stroke-linecap="round" opacity=".18"/><path d="M78 28h31" stroke="' . $accent . '" stroke-width="8" stroke-linecap="round" opacity=".22"/>',
-            1 => '<path d="M0 92c28-22 61-20 128 0v36H0z" fill="' . $accent . '" opacity=".16"/>',
-            2 => '<circle cx="104" cy="27" r="9" fill="' . $background . '" opacity=".9"/><circle cx="21" cy="101" r="8" fill="' . $accent . '" opacity=".22"/>',
-            default => '<path d="M16 26l18-10 18 10-18 10zM78 106l18-10 18 10-18 10z" fill="' . $accent . '" opacity=".16"/>',
+            0 => '<circle cx="64" cy="68" r="39" fill="' . $fur . '"/><ellipse cx="64" cy="46" rx="24" ry="10" fill="' . $dark . '" opacity=".12"/>',
+            1 => '<path d="M25 71c0-24 17-42 39-42s39 18 39 42c0 20-17 35-39 35S25 91 25 71z" fill="' . $fur . '"/><ellipse cx="64" cy="47" rx="22" ry="9" fill="' . $dark . '" opacity=".1"/>',
+            2 => '<path d="M24 66c0-23 18-39 40-39s40 16 40 39c0 24-18 40-40 40S24 90 24 66z" fill="' . $fur . '"/><path d="M36 54c9-7 47-7 56 0" stroke="' . $dark . '" stroke-width="4" stroke-linecap="round" opacity=".18"/>',
+            default => '<path d="M26 68c0-22 16-40 38-40s38 18 38 40-16 38-38 38-38-16-38-38z" fill="' . $fur . '"/><ellipse cx="64" cy="44" rx="20" ry="8" fill="' . $dark . '" opacity=".14"/>',
         };
     }
 
