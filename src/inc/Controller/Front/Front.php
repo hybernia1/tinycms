@@ -25,7 +25,8 @@ final class Front
         private Settings $settings,
         private Term $terms,
         private User $users,
-        private Auth $auth
+        private Auth $auth,
+        private array $resolvedSettings = []
     ) {
         $this->pdo = Connection::get();
         $this->slugger = new Slugger();
@@ -33,7 +34,7 @@ final class Front
 
     public function home(): void
     {
-        $settings = $this->settings->resolved();
+        $settings = $this->resolvedSettings();
         $perPage = $this->resolvePerPage($settings);
 
         $contentId = (int)($settings['front_home_content'] ?? 0);
@@ -272,6 +273,11 @@ final class Front
     {
         $value = (int)($settings['front_posts_per_page'] ?? APP_POSTS_PER_PAGE);
         return max(1, min(100, $value));
+    }
+
+    private function resolvedSettings(): array
+    {
+        return array_replace($this->settings->resolved(), $this->resolvedSettings);
     }
 
     private function findPublishedContent(int $id): ?array

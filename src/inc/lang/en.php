@@ -191,6 +191,7 @@ return [
         'move_up' => 'Move up',
         'move_down' => 'Move down',
         'remove_item' => 'Remove item',
+        'remove_confirm' => 'Do you really want to remove this menu item?',
         'item_label_required' => 'Menu item label is required.',
         'item_url_required' => 'Menu item URL is required.',
         'updated' => 'Menu saved.',
@@ -231,9 +232,6 @@ return [
         'open_site' => 'Open site',
         'back_to_themes' => 'Back to themes',
         'slug' => 'Folder',
-        'customizer_sections' => [
-            'other' => 'Other settings',
-        ],
         'sections' => [
             'settings' => 'Settings',
         ],

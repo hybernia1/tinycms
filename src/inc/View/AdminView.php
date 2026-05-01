@@ -182,6 +182,8 @@ final class AdminView
         array $values,
         array $fields,
         array $customizerSections,
+        array $menuItems,
+        array $menuIcons,
         array $widgetItems,
         array $widgets,
         array $widgetAreas,
@@ -189,6 +191,10 @@ final class AdminView
         string $previewUrl = ''
     ): void
     {
+        if (isset($fields['front_home_content'])) {
+            $fields['front_home_content']['selected_label'] = $this->settings->publishedContentLabel((int)($values['front_home_content'] ?? 0));
+        }
+
         $this->view->render('admin/customizer-layout', 'admin/themes/customizer', array_merge(
             [
                 'themes' => $themes,
@@ -196,6 +202,8 @@ final class AdminView
                 'values' => $values,
                 'fields' => $fields,
                 'customizerSections' => $customizerSections,
+                'menuItems' => $menuItems,
+                'menuIcons' => $menuIcons,
                 'widgetItems' => $widgetItems,
                 'widgets' => $widgets,
                 'widgetAreas' => $widgetAreas,

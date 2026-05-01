@@ -191,6 +191,7 @@ return [
         'move_up' => 'Posunout nahoru',
         'move_down' => 'Posunout dolů',
         'remove_item' => 'Odebrat položku',
+        'remove_confirm' => 'Skutečně odebrat tuto položku menu?',
         'item_label_required' => 'Popisek položky je povinný.',
         'item_url_required' => 'URL položky je povinná.',
         'updated' => 'Menu uloženo.',
@@ -231,9 +232,6 @@ return [
         'open_site' => 'Otevřít web',
         'back_to_themes' => 'Zpět na šablony',
         'slug' => 'Složka',
-        'customizer_sections' => [
-            'other' => 'Další nastavení',
-        ],
         'sections' => [
             'settings' => 'Nastavení',
         ],

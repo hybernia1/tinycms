@@ -21,7 +21,13 @@
     const iconPickers = () => Array.from(root.querySelectorAll('[data-menu-icon-picker]'));
     const iconSvg = app.icons?.icon || (() => '');
     const customSelect = app.ui?.customSelect;
+    const confirm = app.ui?.modal?.confirm;
     const builderDnd = app.builderDnd;
+    const submitBuilder = () => {
+        if (root.hasAttribute('data-api-submit')) {
+            root.requestSubmit();
+        }
+    };
 
     const setAddOpen = (open) => {
         const form = draft?.querySelector('[data-menu-add-form]');
@@ -179,8 +185,12 @@
         }
     };
 
-    const addRow = () => {
+    const addRow = (submit = true) => {
         const values = draftValues();
+        if (!hasDraftValues(values)) {
+            return;
+        }
+
         const fragment = template.content.cloneNode(true);
         items.appendChild(fragment);
         const last = rows().at(-1);
@@ -192,6 +202,9 @@
         syncRows();
         clearDraft();
         setAddOpen(false);
+        if (submit) {
+            submitBuilder();
+        }
     };
 
     const moveRow = (row, direction) => {
@@ -225,11 +238,11 @@
     root.addEventListener('submit', () => {
         const values = draftValues();
         if (hasDraftValues(values)) {
-            addRow();
+            addRow(false);
         }
     });
 
-    root.addEventListener('click', (event) => {
+    root.addEventListener('click', async (event) => {
         if (!(event.target instanceof Element)) {
             return;
         }
@@ -282,8 +295,12 @@
         }
 
         if (event.target.closest('[data-menu-item-remove]')) {
+            if (typeof confirm === 'function' && !await confirm({ message: t('menu.remove_confirm') })) {
+                return;
+            }
             row.remove();
             syncRows();
+            submitBuilder();
             return;
         }
 

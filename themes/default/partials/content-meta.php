@@ -4,11 +4,11 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$date = get_date();
-$author = get_author();
-$commentsCount = (bool)($show_comments_count ?? false) ? get_comments_count() : 0;
+$date = (bool)($show_date ?? true) ? get_date() : '';
+$author = (bool)($show_author ?? true) ? get_author() : '';
+$commentsCount = (bool)($show_comments_count ?? false) ? get_comments_count() : null;
 
-if ($date === '' && $author === '' && $commentsCount <= 0) {
+if ($date === '' && $author === '' && $commentsCount === null) {
     return;
 }
 
@@ -30,7 +30,7 @@ if ($date === '' && $author === '' && $commentsCount <= 0) {
             </span>
         </span>
     <?php endif; ?>
-    <?php if ($commentsCount > 0): ?>
+    <?php if ($commentsCount !== null): ?>
         <span class="content-card-meta-item" title="<?= esc_attr(sprintf(t('front.comments_count', '%d comments'), $commentsCount)) ?>">
             <?= icon('comments') ?>
             <span><?= $commentsCount ?></span>
