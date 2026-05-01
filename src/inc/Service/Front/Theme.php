@@ -4,11 +4,14 @@ declare(strict_types=1);
 namespace App\Service\Front;
 
 use App\Service\Application\Menu;
+use App\Service\Application\Comment;
 use App\Service\Application\Widget;
+use App\Service\Auth\Auth;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Date;
+use App\Service\Support\Csrf;
 use App\Service\Support\I18n;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
@@ -23,8 +26,16 @@ final class Theme
     private array $contentPathCache = [];
     private ?\Closure $includeThemeFile = null;
 
-    public function __construct(private Router $router, private array $settings, string $theme, private Menu $menu, private Widget $widgets)
-    {
+    public function __construct(
+        private Router $router,
+        private array $settings,
+        string $theme,
+        private Menu $menu,
+        private Widget $widgets,
+        private Comment $comments,
+        private Auth $auth,
+        private Csrf $csrf
+    ) {
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
         $this->slugger = new Slugger();
     }
@@ -190,6 +201,9 @@ final class Theme
         }
         $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/block.css')) . '">';
         $tags[] = '<link rel="stylesheet" href="' . esc_url($this->themeUrl('assets/css/style.css')) . '">';
+        if ($this->commentsEnabled($item)) {
+            $tags[] = '<script defer src="' . esc_url($this->url(ASSETS_DIR . 'js/front/comment-reply.js')) . '"></script>';
+        }
 
         $jsonLd = $this->jsonLd($kind, $item, $term, $title, $description, $url, $image, $author, $query);
         if ($jsonLd !== '') {
@@ -369,6 +383,67 @@ final class Theme
         return esc_content($item['body'] ?? '');
     }
 
+    public function commentsEnabled(array $item): bool
+    {
+        return (int)($item['id'] ?? 0) > 0 && (int)($item['comments_enabled'] ?? 0) === 1;
+    }
+
+    public function commentsList(array $item): string
+    {
+        if (!$this->commentsEnabled($item)) {
+            return '';
+        }
+
+        $items = $this->comments->treeForContent((int)$item['id']);
+        $html = '<div class="comments-list"><h2>' . esc_html(t('front.comments_title', 'Comments')) . '</h2>';
+
+        if ($items === []) {
+            return $html . '<p class="text-muted">' . esc_html(t('front.comments_empty', 'No comments yet.')) . '</p></div>';
+        }
+
+        $html .= '<ol class="comment-thread">';
+        foreach ($items as $comment) {
+            $html .= $this->commentItem($item, $comment, true);
+        }
+
+        return $html . '</ol></div>';
+    }
+
+    public function commentsForm(array $item, ?int $parentId = null, ?int $replyToId = null): string
+    {
+        if (!$this->commentsEnabled($item)) {
+            return '';
+        }
+
+        if (!$this->auth->check()) {
+            return '<p class="comments-login">' . sprintf(
+                esc_html(t('front.comments_login_required', 'Please %ssign in%s to comment.')),
+                '<a href="' . esc_url($this->url('auth/login')) . '">',
+                '</a>'
+            ) . '</p>';
+        }
+
+        $parentId = max(0, (int)($parentId ?? 0));
+        $replyToId = max(0, (int)($replyToId ?? 0));
+        $action = $this->url('comments/' . (int)$item['id'] . '/add');
+        $heading = $parentId > 0 ? t('front.comments_reply_title', 'Reply') : t('front.comments_form_title', 'Add comment');
+        $formTargetId = $replyToId > 0 ? $replyToId : $parentId;
+        $formId = $formTargetId > 0 ? ' id="comment-reply-form-' . $formTargetId . '" data-comment-reply-form' : '';
+
+        return sprintf(
+            '<form class="%s"%s action="%s" method="post">%s<input type="hidden" name="parent" value="%d"><input type="hidden" name="reply_to" value="%d"><input type="hidden" name="return" value="%s"><h3>%s</h3><textarea name="body" rows="4" required></textarea><button type="submit">%s</button></form>',
+            $parentId > 0 ? 'comment-form comment-reply-form' : 'comment-form',
+            $formId,
+            esc_url($this->formAction($action)),
+            $this->hiddenRouteField($action) . $this->csrf->field(),
+            $parentId,
+            $replyToId,
+            esc_attr($this->commentReturnPath()),
+            esc_html($heading),
+            esc_html(t('front.comments_submit', 'Send comment')),
+        );
+    }
+
     public function contentAuthor(array $item, string $fallback = ''): string
     {
         $author = trim((string)($item['author_name'] ?? ''));
@@ -523,6 +598,62 @@ final class Theme
     private function contentTerms(array $item): array
     {
         return array_values(array_filter((array)($item['terms'] ?? []), static fn(mixed $term): bool => is_array($term)));
+    }
+
+    private function commentItem(array $item, array $comment, bool $allowReply, int $threadParentId = 0): string
+    {
+        $author = trim((string)($comment['author_name'] ?? ''));
+        if ($author === '') {
+            $author = t('front.comments_no_author', 'No author');
+        }
+
+        $commentId = (int)$comment['id'];
+        $threadParentId = $threadParentId > 0 ? $threadParentId : $commentId;
+        $html = '<li class="comment-item" id="comment-' . $commentId . '">';
+        $html .= '<article class="comment-card">';
+        $html .= '<header class="comment-meta"><strong>' . esc_html($author) . '</strong><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
+        if ((int)($comment['reply_to'] ?? 0) > 0) {
+            $replyAuthor = trim((string)($comment['reply_to_author_name'] ?? ''));
+            if ($replyAuthor === '') {
+                $replyAuthor = '#' . (int)$comment['reply_to'];
+            }
+            $html .= '<p class="comment-reply-context"><a href="#comment-' . (int)$comment['reply_to'] . '">' . esc_html(sprintf(t('front.comments_replying_to', 'Replying to %s'), $replyAuthor)) . '</a></p>';
+        }
+        $html .= '<div class="comment-body">' . esc_content($comment['body'] ?? '') . '</div>';
+        if ($allowReply && $this->auth->check()) {
+            $html .= '<button class="comment-reply" type="button" data-comment-reply data-comment-reply-target="comment-reply-form-' . $commentId . '" aria-controls="comment-reply-form-' . $commentId . '" aria-expanded="false">' . esc_html(t('front.comments_reply_title', 'Reply')) . '</button>';
+            $html .= $this->commentsForm($item, $threadParentId, $commentId !== $threadParentId ? $commentId : null);
+        }
+        $html .= '</article>';
+
+        $children = array_values(array_filter((array)($comment['children'] ?? []), static fn(mixed $child): bool => is_array($child)));
+        if ($children !== []) {
+            $html .= '<ol class="comment-children">';
+            foreach ($children as $child) {
+                $html .= $this->commentItem($item, $child, true, $commentId);
+            }
+            $html .= '</ol>';
+        }
+
+        return $html . '</li>';
+    }
+
+    private function commentDate(string $value): string
+    {
+        $timestamp = $this->timestamp($value);
+        if ($timestamp === null) {
+            return '';
+        }
+
+        $format = Date::normalizeDateTimeFormat($this->setting('app_datetime_format', APP_DATETIME_FORMAT));
+        return date($format, $timestamp);
+    }
+
+    private function commentReturnPath(): string
+    {
+        $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+        $path = strtok($uri, '#');
+        return ($path !== false && $path !== '' ? $path : '/') . '#comments';
     }
 
     private function classAttr(string $class, bool $wrapped): string

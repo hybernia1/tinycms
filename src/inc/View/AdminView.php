@@ -105,6 +105,24 @@ final class AdminView
         ]);
     }
 
+    public function adminCommentList(array $pagination, string $status, string $query, array $statusCounts): void
+    {
+        $this->renderAdmin('admin/comments/list', [
+            'listBase' => $this->adminListBase('comments', $pagination, $status, $query, $statusCounts),
+            'pageTitle' => I18n::t('admin.menu.comments'),
+        ]);
+    }
+
+    public function adminCommentForm(array $item, array $errors, array $children = []): void
+    {
+        $this->renderAdmin('admin/comments/form', [
+            'item' => $item,
+            'children' => $children,
+            'errors' => $errors,
+            'pageTitle' => I18n::t('admin.edit_comment'),
+        ]);
+    }
+
     public function adminTermList(array $pagination, string $status, string $query, array $statusCounts): void
     {
         $this->renderAdmin('admin/terms/list', [
@@ -265,6 +283,7 @@ final class AdminView
             'common',
             'admin',
             'content',
+            'comments',
             'terms',
             'media',
             'menu',
@@ -284,6 +303,7 @@ final class AdminView
             ['label' => I18n::t('admin.menu.dashboard'), 'url' => 'admin/dashboard', 'icon' => 'dashboard'],
             ['label' => I18n::t('admin.menu.users'), 'url' => 'admin/users', 'icon' => 'users'],
             ['label' => I18n::t('admin.menu.content'), 'url' => 'admin/content', 'icon' => 'content'],
+            ['label' => I18n::t('admin.menu.comments'), 'url' => 'admin/comments', 'icon' => 'comments'],
             ['label' => I18n::t('admin.menu.media'), 'url' => 'admin/media', 'icon' => 'media'],
             ['label' => I18n::t('admin.menu.terms'), 'url' => 'admin/terms', 'icon' => 'terms'],
             ['label' => I18n::t('admin.menu.menu'), 'url' => 'admin/menu', 'icon' => 'menu'],

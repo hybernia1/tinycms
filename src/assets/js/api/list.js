@@ -354,6 +354,30 @@
         rowHtml: renderers.termsRowHtml,
     });
 
+    const commentsListConfig = () => ({
+        name: 'comments',
+        rootSelector: '[data-comments-list]',
+        withStatus: true,
+        restore: true,
+        toggle: { defaultMode: 'draft' },
+        togglePath: (endpointBase, id) => `${endpointBase}/${id}/status`,
+        restorePath: (endpointBase, id) => `${endpointBase}/${id}/restore`,
+        deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
+        messages: {
+            deleteSuccess: t('comments.moved_to_trash'),
+            deleteConfirm: {
+                soft: t('comments.delete_confirm_move_to_trash'),
+                hard: t('comments.delete_confirm_hard_delete'),
+            },
+            restoreSuccess: t('comments.restored'),
+            toggleSuccess: (mode) => mode === 'publish' ? t('comments.published') : t('comments.switched_to_draft'),
+        },
+        getContext: (root) => ({
+            contentEditBase: root.getAttribute('data-content-edit-base') || '',
+        }),
+        rowHtml: renderers.commentsRowHtml,
+    });
+
     const mediaListConfig = () => ({
         name: 'media',
         rootSelector: '[data-media-list]',
@@ -380,6 +404,7 @@
     const initLists = () => {
         [
             contentListConfig,
+            commentsListConfig,
             termsListConfig,
             mediaListConfig,
             usersListConfig,
