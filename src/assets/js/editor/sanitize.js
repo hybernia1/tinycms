@@ -84,6 +84,11 @@ const safeWidthStyle = (value) => {
     return 'width: ' + width.toFixed(2).replace(/\.00$/, '') + '%;';
 };
 
+const safeCodeLanguage = (value) => {
+    const clean = String(value || '').trim().toLowerCase();
+    return /^[a-z0-9][a-z0-9_+.#-]{0,29}$/.test(clean) ? clean : '';
+};
+
 const isEmptyTextBlock = (node) => {
     if (!node) {
         return false;
@@ -144,7 +149,7 @@ const normalizeBlockquotes = (root) => {
 };
 
 const blockedCleanTags = ['script', 'style', 'object', 'embed', 'form', 'input', 'button', 'textarea', 'select', 'option'];
-const allowedCleanTags = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col'];
+const allowedCleanTags = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'img', 'iframe', 'pre', 'code', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col'];
 
 const cleanElement = (node) => {
     Array.prototype.slice.call(node.children).forEach(cleanElement);
@@ -217,6 +222,18 @@ const cleanElement = (node) => {
         node.setAttribute('allowfullscreen', '');
         node.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
         node.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        return;
+    }
+
+    if (tag === 'pre') {
+        const className = ' ' + (values.class || '') + ' ';
+        const language = safeCodeLanguage(values['data-language'] || '');
+        if (className.indexOf(' code-block ') >= 0) {
+            node.className = 'code-block';
+        }
+        if (language) {
+            node.setAttribute('data-language', language);
+        }
         return;
     }
 

@@ -202,6 +202,7 @@ final class Theme
         }
         $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/block.css')) . '">';
         $tags[] = '<link rel="stylesheet" href="' . esc_url($this->themeUrl('assets/css/style.css')) . '">';
+        $tags[] = '<script defer src="' . esc_url($this->url(ASSETS_DIR . 'js/front/code-copy.js')) . '"></script>';
         if ($this->commentsEnabled($item)) {
             $tags[] = '<script defer src="' . esc_url($this->url(ASSETS_DIR . 'js/front/comment-reply.js')) . '"></script>';
         }
