@@ -90,11 +90,13 @@ final class Comment
         }
 
         $commentsTable = Table::name('comments');
+        $contentTable = Table::name('content');
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT COUNT(*)',
             "FROM $commentsTable c",
+            "INNER JOIN $contentTable content ON content.id = c.content",
             "LEFT JOIN $commentsTable parent_comment ON parent_comment.id = c.parent",
-            'WHERE c.content = :content AND c.status = :status',
+            'WHERE c.content = :content AND c.status = :status AND content.comments_enabled = 1',
             'AND (c.parent IS NULL OR parent_comment.status = :status)',
         ]));
         $stmt->execute([
