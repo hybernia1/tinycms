@@ -39,7 +39,7 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
             </select>
         <?php elseif ($fieldType === 'checkbox'): ?>
             <input type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="0">
-            <label class="widget-builder-check">
+            <label class="field-check">
                 <input type="checkbox" name="theme[<?= esc_attr($fieldKey) ?>]" value="1"<?= $fieldValue === '1' ? ' checked' : '' ?>>
                 <span><?= esc_html($label) ?></span>
             </label>
