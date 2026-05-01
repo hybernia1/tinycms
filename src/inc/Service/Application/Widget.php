@@ -10,7 +10,6 @@ use App\Service\Support\I18n;
 
 final class Widget
 {
-    private static ?self $current = null;
     private \PDO $pdo;
     private SchemaConstraintValidator $schemaConstraintValidator;
     private array $definitions = [];
@@ -22,23 +21,7 @@ final class Widget
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
         $this->pdo = Connection::get();
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
-        $this->loadThemeFunctions();
-    }
-
-    public static function current(): ?self
-    {
-        return self::$current;
-    }
-
-    public function registerArea(string $area, string $label = ''): void
-    {
-        $clean = $this->slug($area);
-        if ($clean !== '') {
-            $this->areas[$clean] = [
-                'name' => $clean,
-                'label' => trim($label),
-            ];
-        }
+        $this->areas = ThemeDefinition::load($this->rootPath, $this->theme)->widgetAreas();
     }
 
     public function areas(): array
@@ -370,23 +353,6 @@ final class Widget
     {
         $decoded = json_decode($data, true);
         return is_array($decoded) ? $decoded : [];
-    }
-
-    private function loadThemeFunctions(): void
-    {
-        $file = $this->themePath() . '/functions.php';
-        if (!$this->isInside($file, $this->themePath())) {
-            return;
-        }
-
-        $previous = self::$current;
-        self::$current = $this;
-
-        try {
-            require $file;
-        } finally {
-            self::$current = $previous;
-        }
     }
 
     private function themePath(): string

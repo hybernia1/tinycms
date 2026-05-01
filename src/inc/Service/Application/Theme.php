@@ -44,7 +44,7 @@ final class Theme
                 continue;
             }
 
-            $themes[$slug] = $this->manifest($slug, $path);
+            $themes[$slug] = $this->manifest($slug);
         }
 
         if ($themes === []) {
@@ -161,18 +161,10 @@ final class Theme
         return $payload;
     }
 
-    private function manifest(string $slug, string $path): array
+    private function manifest(string $slug): array
     {
         $manifest = $this->fallbackManifest($slug);
-        $file = $path . '/theme.json';
-        if (!is_file($file)) {
-            return $manifest;
-        }
-
-        $data = json_decode((string)file_get_contents($file), true);
-        if (!is_array($data)) {
-            return $manifest;
-        }
+        $data = ThemeDefinition::load($this->rootPath, $slug)->manifest();
 
         $manifest['name'] = trim((string)($data['name'] ?? $manifest['name'])) ?: $manifest['name'];
         $manifest['version'] = trim((string)($data['version'] ?? ''));
@@ -181,7 +173,7 @@ final class Theme
         $manifest['features'] = $this->normalizeFeatures((array)($data['features'] ?? []));
         $manifest['settings'] = $this->normalizeFields((array)($data['settings'] ?? []));
         $manifest['customizer_sections'] = $this->normalizeCustomizerSections(
-            (array)($data['customizer']['sections'] ?? $data['customizer_sections'] ?? []),
+            (array)($data['customizer_sections'] ?? []),
             array_keys($manifest['settings'])
         );
 
