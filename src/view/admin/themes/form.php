@@ -47,7 +47,7 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
             <?php $inputId = 'theme-media-' . preg_replace('/[^a-z0-9_-]/i', '-', $fieldKey); ?>
             <input id="<?= esc_attr($inputId) ?>" type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>">
             <button
-                class="content-thumbnail-trigger settings-media-trigger<?= $fieldValue === '' ? ' empty' : '' ?>"
+                class="media-picker-trigger media-picker-trigger-compact<?= $fieldValue === '' ? ' empty' : '' ?>"
                 type="button"
                 data-media-library-open
                 data-media-library-mode="settings"
@@ -64,7 +64,7 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
                 data-media-library-allow-rename="0"
             >
                 <?php if ($fieldValue !== ''): ?>
-                    <div class="settings-media-preview">
+                    <div class="media-picker-preview-compact">
                         <img src="<?= esc_url($url($fieldValue)) ?>" alt="<?= esc_attr($label) ?>">
                     </div>
                 <?php else: ?>

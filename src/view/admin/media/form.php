@@ -65,7 +65,7 @@ if ($mode === 'edit') {
 
             <?php if ($mode === 'edit'): ?>
                 <?php if ($previewUrl !== ''): ?>
-                    <div class="content-thumbnail-preview mb-3">
+                    <div class="media-picker-preview mb-3">
                         <img src="<?= esc_url($previewUrl) ?>" alt="<?= esc_attr((string)($item['name'] ?? '')) ?>">
                     </div>
                 <?php endif; ?>

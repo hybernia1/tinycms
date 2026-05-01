@@ -23,7 +23,7 @@
             return null;
         }
 
-        const uploadId = 'content-thumbnail-upload';
+        const uploadId = 'media-picker-upload';
         const uploadTypes = openTrigger.getAttribute('data-media-upload-types-label') || '';
         const allowedTypes = uploadTypes !== ''
             ? t('common.allowed_upload_types').replace('%s', uploadTypes)

@@ -99,7 +99,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
 
         openTrigger.classList.remove('empty');
         openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
-        openTrigger.innerHTML = '<div class="content-thumbnail-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
+        openTrigger.innerHTML = '<div class="media-picker-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
         currentMediaId = Number(media.id || 0);
     };
 
@@ -118,7 +118,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
         openTrigger.setAttribute('data-current-media-path', path);
         if (imagePath !== '') {
-            openTrigger.innerHTML = '<div class="settings-media-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
+            openTrigger.innerHTML = '<div class="media-picker-preview-compact"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
         }
         currentMediaId = Number(media.id || 0);
         currentMediaPath = path;
