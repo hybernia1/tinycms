@@ -39,7 +39,7 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
             </select>
         <?php elseif ($fieldType === 'checkbox'): ?>
             <input type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="0">
-            <label class="widget-builder-check">
+            <label class="field-check">
                 <input type="checkbox" name="theme[<?= esc_attr($fieldKey) ?>]" value="1"<?= $fieldValue === '1' ? ' checked' : '' ?>>
                 <span><?= esc_html($label) ?></span>
             </label>
@@ -47,7 +47,7 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
             <?php $inputId = 'theme-media-' . preg_replace('/[^a-z0-9_-]/i', '-', $fieldKey); ?>
             <input id="<?= esc_attr($inputId) ?>" type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>">
             <button
-                class="content-thumbnail-trigger settings-media-trigger<?= $fieldValue === '' ? ' empty' : '' ?>"
+                class="media-picker-trigger media-picker-trigger-compact<?= $fieldValue === '' ? ' empty' : '' ?>"
                 type="button"
                 data-media-library-open
                 data-media-library-mode="settings"
@@ -64,7 +64,7 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
                 data-media-library-allow-rename="0"
             >
                 <?php if ($fieldValue !== ''): ?>
-                    <div class="settings-media-preview">
+                    <div class="media-picker-preview-compact">
                         <img src="<?= esc_url($url($fieldValue)) ?>" alt="<?= esc_attr($label) ?>">
                     </div>
                 <?php else: ?>

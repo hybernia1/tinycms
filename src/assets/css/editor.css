@@ -217,7 +217,7 @@
 
 
 .wysiwyg-editor a {
-    color: var(--color-primary);
+    color: var(--primary);
 }
 
 .wysiwyg-editor a::before {
@@ -320,7 +320,7 @@
     position: absolute;
     width: 0.6rem;
     height: 0.6rem;
-    border: 1px solid var(--color-primary);
+    border: 1px solid var(--primary);
     background: var(--color-surface);
     z-index: 6;
     touch-action: none;
@@ -335,7 +335,7 @@
     display: none;
     position: absolute;
     inset: 0;
-    border: 1px solid var(--color-primary);
+    border: 1px solid var(--primary);
     pointer-events: none;
     z-index: 5;
 }

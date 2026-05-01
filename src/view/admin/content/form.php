@@ -143,7 +143,7 @@ $previewHidden = $previewUrl === '';
                 <div class="content-box-header"><?= esc_html(t('content.thumbnail')) ?></div>
                 <div class="p-3">
                     <button
-                        class="content-thumbnail-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
+                        class="media-picker-trigger mb-3<?= $thumbnailUrl === '' ? ' empty' : '' ?>"
                         type="button"
                         data-media-library-open
                         data-media-library-endpoint="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/media')) ?>"
@@ -159,7 +159,7 @@ $previewHidden = $previewUrl === '';
                         data-media-detach-endpoint="<?= esc_attr($url('admin/api/v1/content/' . $contentId . '/thumbnail/detach')) ?>"
                     >
                         <?php if ($thumbnailUrl !== ''): ?>
-                            <div class="content-thumbnail-preview">
+                            <div class="media-picker-preview">
                                 <img src="<?= esc_url($thumbnailUrl) ?>" alt="<?= esc_attr((string)($item['thumbnail_name'] ?? '')) ?>">
                             </div>
                         <?php else: ?>

@@ -88,10 +88,10 @@ $activeFields = (array)($sections[$activeSection] ?? []);
                         <div class="tag-picker-suggestions" data-picker-suggestions></div>
                     </div>
                 <?php elseif ($fieldType === 'file'): ?>
-                    <?php $inputId = 'settings-media-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>
+                    <?php $inputId = 'media-picker-' . preg_replace('/[^a-z0-9_-]/i', '-', (string)$fieldKey); ?>
                     <input id="<?= esc_attr($inputId) ?>" type="hidden" name="settings[<?= esc_attr((string)$fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>">
                     <button
-                        class="content-thumbnail-trigger settings-media-trigger<?= $fieldValue === '' ? ' empty' : '' ?>"
+                        class="media-picker-trigger media-picker-trigger-compact<?= $fieldValue === '' ? ' empty' : '' ?>"
                         type="button"
                         data-media-library-open
                         data-media-library-mode="settings"
@@ -108,7 +108,7 @@ $activeFields = (array)($sections[$activeSection] ?? []);
                         data-media-library-allow-rename="0"
                     >
                         <?php if ($fieldValue !== ''): ?>
-                            <div class="settings-media-preview">
+                            <div class="media-picker-preview-compact">
                                 <img src="<?= esc_url($url($fieldValue)) ?>" alt="<?= esc_attr((string)$fieldKey) ?> preview">
                             </div>
                         <?php else: ?>
