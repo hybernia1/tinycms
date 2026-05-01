@@ -129,6 +129,7 @@ return [
         'suspend' => 'Suspendovat',
         'unsuspend' => 'Odsuspendovat',
         'search_placeholder' => 'Hledat jméno nebo email',
+        'avatar' => 'Avatar',
         'user' => 'Uživatel',
         'delete' => 'Smazat uživatele',
         'delete_confirm' => 'Skutečně smazat tohoto uživatele?',

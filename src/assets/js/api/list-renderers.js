@@ -165,13 +165,15 @@
         const isAdmin = item.is_admin === true;
         const statusIcon = isSuspended ? 'suspended' : (isAdmin ? 'admin' : 'users');
         const toggleLabel = isSuspended ? t('users.unsuspend') : t('users.suspend');
+        const avatar = String(item.avatar_url || '');
 
         return `
             <tr>
                 <td>
                     <span class="d-flex align-center gap-2">
-                        ${icon(statusIcon)}
+                        ${avatar !== '' ? `<img class="user-list-avatar" src="${esc(avatar)}" alt="">` : icon(statusIcon)}
                         <a href="${esc(editBase)}${id}">${esc(item.name)}</a>
+                        ${icon(statusIcon)}
                     </span>
                     <div class="text-muted small">${esc(item.email)}</div>
                 </td>

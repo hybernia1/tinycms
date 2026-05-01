@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Service\Application\Widget;
 use App\Service\Front\Theme;
+use App\Service\Support\Avatar;
 use App\Service\Support\Escape;
 use App\Service\Support\I18n;
 use App\Service\Support\RequestContext;
@@ -65,6 +66,32 @@ function site_logo(string $class = 'site-logo'): string
 
     $class = trim($class);
     return '<img src="' . esc_url($url) . '" alt="' . esc_attr(site_title()) . '"' . ($class !== '' ? ' class="' . esc_attr($class) . '"' : '') . '>';
+}
+
+function avatar_url(string $seed, int $size = 64): string
+{
+    return Avatar::url($seed, $size);
+}
+
+function user_avatar_url(array $user, int $size = 64): string
+{
+    return Avatar::url(Avatar::userSeed($user), $size);
+}
+
+function comment_avatar_url(array $comment, int $size = 48): string
+{
+    return user_avatar_url([
+        'id' => (int)($comment['author'] ?? 0),
+        'name' => (string)($comment['author_name'] ?? ''),
+    ], $size);
+}
+
+function get_comment_avatar(array $comment, string $class = 'comment-avatar', int $size = 48): string
+{
+    $class = trim($class);
+    $src = comment_avatar_url($comment, $size);
+
+    return '<img src="' . esc_url($src) . '" alt=""' . ($class !== '' ? ' class="' . esc_attr($class) . '"' : '') . '>';
 }
 
 function theme_url(string $path = ''): string

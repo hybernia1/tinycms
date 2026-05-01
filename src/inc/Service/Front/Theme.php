@@ -624,9 +624,10 @@ final class Theme
 
         $commentId = (int)$comment['id'];
         $threadParentId = $threadParentId > 0 ? $threadParentId : $commentId;
+        $comment['author_name'] = $author;
         $html = '<li class="comment-item" id="comment-' . $commentId . '">';
         $html .= '<article class="comment-card">';
-        $html .= '<header class="comment-meta"><strong>' . esc_html($author) . '</strong><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
+        $html .= '<header class="comment-meta"><span class="comment-author">' . get_comment_avatar($comment) . '<strong>' . esc_html($author) . '</strong></span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
         if ((int)($comment['reply_to'] ?? 0) > 0) {
             $replyAuthor = trim((string)($comment['reply_to_author_name'] ?? ''));
             if ($replyAuthor === '') {

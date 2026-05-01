@@ -9,6 +9,7 @@ use App\Service\Application\User as UserService;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
+use App\Service\Support\Avatar;
 
 final class User extends Admin
 {
@@ -149,6 +150,7 @@ final class User extends Admin
             'role' => (string)($row['role'] ?? 'user'),
             'is_admin' => (string)($row['role'] ?? '') === 'admin',
             'is_suspended' => $isSuspended,
+            'avatar_url' => Avatar::url(Avatar::userSeed($row), 40),
         ];
     }
 }

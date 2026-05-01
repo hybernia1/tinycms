@@ -11,6 +11,7 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => '', 'controller' => $front, 'action' => 'home', 'with_redirect' => false],
     ['method' => 'GET', 'path' => 'account', 'controller' => $front, 'action' => 'account'],
     ['method' => 'GET', 'path' => 'search', 'controller' => $front, 'action' => 'search', 'with_redirect' => false],
+    ['method' => 'GET', 'path' => 'avatar/{seed}.svg', 'controller' => $frontAvatar, 'action' => 'show', 'with_redirect' => false, 'raw_params' => true],
     ['method' => 'GET', 'path' => 'robots.txt', 'controller' => $front, 'action' => 'robotsTxt', 'with_redirect' => false],
     ['method' => 'GET', 'path' => 'feed', 'controller' => $front, 'action' => 'feed', 'with_redirect' => false],
     ['method' => 'GET', 'path' => 'sitemap.xml', 'controller' => $front, 'action' => 'sitemapIndex', 'with_redirect' => false],

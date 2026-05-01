@@ -219,8 +219,35 @@ body {
 
 .admin-user-meta {
     margin-bottom: calc(var(--space-2) + var(--space-1) / 2);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
 }
 
+.admin-user-avatar,
+.user-list-avatar,
+.user-form-avatar {
+    border: 1px solid var(--color-border-soft);
+    border-radius: 50%;
+    display: block;
+    flex: 0 0 auto;
+}
+
+.admin-user-avatar {
+    border-color: var(--sidebar-border);
+}
+
+.admin-user-avatar,
+.user-list-avatar {
+    width: 2rem;
+    height: 2rem;
+}
+
+.user-form-avatar {
+    width: 4rem;
+    height: 4rem;
+    border-color: var(--color-border-soft);
+}
 
 .admin-user-name {
     font-weight: 600;

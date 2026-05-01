@@ -129,6 +129,7 @@ return [
         'suspend' => 'Suspend',
         'unsuspend' => 'Unsuspend',
         'search_placeholder' => 'Search name or email',
+        'avatar' => 'Avatar',
         'user' => 'User',
         'delete' => 'Delete user',
         'delete_confirm' => 'Do you really want to delete this user?',

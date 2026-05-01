@@ -121,6 +121,7 @@ p, ul, ol { margin-top: 0; }
 .content-card-meta-item { display: inline-flex; align-items: center; gap: .35rem; }
 
 .content-single { width: 100%; }
+.account-avatar { width: 7rem; height: 7rem; border-radius: 50%; display: block; margin-bottom: 1rem; }
 .error-page { max-width: 860px; }
 .content-single h1 { margin: 0 0 .85rem; font-size: clamp(2rem, 3.6vw, 2.9rem); line-height: 1.06; }
 .content-single .content-card-meta { margin-bottom: 1rem; }
@@ -142,6 +143,8 @@ p, ul, ol { margin-top: 0; }
 .comment-children { margin: 1rem 0 0 1.25rem; padding-left: 1.25rem; border-left: 2px solid var(--border); }
 .comment-card { border: 1px solid var(--border); background: var(--surface); padding: 1rem; }
 .comment-meta { display: flex; gap: .5rem 1rem; align-items: baseline; justify-content: space-between; flex-wrap: wrap; margin-bottom: .65rem; color: var(--muted); }
+.comment-author { display: inline-flex; align-items: center; gap: .55rem; min-width: 0; }
+.comment-avatar { width: 2rem; height: 2rem; border-radius: 50%; display: block; flex: 0 0 auto; }
 .comment-meta strong { color: var(--text); }
 .comment-reply-context { margin: -.25rem 0 .65rem; color: var(--muted); font-size: .92rem; }
 .comment-body > :last-child { margin-bottom: 0; }
