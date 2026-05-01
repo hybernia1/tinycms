@@ -48,6 +48,7 @@ final class Avatar
         $accent = $colors[4];
         $ears = $this->ears($hash, $fur, $muzzle, $dark);
         $head = $this->head($hash, $fur, $dark);
+        $breed = $this->breedTraits($hash, $dark, $accent, $muzzle);
         $markings = $this->markings($hash, $dark, $accent);
         $eyes = $this->eyes($hash, $dark, $accent);
         $nose = $this->nose($hash, $accent, $dark);
@@ -62,6 +63,7 @@ final class Avatar
 <ellipse cx="64" cy="90" rx="44" ry="24" fill="$accent" opacity=".12"/>
 $ears
 $head
+$breed
 $markings
 <ellipse cx="50" cy="78" rx="14" ry="12" fill="$muzzle"/>
 <ellipse cx="78" cy="78" rx="14" ry="12" fill="$muzzle"/>
@@ -127,6 +129,17 @@ SVG;
 
         return '<path d="M56 80H' . $leftEnd . 'M56 86 24 91M72 80h' . (128 - $rightEnd) . 'M72 86l32 5" stroke="' . $dark . '" stroke-width="3" stroke-linecap="round" opacity=".55"/>'
             . '<path d="M55 74 25 67M73 74l30-7" stroke="' . $dark . '" stroke-width="3" stroke-linecap="round" opacity=".45"/>';
+    }
+
+    private function breedTraits(string $hash, string $dark, string $accent, string $muzzle): string
+    {
+        return match ($this->byte($hash, 8) % 5) {
+            0 => '<ellipse cx="64" cy="56" rx="24" ry="11" fill="' . $dark . '" opacity=".08"/><path d="M45 52c4-4 10-5 14-4M69 48c5-1 10 0 14 4" stroke="' . $dark . '" stroke-width="2.4" stroke-linecap="round" opacity=".35"/>',
+            1 => '<path d="M35 69c9-8 49-8 58 0" fill="none" stroke="' . $accent . '" stroke-width="5" stroke-linecap="round" opacity=".22"/><ellipse cx="64" cy="93" rx="12" ry="5" fill="' . $muzzle . '" opacity=".7"/>',
+            2 => '<path d="M40 57c5-4 12-5 17-2M71 55c5-3 12-2 17 2" stroke="' . $dark . '" stroke-width="3" stroke-linecap="round" opacity=".4"/><circle cx="64" cy="52" r="3" fill="' . $accent . '" opacity=".35"/>',
+            3 => '<ellipse cx="45" cy="72" rx="7" ry="5" fill="' . $muzzle . '" opacity=".55"/><ellipse cx="83" cy="72" rx="7" ry="5" fill="' . $muzzle . '" opacity=".55"/><path d="M52 98c4 2 20 2 24 0" stroke="' . $dark . '" stroke-width="2.2" stroke-linecap="round" opacity=".35"/>',
+            default => '<path d="M43 50c6-6 36-6 42 0" fill="none" stroke="' . $accent . '" stroke-width="3" stroke-linecap="round" opacity=".3"/><path d="M48 58c4-3 8-4 12-3M68 55c4-1 8 0 12 3" stroke="' . $dark . '" stroke-width="2" stroke-linecap="round" opacity=".34"/>',
+        };
     }
 
     private function head(string $hash, string $fur, string $dark): string
