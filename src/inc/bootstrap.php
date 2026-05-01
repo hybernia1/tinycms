@@ -61,11 +61,17 @@ use App\View\View;
 
 $isInstalled = is_file(BASE_DIR . '/config.php');
 $resolvedSettings = [];
+$auth = null;
 
 if ($isInstalled) {
+    $auth = new SessionAuth();
     $settingsService = new SettingsService();
     $themeService = new ThemeService(BASE_DIR);
     $resolvedSettings = array_replace($settingsService->resolved(), $themeService->resolved());
+    $previewInput = is_array($_GET['theme'] ?? null) ? (array)$_GET['theme'] : [];
+    if (trim((string)($_GET['theme_preview'] ?? '')) !== '' && $auth->isAdmin() && $previewInput !== []) {
+        $resolvedSettings = array_replace($resolvedSettings, $themeService->previewValues($previewInput));
+    }
     MediaSupport::configure($resolvedSettings);
     RequestContext::setWebsiteUrl((string)($resolvedSettings['website_url'] ?? ''));
     I18n::setLocale((string)($resolvedSettings['app_lang'] ?? APP_LANG));
@@ -124,7 +130,7 @@ if (str_starts_with($requestPath, 'install')) {
     $redirect('admin/dashboard');
 }
 
-$auth = new SessionAuth();
+$auth ??= new SessionAuth();
 Shortcode::configure($router, $auth, $resolvedSettings);
 $authService = new AppAuth($auth);
 $userService = new UserService();
@@ -152,7 +158,7 @@ $adminMedia = new MediaController($adminView, $authService, $mediaService, $user
 $adminMenu = new MenuController($adminView, $authService, $menuService, $flash, $csrf);
 $adminWidgets = new WidgetController($adminView, $authService, $widgetService, $flash, $csrf);
 $adminSettings = new SettingsController($adminView, $authService, $settingsService, $flash, $csrf);
-$adminThemes = new ThemeController($adminView, $authService, $themeService, $flash, $csrf);
+$adminThemes = new ThemeController($adminView, $authService, $themeService, $widgetService, $flash, $csrf);
 $adminTerms = new TermController($adminView, $authService, $termService, $flash, $csrf);
 $apiContent = new ApiContentController($authService, $contentService, $termService, $flash, $csrf);
 $apiComment = new ApiCommentController($authService, $commentService, $flash, $csrf);

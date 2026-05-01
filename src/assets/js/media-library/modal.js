@@ -113,6 +113,9 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         const input = targetInput !== '' ? document.querySelector(targetInput) : null;
         if (input) {
             input.value = path;
+            document.dispatchEvent(new CustomEvent('tinycms:media-setting-selected', {
+                detail: { input, path },
+            }));
         }
         openTrigger.classList.toggle('empty', imagePath === '');
         openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
@@ -132,6 +135,9 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         const input = targetInput !== '' ? document.querySelector(targetInput) : null;
         if (input) {
             input.value = '';
+            document.dispatchEvent(new CustomEvent('tinycms:media-setting-selected', {
+                detail: { input, path: '' },
+            }));
         }
         currentMediaId = 0;
         currentMediaPath = '';

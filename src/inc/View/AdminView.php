@@ -154,29 +154,60 @@ final class AdminView
         ]);
     }
 
-    public function adminWidgetForm(array $items, array $widgets, array $areas, array $areaLabels): void
+    public function adminWidgetForm(array $items, array $widgets, array $areas, array $areaLabels, array $inactiveAreaItems = []): void
     {
         $this->renderAdmin('admin/widgets/form', [
             'items' => $items,
             'widgets' => $widgets,
             'areas' => $areas,
             'areaLabels' => $areaLabels,
+            'inactiveAreaItems' => $inactiveAreaItems,
             'pageTitle' => I18n::t('admin.menu.widgets'),
             'headerAction' => $this->submitHeaderAction('#widgets-form'),
         ]);
     }
 
-    public function adminThemeForm(array $themes, string $activeTheme, array $values, array $fields, string $section): void
+    public function adminThemeForm(array $themes, string $activeTheme): void
     {
         $this->renderAdmin('admin/themes/form', [
             'themes' => $themes,
             'activeTheme' => $activeTheme,
-            'values' => $values,
-            'fields' => $fields,
-            'section' => $section,
             'pageTitle' => I18n::t('admin.menu.themes'),
-            'headerAction' => $this->submitHeaderAction('#themes-form'),
         ]);
+    }
+
+    public function adminThemeCustomizer(
+        array $themes,
+        string $activeTheme,
+        array $values,
+        array $fields,
+        array $customizerSections,
+        array $widgetItems,
+        array $widgets,
+        array $widgetAreas,
+        array $widgetAreaLabels,
+        string $previewUrl = ''
+    ): void
+    {
+        $this->view->render('admin/customizer-layout', 'admin/themes/customizer', array_merge(
+            [
+                'themes' => $themes,
+                'activeTheme' => $activeTheme,
+                'values' => $values,
+                'fields' => $fields,
+                'customizerSections' => $customizerSections,
+                'widgetItems' => $widgetItems,
+                'widgets' => $widgets,
+                'widgetAreas' => $widgetAreas,
+                'widgetAreaLabels' => $widgetAreaLabels,
+                'previewUrl' => $previewUrl,
+                'pageTitle' => I18n::t('themes.customizer'),
+                'adminI18n' => $this->adminI18n(),
+                'imageUploadAccept' => Upload::imageAccept(),
+                'imageUploadTypesLabel' => Upload::imageExtensionsLabel(),
+            ],
+            $this->adminBranding()
+        ));
     }
 
     public function adminMediaList(array $pagination, string $status, string $query, array $statusCounts): void

@@ -6,6 +6,7 @@ namespace App\Service\Front;
 use App\Service\Auth\Auth;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\I18n;
+use App\Service\Support\RequestContext;
 
 final class AdminBar
 {
@@ -15,7 +16,7 @@ final class AdminBar
 
     public function inject(string $output, array $context = []): string
     {
-        if (!$this->auth->isAdmin()) {
+        if (!$this->auth->isAdmin() || trim((string)($_GET['theme_preview'] ?? '')) !== '') {
             return $output;
         }
 
@@ -40,6 +41,7 @@ final class AdminBar
     {
         $dashboard = esc_url($this->router->url('admin/dashboard'));
         $newContent = esc_url($this->router->url('admin/content/add'));
+        $customizer = esc_url($this->router->url('customizer?url=' . rawurlencode($this->currentRequestUrl())));
         $logout = esc_url($this->router->url('admin/logout'));
         $logo = esc_url($this->router->url(ASSETS_DIR . 'svg/logo.svg'));
         $edit = $this->editLink($context);
@@ -47,6 +49,7 @@ final class AdminBar
         return '<div class="tinycms-admin-bar" role="navigation" aria-label="' . esc_attr(I18n::t('admin.brand')) . '">'
             . '<a class="tinycms-admin-bar-brand" href="' . $dashboard . '" aria-label="' . esc_attr(I18n::t('admin.menu.dashboard')) . '"><img src="' . $logo . '" alt=""></a>'
             . $this->link($newContent, I18n::t('admin.add_content'), 'add')
+            . $this->link($customizer, I18n::t('themes.customizer'), 'settings')
             . $edit
             . $this->link($logout, I18n::t('admin.logout'), 'logout', 'tinycms-admin-bar-link-logout')
             . '</div>';
@@ -80,5 +83,28 @@ final class AdminBar
             . icon($icon, 'tinycms-admin-bar-icon')
             . '<span class="tinycms-admin-bar-link-label">' . esc_html($label) . '</span>'
             . '</a>';
+    }
+
+    private function currentRequestUrl(): string
+    {
+        $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+        $path = $this->router->url($this->router->requestPath($uri));
+        $query = $this->publicQuery($uri);
+        if ($query !== '') {
+            $path .= (str_contains($path, '?') ? '&' : '?') . $query;
+        }
+
+        if (!RequestContext::hasAuthority()) {
+            return $path;
+        }
+
+        return RequestContext::scheme() . '://' . RequestContext::authority() . '/' . ltrim($path, '/');
+    }
+
+    private function publicQuery(string $uri): string
+    {
+        parse_str((string)(parse_url($uri, PHP_URL_QUERY) ?? ''), $query);
+        unset($query['route'], $query['theme_preview'], $query['theme']);
+        return http_build_query($query);
     }
 }

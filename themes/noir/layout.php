@@ -11,6 +11,7 @@ $brandDisplay = site_brand_display();
 $brandLogo = in_array($brandDisplay, ['both', 'logo'], true) ? site_logo() : '';
 $brandTitle = in_array($brandDisplay, ['both', 'title'], true);
 $hasBrand = $brandLogo !== '' || $brandTitle;
+$rightSidebar = $widgetsEnabled ? get_widget_area('right') : '';
 ?>
 <!doctype html>
 <html lang="<?= esc_attr(site_language()) ?>">
@@ -19,7 +20,7 @@ $hasBrand = $brandLogo !== '' || $brandTitle;
 </head>
 <body class="theme-layout-<?= esc_attr($layoutWidth) ?>">
     <header class="site-header">
-        <div class="container">
+        <div class="container site-header-inner">
             <?php if ($hasBrand): ?>
             <a href="<?= esc_url(site_url()) ?>" class="site-title">
                 <?= $brandLogo ?>
@@ -47,15 +48,10 @@ $hasBrand = $brandLogo !== '' || $brandTitle;
         <?= get_menu(['class' => 'site-menu site-menu-mobile']) ?>
     </div>
     <button class="site-nav-backdrop" type="button" aria-label="Close menu" data-menu-close></button>
-    <main class="container site-main">
-        <?php if ($widgetsEnabled): ?>
-        <section class="site-widgets site-widgets-before"><?= get_widget_area('before_content') ?></section>
-        <aside class="site-widgets site-widgets-left"><?= get_widget_area('left') ?></aside>
-        <?php endif; ?>
+    <main class="container site-main<?= $rightSidebar !== '' ? ' has-sidebar' : '' ?>">
         <div class="site-content"><?= $content ?></div>
-        <?php if ($widgetsEnabled): ?>
-        <aside class="site-widgets site-widgets-right"><?= get_widget_area('right') ?></aside>
-        <section class="site-widgets site-widgets-after"><?= get_widget_area('after_content') ?></section>
+        <?php if ($rightSidebar !== ''): ?>
+        <aside class="site-sidebar"><?= $rightSidebar ?></aside>
         <?php endif; ?>
     </main>
     <footer class="site-footer">

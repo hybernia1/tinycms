@@ -1,0 +1,40 @@
+[data-customizer-widget] {
+    position: relative;
+    outline: 1px dashed rgba(37, 99, 235, .34);
+    outline-offset: 3px;
+}
+
+[data-customizer-widget]:hover,
+[data-customizer-widget]:focus-within {
+    outline-color: rgba(37, 99, 235, .72);
+}
+
+.customizer-widget-edit {
+    position: absolute;
+    z-index: 30;
+    top: .45rem;
+    right: .45rem;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid rgba(15, 23, 42, .16);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #172033;
+    box-shadow: 0 .35rem 1rem rgba(15, 23, 42, .14);
+    cursor: pointer;
+}
+
+.customizer-widget-edit:hover,
+.customizer-widget-edit:focus-visible {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.customizer-widget-edit .icon {
+    width: 1rem;
+    height: 1rem;
+}

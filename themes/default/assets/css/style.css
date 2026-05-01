@@ -21,7 +21,11 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid 
 img { max-width: 100%; }
 h1, h2, h3 { line-height: 1.15; letter-spacing: 0; }
 p, ul, ol { margin-top: 0; }
-.container { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; position: relative; }
+.container { width: min(var(--container-max, 1180px), calc(100% - 2rem)); margin: 0 auto; position: relative; }
+.theme-layout-narrow { --container-max: 860px; }
+.theme-layout-wide { --container-max: 1440px; }
+.theme-layout-full { --container-max: 100%; }
+.theme-layout-full .container { width: calc(100% - 2rem); }
 .site-title,
 .site-content,
 .site-widgets,

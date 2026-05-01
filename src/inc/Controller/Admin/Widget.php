@@ -27,6 +27,12 @@ final class Widget extends Admin
             return;
         }
 
-        $this->pages->adminWidgetForm($this->widgets->items(), $this->widgets->definitions(), $this->widgets->areas(), $this->widgets->areaLabels());
+        $this->pages->adminWidgetForm(
+            $this->widgets->items(),
+            $this->widgets->definitions(),
+            $this->widgets->areas(),
+            $this->widgets->areaLabels(),
+            $this->widgets->inactiveAreaItems()
+        );
     }
 }

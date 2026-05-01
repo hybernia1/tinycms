@@ -63,11 +63,17 @@ final class Theme
 
     public function siteLogo(): string
     {
-        if ($this->setting('show_logo', '1') !== '1') {
+        if (!in_array($this->brandDisplay(), ['both', 'logo'], true)) {
             return '';
         }
 
         return $this->setting('logo');
+    }
+
+    public function brandDisplay(): string
+    {
+        $display = $this->setting('brand_display', 'both');
+        return in_array($display, ['both', 'logo', 'title', 'none'], true) ? $display : 'both';
     }
 
     public function footerText(): string
@@ -202,9 +208,20 @@ final class Theme
         }
         $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/block.css')) . '">';
         $tags[] = '<link rel="stylesheet" href="' . esc_url($this->themeUrl('assets/css/style.css')) . '">';
+        if ($this->customizerPreview()) {
+            $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/customizer-preview.css')) . '">';
+        }
+        $themeVariables = $this->themeVariablesCss();
+        if ($themeVariables !== '') {
+            $tags[] = '<style data-theme-variables>' . $themeVariables . '</style>';
+        }
+        $customCss = $this->customCss();
+        if ($customCss !== '') {
+            $tags[] = '<style data-theme-custom-css>' . $customCss . '</style>';
+        }
         $tags[] = '<script defer src="' . esc_url($this->url(ASSETS_DIR . 'js/front/code-copy.js')) . '"></script>';
         if ($this->commentsEnabled($item)) {
-            $tags[] = '<script defer src="' . esc_url($this->url(ASSETS_DIR . 'js/front/comment-reply.js')) . '"></script>';
+            $tags[] = '<script defer src="' . esc_url($this->url(ASSETS_DIR . 'js/front/comment-actions.js')) . '"></script>';
         }
 
         $jsonLd = $this->jsonLd($kind, $item, $term, $title, $description, $url, $image, $author, $query);
@@ -328,12 +345,58 @@ final class Theme
             return '';
         }
 
-        return $this->widgets->renderArea($area);
+        return $this->widgets->renderArea($area, $this->customizerPreview());
     }
 
     public function widgetsEnabled(): bool
     {
         return $this->setting('enable_widgets', '1') === '1';
+    }
+
+    public function searchEnabled(): bool
+    {
+        return $this->setting('enable_search', '1') === '1';
+    }
+
+    public function layoutWidth(): string
+    {
+        $width = $this->setting('layout_width', 'default');
+        return in_array($width, ['narrow', 'default', 'wide', 'full'], true) ? $width : 'default';
+    }
+
+    public function customCss(): string
+    {
+        $css = str_replace("\0", '', trim($this->setting('custom_css')));
+        return str_ireplace('</style', '<\/style', $css);
+    }
+
+    private function themeVariablesCss(): string
+    {
+        $variables = [];
+        foreach ($this->settings as $key => $value) {
+            $key = trim((string)$key);
+            if (!str_starts_with($key, 'color_')) {
+                continue;
+            }
+
+            $color = $this->cssColor((string)$value);
+            if ($color !== '') {
+                $variables[] = '--' . str_replace('_', '-', substr($key, 6)) . ': ' . $color;
+            }
+        }
+
+        return $variables !== [] ? ':root{' . implode(';', $variables) . ';}' : '';
+    }
+
+    private function cssColor(string $value): string
+    {
+        $value = strtolower(trim($value));
+        return preg_match('/^#[0-9a-f]{6}$/', $value) === 1 ? $value : '';
+    }
+
+    private function customizerPreview(): bool
+    {
+        return trim((string)($_GET['theme_preview'] ?? '')) !== '' && $this->auth->isAdmin();
     }
 
     public function contentThumbnail(array $item, array $options = []): string
@@ -555,6 +618,10 @@ final class Theme
 
     public function searchForm(string $action = 'search', string $query = '', array $labels = []): string
     {
+        if (!$this->searchEnabled()) {
+            return '';
+        }
+
         $placeholder = trim((string)($labels['placeholder'] ?? 'Search content'));
         $button = trim((string)($labels['button'] ?? 'Search'));
         $formAction = $this->url(trim($action, '/'));
@@ -943,12 +1010,15 @@ final class Theme
             '@type' => 'WebSite',
             'name' => $this->siteTitle(),
             'url' => $this->absoluteUrl($this->url('')),
-            'potentialAction' => [
+        ];
+        if ($this->searchEnabled()) {
+            $payload['potentialAction'] = [
                 '@type' => 'SearchAction',
                 'target' => $this->absoluteUrl($this->withQuery($this->url('search'), 'q={search_term_string}')),
                 'query-input' => 'required name=search_term_string',
-            ],
-        ];
+            ];
+        }
+
         return $this->jsonEncode($payload);
     }
 

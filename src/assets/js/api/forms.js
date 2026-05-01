@@ -124,6 +124,10 @@
 
         clearFieldErrors(form);
         setFormMessage(form, '');
+        form.dispatchEvent(new CustomEvent('tinycms:api-form-success', {
+            bubbles: true,
+            detail: { response, data: normalized },
+        }));
 
         const redirect = String(normalized.data?.redirect || '').trim();
         const successMessage = String(normalized.message || '').trim();

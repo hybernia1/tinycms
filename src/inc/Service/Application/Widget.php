@@ -100,7 +100,22 @@ final class Widget
         return array_map([$this, 'mapItem'], $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []);
     }
 
-    public function renderArea(string $area): string
+    public function inactiveAreaItems(): array
+    {
+        $activeAreas = array_fill_keys(array_keys($this->areas), true);
+        $items = [];
+
+        foreach ($this->items() as $item) {
+            $area = (string)($item['area'] ?? '');
+            if ($area !== '' && !isset($activeAreas[$area])) {
+                $items[] = $item;
+            }
+        }
+
+        return $items;
+    }
+
+    public function renderArea(string $area, bool $editable = false): string
     {
         $area = $this->slug($area);
         if ($area === '') {
@@ -109,7 +124,9 @@ final class Widget
 
         $definitions = $this->definitions();
         $output = [];
+        $index = 0;
         foreach ($this->items($area, true) as $item) {
+            $position = $index++;
             $name = (string)($item['widget'] ?? '');
             $definition = $definitions[$name] ?? null;
             if (!is_array($definition)) {
@@ -118,7 +135,7 @@ final class Widget
 
             $html = $this->renderWidget($name, $definition, (array)($item['data'] ?? []));
             if ($html !== '') {
-                $output[] = '<section class="widget widget-' . esc_attr($name) . '">' . $html . '</section>';
+                $output[] = '<section class="widget widget-' . esc_attr($name) . '"' . $this->customizerAttrs($area, $position, $editable) . '>' . $this->customizerAction($editable) . $html . '</section>';
             }
         }
 
@@ -127,7 +144,8 @@ final class Widget
 
     public function save(array $input): array
     {
-        [$items, $errors] = $this->normalizeItems($input);
+        $managedAreas = $this->managedAreas((array)($input['managed_area'] ?? []));
+        [$items, $errors] = $this->normalizeItems($input, $managedAreas);
         if ($errors !== []) {
             return ['success' => false, 'errors' => $errors];
         }
@@ -136,9 +154,21 @@ final class Widget
         $this->pdo->beginTransaction();
 
         try {
-            $this->pdo->exec("DELETE FROM $table");
             $insert = $this->pdo->prepare("INSERT INTO $table (area, widget, data, active, position) VALUES (:area, :widget, :data, :active, :position)");
             $positions = [];
+
+            if ($managedAreas !== []) {
+                $placeholders = [];
+                $params = [];
+                foreach ($managedAreas as $index => $area) {
+                    $placeholder = ':area' . $index;
+                    $placeholders[] = $placeholder;
+                    $params[$placeholder] = $area;
+                }
+
+                $delete = $this->pdo->prepare("DELETE FROM $table WHERE area IN (" . implode(',', $placeholders) . ")");
+                $delete->execute($params);
+            }
 
             foreach ($items as $item) {
                 $area = (string)$item['area'];
@@ -165,14 +195,14 @@ final class Widget
         }
     }
 
-    private function normalizeItems(array $input): array
+    private function normalizeItems(array $input, array $managedAreas): array
     {
         $areas = (array)($input['item_area'] ?? []);
         $widgets = (array)($input['item_widget'] ?? []);
         $active = (array)($input['item_active'] ?? []);
         $data = (array)($input['item_data'] ?? []);
         $definitions = $this->definitions();
-        $availableAreas = $this->areas;
+        $availableAreas = array_fill_keys($managedAreas, true);
         $items = [];
         $errors = [];
 
@@ -201,6 +231,27 @@ final class Widget
         }
 
         return [$items, $errors];
+    }
+
+    private function managedAreas(array $input): array
+    {
+        $areas = array_fill_keys(array_keys($this->areas), true);
+        $existing = [];
+        foreach ($this->items() as $item) {
+            $area = $this->slug((string)($item['area'] ?? ''));
+            if ($area !== '') {
+                $existing[$area] = true;
+            }
+        }
+
+        foreach ($input as $rawArea) {
+            $area = $this->slug((string)$rawArea);
+            if ($area !== '' && isset($existing[$area])) {
+                $areas[$area] = true;
+            }
+        }
+
+        return array_keys($areas);
     }
 
     private function normalizeData(array $definition, array $input): array
@@ -258,6 +309,25 @@ final class Widget
         } finally {
             I18n::popCataloguePath();
         }
+    }
+
+    private function customizerAttrs(string $area, int $index, bool $editable): string
+    {
+        if (!$editable) {
+            return '';
+        }
+
+        return ' data-customizer-widget data-customizer-widget-area="' . esc_attr($area) . '" data-customizer-widget-index="' . $index . '"';
+    }
+
+    private function customizerAction(bool $editable): string
+    {
+        if (!$editable) {
+            return '';
+        }
+
+        $label = esc_attr(I18n::t('widgets.edit_in_customizer', 'Edit widget'));
+        return '<button class="customizer-widget-edit" type="button" data-customizer-widget-edit aria-label="' . $label . '" title="' . $label . '">' . icon('concept') . '</button>';
     }
 
     private function loadDefinition(string $name): ?array

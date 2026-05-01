@@ -6,15 +6,23 @@
     }
 
     const customSelect = app.ui?.customSelect;
+    const confirm = app.ui?.modal?.confirm;
+    const t = app.i18n?.t || (() => '');
     const builderDnd = app.builderDnd;
     const escapeSelector = app.support?.escapeSelector || ((value) => String(value || '').replace(/["\\]/g, '\\$&'));
 
     const rows = () => Array.from(root.querySelectorAll('[data-widget-item]'));
     const areas = () => Array.from(root.querySelectorAll('[data-widget-area]'));
+    const unusedAreas = () => Array.from(root.querySelectorAll('[data-widget-unused-area]'));
+    const submitBuilder = () => {
+        if (root.hasAttribute('data-api-submit')) {
+            root.requestSubmit();
+        }
+    };
 
     const renumber = () => {
         rows().forEach((row, index) => {
-            const area = row.closest('[data-widget-area]')?.dataset.widgetArea || '';
+            const area = row.closest('[data-widget-area]')?.dataset.widgetArea || row.closest('[data-widget-unused-area]')?.dataset.widgetUnusedArea || '';
             const areaInput = row.querySelector('[data-widget-item-area]');
             if (areaInput) {
                 areaInput.value = area;
@@ -70,17 +78,7 @@
     const syncRows = () => {
         areas().forEach((area) => {
             const currentRows = Array.from(area.querySelectorAll('[data-widget-item]'));
-            currentRows.forEach((row, index) => {
-                syncSummary(row);
-                const up = row.querySelector('[data-widget-item-up]');
-                const down = row.querySelector('[data-widget-item-down]');
-                if (up) {
-                    up.disabled = index === 0;
-                }
-                if (down) {
-                    down.disabled = index === currentRows.length - 1;
-                }
-            });
+            currentRows.forEach(syncSummary);
 
             const empty = area.querySelector('[data-widget-area-empty]');
             const count = area.querySelector('[data-widget-area-count]');
@@ -91,6 +89,21 @@
                 count.textContent = String(currentRows.length);
             }
         });
+        unusedAreas().forEach((area) => {
+            const currentRows = Array.from(area.querySelectorAll('[data-widget-item]'));
+            currentRows.forEach(syncSummary);
+
+            const count = area.querySelector('[data-widget-unused-count]');
+            if (count) {
+                count.textContent = String(currentRows.length);
+            }
+            area.hidden = currentRows.length === 0;
+        });
+
+        const unusedCard = root.querySelector('[data-widget-unused-card]');
+        if (unusedCard) {
+            unusedCard.hidden = unusedAreas().every((area) => area.hidden);
+        }
         renumber();
     };
 
@@ -130,21 +143,7 @@
             setAddOpen(add, false);
         }
         syncRows();
-    };
-
-    const moveRow = (row, direction) => {
-        const items = row.closest('[data-widget-items]');
-        if (!items) {
-            return;
-        }
-
-        if (direction < 0 && row.previousElementSibling) {
-            items.insertBefore(row, row.previousElementSibling);
-        }
-
-        if (direction > 0 && row.nextElementSibling) {
-            items.insertBefore(row.nextElementSibling, row);
-        }
+        submitBuilder();
     };
 
     root.addEventListener('submit', renumber);
@@ -158,7 +157,7 @@
         onChange: syncRows,
     });
 
-    root.addEventListener('click', (event) => {
+    root.addEventListener('click', async (event) => {
         if (!(event.target instanceof Element)) {
             return;
         }
@@ -187,6 +186,24 @@
             return;
         }
 
+        const unusedMove = event.target.closest('[data-widget-unused-move]');
+        if (unusedMove) {
+            const row = unusedMove.closest('[data-widget-item]');
+            const target = row?.querySelector('[data-widget-unused-target]')?.value || '';
+            const items = target !== '' ? root.querySelector(`[data-widget-area="${escapeSelector(target)}"] [data-widget-items]`) : null;
+            if (!row || !items) {
+                return;
+            }
+
+            row.querySelector('[data-widget-unused-controls]')?.remove();
+            row.classList.remove('builder-row-unused');
+            items.appendChild(row);
+            setExpanded(row, true);
+            syncRows();
+            submitBuilder();
+            return;
+        }
+
         const row = event.target.closest('[data-widget-item]');
         if (!row) {
             return;
@@ -198,21 +215,15 @@
         }
 
         if (event.target.closest('[data-widget-item-remove]')) {
+            if (typeof confirm === 'function' && !await confirm({ message: t('widgets.remove_confirm') })) {
+                return;
+            }
             row.remove();
             syncRows();
+            submitBuilder();
             return;
         }
 
-        if (event.target.closest('[data-widget-item-up]')) {
-            moveRow(row, -1);
-            syncRows();
-            return;
-        }
-
-        if (event.target.closest('[data-widget-item-down]')) {
-            moveRow(row, 1);
-            syncRows();
-        }
     });
 
     root.addEventListener('input', (event) => {

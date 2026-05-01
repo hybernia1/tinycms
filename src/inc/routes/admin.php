@@ -78,8 +78,8 @@ register_routes($router, $redirect, [
     ['method' => 'GET', 'path' => 'admin/widgets', 'controller' => $adminWidgets, 'action' => 'form'],
     ['method' => 'POST', 'path' => 'admin/api/v1/widgets', 'controller' => $apiWidget, 'action' => 'saveApiV1'],
 
+    ['method' => 'GET', 'path' => 'customizer', 'controller' => $adminThemes, 'action' => 'customizer'],
     ['method' => 'GET', 'path' => 'admin/themes', 'controller' => $adminThemes, 'action' => 'form'],
-    ['method' => 'GET', 'path' => 'admin/themes/{section}', 'controller' => $adminThemes, 'action' => 'sectionForm', 'params' => ['section' => 'string']],
     ['method' => 'POST', 'path' => 'admin/api/v1/themes', 'controller' => $apiTheme, 'action' => 'saveApiV1'],
 
     ['method' => 'GET', 'path' => 'admin/settings', 'controller' => $adminSettings, 'action' => 'form'],

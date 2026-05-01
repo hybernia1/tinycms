@@ -1,8 +1,8 @@
 {
-  "name": "Default",
+  "name": "Noir",
   "version": "1.0.0",
   "author": "TinyCMS",
-  "description": "Clean default TinyCMS theme.",
+  "description": "Dark editorial TinyCMS theme with a right sidebar.",
   "features": [
     "responsive",
     "widgets",
@@ -62,7 +62,7 @@
     },
     "enable_widgets": {
       "type": "checkbox",
-      "label": "Enable widgets",
+      "label": "Enable right sidebar",
       "default": "1"
     },
     "enable_search": {
@@ -90,47 +90,47 @@
     "color_bg": {
       "type": "color",
       "label": "Page background",
-      "default": "#f7f7f2"
+      "default": "#090b10"
     },
     "color_surface": {
       "type": "color",
       "label": "Surface",
-      "default": "#ffffff"
+      "default": "#11151d"
     },
     "color_surface_alt": {
       "type": "color",
       "label": "Muted surface",
-      "default": "#efefea"
+      "default": "#1a2130"
     },
     "color_text": {
       "type": "color",
       "label": "Text",
-      "default": "#1f2328"
+      "default": "#f4f1e8"
     },
     "color_muted": {
       "type": "color",
       "label": "Muted text",
-      "default": "#687076"
+      "default": "#9ba3b4"
     },
     "color_border": {
       "type": "color",
       "label": "Border",
-      "default": "#c8ccc8"
+      "default": "#303848"
     },
     "color_accent": {
       "type": "color",
       "label": "Accent",
-      "default": "#2457c5"
+      "default": "#d8aa5b"
     },
     "color_accent_strong": {
       "type": "color",
       "label": "Accent strong",
-      "default": "#163f96"
+      "default": "#f0c778"
     },
     "color_accent_soft": {
       "type": "color",
       "label": "Accent soft",
-      "default": "#edf2ff"
+      "default": "#292112"
     },
     "footer_text": {
       "type": "textarea",

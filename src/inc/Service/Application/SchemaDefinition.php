@@ -34,7 +34,7 @@ final class SchemaDefinition
             ],
             'settings' => [
                 'key_name' => ['max' => 100, 'nullable' => false],
-                'value' => ['max' => 1000, 'nullable' => true],
+                'value' => ['nullable' => true],
             ],
             'menu' => [
                 'label' => ['max' => 255, 'nullable' => false],
@@ -168,7 +168,7 @@ final class SchemaDefinition
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS $settings (
                 key_name VARCHAR(100) NOT NULL,
-                value VARCHAR(1000) DEFAULT NULL,
+                value LONGTEXT NULL,
                 PRIMARY KEY (key_name)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
         ], self::menuDdl($prefix), self::widgetsDdl($prefix));

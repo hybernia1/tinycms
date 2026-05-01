@@ -5,8 +5,10 @@ namespace App\Controller\Admin;
 
 use App\Service\Application\Auth;
 use App\Service\Application\Theme as ThemeService;
+use App\Service\Application\Widget as WidgetService;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
+use App\Service\Support\RequestContext;
 use App\View\AdminView;
 
 final class Theme extends Admin
@@ -15,6 +17,7 @@ final class Theme extends Admin
         private AdminView $pages,
         Auth $authService,
         private ThemeService $themes,
+        private WidgetService $widgets,
         Flash $flash,
         Csrf $csrf
     ) {
@@ -23,32 +26,76 @@ final class Theme extends Admin
 
     public function form(callable $redirect): void
     {
-        $this->renderForm($redirect, 'overview');
-    }
-
-    public function sectionForm(callable $redirect, string $section): void
-    {
-        $this->renderForm($redirect, $section);
-    }
-
-    private function renderForm(callable $redirect, string $section): void
-    {
         if (!$this->guardAdmin($redirect, false)) {
-            return;
-        }
-
-        $section = strtolower(trim($section));
-        if (!$this->themes->hasSection($section)) {
-            $redirect('admin/themes');
             return;
         }
 
         $this->pages->adminThemeForm(
             $this->themes->themes(),
+            $this->themes->active()
+        );
+    }
+
+    public function customizer(callable $redirect): void
+    {
+        if (!$this->guardAdmin($redirect, false)) {
+            return;
+        }
+
+        $this->pages->adminThemeCustomizer(
+            $this->themes->themes(),
             $this->themes->active(),
             $this->themes->resolved(),
             $this->themes->fields(),
-            $section
+            $this->themes->customizerSections(),
+            $this->widgets->items(),
+            $this->widgets->definitions(),
+            $this->widgets->areas(),
+            $this->widgets->areaLabels(),
+            $this->customizerPreviewUrl()
         );
+    }
+
+    private function customizerPreviewUrl(): string
+    {
+        $value = trim((string)($_GET['url'] ?? ''));
+        if ($value === '') {
+            return '';
+        }
+
+        $parts = parse_url($value);
+        if (!is_array($parts)) {
+            return '';
+        }
+
+        $scheme = strtolower((string)($parts['scheme'] ?? ''));
+        if ($scheme !== '' && !in_array($scheme, ['http', 'https'], true)) {
+            return '';
+        }
+
+        $host = trim((string)($parts['host'] ?? ''));
+        $port = isset($parts['port']) ? ':' . (int)$parts['port'] : '';
+        $authority = $host . $port;
+        if ($authority !== '' && (!RequestContext::hasAuthority() || strcasecmp($authority, RequestContext::authority()) !== 0)) {
+            return '';
+        }
+
+        $path = '/' . ltrim((string)($parts['path'] ?? ''), '/');
+        if ($path === '/customizer' || str_starts_with($path, '/admin/') || str_starts_with($path, '/auth/')) {
+            return '';
+        }
+
+        parse_str((string)($parts['query'] ?? ''), $query);
+        unset($query['theme_preview'], $query['theme']);
+
+        $queryString = http_build_query($query);
+        $fragment = trim((string)($parts['fragment'] ?? ''));
+        $relativeUrl = $path . ($queryString !== '' ? '?' . $queryString : '') . ($fragment !== '' ? '#' . $fragment : '');
+
+        if (!RequestContext::hasAuthority()) {
+            return $relativeUrl;
+        }
+
+        return RequestContext::scheme() . '://' . RequestContext::authority() . $relativeUrl;
     }
 }

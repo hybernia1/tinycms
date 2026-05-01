@@ -68,6 +68,11 @@ function site_logo(string $class = 'site-logo'): string
     return '<img src="' . esc_url($url) . '" alt="' . esc_attr(site_title()) . '"' . ($class !== '' ? ' class="' . esc_attr($class) . '"' : '') . '>';
 }
 
+function site_brand_display(): string
+{
+    return Theme::current()?->brandDisplay() ?? 'both';
+}
+
 function avatar_url(string $seed, int $size = 64): string
 {
     return Avatar::url($seed, $size);
@@ -117,6 +122,16 @@ function get_widget_area(string $area): string
 function widgets_enabled(): bool
 {
     return Theme::current()?->widgetsEnabled() ?? false;
+}
+
+function search_enabled(): bool
+{
+    return Theme::current()?->searchEnabled() ?? false;
+}
+
+function layout_width(): string
+{
+    return Theme::current()?->layoutWidth() ?? 'default';
 }
 
 function register_widget_area(string $area, string $label = ''): void
