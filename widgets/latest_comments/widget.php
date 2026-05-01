@@ -40,7 +40,7 @@ return [
             "INNER JOIN $contentTable content ON content.id = c.content",
             "LEFT JOIN $commentsTable parent_comment ON parent_comment.id = c.parent",
             "LEFT JOIN $usersTable u ON u.id = c.author",
-            'WHERE c.status = :comment_status AND content.status = :content_status AND content.created <= :now',
+            'WHERE c.status = :comment_status AND content.status = :content_status AND content.comments_enabled = 1 AND content.created <= :now',
             'AND (c.parent IS NULL OR parent_comment.status = :comment_status)',
             'ORDER BY c.created DESC, c.id DESC',
             'LIMIT :limit',
