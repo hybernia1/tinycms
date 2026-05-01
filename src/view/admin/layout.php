@@ -11,6 +11,7 @@ $contentHtml = (string)($content ?? '');
 $headerActionType = (string)($headerAction['type'] ?? '');
 $hasApiForm = str_contains($contentHtml, 'data-api-submit');
 $hasApiList = str_contains($contentHtml, 'data-content-list')
+    || str_contains($contentHtml, 'data-comments-list')
     || str_contains($contentHtml, 'data-terms-list')
     || str_contains($contentHtml, 'data-media-list')
     || str_contains($contentHtml, 'data-users-list');

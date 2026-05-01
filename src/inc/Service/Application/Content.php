@@ -76,6 +76,7 @@ final class Content
             'body',
             'author',
             'thumbnail',
+            'comments_enabled',
             "(SELECT name FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_name",
             "(SELECT path FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path",
             'created',
@@ -162,6 +163,7 @@ final class Content
         $body = trim((string)($input['body'] ?? ''));
         $author = $this->resolveAuthorId($input, $defaultAuthorId);
         $created = $this->resolveDateTime((string)($input['created'] ?? ''));
+        $commentsEnabled = $this->resolveCommentsEnabled($input, $id);
         $errors = [];
 
         if ($name === '') {
@@ -216,6 +218,7 @@ final class Content
             'excerpt' => $excerpt === '' ? null : $excerpt,
             'body' => $body,
             'author' => $author,
+            'comments_enabled' => $commentsEnabled,
         ];
 
         try {
@@ -417,5 +420,19 @@ final class Content
 
         $timestamp = strtotime($clean);
         return $timestamp === false ? null : date('Y-m-d H:i:s', $timestamp);
+    }
+
+    private function resolveCommentsEnabled(array $input, ?int $id): int
+    {
+        if (array_key_exists('comments_enabled', $input)) {
+            return (int)((string)$input['comments_enabled'] === '1');
+        }
+
+        if ($id !== null) {
+            $item = $this->find($id);
+            return (int)((int)($item['comments_enabled'] ?? 1) === 1);
+        }
+
+        return 1;
     }
 }

@@ -20,4 +20,12 @@ return [
     'front.not_found_title' => 'Stránka nebyla nalezena',
     'front.not_found_text' => 'Požadovaná stránka neexistuje.',
     'front.not_found_home' => 'Zpět na úvod',
+    'front.comments_title' => 'Komentáře',
+    'front.comments_empty' => 'Zatím tu nejsou žádné komentáře.',
+    'front.comments_form_title' => 'Přidat komentář',
+    'front.comments_reply_title' => 'Odpovědět',
+    'front.comments_replying_to' => 'Odpověď na %s',
+    'front.comments_submit' => 'Odeslat komentář',
+    'front.comments_login_required' => 'Pro komentování se prosím %spřihlaste%s.',
+    'front.comments_no_author' => 'Bez autora',
 ];

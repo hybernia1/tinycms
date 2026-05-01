@@ -129,6 +129,24 @@ function get_content(): string
     return Theme::current()?->contentBody($item) ?? esc_content($item['body'] ?? '');
 }
 
+function comments_enabled(): bool
+{
+    $item = current_content_item();
+    return Theme::current()?->commentsEnabled($item) ?? false;
+}
+
+function get_comments_list(): string
+{
+    $item = current_content_item();
+    return Theme::current()?->commentsList($item) ?? '';
+}
+
+function get_comments_form(?int $parentId = null, ?int $replyToId = null): string
+{
+    $item = current_content_item();
+    return Theme::current()?->commentsForm($item, $parentId, $replyToId) ?? '';
+}
+
 function get_permalink(): string
 {
     $item = current_content_item();

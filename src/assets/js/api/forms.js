@@ -89,12 +89,24 @@
         });
     };
 
-    const submitApiForm = async (form) => {
+    const submitApiForm = async (form, submitter = null) => {
         if (typeof postForm !== 'function') {
             return;
         }
 
-        const { response, data: normalized } = await postForm(form.action, form, {
+        const payload = new FormData(form);
+        if (submitter instanceof HTMLElement) {
+            const name = String(submitter.getAttribute('name') || '').trim();
+            if (name !== '') {
+                payload.set(name, String(submitter.getAttribute('value') || ''));
+            }
+        }
+
+        const action = submitter instanceof HTMLElement && String(submitter.getAttribute('formaction') || '').trim() !== ''
+            ? submitter.getAttribute('formaction')
+            : form.action;
+
+        const { response, data: normalized } = await postForm(action, payload, {
             credentials: 'same-origin',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
@@ -150,7 +162,7 @@
         }
 
         event.preventDefault();
-        submitApiForm(form);
+        submitApiForm(form, event.submitter || null);
     });
 
 })();

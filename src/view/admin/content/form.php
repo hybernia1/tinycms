@@ -90,6 +90,13 @@ $previewHidden = $previewUrl === '';
                         <?php if (!empty($errors['type'])): ?><small class="text-danger"><?= esc_html((string)$errors['type']) ?></small><?php endif; ?>
                     </div>
                     <div class="mt-3 mb-3">
+                        <input type="hidden" name="comments_enabled" value="0">
+                        <label>
+                            <input type="checkbox" name="comments_enabled" value="1" <?= (int)($item['comments_enabled'] ?? 1) === 1 ? 'checked' : '' ?>>
+                            <span><?= esc_html(t('content.comments_enabled')) ?></span>
+                        </label>
+                    </div>
+                    <div class="mt-3 mb-3">
                         <label><?= esc_html(t('common.author')) ?></label>
                         <div
                             class="tag-picker"

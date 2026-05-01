@@ -17,4 +17,10 @@ if (!defined('BASE_DIR')) {
         <?= get_term_links() ?>
     <?php endif; ?>
     <div class="content-body"><?= get_content() ?></div>
+    <?php if (comments_enabled()): ?>
+        <section id="comments" class="comments">
+            <?= get_comments_list() ?>
+            <?= get_comments_form() ?>
+        </section>
+    <?php endif; ?>
 </article>

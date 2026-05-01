@@ -4,10 +4,13 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Service\Application\Menu;
+use App\Service\Application\Comment;
 use App\Service\Application\Widget;
+use App\Service\Auth\Auth;
 use App\Service\Front\AdminBar;
 use App\Service\Front\Theme;
 use App\Service\Infrastructure\Router\Router;
+use App\Service\Support\Csrf;
 use App\Service\Support\I18n;
 
 final class FrontView
@@ -17,8 +20,17 @@ final class FrontView
     private array $settings;
     private string $theme;
 
-    public function __construct(string $rootPath, Router $router, array $settings, private AdminBar $adminBar, private Menu $menu, private Widget $widgets)
-    {
+    public function __construct(
+        string $rootPath,
+        Router $router,
+        array $settings,
+        private AdminBar $adminBar,
+        private Menu $menu,
+        private Widget $widgets,
+        private Comment $comments,
+        private Auth $auth,
+        private Csrf $csrf
+    ) {
         $this->rootPath = rtrim($rootPath, '/');
         $this->router = $router;
         $this->settings = $settings;
@@ -113,7 +125,7 @@ final class FrontView
 
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
-        $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu, $this->widgets);
+        $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu, $this->widgets, $this->comments, $this->auth, $this->csrf);
         $theme->setIncludeThemeFile(function (string $name, array $context = []): void {
             $file = $this->resolveThemeFile($this->partialPath($name));
             extract($context, EXTR_SKIP);

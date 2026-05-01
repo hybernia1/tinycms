@@ -378,6 +378,7 @@ final class Content extends Admin
             'body' => (string)($input['body'] ?? ''),
             'author' => $author,
             'created' => (string)($input['created'] ?? ''),
+            'comments_enabled' => (string)($input['comments_enabled'] ?? '1'),
         ];
     }
 

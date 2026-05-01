@@ -295,7 +295,7 @@ final class Front
         $mediaTable = Table::name('media');
         if (!$includeUnpublished) {
             $stmt = $this->pdo->prepare(implode("\n", [
-                'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
+                'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
                 "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
                 "FROM $contentTable c",
                 "LEFT JOIN $usersTable u ON u.id = c.author",
@@ -306,7 +306,7 @@ final class Front
             $stmt->execute(['id' => $id, 'status' => 'published', 'now' => $this->now()]);
         } else {
             $stmt = $this->pdo->prepare(implode("\n", [
-                'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
+                'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
                 "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
                 "FROM $contentTable c",
                 "LEFT JOIN $usersTable u ON u.id = c.author",
@@ -397,7 +397,7 @@ final class Front
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->pdo->prepare(implode("\n", array_merge([
-            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type,',
+            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
             "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
             "FROM $contentTable c",
         ], $joins, [
