@@ -31,4 +31,5 @@ return [
     'front.comments_edit' => 'Upravit',
     'front.comments_delete' => 'Smazat',
     'front.comments_save' => 'Uložit',
+    'front.comments_count' => 'Komentářů: %d',
 ];

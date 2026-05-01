@@ -31,4 +31,5 @@ return [
     'front.comments_edit' => 'Edit',
     'front.comments_delete' => 'Delete',
     'front.comments_save' => 'Save',
+    'front.comments_count' => '%d comments',
 ];

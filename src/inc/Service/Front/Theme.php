@@ -24,6 +24,7 @@ final class Theme
     private Slugger $slugger;
     private array $context = [];
     private array $contentPathCache = [];
+    private array $commentCountCache = [];
     private ?\Closure $includeThemeFile = null;
 
     public function __construct(
@@ -407,6 +408,20 @@ final class Theme
         }
 
         return $html . '</ol></div>';
+    }
+
+    public function commentsCount(array $item): int
+    {
+        $contentId = (int)($item['id'] ?? 0);
+        if ($contentId <= 0) {
+            return 0;
+        }
+
+        if (!array_key_exists($contentId, $this->commentCountCache)) {
+            $this->commentCountCache[$contentId] = $this->comments->countForContent($contentId);
+        }
+
+        return $this->commentCountCache[$contentId];
     }
 
     public function commentsForm(array $item, ?int $parentId = null, ?int $replyToId = null): string
