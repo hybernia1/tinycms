@@ -78,7 +78,7 @@ return [
                 return '';
             }
 
-            $label = esc_html($name) . ($showCounts ? ' <span class="popular-terms-count">' . $count . '</span>' : '');
+            $label = esc_html($name) . ($showCounts ? ' <span class="popular-terms-count">(' . $count . ')</span>' : '');
             return '<a href="' . esc_url(site_url('term/' . $slugger->slug($name, $id))) . '">' . $label . '</a>';
         }, $items);
         $links = array_values(array_filter($links));
