@@ -61,7 +61,7 @@ final class Widget
         return $this->definitions;
     }
 
-    public function items(?string $area = null, bool $activeOnly = false): array
+    public function items(?string $area = null): array
     {
         $table = Table::name('widgets');
         $conditions = [];
@@ -72,12 +72,9 @@ final class Widget
             $conditions[] = 'area = :area';
             $params['area'] = $cleanArea;
         }
-        if ($activeOnly) {
-            $conditions[] = 'active = 1';
-        }
 
         $where = $conditions !== [] ? ' WHERE ' . implode(' AND ', $conditions) : '';
-        $stmt = $this->pdo->prepare("SELECT id, area, widget, data, active, position FROM $table$where ORDER BY area ASC, position ASC, id ASC");
+        $stmt = $this->pdo->prepare("SELECT id, area, widget, data, position FROM $table$where ORDER BY area ASC, position ASC, id ASC");
         $stmt->execute($params);
 
         return array_map([$this, 'mapItem'], $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []);
@@ -108,7 +105,7 @@ final class Widget
         $definitions = $this->definitions();
         $output = [];
         $index = 0;
-        foreach ($this->items($area, true) as $item) {
+        foreach ($this->items($area) as $item) {
             $position = $index++;
             $name = (string)($item['widget'] ?? '');
             $definition = $definitions[$name] ?? null;
@@ -137,7 +134,7 @@ final class Widget
         $this->pdo->beginTransaction();
 
         try {
-            $insert = $this->pdo->prepare("INSERT INTO $table (area, widget, data, active, position) VALUES (:area, :widget, :data, :active, :position)");
+            $insert = $this->pdo->prepare("INSERT INTO $table (area, widget, data, position) VALUES (:area, :widget, :data, :position)");
             $positions = [];
 
             if ($managedAreas !== []) {
@@ -162,7 +159,6 @@ final class Widget
                     'area' => $area,
                     'widget' => $item['widget'],
                     'data' => json_encode($item['data'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                    'active' => $item['active'],
                     'position' => $position,
                 ]);
             }
@@ -182,7 +178,6 @@ final class Widget
     {
         $areas = (array)($input['item_area'] ?? []);
         $widgets = (array)($input['item_widget'] ?? []);
-        $active = (array)($input['item_active'] ?? []);
         $data = (array)($input['item_data'] ?? []);
         $definitions = $this->definitions();
         $availableAreas = array_fill_keys($managedAreas, true);
@@ -208,7 +203,6 @@ final class Widget
             $items[] = [
                 'area' => $this->schemaRules->truncate('widgets', 'area', $area, 100),
                 'widget' => $this->schemaRules->truncate('widgets', 'widget', $widget, 100),
-                'active' => (int)($active[$index] ?? 1) === 1 ? 1 : 0,
                 'data' => $this->normalizeData($definitions[$widget], is_array($data[$index] ?? null) ? $data[$index] : []),
             ];
         }
@@ -344,7 +338,6 @@ final class Widget
             'area' => (string)($row['area'] ?? ''),
             'widget' => (string)($row['widget'] ?? ''),
             'data' => $this->decodeData((string)($row['data'] ?? '')),
-            'active' => (int)($row['active'] ?? 1),
             'position' => (int)($row['position'] ?? 0),
         ];
     }
