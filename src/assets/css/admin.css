@@ -448,6 +448,14 @@ body {
     min-width: 0;
 }
 
+.comment-editor-form:target {
+    scroll-margin-top: var(--space-5);
+}
+
+.comment-editor-form:target .comment-editor-card {
+    background: var(--warning-bg);
+}
+
 .comment-editor-main {
     display: grid;
     gap: var(--space-3);

@@ -5,7 +5,6 @@ namespace App\Service\Front;
 
 use App\Service\Application\Menu;
 use App\Service\Application\Comment;
-use App\Service\Application\Content;
 use App\Service\Application\Widget;
 use App\Service\Auth\Auth;
 use App\Service\Infrastructure\Router\Router;
@@ -22,7 +21,6 @@ final class Theme
     private string $theme;
     private Slugger $slugger;
     private array $context = [];
-    private array $contentPathCache = [];
     private array $commentCountCache = [];
     private ?\Closure $includeThemeFile = null;
 
@@ -31,7 +29,6 @@ final class Theme
         private array $settings,
         string $theme,
         private Menu $menu,
-        private Content $content,
         private Widget $widgets,
         private Comment $comments,
         private Auth $auth,
@@ -82,15 +79,6 @@ final class Theme
     {
         $lang = trim((string)($this->settings['app_lang'] ?? ''));
         return $lang !== '' ? $lang : I18n::htmlLang();
-    }
-
-    public function pageTitle(?string $value = null): string
-    {
-        if ($value !== null && trim($value) !== '') {
-            return trim($value);
-        }
-
-        return $this->siteTitle();
     }
 
     public function setContext(array $context): void
@@ -676,12 +664,10 @@ final class Theme
             $replyForm = $this->commentsForm($item, $threadParentId, $commentId !== $threadParentId ? $commentId : null);
         }
 
-        $adminActions = $this->commentAdminActions($comment);
-        $adminEditForm = $this->commentAdminEditForm($comment);
+        $adminActions = $this->commentAdminLink($commentId, $threadParentId);
         if ($replyButton !== '' || $adminActions !== '') {
             $html .= '<div class="comment-actions">' . $replyButton . $adminActions . '</div>' . $replyForm;
         }
-        $html .= $adminEditForm;
         $html .= '</article>';
 
         $children = array_values(array_filter((array)($comment['children'] ?? []), static fn(mixed $child): bool => is_array($child)));
@@ -696,63 +682,25 @@ final class Theme
         return $html . '</li>';
     }
 
-    private function commentAdminActions(array $comment): string
+    private function commentAdminLink(int $commentId, int $threadParentId): string
     {
         if (!$this->auth->isAdmin()) {
             return '';
         }
-
-        $commentId = (int)($comment['id'] ?? 0);
         if ($commentId <= 0) {
             return '';
         }
 
-        $deleteAction = $this->url('comments/' . $commentId . '/delete');
-        $editLabel = esc_attr(t('front.comments_edit', 'Edit'));
-        $deleteLabel = esc_attr(t('front.comments_delete', 'Delete'));
+        $targetId = $threadParentId > 0 ? $threadParentId : $commentId;
+        $fragment = $targetId !== $commentId ? '#comments-child-form-' . $commentId : '#comments-form';
+        $label = esc_attr(t('front.comments_edit', 'Edit'));
 
         return sprintf(
-            '<button class="comment-admin-action comment-admin-edit-toggle" type="button" data-comment-edit data-comment-edit-target="comment-edit-form-%d" aria-controls="comment-edit-form-%d" aria-expanded="false" aria-label="%s" title="%s">%s</button><form class="comment-admin-delete" action="%s" method="post">%s<input type="hidden" name="return" value="%s"><button class="comment-admin-action comment-admin-action-danger" type="submit" aria-label="%s" title="%s">%s</button></form>',
-            $commentId,
-            $commentId,
-            $editLabel,
-            $editLabel,
+            '<a class="comment-admin-action" href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s" title="%s">%s</a>',
+            esc_url($this->url('admin/comments/edit?id=' . $targetId) . $fragment),
+            $label,
+            $label,
             icon('concept'),
-            esc_url($this->formAction($deleteAction)),
-            $this->hiddenRouteField($deleteAction) . $this->csrf->field(),
-            esc_attr($this->commentReturnPath()),
-            $deleteLabel,
-            $deleteLabel,
-            icon('delete'),
-        );
-    }
-
-    private function commentAdminEditForm(array $comment): string
-    {
-        if (!$this->auth->isAdmin()) {
-            return '';
-        }
-
-        $commentId = (int)($comment['id'] ?? 0);
-        if ($commentId <= 0) {
-            return '';
-        }
-
-        $editAction = $this->url('comments/' . $commentId . '/edit');
-        $return = $this->commentReturnPath($commentId);
-        $saveLabel = esc_attr(t('front.comments_save', 'Save'));
-
-        return sprintf(
-            '<form class="comment-admin-form" id="comment-edit-form-%d" action="%s" method="post" hidden>%s<input type="hidden" name="return" value="%s"><textarea name="body" rows="4" aria-label="%s" required>%s</textarea><button class="comment-admin-action" type="submit" aria-label="%s" title="%s">%s</button></form>',
-            $commentId,
-            esc_url($this->formAction($editAction)),
-            $this->hiddenRouteField($editAction) . $this->csrf->field(),
-            esc_attr($return),
-            esc_attr(t('comments.body', 'Comment body')),
-            esc_html((string)($comment['body'] ?? '')),
-            $saveLabel,
-            $saveLabel,
-            icon('save'),
         );
     }
 
@@ -797,11 +745,6 @@ final class Theme
             return $value;
         }
 
-        $contentPath = $this->contentPathFromMenuUrl($value);
-        if ($contentPath !== null) {
-            return $this->url($contentPath);
-        }
-
         return $this->url($value);
     }
 
@@ -816,29 +759,7 @@ final class Theme
             return null;
         }
 
-        return $this->router->requestPath($this->url($this->contentPathFromMenuUrl($value) ?? $value));
-    }
-
-    private function contentPathFromMenuUrl(string $url): ?string
-    {
-        $path = trim((string)(parse_url(trim($url), PHP_URL_PATH) ?? ''), '/');
-        if ($path === '' || !ctype_digit($path)) {
-            return null;
-        }
-
-        $id = (int)$path;
-        if ($id <= 0) {
-            return null;
-        }
-
-        if (array_key_exists($id, $this->contentPathCache)) {
-            return $this->contentPathCache[$id];
-        }
-
-        $item = $this->content->findPublishedSummary($id);
-        $this->contentPathCache[$id] = is_array($item) ? $this->slugger->slug((string)($item['name'] ?? ''), $id) : null;
-
-        return $this->contentPathCache[$id];
+        return $this->router->requestPath($this->url($value));
     }
 
     private function paginationUrl(string $basePath, int $page): string
@@ -870,7 +791,7 @@ final class Theme
             return ($query !== '' ? $title . ': ' . $query : $title) . ' | ' . $this->siteTitle();
         }
 
-        return $this->pageTitle(null);
+        return $this->siteTitle();
     }
 
     private function resolveHeadDescription(string $kind, array $item, array $term, string $query = ''): string

@@ -1,7 +1,6 @@
 (() => {
     const replyButtons = Array.from(document.querySelectorAll('[data-comment-reply]'));
-    const editButtons = Array.from(document.querySelectorAll('[data-comment-edit]'));
-    if (replyButtons.length === 0 && editButtons.length === 0) {
+    if (replyButtons.length === 0) {
         return;
     }
 
@@ -40,23 +39,4 @@
         });
     });
 
-    editButtons.forEach((button) => {
-        const target = String(button.getAttribute('data-comment-edit-target') || '').trim();
-        const form = target !== '' ? document.getElementById(target) : null;
-        if (!form) {
-            return;
-        }
-
-        form.hidden = true;
-        button.setAttribute('aria-expanded', 'false');
-
-        button.addEventListener('click', () => {
-            const willOpen = form.hidden;
-            form.hidden = !willOpen;
-            button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-            if (willOpen) {
-                form.querySelector('textarea')?.focus();
-            }
-        });
-    });
 })();

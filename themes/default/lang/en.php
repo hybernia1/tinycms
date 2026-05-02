@@ -72,7 +72,5 @@ return [
     'front.comments_login_required' => 'Please %ssign in%s to comment.',
     'front.comments_no_author' => 'No author',
     'front.comments_edit' => 'Edit',
-    'front.comments_delete' => 'Delete',
-    'front.comments_save' => 'Save',
     'front.comments_count' => '%d comments',
 ];

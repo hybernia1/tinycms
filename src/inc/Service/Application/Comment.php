@@ -251,16 +251,6 @@ final class Comment
         return $this->setStatus($id, self::STATUS_DRAFT);
     }
 
-    public function trash(int $id): bool
-    {
-        $item = $this->find($id);
-        if ($item === null || (string)($item['status'] ?? '') === self::STATUS_TRASH) {
-            return false;
-        }
-
-        return $this->setStatus($id, self::STATUS_TRASH);
-    }
-
     public function setStatus(int $id, string $status): bool
     {
         $item = $this->find($id);
