@@ -1,7 +1,17 @@
 (() => {
+    const app = window.tinycms || null;
+    const t = (key, fallback = '') => {
+        if (app?.i18n?.t) {
+            return app.i18n.t(key, fallback);
+        }
+        return fallback || key;
+    };
+    const confirmModal = app?.ui?.modal?.confirm || null;
+
     const replyButtons = Array.from(document.querySelectorAll('[data-comment-reply]'));
     const editButtons = Array.from(document.querySelectorAll('[data-comment-edit]'));
-    if (replyButtons.length === 0 && editButtons.length === 0) {
+    const deleteForms = Array.from(document.querySelectorAll('.comment-admin-delete'));
+    if (replyButtons.length === 0 && editButtons.length === 0 && deleteForms.length === 0) {
         return;
     }
 
@@ -56,6 +66,21 @@
             button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
             if (willOpen) {
                 form.querySelector('textarea')?.focus();
+            }
+        });
+    });
+
+    deleteForms.forEach((form) => {
+        form.addEventListener('submit', async (event) => {
+            if (typeof confirmModal !== 'function') {
+                return;
+            }
+            event.preventDefault();
+            const confirmed = await confirmModal({
+                message: t('comments.delete_confirm', 'Do you really want to delete this comment?'),
+            });
+            if (confirmed) {
+                form.submit();
             }
         });
     });
