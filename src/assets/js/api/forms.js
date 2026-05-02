@@ -131,7 +131,8 @@
 
         const redirect = String(normalized.data?.redirect || '').trim();
         const successMessage = String(normalized.message || '').trim();
-        if (form.hasAttribute('data-stay-on-page')) {
+        const followRedirect = submitter instanceof HTMLElement && submitter.hasAttribute('data-api-follow-redirect');
+        if (form.hasAttribute('data-stay-on-page') && !followRedirect) {
             if (successMessage !== '') {
                 const hasInlineMessage = setFormMessage(form, successMessage, 'success');
                 if (!hasInlineMessage) {

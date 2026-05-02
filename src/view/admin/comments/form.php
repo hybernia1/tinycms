@@ -13,6 +13,7 @@ if ($author === '') {
 ?>
 <form
     id="comments-form"
+    class="comment-editor-form"
     method="post"
     action="<?= esc_url($url('admin/api/v1/comments/' . (int)($item['id'] ?? 0) . '/edit')) ?>"
     data-api-submit
@@ -41,17 +42,17 @@ if ($author === '') {
                 </div>
                 <div class="comment-editor-actions">
                     <?php if ($statusValue === 'trash'): ?>
-                        <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . (int)($item['id'] ?? 0) . '/restore')) ?>" formnovalidate aria-label="<?= esc_attr(t('comments.restore')) ?>" title="<?= esc_attr(t('comments.restore')) ?>">
+                        <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . (int)($item['id'] ?? 0) . '/restore')) ?>" formnovalidate data-api-follow-redirect aria-label="<?= esc_attr(t('comments.restore')) ?>" title="<?= esc_attr(t('comments.restore')) ?>">
                             <?= icon('restore') ?>
                             <span class="sr-only"><?= esc_html(t('comments.restore')) ?></span>
                         </button>
                     <?php else: ?>
-                        <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . (int)($item['id'] ?? 0) . '/status')) ?>" name="mode" value="<?= esc_attr($statusValue === 'published' ? 'draft' : 'publish') ?>" formnovalidate aria-label="<?= esc_attr($statusValue === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?>" title="<?= esc_attr($statusValue === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?>">
+                        <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . (int)($item['id'] ?? 0) . '/status')) ?>" name="mode" value="<?= esc_attr($statusValue === 'published' ? 'draft' : 'publish') ?>" formnovalidate data-api-follow-redirect aria-label="<?= esc_attr($statusValue === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?>" title="<?= esc_attr($statusValue === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?>">
                             <?= icon($statusValue === 'published' ? 'hide' : 'show') ?>
                             <span class="sr-only"><?= esc_html($statusValue === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?></span>
                         </button>
                     <?php endif; ?>
-                    <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . (int)($item['id'] ?? 0) . '/delete')) ?>" formnovalidate aria-label="<?= esc_attr(t('comments.delete')) ?>" title="<?= esc_attr(t('comments.delete')) ?>">
+                    <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . (int)($item['id'] ?? 0) . '/delete')) ?>" formnovalidate data-api-follow-redirect aria-label="<?= esc_attr(t('comments.delete')) ?>" title="<?= esc_attr(t('comments.delete')) ?>">
                         <?= icon('delete') ?>
                         <span class="sr-only"><?= esc_html(t('comments.delete')) ?></span>
                     </button>
@@ -91,7 +92,7 @@ if ($author === '') {
         ?>
         <form
             id="comments-child-form-<?= $childId ?>"
-            class="mb-3"
+            class="mb-3 comment-editor-form"
             method="post"
             action="<?= esc_url($url('admin/api/v1/comments/' . $childId . '/edit')) ?>"
             data-api-submit
@@ -115,17 +116,17 @@ if ($author === '') {
                         </div>
                         <div class="comment-editor-actions">
                             <?php if ($childStatus === 'trash'): ?>
-                                <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . $childId . '/restore')) ?>" formnovalidate aria-label="<?= esc_attr(t('comments.restore')) ?>" title="<?= esc_attr(t('comments.restore')) ?>">
+                                <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . $childId . '/restore')) ?>" formnovalidate data-api-follow-redirect aria-label="<?= esc_attr(t('comments.restore')) ?>" title="<?= esc_attr(t('comments.restore')) ?>">
                                     <?= icon('restore') ?>
                                     <span class="sr-only"><?= esc_html(t('comments.restore')) ?></span>
                                 </button>
                             <?php else: ?>
-                                <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . $childId . '/status')) ?>" name="mode" value="<?= esc_attr($childStatus === 'published' ? 'draft' : 'publish') ?>" formnovalidate aria-label="<?= esc_attr($childStatus === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?>" title="<?= esc_attr($childStatus === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?>">
+                                <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . $childId . '/status')) ?>" name="mode" value="<?= esc_attr($childStatus === 'published' ? 'draft' : 'publish') ?>" formnovalidate data-api-follow-redirect aria-label="<?= esc_attr($childStatus === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?>" title="<?= esc_attr($childStatus === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?>">
                                     <?= icon($childStatus === 'published' ? 'hide' : 'show') ?>
                                     <span class="sr-only"><?= esc_html($childStatus === 'published' ? t('comments.switch_to_draft') : t('comments.publish')) ?></span>
                                 </button>
                             <?php endif; ?>
-                            <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . $childId . '/delete')) ?>" formnovalidate aria-label="<?= esc_attr(t('comments.delete')) ?>" title="<?= esc_attr(t('comments.delete')) ?>">
+                            <button class="btn btn-light btn-icon" type="submit" formaction="<?= esc_url($url('admin/api/v1/comments/' . $childId . '/delete')) ?>" formnovalidate data-api-follow-redirect aria-label="<?= esc_attr(t('comments.delete')) ?>" title="<?= esc_attr(t('comments.delete')) ?>">
                                 <?= icon('delete') ?>
                                 <span class="sr-only"><?= esc_html(t('comments.delete')) ?></span>
                             </button>
