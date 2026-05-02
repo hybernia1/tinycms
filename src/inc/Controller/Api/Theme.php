@@ -29,13 +29,6 @@ final class Theme extends Admin
 
         $result = $this->themes->save((array)($_POST['theme'] ?? []));
         if (($result['success'] ?? false) === true) {
-            if (trim((string)($_POST['theme_no_redirect'] ?? '')) === '1') {
-                $this->apiOk([
-                    'message' => I18n::t('themes.saved'),
-                ]);
-                return;
-            }
-
             $this->apiOk([
                 'message' => I18n::t('themes.saved'),
                 'redirect' => $this->buildPath('admin/themes'),

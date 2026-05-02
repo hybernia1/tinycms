@@ -15,14 +15,13 @@ register_theme([
         'menu',
         'search',
         'logo',
-        'favicon',
         'custom_css',
         'layout_width',
         'colors',
     ],
 ]);
 
-register_theme_section('branding', t('theme.customizer_sections.branding'), ['brand_display', 'logo', 'favicon']);
+register_theme_section('branding', t('theme.customizer_sections.branding'), ['brand_display', 'logo']);
 register_theme_section('layout', t('theme.customizer_sections.layout'), [
     'layout_width',
     'enable_search',
@@ -68,13 +67,12 @@ register_theme_option('brand_display', [
     ],
 ]);
 register_theme_option('logo', ['type' => 'file', 'label' => t('theme.customizer_fields.logo')]);
-register_theme_option('favicon', ['type' => 'file', 'label' => t('theme.customizer_fields.favicon')]);
 register_theme_option('front_home_content', [
     'type' => 'content_picker',
     'label' => t('theme.customizer_fields.homepage_content'),
     'default' => '',
-    'default_setting' => 'front_home_content',
     'empty_label' => t('theme.customizer_fields.homepage_loop'),
+    'placeholder' => t('theme.customizer_fields.homepage_search'),
 ]);
 register_theme_option('layout_width', [
     'type' => 'select',

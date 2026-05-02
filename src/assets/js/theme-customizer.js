@@ -116,9 +116,8 @@
             return;
         }
 
-        const section = customizerRoot.querySelector('[data-customizer-widget-section]');
         const widgetForm = customizerRoot.querySelector('[data-customizer-widgets]');
-        if (!section || !widgetForm) {
+        if (!widgetForm) {
             return;
         }
 

@@ -31,7 +31,10 @@ final class Content extends Admin
         }
 
         [$page, $perPage, $status, $query, $availableStatuses] = $this->resolveContentListQuery($this->content->statuses());
-        $pagination = $this->content->paginate($page, $perPage, $status, $query);
+        $publicOnly = (string)($_GET['public'] ?? '') === '1';
+        $pagination = $publicOnly
+            ? $this->content->paginatePublic($page, $perPage, $query)
+            : $this->content->paginate($page, $perPage, $status, $query);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->content->statusCounts($availableStatuses);
 
@@ -155,14 +158,14 @@ final class Content extends Admin
         }
 
         if ($mode === 'publish') {
-            if (!$this->content->setStatus($id, 'published')) {
+            if (!$this->content->setStatus($id, ContentService::STATUS_PUBLISHED)) {
                 $this->apiError('PUBLISH_FAILED', I18n::t('content.publish_failed'));
                 return;
             }
 
             $this->apiOk([
                 'id' => $id,
-                'status' => 'published',
+                'status' => ContentService::STATUS_PUBLISHED,
                 'message' => I18n::t('content.published'),
             ]);
             return;

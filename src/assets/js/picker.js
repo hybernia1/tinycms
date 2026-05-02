@@ -58,6 +58,9 @@
         if (searchStatus !== '') {
             url.searchParams.set('status', searchStatus);
         }
+        if (String(picker.getAttribute('data-search-public') || '').trim() === '1') {
+            url.searchParams.set('public', '1');
+        }
         url.searchParams.set('limit', String(searchLimit));
         if (query !== '') {
             url.searchParams.set(searchParam, query);

@@ -232,9 +232,6 @@ return [
         'open_site' => 'Otevřít web',
         'back_to_themes' => 'Zpět na šablony',
         'slug' => 'Složka',
-        'sections' => [
-            'settings' => 'Nastavení',
-        ],
         'feature_labels' => [
             'responsive' => 'Responzivní',
             'widgets' => 'Widgety',
@@ -417,7 +414,6 @@ return [
             'sitename' => 'Název webu',
             'siteauthor' => 'Autor webu',
             'meta_description' => 'Meta description',
-            'front_home_content' => 'Domovská stránka',
             'front_posts_per_page' => 'Počet příspěvků na stránku',
             'media_small_width' => 'Šířka malého thumbnailu',
             'media_small_height' => 'Výška malého thumbnailu',
@@ -427,10 +423,6 @@ return [
             'website_email' => 'E-mail webu',
         ],
         'options' => [
-            'front_home_content' => [
-                'none' => '— Výpis posledních příspěvků —',
-                'search_placeholder' => 'Hledat obsah',
-            ],
             'allow_registration' => [
                 'disabled' => 'Ne',
                 'enabled' => 'Ano',
