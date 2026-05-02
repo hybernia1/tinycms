@@ -8,7 +8,7 @@ use App\Service\Support\I18n;
 
 final class Theme
 {
-    private const SETTINGS_KEY = 'theme_settings';
+    private const OPTIONS_SETTING_KEY = 'theme_options';
 
     private SchemaConstraintValidator $schemaConstraintValidator;
     private Settings $settings;
@@ -65,7 +65,7 @@ final class Theme
     {
         $active = $this->active();
         $resolved = ['front_theme' => $active];
-        $values = $this->themeValues($active);
+        $values = $this->themeOptionValues($active);
         $fields = $this->fields($active);
 
         foreach ($fields as $key => $field) {
@@ -111,8 +111,8 @@ final class Theme
             return ['success' => false, 'errors' => ['front_theme' => I18n::t('themes.invalid_theme')]];
         }
 
-        $themeSettings = $this->themeSettings();
-        $themeValues = $this->themeValues($selected, $themeSettings);
+        $themeOptions = $this->themeOptions();
+        $themeOptionValues = $this->themeOptionValues($selected, $themeOptions);
         $payload = [];
         $hasThemeInput = false;
         $fields = $this->fields($selected);
@@ -127,8 +127,8 @@ final class Theme
 
         $values = ['front_theme' => $selected];
         if ($hasThemeInput) {
-            $themeSettings[$selected] = $this->filterValues(array_replace($themeValues, $payload), array_keys($fields));
-            $values[self::SETTINGS_KEY] = $this->encodeThemeSettings($themeSettings);
+            $themeOptions[$selected] = $this->filterValues(array_replace($themeOptionValues, $payload), array_keys($fields));
+            $values[self::OPTIONS_SETTING_KEY] = $this->encodeThemeOptions($themeOptions);
         }
 
         $this->settings->saveValues($values);
@@ -144,7 +144,7 @@ final class Theme
         }
 
         $payload = ['front_theme' => $selected];
-        $themeValues = $this->themeValues($selected);
+        $themeOptionValues = $this->themeOptionValues($selected);
         $fields = $this->fields($selected);
 
         foreach ($fields as $key => $field) {
@@ -152,11 +152,11 @@ final class Theme
                 continue;
             }
 
-            $themeValues[$key] = $this->normalizeValue($key, (string)$input[$key], $field);
+            $themeOptionValues[$key] = $this->normalizeValue($key, (string)$input[$key], $field);
         }
 
         foreach ($fields as $key => $field) {
-            $rawValue = array_key_exists($key, $themeValues) ? (string)$themeValues[$key] : $this->defaultValue($field);
+            $rawValue = array_key_exists($key, $themeOptionValues) ? (string)$themeOptionValues[$key] : $this->defaultValue($field);
             $payload[$key] = $this->normalizeValue($key, $rawValue, $field);
         }
 
@@ -320,18 +320,18 @@ final class Theme
         return $id > 0 && $this->settings->publishedContentLabel($id) !== '' ? (string)$id : '';
     }
 
-    private function themeValues(string $theme, ?array $themeSettings = null): array
+    private function themeOptionValues(string $theme, ?array $themeOptions = null): array
     {
         $theme = $this->slug($theme);
-        $themeSettings ??= $this->themeSettings();
-        $values = is_array($themeSettings[$theme] ?? null) ? $themeSettings[$theme] : [];
+        $themeOptions ??= $this->themeOptions();
+        $values = is_array($themeOptions[$theme] ?? null) ? $themeOptions[$theme] : [];
 
         return $this->filterValues($values);
     }
 
-    private function themeSettings(): array
+    private function themeOptions(): array
     {
-        $raw = (string)($this->settings->values()[self::SETTINGS_KEY] ?? '');
+        $raw = (string)($this->settings->values()[self::OPTIONS_SETTING_KEY] ?? '');
         if ($raw === '') {
             return [];
         }
@@ -389,10 +389,10 @@ final class Theme
         return $result;
     }
 
-    private function encodeThemeSettings(array $themeSettings): string
+    private function encodeThemeOptions(array $themeOptions): string
     {
         $payload = [];
-        foreach ($themeSettings as $theme => $values) {
+        foreach ($themeOptions as $theme => $values) {
             $theme = $this->slug((string)$theme);
             if ($theme !== '' && is_array($values)) {
                 $fields = array_keys($this->fields($theme));

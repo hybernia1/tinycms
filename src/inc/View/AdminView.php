@@ -12,7 +12,7 @@ final class AdminView
     private View $view;
     private Settings $settings;
 
-    public function __construct(View $view, Settings $settings, private array $themeSettings = [])
+    public function __construct(View $view, Settings $settings, private array $themeOptions = [])
     {
         $this->view = $view;
         $this->settings = $settings;
@@ -307,11 +307,9 @@ final class AdminView
 
     private function adminBranding(): array
     {
-        $settings = array_replace($this->settings->resolved(), $this->themeSettings);
+        $settings = array_replace($this->settings->resolved(), $this->themeOptions);
         return [
-            'siteName' => (string)($settings['sitename'] ?? 'TinyCMS'),
             'siteFavicon' => (string)($settings['favicon'] ?? ''),
-            'siteLogo' => (string)($settings['logo'] ?? ''),
             'appVersion' => defined('APP_VERSION') ? (string)APP_VERSION : '0.9.0',
         ];
     }

@@ -106,7 +106,7 @@ $scripts = array_merge(...$scriptGroups);
         <div class="admin-sidebar-bottom">
             <?php if (is_array($authUser)): ?>
             <div class="admin-user-meta">
-                <img class="admin-user-avatar" src="<?= esc_url(user_avatar_url($authUser, 40)) ?>" alt="">
+                <?= get_avatar($authUser, 'admin-user-avatar', 40) ?>
                 <div class="admin-user-name"><?= esc_html((string)($authUser['name'] ?? '')) ?></div>
             </div>
             <?php endif; ?>

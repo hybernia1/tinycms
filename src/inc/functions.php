@@ -56,45 +56,37 @@ function site_language(): string
     return Theme::current()?->language() ?? I18n::htmlLang();
 }
 
-function site_logo(string $class = 'site-logo'): string
+function get_site_brand(string $class = 'site-title'): string
 {
-    $logo = trim((string)(Theme::current()?->siteLogo() ?? ''));
-    $url = $logo !== '' ? site_url($logo) : '';
-    if ($url === '') {
+    $brand = Theme::current()?->brand() ?? [];
+    $logo = trim((string)($brand['logo'] ?? ''));
+    $title = (string)($brand['title'] ?? '');
+
+    if ($logo === '' && $title === '') {
         return '';
     }
 
     $class = trim($class);
-    return '<img src="' . esc_url($url) . '" alt="' . esc_attr(site_title()) . '"' . ($class !== '' ? ' class="' . esc_attr($class) . '"' : '') . '>';
+    $logoHtml = $logo !== '' ? '<img src="' . esc_url(site_url($logo)) . '" alt="' . esc_attr(site_title()) . '" class="site-logo">' : '';
+    $titleHtml = $title !== '' ? '<span>' . esc_html($title) . '</span>' : '';
+
+    return '<a href="' . esc_url(site_url()) . '"' . ($class !== '' ? ' class="' . esc_attr($class) . '"' : '') . '>' . $logoHtml . $titleHtml . '</a>';
 }
 
-function site_brand_display(): string
+function site_layout_class(): string
 {
-    return Theme::current()?->brandDisplay() ?? 'both';
+    return Theme::current()?->layoutClass() ?? 'theme-layout-default';
 }
 
-function avatar_url(string $seed, int $size = 64): string
+function get_avatar_url(?array $source = null, int $size = 64): string
 {
-    return Avatar::url($seed, $size);
+    return Avatar::url(Avatar::userSeed(author_user($source)), $size);
 }
 
-function user_avatar_url(array $user, int $size = 64): string
-{
-    return Avatar::url(Avatar::userSeed($user), $size);
-}
-
-function comment_avatar_url(array $comment, int $size = 48): string
-{
-    return user_avatar_url([
-        'id' => (int)($comment['author'] ?? 0),
-        'name' => (string)($comment['author_name'] ?? ''),
-    ], $size);
-}
-
-function get_comment_avatar(array $comment, string $class = 'comment-avatar', int $size = 48): string
+function get_avatar(?array $source = null, string $class = 'avatar', int $size = 64): string
 {
     $class = trim($class);
-    $src = comment_avatar_url($comment, $size);
+    $src = get_avatar_url($source, $size);
 
     return '<img src="' . esc_url($src) . '" alt=""' . ($class !== '' ? ' class="' . esc_attr($class) . '"' : '') . '>';
 }
@@ -119,24 +111,14 @@ function get_widget_area(string $area): string
     return Theme::current()?->widgetArea($area) ?? '';
 }
 
-function widgets_enabled(): bool
-{
-    return Theme::current()?->widgetsEnabled() ?? false;
-}
-
-function search_enabled(): bool
-{
-    return Theme::current()?->searchEnabled() ?? false;
-}
-
-function layout_width(): string
-{
-    return Theme::current()?->layoutWidth() ?? 'default';
-}
-
-function theme_setting(string $key, string $default = ''): string
+function theme_option(string $key, string $default = ''): string
 {
     return Theme::current()?->setting($key, $default) ?? $default;
+}
+
+function theme_option_enabled(string $key, bool $default = false): bool
+{
+    return theme_option($key, $default ? '1' : '0') === '1';
 }
 
 function register_theme(array $manifest): void
@@ -144,9 +126,9 @@ function register_theme(array $manifest): void
     ThemeDefinition::current()?->registerTheme($manifest);
 }
 
-function register_theme_setting(string $key, array $field): void
+function register_theme_option(string $key, array $field): void
 {
-    ThemeDefinition::current()?->registerSetting($key, $field);
+    ThemeDefinition::current()?->registerOption($key, $field);
 }
 
 function register_theme_section(string $key, string $label = '', array $fields = []): void
@@ -173,82 +155,103 @@ function get_search_form(string $action = 'search', ?string $query = null): stri
     ]) ?? '';
 }
 
-function get_title(): string
+function get_content_title(?array $source = null): string
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->contentTitle($item) ?? trim((string)($item['name'] ?? ''));
 }
 
-function get_excerpt(int $limit = 0): string
+function get_content_excerpt(?array $source = null, int $limit = 0): string
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->contentExcerpt($item, $limit) ?? trim(strip_tags((string)($item['excerpt'] ?? '')));
 }
 
-function get_content(): string
+function get_content_body(?array $source = null): string
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->contentBody($item) ?? esc_content($item['body'] ?? '');
 }
 
-function comments_enabled(): bool
+function content_comments_enabled(?array $source = null): bool
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->commentsEnabled($item) ?? false;
 }
 
-function get_comments_list(): string
+function get_content_comments(?array $source = null): string
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->commentsList($item) ?? '';
 }
 
-function get_comments_count(): int
+function get_content_comments_count(?array $source = null): int
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->commentsCount($item) ?? 0;
 }
 
-function get_comments_form(?int $parentId = null, ?int $replyToId = null): string
+function get_content_comments_form(?array $source = null, ?int $parentId = null, ?int $replyToId = null): string
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->commentsForm($item, $parentId, $replyToId) ?? '';
 }
 
-function get_permalink(): string
+function get_content_url(?array $source = null): string
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->contentUrl($item) ?? '';
 }
 
-function get_thumbnail(array $options = []): string
+function get_content_thumbnail(?array $source = null, array $options = []): string
 {
-    $item = current_content_item();
+    $item = content_item($source);
     return Theme::current()?->contentThumbnail($item, $options) ?? '';
 }
 
-function get_author(string $fallback = ''): string
+function get_author(?array $source = null, string $fallback = ''): string
 {
-    $item = current_content_item();
-    return Theme::current()?->contentAuthor($item, $fallback) ?? trim($fallback);
+    $user = author_user($source, $fallback);
+    $name = trim((string)($user['name'] ?? ''));
+
+    return $name !== '' ? $name : trim($fallback);
 }
 
-function get_author_url(): string
+function get_author_url(?array $source = null): string
 {
-    $item = current_content_item();
-    return Theme::current()?->authorUrl($item) ?? '';
+    $user = author_user($source);
+    if ((int)($user['id'] ?? 0) <= 0) {
+        return '';
+    }
+
+    return Theme::current()?->authorUrl([
+        'author' => (int)$user['id'],
+        'author_name' => (string)($user['name'] ?? ''),
+    ]) ?? '';
 }
 
-function get_date(string $fallback = ''): string
+function get_content_date(?array $source = null): string
 {
-    $item = current_content_item();
-    return Theme::current()?->contentDate($item, $fallback) ?? trim($fallback);
+    $item = content_item($source);
+    return Theme::current()?->contentDate($item) ?? '';
 }
 
-function get_term_links(string $class = 'term-list'): string
+function get_content_terms(?array $source = null): array
 {
-    $item = current_content_item();
-    return Theme::current()?->termLinks($item, $class) ?? '';
+    $item = content_item($source);
+    return array_values(array_filter((array)($item['terms'] ?? []), static function (mixed $term): bool {
+        return is_array($term) && (int)($term['id'] ?? 0) > 0 && trim((string)($term['name'] ?? '')) !== '';
+    }));
+}
+
+function get_term_url(array $term): string
+{
+    $id = (int)($term['id'] ?? 0);
+    if ($id <= 0) {
+        return '';
+    }
+
+    return Theme::current()?->termUrl($term) ?? '';
 }
 
 function get_pagination(array|string|null $pagination = null, string $basePath = ''): string
@@ -269,14 +272,31 @@ function include_partial(string $name, array $context = []): void
     Theme::current()?->include($name, $context);
 }
 
+function content_item(?array $source = null): array
+{
+    return $source ?? current_content_item();
+}
+
+function author_user(?array $source = null, string $fallback = ''): array
+{
+    $source = content_item($source);
+    $hasAuthorFields = array_key_exists('author', $source)
+        || array_key_exists('author_name', $source)
+        || array_key_exists('author_email', $source);
+    $name = trim((string)($hasAuthorFields ? ($source['author_name'] ?? $fallback) : ($source['name'] ?? $fallback)));
+    $email = trim((string)($hasAuthorFields ? ($source['author_email'] ?? '') : ($source['email'] ?? '')));
+    $id = (int)($hasAuthorFields ? ($source['author'] ?? 0) : ($source['id'] ?? $source['ID'] ?? 0));
+
+    return [
+        'id' => $id,
+        'name' => $name,
+        'email' => $email,
+    ];
+}
+
 function current_content_item(): array
 {
     return Theme::current()?->item() ?? [];
-}
-
-function use_content_item(array $item): void
-{
-    Theme::current()?->setItem($item);
 }
 
 function esc_html(mixed $value): string

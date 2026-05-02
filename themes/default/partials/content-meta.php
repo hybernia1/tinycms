@@ -4,9 +4,10 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$date = (bool)($show_date ?? true) ? get_date() : '';
-$author = (bool)($show_author ?? true) ? get_author() : '';
-$commentsCount = (bool)($show_comments_count ?? false) ? get_comments_count() : null;
+$item = isset($item) && is_array($item) ? $item : null;
+$date = (bool)($show_date ?? true) ? get_content_date($item) : '';
+$author = (bool)($show_author ?? true) ? get_author($item) : '';
+$commentsCount = (bool)($show_comments_count ?? false) ? get_content_comments_count($item) : null;
 
 if ($date === '' && $author === '' && $commentsCount === null) {
     return;
@@ -18,7 +19,7 @@ if ($date === '' && $author === '' && $commentsCount === null) {
         <span class="content-card-meta-item"><?= icon('calendar') ?><span><?= esc_html($date) ?></span></span>
     <?php endif; ?>
     <?php if ($author !== ''): ?>
-        <?php $authorUrl = get_author_url(); ?>
+        <?php $authorUrl = get_author_url($item); ?>
         <span class="content-card-meta-item">
             <?= icon('users') ?>
             <span>

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
-use App\Service\Support\Slugger;
 
 if (!defined('BASE_DIR')) {
     exit;
@@ -69,17 +68,17 @@ return [
             return '';
         }
 
-        $slugger = new Slugger();
-        $links = array_map(static function (array $term) use ($slugger, $showCounts): string {
+        $links = array_map(static function (array $term) use ($showCounts): string {
             $id = (int)($term['id'] ?? 0);
             $name = trim((string)($term['name'] ?? ''));
             $count = (int)($term['total'] ?? 0);
-            if ($id <= 0 || $name === '') {
+            $termUrl = get_term_url($term);
+            if ($id <= 0 || $name === '' || $termUrl === '') {
                 return '';
             }
 
             $label = esc_html($name) . ($showCounts ? ' <span class="popular-terms-count">(' . $count . ')</span>' : '');
-            return '<a href="' . esc_url(site_url('term/' . $slugger->slug($name, $id))) . '">' . $label . '</a>';
+            return '<a href="' . esc_url($termUrl) . '">' . $label . '</a>';
         }, $items);
         $links = array_values(array_filter($links));
 
