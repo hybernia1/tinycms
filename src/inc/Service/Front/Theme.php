@@ -14,6 +14,7 @@ use App\Service\Support\I18n;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
+use App\Service\Support\Shortcode;
 
 final class Theme
 {
@@ -797,12 +798,12 @@ final class Theme
     private function resolveHeadDescription(string $kind, array $item, array $term, string $query = ''): string
     {
         if ($kind === 'content' || $kind === 'home-content') {
-            $excerpt = $this->plainText((string)($item['excerpt'] ?? ''));
+            $excerpt = $this->plainText(Shortcode::render((string)($item['excerpt'] ?? '')));
             if ($excerpt !== '') {
                 return $excerpt;
             }
 
-            $body = $this->plainText((string)($item['body'] ?? ''));
+            $body = $this->plainText(Shortcode::render((string)($item['body'] ?? '')));
             if ($body !== '') {
                 return $body;
             }
