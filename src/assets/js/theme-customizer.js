@@ -30,6 +30,11 @@
         }
 
         removePreviewParams(url);
+        const path = `/${url.pathname.replace(/^\/+/, '')}`;
+        if (['/customizer', '/admin', '/auth'].includes(path) || path.startsWith('/customizer/') || path.startsWith('/admin/') || path.startsWith('/auth/')) {
+            return null;
+        }
+
         return url;
     };
 
@@ -145,73 +150,29 @@
         details?.querySelector('input:not([type="hidden"]), textarea, select')?.focus({ preventScroll: true });
     };
 
-    const attachFrameHandlers = () => {
-        let doc = null;
-        try {
-            doc = frame.contentDocument;
-        } catch (error) {
-            return;
-        }
-        if (!doc || doc.documentElement?.dataset.customizerBound === '1') {
+    window.addEventListener('message', (event) => {
+        if (event.source !== frame.contentWindow || !event.data || event.data.source !== 'tinycms:customizer-preview') {
             return;
         }
 
-        doc.documentElement.dataset.customizerBound = '1';
-        doc.addEventListener('click', (event) => {
-            const targetNode = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
-            const widgetEdit = targetNode?.closest('[data-customizer-widget-edit]');
-            if (widgetEdit) {
-                event.preventDefault();
-                openWidgetRow(widgetEdit);
-                return;
-            }
-
-            const link = targetNode?.closest('a[href]');
-            if (!link || link.tagName !== 'A' || link.hasAttribute('download')) {
-                return;
-            }
-
-            const target = String(link.target || '').toLowerCase();
-            if (target !== '' && target !== '_self') {
-                return;
-            }
-
-            if (setPreviewBase(link.href)) {
-                event.preventDefault();
-            }
-        });
-
-        doc.addEventListener('submit', (event) => {
-            const targetForm = event.target;
-            if (!targetForm || targetForm.tagName !== 'FORM' || String(targetForm.method || 'get').toLowerCase() !== 'get') {
-                return;
-            }
-
-            const url = new URL(targetForm.action || previewBase, window.location.href);
-            if (url.origin !== window.location.origin) {
-                return;
-            }
-
-            removePreviewParams(url);
-            new FormData(targetForm).forEach((value, key) => {
-                url.searchParams.set(String(key), String(value));
+        if (event.data.action === 'edit-widget') {
+            openWidgetRow({
+                getAttribute: (name) => {
+                    if (name === 'data-customizer-widget-area') {
+                        return String(event.data.area || '');
+                    }
+                    if (name === 'data-customizer-widget-index') {
+                        return String(event.data.index || 0);
+                    }
+                    return '';
+                },
+                closest: () => null,
             });
-
-            event.preventDefault();
-            setPreviewBase(url.toString());
-        });
-    };
-
-    frame.addEventListener('load', () => {
-        attachFrameHandlers();
-        try {
-            const loaded = new URL(frame.contentWindow.location.href);
-            const hadPreview = loaded.searchParams.has('theme_preview');
-            if (setPreviewBase(loaded.toString(), false) && !hadPreview) {
-                refresh();
-            }
-        } catch (error) {
             return;
+        }
+
+        if (event.data.action === 'navigate') {
+            setPreviewBase(String(event.data.url || ''));
         }
     });
 

@@ -88,7 +88,11 @@ final class Theme extends Admin
         }
 
         $path = '/' . ltrim((string)($parts['path'] ?? ''), '/');
-        if ($path === '/customizer' || str_starts_with($path, '/admin/') || str_starts_with($path, '/auth/')) {
+        if (in_array($path, ['/customizer', '/admin', '/auth'], true)
+            || str_starts_with($path, '/customizer/')
+            || str_starts_with($path, '/admin/')
+            || str_starts_with($path, '/auth/')
+        ) {
             return '';
         }
 

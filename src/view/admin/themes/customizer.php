@@ -250,6 +250,10 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
             <span><?= esc_html(t('themes.live_preview')) ?></span>
             <a href="<?= esc_url($previewBase) ?>" target="_blank" rel="noopener noreferrer" data-preview-open><?= icon('show') ?><span><?= esc_html(t('themes.open_site')) ?></span></a>
         </div>
-        <iframe id="theme-customizer-preview" title="<?= esc_attr(t('themes.live_preview')) ?>"></iframe>
+        <iframe
+            id="theme-customizer-preview"
+            title="<?= esc_attr(t('themes.live_preview')) ?>"
+            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+        ></iframe>
     </section>
 </div>
