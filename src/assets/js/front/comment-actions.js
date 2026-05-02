@@ -6,7 +6,6 @@
         }
         return fallback || key;
     };
-    const confirmModal = app?.ui?.modal?.confirm || null;
 
     const replyButtons = Array.from(document.querySelectorAll('[data-comment-reply]'));
     const editButtons = Array.from(document.querySelectorAll('[data-comment-edit]'));
@@ -72,13 +71,16 @@
 
     deleteForms.forEach((form) => {
         form.addEventListener('submit', async (event) => {
+            const message = t('comments.delete_confirm', 'Do you really want to delete this comment?');
+            const confirmModal = window.tinycms?.ui?.modal?.confirm || null;
             if (typeof confirmModal !== 'function') {
+                if (!window.confirm(message)) {
+                    event.preventDefault();
+                }
                 return;
             }
             event.preventDefault();
-            const confirmed = await confirmModal({
-                message: t('comments.delete_confirm', 'Do you really want to delete this comment?'),
-            });
+            const confirmed = await confirmModal({ message });
             if (confirmed) {
                 form.submit();
             }
