@@ -6,7 +6,7 @@ namespace App\Service\Infrastructure\Db;
 use App\Service\Application\SchemaDefinition;
 use App\Service\Support\I18n;
 
-final class SchemaConstraintValidator
+final class SchemaRules
 {
     private array $rules;
 

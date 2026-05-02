@@ -5,7 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
@@ -14,13 +14,13 @@ final class Term
 {
     private Query $query;
     private \PDO $pdo;
-    private SchemaConstraintValidator $schemaConstraintValidator;
+    private SchemaRules $schemaRules;
 
     public function __construct()
     {
         $this->pdo = Connection::get();
         $this->query = new Query($this->pdo);
-        $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $search = '', string $status = 'all'): array
@@ -71,7 +71,7 @@ final class Term
 
     public function save(array $input, ?int $id = null): array
     {
-        $name = $this->schemaConstraintValidator->truncate(
+        $name = $this->schemaRules->truncate(
             'terms',
             'name',
             trim((string)($input['name'] ?? '')),
@@ -87,7 +87,7 @@ final class Term
             $errors['name'] = I18n::t('terms.name_exists');
         }
 
-        $lengthErrors = $this->schemaConstraintValidator->validate('terms', [
+        $lengthErrors = $this->schemaRules->validate('terms', [
             'name' => $name,
         ], [
             'name' => 'name',
@@ -281,7 +281,7 @@ final class Term
             if ($value === '') {
                 continue;
             }
-            $value = $this->schemaConstraintValidator->truncate(
+            $value = $this->schemaRules->truncate(
                 'terms',
                 'name',
                 $value,
@@ -316,50 +316,22 @@ final class Term
         $termsTable = Table::name('terms');
         $contentTermsTable = Table::name('content_terms');
 
+        $where = ["NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)"];
         $params = [];
-        $searchSql = '';
         if ($search !== '') {
-            $searchSql = ' AND t.name LIKE :search';
+            $where[] = 't.name LIKE :search';
             $params['search'] = '%' . $search . '%';
         }
 
-        $baseSql = implode("\n", [
-            "FROM $termsTable t",
-            "WHERE NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)",
-        ]) . $searchSql;
-
-        $countStmt = $this->pdo->prepare("SELECT COUNT(*) $baseSql");
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue(':' . $key, $value);
-        }
-        $countStmt->execute();
-
-        $total = (int)($countStmt->fetchColumn() ?: 0);
-        $totalPages = max(1, (int)ceil($total / $perPage));
-        $page = min($page, $totalPages);
-        $offset = ($page - 1) * $perPage;
-
-        $sql = implode("\n", [
-            'SELECT t.id, t.name, t.created, t.updated',
-            $baseSql,
-            'ORDER BY t.id DESC',
-            'LIMIT :limit OFFSET :offset',
-        ]);
-
-        $stmt = $this->pdo->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return [
-            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
-            'total' => $total,
-            'total_pages' => $totalPages,
+        return $this->query->paginateQuery([
+            'select' => 't.id, t.name, t.created, t.updated',
+            'from' => "FROM $termsTable t",
+            'where' => $where,
+            'params' => $params,
+            'orderBy' => 't.id DESC',
+        ], [
             'page' => $page,
-            'per_page' => $perPage,
-        ];
+            'perPage' => $perPage,
+        ]);
     }
 }

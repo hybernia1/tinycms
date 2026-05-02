@@ -5,7 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
@@ -24,13 +24,13 @@ final class Content
 
     private Query $query;
     private \PDO $pdo;
-    private SchemaConstraintValidator $schemaConstraintValidator;
+    private SchemaRules $schemaRules;
 
     public function __construct()
     {
         $this->pdo = Connection::get();
         $this->query = new Query($this->pdo);
-        $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
@@ -143,36 +143,18 @@ final class Content
             $params['search'] = '%' . $search . '%';
         }
 
-        $where = 'WHERE ' . implode(' AND ', $conditions);
-        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable c $where");
-        $countStmt->execute($params);
-        $total = (int)($countStmt->fetchColumn() ?: 0);
-        $totalPages = max(1, (int)ceil($total / $perPage));
-        $page = min($page, $totalPages);
-        $offset = ($page - 1) * $perPage;
-
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.status, c.type, c.author, u.name AS author_name, c.created, c.updated',
-            "FROM $contentTable c",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            $where,
-            'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
-            'LIMIT :limit OFFSET :offset',
-        ]));
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return [
-            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
-            'total' => $total,
-            'total_pages' => $totalPages,
+        return $this->query->paginateQuery([
+            'select' => 'c.id, c.name, c.status, c.type, c.author, u.name AS author_name, c.created, c.updated',
+            'from' => "FROM $contentTable c",
+            'joins' => ["LEFT JOIN $usersTable u ON u.id = c.author"],
+            'countJoins' => [],
+            'where' => $conditions,
+            'params' => $params,
+            'orderBy' => 'COALESCE(c.updated, c.created) DESC, c.id DESC',
+        ], [
             'page' => $page,
-            'per_page' => $perPage,
-        ];
+            'perPage' => $perPage,
+        ]);
     }
 
     private function delete(int $id): bool
@@ -236,7 +218,7 @@ final class Content
 
     public function save(array $input, int $defaultAuthorId, ?int $id = null): array
     {
-        $name = $this->schemaConstraintValidator->truncate(
+        $name = $this->schemaRules->truncate(
             'content',
             'name',
             trim((string)($input['name'] ?? '')),
@@ -244,7 +226,7 @@ final class Content
         );
         $status = trim((string)($input['status'] ?? 'draft'));
         $type = trim((string)($input['type'] ?? self::TYPE_ARTICLE));
-        $excerpt = $this->schemaConstraintValidator->truncate(
+        $excerpt = $this->schemaRules->truncate(
             'content',
             'excerpt',
             $this->sanitizeExcerpt((string)($input['excerpt'] ?? '')),
@@ -278,7 +260,7 @@ final class Content
             $errors['created'] = I18n::t('validation.publish_date_invalid');
         }
 
-        $lengthErrors = $this->schemaConstraintValidator->validate('content', [
+        $lengthErrors = $this->schemaRules->validate('content', [
             'name' => $name,
             'status' => $status,
             'type' => $type,

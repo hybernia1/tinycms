@@ -9,6 +9,7 @@ use App\Service\Application\Settings;
 use App\Service\Application\Term;
 use App\Service\Application\User;
 use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
@@ -19,6 +20,7 @@ final class Front
 {
     private const SITEMAP_CHUNK_SIZE = 5000;
     private \PDO $pdo;
+    private Query $query;
     private Slugger $slugger;
 
     public function __construct(
@@ -30,6 +32,7 @@ final class Front
         private array $resolvedSettings = []
     ) {
         $this->pdo = Connection::get();
+        $this->query = new Query($this->pdo);
         $this->slugger = new Slugger();
     }
 
@@ -391,56 +394,28 @@ final class Front
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $params = array_merge(ContentService::publicParams($this->now()), $params);
-        $where = 'WHERE ' . implode(' AND ', array_merge([ContentService::publicWhere('c')], $conditions));
-
-        $countStmt = $this->pdo->prepare(implode("\n", array_merge([
-            'SELECT COUNT(*)',
-            "FROM $contentTable c",
-        ], $joins, [$where])));
-        $this->bindParams($countStmt, $params, $intParams);
-        $countStmt->execute();
-        $total = (int)($countStmt->fetchColumn() ?: 0);
-        $page = min($page, max(1, (int)ceil($total / $perPage)));
-        $offset = ($page - 1) * $perPage;
-
-        $stmt = $this->pdo->prepare(implode("\n", array_merge([
-            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
-            "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
-            "FROM $contentTable c",
-        ], $joins, [
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            $where,
-            'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
-            'LIMIT :limit OFFSET :offset',
-        ])));
-        $this->bindParams($stmt, $params, $intParams);
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $this->paginationPayload($this->withThumbnails($stmt->fetchAll(\PDO::FETCH_ASSOC)), $page, $perPage, $total);
-    }
-
-    private function paginationPayload(array $rows, int $page, int $perPage, int $total): array
-    {
-        $totalPages = max(1, (int)ceil($total / $perPage));
-
-        return [
-            'data' => $rows,
+        $pagination = $this->query->paginateQuery([
+            'select' => implode("\n", [
+                'c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
+                'u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name',
+            ]),
+            'from' => "FROM $contentTable c",
+            'joins' => array_merge($joins, [
+                "LEFT JOIN $usersTable u ON u.id = c.author",
+                "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
+            ]),
+            'countJoins' => $joins,
+            'where' => array_merge([ContentService::publicWhere('c')], $conditions),
+            'params' => $params,
+            'intParams' => $intParams,
+            'orderBy' => 'COALESCE(c.updated, c.created) DESC, c.id DESC',
+        ], [
             'page' => $page,
-            'per_page' => $perPage,
-            'total' => $total,
-            'total_pages' => $totalPages,
-        ];
-    }
+            'perPage' => $perPage,
+        ]);
+        $pagination['data'] = $this->withThumbnails((array)($pagination['data'] ?? []));
 
-    private function bindParams(\PDOStatement $stmt, array $params, array $intParams = []): void
-    {
-        foreach ($params as $key => $value) {
-            $type = in_array($key, $intParams, true) ? \PDO::PARAM_INT : \PDO::PARAM_STR;
-            $stmt->bindValue(':' . $key, $value, $type);
-        }
+        return $pagination;
     }
 
     private function withThumbnails(array $rows): array

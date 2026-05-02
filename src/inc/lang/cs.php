@@ -562,11 +562,6 @@ return [
     'errors' => [
         'unexpected' => 'Došlo k neočekávané chybě. Zkuste to prosím později.',
         'db' => [
-            'value_too_long' => 'Jedna nebo více hodnot je příliš dlouhá pro databázový sloupec.',
-            'required_value_missing' => 'Chybí povinná hodnota (NOT NULL).',
-            'unique_violation' => 'Hodnota už existuje a musí být unikátní.',
-            'invalid_foreign_key' => 'Neplatná vazba na související záznam (foreign key).',
-            'operation_failed' => 'Databázová operace selhala.',
             'insert_data_empty' => 'Data pro vložení nesmí být prázdná.',
             'update_data_empty' => 'Data pro aktualizaci nesmí být prázdná.',
             'update_conditions_empty' => 'Podmínky pro aktualizaci nesmí být prázdné.',

@@ -562,11 +562,6 @@ return [
     'errors' => [
         'unexpected' => 'An unexpected error occurred. Please try again later.',
         'db' => [
-            'value_too_long' => 'One or more values are too long for the database column.',
-            'required_value_missing' => 'A required value (NOT NULL) is missing.',
-            'unique_violation' => 'The value already exists and must be unique.',
-            'invalid_foreign_key' => 'Invalid reference to related record (foreign key).',
-            'operation_failed' => 'Database operation failed.',
             'insert_data_empty' => 'Insert data cannot be empty.',
             'update_data_empty' => 'Update data cannot be empty.',
             'update_conditions_empty' => 'Update conditions cannot be empty.',

@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 
 final class Widget
 {
     private \PDO $pdo;
-    private SchemaConstraintValidator $schemaConstraintValidator;
+    private SchemaRules $schemaRules;
     private array $definitions = [];
     private array $areas = [];
 
@@ -20,7 +20,7 @@ final class Widget
         $this->rootPath = rtrim($rootPath, '/\\');
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
         $this->pdo = Connection::get();
-        $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
         $this->areas = ThemeDefinition::load($this->rootPath, $this->theme)->widgetAreas();
     }
 
@@ -206,8 +206,8 @@ final class Widget
             }
 
             $items[] = [
-                'area' => $this->schemaConstraintValidator->truncate('widgets', 'area', $area, 100),
-                'widget' => $this->schemaConstraintValidator->truncate('widgets', 'widget', $widget, 100),
+                'area' => $this->schemaRules->truncate('widgets', 'area', $area, 100),
+                'widget' => $this->schemaRules->truncate('widgets', 'widget', $widget, 100),
                 'active' => (int)($active[$index] ?? 1) === 1 ? 1 : 0,
                 'data' => $this->normalizeData($definitions[$widget], is_array($data[$index] ?? null) ? $data[$index] : []),
             ];

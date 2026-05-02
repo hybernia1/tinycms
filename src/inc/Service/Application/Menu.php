@@ -4,19 +4,19 @@ declare(strict_types=1);
 namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 
 final class Menu
 {
     private \PDO $pdo;
-    private SchemaConstraintValidator $schemaConstraintValidator;
+    private SchemaRules $schemaRules;
 
     public function __construct()
     {
         $this->pdo = Connection::get();
-        $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
     }
 
     public function items(): array
@@ -89,8 +89,8 @@ final class Menu
         $errors = [];
 
         for ($index = 0; $index < $total; $index++) {
-            $label = $this->schemaConstraintValidator->truncate('menu', 'label', $this->plainText((string)($labels[$index] ?? '')), 255);
-            $url = $this->schemaConstraintValidator->truncate('menu', 'url', trim((string)($urls[$index] ?? '')), 500);
+            $label = $this->schemaRules->truncate('menu', 'label', $this->plainText((string)($labels[$index] ?? '')), 255);
+            $url = $this->schemaRules->truncate('menu', 'url', trim((string)($urls[$index] ?? '')), 500);
             $icon = $this->normalizeIcon((string)($icons[$index] ?? ''), $availableIcons);
             $target = trim((string)($targets[$index] ?? '_self')) === '_blank' ? '_blank' : '_self';
 
@@ -127,7 +127,7 @@ final class Menu
     {
         $raw = trim($value);
         $icon = preg_replace('/[^a-z0-9_-]/i', '', str_starts_with($raw, 'icon-') ? substr($raw, 5) : $raw) ?? '';
-        return isset($availableIcons[$icon]) ? $this->schemaConstraintValidator->truncate('menu', 'icon', $icon, 100) : '';
+        return isset($availableIcons[$icon]) ? $this->schemaRules->truncate('menu', 'icon', $icon, 100) : '';
     }
 
     private function mapItem(array $row): array
