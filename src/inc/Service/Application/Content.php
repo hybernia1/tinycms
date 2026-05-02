@@ -85,6 +85,96 @@ final class Content
         return $rows[0] ?? null;
     }
 
+    public static function publicWhere(string $alias = ''): string
+    {
+        $prefix = trim($alias);
+        $prefix = $prefix !== '' ? $prefix . '.' : '';
+
+        return $prefix . 'status = :status AND ' . $prefix . 'created <= :now';
+    }
+
+    public static function publicParams(?string $now = null): array
+    {
+        return [
+            'status' => self::STATUS_PUBLISHED,
+            'now' => $now ?? date('Y-m-d H:i:s'),
+        ];
+    }
+
+    public function findPublishedSummary(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+
+        $contentTable = Table::name('content');
+        $stmt = $this->pdo->prepare(
+            "SELECT c.id, c.name FROM $contentTable c WHERE c.id = :id AND " . self::publicWhere('c') . " LIMIT 1"
+        );
+        $stmt->execute(array_merge(['id' => $id], self::publicParams()));
+        $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+
+        return is_array($item) ? $item : null;
+    }
+
+    public function publishedLabel(int $id): string
+    {
+        $item = $this->findPublishedSummary($id);
+        if ($item === null) {
+            return '';
+        }
+
+        $name = trim((string)($item['name'] ?? ''));
+        return $name !== '' ? $name : sprintf('#%d', $id);
+    }
+
+    public function paginatePublic(int $page = 1, int $perPage = 10, string $search = ''): array
+    {
+        $contentTable = Table::name('content');
+        $usersTable = Table::name('users');
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $search = trim($search);
+        $params = self::publicParams();
+        $conditions = [self::publicWhere('c')];
+
+        if ($search !== '') {
+            $conditions[] = '(c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)';
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $where = 'WHERE ' . implode(' AND ', $conditions);
+        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable c $where");
+        $countStmt->execute($params);
+        $total = (int)($countStmt->fetchColumn() ?: 0);
+        $totalPages = max(1, (int)ceil($total / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
+
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT c.id, c.name, c.status, c.type, c.author, u.name AS author_name, c.created, c.updated',
+            "FROM $contentTable c",
+            "LEFT JOIN $usersTable u ON u.id = c.author",
+            $where,
+            'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
+            'LIMIT :limit OFFSET :offset',
+        ]));
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value);
+        }
+        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
+            'total' => $total,
+            'total_pages' => $totalPages,
+            'page' => $page,
+            'per_page' => $perPage,
+        ];
+    }
+
     private function delete(int $id): bool
     {
         return $this->query->delete('content', ['id' => $id]) > 0;

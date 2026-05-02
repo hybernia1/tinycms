@@ -398,12 +398,10 @@ final class Comment
         }
 
         $contentTable = Table::name('content');
-        $stmt = $this->pdo->prepare("SELECT id FROM $contentTable WHERE id = :id AND status = :status AND created <= :now AND comments_enabled = 1 LIMIT 1");
-        $stmt->execute([
-            'id' => $contentId,
-            'status' => Content::STATUS_PUBLISHED,
-            'now' => date('Y-m-d H:i:s'),
-        ]);
+        $stmt = $this->pdo->prepare(
+            "SELECT id FROM $contentTable WHERE id = :id AND " . Content::publicWhere() . " AND comments_enabled = 1 LIMIT 1"
+        );
+        $stmt->execute(array_merge(['id' => $contentId], Content::publicParams()));
 
         return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
     }

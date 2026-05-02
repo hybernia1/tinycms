@@ -5,10 +5,9 @@ namespace App\Service\Front;
 
 use App\Service\Application\Menu;
 use App\Service\Application\Comment;
+use App\Service\Application\Content;
 use App\Service\Application\Widget;
 use App\Service\Auth\Auth;
-use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\Date;
 use App\Service\Support\Csrf;
@@ -32,6 +31,7 @@ final class Theme
         private array $settings,
         string $theme,
         private Menu $menu,
+        private Content $content,
         private Widget $widgets,
         private Comment $comments,
         private Auth $auth,
@@ -835,10 +835,7 @@ final class Theme
             return $this->contentPathCache[$id];
         }
 
-        $contentTable = Table::name('content');
-        $stmt = Connection::get()->prepare("SELECT id, name FROM $contentTable WHERE id = :id AND status = :status AND created <= :now LIMIT 1");
-        $stmt->execute(['id' => $id, 'status' => 'published', 'now' => date('Y-m-d H:i:s')]);
-        $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        $item = $this->content->findPublishedSummary($id);
         $this->contentPathCache[$id] = is_array($item) ? $this->slugger->slug((string)($item['name'] ?? ''), $id) : null;
 
         return $this->contentPathCache[$id];

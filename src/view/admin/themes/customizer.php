@@ -3,41 +3,23 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$themes = is_array($themes ?? null) ? $themes : [];
-$activeTheme = (string)($activeTheme ?? 'default');
-$values = is_array($values ?? null) ? $values : [];
-$fields = is_array($fields ?? null) ? $fields : [];
-$customizerSections = is_array($customizerSections ?? null) ? $customizerSections : [];
-$menuItems = is_array($menuItems ?? null) ? $menuItems : [];
-$menuIcons = is_array($menuIcons ?? null) ? $menuIcons : [];
-$widgetItems = is_array($widgetItems ?? null) ? $widgetItems : [];
-$widgetAreas = is_array($widgetAreas ?? null) ? $widgetAreas : [];
-$widgetAreaLabels = is_array($widgetAreaLabels ?? null) ? $widgetAreaLabels : [];
-$activeManifest = is_array($themes[$activeTheme] ?? null) ? $themes[$activeTheme] : [];
-$previewUrl = trim((string)($previewUrl ?? ''));
+$activeTheme = (string)$activeTheme;
+$activeThemeName = (string)$activeThemeName;
+$previewUrl = trim((string)$previewUrl);
 $previewBase = $previewUrl !== '' ? $previewUrl : $absoluteUrl('');
 
-$translateThemeLabel = static function (string $value, string $fallback): string {
-    $value = trim($value);
-    return str_contains($value, '.') ? t($value, $fallback) : $value;
-};
-
 $fieldLabel = static function (string $key, array $field): string {
-    $label = trim((string)($field['label'] ?? ''));
-    return $label !== '' ? (str_contains($label, '.') ? t($label, $key) : $label) : $key;
+    $label = trim((string)$field['label']);
+    return $label !== '' ? $label : $key;
 };
 
-$renderOptionLabel = static function (string $value, string $label) use ($translateThemeLabel): string {
-    return $translateThemeLabel($label, $value);
+$sectionLabel = static function (string $key, array $section): string {
+    $label = trim((string)$section['label']);
+    return $label !== '' ? $label : $key;
 };
 
-$sectionLabel = static function (string $key, array $section) use ($translateThemeLabel): string {
-    $label = trim((string)($section['label'] ?? ''));
-    return $label !== '' ? $translateThemeLabel($label, $key) : $key;
-};
-
-$renderField = static function (string $fieldKey, array $field, string $fieldValue) use ($url, $imageUploadAccept, $imageUploadTypesLabel, $fieldLabel, $renderOptionLabel): void {
-    $fieldType = (string)($field['type'] ?? 'text');
+$renderField = static function (string $fieldKey, array $field, string $fieldValue) use ($url, $imageUploadAccept, $imageUploadTypesLabel, $fieldLabel): void {
+    $fieldType = (string)$field['type'];
     $label = $fieldLabel($fieldKey, $field);
     ?>
     <div class="customizer-field customizer-field-<?= esc_attr($fieldType) ?>">
@@ -53,10 +35,10 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
                 <textarea name="theme[<?= esc_attr($fieldKey) ?>]" rows="<?= $fieldKey === 'custom_css' ? 10 : 4 ?>"><?= esc_html($fieldValue) ?></textarea>
             <?php elseif ($fieldType === 'select'): ?>
                 <select name="theme[<?= esc_attr($fieldKey) ?>]">
-                    <?php foreach ((array)($field['options'] ?? []) as $optionValue => $optionLabel): ?>
+                    <?php foreach ($field['options'] as $optionValue => $optionLabel): ?>
                     <?php $value = trim((string)$optionValue); ?>
                     <option value="<?= esc_attr($value) ?>"<?= $fieldValue === $value ? ' selected' : '' ?>>
-                        <?= esc_html($renderOptionLabel($value, (string)$optionLabel)) ?>
+                        <?= esc_html((string)$optionLabel) ?>
                     </option>
                     <?php endforeach; ?>
                 </select>
@@ -75,8 +57,8 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
                     data-media-library-per-page="<?= defined('APP_POSTS_PER_PAGE') ? (int)APP_POSTS_PER_PAGE : 10 ?>"
                     data-media-upload-endpoint="<?= esc_attr($url('admin/api/v1/media/add')) ?>"
                     data-media-upload-name="file"
-                    data-media-upload-accept="<?= esc_attr((string)($imageUploadAccept ?? '')) ?>"
-                    data-media-upload-types-label="<?= esc_attr((string)($imageUploadTypesLabel ?? '')) ?>"
+                    data-media-upload-accept="<?= esc_attr((string)$imageUploadAccept) ?>"
+                    data-media-upload-types-label="<?= esc_attr((string)$imageUploadTypesLabel) ?>"
                     data-media-library-allow-delete="0"
                     data-media-library-allow-rename="0"
                 >
@@ -90,18 +72,19 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
                 </button>
             <?php elseif ($fieldType === 'content_picker'): ?>
                 <?php
-                    $loopLabel = (string)($field['empty_label'] ?? t('settings.options.front_home_content.none'));
-                    $selectedLabel = (string)($field['selected_label'] ?? '');
+                    $loopLabel = (string)$field['empty_label'];
+                    $placeholder = (string)$field['placeholder'];
+                    $selectedLabel = (string)$field['selected_label'];
                 ?>
                 <div
                     class="tag-picker"
                     data-picker
                     data-picker-mode="single"
                     data-search-endpoint="<?= esc_attr($url('admin/api/v1/content')) ?>"
-                    data-search-status="published"
+                    data-search-public="1"
                     data-empty-label="<?= esc_attr($loopLabel) ?>"
                     data-no-results-label="<?= esc_attr(t('common.no_results')) ?>"
-                    data-search-placeholder="<?= esc_attr(t('settings.options.front_home_content.search_placeholder')) ?>"
+                    data-search-placeholder="<?= esc_attr($placeholder) ?>"
                     data-selected-label="<?= esc_attr($selectedLabel) ?>"
                 >
                     <input type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>" data-picker-value>
@@ -112,7 +95,7 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
                             class="tag-picker-input"
                             data-picker-input
                             autocomplete="off"
-                            placeholder="<?= esc_attr(t('settings.options.front_home_content.search_placeholder')) ?>"
+                            placeholder="<?= esc_attr($placeholder) ?>"
                         >
                     </div>
                     <div class="tag-picker-suggestions" data-picker-suggestions></div>
@@ -122,8 +105,8 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
                     type="number"
                     name="theme[<?= esc_attr($fieldKey) ?>]"
                     value="<?= esc_attr($fieldValue) ?>"
-                    min="<?= esc_attr((string)($field['min'] ?? 0)) ?>"
-                    max="<?= esc_attr((string)($field['max'] ?? 1000)) ?>"
+                    min="<?= esc_attr((string)$field['min']) ?>"
+                    max="<?= esc_attr((string)$field['max']) ?>"
                     step="1"
                 >
             <?php elseif ($fieldType === 'color'): ?>
@@ -135,39 +118,6 @@ $renderField = static function (string $fieldKey, array $field, string $fieldVal
     </div>
     <?php
 };
-
-$sections = [];
-$assignedFields = [];
-foreach ($customizerSections as $sectionKey => $section) {
-    if (!is_array($section)) {
-        continue;
-    }
-
-    $sectionFields = [];
-    foreach ((array)($section['fields'] ?? []) as $fieldKey) {
-        $fieldKey = (string)$fieldKey;
-        if ($fieldKey !== '' && isset($fields[$fieldKey])) {
-            $sectionFields[] = $fieldKey;
-            $assignedFields[$fieldKey] = true;
-        }
-    }
-
-    $sectionFields = array_values(array_unique($sectionFields));
-    if ($sectionFields !== []) {
-        $sectionKey = (string)$sectionKey;
-        $sections[$sectionKey] = [
-            'label' => $sectionLabel($sectionKey, $section),
-            'fields' => $sectionFields,
-        ];
-    }
-}
-$extraFields = array_values(array_diff(array_keys($fields), array_keys($assignedFields)));
-if ($extraFields !== []) {
-    $sections['other'] = [
-        'label' => 'Other settings',
-        'fields' => $extraFields,
-    ];
-}
 ?>
 <div class="theme-customizer" data-customizer-root>
     <aside class="customizer-panel">
@@ -175,7 +125,7 @@ if ($extraFields !== []) {
             <div>
                 <a class="customizer-back" href="<?= esc_url($url('admin/themes')) ?>"><?= icon('prev') ?><span><?= esc_html(t('themes.back_to_themes')) ?></span></a>
                 <h1><?= esc_html(t('themes.customizer')) ?></h1>
-                <p><?= esc_html((string)($activeManifest['name'] ?? $activeTheme)) ?></p>
+                <p><?= esc_html($activeThemeName) ?></p>
             </div>
             <button class="btn btn-primary btn-icon customizer-save" type="button" data-customizer-save aria-label="<?= esc_attr(t('common.save')) ?>" title="<?= esc_attr(t('common.save')) ?>">
                 <?= icon('save') ?>
@@ -195,14 +145,13 @@ if ($extraFields !== []) {
                 data-customizer-url="<?= esc_attr($url('customizer')) ?>"
             >
                 <?= $csrfField() ?>
-                <input type="hidden" name="theme_no_redirect" value="1">
                 <input type="hidden" name="theme[front_theme]" value="<?= esc_attr($activeTheme) ?>">
 
                 <section class="customizer-screen is-active" data-customizer-screen="main">
                     <div class="customizer-nav-list">
-                        <?php foreach ($sections as $sectionKey => $customizerSection): ?>
+                        <?php foreach ($customizerSections as $sectionKey => $customizerSection): ?>
                             <button class="customizer-nav-item" type="button" data-customizer-open="<?= esc_attr('theme-' . $sectionKey) ?>">
-                                <span><?= esc_html((string)$customizerSection['label']) ?></span>
+                                <span><?= esc_html($sectionLabel((string)$sectionKey, $customizerSection)) ?></span>
                                 <?= icon('next') ?>
                             </button>
                         <?php endforeach; ?>
@@ -217,16 +166,16 @@ if ($extraFields !== []) {
                     </div>
                 </section>
 
-                <?php foreach ($sections as $sectionKey => $customizerSection): ?>
+                <?php foreach ($customizerSections as $sectionKey => $customizerSection): ?>
                     <section class="customizer-screen" data-customizer-screen="<?= esc_attr('theme-' . $sectionKey) ?>">
                         <div class="customizer-subhead">
                             <button class="customizer-subhead-back" type="button" data-customizer-back="main" aria-label="<?= esc_attr(t('common.back')) ?>" title="<?= esc_attr(t('common.back')) ?>"><?= icon('prev') ?></button>
-                            <h2><?= esc_html((string)$customizerSection['label']) ?></h2>
+                            <h2><?= esc_html($sectionLabel((string)$sectionKey, $customizerSection)) ?></h2>
                         </div>
                         <div class="customizer-section-fields">
-                            <?php foreach ((array)$customizerSection['fields'] as $fieldKey): ?>
-                                <?php $field = (array)$fields[$fieldKey]; ?>
-                                <?php $renderField((string)$fieldKey, $field, (string)($values[$fieldKey] ?? ($field['default'] ?? ''))); ?>
+                            <?php foreach ($customizerSection['fields'] as $fieldKey): ?>
+                                <?php $field = $fields[$fieldKey]; ?>
+                                <?php $renderField((string)$fieldKey, $field, (string)($values[$fieldKey] ?? $field['default'])); ?>
                             <?php endforeach; ?>
                         </div>
                     </section>

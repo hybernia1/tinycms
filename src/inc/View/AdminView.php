@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Service\Application\Settings;
+use App\Service\Application\Content;
 use App\Service\Application\Upload;
 use App\Service\Support\I18n;
 
@@ -11,11 +12,13 @@ final class AdminView
 {
     private View $view;
     private Settings $settings;
+    private Content $content;
 
-    public function __construct(View $view, Settings $settings, private array $themeOptions = [])
+    public function __construct(View $view, Settings $settings, Content $content, private array $themeOptions = [])
     {
         $this->view = $view;
         $this->settings = $settings;
+        $this->content = $content;
     }
 
     public function adminDashboard(?array $user): void
@@ -177,8 +180,8 @@ final class AdminView
     }
 
     public function adminThemeCustomizer(
-        array $themes,
         string $activeTheme,
+        string $activeThemeName,
         array $values,
         array $fields,
         array $customizerSections,
@@ -191,14 +194,12 @@ final class AdminView
         string $previewUrl = ''
     ): void
     {
-        if (isset($fields['front_home_content'])) {
-            $fields['front_home_content']['selected_label'] = $this->settings->publishedContentLabel((int)($values['front_home_content'] ?? 0));
-        }
+        $fields = $this->withContentPickerLabels($fields, $values);
 
         $this->view->render('admin/customizer-layout', 'admin/themes/customizer', array_merge(
             [
-                'themes' => $themes,
                 'activeTheme' => $activeTheme,
+                'activeThemeName' => $activeThemeName,
                 'values' => $values,
                 'fields' => $fields,
                 'customizerSections' => $customizerSections,
@@ -259,6 +260,17 @@ final class AdminView
     private function submitHeaderAction(string $formSelector): array
     {
         return ['type' => 'submit', 'form' => $formSelector, 'label' => I18n::t('common.save')];
+    }
+
+    private function withContentPickerLabels(array $fields, array $values): array
+    {
+        foreach ($fields as $key => $field) {
+            if ((string)($field['type'] ?? '') === 'content_picker') {
+                $fields[$key]['selected_label'] = $this->content->publishedLabel((int)($values[$key] ?? 0));
+            }
+        }
+
+        return $fields;
     }
 
     private function linkHeaderAction(string $href, string $label): array

@@ -55,13 +55,7 @@ final class Settings
             'meta_description' => ['label_key' => 'settings.fields.meta_description', 'section' => 'general', 'type' => 'textarea', 'default' => ''],
             'website_url' => ['label_key' => 'settings.fields.website_url', 'section' => 'general', 'type' => 'text', 'default' => ''],
             'website_email' => ['label_key' => 'settings.fields.website_email', 'section' => 'general', 'type' => 'text', 'default' => ''],
-            'front_home_content' => [
-                'label_key' => 'settings.fields.front_home_content',
-                'section' => 'content',
-                'type' => 'content_picker',
-                'default' => '',
-                'empty_label' => I18n::t('settings.options.front_home_content.none'),
-            ],
+            'favicon' => ['label_key' => 'settings.fields.favicon', 'section' => 'general', 'type' => 'file', 'default' => ''],
             'front_posts_per_page' => [
                 'label_key' => 'settings.fields.front_posts_per_page',
                 'section' => 'content',
@@ -105,21 +99,6 @@ final class Settings
                 ],
             ],
         ];
-    }
-
-    public function publishedContentLabel(int $id): string
-    {
-        if ($id <= 0) {
-            return '';
-        }
-
-        $rows = $this->query->select('content', ['id', 'name'], ['id' => $id, 'status' => 'published']);
-        if ($rows === []) {
-            return '';
-        }
-
-        $name = trim((string)($rows[0]['name'] ?? ''));
-        return $name !== '' ? $name : sprintf('#%d', $id);
     }
 
     public function values(): array
@@ -167,9 +146,6 @@ final class Settings
                     $result[$key] = (string)($field['default'] ?? '');
                 }
             }
-            if ($type === 'content_picker') {
-                $result[$key] = $this->normalizePublishedContentId((string)($result[$key] ?? ''));
-            }
             if ($type === 'number') {
                 $result[$key] = $this->normalizeNumber((string)($result[$key] ?? ''), $field);
             }
@@ -196,9 +172,6 @@ final class Settings
             }
             if ($type === 'number') {
                 $value = $this->normalizeNumber($value, $fields[$key]);
-            }
-            if ($key === 'front_home_content') {
-                $value = $this->normalizePublishedContentId($value);
             }
             if ($key === 'website_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 $value = '';
@@ -264,21 +237,6 @@ final class Settings
         $numeric = (int)$value;
 
         return (string)max($min, min($max, $numeric > 0 ? $numeric : $min));
-    }
-
-    private function normalizePublishedContentId(string $value): string
-    {
-        $id = (int)$value;
-        if ($id <= 0) {
-            return '';
-        }
-
-        $rows = $this->query->select('content', ['id'], ['id' => $id, 'status' => 'published']);
-        if ($rows === []) {
-            return '';
-        }
-
-        return (string)$id;
     }
 
 }

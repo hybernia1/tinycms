@@ -44,9 +44,12 @@ final class Theme extends Admin
             return;
         }
 
+        $themes = $this->themes->themes();
+        $activeTheme = $this->themes->active();
+
         $this->pages->adminThemeCustomizer(
-            $this->themes->themes(),
-            $this->themes->active(),
+            $activeTheme,
+            (string)($themes[$activeTheme]['name'] ?? $activeTheme),
             $this->themes->resolved(),
             $this->themes->fields(),
             $this->themes->customizerSections(),

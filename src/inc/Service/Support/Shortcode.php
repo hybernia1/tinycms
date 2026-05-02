@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace App\Service\Support;
 
 use App\Service\Auth\Auth;
-use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\Table;
+use App\Service\Application\Content;
 use App\Service\Infrastructure\Router\Router;
 
 final class Shortcode
 {
     private static ?Router $router = null;
     private static ?Auth $auth = null;
+    private static ?Content $content = null;
     private static array $settings = [];
     private static array $contentCache = [];
 
@@ -19,6 +19,7 @@ final class Shortcode
     {
         self::$router = $router;
         self::$auth = $auth;
+        self::$content = null;
         self::$settings = $settings;
         self::$contentCache = [];
     }
@@ -164,10 +165,8 @@ final class Shortcode
             return self::$contentCache[$id] = null;
         }
 
-        $contentTable = Table::name('content');
-        $stmt = Connection::get()->prepare("SELECT id, name FROM $contentTable WHERE id = :id AND status = :status AND created <= :now LIMIT 1");
-        $stmt->execute(['id' => $id, 'status' => 'published', 'now' => date('Y-m-d H:i:s')]);
-        $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        $content = self::$content ??= new Content();
+        $item = $content->findPublishedSummary($id);
 
         return self::$contentCache[$id] = is_array($item) ? $item : null;
     }

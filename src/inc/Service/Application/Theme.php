@@ -12,12 +12,14 @@ final class Theme
 
     private SchemaConstraintValidator $schemaConstraintValidator;
     private Settings $settings;
+    private Content $content;
     private ?array $themes = null;
 
     public function __construct(private string $rootPath)
     {
         $this->rootPath = rtrim($rootPath, '/\\');
         $this->settings = new Settings();
+        $this->content = new Content();
         $this->schemaConstraintValidator = new SchemaConstraintValidator();
     }
 
@@ -69,8 +71,8 @@ final class Theme
         $fields = $this->fields($active);
 
         foreach ($fields as $key => $field) {
-            $rawValue = array_key_exists($key, $values) ? (string)$values[$key] : $this->defaultValue($field);
-            $resolved[$key] = $this->normalizeValue($key, $rawValue, $field);
+            $rawValue = array_key_exists($key, $values) ? (string)$values[$key] : (string)($field['default'] ?? '');
+            $resolved[$key] = $this->normalizeValue($rawValue, $field);
         }
 
         return $resolved;
@@ -87,18 +89,7 @@ final class Theme
     {
         $theme = $this->slug($theme ?? $this->active());
         $manifest = $this->themes()[$theme] ?? $this->themes()[$this->active()] ?? [];
-        $sections = is_array($manifest['customizer_sections'] ?? null) ? $manifest['customizer_sections'] : [];
-        if ($sections !== []) {
-            return $sections;
-        }
-
-        $fields = array_keys($this->fields($theme));
-        return $fields === [] ? [] : [
-            'settings' => [
-                'label' => I18n::t('themes.sections.settings'),
-                'fields' => $fields,
-            ],
-        ];
+        return is_array($manifest['customizer_sections'] ?? null) ? $manifest['customizer_sections'] : [];
     }
 
     public function save(array $input): array
@@ -122,7 +113,7 @@ final class Theme
                 continue;
             }
             $hasThemeInput = true;
-            $payload[$key] = $this->normalizeValue($key, (string)$input[$key], $field);
+            $payload[$key] = $this->normalizeValue((string)$input[$key], $field);
         }
 
         $values = ['front_theme' => $selected];
@@ -152,25 +143,15 @@ final class Theme
                 continue;
             }
 
-            $themeOptionValues[$key] = $this->normalizeValue($key, (string)$input[$key], $field);
+            $themeOptionValues[$key] = $this->normalizeValue((string)$input[$key], $field);
         }
 
         foreach ($fields as $key => $field) {
-            $rawValue = array_key_exists($key, $themeOptionValues) ? (string)$themeOptionValues[$key] : $this->defaultValue($field);
-            $payload[$key] = $this->normalizeValue($key, $rawValue, $field);
+            $rawValue = array_key_exists($key, $themeOptionValues) ? (string)$themeOptionValues[$key] : (string)($field['default'] ?? '');
+            $payload[$key] = $this->normalizeValue($rawValue, $field);
         }
 
         return $payload;
-    }
-
-    private function defaultValue(array $field): string
-    {
-        $settingKey = trim((string)($field['default_setting'] ?? ''));
-        if ($settingKey !== '') {
-            return (string)($this->settings->resolved()[$settingKey] ?? ($field['default'] ?? ''));
-        }
-
-        return (string)($field['default'] ?? '');
     }
 
     private function manifest(string $slug): array
@@ -223,7 +204,7 @@ final class Theme
 
             $type = (string)($field['type'] ?? 'text');
             if (!in_array($type, $allowedTypes, true)) {
-                $type = 'text';
+                continue;
             }
 
             $result[$name] = [
@@ -234,7 +215,7 @@ final class Theme
                 'min' => (int)($field['min'] ?? 0),
                 'max' => (int)($field['max'] ?? 1000),
                 'empty_label' => trim((string)($field['empty_label'] ?? '')),
-                'default_setting' => $this->fieldName((string)($field['default_setting'] ?? '')),
+                'placeholder' => trim((string)($field['placeholder'] ?? '')),
             ];
         }
 
@@ -267,7 +248,7 @@ final class Theme
         return array_values(array_unique($result));
     }
 
-    private function normalizeValue(string $key, string $value, array $field): string
+    private function normalizeValue(string $value, array $field): string
     {
         $type = (string)($field['type'] ?? 'text');
         $default = (string)($field['default'] ?? '');
@@ -317,7 +298,7 @@ final class Theme
     private function normalizePublishedContentId(string $value): string
     {
         $id = (int)$value;
-        return $id > 0 && $this->settings->publishedContentLabel($id) !== '' ? (string)$id : '';
+        return $this->content->findPublishedSummary($id) !== null ? (string)$id : '';
     }
 
     private function themeOptionValues(string $theme, ?array $themeOptions = null): array

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller\Front;
 
 use App\Service\Auth\Auth;
+use App\Service\Application\Content as ContentService;
 use App\Service\Application\Settings;
 use App\Service\Application\Term;
 use App\Service\Application\User;
@@ -306,10 +307,10 @@ final class Front
                 "FROM $contentTable c",
                 "LEFT JOIN $usersTable u ON u.id = c.author",
                 "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-                'WHERE c.id = :id AND c.status = :status AND c.created <= :now',
+                'WHERE c.id = :id AND ' . ContentService::publicWhere('c'),
                 'LIMIT 1',
             ]));
-            $stmt->execute(['id' => $id, 'status' => 'published', 'now' => $this->now()]);
+            $stmt->execute(array_merge(['id' => $id], ContentService::publicParams($this->now())));
         } else {
             $stmt = $this->pdo->prepare(implode("\n", [
                 'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
@@ -389,8 +390,8 @@ final class Front
         $mediaTable = Table::name('media');
         $page = max(1, $page);
         $perPage = max(1, $perPage);
-        $params = array_merge(['status' => 'published', 'now' => $this->now()], $params);
-        $where = 'WHERE ' . implode(' AND ', array_merge(['c.status = :status', 'c.created <= :now'], $conditions));
+        $params = array_merge(ContentService::publicParams($this->now()), $params);
+        $where = 'WHERE ' . implode(' AND ', array_merge([ContentService::publicWhere('c')], $conditions));
 
         $countStmt = $this->pdo->prepare(implode("\n", array_merge([
             'SELECT COUNT(*)',
@@ -462,8 +463,8 @@ final class Front
     private function sitemapContentChunkCount(): int
     {
         $contentTable = Table::name('content');
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable c WHERE c.status = :status AND c.created <= :now");
-        $stmt->execute(['status' => 'published', 'now' => $this->now()]);
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable c WHERE " . ContentService::publicWhere('c'));
+        $stmt->execute(ContentService::publicParams($this->now()));
         return max(1, (int)ceil(((int)($stmt->fetchColumn() ?: 0)) / self::SITEMAP_CHUNK_SIZE));
     }
 
@@ -477,9 +478,9 @@ final class Front
             "FROM $termsTable t",
             "INNER JOIN $contentTermsTable ct ON ct.term = t.id",
             "INNER JOIN $contentTable c ON c.id = ct.content",
-            'WHERE c.status = :status AND c.created <= :now',
+            'WHERE ' . ContentService::publicWhere('c'),
         ]));
-        $stmt->execute(['status' => 'published', 'now' => $this->now()]);
+        $stmt->execute(ContentService::publicParams($this->now()));
         return max(1, (int)ceil(((int)($stmt->fetchColumn() ?: 0)) / self::SITEMAP_CHUNK_SIZE));
     }
 
@@ -489,12 +490,13 @@ final class Front
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.name, c.created, c.updated',
             "FROM $contentTable c",
-            'WHERE c.status = :status AND c.created <= :now',
+            'WHERE ' . ContentService::publicWhere('c'),
             'ORDER BY c.id ASC',
             'LIMIT :limit OFFSET :offset',
         ]));
-        $stmt->bindValue(':status', 'published');
-        $stmt->bindValue(':now', $this->now());
+        $publicParams = ContentService::publicParams($this->now());
+        $stmt->bindValue(':status', $publicParams['status']);
+        $stmt->bindValue(':now', $publicParams['now']);
         $stmt->bindValue(':limit', self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', ($chunk - 1) * self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
         $stmt->execute();
@@ -511,13 +513,14 @@ final class Front
             "FROM $termsTable t",
             "INNER JOIN $contentTermsTable ct ON ct.term = t.id",
             "INNER JOIN $contentTable c ON c.id = ct.content",
-            'WHERE c.status = :status AND c.created <= :now',
+            'WHERE ' . ContentService::publicWhere('c'),
             'GROUP BY t.id, t.name',
             'ORDER BY t.id ASC',
             'LIMIT :limit OFFSET :offset',
         ]));
-        $stmt->bindValue(':status', 'published');
-        $stmt->bindValue(':now', $this->now());
+        $publicParams = ContentService::publicParams($this->now());
+        $stmt->bindValue(':status', $publicParams['status']);
+        $stmt->bindValue(':now', $publicParams['now']);
         $stmt->bindValue(':limit', self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', ($chunk - 1) * self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
         $stmt->execute();

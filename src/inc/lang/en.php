@@ -232,9 +232,6 @@ return [
         'open_site' => 'Open site',
         'back_to_themes' => 'Back to themes',
         'slug' => 'Folder',
-        'sections' => [
-            'settings' => 'Settings',
-        ],
         'feature_labels' => [
             'responsive' => 'Responsive',
             'widgets' => 'Widgets',
@@ -417,7 +414,6 @@ return [
             'sitename' => 'Site name',
             'siteauthor' => 'Site author',
             'meta_description' => 'Meta description',
-            'front_home_content' => 'Home page',
             'front_posts_per_page' => 'Posts per page',
             'media_small_width' => 'Small thumbnail width',
             'media_small_height' => 'Small thumbnail height',
@@ -427,10 +423,6 @@ return [
             'website_email' => 'Website email',
         ],
         'options' => [
-            'front_home_content' => [
-                'none' => '— Latest posts loop —',
-                'search_placeholder' => 'Search content',
-            ],
             'allow_registration' => [
                 'disabled' => 'No',
                 'enabled' => 'Yes',

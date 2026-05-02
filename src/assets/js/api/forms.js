@@ -131,6 +131,16 @@
 
         const redirect = String(normalized.data?.redirect || '').trim();
         const successMessage = String(normalized.message || '').trim();
+        if (form.hasAttribute('data-stay-on-page')) {
+            if (successMessage !== '') {
+                const hasInlineMessage = setFormMessage(form, successMessage, 'success');
+                if (!hasInlineMessage) {
+                    pushFlash('success', successMessage);
+                }
+            }
+            return;
+        }
+
         if (redirect !== '') {
             if (successMessage !== '') {
                 storeFlash('success', successMessage);
@@ -139,16 +149,6 @@
                 ? redirect
                 : '/' + redirect.replace(/^\/+/, '');
             window.location.href = target;
-            return;
-        }
-
-        if (form.hasAttribute('data-stay-on-page')) {
-            if (successMessage !== '') {
-                const hasInlineMessage = setFormMessage(form, successMessage, 'success');
-                if (!hasInlineMessage) {
-                    pushFlash('success', successMessage);
-                }
-            }
             return;
         }
 
