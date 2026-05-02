@@ -89,7 +89,6 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
     <div class="builder-row<?= $unused ? ' builder-row-unused' : '' ?>" data-widget-item data-widget-label="<?= esc_attr($label) ?>">
         <input type="hidden" name="item_widget[<?= esc_attr($index) ?>]" value="<?= esc_attr($widget) ?>">
         <input type="hidden" name="item_area[<?= esc_attr($index) ?>]" value="<?= esc_attr($area) ?>" data-widget-item-area>
-        <input type="hidden" name="item_active[<?= esc_attr($index) ?>]" value="1">
         <div class="builder-summary">
             <button class="btn btn-light btn-icon builder-drag-handle" type="button" draggable="true" data-builder-drag-handle aria-label="<?= esc_attr(t('widgets.move_item')) ?>" title="<?= esc_attr(t('widgets.move_item')) ?>">
                 <?= icon('menu') ?>
@@ -220,6 +219,6 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
 
 <?php foreach ($widgets as $name => $definition): ?>
     <template data-widget-template="<?= esc_attr((string)$name) ?>">
-        <?php $renderRow(['area' => $defaultArea, 'widget' => (string)$name, 'data' => [], 'active' => 1], '__INDEX__'); ?>
+        <?php $renderRow(['area' => $defaultArea, 'widget' => (string)$name, 'data' => []], '__INDEX__'); ?>
     </template>
 <?php endforeach; ?>

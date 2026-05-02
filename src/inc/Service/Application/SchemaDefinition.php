@@ -204,7 +204,6 @@ final class SchemaDefinition
                 area VARCHAR(100) NOT NULL,
                 widget VARCHAR(100) NOT NULL,
                 data LONGTEXT,
-                active TINYINT(1) NOT NULL DEFAULT 1,
                 position INT NOT NULL DEFAULT 0,
                 created DATETIME NOT NULL DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
