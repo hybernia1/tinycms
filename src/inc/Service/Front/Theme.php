@@ -61,19 +61,16 @@ final class Theme
         return $this->setting('sitename', 'TinyCMS');
     }
 
-    public function siteLogo(): string
+    public function brand(): array
     {
-        if (!in_array($this->brandDisplay(), ['both', 'logo'], true)) {
-            return '';
-        }
+        $display = $this->brandDisplay();
+        $logo = in_array($display, ['both', 'logo'], true) ? trim($this->setting('logo')) : '';
+        $title = in_array($display, ['both', 'title'], true) ? $this->siteTitle() : '';
 
-        return $this->setting('logo');
-    }
-
-    public function brandDisplay(): string
-    {
-        $display = $this->setting('brand_display', 'both');
-        return in_array($display, ['both', 'logo', 'title', 'none'], true) ? $display : 'both';
+        return [
+            'logo' => $logo,
+            'title' => $title,
+        ];
     }
 
     public function footerText(): string
@@ -125,11 +122,6 @@ final class Theme
     public function item(): array
     {
         return is_array($this->context['item'] ?? null) ? $this->context['item'] : [];
-    }
-
-    public function setItem(array $item): void
-    {
-        $this->context['item'] = $item;
     }
 
     public function paginationContext(): array
@@ -262,7 +254,7 @@ final class Theme
     {
         $id = (int)($term['id'] ?? 0);
         if ($id <= 0) {
-            return $this->url('term');
+            return '';
         }
 
         return $this->url('term/' . $this->slugger->slug((string)($term['name'] ?? ''), $id));
@@ -348,17 +340,28 @@ final class Theme
         return $this->widgets->renderArea($area, $this->customizerPreview());
     }
 
-    public function widgetsEnabled(): bool
+    public function layoutClass(): string
+    {
+        return 'theme-layout-' . $this->layoutWidth();
+    }
+
+    private function brandDisplay(): string
+    {
+        $display = $this->setting('brand_display', 'both');
+        return in_array($display, ['both', 'logo', 'title', 'none'], true) ? $display : 'both';
+    }
+
+    private function widgetsEnabled(): bool
     {
         return $this->setting('enable_widgets', '1') === '1';
     }
 
-    public function searchEnabled(): bool
+    private function searchEnabled(): bool
     {
         return $this->setting('enable_search', '1') === '1';
     }
 
-    public function layoutWidth(): string
+    private function layoutWidth(): string
     {
         $width = $this->setting('layout_width', 'default');
         return in_array($width, ['narrow', 'default', 'wide', 'full'], true) ? $width : 'default';
@@ -523,50 +526,20 @@ final class Theme
         );
     }
 
-    public function contentAuthor(array $item, string $fallback = ''): string
-    {
-        $author = trim((string)($item['author_name'] ?? ''));
-        if ($author !== '') {
-            return $author;
-        }
-
-        return trim($fallback);
-    }
-
-    public function contentDate(array $item, string $fallback = ''): string
+    public function contentDate(array $item): string
     {
         $raw = trim((string)($item['created'] ?? ''));
         if ($raw === '') {
-            return trim($fallback);
+            return '';
         }
 
         $timestamp = $this->timestamp($raw);
         if ($timestamp === null) {
-            return trim($fallback);
+            return '';
         }
 
         $format = Date::normalizeDateTimeFormat($this->setting('app_datetime_format', APP_DATETIME_FORMAT));
         return date($format, $timestamp);
-    }
-
-    public function termLinks(array $item, string $class = 'term-list'): string
-    {
-        $terms = $this->contentTerms($item);
-        if ($terms === []) {
-            return '';
-        }
-
-        $items = [];
-        foreach ($terms as $term) {
-            $name = trim((string)($term['name'] ?? ''));
-            if ($name === '') {
-                continue;
-            }
-
-            $items[] = '<li><a href="' . esc_url($this->termUrl($term)) . '">' . esc_html($name) . '</a></li>';
-        }
-
-        return $items !== [] ? '<ul class="' . esc_attr($class) . '">' . implode('', $items) . '</ul>' : '';
     }
 
     public function pagination(array $pagination, string $basePath = ''): string
@@ -678,24 +651,16 @@ final class Theme
         return implode(', ', $sources);
     }
 
-    private function contentTerms(array $item): array
-    {
-        return array_values(array_filter((array)($item['terms'] ?? []), static fn(mixed $term): bool => is_array($term)));
-    }
-
     private function commentItem(array $item, array $comment, bool $allowReply, int $threadParentId = 0): string
     {
-        $author = trim((string)($comment['author_name'] ?? ''));
-        if ($author === '') {
-            $author = t('front.comments_no_author', 'No author');
-        }
+        $author = get_author($comment, t('front.comments_no_author', 'No author'));
 
         $commentId = (int)$comment['id'];
         $threadParentId = $threadParentId > 0 ? $threadParentId : $commentId;
         $comment['author_name'] = $author;
         $html = '<li class="comment-item" id="comment-' . $commentId . '">';
         $html .= '<article class="comment-card">';
-        $html .= '<header class="comment-meta"><span class="comment-author">' . get_comment_avatar($comment) . '<strong>' . esc_html($author) . '</strong></span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
+        $html .= '<header class="comment-meta"><span class="comment-author">' . get_avatar($comment, 'comment-avatar', 48) . '<strong>' . esc_html($author) . '</strong></span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
         if ((int)($comment['reply_to'] ?? 0) > 0) {
             $replyAuthor = trim((string)($comment['reply_to_author_name'] ?? ''));
             if ($replyAuthor === '') {

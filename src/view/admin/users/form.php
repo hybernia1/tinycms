@@ -5,7 +5,7 @@ if (!defined('BASE_DIR')) {
 $isAdmin = (string)($user['role'] ?? '') === 'admin'; ?>
 <div class="card p-4">
     <div class="d-flex align-center gap-3 mb-4">
-        <img class="user-form-avatar" src="<?= esc_url(user_avatar_url($user, 96)) ?>" alt="">
+        <?= get_avatar($user, 'user-form-avatar', 96) ?>
         <div>
             <div class="text-muted small"><?= esc_html(t('users.avatar')) ?></div>
             <strong><?= esc_html((string)($user['name'] ?? t('users.user'))) ?></strong>

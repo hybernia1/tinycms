@@ -4,36 +4,26 @@ if (!defined('BASE_DIR')) {
     exit;
 }
 
-$widgetsEnabled = widgets_enabled();
-$searchEnabled = search_enabled();
-$layoutWidth = layout_width();
-$brandDisplay = site_brand_display();
-$brandLogo = in_array($brandDisplay, ['both', 'logo'], true) ? site_logo() : '';
-$brandTitle = in_array($brandDisplay, ['both', 'title'], true);
-$hasBrand = $brandLogo !== '' || $brandTitle;
+$brand = get_site_brand();
+$searchForm = get_search_form();
+$widgetsBefore = get_widget_area('before_content');
+$widgetsLeft = get_widget_area('left');
+$widgetsRight = get_widget_area('right');
+$widgetsAfter = get_widget_area('after_content');
 ?>
 <!doctype html>
 <html lang="<?= esc_attr(site_language()) ?>">
 <head>
     <?= get_head() . PHP_EOL ?>
 </head>
-<body class="theme-layout-<?= esc_attr($layoutWidth) ?>">
+<body class="<?= esc_attr(site_layout_class()) ?>">
     <header class="site-header">
         <div class="container">
-            <?php if ($hasBrand): ?>
-            <a href="<?= esc_url(site_url()) ?>" class="site-title">
-                <?= $brandLogo ?>
-                <?php if ($brandTitle): ?>
-                <span><?= esc_html(site_title()) ?></span>
-                <?php endif; ?>
-            </a>
-            <?php endif; ?>
+            <?= $brand ?>
             <div class="site-desktop-nav">
                 <?= get_menu() ?>
             </div>
-            <?php if ($searchEnabled): ?>
-            <?= get_search_form() ?>
-            <?php endif; ?>
+            <?= $searchForm ?>
             <button class="site-menu-toggle" type="button" aria-label="Menu" aria-expanded="false" data-menu-toggle>
                 <?= icon('menu') ?>
             </button>
@@ -48,14 +38,18 @@ $hasBrand = $brandLogo !== '' || $brandTitle;
     </div>
     <button class="site-nav-backdrop" type="button" aria-label="Close menu" data-menu-close></button>
     <main class="container site-main">
-        <?php if ($widgetsEnabled): ?>
-        <section class="site-widgets site-widgets-before"><?= get_widget_area('before_content') ?></section>
-        <aside class="site-widgets site-widgets-left"><?= get_widget_area('left') ?></aside>
+        <?php if ($widgetsBefore !== ''): ?>
+        <section class="site-widgets site-widgets-before"><?= $widgetsBefore ?></section>
+        <?php endif; ?>
+        <?php if ($widgetsLeft !== ''): ?>
+        <aside class="site-widgets site-widgets-left"><?= $widgetsLeft ?></aside>
         <?php endif; ?>
         <div class="site-content"><?= $content ?></div>
-        <?php if ($widgetsEnabled): ?>
-        <aside class="site-widgets site-widgets-right"><?= get_widget_area('right') ?></aside>
-        <section class="site-widgets site-widgets-after"><?= get_widget_area('after_content') ?></section>
+        <?php if ($widgetsRight !== ''): ?>
+        <aside class="site-widgets site-widgets-right"><?= $widgetsRight ?></aside>
+        <?php endif; ?>
+        <?php if ($widgetsAfter !== ''): ?>
+        <section class="site-widgets site-widgets-after"><?= $widgetsAfter ?></section>
         <?php endif; ?>
     </main>
     <footer class="site-footer">

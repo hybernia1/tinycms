@@ -70,7 +70,7 @@ final class ThemeDefinition
         }
     }
 
-    public function registerSetting(string $key, array $field): void
+    public function registerOption(string $key, array $field): void
     {
         $key = self::fieldName($key);
         if ($key !== '') {

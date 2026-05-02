@@ -20,7 +20,7 @@ $rowRenderer = static function (array $row) use ($url, $csrfField): string {
     <tr>
         <td>
             <span class="d-flex align-center gap-2">
-                <img class="user-list-avatar" src="<?= esc_url(user_avatar_url($row, 40)) ?>" alt="">
+                <?= get_avatar($row, 'user-list-avatar', 40) ?>
                 <a href="<?= esc_url($url('admin/users/edit?id=' . $id)) ?>"><?= esc_html((string)($row['name'] ?? '')) ?></a>
                 <?= icon($statusIcon) ?>
             </span>
