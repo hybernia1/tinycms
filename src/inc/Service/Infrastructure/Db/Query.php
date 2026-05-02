@@ -5,7 +5,6 @@ namespace App\Service\Infrastructure\Db;
 
 use InvalidArgumentException;
 use PDO;
-use PDOException;
 use App\Service\Support\I18n;
 use App\Service\Infrastructure\Db\Table;
 
@@ -51,31 +50,67 @@ class Query
             $orderBy = 'ID';
         }
 
-        [$whereSql, $params] = $this->buildWhere($where);
+        [$conditions, $params] = $this->buildWhereConditions($where);
         [$searchSql, $searchParams] = $this->buildSearch($search, $searchColumns);
         $params = array_merge($params, $searchParams);
-        $conditionsSql = $whereSql;
 
         if ($searchSql !== '') {
-            $conditionsSql .= ($whereSql === '' ? ' WHERE ' : ' AND ') . $searchSql;
+            $conditions[] = $searchSql;
         }
 
-        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM $table$conditionsSql");
-        $countStmt->execute($params);
-        $total = (int)$countStmt->fetchColumn();
+        return $this->paginateQuery([
+            'select' => $cols,
+            'from' => "FROM $table",
+            'where' => $conditions,
+            'params' => $params,
+            'orderBy' => "$orderBy $orderDir",
+        ], [
+            'page' => $page,
+            'perPage' => $perPage,
+        ]);
+    }
+
+    public function paginateQuery(array $query, array $options = []): array
+    {
+        $select = trim((string)($query['select'] ?? '*'));
+        $from = trim((string)($query['from'] ?? ''));
+        $joins = $this->cleanSqlParts((array)($query['joins'] ?? []));
+        $countJoins = $this->cleanSqlParts(array_key_exists('countJoins', $query) ? (array)$query['countJoins'] : $joins);
+        $where = $this->cleanSqlParts((array)($query['where'] ?? []));
+        $params = (array)($query['params'] ?? []);
+        $intParams = array_values(array_map('strval', (array)($query['intParams'] ?? [])));
+        $orderBy = trim((string)($query['orderBy'] ?? ''));
+        $count = trim((string)($query['count'] ?? 'COUNT(*)'));
+        $page = max(1, (int)($options['page'] ?? 1));
+        $perPage = max(1, (int)($options['perPage'] ?? 10));
+
+        if ($select === '' || $from === '' || $orderBy === '' || $count === '') {
+            throw new InvalidArgumentException('Invalid pagination query.');
+        }
+
+        $baseSql = implode("\n", array_merge([$from], $joins));
+        $countBaseSql = implode("\n", array_merge([$from], $countJoins));
+        if ($where !== []) {
+            $baseSql .= "\nWHERE " . implode(' AND ', $where);
+            $countBaseSql .= "\nWHERE " . implode(' AND ', $where);
+        }
+
+        $countStmt = $this->pdo->prepare("SELECT $count\n$countBaseSql");
+        $this->bindValues($countStmt, $params, $intParams);
+        $countStmt->execute();
+        $total = (int)($countStmt->fetchColumn() ?: 0);
 
         $totalPages = max(1, (int)ceil($total / $perPage));
         $page = min($page, $totalPages);
         $offset = ($page - 1) * $perPage;
 
-        $sql = "SELECT $cols FROM $table$conditionsSql ORDER BY $orderBy $orderDir LIMIT :limit OFFSET :offset";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
-
+        $stmt = $this->pdo->prepare(implode("\n", [
+            "SELECT $select",
+            $baseSql,
+            "ORDER BY $orderBy",
+            'LIMIT :limit OFFSET :offset',
+        ]));
+        $this->bindValues($stmt, $params, $intParams);
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -103,12 +138,8 @@ class Query
 
         $sql = "INSERT INTO $table ($columns) VALUES ($placeholders)";
 
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($data);
-        } catch (PDOException $e) {
-            throw $this->translatedDbError($e);
-        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($data);
 
         return (int)$this->pdo->lastInsertId();
     }
@@ -140,13 +171,9 @@ class Query
 
         $sql = "UPDATE $table SET " . implode(', ', $set) . " WHERE " . implode(' AND ', $conditions);
 
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($data);
-            return $stmt->rowCount();
-        } catch (PDOException $e) {
-            throw $this->translatedDbError($e);
-        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($data);
+        return $stmt->rowCount();
     }
 
     public function delete(string $table, array $where): int
@@ -166,30 +193,17 @@ class Query
         return $stmt->rowCount();
     }
 
-    public function deleteIn(string $table, string $column, array $values): int
-    {
-        $table = Table::name($table);
-        $this->assertIdentifier($table, 'table');
-        $this->assertIdentifier($column, 'column');
-        $ids = array_values(array_unique(array_filter(array_map('intval', $values), fn(int $v): bool => $v > 0)));
-
-        if ($ids === []) {
-            return 0;
-        }
-
-        $placeholders = implode(', ', array_fill(0, count($ids), '?'));
-        $sql = "DELETE FROM $table WHERE $column IN ($placeholders)";
-
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($ids);
-
-        return $stmt->rowCount();
-    }
-
     private function buildWhere(array $where): array
     {
+        [$conditions, $params] = $this->buildWhereConditions($where);
+
+        return $conditions === [] ? ['', []] : [' WHERE ' . implode(' AND ', $conditions), $params];
+    }
+
+    private function buildWhereConditions(array $where): array
+    {
         if ($where === []) {
-            return ['', []];
+            return [[], []];
         }
 
         $conditions = [];
@@ -201,7 +215,7 @@ class Query
             $params[$column] = $value;
         }
 
-        return [' WHERE ' . implode(' AND ', $conditions), $params];
+        return [$conditions, $params];
     }
 
     private function buildSearch(string $search, array $columns): array
@@ -243,6 +257,23 @@ class Query
         }
 
         return implode(', ', $filtered);
+    }
+
+    private function cleanSqlParts(array $parts): array
+    {
+        return array_values(array_filter(array_map(
+            static fn(mixed $part): string => trim((string)$part),
+            $parts
+        ), static fn(string $part): bool => $part !== ''));
+    }
+
+    private function bindValues(\PDOStatement $stmt, array $params, array $intParams = []): void
+    {
+        foreach ($params as $key => $value) {
+            $name = ltrim((string)$key, ':');
+            $type = in_array($name, $intParams, true) ? PDO::PARAM_INT : PDO::PARAM_STR;
+            $stmt->bindValue(':' . $name, $value, $type);
+        }
     }
 
     private function filterIdentifiers(array $identifiers): array
@@ -287,27 +318,4 @@ class Query
         return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $value) === 1;
     }
 
-    private function translatedDbError(PDOException $e): InvalidArgumentException
-    {
-        $sqlState = (string)($e->errorInfo[0] ?? "");
-        $driverCode = (int)($e->errorInfo[1] ?? 0);
-
-        if ($sqlState === "22001" || $driverCode === 1406) {
-            return new InvalidArgumentException(I18n::t('errors.db.value_too_long'), 0, $e);
-        }
-
-        if ($driverCode === 1048 || $driverCode === 1364) {
-            return new InvalidArgumentException(I18n::t('errors.db.required_value_missing'), 0, $e);
-        }
-
-        if ($driverCode === 1062) {
-            return new InvalidArgumentException(I18n::t('errors.db.unique_violation'), 0, $e);
-        }
-
-        if ($driverCode === 1452) {
-            return new InvalidArgumentException(I18n::t('errors.db.invalid_foreign_key'), 0, $e);
-        }
-
-        return new InvalidArgumentException(I18n::t('errors.db.operation_failed'), 0, $e);
-    }
 }

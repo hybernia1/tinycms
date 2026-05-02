@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace App\Service\Application;
 
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Support\I18n;
 
 final class Theme
 {
     private const OPTIONS_SETTING_KEY = 'theme_options';
 
-    private SchemaConstraintValidator $schemaConstraintValidator;
+    private SchemaRules $schemaRules;
     private Settings $settings;
     private Content $content;
     private ?array $themes = null;
@@ -20,7 +20,7 @@ final class Theme
         $this->rootPath = rtrim($rootPath, '/\\');
         $this->settings = new Settings();
         $this->content = new Content();
-        $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
     }
 
     public function themes(): array
@@ -277,7 +277,7 @@ final class Theme
         }
 
         $limit = max(1, (int)($field['max'] ?? ($type === 'textarea' ? 10000 : 500)));
-        return $this->schemaConstraintValidator->truncate('settings', 'value', trim($value), $limit);
+        return $this->schemaRules->truncate('settings', 'value', trim($value), $limit);
     }
 
     private function normalizeColor(string $value, string $default): string

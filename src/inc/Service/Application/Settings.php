@@ -5,7 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Support\Date;
 use App\Service\Support\I18n;
 use App\Service\Support\RequestContext;
@@ -13,12 +13,12 @@ use App\Service\Support\RequestContext;
 final class Settings
 {
     private Query $query;
-    private SchemaConstraintValidator $schemaConstraintValidator;
+    private SchemaRules $schemaRules;
 
     public function __construct()
     {
         $this->query = new Query(Connection::get());
-        $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
     }
 
     public function fields(): array
@@ -192,7 +192,7 @@ final class Settings
                 }
             }
             if (in_array($key, ['sitename', 'siteauthor', 'meta_description'], true)) {
-                $value = $this->schemaConstraintValidator->truncate(
+                $value = $this->schemaRules->truncate(
                     'settings',
                     'value',
                     $value,

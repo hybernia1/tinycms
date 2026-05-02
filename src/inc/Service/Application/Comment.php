@@ -5,7 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
@@ -18,13 +18,13 @@ final class Comment
 
     private Query $query;
     private \PDO $pdo;
-    private SchemaConstraintValidator $schemaConstraintValidator;
+    private SchemaRules $schemaRules;
 
     public function __construct()
     {
         $this->pdo = Connection::get();
         $this->query = new Query($this->pdo);
-        $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
     }
 
     public function treeForContent(int $contentId): array
@@ -132,45 +132,24 @@ final class Comment
             $params['search'] = '%' . $search . '%';
         }
 
-        $whereSql = $where !== [] ? 'WHERE ' . implode(' AND ', $where) : '';
-        $countStmt = $this->pdo->prepare(implode("\n", [
-            'SELECT COUNT(*)',
-            "FROM $commentsTable c",
-            "INNER JOIN $contentTable content ON content.id = c.content",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            $whereSql,
-        ]));
-        $countStmt->execute($params);
-        $total = (int)($countStmt->fetchColumn() ?: 0);
-        $totalPages = max(1, (int)ceil($total / $perPage));
-        $page = min($page, $totalPages);
-        $offset = ($page - 1) * $perPage;
-
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.content, c.parent, c.reply_to, c.author, c.status, c.body, c.ip_address, c.created, c.updated,',
-            'content.name AS content_name, u.name AS author_name, u.email AS author_email,',
-            "(SELECT COUNT(*) FROM $commentsTable child WHERE child.parent = c.id) AS replies_count",
-            "FROM $commentsTable c",
-            "INNER JOIN $contentTable content ON content.id = c.content",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            $whereSql,
-            'ORDER BY c.created DESC, c.id DESC',
-            'LIMIT :limit OFFSET :offset',
-        ]));
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return [
-            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [],
-            'total' => $total,
-            'total_pages' => $totalPages,
+        return $this->query->paginateQuery([
+            'select' => implode("\n", [
+                'c.id, c.content, c.parent, c.reply_to, c.author, c.status, c.body, c.ip_address, c.created, c.updated,',
+                'content.name AS content_name, u.name AS author_name, u.email AS author_email,',
+                "(SELECT COUNT(*) FROM $commentsTable child WHERE child.parent = c.id) AS replies_count",
+            ]),
+            'from' => "FROM $commentsTable c",
+            'joins' => [
+                "INNER JOIN $contentTable content ON content.id = c.content",
+                "LEFT JOIN $usersTable u ON u.id = c.author",
+            ],
+            'where' => $where,
+            'params' => $params,
+            'orderBy' => 'c.created DESC, c.id DESC',
+        ], [
             'page' => $page,
-            'per_page' => $perPage,
-        ];
+            'perPage' => $perPage,
+        ]);
     }
 
     public function find(int $id): ?array
@@ -372,7 +351,7 @@ final class Comment
             return ['success' => false, 'errors' => $errors];
         }
 
-        $ipAddress = $this->schemaConstraintValidator->truncate('comments', 'ip_address', trim($ipAddress), 45);
+        $ipAddress = $this->schemaRules->truncate('comments', 'ip_address', trim($ipAddress), 45);
 
         try {
             $newId = $this->query->insert('comments', [

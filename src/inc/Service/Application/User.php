@@ -5,7 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
@@ -13,13 +13,13 @@ use InvalidArgumentException;
 final class User
 {
     private Query $query;
-    private SchemaConstraintValidator $columnLimitValidator;
+    private SchemaRules $schemaRules;
     private Email $email;
 
     public function __construct()
     {
         $this->query = new Query(Connection::get());
-        $this->columnLimitValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
         $this->email = new Email();
     }
 
@@ -103,7 +103,7 @@ final class User
 
     public function save(array $input, ?int $id = null): array
     {
-        $name = $this->columnLimitValidator->truncate(
+        $name = $this->schemaRules->truncate(
             'users',
             'name',
             trim((string)($input['name'] ?? '')),
@@ -127,7 +127,7 @@ final class User
             $errors['password'] = I18n::t('validation.password_required_new_user');
         }
 
-        $lengthErrors = $this->columnLimitValidator->validate('users', [
+        $lengthErrors = $this->schemaRules->validate('users', [
             'name' => $name,
             'email' => $email,
             'role' => $role,

@@ -5,7 +5,7 @@ namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
@@ -13,12 +13,12 @@ use InvalidArgumentException;
 final class Media
 {
     private Query $query;
-    private SchemaConstraintValidator $schemaConstraintValidator;
+    private SchemaRules $schemaRules;
 
     public function __construct()
     {
         $this->query = new Query(Connection::get());
-        $this->schemaConstraintValidator = new SchemaConstraintValidator();
+        $this->schemaRules = new SchemaRules();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $search = '', string $status = 'all'): array
@@ -92,7 +92,7 @@ final class Media
 
     public function save(array $input, ?int $id = null): array
     {
-        $name = $this->schemaConstraintValidator->truncate(
+        $name = $this->schemaRules->truncate(
             'media',
             'name',
             trim((string)($input['name'] ?? '')),
@@ -114,7 +114,7 @@ final class Media
             $errors['author'] = I18n::t('validation.author_invalid');
         }
 
-        $lengthErrors = $this->schemaConstraintValidator->validate('media', [
+        $lengthErrors = $this->schemaRules->validate('media', [
             'name' => $name,
             'path' => $path,
         ], [
@@ -223,58 +223,34 @@ final class Media
     {
         $page = max(1, $page);
         $perPage = max(1, $perPage);
-        $offset = ($page - 1) * $perPage;
 
         $mediaTable = Table::name('media');
         $usersTable = Table::name('users');
         $contentTable = Table::name('content');
         $contentMediaTable = Table::name('content_media');
 
+        $where = [
+            "NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
+            "NOT EXISTS (SELECT 1 FROM $contentMediaTable a WHERE a.media = m.id)",
+        ];
         $params = [];
-        $searchSql = '';
         if ($search !== '') {
-            $searchSql = ' AND (m.name LIKE :search OR m.path LIKE :search)';
+            $where[] = '(m.name LIKE :search OR m.path LIKE :search)';
             $params['search'] = '%' . $search . '%';
         }
 
-        $baseSql = implode("\n", [
-            "FROM $mediaTable m",
-            "WHERE NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
-            "AND NOT EXISTS (SELECT 1 FROM $contentMediaTable a WHERE a.media = m.id)",
-        ]) . $searchSql;
-
-        $countStmt = Connection::get()->prepare("SELECT COUNT(*) $baseSql");
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue(':' . $key, $value);
-        }
-        $countStmt->execute();
-        $total = (int)($countStmt->fetchColumn() ?: 0);
-        $totalPages = max(1, (int)ceil($total / $perPage));
-        $page = min($page, $totalPages);
-        $offset = ($page - 1) * $perPage;
-
-        $sql = implode("\n", [
-            'SELECT',
-            'm.id, m.name, m.path, m.author, m.created, m.updated,',
-            "(SELECT name FROM $usersTable u WHERE u.ID = m.author LIMIT 1) AS author_name",
-            $baseSql,
-            'ORDER BY m.id DESC',
-            'LIMIT :limit OFFSET :offset',
-        ]);
-        $stmt = Connection::get()->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return [
-            'data' => $stmt->fetchAll(\PDO::FETCH_ASSOC),
-            'total' => $total,
-            'total_pages' => $totalPages,
+        return $this->query->paginateQuery([
+            'select' => implode("\n", [
+                'm.id, m.name, m.path, m.author, m.created, m.updated,',
+                "(SELECT name FROM $usersTable u WHERE u.ID = m.author LIMIT 1) AS author_name",
+            ]),
+            'from' => "FROM $mediaTable m",
+            'where' => $where,
+            'params' => $params,
+            'orderBy' => 'm.id DESC',
+        ], [
             'page' => $page,
-            'per_page' => $perPage,
-        ];
+            'perPage' => $perPage,
+        ]);
     }
 }

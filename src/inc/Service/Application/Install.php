@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service\Application;
 
-use App\Service\Infrastructure\Db\SchemaConstraintValidator;
+use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Support\I18n;
 use App\Service\Support\Mailer;
 use App\Service\Support\RequestContext;
@@ -12,11 +12,11 @@ use PDOException;
 
 final class Install
 {
-    private SchemaConstraintValidator $schemaValidator;
+    private SchemaRules $schemaRules;
 
-    public function __construct(?SchemaConstraintValidator $schemaValidator = null)
+    public function __construct(?SchemaRules $schemaRules = null)
     {
-        $this->schemaValidator = $schemaValidator ?? new SchemaConstraintValidator();
+        $this->schemaRules = $schemaRules ?? new SchemaRules();
     }
 
     public function validateDatabaseInput(array $input): array
@@ -79,7 +79,7 @@ final class Install
 
     public function validateAdminInput(array $input): array
     {
-        $name = $this->schemaValidator->truncate(
+        $name = $this->schemaRules->truncate(
             'users',
             'name',
             trim((string)($input['name'] ?? '')),
@@ -108,7 +108,7 @@ final class Install
             $errors['password'] = I18n::t('install.admin_password_min');
         }
 
-        $lengthErrors = $this->schemaValidator->validate('users', [
+        $lengthErrors = $this->schemaRules->validate('users', [
             'name' => $name,
             'email' => $email,
             'password' => $password,
