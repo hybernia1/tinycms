@@ -14,6 +14,7 @@ use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
+use App\Service\Support\Shortcode;
 use App\View\FrontView;
 
 final class Front
@@ -200,9 +201,9 @@ final class Front
             if ($date !== '') {
                 $xml[] = '      <pubDate>' . $this->xml($date) . '</pubDate>';
             }
-            $excerpt = $this->plainText((string)($item['excerpt'] ?? ''));
+            $excerpt = $this->plainText(Shortcode::render((string)($item['excerpt'] ?? '')));
             if ($excerpt === '') {
-                $excerpt = $this->plainText((string)($item['body'] ?? ''));
+                $excerpt = $this->plainText(Shortcode::render((string)($item['body'] ?? '')));
             }
             if ($excerpt !== '') {
                 $xml[] = '      <description>' . $this->xml($excerpt) . '</description>';
