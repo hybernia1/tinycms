@@ -104,6 +104,7 @@ return [
             'comments' => 'Komentáře',
             'media' => 'Média',
             'terms' => 'Štítky',
+            'appearance' => 'Vzhled',
             'menu' => 'Menu',
             'widgets' => 'Widgety',
             'themes' => 'Šablony',

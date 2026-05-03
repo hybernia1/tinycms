@@ -55,6 +55,11 @@ $scriptGroups = [
     ['session.js'],
 ];
 $scripts = array_merge(...$scriptGroups);
+$isActiveMenuItem = static function (array $item) use ($currentPath): bool {
+    $itemUrl = (string)($item['url'] ?? '');
+    $itemPath = trim((string)($item['path'] ?? $itemUrl), '/');
+    return $itemPath !== '' && str_starts_with($currentPath, $itemPath);
+};
 ?>
 <!doctype html>
 <html lang="<?= esc_attr((string)$lang) ?>">
@@ -91,16 +96,43 @@ $scripts = array_merge(...$scriptGroups);
         </a>
         <nav class="admin-nav">
             <?php foreach ($adminMenu as $item):
-                $itemUrl = (string)($item['url'] ?? '');
-                $itemPath = trim((string)($item['path'] ?? $itemUrl), '/');
-                $active = $itemPath !== '' && str_starts_with($currentPath, $itemPath);
+                $children = is_array($item['children'] ?? null) ? $item['children'] : [];
+                $active = $isActiveMenuItem($item);
+                foreach ($children as $child) {
+                    $active = $active || $isActiveMenuItem($child);
+                }
             ?>
+            <?php if ($children !== []): ?>
+            <div class="admin-nav-group<?= $active ? ' open active' : '' ?>" data-admin-nav-group>
+                <button class="admin-nav-link admin-nav-toggle<?= $active ? ' active' : '' ?>" type="button" data-admin-nav-toggle aria-expanded="<?= $active ? 'true' : 'false' ?>">
+                    <?php if (!empty($item['icon'])): ?>
+                    <?= icon((string)$item['icon'], 'icon admin-nav-link-icon') ?>
+                    <?php endif; ?>
+                    <span><?= esc_html((string)$item['label']) ?></span>
+                    <?= icon('next', 'icon admin-nav-toggle-icon') ?>
+                </button>
+                <div class="admin-nav-children"<?= $active ? '' : ' hidden' ?>>
+                    <?php foreach ($children as $child):
+                        $childUrl = (string)($child['url'] ?? '');
+                        $childActive = $isActiveMenuItem($child);
+                    ?>
+                    <a class="admin-nav-link admin-nav-child<?= $childActive ? ' active' : '' ?>" href="<?= esc_url($childUrl) ?>">
+                        <?php if (!empty($child['icon'])): ?>
+                        <?= icon((string)$child['icon'], 'icon admin-nav-link-icon') ?>
+                        <?php endif; ?>
+                        <span><?= esc_html((string)$child['label']) ?></span>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php else: ?>
             <a class="admin-nav-link<?= $active ? ' active' : '' ?>" href="<?= esc_url((string)$item['url']) ?>">
                 <?php if (!empty($item['icon'])): ?>
                 <?= icon((string)$item['icon'], 'icon admin-nav-link-icon') ?>
                 <?php endif; ?>
                 <span><?= esc_html((string)$item['label']) ?></span>
             </a>
+            <?php endif; ?>
             <?php endforeach; ?>
         </nav>
         <div class="admin-sidebar-bottom">
