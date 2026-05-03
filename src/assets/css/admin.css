@@ -1193,26 +1193,46 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
 .builder-summary {
     display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr) max-content;
+    grid-template-columns: auto minmax(0, 1fr) max-content;
     gap: var(--space-2);
     align-items: center;
     padding: var(--space-2) var(--space-3);
 }
 
-.builder-summary-text {
+.builder-summary-toggle {
+    appearance: none;
     min-width: 0;
+    width: 100%;
+    margin: 0;
+    padding: var(--space-1) 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
 }
 
-.builder-summary-text > * {
+.builder-summary-toggle:hover,
+.builder-summary-toggle:focus-visible {
+    color: var(--color-text);
+}
+
+.builder-summary-toggle:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.builder-summary-toggle > * {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.builder-toggle,
 .builder-drag-handle,
 .builder-actions .builder-action {
     --btn-bg: transparent;
@@ -1221,8 +1241,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     box-shadow: none;
 }
 
-.builder-toggle:hover,
-.builder-toggle:focus-visible,
 .builder-drag-handle:hover,
 .builder-drag-handle:focus-visible,
 .builder-actions .builder-action:hover,
@@ -1289,14 +1307,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 .builder-field textarea {
     min-height: 8rem;
     resize: vertical;
-}
-
-.builder-toggle-icon {
-    transition: transform .16s ease;
-}
-
-.builder-row.is-open .builder-toggle-icon {
-    transform: rotate(90deg);
 }
 
 .builder-action-danger:hover,
@@ -1491,7 +1501,7 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     }
 
     .builder-summary {
-        grid-template-columns: auto auto minmax(0, 1fr);
+        grid-template-columns: auto minmax(0, 1fr) max-content;
     }
 
     .builder-actions {
