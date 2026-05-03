@@ -149,22 +149,21 @@ $sectionLabel = static function (string $key, array $section): string {
             ></iframe>
         </div>
         <div class="customizer-preview-bar">
-            <span><?= esc_html(t('themes.live_preview')) ?></span>
+            <div class="customizer-device-switch" role="group" aria-label="<?= esc_attr(t('themes.preview_device')) ?>">
+                <?php foreach (['desktop', 'tablet', 'mobile'] as $device): ?>
+                    <button
+                        class="customizer-device-button<?= $device === 'desktop' ? ' is-active' : '' ?>"
+                        type="button"
+                        data-preview-device="<?= esc_attr($device) ?>"
+                        aria-label="<?= esc_attr(t('themes.preview_' . $device)) ?>"
+                        title="<?= esc_attr(t('themes.preview_' . $device)) ?>"
+                        aria-pressed="<?= $device === 'desktop' ? 'true' : 'false' ?>"
+                    >
+                        <?= icon($device) ?>
+                    </button>
+                <?php endforeach; ?>
+            </div>
             <div class="customizer-preview-actions">
-                <div class="customizer-device-switch" role="group" aria-label="<?= esc_attr(t('themes.preview_device')) ?>">
-                    <?php foreach (['desktop', 'tablet', 'mobile'] as $device): ?>
-                        <button
-                            class="customizer-device-button<?= $device === 'desktop' ? ' is-active' : '' ?>"
-                            type="button"
-                            data-preview-device="<?= esc_attr($device) ?>"
-                            aria-label="<?= esc_attr(t('themes.preview_' . $device)) ?>"
-                            title="<?= esc_attr(t('themes.preview_' . $device)) ?>"
-                            aria-pressed="<?= $device === 'desktop' ? 'true' : 'false' ?>"
-                        >
-                            <?= icon($device) ?>
-                        </button>
-                    <?php endforeach; ?>
-                </div>
                 <a href="<?= esc_url($previewBase) ?>" target="_blank" rel="noopener noreferrer" data-preview-open><?= icon('show') ?><span><?= esc_html(t('themes.open_site')) ?></span></a>
             </div>
         </div>
