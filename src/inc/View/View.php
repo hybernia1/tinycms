@@ -67,15 +67,23 @@ final class View
         $isAdminLayout = str_starts_with($layout, 'admin/');
 
         if ($isAdminLayout && is_array($data['adminMenu'] ?? null)) {
-            $data['adminMenu'] = array_map(static function (array $item) use ($url): array {
+            $normalizeAdminMenuItem = static function (array $item) use ($url, &$normalizeAdminMenuItem): array {
                 $path = (string)($item['url'] ?? '');
-                return [
+                $normalized = [
                     'label' => (string)($item['label'] ?? ''),
                     'url' => str_starts_with($path, 'http') ? $path : $url($path),
                     'path' => $path,
                     'icon' => (string)($item['icon'] ?? ''),
                 ];
-            }, $data['adminMenu']);
+
+                if (is_array($item['children'] ?? null)) {
+                    $normalized['children'] = array_map($normalizeAdminMenuItem, $item['children']);
+                }
+
+                return $normalized;
+            };
+
+            $data['adminMenu'] = array_map($normalizeAdminMenuItem, $data['adminMenu']);
         }
 
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';

@@ -355,9 +355,15 @@ final class AdminView
             ['label' => I18n::t('admin.menu.comments'), 'url' => 'admin/comments', 'icon' => 'comments'],
             ['label' => I18n::t('admin.menu.media'), 'url' => 'admin/media', 'icon' => 'media'],
             ['label' => I18n::t('admin.menu.terms'), 'url' => 'admin/terms', 'icon' => 'terms'],
-            ['label' => I18n::t('admin.menu.menu'), 'url' => 'admin/menu', 'icon' => 'menu'],
-            ['label' => I18n::t('admin.menu.widgets'), 'url' => 'admin/widgets', 'icon' => 'widgets'],
-            ['label' => I18n::t('admin.menu.themes'), 'url' => 'admin/themes', 'icon' => 'image'],
+            [
+                'label' => I18n::t('admin.menu.appearance'),
+                'icon' => 'brush',
+                'children' => [
+                    ['label' => I18n::t('admin.menu.menu'), 'url' => 'admin/menu', 'icon' => 'menu'],
+                    ['label' => I18n::t('admin.menu.widgets'), 'url' => 'admin/widgets', 'icon' => 'widgets'],
+                    ['label' => I18n::t('admin.menu.themes'), 'url' => 'admin/themes', 'icon' => 'image'],
+                ],
+            ],
             ['label' => I18n::t('admin.menu.settings'), 'url' => 'admin/settings', 'icon' => 'settings'],
         ];
     }

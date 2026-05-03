@@ -104,6 +104,7 @@ return [
             'comments' => 'Comments',
             'media' => 'Media',
             'terms' => 'Tags',
+            'appearance' => 'Appearance',
             'menu' => 'Menu',
             'widgets' => 'Widgets',
             'themes' => 'Themes',

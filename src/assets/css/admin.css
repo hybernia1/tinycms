@@ -34,6 +34,7 @@
     --admin-z-toast: 25;
     --admin-z-menu-overlay: 30;
     --admin-z-sidebar: 40;
+    --admin-z-nav-flyout: 70;
     --admin-z-modal: 200;
     --admin-sidebar-width: 240px;
     --admin-sidebar-collapsed-width: 72px;
@@ -66,6 +67,7 @@ body {
     overflow-y: auto;
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
+    z-index: var(--admin-z-sidebar);
     padding: var(--space-2) var(--space-3);
     display: flex;
     flex-direction: column;
@@ -93,15 +95,54 @@ body {
 }
 
 .admin-nav-link {
+    width: 100%;
     color: var(--sidebar-link);
+    font: inherit;
+    text-align: left;
     text-decoration: none;
     padding: calc(var(--space-2) + var(--space-1) / 2);
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    background: transparent;
     border: 1px solid transparent;
     border-radius: var(--space-2);
+    cursor: pointer;
     transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.admin-nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-1) / 2);
+}
+
+.admin-nav-toggle-icon {
+    width: .9rem;
+    height: .9rem;
+    flex: 0 0 .9rem;
+    margin-left: auto;
+    fill: currentColor;
+    transition: transform .16s ease;
+}
+
+.admin-nav-group.open .admin-nav-toggle-icon {
+    transform: rotate(90deg);
+}
+
+.admin-nav-children {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-1) / 2);
+    padding-left: calc(var(--space-2) + 1rem);
+}
+
+.admin-nav-children[hidden] {
+    display: none;
+}
+
+.admin-nav-child {
+    padding-block: var(--space-2);
 }
 
 .admin-nav-link-icon {
@@ -152,8 +193,37 @@ body {
     }
 
     body.admin-sidebar-collapsed .admin-nav-link > span,
+    body.admin-sidebar-collapsed .admin-nav-toggle-icon,
     body.admin-sidebar-collapsed .admin-user-meta {
         display: none;
+    }
+
+    body.admin-sidebar-collapsed .admin-nav-children {
+        display: none;
+    }
+
+    body.admin-sidebar-collapsed .admin-nav-group.flyout-open .admin-nav-children {
+        position: fixed;
+        top: var(--admin-nav-flyout-top, var(--space-2));
+        left: var(--admin-sidebar-collapsed-width);
+        z-index: var(--admin-z-nav-flyout);
+        display: flex;
+        min-width: 11rem;
+        padding: var(--space-2);
+        background: var(--sidebar-bg);
+        border: 1px solid var(--sidebar-border);
+        border-left: 0;
+        border-radius: 0 var(--space-2) var(--space-2) 0;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, .22);
+    }
+
+    body.admin-sidebar-collapsed .admin-nav-group.flyout-open .admin-nav-child {
+        justify-content: flex-start;
+        padding-inline: var(--space-2);
+    }
+
+    body.admin-sidebar-collapsed .admin-nav-group.flyout-open .admin-nav-child > span {
+        display: inline;
     }
 }
 
