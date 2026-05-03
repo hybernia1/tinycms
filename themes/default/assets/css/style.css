@@ -139,8 +139,12 @@ p, ul, ol { margin-top: 0; }
 .widget-menu-list a:hover, .widget-menu-list a:focus-visible, .widget-menu-list a.is-current { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--border); }
 .widget-menu-list .icon { color: var(--accent); width: 1rem; height: 1rem; justify-self: center; }
 .latest-comments-list { margin: 0; padding: 0; list-style: none; display: grid; gap: .45rem; }
-.latest-comments-list a { display: grid; gap: .12rem; color: var(--text); text-decoration: none; padding: .45rem .5rem; border: 1px solid transparent; }
-.latest-comments-list a:hover, .latest-comments-list a:focus-visible { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--border); }
+.latest-comments-item { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: .65rem; padding: .45rem .5rem; border: 1px solid transparent; }
+.latest-comments-item-avatar { grid-template-columns: auto minmax(0, 1fr); }
+.latest-comments-text { min-width: 0; display: grid; gap: .12rem; }
+.latest-comments-avatar { width: 2rem; height: 2rem; border-radius: 50%; display: block; }
+.latest-comments-content { color: var(--muted); text-decoration: none; }
+.latest-comments-content:hover, .latest-comments-content:focus-visible { color: var(--accent-strong); text-decoration: underline; }
 .latest-comments-body, .latest-comments-content { overflow-wrap: anywhere; }
 .latest-comments-meta, .latest-comments-content { color: var(--muted); font-size: .86rem; }
 .social-link-facebook .icon { color: #1877f2; }

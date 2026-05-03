@@ -26,16 +26,30 @@ return [
             'min' => 1,
             'max' => 20,
         ],
+        [
+            'name' => 'show_content_link',
+            'type' => 'checkbox',
+            'label' => t('widgets.latest_comments.show_content_link'),
+            'default' => '1',
+        ],
+        [
+            'name' => 'show_avatar',
+            'type' => 'checkbox',
+            'label' => t('widgets.latest_comments.show_avatar'),
+            'default' => '0',
+        ],
     ],
     'render' => static function (array $data): string {
         $title = trim((string)($data['title'] ?? ''));
         $limit = max(1, min(20, (int)($data['limit'] ?? 5)));
+        $showContentLink = (string)($data['show_content_link'] ?? '1') === '1';
+        $showAvatar = (string)($data['show_avatar'] ?? '0') === '1';
 
         $commentsTable = Table::name('comments');
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
         $stmt = Connection::get()->prepare(implode("\n", [
-            'SELECT c.id, c.content, c.body, c.created, content.name AS content_name, u.name AS author_name',
+            'SELECT c.id, c.content, c.author, c.body, c.created, content.name AS content_name, u.name AS author_name, u.email AS author_email',
             "FROM $commentsTable c",
             "INNER JOIN $contentTable content ON content.id = c.content",
             "LEFT JOIN $commentsTable parent_comment ON parent_comment.id = c.parent",
@@ -57,7 +71,7 @@ return [
         }
 
         $slugger = new Slugger();
-        $rows = array_map(static function (array $comment) use ($slugger): string {
+        $rows = array_map(static function (array $comment) use ($slugger, $showContentLink, $showAvatar): string {
             $contentId = (int)($comment['content'] ?? 0);
             $contentName = trim((string)($comment['content_name'] ?? ''));
             if ($contentId <= 0 || $contentName === '') {
@@ -78,7 +92,14 @@ return [
             ], static fn(string $value): bool => $value !== '');
             $url = site_url($slugger->slug($contentName, $contentId)) . ($commentId > 0 ? '#comment-' . $commentId : '#comments');
 
-            return '<li><a href="' . esc_url($url) . '"><span class="latest-comments-body">' . esc_html($excerpt) . '</span><span class="latest-comments-meta">' . esc_html(implode(' - ', $meta)) . '</span><span class="latest-comments-content">' . esc_html($contentName) . '</span></a></li>';
+            $comment['author_name'] = $author;
+            $avatar = $showAvatar && function_exists('get_avatar') ? get_avatar($comment, 'latest-comments-avatar', 40) : '';
+            $content = $showContentLink
+                ? '<a class="latest-comments-content" href="' . esc_url($url) . '">' . esc_html($contentName) . '</a>'
+                : '';
+            $itemClass = 'latest-comments-item' . ($avatar !== '' ? ' latest-comments-item-avatar' : '');
+
+            return '<li><div class="' . esc_attr($itemClass) . '">' . $avatar . '<div class="latest-comments-text"><span class="latest-comments-body">' . esc_html($excerpt) . '</span><span class="latest-comments-meta">' . esc_html(implode(' - ', $meta)) . '</span>' . $content . '</div></div></li>';
         }, $items);
         $rows = array_values(array_filter($rows));
 
