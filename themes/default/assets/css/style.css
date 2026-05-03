@@ -301,7 +301,7 @@ p, ul, ol { margin-top: 0; }
   .content-single h1 { font-size: clamp(1.75rem, 9vw, 2.25rem); }
   .content-excerpt-lead { font-size: 1.04rem; }
   .content-card { flex-direction: column; padding: .8rem; }
-  .content-card-thumb { width: 112px; height: 112px; flex-basis: 112px; }
+  .content-card-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; flex-basis: auto; }
   .comment-children { margin-left: .65rem; padding-left: .75rem; }
   .comment-card { padding: .85rem; }
 }
