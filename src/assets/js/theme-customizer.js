@@ -12,6 +12,7 @@
     const openLink = document.querySelector('[data-preview-open]');
     const customizerBase = form.getAttribute('data-customizer-url') || window.location.pathname;
     const customizerRoot = form.closest('[data-customizer-root]') || document;
+    const previewRoot = document.querySelector('[data-customizer-preview]');
     let previewBase = form.getAttribute('data-preview-base') || '/';
     let timer = 0;
 
@@ -114,6 +115,23 @@
         }
     };
 
+    const setPreviewDevice = (button) => {
+        const device = String(button.getAttribute('data-preview-device') || '').trim();
+        if (!['desktop', 'tablet', 'mobile'].includes(device)) {
+            return;
+        }
+
+        if (previewRoot instanceof HTMLElement) {
+            previewRoot.setAttribute('data-preview-device', device);
+        }
+
+        customizerRoot.querySelectorAll('.customizer-device-button[data-preview-device]').forEach((item) => {
+            const active = item === button;
+            item.classList.toggle('is-active', active);
+            item.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    };
+
     const openWidgetRow = (button) => {
         const area = button.getAttribute('data-customizer-widget-area') || button.closest('[data-customizer-widget]')?.getAttribute('data-customizer-widget-area') || '';
         const index = Number(button.getAttribute('data-customizer-widget-index') || button.closest('[data-customizer-widget]')?.getAttribute('data-customizer-widget-index') || 0);
@@ -185,6 +203,12 @@
 
         if (event.target.closest('[data-customizer-save]')) {
             activeForm().requestSubmit();
+            return;
+        }
+
+        const deviceButton = event.target.closest('.customizer-device-button[data-preview-device]');
+        if (deviceButton instanceof HTMLElement) {
+            setPreviewDevice(deviceButton);
             return;
         }
 
