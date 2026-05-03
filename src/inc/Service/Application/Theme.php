@@ -3,24 +3,21 @@ declare(strict_types=1);
 
 namespace App\Service\Application;
 
-use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Support\I18n;
 
 final class Theme
 {
     private const OPTIONS_SETTING_KEY = 'theme_options';
 
-    private SchemaRules $schemaRules;
     private Settings $settings;
-    private Content $content;
+    private ThemeCustomizer $customizer;
     private ?array $themes = null;
 
     public function __construct(private string $rootPath)
     {
         $this->rootPath = rtrim($rootPath, '/\\');
         $this->settings = new Settings();
-        $this->content = new Content();
-        $this->schemaRules = new SchemaRules();
+        $this->customizer = new ThemeCustomizer(new Content());
     }
 
     public function themes(): array
@@ -72,7 +69,7 @@ final class Theme
 
         foreach ($fields as $key => $field) {
             $rawValue = array_key_exists($key, $values) ? (string)$values[$key] : (string)($field['default'] ?? '');
-            $resolved[$key] = $this->normalizeValue($rawValue, $field);
+            $resolved[$key] = $this->customizer->normalizeValue($rawValue, $field);
         }
 
         return $resolved;
@@ -107,13 +104,25 @@ final class Theme
         $payload = [];
         $hasThemeInput = false;
         $fields = $this->fields($selected);
+        $errors = [];
 
         foreach ($fields as $key => $field) {
             if (!array_key_exists($key, $input)) {
                 continue;
             }
             $hasThemeInput = true;
-            $payload[$key] = $this->normalizeValue((string)$input[$key], $field);
+            $rawValue = (string)$input[$key];
+            $error = $this->customizer->validateValue($rawValue, $field);
+            if ($error !== '') {
+                $errors[$key] = $error;
+                continue;
+            }
+
+            $payload[$key] = $this->customizer->normalizeValue($rawValue, $field);
+        }
+
+        if ($errors !== []) {
+            return ['success' => false, 'errors' => $errors];
         }
 
         $values = ['front_theme' => $selected];
@@ -143,12 +152,12 @@ final class Theme
                 continue;
             }
 
-            $themeOptionValues[$key] = $this->normalizeValue((string)$input[$key], $field);
+            $themeOptionValues[$key] = $this->customizer->normalizeValue((string)$input[$key], $field);
         }
 
         foreach ($fields as $key => $field) {
             $rawValue = array_key_exists($key, $themeOptionValues) ? (string)$themeOptionValues[$key] : (string)($field['default'] ?? '');
-            $payload[$key] = $this->normalizeValue($rawValue, $field);
+            $payload[$key] = $this->customizer->normalizeValue($rawValue, $field);
         }
 
         return $payload;
@@ -164,8 +173,8 @@ final class Theme
         $manifest['author'] = trim((string)($data['author'] ?? ''));
         $manifest['description'] = trim((string)($data['description'] ?? ''));
         $manifest['features'] = $this->normalizeFeatures((array)($data['features'] ?? []));
-        $manifest['settings'] = $this->normalizeFields((array)($data['settings'] ?? []));
-        $manifest['customizer_sections'] = $this->normalizeCustomizerSections(
+        $manifest['settings'] = ThemeCustomizer::normalizeFields((array)($data['settings'] ?? []));
+        $manifest['customizer_sections'] = ThemeCustomizer::normalizeSections(
             (array)($data['customizer_sections'] ?? []),
             array_keys($manifest['settings'])
         );
@@ -187,54 +196,6 @@ final class Theme
         ];
     }
 
-    private function normalizeFields(array $fields): array
-    {
-        $result = [];
-        $allowedTypes = ['text', 'textarea', 'select', 'checkbox', 'number', 'file', 'color', 'content_picker'];
-
-        foreach ($fields as $key => $field) {
-            if (!is_array($field)) {
-                continue;
-            }
-
-            $name = $this->fieldName((string)$key);
-            if ($name === '') {
-                continue;
-            }
-
-            $type = (string)($field['type'] ?? 'text');
-            if (!in_array($type, $allowedTypes, true)) {
-                continue;
-            }
-
-            $result[$name] = [
-                'type' => $type,
-                'label' => trim((string)($field['label'] ?? '')),
-                'default' => (string)($field['default'] ?? ($type === 'checkbox' ? '0' : '')),
-                'options' => $this->normalizeOptions((array)($field['options'] ?? [])),
-                'min' => (int)($field['min'] ?? 0),
-                'max' => (int)($field['max'] ?? 1000),
-                'empty_label' => trim((string)($field['empty_label'] ?? '')),
-                'placeholder' => trim((string)($field['placeholder'] ?? '')),
-            ];
-        }
-
-        return $result;
-    }
-
-    private function normalizeOptions(array $options): array
-    {
-        $result = [];
-        foreach ($options as $value => $label) {
-            $value = trim((string)$value);
-            if ($value !== '') {
-                $result[$value] = (string)$label;
-            }
-        }
-
-        return $result;
-    }
-
     private function normalizeFeatures(array $features): array
     {
         $result = [];
@@ -246,59 +207,6 @@ final class Theme
         }
 
         return array_values(array_unique($result));
-    }
-
-    private function normalizeValue(string $value, array $field): string
-    {
-        $type = (string)($field['type'] ?? 'text');
-        $default = (string)($field['default'] ?? '');
-
-        if ($type === 'checkbox') {
-            return $value === '1' ? '1' : '0';
-        }
-
-        if ($type === 'number') {
-            $min = (int)($field['min'] ?? 0);
-            $max = max($min, (int)($field['max'] ?? 1000));
-            return (string)max($min, min($max, (int)$value));
-        }
-
-        if ($type === 'select') {
-            $options = (array)($field['options'] ?? []);
-            return array_key_exists($value, $options) ? $value : $default;
-        }
-
-        if ($type === 'content_picker') {
-            return $this->normalizePublishedContentId($value);
-        }
-
-        if ($type === 'color') {
-            return $this->normalizeColor($value, $default);
-        }
-
-        $limit = max(1, (int)($field['max'] ?? ($type === 'textarea' ? 10000 : 500)));
-        return $this->schemaRules->truncate('settings', 'value', trim($value), $limit);
-    }
-
-    private function normalizeColor(string $value, string $default): string
-    {
-        $value = strtolower(trim($value));
-        if (preg_match('/^#[0-9a-f]{6}$/', $value) === 1) {
-            return $value;
-        }
-
-        if (preg_match('/^#([0-9a-f])([0-9a-f])([0-9a-f])$/', $value, $matches) === 1) {
-            return '#' . $matches[1] . $matches[1] . $matches[2] . $matches[2] . $matches[3] . $matches[3];
-        }
-
-        $default = strtolower(trim($default));
-        return preg_match('/^#[0-9a-f]{6}$/', $default) === 1 ? $default : '';
-    }
-
-    private function normalizePublishedContentId(string $value): string
-    {
-        $id = (int)$value;
-        return $this->content->findPublishedSummary($id) !== null ? (string)$id : '';
     }
 
     private function themeOptionValues(string $theme, ?array $themeOptions = null): array
@@ -333,43 +241,6 @@ final class Theme
         return $result;
     }
 
-    private function normalizeCustomizerSections(array $sections, array $availableFields): array
-    {
-        $available = array_fill_keys($availableFields, true);
-        $result = [];
-
-        foreach ($sections as $section) {
-            if (!is_array($section)) {
-                continue;
-            }
-
-            $key = $this->fieldName((string)($section['key'] ?? ''));
-            if ($key === '') {
-                continue;
-            }
-
-            $fields = [];
-            foreach ((array)($section['fields'] ?? []) as $field) {
-                $field = $this->fieldName((string)$field);
-                if ($field !== '' && isset($available[$field])) {
-                    $fields[] = $field;
-                }
-            }
-
-            $fields = array_values(array_unique($fields));
-            if ($fields === []) {
-                continue;
-            }
-
-            $result[$key] = [
-                'label' => trim((string)($section['label'] ?? '')),
-                'fields' => $fields,
-            ];
-        }
-
-        return $result;
-    }
-
     private function encodeThemeOptions(array $themeOptions): string
     {
         $payload = [];
@@ -393,7 +264,7 @@ final class Theme
         $allowed = $allowedKeys !== [] ? array_fill_keys($allowedKeys, true) : [];
 
         foreach ($values as $key => $value) {
-            $key = $this->fieldName((string)$key);
+            $key = ThemeCustomizer::fieldName((string)$key);
             if ($key === '') {
                 continue;
             }
@@ -422,9 +293,4 @@ final class Theme
         return preg_match('/^[a-z0-9_-]{1,100}$/', $clean) === 1 ? $clean : '';
     }
 
-    private function fieldName(string $value): string
-    {
-        $clean = trim($value);
-        return preg_match('/^[a-z0-9_]{1,100}$/i', $clean) === 1 ? $clean : '';
-    }
 }
