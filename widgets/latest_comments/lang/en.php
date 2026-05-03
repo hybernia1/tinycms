@@ -7,6 +7,8 @@ return [
             'name' => 'Latest comments',
             'title' => 'Title',
             'limit' => 'Maximum comments',
+            'show_content_link' => 'Show content link',
+            'show_avatar' => 'Show avatar',
         ],
     ],
 ];

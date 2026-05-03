@@ -140,15 +140,32 @@ $sectionLabel = static function (string $key, array $section): string {
         </div>
     </aside>
 
-    <section class="customizer-preview">
-        <div class="customizer-preview-bar">
-            <span><?= esc_html(t('themes.live_preview')) ?></span>
-            <a href="<?= esc_url($previewBase) ?>" target="_blank" rel="noopener noreferrer" data-preview-open><?= icon('show') ?><span><?= esc_html(t('themes.open_site')) ?></span></a>
+    <section class="customizer-preview" data-customizer-preview data-preview-device="desktop">
+        <div class="customizer-preview-stage">
+            <iframe
+                id="theme-customizer-preview"
+                title="<?= esc_attr(t('themes.live_preview')) ?>"
+                sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+            ></iframe>
         </div>
-        <iframe
-            id="theme-customizer-preview"
-            title="<?= esc_attr(t('themes.live_preview')) ?>"
-            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-        ></iframe>
+        <div class="customizer-preview-bar">
+            <div class="customizer-device-switch" role="group" aria-label="<?= esc_attr(t('themes.preview_device')) ?>">
+                <?php foreach (['desktop', 'tablet', 'mobile'] as $device): ?>
+                    <button
+                        class="customizer-device-button<?= $device === 'desktop' ? ' is-active' : '' ?>"
+                        type="button"
+                        data-preview-device="<?= esc_attr($device) ?>"
+                        aria-label="<?= esc_attr(t('themes.preview_' . $device)) ?>"
+                        title="<?= esc_attr(t('themes.preview_' . $device)) ?>"
+                        aria-pressed="<?= $device === 'desktop' ? 'true' : 'false' ?>"
+                    >
+                        <?= icon($device) ?>
+                    </button>
+                <?php endforeach; ?>
+            </div>
+            <div class="customizer-preview-actions">
+                <a href="<?= esc_url($previewBase) ?>" target="_blank" rel="noopener noreferrer" data-preview-open><?= icon('show') ?><span><?= esc_html(t('themes.open_site')) ?></span></a>
+            </div>
+        </div>
     </section>
 </div>

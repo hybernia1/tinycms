@@ -40,7 +40,7 @@ $renderFields = static function (array $definition, array $data, string $index):
 
         $type = (string)($field['type'] ?? 'text');
         $label = trim((string)($field['label'] ?? $name));
-        $value = (string)($data[$name] ?? '');
+        $value = array_key_exists($name, $data) ? (string)$data[$name] : (string)($field['default'] ?? '');
         $inputName = 'item_data[' . $index . '][' . $name . ']';
         $fieldAttr = $name === 'title' ? ' data-widget-title-input' : '';
         ?>
@@ -91,15 +91,12 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
         <input type="hidden" name="item_area[<?= esc_attr($index) ?>]" value="<?= esc_attr($area) ?>" data-widget-item-area>
         <div class="builder-summary">
             <button class="btn btn-light btn-icon builder-drag-handle" type="button" draggable="true" data-builder-drag-handle aria-label="<?= esc_attr(t('widgets.move_item')) ?>" title="<?= esc_attr(t('widgets.move_item')) ?>">
-                <?= icon('menu') ?>
+                <?= icon('drag') ?>
             </button>
-            <button class="btn btn-light btn-icon builder-toggle" type="button" data-widget-item-toggle aria-expanded="false" aria-label="<?= esc_attr(t('widgets.configure')) ?>" title="<?= esc_attr(t('widgets.configure')) ?>">
-                <?= icon('next', 'icon builder-toggle-icon') ?>
-            </button>
-            <div class="builder-summary-text">
+            <button class="builder-summary-toggle" type="button" data-widget-item-toggle aria-expanded="false">
                 <strong data-widget-item-label><?= esc_html($label) ?></strong>
                 <span class="text-muted small" data-widget-item-title<?= $title === '' ? ' hidden' : '' ?>><?= esc_html($title) ?></span>
-            </div>
+            </button>
             <div class="builder-actions">
                 <?php if ($unused && $areas !== []): ?>
                     <div class="widget-unused-move" data-widget-unused-controls>
@@ -127,6 +124,7 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
     <?php
 };
 ?>
+<?php $rowIndex = 0; ?>
 <div class="builder-areas">
     <?php if ($inactiveItemsByArea !== []): ?>
         <section class="card p-4 widget-unused-card" data-widget-unused-card>
@@ -147,7 +145,7 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
                         </div>
                         <div class="builder-items" data-widget-items>
                             <?php foreach ($areaItems as $item): ?>
-                                <?php $renderRow($item, '__INDEX__', true); ?>
+                                <?php $renderRow($item, (string)$rowIndex++, true); ?>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -171,7 +169,7 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
             </div>
             <div class="builder-items" data-widget-items>
                 <?php foreach ($areaItems as $item): ?>
-                    <?php $renderRow($item, '__INDEX__'); ?>
+                    <?php $renderRow($item, (string)$rowIndex++); ?>
                 <?php endforeach; ?>
             </div>
             <p class="text-muted m-0 builder-empty" data-widget-area-empty<?= $areaItems === [] ? '' : ' hidden' ?>><?= esc_html(t('widgets.empty')) ?></p>

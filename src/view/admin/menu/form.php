@@ -57,22 +57,13 @@ $renderItem = static function (array $item) use ($renderIconPicker): void {
     <div class="builder-row" data-menu-item>
         <div class="builder-summary">
             <button class="btn btn-light btn-icon builder-drag-handle" type="button" draggable="true" data-builder-drag-handle aria-label="<?= esc_attr(t('menu.move_item')) ?>" title="<?= esc_attr(t('menu.move_item')) ?>">
-                <?= icon('menu') ?>
+                <?= icon('drag') ?>
             </button>
-            <button class="btn btn-light btn-icon builder-toggle" type="button" data-menu-item-toggle aria-expanded="false" aria-label="<?= esc_attr(t('menu.item_label')) ?>" title="<?= esc_attr(t('menu.item_label')) ?>">
-                <?= icon('next', 'icon builder-toggle-icon') ?>
-            </button>
-            <div class="builder-summary-text">
+            <button class="builder-summary-toggle" type="button" data-menu-item-toggle aria-expanded="false">
                 <strong data-menu-item-label><?= esc_html($label !== '' ? $label : t('menu.add_item')) ?></strong>
                 <span class="text-muted small" data-menu-item-url<?= $url === '' ? ' hidden' : '' ?>><?= esc_html($url) ?></span>
-            </div>
+            </button>
             <div class="builder-actions">
-                <button class="btn btn-light btn-icon builder-action" type="button" data-menu-item-up aria-label="<?= esc_attr(t('menu.move_up')) ?>" title="<?= esc_attr(t('menu.move_up')) ?>">
-                    <?= icon('next', 'icon builder-icon-up') ?>
-                </button>
-                <button class="btn btn-light btn-icon builder-action" type="button" data-menu-item-down aria-label="<?= esc_attr(t('menu.move_down')) ?>" title="<?= esc_attr(t('menu.move_down')) ?>">
-                    <?= icon('next', 'icon builder-icon-down') ?>
-                </button>
                 <button class="btn btn-light btn-icon builder-action builder-action-danger" type="button" data-menu-item-remove aria-label="<?= esc_attr(t('menu.remove_item')) ?>" title="<?= esc_attr(t('menu.remove_item')) ?>">
                     <?= icon('delete') ?>
                 </button>

@@ -285,6 +285,7 @@ final class Theme
         $itemClass = trim((string)($options['item_class'] ?? 'site-menu-link'));
         $label = trim((string)($options['label'] ?? 'Menu'));
         $showIcons = (bool)($options['show_icons'] ?? true);
+        $reserveIconSpace = (bool)($options['reserve_icon_space'] ?? false);
         $currentPath = $this->router->requestPath((string)($_SERVER['REQUEST_URI'] ?? '/'));
         $links = [];
 
@@ -297,6 +298,9 @@ final class Theme
             $hasLabel = trim($labelText) !== '';
             $ariaLabel = $showIcons && $iconName !== '' && !$hasLabel ? ' aria-label="' . esc_attr($iconName) . '"' : '';
             $content = $showIcons && $iconName !== '' ? icon($iconName) : '';
+            if ($content === '' && $showIcons && $reserveIconSpace) {
+                $content = '<span class="menu-icon-placeholder" aria-hidden="true"></span>';
+            }
             if ($hasLabel) {
                 $content .= esc_html($labelText);
             }
@@ -579,9 +583,9 @@ final class Theme
         return '<nav class="pagination" aria-label="Pagination">' . implode('', $items) . '</nav>';
     }
 
-    public function searchForm(string $action = 'search', string $query = '', array $labels = []): string
+    public function searchForm(string $action = 'search', string $query = '', array $labels = [], bool $respectThemeSetting = true): string
     {
-        if (!$this->searchEnabled()) {
+        if ($respectThemeSetting && !$this->searchEnabled()) {
             return '';
         }
 
