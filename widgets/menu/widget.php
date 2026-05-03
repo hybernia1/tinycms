@@ -28,6 +28,7 @@ return [
             'item_class' => 'widget-menu-link',
             'label' => $title !== '' ? $title : t('widgets.menu.name'),
             'show_icons' => $showIcons,
+            'reserve_icon_space' => true,
         ]);
 
         return $menu !== '' ? widget_title($title, 'home') . $menu : '';

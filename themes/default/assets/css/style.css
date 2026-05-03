@@ -138,6 +138,7 @@ p, ul, ol { margin-top: 0; }
 .widget-menu-list-icons a { grid-template-columns: var(--widget-icon-col) minmax(0, 1fr); }
 .widget-menu-list a:hover, .widget-menu-list a:focus-visible, .widget-menu-list a.is-current { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--border); }
 .widget-menu-list .icon { color: var(--accent); width: 1rem; height: 1rem; justify-self: center; }
+.widget-menu-list .menu-icon-placeholder { width: 1rem; height: 1rem; justify-self: center; }
 .latest-comments-list { margin: 0; padding: 0; list-style: none; display: grid; gap: .45rem; }
 .latest-comments-item { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: .65rem; padding: .45rem .5rem; border: 1px solid transparent; }
 .latest-comments-item-avatar { grid-template-columns: auto minmax(0, 1fr); }
