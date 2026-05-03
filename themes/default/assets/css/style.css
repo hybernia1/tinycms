@@ -143,6 +143,8 @@ p, ul, ol { margin-top: 0; }
 .latest-comments-item-avatar { grid-template-columns: auto minmax(0, 1fr); }
 .latest-comments-text { min-width: 0; display: grid; gap: .12rem; }
 .latest-comments-avatar { width: 2rem; height: 2rem; border-radius: 50%; display: block; }
+.latest-comments-comment { display: grid; gap: .12rem; color: var(--text); text-decoration: none; }
+.latest-comments-comment:hover, .latest-comments-comment:focus-visible { color: var(--accent-strong); }
 .latest-comments-content { color: var(--muted); text-decoration: none; }
 .latest-comments-content:hover, .latest-comments-content:focus-visible { color: var(--accent-strong); text-decoration: underline; }
 .latest-comments-body, .latest-comments-content { overflow-wrap: anywhere; }

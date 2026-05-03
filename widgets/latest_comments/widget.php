@@ -94,12 +94,16 @@ return [
 
             $comment['author_name'] = $author;
             $avatar = $showAvatar && function_exists('get_avatar') ? get_avatar($comment, 'latest-comments-avatar', 40) : '';
+            $commentHtml = '<span class="latest-comments-body">' . esc_html($excerpt) . '</span><span class="latest-comments-meta">' . esc_html(implode(' - ', $meta)) . '</span>';
+            $commentLink = !$showContentLink
+                ? '<a class="latest-comments-comment" href="' . esc_url($url) . '">' . $commentHtml . '</a>'
+                : $commentHtml;
             $content = $showContentLink
                 ? '<a class="latest-comments-content" href="' . esc_url($url) . '">' . esc_html($contentName) . '</a>'
                 : '';
             $itemClass = 'latest-comments-item' . ($avatar !== '' ? ' latest-comments-item-avatar' : '');
 
-            return '<li><div class="' . esc_attr($itemClass) . '">' . $avatar . '<div class="latest-comments-text"><span class="latest-comments-body">' . esc_html($excerpt) . '</span><span class="latest-comments-meta">' . esc_html(implode(' - ', $meta)) . '</span>' . $content . '</div></div></li>';
+            return '<li><div class="' . esc_attr($itemClass) . '">' . $avatar . '<div class="latest-comments-text">' . $commentLink . $content . '</div></div></li>';
         }, $items);
         $rows = array_values(array_filter($rows));
 
