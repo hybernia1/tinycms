@@ -40,7 +40,7 @@ $renderFields = static function (array $definition, array $data, string $index):
 
         $type = (string)($field['type'] ?? 'text');
         $label = trim((string)($field['label'] ?? $name));
-        $value = (string)($data[$name] ?? '');
+        $value = array_key_exists($name, $data) ? (string)$data[$name] : (string)($field['default'] ?? '');
         $inputName = 'item_data[' . $index . '][' . $name . ']';
         $fieldAttr = $name === 'title' ? ' data-widget-title-input' : '';
         ?>
@@ -124,6 +124,7 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
     <?php
 };
 ?>
+<?php $rowIndex = 0; ?>
 <div class="builder-areas">
     <?php if ($inactiveItemsByArea !== []): ?>
         <section class="card p-4 widget-unused-card" data-widget-unused-card>
@@ -144,7 +145,7 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
                         </div>
                         <div class="builder-items" data-widget-items>
                             <?php foreach ($areaItems as $item): ?>
-                                <?php $renderRow($item, '__INDEX__', true); ?>
+                                <?php $renderRow($item, (string)$rowIndex++, true); ?>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -168,7 +169,7 @@ $renderRow = static function (array $item, string $index, bool $unused = false) 
             </div>
             <div class="builder-items" data-widget-items>
                 <?php foreach ($areaItems as $item): ?>
-                    <?php $renderRow($item, '__INDEX__'); ?>
+                    <?php $renderRow($item, (string)$rowIndex++); ?>
                 <?php endforeach; ?>
             </div>
             <p class="text-muted m-0 builder-empty" data-widget-area-empty<?= $areaItems === [] ? '' : ' hidden' ?>><?= esc_html(t('widgets.empty')) ?></p>
