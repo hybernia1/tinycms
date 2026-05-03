@@ -22,6 +22,11 @@ final class Avatar
         return RequestContext::path('avatar/' . rawurlencode($cleanSeed) . '.svg?size=' . $size);
     }
 
+    public static function dataUrl(string $seed, int $size = 64): string
+    {
+        return 'data:image/svg+xml;base64,' . base64_encode((new self())->svg($seed, $size));
+    }
+
     public static function userSeed(array $user): string
     {
         foreach (['name', 'email'] as $field) {

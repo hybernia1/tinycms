@@ -110,17 +110,19 @@ function site_layout_class(): string
     return Theme::current()?->layoutClass() ?? 'theme-layout-default';
 }
 
-function get_avatar_url(?array $source = null, int $size = 64): string
+function get_avatar_url(?array $source = null, int $size = 64, bool $inline = false): string
 {
-    return Avatar::url(Avatar::userSeed(author_user($source)), $size);
+    $seed = Avatar::userSeed(author_user($source));
+    return $inline ? Avatar::dataUrl($seed, $size) : Avatar::url($seed, $size);
 }
 
-function get_avatar(?array $source = null, string $class = 'avatar', int $size = 64): string
+function get_avatar(?array $source = null, string $class = 'avatar', int $size = 64, bool $inline = false): string
 {
     $class = trim($class);
-    $src = get_avatar_url($source, $size);
+    $src = get_avatar_url($source, $size, $inline);
+    $src = $inline ? esc_attr($src) : esc_url($src);
 
-    return '<img src="' . esc_url($src) . '" alt=""' . ($class !== '' ? ' class="' . esc_attr($class) . '"' : '') . '>';
+    return '<img src="' . $src . '" alt=""' . ($class !== '' ? ' class="' . esc_attr($class) . '"' : '') . '>';
 }
 
 function theme_url(string $path = ''): string

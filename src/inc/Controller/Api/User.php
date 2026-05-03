@@ -150,7 +150,7 @@ final class User extends Admin
             'role' => (string)($row['role'] ?? 'user'),
             'is_admin' => (string)($row['role'] ?? '') === 'admin',
             'is_suspended' => $isSuspended,
-            'avatar_url' => Avatar::url(Avatar::userSeed($row), 40),
+            'avatar_url' => Avatar::dataUrl(Avatar::userSeed($row), 40),
         ];
     }
 }
