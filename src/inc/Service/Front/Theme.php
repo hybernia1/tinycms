@@ -191,6 +191,7 @@ final class Theme
         $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/block.css')) . '">';
         if ($this->customizerPreview()) {
             $tags[] = '<link rel="stylesheet" href="' . esc_url($this->url(ASSETS_DIR . 'css/customizer-preview.css')) . '">';
+            $tags[] = '<script defer src="' . esc_url($this->url(ASSETS_DIR . 'js/front/theme-customizer-preview.js')) . '"></script>';
         }
         $themeVariables = $this->themeVariablesCss();
         if ($themeVariables !== '') {

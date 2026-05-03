@@ -21,8 +21,40 @@ function icon(string $name, string $classes = 'icon'): string
     }
 
     $class = trim($classes);
+    if (trim((string)($_GET['theme_preview'] ?? '')) !== '') {
+        return inline_icon($icon, $class !== '' ? $class : 'icon');
+    }
+
     $href = esc_url(icon_sprite() . '#icon-' . $icon);
     return '<svg class="' . esc_attr($class !== '' ? $class : 'icon') . '" aria-hidden="true" focusable="false"><use href="' . $href . '"></use></svg>';
+}
+
+function inline_icon(string $name, string $classes = 'icon'): string
+{
+    static $symbols = null;
+
+    if ($symbols === null) {
+        $symbols = [];
+        $file = BASE_DIR . '/' . ASSETS_DIR . 'svg/icons.svg';
+        $svg = is_file($file) ? (string)file_get_contents($file) : '';
+        preg_match_all('/<symbol\b([^>]*)\bid="icon-([^"]+)"([^>]*)>(.*?)<\/symbol>/s', $svg, $matches, PREG_SET_ORDER);
+        foreach ($matches as $match) {
+            $attrs = $match[1] . ' ' . $match[3];
+            preg_match('/\bviewBox="([^"]+)"/', $attrs, $viewBox);
+            $symbols[$match[2]] = [
+                'viewBox' => $viewBox[1] ?? '0 0 16 16',
+                'body' => trim($match[4]),
+            ];
+        }
+    }
+
+    $symbol = $symbols[$name] ?? null;
+    if ($symbol === null || $symbol['body'] === '') {
+        return '';
+    }
+
+    $class = trim($classes) !== '' ? trim($classes) : 'icon';
+    return '<svg class="' . esc_attr($class) . '" viewBox="' . esc_attr($symbol['viewBox']) . '" aria-hidden="true" focusable="false">' . $symbol['body'] . '</svg>';
 }
 
 function widget_title(string $title, string $icon = ''): string
