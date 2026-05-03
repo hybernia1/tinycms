@@ -163,18 +163,9 @@
 
     const syncRows = () => {
         const currentRows = rows();
-        currentRows.forEach((row, index) => {
+        currentRows.forEach((row) => {
             syncIconPreview(row);
             syncRowSummary(row);
-
-            const up = row.querySelector('[data-menu-item-up]');
-            const down = row.querySelector('[data-menu-item-down]');
-            if (up) {
-                up.disabled = index === 0;
-            }
-            if (down) {
-                down.disabled = index === currentRows.length - 1;
-            }
         });
 
         if (empty) {
@@ -204,16 +195,6 @@
         setAddOpen(false);
         if (submit) {
             submitBuilder();
-        }
-    };
-
-    const moveRow = (row, direction) => {
-        if (direction < 0 && row.previousElementSibling) {
-            items.insertBefore(row, row.previousElementSibling);
-        }
-
-        if (direction > 0 && row.nextElementSibling) {
-            items.insertBefore(row.nextElementSibling, row);
         }
     };
 
@@ -304,16 +285,6 @@
             return;
         }
 
-        if (event.target.closest('[data-menu-item-up]')) {
-            moveRow(row, -1);
-            syncRows();
-            return;
-        }
-
-        if (event.target.closest('[data-menu-item-down]')) {
-            moveRow(row, 1);
-            syncRows();
-        }
     });
 
     root.addEventListener('input', (event) => {

@@ -188,8 +188,6 @@ return [
         'target_self' => 'Stejné okno',
         'target_blank' => 'Nové okno',
         'move_item' => 'Přesunout položku',
-        'move_up' => 'Posunout nahoru',
-        'move_down' => 'Posunout dolů',
         'remove_item' => 'Odebrat položku',
         'remove_confirm' => 'Skutečně odebrat tuto položku menu?',
         'item_label_required' => 'Popisek položky je povinný.',

@@ -188,8 +188,6 @@ return [
         'target_self' => 'Same window',
         'target_blank' => 'New window',
         'move_item' => 'Move item',
-        'move_up' => 'Move up',
-        'move_down' => 'Move down',
         'remove_item' => 'Remove item',
         'remove_confirm' => 'Do you really want to remove this menu item?',
         'item_label_required' => 'Menu item label is required.',

@@ -1428,14 +1428,6 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
     --btn-text: var(--color-text);
 }
 
-.builder-icon-up {
-    transform: rotate(-90deg);
-}
-
-.builder-icon-down {
-    transform: rotate(90deg);
-}
-
 .builder-empty {
     padding-top: var(--space-3);
 }
