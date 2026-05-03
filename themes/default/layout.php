@@ -58,6 +58,5 @@ $widgetsAfter = get_widget_area('after_content');
         </div>
     </footer>
     <script src="<?= esc_url(theme_url('assets/js/main.js')) ?>" defer></script>
-    <?= get_footer_scripts() . PHP_EOL ?>
 </body>
 </html>
