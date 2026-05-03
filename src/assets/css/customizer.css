@@ -315,7 +315,7 @@
 
 .customizer-menu-fields .builder-summary,
 .customizer-widget-fields .builder-summary {
-    grid-template-columns: auto auto minmax(0, 1fr) max-content;
+    grid-template-columns: auto minmax(0, 1fr) max-content;
 }
 
 .customizer-menu-fields .builder-actions,

@@ -11,8 +11,12 @@ $imageUploadAccept = (string)($imageUploadAccept ?? '');
 $imageUploadTypesLabel = (string)($imageUploadTypesLabel ?? '');
 $label = trim((string)($field['label'] ?? ''));
 $label = $label !== '' ? $label : $fieldKey;
+$fieldClasses = ['customizer-field', 'customizer-field-' . $fieldType];
+if ($fieldType !== 'checkbox') {
+    $fieldClasses[] = 'form-floating-field';
+}
 ?>
-<div class="customizer-field customizer-field-<?= esc_attr($fieldType) ?>">
+<div class="<?= esc_attr(implode(' ', $fieldClasses)) ?>">
     <?php if ($fieldType === 'checkbox'): ?>
         <input type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="0">
         <label class="customizer-switch">
