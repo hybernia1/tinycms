@@ -26,7 +26,7 @@ if ($fieldType !== 'checkbox') {
     <?php else: ?>
         <label><?= esc_html($label) ?></label>
         <?php if ($fieldType === 'textarea'): ?>
-            <textarea name="theme[<?= esc_attr($fieldKey) ?>]" rows="<?= $fieldKey === 'custom_css' ? 10 : 4 ?>"><?= esc_html($fieldValue) ?></textarea>
+            <textarea name="theme[<?= esc_attr($fieldKey) ?>]" rows="<?= in_array($fieldKey, ['custom_css', 'custom_js'], true) ? 10 : 4 ?>"><?= esc_html($fieldValue) ?></textarea>
         <?php elseif ($fieldType === 'select'): ?>
             <select name="theme[<?= esc_attr($fieldKey) ?>]">
                 <?php foreach ((array)($field['options'] ?? []) as $optionValue => $optionLabel): ?>

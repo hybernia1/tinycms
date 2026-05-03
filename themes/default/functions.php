@@ -16,6 +16,7 @@ register_theme([
         'search',
         'logo',
         'custom_css',
+        'custom_js',
         'layout_width',
         'colors',
     ],
@@ -53,7 +54,7 @@ register_theme_section('colors', t('theme.customizer_sections.colors'), [
     'color_accent_strong',
     'color_accent_soft',
 ]);
-register_theme_section('advanced', t('theme.customizer_sections.advanced'), ['custom_css']);
+register_theme_section('advanced', t('theme.customizer_sections.advanced'), ['custom_css', 'custom_js']);
 
 register_widget_area('before_content', t('theme.widget_areas.before_content'));
 register_widget_area('left', t('theme.widget_areas.left'));

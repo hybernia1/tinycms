@@ -180,6 +180,11 @@ function get_footer(): string
     return esc_content(Theme::current()?->footerText() ?? '');
 }
 
+function get_footer_scripts(): string
+{
+    return Theme::current()?->footerScripts() ?? '';
+}
+
 function get_search_form(string $action = 'search', ?string $query = null, bool $respectThemeSetting = true): string
 {
     $query ??= (string)($_GET['q'] ?? '');

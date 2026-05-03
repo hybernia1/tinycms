@@ -224,6 +224,7 @@ final class ThemeCustomizer
             'color_accent_strong' => ['type' => 'color', 'label_key' => 'theme.customizer_fields.color_accent_strong', 'default' => '#163f96'],
             'color_accent_soft' => ['type' => 'color', 'label_key' => 'theme.customizer_fields.color_accent_soft', 'default' => '#edf2ff'],
             'custom_css' => ['type' => 'textarea', 'label_key' => 'theme.customizer_fields.custom_css', 'max' => 20000],
+            'custom_js' => ['type' => 'textarea', 'label_key' => 'theme.customizer_fields.custom_js', 'max' => 20000],
             'footer_text' => ['type' => 'textarea', 'label_key' => 'theme.customizer_fields.footer_text'],
         ];
     }

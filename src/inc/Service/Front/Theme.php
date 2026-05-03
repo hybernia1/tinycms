@@ -363,6 +363,25 @@ final class Theme
         return str_ireplace('</style', '<\/style', $css);
     }
 
+    public function footerScripts(): string
+    {
+        $customJs = $this->customJs();
+        if ($customJs === '') {
+            return '';
+        }
+
+        if (stripos($customJs, '<script') !== false || stripos($customJs, '<noscript') !== false) {
+            return $customJs;
+        }
+
+        return '<script data-theme-custom-js>' . str_ireplace('</script', '<\/script', $customJs) . '</script>';
+    }
+
+    private function customJs(): string
+    {
+        return str_replace("\0", '', trim($this->setting('custom_js')));
+    }
+
     private function themeVariablesCss(): string
     {
         $variables = [];
