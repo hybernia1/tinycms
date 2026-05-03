@@ -72,15 +72,19 @@ final class ThemeDefinition
 
     public function registerOption(string $key, array $field): void
     {
-        $key = self::fieldName($key);
+        $key = ThemeCustomizer::fieldName($key);
         if ($key !== '') {
+            $coreField = ThemeCustomizer::field($key);
+            if ($coreField !== []) {
+                $field = array_replace($coreField, $field);
+            }
             $this->manifest['settings'][$key] = $field;
         }
     }
 
     public function registerCustomizerSection(string $key, string $label = '', array $fields = []): void
     {
-        $key = self::fieldName($key);
+        $key = ThemeCustomizer::fieldName($key);
         if ($key === '') {
             return;
         }
@@ -90,6 +94,16 @@ final class ThemeDefinition
             'label' => trim($label),
             'fields' => $fields,
         ];
+
+        foreach ($fields as $field) {
+            $field = ThemeCustomizer::fieldName((string)$field);
+            if ($field !== '' && !isset($this->manifest['settings'][$field])) {
+                $coreField = ThemeCustomizer::field($field);
+                if ($coreField !== []) {
+                    $this->manifest['settings'][$field] = $coreField;
+                }
+            }
+        }
     }
 
     public function registerWidgetArea(string $area, string $label = ''): void
@@ -159,11 +173,5 @@ final class ThemeDefinition
     {
         $clean = trim($value);
         return preg_match('/^[a-z0-9_-]{1,100}$/i', $clean) === 1 ? $clean : '';
-    }
-
-    private static function fieldName(string $value): string
-    {
-        $clean = trim($value);
-        return preg_match('/^[a-z0-9_]{1,100}$/i', $clean) === 1 ? $clean : '';
     }
 }
