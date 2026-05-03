@@ -77,7 +77,7 @@ final class Shortcode
     {
         return preg_replace_callback('/<p>\s*\[search\]\s*<\/p>|\[search\]/i', static function () use (&$blocks): string {
             $placeholder = self::placeholder('TRUSTED_BLOCK');
-            $blocks[$placeholder] = \function_exists('get_search_form') ? \get_search_form() : '';
+            $blocks[$placeholder] = \function_exists('get_search_form') ? \get_search_form('search', null, false) : '';
             return $placeholder;
         }, $value) ?? $value;
     }

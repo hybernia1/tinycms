@@ -579,9 +579,9 @@ final class Theme
         return '<nav class="pagination" aria-label="Pagination">' . implode('', $items) . '</nav>';
     }
 
-    public function searchForm(string $action = 'search', string $query = '', array $labels = []): string
+    public function searchForm(string $action = 'search', string $query = '', array $labels = [], bool $respectThemeSetting = true): string
     {
-        if (!$this->searchEnabled()) {
+        if ($respectThemeSetting && !$this->searchEnabled()) {
             return '';
         }
 
