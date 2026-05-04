@@ -98,6 +98,16 @@ final class Settings
                     '1' => I18n::t('settings.options.allow_registration.enabled'),
                 ],
             ],
+            'comments_allow_anonymous' => [
+                'label_key' => 'settings.fields.comments_allow_anonymous',
+                'section' => 'content',
+                'type' => 'select',
+                'default' => '0',
+                'options' => [
+                    '0' => I18n::t('settings.options.comments_allow_anonymous.disabled'),
+                    '1' => I18n::t('settings.options.comments_allow_anonymous.enabled'),
+                ],
+            ],
         ];
     }
 

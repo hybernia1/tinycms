@@ -74,4 +74,5 @@ return [
     'front.comments_no_author' => 'Bez autora',
     'front.comments_edit' => 'Upravit',
     'front.comments_count' => 'Komentářů: %d',
+    'front.comments_pending' => 'Váš komentář čeká na schválení.',
 ];

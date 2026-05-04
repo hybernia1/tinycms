@@ -203,13 +203,17 @@ p, ul, ol { margin-top: 0; }
 .comment-thread, .comment-children { margin: 0; padding: 0; list-style: none; display: grid; gap: 1rem; }
 .comment-children { margin: 1rem 0 0 1.25rem; padding-left: 1.25rem; border-left: 2px solid var(--border); }
 .comment-card { max-width: 100%; border: 1px solid var(--border); background: var(--surface); padding: 1rem; }
+.comment-card-pending { border-style: dashed; background: var(--surface-alt); }
 .comment-meta { max-width: 100%; display: flex; gap: .5rem 1rem; align-items: baseline; justify-content: space-between; flex-wrap: wrap; margin-bottom: .65rem; color: var(--muted); }
 .comment-author { display: inline-flex; align-items: center; gap: .55rem; }
 .comment-avatar { width: 2rem; height: 2rem; border-radius: 50%; display: block; flex: 0 0 auto; }
 .comment-meta a, .comment-author strong { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .comment-meta strong { color: var(--text); }
+.comment-author-link { color: inherit; text-decoration: none; }
+.comment-author-link:hover, .comment-author-link:focus-visible { color: var(--accent-strong); text-decoration: underline; }
 .comment-reply-context { margin: -.25rem 0 .65rem; color: var(--muted); font-size: .92rem; }
 .comment-reply-context a { max-width: 100%; overflow-wrap: anywhere; }
+.comment-pending-notice { margin: -.25rem 0 .65rem; color: var(--accent-strong); font-size: .92rem; font-weight: 700; }
 .comment-body { max-width: 100%; overflow-wrap: anywhere; }
 .comment-body a { overflow-wrap: anywhere; }
 .comment-body > :last-child { margin-bottom: 0; }
@@ -221,8 +225,11 @@ p, ul, ol { margin-top: 0; }
 .comment-form { display: grid; gap: .75rem; margin-top: 1.35rem; }
 .comment-reply-form { margin-top: 1rem; }
 .comment-reply-form[hidden] { display: none; }
-.comment-form textarea { width: 100%; min-height: 7rem; resize: vertical; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: .8rem; font: inherit; }
-.comment-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.comment-form-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.comment-form-fields label { display: grid; gap: .35rem; color: var(--muted); font-size: .92rem; }
+.comment-form input, .comment-form textarea { width: 100%; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: .8rem; font: inherit; }
+.comment-form textarea { min-height: 7rem; resize: vertical; }
+.comment-form input:focus, .comment-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 .comment-form button { justify-self: start; min-height: 2.6rem; border: 1px solid var(--accent); background: var(--accent); color: #fff; padding: .55rem .95rem; font: inherit; font-weight: 700; cursor: pointer; }
 .comment-form button:hover, .comment-form button:focus-visible { background: var(--accent-strong); border-color: var(--accent-strong); }
 .comments-login { border: 1px solid var(--border); background: var(--surface); padding: 1rem; }
@@ -305,4 +312,5 @@ p, ul, ol { margin-top: 0; }
   .content-card-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; flex-basis: auto; }
   .comment-children { margin-left: .65rem; padding-left: .75rem; }
   .comment-card { padding: .85rem; }
+  .comment-form-fields { grid-template-columns: minmax(0, 1fr); }
 }

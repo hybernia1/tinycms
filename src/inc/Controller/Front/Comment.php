@@ -7,20 +7,29 @@ use App\Service\Application\Comment as CommentService;
 use App\Service\Auth\Auth;
 use App\Service\Support\Csrf;
 use App\Service\Support\RequestContext;
+use App\Service\Support\RateLimiter;
 
 final class Comment
 {
     public function __construct(
         private Auth $auth,
         private CommentService $comments,
-        private Csrf $csrf
+        private Csrf $csrf,
+        private RateLimiter $rateLimiter,
+        private array $settings = []
     ) {
     }
 
     public function add(callable $redirect, int $contentId): void
     {
-        if (!$this->auth->check()) {
+        $isAuthenticated = $this->auth->check();
+        if (!$isAuthenticated && !$this->anonymousAllowed()) {
             $redirect('auth/login');
+            return;
+        }
+
+        if (!$this->guardRateLimit($contentId)) {
+            $this->redirectBack($redirect);
             return;
         }
 
@@ -29,7 +38,10 @@ final class Comment
             return;
         }
 
-        $this->comments->save($contentId, (int)($this->auth->id() ?? 0), $_POST, $this->ipAddress());
+        $result = $this->comments->save($contentId, $isAuthenticated ? (int)($this->auth->id() ?? 0) : 0, $_POST, $this->ipAddress(), $this->anonymousAllowed());
+        if (!$isAuthenticated && ($result['success'] ?? false) === true) {
+            $this->rememberPendingComment($contentId, (int)($result['id'] ?? 0));
+        }
         $this->redirectBack($redirect);
     }
 
@@ -76,5 +88,33 @@ final class Comment
     private function ipAddress(): string
     {
         return trim((string)($_SERVER['REMOTE_ADDR'] ?? ''));
+    }
+
+    private function guardRateLimit(int $contentId): bool
+    {
+        $rateLimit = $this->rateLimiter->hit('comment|' . $contentId . '|' . $this->ipAddress(), 5, 300);
+        return ($rateLimit['allowed'] ?? false) === true;
+    }
+
+    private function anonymousAllowed(): bool
+    {
+        return (string)($this->settings['comments_allow_anonymous'] ?? '0') === '1';
+    }
+
+    private function rememberPendingComment(int $contentId, int $commentId): void
+    {
+        if ($contentId <= 0 || $commentId <= 0 || session_status() !== PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        $key = (string)$contentId;
+        $current = array_map(
+            static fn(mixed $id): int => (int)$id,
+            (array)($_SESSION['pending_comments'][$key] ?? [])
+        );
+        $current[] = $commentId;
+        $current = array_values(array_unique(array_filter($current, static fn(int $id): bool => $id > 0)));
+
+        $_SESSION['pending_comments'][$key] = array_slice($current, -50);
     }
 }

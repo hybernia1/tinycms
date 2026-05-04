@@ -26,6 +26,8 @@ final class SchemaDefinition
                 'name' => ['max' => 255, 'nullable' => true],
             ],
             'comments' => [
+                'author_name' => ['max' => 255, 'nullable' => true],
+                'author_email' => ['max' => 255, 'nullable' => true],
                 'ip_address' => ['max' => 45, 'nullable' => true],
                 'status' => ['max' => 50, 'nullable' => false, 'allowed' => ['draft', 'published', 'trash']],
             ],
@@ -126,6 +128,8 @@ final class SchemaDefinition
                 parent INT DEFAULT NULL,
                 reply_to INT DEFAULT NULL,
                 author INT DEFAULT NULL,
+                author_name VARCHAR(255) DEFAULT NULL,
+                author_email VARCHAR(255) DEFAULT NULL,
                 ip_address VARCHAR(45) DEFAULT NULL,
                 status VARCHAR(50) NOT NULL DEFAULT 'published',
                 body LONGTEXT NOT NULL,

@@ -485,7 +485,7 @@ final class Theme
             return '';
         }
 
-        $items = $this->comments->treeForContent((int)$item['id']);
+        $items = $this->comments->treeForContent((int)$item['id'], $this->pendingCommentIds((int)$item['id']));
         $html = '<div class="comments-list"><h2>' . esc_html(t('front.comments_title', 'Comments')) . '</h2>';
 
         if ($items === []) {
@@ -520,7 +520,7 @@ final class Theme
             return '';
         }
 
-        if (!$this->auth->check()) {
+        if (!$this->auth->check() && !$this->commentsAllowAnonymous()) {
             return '<p class="comments-login">' . sprintf(
                 esc_html(t('front.comments_login_required', 'Please %ssign in%s to comment.')),
                 '<a href="' . esc_url($this->url('auth/login')) . '">',
@@ -534,9 +534,14 @@ final class Theme
         $heading = $parentId > 0 ? t('front.comments_reply_title', 'Reply') : t('front.comments_form_title', 'Add comment');
         $formTargetId = $replyToId > 0 ? $replyToId : $parentId;
         $formId = $formTargetId > 0 ? ' id="comment-reply-form-' . $formTargetId . '" data-comment-reply-form' : '';
+        $authorFields = !$this->auth->check() ? sprintf(
+            '<div class="comment-form-fields"><label><span>%s</span><input type="text" name="author_name" autocomplete="name" required></label><label><span>%s</span><input type="email" name="author_email" autocomplete="email"></label></div>',
+            esc_html(t('common.name', 'Name')),
+            esc_html(t('common.email', 'Email')),
+        ) : '';
 
         return sprintf(
-            '<form class="%s"%s action="%s" method="post">%s<input type="hidden" name="parent" value="%d"><input type="hidden" name="reply_to" value="%d"><input type="hidden" name="return" value="%s"><h3>%s</h3><textarea name="body" rows="4" required></textarea><button type="submit">%s</button></form>',
+            '<form class="%s"%s action="%s" method="post">%s<input type="hidden" name="parent" value="%d"><input type="hidden" name="reply_to" value="%d"><input type="hidden" name="return" value="%s"><h3>%s</h3>%s<textarea name="body" rows="4" required></textarea><button type="submit">%s</button></form>',
             $parentId > 0 ? 'comment-form comment-reply-form' : 'comment-form',
             $formId,
             esc_url($this->formAction($action)),
@@ -545,6 +550,7 @@ final class Theme
             $replyToId,
             esc_attr($this->commentReturnPath()),
             esc_html($heading),
+            $authorFields,
             esc_html(t('front.comments_submit', 'Send comment')),
         );
     }
@@ -679,11 +685,15 @@ final class Theme
         $author = get_author($comment, t('front.comments_no_author', 'No author'));
 
         $commentId = (int)$comment['id'];
+        $isPending = (bool)($comment['is_pending'] ?? false);
         $threadParentId = $threadParentId > 0 ? $threadParentId : $commentId;
         $comment['author_name'] = $author;
         $html = '<li class="comment-item" id="comment-' . $commentId . '">';
-        $html .= '<article class="comment-card">';
-        $html .= '<header class="comment-meta"><span class="comment-author">' . get_avatar($comment, 'comment-avatar', 48) . '<strong>' . esc_html($author) . '</strong></span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
+        $html .= '<article class="comment-card' . ($isPending ? ' comment-card-pending' : '') . '">';
+        $html .= '<header class="comment-meta"><span class="comment-author">' . get_avatar($comment, 'comment-avatar', 48) . $this->commentAuthorName($comment, $author) . '</span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
+        if ($isPending) {
+            $html .= '<p class="comment-pending-notice">' . esc_html(t('front.comments_pending', 'Your comment is waiting for approval.')) . '</p>';
+        }
         if ((int)($comment['reply_to'] ?? 0) > 0) {
             $replyAuthor = trim((string)($comment['reply_to_author_name'] ?? ''));
             if ($replyAuthor === '') {
@@ -694,7 +704,7 @@ final class Theme
         $html .= '<div class="comment-body">' . esc_content($comment['body'] ?? '') . '</div>';
         $replyButton = '';
         $replyForm = '';
-        if ($allowReply && $this->auth->check()) {
+        if (!$isPending && $allowReply && ($this->auth->check() || $this->commentsAllowAnonymous())) {
             $replyButton = '<button class="comment-reply" type="button" data-comment-reply data-comment-reply-target="comment-reply-form-' . $commentId . '" aria-controls="comment-reply-form-' . $commentId . '" aria-expanded="false">' . esc_html(t('front.comments_reply_title', 'Reply')) . '</button>';
             $replyForm = $this->commentsForm($item, $threadParentId, $commentId !== $threadParentId ? $commentId : null);
         }
@@ -737,6 +747,40 @@ final class Theme
             $label,
             icon('concept'),
         );
+    }
+
+    private function commentsAllowAnonymous(): bool
+    {
+        return $this->setting('comments_allow_anonymous', '0') === '1';
+    }
+
+    private function commentAuthorName(array $comment, string $author): string
+    {
+        $authorId = (int)($comment['author'] ?? 0);
+        if ($authorId <= 0) {
+            return '<strong>' . esc_html($author) . '</strong>';
+        }
+
+        $url = $this->authorUrl([
+            'author' => $authorId,
+            'author_name' => $author,
+        ]);
+
+        return $url !== ''
+            ? '<a class="comment-author-link" href="' . esc_url($url) . '"><strong>' . esc_html($author) . '</strong></a>'
+            : '<strong>' . esc_html($author) . '</strong>';
+    }
+
+    private function pendingCommentIds(int $contentId): array
+    {
+        if ($contentId <= 0 || session_status() !== PHP_SESSION_ACTIVE) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(
+            array_map(static fn(mixed $id): int => (int)$id, (array)($_SESSION['pending_comments'][(string)$contentId] ?? [])),
+            static fn(int $id): bool => $id > 0
+        )));
     }
 
     private function commentDate(string $value): string

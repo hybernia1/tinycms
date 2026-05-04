@@ -400,6 +400,8 @@ return [
         'not_found' => 'Komentář nenalezen.',
         'empty_body' => 'Prázdný komentář',
         'body_required' => 'Tělo komentáře je povinné.',
+        'author_name_required' => 'Jméno je povinné.',
+        'author_email_invalid' => 'E-mail není validní.',
         'closed' => 'Komentáře jsou u tohoto obsahu zavřené.',
         'login_required' => 'Pro komentování se přihlaste.',
         'parent_invalid' => 'Cíl odpovědi není platný.',
@@ -430,11 +432,16 @@ return [
             'media_small_height' => 'Výška malého thumbnailu',
             'media_medium_width' => 'Šířka středního obrázku',
             'allow_registration' => 'Povolit registrace',
+            'comments_allow_anonymous' => 'Povolit anonymní komentáře',
             'website_url' => 'URL webu',
             'website_email' => 'E-mail webu',
         ],
         'options' => [
             'allow_registration' => [
+                'disabled' => 'Ne',
+                'enabled' => 'Ano',
+            ],
+            'comments_allow_anonymous' => [
                 'disabled' => 'Ne',
                 'enabled' => 'Ano',
             ],

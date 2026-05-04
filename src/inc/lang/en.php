@@ -400,6 +400,8 @@ return [
         'not_found' => 'Comment not found.',
         'empty_body' => 'Empty comment',
         'body_required' => 'Comment body is required.',
+        'author_name_required' => 'Name is required.',
+        'author_email_invalid' => 'Email is not valid.',
         'closed' => 'Comments are closed for this content.',
         'login_required' => 'Sign in to comment.',
         'parent_invalid' => 'Reply target is invalid.',
@@ -430,11 +432,16 @@ return [
             'media_small_height' => 'Small thumbnail height',
             'media_medium_width' => 'Medium image width',
             'allow_registration' => 'Allow registrations',
+            'comments_allow_anonymous' => 'Allow anonymous comments',
             'website_url' => 'Website URL',
             'website_email' => 'Website email',
         ],
         'options' => [
             'allow_registration' => [
+                'disabled' => 'No',
+                'enabled' => 'Yes',
+            ],
+            'comments_allow_anonymous' => [
                 'disabled' => 'No',
                 'enabled' => 'Yes',
             ],

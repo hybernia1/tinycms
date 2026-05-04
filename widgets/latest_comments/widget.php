@@ -49,7 +49,9 @@ return [
         $contentTable = Table::name('content');
         $usersTable = Table::name('users');
         $stmt = Connection::get()->prepare(implode("\n", [
-            'SELECT c.id, c.content, c.author, c.body, c.created, content.name AS content_name, u.name AS author_name, u.email AS author_email',
+            'SELECT c.id, c.content, c.author, c.body, c.created, content.name AS content_name,',
+            'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
+            'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email',
             "FROM $commentsTable c",
             "INNER JOIN $contentTable content ON content.id = c.content",
             "LEFT JOIN $commentsTable parent_comment ON parent_comment.id = c.parent",
