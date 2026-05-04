@@ -31,15 +31,12 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime): string 
             <span class="d-flex align-center gap-2">
                 <?= icon($statusIcon) ?>
                 <a class="admin-list-truncate" href="<?= esc_url($url('admin/comments/edit?id=' . $id)) ?>" title="<?= esc_attr($body) ?>"><?= esc_html($body !== '' ? $body : t('comments.empty_body')) ?></a>
-            </span>
-            <div class="text-muted small">
                 <?php if ($parentId > 0): ?>
-                    <?= esc_html(t('comments.child_of')) ?>
-                    <a href="<?= esc_url($url('admin/comments/edit?id=' . $parentId)) ?>">#<?= (int)$parentId ?></a>
+                    <a class="badge" href="<?= esc_url($url('admin/comments/edit?id=' . $parentId)) ?>" title="<?= esc_attr(t('comments.child_of')) ?>">↳ <?= esc_html(t('comments.child_badge')) ?> #<?= (int)$parentId ?></a>
                 <?php else: ?>
-                    <?= esc_html(t('comments.parent_thread')) ?>
+                    <span class="badge"><?= esc_html(t('comments.parent_badge')) ?></span>
                 <?php endif; ?>
-            </div>
+            </span>
             <div class="text-muted small">
                 <?php if ($contentId > 0): ?>
                     <a href="<?= esc_url($url('admin/content/edit?id=' . $contentId)) ?>"><?= esc_html((string)($row['content_name'] ?? ('#' . $contentId))) ?></a>
