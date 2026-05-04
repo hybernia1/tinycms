@@ -225,6 +225,18 @@ function get_content_comments_count(?array $source = null): int
     return Theme::current()?->commentsCount($item) ?? 0;
 }
 
+function get_content_views_count(?array $source = null): int
+{
+    $item = content_item($source);
+    return Theme::current()?->viewsCount($item) ?? 0;
+}
+
+function get_content_last_visit(?array $source = null): string
+{
+    $item = content_item($source);
+    return Theme::current()?->lastVisit($item) ?? '';
+}
+
 function get_content_comments_form(?array $source = null, ?int $parentId = null, ?int $replyToId = null): string
 {
     $item = content_item($source);

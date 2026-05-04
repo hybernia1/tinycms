@@ -11,6 +11,7 @@ if (!defined('BASE_DIR')) {
         'show_date' => theme_option_enabled('single_meta_date', true),
         'show_author' => theme_option_enabled('single_meta_author', true),
         'show_comments_count' => theme_option_enabled('single_meta_comments'),
+        'show_views_count' => theme_option_enabled('single_meta_views'),
     ]); ?>
     <?php $excerpt = get_content_excerpt(); ?>
     <?php if ($excerpt !== ''): ?>

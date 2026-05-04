@@ -26,6 +26,7 @@ return [
     'theme.customizer_fields.meta_date' => 'Show date',
     'theme.customizer_fields.meta_author' => 'Show author',
     'theme.customizer_fields.meta_comments' => 'Show comments count',
+    'theme.customizer_fields.meta_views' => 'Show unique views count',
     'theme.customizer_fields.show_terms' => 'Show term list',
     'theme.customizer_fields.color_bg' => 'Page background',
     'theme.customizer_fields.color_surface' => 'Surface',
@@ -74,5 +75,6 @@ return [
     'front.comments_no_author' => 'No author',
     'front.comments_edit' => 'Edit',
     'front.comments_count' => '%d comments',
+    'front.views_count' => '%d unique views',
     'front.comments_pending' => 'Your comment is waiting for approval.',
 ];

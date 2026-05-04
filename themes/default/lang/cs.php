@@ -26,6 +26,7 @@ return [
     'theme.customizer_fields.meta_date' => 'Zobrazit datum',
     'theme.customizer_fields.meta_author' => 'Zobrazit autora',
     'theme.customizer_fields.meta_comments' => 'Zobrazit počet komentářů',
+    'theme.customizer_fields.meta_views' => 'Zobrazit počet unikátních zobrazení',
     'theme.customizer_fields.show_terms' => 'Zobrazit seznam termů',
     'theme.customizer_fields.color_bg' => 'Pozadí stránky',
     'theme.customizer_fields.color_surface' => 'Plocha',
@@ -74,5 +75,6 @@ return [
     'front.comments_no_author' => 'Bez autora',
     'front.comments_edit' => 'Upravit',
     'front.comments_count' => 'Komentářů: %d',
+    'front.views_count' => 'Unikátních zobrazení: %d',
     'front.comments_pending' => 'Váš komentář čeká na schválení.',
 ];

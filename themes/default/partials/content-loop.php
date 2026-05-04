@@ -23,6 +23,7 @@ if (!defined('BASE_DIR')) {
                     'show_date' => theme_option_enabled('archive_meta_date', true),
                     'show_author' => theme_option_enabled('archive_meta_author', true),
                     'show_comments_count' => theme_option_enabled('archive_meta_comments', true),
+                    'show_views_count' => theme_option_enabled('archive_meta_views'),
                 ]); ?>
                 <?php $excerpt = get_content_excerpt($content); ?>
                 <?php if ($excerpt !== ''): ?>

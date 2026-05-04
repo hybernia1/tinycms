@@ -5,6 +5,7 @@ namespace App\Service\Front;
 
 use App\Service\Application\Menu;
 use App\Service\Application\Comment;
+use App\Service\Application\ContentStats;
 use App\Service\Application\Widget;
 use App\Service\Auth\Auth;
 use App\Service\Infrastructure\Router\Router;
@@ -23,6 +24,8 @@ final class Theme
     private Slugger $slugger;
     private array $context = [];
     private array $commentCountCache = [];
+    private array $viewsCountCache = [];
+    private array $lastVisitCache = [];
     private ?\Closure $includeThemeFile = null;
 
     public function __construct(
@@ -32,6 +35,7 @@ final class Theme
         private Menu $menu,
         private Widget $widgets,
         private Comment $comments,
+        private ContentStats $contentStats,
         private Auth $auth,
         private Csrf $csrf
     ) {
@@ -514,6 +518,34 @@ final class Theme
         return $this->commentCountCache[$contentId];
     }
 
+    public function viewsCount(array $item): int
+    {
+        $contentId = (int)($item['id'] ?? 0);
+        if ($contentId <= 0) {
+            return 0;
+        }
+
+        if (!array_key_exists($contentId, $this->viewsCountCache)) {
+            $this->viewsCountCache[$contentId] = $this->contentStats->viewsCount($contentId);
+        }
+
+        return $this->viewsCountCache[$contentId];
+    }
+
+    public function lastVisit(array $item): string
+    {
+        $contentId = (int)($item['id'] ?? 0);
+        if ($contentId <= 0) {
+            return '';
+        }
+
+        if (!array_key_exists($contentId, $this->lastVisitCache)) {
+            $this->lastVisitCache[$contentId] = $this->contentStats->lastVisit($contentId);
+        }
+
+        return $this->lastVisitCache[$contentId];
+    }
+
     public function commentsForm(array $item, ?int $parentId = null, ?int $replyToId = null): string
     {
         if (!$this->commentsEnabled($item)) {
@@ -933,6 +965,14 @@ final class Theme
             if ($author !== '') {
                 $payload['author'] = ['@type' => 'Person', 'name' => $author];
             }
+            $commentsCount = $this->commentsCount($item);
+            if ($commentsCount > 0) {
+                $payload['commentCount'] = $commentsCount;
+            }
+            $interactionStatistic = $this->interactionStatistic($this->viewsCount($item), $commentsCount);
+            if ($interactionStatistic !== []) {
+                $payload['interactionStatistic'] = $interactionStatistic;
+            }
             $terms = array_values(array_filter(array_map(static fn(array $entry): string => trim((string)($entry['name'] ?? '')), (array)($item['terms'] ?? []))));
             if ($terms !== []) {
                 $payload['keywords'] = implode(', ', $terms);
@@ -982,6 +1022,27 @@ final class Theme
         }
 
         return $this->jsonEncode($payload);
+    }
+
+    private function interactionStatistic(int $viewsCount, int $commentsCount): array
+    {
+        $items = [];
+        if ($viewsCount > 0) {
+            $items[] = [
+                '@type' => 'InteractionCounter',
+                'interactionType' => ['@type' => 'ReadAction'],
+                'userInteractionCount' => $viewsCount,
+            ];
+        }
+        if ($commentsCount > 0) {
+            $items[] = [
+                '@type' => 'InteractionCounter',
+                'interactionType' => ['@type' => 'CommentAction'],
+                'userInteractionCount' => $commentsCount,
+            ];
+        }
+
+        return $items;
     }
 
     private function plainText(string $value, int $limit = 160): string

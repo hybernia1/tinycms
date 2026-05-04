@@ -35,6 +35,7 @@ register_theme_section('single_content', t('theme.customizer_sections.single_con
     'single_meta_date',
     'single_meta_author',
     'single_meta_comments',
+    'single_meta_views',
     'single_show_terms',
 ]);
 register_theme_section('archive', t('theme.customizer_sections.archive'), [
@@ -42,6 +43,7 @@ register_theme_section('archive', t('theme.customizer_sections.archive'), [
     'archive_meta_date',
     'archive_meta_author',
     'archive_meta_comments',
+    'archive_meta_views',
 ]);
 register_theme_section('colors', t('theme.customizer_sections.colors'), [
     'color_bg',
