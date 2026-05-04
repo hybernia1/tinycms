@@ -326,7 +326,7 @@ final class Comment
     public function pendingCount(): int
     {
         $commentsTable = Table::name('comments');
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $commentsTable WHERE status = :status");
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $commentsTable WHERE parent IS NULL AND status = :status");
         $stmt->execute(['status' => self::STATUS_DRAFT]);
 
         return (int)($stmt->fetchColumn() ?: 0);
