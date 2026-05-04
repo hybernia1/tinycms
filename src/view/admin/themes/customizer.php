@@ -7,6 +7,9 @@ $activeTheme = (string)$activeTheme;
 $activeThemeName = (string)$activeThemeName;
 $previewUrl = trim((string)$previewUrl);
 $previewBase = $previewUrl !== '' ? $previewUrl : $absoluteUrl('');
+$enabledWidgetAreasValue = strtolower(trim((string)($values['enabled_widget_areas'] ?? '*')));
+$enabledWidgetAreas = array_filter(array_map('trim', explode(',', $enabledWidgetAreasValue)));
+$allWidgetAreasEnabled = $enabledWidgetAreasValue === '*';
 
 $sectionLabel = static function (string $key, array $section): string {
     $label = trim((string)$section['label']);
@@ -40,6 +43,7 @@ $sectionLabel = static function (string $key, array $section): string {
             >
                 <?= $csrfField() ?>
                 <input type="hidden" name="theme[front_theme]" value="<?= esc_attr($activeTheme) ?>">
+                <input type="hidden" name="theme[enabled_widget_areas]" value="<?= esc_attr($enabledWidgetAreasValue) ?>" data-widget-area-visibility-value>
 
                 <section class="customizer-screen is-active" data-customizer-screen="main">
                     <div class="customizer-nav-list">
@@ -105,23 +109,39 @@ $sectionLabel = static function (string $key, array $section): string {
                 data-preview-refresh-on-success
             >
                 <?= $csrfField() ?>
+                <input type="hidden" name="enabled_widget_areas" value="<?= esc_attr($enabledWidgetAreasValue) ?>" data-widget-area-visibility-value>
                 <section class="customizer-screen" data-customizer-screen="widgets" data-customizer-widget-section>
                     <div class="customizer-subhead">
                         <button class="customizer-subhead-back" type="button" data-customizer-back="main" aria-label="<?= esc_attr(t('common.back')) ?>" title="<?= esc_attr(t('common.back')) ?>"><?= icon('prev') ?></button>
                         <h2><?= esc_html(t('admin.menu.widgets')) ?></h2>
                     </div>
-                    <?php if ($widgetAreas !== [] && $widgets !== []): ?>
+                    <?php if ($widgetAreas !== []): ?>
                     <div class="customizer-nav-list">
                         <?php foreach ($widgetAreas as $area): ?>
                             <?php $area = (string)$area; ?>
-                            <button class="customizer-nav-item" type="button" data-customizer-open="<?= esc_attr('widget-area-' . $area) ?>">
-                                <span><?= esc_html((string)($widgetAreaLabels[$area] ?? $area)) ?></span>
-                                <?= icon('next') ?>
-                            </button>
+                            <?php
+                                $areaEnabled = $allWidgetAreasEnabled || in_array($area, $enabledWidgetAreas, true);
+                                $toggleLabel = $areaEnabled ? t('widgets.hide_area') : t('widgets.show_area');
+                            ?>
+                            <div class="customizer-nav-row<?= $areaEnabled ? '' : ' is-hidden' ?>" data-widget-area-visibility-row>
+                                <button class="customizer-nav-item" type="button" data-customizer-open="<?= esc_attr('widget-area-' . $area) ?>">
+                                    <span><?= esc_html((string)($widgetAreaLabels[$area] ?? $area)) ?></span>
+                                    <?= icon('next') ?>
+                                </button>
+                                <button
+                                    class="btn btn-light btn-icon customizer-area-visibility-toggle"
+                                    type="button"
+                                    value="<?= esc_attr($area) ?>"
+                                    data-widget-area-visibility-toggle
+                                    aria-pressed="<?= $areaEnabled ? 'true' : 'false' ?>"
+                                    aria-label="<?= esc_attr($toggleLabel) ?>"
+                                    title="<?= esc_attr($toggleLabel) ?>"
+                                >
+                                    <span data-widget-area-visibility-icon><?= icon($areaEnabled ? 'hide' : 'show') ?></span>
+                                </button>
+                            </div>
                         <?php endforeach; ?>
                     </div>
-                    <?php elseif ($widgets === []): ?>
-                    <p class="text-muted m-0"><?= esc_html(t('widgets.no_widgets')) ?></p>
                     <?php else: ?>
                     <p class="text-muted m-0"><?= esc_html(t('widgets.no_areas')) ?></p>
                     <?php endif; ?>

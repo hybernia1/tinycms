@@ -15,6 +15,13 @@ $fieldClasses = ['customizer-field', 'customizer-field-' . $fieldType];
 if ($fieldType !== 'checkbox') {
     $fieldClasses[] = 'form-floating-field';
 }
+$colorIsTransparent = strtolower(trim($fieldValue)) === 'transparent';
+$colorDefaultValue = strtolower(trim((string)($field['default'] ?? '')));
+$colorPickerValue = preg_match('/^#[0-9a-f]{6}$/i', $fieldValue) === 1 ? strtolower($fieldValue) : '#000000';
+if ($colorIsTransparent && preg_match('/^#[0-9a-f]{6}$/i', $colorDefaultValue) === 1) {
+    $colorPickerValue = $colorDefaultValue;
+}
+$colorFieldValue = $colorIsTransparent ? 'transparent' : $colorPickerValue;
 ?>
 <div class="<?= esc_attr(implode(' ', $fieldClasses)) ?>">
     <?php if ($fieldType === 'checkbox'): ?>
@@ -104,7 +111,14 @@ if ($fieldType !== 'checkbox') {
                 step="1"
             >
         <?php elseif ($fieldType === 'color'): ?>
-            <input type="color" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>">
+            <div class="customizer-color-control" data-color-field>
+                <input type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($colorFieldValue) ?>" data-color-value>
+                <input type="color" value="<?= esc_attr($colorPickerValue) ?>" data-color-picker<?= $colorIsTransparent ? ' disabled' : '' ?>>
+                <label class="customizer-color-transparent">
+                    <input type="checkbox" value="1" data-color-transparent<?= $colorIsTransparent ? ' checked' : '' ?>>
+                    <span><?= esc_html(t('themes.color_transparent')) ?></span>
+                </label>
+            </div>
         <?php else: ?>
             <input type="text" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>">
         <?php endif; ?>
