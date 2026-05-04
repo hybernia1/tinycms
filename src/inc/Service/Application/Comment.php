@@ -138,27 +138,16 @@ final class Comment
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $search = mb_substr(trim($search), 0, 100);
-        $where = ['c.parent IS NULL'];
+        $where = [];
         $params = [];
 
         if ($status !== 'all') {
-            if ($status === self::STATUS_DRAFT) {
-                $where[] = implode(' ', [
-                    '(c.status = :status',
-                    "OR EXISTS (SELECT 1 FROM $commentsTable child WHERE child.parent = c.id AND child.status = :status))",
-                ]);
-            } else {
-                $where[] = 'c.status = :status';
-            }
+            $where[] = 'c.status = :status';
             $params['status'] = $status;
         }
 
         if ($search !== '') {
-            $where[] = implode(' ', [
-                '(c.body LIKE :search OR content.name LIKE :search OR u.name LIKE :search OR u.email LIKE :search OR c.author_name LIKE :search OR c.author_email LIKE :search',
-                "OR EXISTS (SELECT 1 FROM $commentsTable child LEFT JOIN $usersTable child_user ON child_user.id = child.author",
-                'WHERE child.parent = c.id AND (child.body LIKE :search OR child_user.name LIKE :search OR child_user.email LIKE :search OR child.author_name LIKE :search OR child.author_email LIKE :search)))',
-            ]);
+            $where[] = '(c.body LIKE :search OR content.name LIKE :search OR u.name LIKE :search OR u.email LIKE :search OR c.author_name LIKE :search OR c.author_email LIKE :search)';
             $params['search'] = '%' . $search . '%';
         }
 
@@ -302,13 +291,7 @@ final class Comment
     public function statusCounts(array $statuses = []): array
     {
         $commentsTable = Table::name('comments');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.status,',
-            "       EXISTS (SELECT 1 FROM $commentsTable child WHERE child.parent = c.id AND child.status = :draft_status) AS has_draft_child",
-            "FROM $commentsTable c",
-            'WHERE c.parent IS NULL',
-        ]));
-        $stmt->execute(['draft_status' => self::STATUS_DRAFT]);
+        $stmt = $this->pdo->query("SELECT status FROM $commentsTable");
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
         $counts = [
             'all' => count($rows),
@@ -324,10 +307,6 @@ final class Comment
                 $counts[$value] = 0;
             }
             $counts[$value]++;
-
-            if ($value !== self::STATUS_DRAFT && (int)($row['has_draft_child'] ?? 0) === 1) {
-                $counts[self::STATUS_DRAFT] = ($counts[self::STATUS_DRAFT] ?? 0) + 1;
-            }
         }
 
         foreach ($statuses as $status) {
