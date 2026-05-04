@@ -78,9 +78,7 @@ $contentTabsRows = static function (array $items, bool $showThumbnail, bool $sho
             'class' => 'content-tabs-thumb',
             'wrap' => false,
         ]) : '';
-        $meta = $mode === 'hot'
-            ? ''
-            : esc_html(Date::formatDateTimeValue((string)($item['updated'] ?? $item['created'] ?? '')));
+        $meta = esc_html(Date::formatDateTimeValue((string)($item['updated'] ?? $item['created'] ?? '')));
         $excerpt = $showExcerpt ? trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode((string)($item['excerpt'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '') : '';
         if ($showExcerpt && $excerpt === '') {
             $excerpt = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode((string)($item['body'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
