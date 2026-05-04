@@ -78,16 +78,17 @@ $contentTabsRows = static function (array $items, bool $showThumbnail, string $m
             'class' => 'content-tabs-thumb',
             'wrap' => false,
         ]) : '';
+        $viewsCount = (int)($item['views_count'] ?? 0);
         $meta = $mode === 'hot'
-            ? sprintf(t('widgets.content_tabs.views_count'), (int)($item['views_count'] ?? 0))
-            : Date::formatDateTimeValue((string)($item['updated'] ?? $item['created'] ?? ''));
+            ? '<span class="content-tabs-views" title="' . esc_attr(sprintf(t('front.views_count', '%d unique views'), $viewsCount)) . '">' . icon('show') . '<span>' . $viewsCount . '</span></span>'
+            : esc_html(Date::formatDateTimeValue((string)($item['updated'] ?? $item['created'] ?? '')));
 
         return implode('', [
             '<li>',
             '<a class="content-tabs-item' . ($thumbnail !== '' ? ' content-tabs-item-thumb' : '') . '" href="' . esc_url($url) . '">',
             $thumbnail,
             '<span class="content-tabs-text"><span class="content-tabs-title">' . esc_html($name) . '</span>',
-            $meta !== '' ? '<span class="content-tabs-meta">' . esc_html($meta) . '</span>' : '',
+            $meta !== '' ? '<span class="content-tabs-meta">' . $meta . '</span>' : '',
             '</span></a></li>',
         ]);
     }, $items);
