@@ -96,6 +96,16 @@ return [
         'title_suffix' => 'Admin',
         'dashboard' => [
             'logged_in' => 'Přihlášen',
+            'recent_content' => 'Poslední obsah',
+            'recent_comments' => 'Poslední komentáře',
+            'stats' => [
+                'content_all' => 'Obsah',
+                'content_published' => 'Publikováno',
+                'content_draft' => 'Drafty',
+                'comments_pending' => 'Ke schválení',
+                'media_all' => 'Média',
+                'users_all' => 'Uživatelé',
+            ],
         ],
         'menu' => [
             'dashboard' => 'Dashboard',
