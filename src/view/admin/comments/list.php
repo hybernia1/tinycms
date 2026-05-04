@@ -30,7 +30,11 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime): string 
         <td>
             <span class="d-flex align-center gap-2">
                 <?= icon($statusIcon) ?>
-                <a class="admin-list-truncate" href="<?= esc_url($url('admin/comments/edit?id=' . $id)) ?>" title="<?= esc_attr($body) ?>"><?= esc_html($body !== '' ? $body : t('comments.empty_body')) ?></a>
+                <?php if ($parentId > 0): ?>
+                    <span class="admin-list-truncate" title="<?= esc_attr($body) ?>"><?= esc_html($body !== '' ? $body : t('comments.empty_body')) ?></span>
+                <?php else: ?>
+                    <a class="admin-list-truncate" href="<?= esc_url($url('admin/comments/edit?id=' . $id)) ?>" title="<?= esc_attr($body) ?>"><?= esc_html($body !== '' ? $body : t('comments.empty_body')) ?></a>
+                <?php endif; ?>
                 <?php if ($parentId > 0): ?>
                     <a class="badge" href="<?= esc_url($url('admin/comments/edit?id=' . $parentId)) ?>" title="<?= esc_attr(t('comments.child_of')) ?>">↳ <?= esc_html(t('comments.child_badge')) ?> #<?= (int)$parentId ?></a>
                 <?php else: ?>

@@ -98,9 +98,11 @@
                 <td>
                     <span class="d-flex align-center gap-2">
                         ${icon(statusIcon)}
-                        ${canEdit
-        ? `<a class="admin-list-truncate" href="${esc(editBase)}${id}" title="${esc(body)}">${esc(body)}</a>`
-        : `<span class="admin-list-truncate" title="${esc(body)}">${esc(body)}</span>`}
+                        ${parentId > 0
+        ? `<span class="admin-list-truncate" title="${esc(body)}">${esc(body)}</span>`
+        : (canEdit
+            ? `<a class="admin-list-truncate" href="${esc(editBase)}${id}" title="${esc(body)}">${esc(body)}</a>`
+            : `<span class="admin-list-truncate" title="${esc(body)}">${esc(body)}</span>`)}
                         ${parentBadge}
                     </span>
                     <div class="text-muted small">
