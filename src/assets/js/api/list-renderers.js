@@ -74,6 +74,7 @@
     const commentsRowHtml = (item, { editBase, context }) => {
         const id = Number(item.id || 0);
         const contentId = Number(item.content || 0);
+        const parentId = Number(item.parent || 0);
         const repliesCount = Number(item.replies_count || 0);
         const status = String(item.status || 'draft');
         const isTrash = status === 'trash';
@@ -86,6 +87,11 @@
         const author = String(item.author_name || item.author_email || t('common.no_author') || '-');
         const body = String(item.body || t('comments.empty_body') || '');
         const contentEditBase = String(context.contentEditBase || '');
+        const parentBadge = parentId > 0
+            ? (canEdit
+                ? `<a class="badge" href="${esc(editBase)}${parentId}" title="${esc(t('comments.child_of'))}">↳ ${esc(t('comments.child_badge'))} #${parentId}</a>`
+                : `<span class="badge">↳ ${esc(t('comments.child_badge'))} #${parentId}</span>`)
+            : `<span class="badge">${esc(t('comments.parent_badge'))}</span>`;
 
         return `
             <tr>
@@ -95,6 +101,7 @@
                         ${canEdit
         ? `<a class="admin-list-truncate" href="${esc(editBase)}${id}" title="${esc(body)}">${esc(body)}</a>`
         : `<span class="admin-list-truncate" title="${esc(body)}">${esc(body)}</span>`}
+                        ${parentBadge}
                     </span>
                     <div class="text-muted small">
                         ${contentId > 0 && contentEditBase !== '' ? `<a href="${esc(contentEditBase)}${contentId}">${esc(item.content_name || '#' + contentId)}</a>` : '<span>-</span>'}
