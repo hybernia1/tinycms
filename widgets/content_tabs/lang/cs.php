@@ -17,7 +17,6 @@ return [
             'show_excerpt' => 'Zobrazit perex',
             'hot_default' => 'Hot content',
             'latest_default' => 'Poslední příspěvky',
-            'views_count' => 'Unikátních zobrazení: %d',
             'empty' => 'Žádný obsah nebyl nalezen.',
         ],
     ],

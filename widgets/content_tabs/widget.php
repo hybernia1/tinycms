@@ -78,9 +78,8 @@ $contentTabsRows = static function (array $items, bool $showThumbnail, bool $sho
             'class' => 'content-tabs-thumb',
             'wrap' => false,
         ]) : '';
-        $viewsCount = (int)($item['views_count'] ?? 0);
         $meta = $mode === 'hot'
-            ? '<span class="content-tabs-views" title="' . esc_attr(sprintf(t('front.views_count', '%d unique views'), $viewsCount)) . '">' . icon('show') . '<span>' . $viewsCount . '</span></span>'
+            ? ''
             : esc_html(Date::formatDateTimeValue((string)($item['updated'] ?? $item['created'] ?? '')));
         $excerpt = $showExcerpt ? trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode((string)($item['excerpt'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '') : '';
         if ($showExcerpt && $excerpt === '') {

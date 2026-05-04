@@ -175,7 +175,6 @@ p, ul, ol { margin-top: 0; }
 .content-tabs-excerpt { color: var(--text); font-size: .9rem; line-height: 1.45; overflow-wrap: anywhere; }
 .content-tabs-meta, .content-tabs-empty { color: var(--muted); }
 .content-tabs-meta { font-size: .86rem; line-height: 1.35; }
-.content-tabs-views { display: inline-flex; align-items: center; gap: .35rem; }
 .content-tabs-empty { margin: 0; }
 .social-link-facebook .icon { color: #1877f2; }
 .social-link-instagram .icon { color: #c0175b; }

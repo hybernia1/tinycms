@@ -17,7 +17,6 @@ return [
             'show_excerpt' => 'Show excerpt',
             'hot_default' => 'Hot content',
             'latest_default' => 'Latest posts',
-            'views_count' => '%d unique views',
             'empty' => 'No content found.',
         ],
     ],
