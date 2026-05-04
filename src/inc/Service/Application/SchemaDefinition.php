@@ -31,6 +31,9 @@ final class SchemaDefinition
                 'ip_address' => ['max' => 45, 'nullable' => true],
                 'status' => ['max' => 50, 'nullable' => false, 'allowed' => ['draft', 'published', 'trash']],
             ],
+            'content_stats' => [
+                'ip_address' => ['max' => 45, 'nullable' => false],
+            ],
             'terms' => [
                 'name' => ['max' => 255, 'nullable' => false],
             ],
@@ -57,6 +60,7 @@ final class SchemaDefinition
         $media = $prefix . 'media';
         $content = $prefix . 'content';
         $comments = $prefix . 'comments';
+        $contentStats = $prefix . 'content_stats';
         $terms = $prefix . 'terms';
         $contentTerms = $prefix . 'content_terms';
         $contentMedia = $prefix . 'content_media';
@@ -68,6 +72,7 @@ final class SchemaDefinition
         $fkCommentsParent = self::constraintName($prefix, 'fk_comments_parent');
         $fkCommentsReplyTo = self::constraintName($prefix, 'fk_comments_reply_to');
         $fkCommentsAuthorUser = self::constraintName($prefix, 'fk_comments_author_user');
+        $fkContentStatsContent = self::constraintName($prefix, 'fk_content_stats_content');
         $fkContentTermsContent = self::constraintName($prefix, 'fk_content_terms_content');
         $fkContentTermsTerm = self::constraintName($prefix, 'fk_content_terms_term');
         $fkContentMediaContent = self::constraintName($prefix, 'fk_content_media_content');
@@ -145,6 +150,15 @@ final class SchemaDefinition
                 CONSTRAINT $fkCommentsParent FOREIGN KEY (parent) REFERENCES $comments (id) ON DELETE CASCADE,
                 CONSTRAINT $fkCommentsReplyTo FOREIGN KEY (reply_to) REFERENCES $comments (id) ON DELETE SET NULL,
                 CONSTRAINT $fkCommentsAuthorUser FOREIGN KEY (author) REFERENCES $users (id) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
+            "CREATE TABLE IF NOT EXISTS $contentStats (
+                content INT NOT NULL,
+                ip_address VARCHAR(45) NOT NULL,
+                visits INT UNSIGNED NOT NULL DEFAULT 1,
+                last_visit DATETIME NOT NULL DEFAULT (NOW()),
+                PRIMARY KEY (content, ip_address),
+                KEY idx_content_stats_last_visit (last_visit),
+                CONSTRAINT $fkContentStatsContent FOREIGN KEY (content) REFERENCES $content (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
             "CREATE TABLE IF NOT EXISTS $terms (
                 id INT NOT NULL AUTO_INCREMENT,

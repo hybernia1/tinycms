@@ -5,6 +5,7 @@ namespace App\Controller\Front;
 
 use App\Service\Auth\Auth;
 use App\Service\Application\Content as ContentService;
+use App\Service\Application\ContentStats;
 use App\Service\Application\Settings;
 use App\Service\Application\Term;
 use App\Service\Application\User;
@@ -30,6 +31,7 @@ final class Front
         private Term $terms,
         private User $users,
         private Auth $auth,
+        private ContentStats $contentStats,
         private array $resolvedSettings = []
     ) {
         $this->pdo = Connection::get();
@@ -45,6 +47,7 @@ final class Front
         $contentId = (int)($settings['front_home_content'] ?? 0);
         $item = $contentId > 0 ? $this->findPublishedContent($contentId) : null;
         if ($item !== null) {
+            $this->recordView($item);
             $this->view->homeContent($item);
             return;
         }
@@ -70,6 +73,8 @@ final class Front
         if (!$preview && $slug !== $canonicalSlug) {
             $redirect($canonicalSlug, true);
         }
+
+        $this->recordView($item, $preview);
 
         $this->view->singleContent($item);
     }
@@ -344,6 +349,20 @@ final class Front
         return $preview !== '' && $preview !== '0' && $this->auth->isAdmin();
     }
 
+    private function recordView(array $item, bool $contentPreview = false): void
+    {
+        if ($contentPreview || $this->customizerPreview()) {
+            return;
+        }
+
+        $this->contentStats->recordView((int)($item['id'] ?? 0), $this->ipAddress());
+    }
+
+    private function customizerPreview(): bool
+    {
+        return trim((string)($_GET['theme_preview'] ?? '')) !== '' && $this->auth->isAdmin();
+    }
+
     private function paginatePublished(int $page, int $perPage, string $search = ''): array
     {
         $search = $this->sanitizeSearch($search);
@@ -526,6 +545,11 @@ final class Front
     private function now(): string
     {
         return date('Y-m-d H:i:s');
+    }
+
+    private function ipAddress(): string
+    {
+        return trim((string)($_SERVER['REMOTE_ADDR'] ?? ''));
     }
 
     private function absoluteUrl(string $path): string
