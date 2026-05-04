@@ -14,6 +14,7 @@ return [
             'latest_label' => 'Latest tab label',
             'first_tab' => 'First tab',
             'show_thumbnail' => 'Show thumbnail',
+            'show_excerpt' => 'Show excerpt',
             'hot_default' => 'Hot content',
             'latest_default' => 'Latest posts',
             'views_count' => '%d unique views',

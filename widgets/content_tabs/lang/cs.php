@@ -14,6 +14,7 @@ return [
             'latest_label' => 'Popisek posledních příspěvků',
             'first_tab' => 'První tab',
             'show_thumbnail' => 'Zobrazit miniaturu',
+            'show_excerpt' => 'Zobrazit perex',
             'hot_default' => 'Hot content',
             'latest_default' => 'Poslední příspěvky',
             'views_count' => 'Unikátních zobrazení: %d',

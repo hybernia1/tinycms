@@ -21,13 +21,13 @@ $fetchContentTabs = static function (int $limit): array {
 
     try {
         $hot = Connection::get()->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.created, c.updated, c.thumbnail, m.path AS thumbnail_path, m.name AS thumbnail_name,',
+            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path AS thumbnail_path, m.name AS thumbnail_name,',
             'COUNT(cs.ip_address) AS views_count, MAX(cs.last_visit) AS last_visit',
             "FROM $contentTable c",
             "INNER JOIN $contentStatsTable cs ON cs.content = c.id AND cs.last_visit >= :since",
             "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
             'WHERE ' . Content::publicWhere('c'),
-            'GROUP BY c.id, c.name, c.created, c.updated, c.thumbnail, m.path, m.name',
+            'GROUP BY c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path, m.name',
             'ORDER BY views_count DESC, last_visit DESC, c.id DESC',
             'LIMIT :limit',
         ]));
@@ -42,7 +42,7 @@ $fetchContentTabs = static function (int $limit): array {
     }
 
     $latest = Connection::get()->prepare(implode("\n", [
-        'SELECT c.id, c.name, c.created, c.updated, c.thumbnail, m.path AS thumbnail_path, m.name AS thumbnail_name,',
+        'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path AS thumbnail_path, m.name AS thumbnail_name,',
         '0 AS views_count, NULL AS last_visit',
         "FROM $contentTable c",
         "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
@@ -61,9 +61,9 @@ $fetchContentTabs = static function (int $limit): array {
     ];
 };
 
-$contentTabsRows = static function (array $items, bool $showThumbnail, string $mode): string {
+$contentTabsRows = static function (array $items, bool $showThumbnail, bool $showExcerpt, string $mode): string {
     $slugger = new Slugger();
-    $rows = array_map(static function (array $item) use ($slugger, $showThumbnail, $mode): string {
+    $rows = array_map(static function (array $item) use ($slugger, $showThumbnail, $showExcerpt, $mode): string {
         $id = (int)($item['id'] ?? 0);
         $name = trim((string)($item['name'] ?? ''));
         if ($id <= 0 || $name === '') {
@@ -82,12 +82,20 @@ $contentTabsRows = static function (array $items, bool $showThumbnail, string $m
         $meta = $mode === 'hot'
             ? '<span class="content-tabs-views" title="' . esc_attr(sprintf(t('front.views_count', '%d unique views'), $viewsCount)) . '">' . icon('show') . '<span>' . $viewsCount . '</span></span>'
             : esc_html(Date::formatDateTimeValue((string)($item['updated'] ?? $item['created'] ?? '')));
+        $excerpt = $showExcerpt ? trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode((string)($item['excerpt'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '') : '';
+        if ($showExcerpt && $excerpt === '') {
+            $excerpt = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode((string)($item['body'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
+        }
+        if (mb_strlen($excerpt) > 120) {
+            $excerpt = mb_substr($excerpt, 0, 117) . '...';
+        }
 
         return implode('', [
             '<li>',
             '<a class="content-tabs-item' . ($thumbnail !== '' ? ' content-tabs-item-thumb' : '') . '" href="' . esc_url($url) . '">',
             $thumbnail,
             '<span class="content-tabs-text"><span class="content-tabs-title">' . esc_html($name) . '</span>',
+            $excerpt !== '' ? '<span class="content-tabs-excerpt">' . esc_html($excerpt) . '</span>' : '',
             $meta !== '' ? '<span class="content-tabs-meta">' . $meta . '</span>' : '',
             '</span></a></li>',
         ]);
@@ -140,6 +148,12 @@ return [
             'label' => t('widgets.content_tabs.show_thumbnail'),
             'default' => '1',
         ],
+        [
+            'name' => 'show_excerpt',
+            'type' => 'checkbox',
+            'label' => t('widgets.content_tabs.show_excerpt'),
+            'default' => '0',
+        ],
     ],
     'render' => static function (array $data) use ($fetchContentTabs, $contentTabsRows): string {
         static $instance = 0;
@@ -150,6 +164,7 @@ return [
         $latestLabel = trim((string)($data['latest_label'] ?? ''));
         $firstTab = (string)($data['first_tab'] ?? 'hot') === 'latest' ? 'latest' : 'hot';
         $showThumbnail = (string)($data['show_thumbnail'] ?? '1') === '1';
+        $showExcerpt = (string)($data['show_excerpt'] ?? '0') === '1';
         $items = $fetchContentTabs($limit);
 
         if (($items['hot'] ?? []) === [] && ($items['latest'] ?? []) === []) {
@@ -172,8 +187,8 @@ return [
             . '<label class="content-tabs-tab content-tabs-tab-latest" for="' . esc_attr($latestId) . '">' . esc_html($latestLabel) . '</label>'
             . '</div>'
             . '<div class="content-tabs-panels">'
-            . '<div class="content-tabs-panel content-tabs-panel-hot">' . $contentTabsRows((array)($items['hot'] ?? []), $showThumbnail, 'hot') . '</div>'
-            . '<div class="content-tabs-panel content-tabs-panel-latest">' . $contentTabsRows((array)($items['latest'] ?? []), $showThumbnail, 'latest') . '</div>'
+            . '<div class="content-tabs-panel content-tabs-panel-hot">' . $contentTabsRows((array)($items['hot'] ?? []), $showThumbnail, $showExcerpt, 'hot') . '</div>'
+            . '<div class="content-tabs-panel content-tabs-panel-latest">' . $contentTabsRows((array)($items['latest'] ?? []), $showThumbnail, $showExcerpt, 'latest') . '</div>'
             . '</div></div>';
     },
 ];
