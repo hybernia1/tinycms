@@ -29,7 +29,7 @@ final class ThemeCustomizer
     public static function normalizeFields(array $fields): array
     {
         $result = [];
-        $allowedTypes = ['text', 'textarea', 'select', 'checkbox', 'number', 'file', 'color', 'content_picker'];
+        $allowedTypes = ['text', 'textarea', 'select', 'checkbox', 'number', 'file', 'color', 'content_picker', 'widget_area_visibility'];
 
         foreach ($fields as $key => $field) {
             if (!is_array($field)) {
@@ -122,6 +122,10 @@ final class ThemeCustomizer
             return $this->normalizePublishedContentId($value);
         }
 
+        if ($type === 'widget_area_visibility') {
+            return $this->normalizeSlugList($value, '*');
+        }
+
         if ($type === 'color') {
             return $this->normalizeColor($value, $default);
         }
@@ -156,6 +160,10 @@ final class ThemeCustomizer
 
         if ($type === 'content_picker') {
             return $this->validPublishedContentId($value) ? '' : I18n::t('themes.invalid_content');
+        }
+
+        if ($type === 'widget_area_visibility') {
+            return $this->validSlugList($value, '*') ? '' : I18n::t('themes.invalid_value');
         }
 
         if ($type === 'color') {
@@ -203,7 +211,7 @@ final class ThemeCustomizer
                     'full' => 'theme.customizer_options.width_full',
                 ],
             ],
-            'enable_widgets' => ['type' => 'checkbox', 'label_key' => 'theme.customizer_fields.enable_widgets', 'default' => '1'],
+            'enabled_widget_areas' => ['type' => 'widget_area_visibility', 'label_key' => 'theme.customizer_fields.enabled_widget_areas', 'default' => '*'],
             'enable_search' => ['type' => 'checkbox', 'label_key' => 'theme.customizer_fields.enable_search', 'default' => '1'],
             'single_show_thumbnail' => ['type' => 'checkbox', 'label_key' => 'theme.customizer_fields.show_thumbnail', 'default' => '1'],
             'single_meta_date' => ['type' => 'checkbox', 'label_key' => 'theme.customizer_fields.meta_date', 'default' => '1'],
@@ -274,6 +282,10 @@ final class ThemeCustomizer
     private function normalizeColor(string $value, string $default): string
     {
         $value = strtolower(trim($value));
+        if ($value === 'transparent') {
+            return $value;
+        }
+
         if (preg_match('/^#[0-9a-f]{6}$/', $value) === 1) {
             return $value;
         }
@@ -283,6 +295,10 @@ final class ThemeCustomizer
         }
 
         $default = strtolower(trim($default));
+        if ($default === 'transparent') {
+            return $default;
+        }
+
         return preg_match('/^#[0-9a-f]{6}$/', $default) === 1 ? $default : '';
     }
 
@@ -290,6 +306,24 @@ final class ThemeCustomizer
     {
         $id = (int)$value;
         return $this->content->findPublishedSummary($id) !== null ? (string)$id : '';
+    }
+
+    private function normalizeSlugList(string $value, string $allValue = ''): string
+    {
+        $value = strtolower(trim($value));
+        if ($allValue !== '' && $value === $allValue) {
+            return $allValue;
+        }
+
+        $items = [];
+        foreach (explode(',', $value) as $item) {
+            $item = $this->slug((string)$item);
+            if ($item !== '') {
+                $items[$item] = true;
+            }
+        }
+
+        return implode(',', array_keys($items));
     }
 
     private function validPublishedContentId(string $value): bool
@@ -303,10 +337,33 @@ final class ThemeCustomizer
         return (string)$id === $value && $id > 0 && $this->content->findPublishedSummary($id) !== null;
     }
 
+    private function validSlugList(string $value, string $allValue = ''): bool
+    {
+        $value = strtolower(trim($value));
+        if ($allValue !== '' && $value === $allValue) {
+            return true;
+        }
+
+        foreach (explode(',', $value) as $item) {
+            if (trim($item) !== '' && $this->slug((string)$item) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private function validColor(string $value): bool
     {
         $value = strtolower(trim($value));
-        return preg_match('/^#[0-9a-f]{6}$/', $value) === 1
+        return $value === 'transparent'
+            || preg_match('/^#[0-9a-f]{6}$/', $value) === 1
             || preg_match('/^#[0-9a-f]{3}$/', $value) === 1;
+    }
+
+    private function slug(string $value): string
+    {
+        $clean = strtolower(trim($value));
+        return preg_match('/^[a-z0-9_-]{1,100}$/', $clean) === 1 ? $clean : '';
     }
 }

@@ -4,6 +4,9 @@
         return;
     }
 
+    const app = window.tinycms || {};
+    const icon = app.icons?.icon || (() => '');
+    const t = app.i18n?.t || ((key, fallback = '') => fallback || key);
     const frame = document.querySelector(form.getAttribute('data-preview-frame') || '');
     if (!(frame instanceof HTMLIFrameElement)) {
         return;
@@ -64,6 +67,10 @@
                 url.searchParams.set(key, String(value));
             }
         });
+        const widgetAreas = customizerRoot.querySelector('[data-widget-area-visibility-value]');
+        if (widgetAreas instanceof HTMLInputElement) {
+            url.searchParams.set('theme[enabled_widget_areas]', widgetAreas.value);
+        }
         url.searchParams.set('theme_preview', '1');
 
         return url.toString();
@@ -72,6 +79,51 @@
     const refresh = () => {
         syncCustomizerUrl();
         frame.src = previewUrl();
+    };
+
+    const syncColorControl = (control) => {
+        const value = control.querySelector('[data-color-value]');
+        const picker = control.querySelector('[data-color-picker]');
+        const transparent = control.querySelector('[data-color-transparent]');
+        if (!(value instanceof HTMLInputElement) || !(picker instanceof HTMLInputElement) || !(transparent instanceof HTMLInputElement)) {
+            return;
+        }
+
+        picker.disabled = transparent.checked;
+        value.value = transparent.checked ? 'transparent' : picker.value;
+        control.classList.toggle('is-transparent', transparent.checked);
+    };
+
+    const syncWidgetAreaVisibility = () => {
+        const values = Array.from(customizerRoot.querySelectorAll('[data-widget-area-visibility-value]'))
+            .filter((item) => item instanceof HTMLInputElement);
+        if (values.length === 0) {
+            return;
+        }
+
+        const toggles = Array.from(customizerRoot.querySelectorAll('[data-widget-area-visibility-toggle]'));
+        const enabled = toggles.filter((item) => item.getAttribute('aria-pressed') === 'true');
+        const nextValue = enabled.length === toggles.length
+            ? '*'
+            : enabled.map((item) => item instanceof HTMLButtonElement ? item.value : '').filter(Boolean).join(',');
+        values.forEach((value) => {
+            value.value = nextValue;
+        });
+    };
+
+    const setWidgetAreaVisibility = (button, enabled) => {
+        const label = enabled ? t('widgets.hide_area', 'Hide area') : t('widgets.show_area', 'Show area');
+        button.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+        button.setAttribute('aria-label', label);
+        button.setAttribute('title', label);
+        button.closest('[data-widget-area-visibility-row]')?.classList.toggle('is-hidden', !enabled);
+
+        const target = button.querySelector('[data-widget-area-visibility-icon]');
+        if (target) {
+            target.innerHTML = icon(enabled ? 'hide' : 'show');
+        }
+
+        syncWidgetAreaVisibility();
     };
 
     const scheduleRefresh = () => {
@@ -196,6 +248,30 @@
 
     form.addEventListener('input', scheduleRefresh);
     form.addEventListener('change', scheduleRefresh);
+    customizerRoot.querySelectorAll('[data-color-field]').forEach(syncColorControl);
+    syncWidgetAreaVisibility();
+    customizerRoot.addEventListener('input', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element) || !target.matches('[data-color-picker]')) {
+            return;
+        }
+
+        const control = target.closest('[data-color-field]');
+        if (control instanceof HTMLElement) {
+            syncColorControl(control);
+        }
+    });
+    customizerRoot.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element) || !target.matches('[data-color-picker], [data-color-transparent]')) {
+            return;
+        }
+
+        const colorControl = target.closest('[data-color-field]');
+        if (colorControl instanceof HTMLElement) {
+            syncColorControl(colorControl);
+        }
+    });
     customizerRoot.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) {
             return;
@@ -203,6 +279,13 @@
 
         if (event.target.closest('[data-customizer-save]')) {
             activeForm().requestSubmit();
+            return;
+        }
+
+        const areaToggle = event.target.closest('[data-widget-area-visibility-toggle]');
+        if (areaToggle instanceof HTMLButtonElement) {
+            setWidgetAreaVisibility(areaToggle, areaToggle.getAttribute('aria-pressed') !== 'true');
+            scheduleRefresh();
             return;
         }
 

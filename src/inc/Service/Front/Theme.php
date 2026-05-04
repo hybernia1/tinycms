@@ -327,7 +327,7 @@ final class Theme
 
     public function widgetArea(string $area): string
     {
-        if (!$this->widgetsEnabled()) {
+        if (!$this->widgetAreaEnabled($area)) {
             return '';
         }
 
@@ -345,14 +345,30 @@ final class Theme
         return in_array($display, ['both', 'logo', 'title', 'none'], true) ? $display : 'both';
     }
 
-    private function widgetsEnabled(): bool
-    {
-        return $this->setting('enable_widgets', '1') === '1';
-    }
-
     private function searchEnabled(): bool
     {
         return $this->setting('enable_search', '1') === '1';
+    }
+
+    private function widgetAreaEnabled(string $area): bool
+    {
+        $area = strtolower(trim($area));
+        if ($area === '' || preg_match('/^[a-z0-9_-]{1,100}$/', $area) !== 1) {
+            return false;
+        }
+
+        $value = strtolower(trim($this->setting('enabled_widget_areas', '*')));
+        if ($value === '*') {
+            return true;
+        }
+
+        foreach (explode(',', $value) as $enabledArea) {
+            if (trim($enabledArea) === $area) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function layoutWidth(): string
@@ -388,6 +404,10 @@ final class Theme
     private function cssColor(string $value): string
     {
         $value = strtolower(trim($value));
+        if ($value === 'transparent') {
+            return $value;
+        }
+
         return preg_match('/^#[0-9a-f]{6}$/', $value) === 1 ? $value : '';
     }
 

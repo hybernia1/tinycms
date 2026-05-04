@@ -173,7 +173,10 @@ final class Theme
         $manifest['author'] = trim((string)($data['author'] ?? ''));
         $manifest['description'] = trim((string)($data['description'] ?? ''));
         $manifest['features'] = $this->normalizeFeatures((array)($data['features'] ?? []));
-        $manifest['settings'] = ThemeCustomizer::normalizeFields((array)($data['settings'] ?? []));
+        $manifest['settings'] = array_replace(
+            ['enabled_widget_areas' => ThemeCustomizer::field('enabled_widget_areas')],
+            ThemeCustomizer::normalizeFields((array)($data['settings'] ?? []))
+        );
         $manifest['customizer_sections'] = ThemeCustomizer::normalizeSections(
             (array)($data['customizer_sections'] ?? []),
             array_keys($manifest['settings'])

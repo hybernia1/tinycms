@@ -14,7 +14,6 @@ return [
     'theme.customizer_sections.advanced' => 'Vlastní CSS',
     'theme.customizer_fields.branding' => 'Branding',
     'theme.customizer_fields.logo' => 'Logo',
-    'theme.customizer_fields.enable_widgets' => 'Povolit widgety',
     'theme.customizer_fields.enable_search' => 'Povolit vyhledávání',
     'theme.customizer_fields.homepage_content' => 'Domovská stránka',
     'theme.customizer_fields.homepage_loop' => 'Výpis příspěvků',

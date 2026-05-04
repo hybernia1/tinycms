@@ -14,7 +14,6 @@ return [
     'theme.customizer_sections.advanced' => 'Custom CSS',
     'theme.customizer_fields.branding' => 'Branding',
     'theme.customizer_fields.logo' => 'Logo',
-    'theme.customizer_fields.enable_widgets' => 'Enable widgets',
     'theme.customizer_fields.enable_search' => 'Enable search bar',
     'theme.customizer_fields.homepage_content' => 'Homepage',
     'theme.customizer_fields.homepage_loop' => 'Latest posts loop',
