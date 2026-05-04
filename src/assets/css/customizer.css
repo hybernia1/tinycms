@@ -223,13 +223,13 @@
 }
 
 .customizer-color-transparent {
-    min-height: 2.25rem;
-    border: 1px solid #d0d7e2;
-    padding: .45rem .6rem;
-    display: flex;
+    min-height: 2.75rem;
+    padding: 0 .2rem;
+    display: inline-flex;
     align-items: center;
-    gap: .55rem;
+    gap: .5rem;
     cursor: pointer;
+    width: fit-content;
 }
 
 .customizer-color-transparent input {
