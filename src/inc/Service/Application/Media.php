@@ -27,40 +27,23 @@ final class Media
             return $this->paginateUnassigned($page, $perPage, $search);
         }
 
-        $mediaTable = Table::name('media');
-        $usersTable = Table::name('users');
-        return $this->query->paginate('media', [
-            'id',
-            'name',
-            'path',
-            'author',
-            'created',
-            'updated',
-            "(SELECT name FROM $usersTable WHERE $usersTable.ID = $mediaTable.author LIMIT 1) AS author_name",
-        ], [], [
-            'page' => $page,
-            'perPage' => $perPage,
-            'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'path', 'author', 'created', 'updated'],
-            'orderDir' => 'DESC',
-            'search' => $search,
-            'searchColumns' => ['name', 'path'],
-        ]);
+        return $this->query
+            ->from('media', 'm')
+            ->select(['m.id', 'm.name', 'm.path', 'm.author', 'm.created', 'm.updated', 'u.name AS author_name'])
+            ->leftJoin('users', 'u', 'u.id', '=', 'm.author')
+            ->search(['m.name', 'm.path'], $search)
+            ->orderBy('m.id', 'DESC')
+            ->paginate($page, $perPage);
     }
 
     public function statusCounts(): array
     {
-        $mediaTable = Table::name('media');
-        $contentTable = Table::name('content');
-        $contentMediaTable = Table::name('content_media');
-
-        $all = (int)(Connection::get()->query("SELECT COUNT(*) FROM $mediaTable")->fetchColumn() ?: 0);
-        $unassignedSql = implode("\n", [
-            "SELECT COUNT(*) FROM $mediaTable m",
-            "WHERE NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
-            "AND NOT EXISTS (SELECT 1 FROM $contentMediaTable a WHERE a.media = m.id)",
-        ]);
-        $unassigned = (int)(Connection::get()->query($unassignedSql)->fetchColumn() ?: 0);
+        $all = $this->query->from('media', 'm')->count();
+        $unassigned = $this->query
+            ->from('media', 'm')
+            ->whereNotExists('content', 'c', 'c.thumbnail', '=', 'm.id')
+            ->whereNotExists('content_media', 'a', 'a.media', '=', 'm.id')
+            ->count();
 
         return [
             'all' => $all,
@@ -157,24 +140,16 @@ final class Media
             return [];
         }
 
-        $contentTable = Table::name('content');
-        $contentMediaTable = Table::name('content_media');
-        $sql = implode("\n", [
-            'SELECT c.id, c.name, c.created,',
-            'MAX(CASE WHEN c.thumbnail = :media THEN 1 ELSE 0 END) AS used_as_thumbnail,',
-            'MAX(CASE WHEN a.media = :media THEN 1 ELSE 0 END) AS used_in_body',
-            "FROM $contentTable c",
-            "LEFT JOIN $contentMediaTable a ON a.content = c.id",
-            'WHERE c.thumbnail = :media OR a.media = :media',
-            'GROUP BY c.id, c.name, c.created',
-            'ORDER BY COALESCE(MAX(c.updated), c.created) DESC',
-        ]);
-
-        $stmt = Connection::get()->prepare($sql);
-        $stmt->bindValue(':media', $mediaId, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        return $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.created'])
+            ->selectRaw('MAX(CASE WHEN c.thumbnail = :media THEN 1 ELSE 0 END) AS used_as_thumbnail')
+            ->selectRaw('MAX(CASE WHEN a.media = :media THEN 1 ELSE 0 END) AS used_in_body')
+            ->leftJoin('content_media', 'a', 'a.content', '=', 'c.id')
+            ->whereRaw('c.thumbnail = :media OR a.media = :media', ['media' => $mediaId], ['media'])
+            ->groupBy(['c.id', 'c.name', 'c.created'])
+            ->orderByRaw('COALESCE(MAX(c.updated), c.created) DESC')
+            ->get();
     }
 
     public function editNavigation(int $id, ?int $authorId = null): array
@@ -224,33 +199,15 @@ final class Media
         $page = max(1, $page);
         $perPage = max(1, $perPage);
 
-        $mediaTable = Table::name('media');
         $usersTable = Table::name('users');
-        $contentTable = Table::name('content');
-        $contentMediaTable = Table::name('content_media');
-
-        $where = [
-            "NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
-            "NOT EXISTS (SELECT 1 FROM $contentMediaTable a WHERE a.media = m.id)",
-        ];
-        $params = [];
-        if ($search !== '') {
-            $where[] = '(m.name LIKE :search OR m.path LIKE :search)';
-            $params['search'] = '%' . $search . '%';
-        }
-
-        return $this->query->paginateQuery([
-            'select' => implode("\n", [
-                'm.id, m.name, m.path, m.author, m.created, m.updated,',
-                "(SELECT name FROM $usersTable u WHERE u.ID = m.author LIMIT 1) AS author_name",
-            ]),
-            'from' => "FROM $mediaTable m",
-            'where' => $where,
-            'params' => $params,
-            'orderBy' => 'm.id DESC',
-        ], [
-            'page' => $page,
-            'perPage' => $perPage,
-        ]);
+        return $this->query
+            ->from('media', 'm')
+            ->select(['m.id', 'm.name', 'm.path', 'm.author', 'm.created', 'm.updated'])
+            ->selectRaw("(SELECT name FROM $usersTable u WHERE u.ID = m.author LIMIT 1) AS author_name")
+            ->whereNotExists('content', 'c', 'c.thumbnail', '=', 'm.id')
+            ->whereNotExists('content_media', 'a', 'a.media', '=', 'm.id')
+            ->search(['m.name', 'm.path'], $search)
+            ->orderBy('m.id', 'DESC')
+            ->paginate($page, $perPage);
     }
 }

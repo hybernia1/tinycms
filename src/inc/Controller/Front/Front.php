@@ -11,7 +11,6 @@ use App\Service\Application\Term;
 use App\Service\Application\User;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\Media;
 use App\Service\Support\RequestContext;
 use App\Service\Support\Slugger;
@@ -21,7 +20,6 @@ use App\View\FrontView;
 final class Front
 {
     private const SITEMAP_CHUNK_SIZE = 5000;
-    private \PDO $pdo;
     private Query $query;
     private Slugger $slugger;
 
@@ -34,8 +32,7 @@ final class Front
         private ContentStats $contentStats,
         private array $resolvedSettings = []
     ) {
-        $this->pdo = Connection::get();
-        $this->query = new Query($this->pdo);
+        $this->query = new Query(Connection::get());
         $this->slugger = new Slugger();
     }
 
@@ -306,33 +303,21 @@ final class Front
             return null;
         }
 
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
-        $mediaTable = Table::name('media');
+        $builder = $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.excerpt', 'c.body', 'c.created', 'c.updated', 'c.thumbnail', 'c.author', 'c.type', 'c.comments_enabled'])
+            ->selectRaw('u.name AS author_name')
+            ->selectRaw('m.path AS thumbnail_path')
+            ->selectRaw('m.name AS thumbnail_name')
+            ->leftJoin('users', 'u', 'u.id', '=', 'c.author')
+            ->leftJoin('media', 'm', 'm.id', '=', 'c.thumbnail')
+            ->where('c.id', $id);
+
         if (!$includeUnpublished) {
-            $stmt = $this->pdo->prepare(implode("\n", [
-                'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
-                "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
-                "FROM $contentTable c",
-                "LEFT JOIN $usersTable u ON u.id = c.author",
-                "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-                'WHERE c.id = :id AND ' . ContentService::publicWhere('c'),
-                'LIMIT 1',
-            ]));
-            $stmt->execute(array_merge(['id' => $id], ContentService::publicParams($this->now())));
-        } else {
-            $stmt = $this->pdo->prepare(implode("\n", [
-                'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
-                "u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name",
-                "FROM $contentTable c",
-                "LEFT JOIN $usersTable u ON u.id = c.author",
-                "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-                'WHERE c.id = :id',
-                'LIMIT 1',
-            ]));
-            $stmt->execute(['id' => $id]);
+            ContentService::publicScope($builder, 'c', $this->now());
         }
-        $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+
+        $item = $builder->first();
 
         if ($item === null) {
             return null;
@@ -366,73 +351,52 @@ final class Front
     private function paginatePublished(int $page, int $perPage, string $search = ''): array
     {
         $search = $this->sanitizeSearch($search);
-        return $this->paginatePublishedContent(
-            $page,
-            $perPage,
-            [],
-            $search !== '' ? ['(c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)'] : [],
-            $search !== '' ? ['search' => '%' . $search . '%'] : []
-        );
+        return $this->paginatePublishedContent($page, $perPage, null, $search);
     }
 
     private function paginateTermPublished(int $termId, int $page, int $perPage): array
     {
-        $contentTermsTable = Table::name('content_terms');
-        return $this->paginatePublishedContent(
-            $page,
-            $perPage,
-            ["INNER JOIN $contentTermsTable ct ON ct.content = c.id"],
-            ['ct.term = :term'],
-            ['term' => $termId],
-            ['term']
-        );
+        return $this->paginatePublishedContent($page, $perPage, static function ($builder) use ($termId): void {
+            $builder
+                ->innerJoin('content_terms', 'ct', 'ct.content', '=', 'c.id')
+                ->where('ct.term', $termId);
+        });
     }
 
     private function paginateAuthorPublished(int $authorId, int $page, int $perPage): array
     {
-        return $this->paginatePublishedContent(
-            $page,
-            $perPage,
-            [],
-            ['c.author = :author'],
-            ['author' => $authorId],
-            ['author']
-        );
+        return $this->paginatePublishedContent($page, $perPage, static function ($builder) use ($authorId): void {
+            $builder->where('c.author', $authorId);
+        });
     }
 
     private function paginatePublishedContent(
         int $page,
         int $perPage,
-        array $joins = [],
-        array $conditions = [],
-        array $params = [],
-        array $intParams = []
+        ?callable $scope = null,
+        string $search = ''
     ): array {
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
-        $mediaTable = Table::name('media');
         $page = max(1, $page);
         $perPage = max(1, $perPage);
-        $params = array_merge(ContentService::publicParams($this->now()), $params);
-        $pagination = $this->query->paginateQuery([
-            'select' => implode("\n", [
-                'c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, c.author, c.type, c.comments_enabled,',
-                'u.name AS author_name, m.path AS thumbnail_path, m.name AS thumbnail_name',
-            ]),
-            'from' => "FROM $contentTable c",
-            'joins' => array_merge($joins, [
-                "LEFT JOIN $usersTable u ON u.id = c.author",
-                "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            ]),
-            'countJoins' => $joins,
-            'where' => array_merge([ContentService::publicWhere('c')], $conditions),
-            'params' => $params,
-            'intParams' => $intParams,
-            'orderBy' => 'COALESCE(c.updated, c.created) DESC, c.id DESC',
-        ], [
-            'page' => $page,
-            'perPage' => $perPage,
-        ]);
+
+        $builder = $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.excerpt', 'c.body', 'c.created', 'c.updated', 'c.thumbnail', 'c.author', 'c.type', 'c.comments_enabled'])
+            ->selectRaw('u.name AS author_name')
+            ->selectRaw('m.path AS thumbnail_path')
+            ->selectRaw('m.name AS thumbnail_name')
+            ->leftJoin('users', 'u', 'u.id', '=', 'c.author')
+            ->leftJoin('media', 'm', 'm.id', '=', 'c.thumbnail')
+            ->search(['c.name', 'c.excerpt', 'c.body'], $search)
+            ->orderByRaw('COALESCE(c.updated, c.created) DESC, c.id DESC');
+
+        ContentService::publicScope($builder, 'c', $this->now());
+
+        if ($scope !== null) {
+            $scope($builder);
+        }
+
+        $pagination = $builder->paginate($page, $perPage);
         $pagination['data'] = $this->withThumbnails((array)($pagination['data'] ?? []));
 
         return $pagination;
@@ -457,69 +421,52 @@ final class Front
 
     private function sitemapContentChunkCount(): int
     {
-        $contentTable = Table::name('content');
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentTable c WHERE " . ContentService::publicWhere('c'));
-        $stmt->execute(ContentService::publicParams($this->now()));
-        return max(1, (int)ceil(((int)($stmt->fetchColumn() ?: 0)) / self::SITEMAP_CHUNK_SIZE));
+        $builder = $this->query
+            ->from('content', 'c')
+            ->select('c.id');
+
+        $count = ContentService::publicScope($builder, 'c', $this->now())->count();
+
+        return max(1, (int)ceil($count / self::SITEMAP_CHUNK_SIZE));
     }
 
     private function sitemapTermChunkCount(): int
     {
-        $termsTable = Table::name('terms');
-        $contentTable = Table::name('content');
-        $contentTermsTable = Table::name('content_terms');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT COUNT(DISTINCT t.id)',
-            "FROM $termsTable t",
-            "INNER JOIN $contentTermsTable ct ON ct.term = t.id",
-            "INNER JOIN $contentTable c ON c.id = ct.content",
-            'WHERE ' . ContentService::publicWhere('c'),
-        ]));
-        $stmt->execute(ContentService::publicParams($this->now()));
-        return max(1, (int)ceil(((int)($stmt->fetchColumn() ?: 0)) / self::SITEMAP_CHUNK_SIZE));
+        $builder = $this->query
+            ->from('terms', 't')
+            ->innerJoin('content_terms', 'ct', 'ct.term', '=', 't.id')
+            ->innerJoin('content', 'c', 'c.id', '=', 'ct.content');
+
+        $count = ContentService::publicScope($builder, 'c', $this->now())
+            ->count($this->query->raw('COUNT(DISTINCT t.id)'));
+
+        return max(1, (int)ceil($count / self::SITEMAP_CHUNK_SIZE));
     }
 
     private function sitemapContentChunk(int $chunk): array
     {
-        $contentTable = Table::name('content');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.created, c.updated',
-            "FROM $contentTable c",
-            'WHERE ' . ContentService::publicWhere('c'),
-            'ORDER BY c.id ASC',
-            'LIMIT :limit OFFSET :offset',
-        ]));
-        $publicParams = ContentService::publicParams($this->now());
-        $stmt->bindValue(':status', $publicParams['status']);
-        $stmt->bindValue(':now', $publicParams['now']);
-        $stmt->bindValue(':limit', self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', ($chunk - 1) * self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $builder = $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.created', 'c.updated'])
+            ->orderBy('c.id', 'ASC')
+            ->limit(self::SITEMAP_CHUNK_SIZE, ($chunk - 1) * self::SITEMAP_CHUNK_SIZE);
+
+        return ContentService::publicScope($builder, 'c', $this->now())->get();
     }
 
     private function sitemapTermChunk(int $chunk): array
     {
-        $termsTable = Table::name('terms');
-        $contentTable = Table::name('content');
-        $contentTermsTable = Table::name('content_terms');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT t.id, t.name, MAX(COALESCE(c.updated, c.created)) AS lastmod',
-            "FROM $termsTable t",
-            "INNER JOIN $contentTermsTable ct ON ct.term = t.id",
-            "INNER JOIN $contentTable c ON c.id = ct.content",
-            'WHERE ' . ContentService::publicWhere('c'),
-            'GROUP BY t.id, t.name',
-            'ORDER BY t.id ASC',
-            'LIMIT :limit OFFSET :offset',
-        ]));
-        $publicParams = ContentService::publicParams($this->now());
-        $stmt->bindValue(':status', $publicParams['status']);
-        $stmt->bindValue(':now', $publicParams['now']);
-        $stmt->bindValue(':limit', self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', ($chunk - 1) * self::SITEMAP_CHUNK_SIZE, \PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $builder = $this->query
+            ->from('terms', 't')
+            ->select(['t.id', 't.name'])
+            ->selectRaw('MAX(COALESCE(c.updated, c.created)) AS lastmod')
+            ->innerJoin('content_terms', 'ct', 'ct.term', '=', 't.id')
+            ->innerJoin('content', 'c', 'c.id', '=', 'ct.content')
+            ->groupBy(['t.id', 't.name'])
+            ->orderBy('t.id', 'ASC')
+            ->limit(self::SITEMAP_CHUNK_SIZE, ($chunk - 1) * self::SITEMAP_CHUNK_SIZE);
+
+        return ContentService::publicScope($builder, 'c', $this->now())->get();
     }
 
     private function renderSitemapUrlSet(array $items): void

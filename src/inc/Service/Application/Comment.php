@@ -17,13 +17,11 @@ final class Comment
     public const STATUS_TRASH = 'trash';
 
     private Query $query;
-    private \PDO $pdo;
     private SchemaRules $schemaRules;
 
     public function __construct()
     {
-        $this->pdo = Connection::get();
-        $this->query = new Query($this->pdo);
+        $this->query = new Query(Connection::get());
         $this->schemaRules = new SchemaRules();
     }
 
@@ -37,38 +35,37 @@ final class Comment
             array_map(static fn(mixed $id): int => (int)$id, $visibleDraftIds),
             static fn(int $id): bool => $id > 0
         )));
-        $commentsTable = Table::name('comments');
         $usersTable = Table::name('users');
-        $draftCondition = '';
         $params = [
-            'content' => $contentId,
             'status' => self::STATUS_PUBLISHED,
         ];
+        $intParams = [];
+        $statusCondition = 'c.status = :status';
         if ($visibleDraftIds !== []) {
             $pendingPlaceholders = [];
             foreach ($visibleDraftIds as $index => $id) {
                 $key = 'pending_' . $index;
                 $pendingPlaceholders[] = ':' . $key;
                 $params[$key] = $id;
+                $intParams[] = $key;
             }
-            $draftCondition = ' OR (c.status = :draft_status AND c.id IN (' . implode(', ', $pendingPlaceholders) . '))';
+            $statusCondition .= ' OR (c.status = :draft_status AND c.id IN (' . implode(', ', $pendingPlaceholders) . '))';
             $params['draft_status'] = self::STATUS_DRAFT;
         }
 
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.parent, c.reply_to, c.author, c.status, c.body, c.created, c.updated,',
-            'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
-            'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email,',
-            'COALESCE(NULLIF(reply_user.name, \'\'), reply_target.author_name) AS reply_to_author_name',
-            "FROM $commentsTable c",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            "LEFT JOIN $commentsTable reply_target ON reply_target.id = c.reply_to",
-            "LEFT JOIN $usersTable reply_user ON reply_user.id = reply_target.author",
-            'WHERE c.content = :content AND (c.status = :status' . $draftCondition . ')',
-            'ORDER BY COALESCE(c.parent, c.id) ASC, c.parent IS NOT NULL ASC, c.created ASC, c.id ASC',
-        ]));
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $rows = $this->query
+            ->from('comments', 'c')
+            ->select(['c.id', 'c.parent', 'c.reply_to', 'c.author', 'c.status', 'c.body', 'c.created', 'c.updated'])
+            ->selectRaw('COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name')
+            ->selectRaw('COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email')
+            ->selectRaw('COALESCE(NULLIF(reply_user.name, \'\'), reply_target.author_name) AS reply_to_author_name')
+            ->leftJoin('users', 'u', 'u.id', '=', 'c.author')
+            ->leftJoin('comments', 'reply_target', 'reply_target.id', '=', 'c.reply_to')
+            ->leftJoin('users', 'reply_user', 'reply_user.id', '=', 'reply_target.author')
+            ->where('c.content', $contentId)
+            ->whereRaw('(' . $statusCondition . ')', $params, $intParams)
+            ->orderByRaw('COALESCE(c.parent, c.id) ASC, c.parent IS NOT NULL ASC, c.created ASC, c.id ASC')
+            ->get();
         $parents = [];
         $children = [];
 
@@ -112,69 +109,51 @@ final class Comment
             return 0;
         }
 
-        $commentsTable = Table::name('comments');
-        $contentTable = Table::name('content');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT COUNT(*)',
-            "FROM $commentsTable c",
-            "INNER JOIN $contentTable content ON content.id = c.content",
-            "LEFT JOIN $commentsTable parent_comment ON parent_comment.id = c.parent",
-            'WHERE c.content = :content AND c.status = :status AND content.comments_enabled = 1',
-            'AND (c.parent IS NULL OR parent_comment.status = :status)',
-        ]));
-        $stmt->execute([
-            'content' => $contentId,
-            'status' => self::STATUS_PUBLISHED,
-        ]);
-
-        return (int)($stmt->fetchColumn() ?: 0);
+        return $this->query
+            ->from('comments', 'c')
+            ->innerJoin('content', 'content', 'content.id', '=', 'c.content')
+            ->leftJoin('comments', 'parent_comment', 'parent_comment.id', '=', 'c.parent')
+            ->where('c.content', $contentId)
+            ->where('c.status', self::STATUS_PUBLISHED)
+            ->where('content.comments_enabled', 1)
+            ->whereRaw('(c.parent IS NULL OR parent_comment.status = :parent_status)', ['parent_status' => self::STATUS_PUBLISHED])
+            ->count();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
     {
         $commentsTable = Table::name('comments');
-        $contentTable = Table::name('content');
         $usersTable = Table::name('users');
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $search = mb_substr(trim($search), 0, 100);
-        $where = ['c.parent IS NULL'];
-        $params = [];
+
+        $builder = $this->query
+            ->from('comments', 'c')
+            ->select(['c.id', 'c.content', 'c.parent', 'c.reply_to', 'c.author', 'c.status', 'c.body', 'c.ip_address', 'c.created', 'c.updated'])
+            ->selectRaw('content.name AS content_name')
+            ->selectRaw('COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name')
+            ->selectRaw('COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email')
+            ->selectRaw("(SELECT COUNT(*) FROM $commentsTable child WHERE child.parent = c.id) AS replies_count")
+            ->innerJoin('content', 'content', 'content.id', '=', 'c.content')
+            ->leftJoin('users', 'u', 'u.id', '=', 'c.author')
+            ->whereNull('c.parent')
+            ->orderBy('c.created', 'DESC')
+            ->orderBy('c.id', 'DESC');
 
         if ($status !== 'all') {
-            $where[] = 'c.status = :status';
-            $params['status'] = $status;
+            $builder->where('c.status', $status);
         }
 
         if ($search !== '') {
-            $where[] = implode(' ', [
+            $builder->whereRaw(implode(' ', [
                 '(c.body LIKE :search OR content.name LIKE :search OR u.name LIKE :search OR u.email LIKE :search OR c.author_name LIKE :search OR c.author_email LIKE :search',
                 "OR EXISTS (SELECT 1 FROM $commentsTable child LEFT JOIN $usersTable child_user ON child_user.id = child.author",
                 'WHERE child.parent = c.id AND (child.body LIKE :search OR child_user.name LIKE :search OR child_user.email LIKE :search OR child.author_name LIKE :search OR child.author_email LIKE :search)))',
-            ]);
-            $params['search'] = '%' . $search . '%';
+            ]), ['search' => '%' . $search . '%']);
         }
 
-        return $this->query->paginateQuery([
-            'select' => implode("\n", [
-                'c.id, c.content, c.parent, c.reply_to, c.author, c.status, c.body, c.ip_address, c.created, c.updated,',
-                'content.name AS content_name,',
-                'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
-                'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email,',
-                "(SELECT COUNT(*) FROM $commentsTable child WHERE child.parent = c.id) AS replies_count",
-            ]),
-            'from' => "FROM $commentsTable c",
-            'joins' => [
-                "INNER JOIN $contentTable content ON content.id = c.content",
-                "LEFT JOIN $usersTable u ON u.id = c.author",
-            ],
-            'where' => $where,
-            'params' => $params,
-            'orderBy' => 'c.created DESC, c.id DESC',
-        ], [
-            'page' => $page,
-            'perPage' => $perPage,
-        ]);
+        return $builder->paginate($page, $perPage);
     }
 
     public function find(int $id): ?array
@@ -183,22 +162,16 @@ final class Comment
             return null;
         }
 
-        $commentsTable = Table::name('comments');
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.content, c.parent, c.reply_to, c.author, c.status, c.body, c.ip_address, c.created, c.updated,',
-            'content.name AS content_name,',
-            'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
-            'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email',
-            "FROM $commentsTable c",
-            "INNER JOIN $contentTable content ON content.id = c.content",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            'WHERE c.id = :id',
-            'LIMIT 1',
-        ]));
-        $stmt->execute(['id' => $id]);
-        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        return $this->query
+            ->from('comments', 'c')
+            ->select(['c.id', 'c.content', 'c.parent', 'c.reply_to', 'c.author', 'c.status', 'c.body', 'c.ip_address', 'c.created', 'c.updated'])
+            ->selectRaw('content.name AS content_name')
+            ->selectRaw('COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name')
+            ->selectRaw('COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email')
+            ->innerJoin('content', 'content', 'content.id', '=', 'c.content')
+            ->leftJoin('users', 'u', 'u.id', '=', 'c.author')
+            ->where('c.id', $id)
+            ->first();
     }
 
     public function update(int $id, array $input): array
@@ -232,23 +205,18 @@ final class Comment
             return [];
         }
 
-        $commentsTable = Table::name('comments');
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.content, c.parent, c.reply_to, c.author, c.status, c.body, c.ip_address, c.created, c.updated,',
-            'content.name AS content_name,',
-            'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
-            'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email',
-            "FROM $commentsTable c",
-            "INNER JOIN $contentTable content ON content.id = c.content",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            'WHERE c.parent = :parent',
-            'ORDER BY c.created ASC, c.id ASC',
-        ]));
-        $stmt->execute(['parent' => $parentId]);
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        return $this->query
+            ->from('comments', 'c')
+            ->select(['c.id', 'c.content', 'c.parent', 'c.reply_to', 'c.author', 'c.status', 'c.body', 'c.ip_address', 'c.created', 'c.updated'])
+            ->selectRaw('content.name AS content_name')
+            ->selectRaw('COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name')
+            ->selectRaw('COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email')
+            ->innerJoin('content', 'content', 'content.id', '=', 'c.content')
+            ->leftJoin('users', 'u', 'u.id', '=', 'c.author')
+            ->where('c.parent', $parentId)
+            ->orderBy('c.created', 'ASC')
+            ->orderBy('c.id', 'ASC')
+            ->get();
     }
 
     private function delete(int $id): bool
@@ -294,9 +262,11 @@ final class Comment
 
     public function statusCounts(array $statuses = []): array
     {
-        $commentsTable = Table::name('comments');
-        $stmt = $this->pdo->query("SELECT status FROM $commentsTable WHERE parent IS NULL");
-        $rows = $stmt ? ($stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []) : [];
+        $rows = $this->query
+            ->from('comments')
+            ->select('status')
+            ->whereNull('parent')
+            ->get();
         $counts = [
             'all' => count($rows),
         ];
@@ -325,11 +295,10 @@ final class Comment
 
     public function pendingCount(): int
     {
-        $commentsTable = Table::name('comments');
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $commentsTable WHERE status = :status");
-        $stmt->execute(['status' => self::STATUS_DRAFT]);
-
-        return (int)($stmt->fetchColumn() ?: 0);
+        return $this->query
+            ->from('comments')
+            ->where('status', self::STATUS_DRAFT)
+            ->count();
     }
 
     public function save(int $contentId, int $authorId, array $input, string $ipAddress, bool $allowAnonymous = false): array
@@ -427,13 +396,13 @@ final class Comment
             return null;
         }
 
-        $contentTable = Table::name('content');
-        $stmt = $this->pdo->prepare(
-            "SELECT id FROM $contentTable WHERE id = :id AND " . Content::publicWhere() . " AND comments_enabled = 1 LIMIT 1"
-        );
-        $stmt->execute(array_merge(['id' => $contentId], Content::publicParams()));
+        $builder = $this->query
+            ->from('content')
+            ->select('id')
+            ->where('id', $contentId)
+            ->where('comments_enabled', 1);
 
-        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        return Content::publicScope($builder)->first();
     }
 
     private function findCommentForReply(int $commentId): ?array

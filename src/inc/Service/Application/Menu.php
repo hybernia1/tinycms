@@ -4,26 +4,31 @@ declare(strict_types=1);
 namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaRules;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 
 final class Menu
 {
-    private \PDO $pdo;
+    private Query $query;
     private SchemaRules $schemaRules;
 
     public function __construct()
     {
-        $this->pdo = Connection::get();
+        $this->query = new Query(Connection::get());
         $this->schemaRules = new SchemaRules();
     }
 
     public function items(): array
     {
-        $table = Table::name('menu');
-        $stmt = $this->pdo->query("SELECT id, label, url, icon, link_target, position FROM $table ORDER BY position ASC, id ASC");
-        return array_map([$this, 'mapItem'], $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []);
+        $rows = $this->query
+            ->from('menu')
+            ->select(['id', 'label', 'url', 'icon', 'link_target', 'position'])
+            ->orderBy('position', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        return array_map([$this, 'mapItem'], $rows);
     }
 
     public function icons(): array
@@ -49,30 +54,22 @@ final class Menu
             return ['success' => false, 'errors' => $errors];
         }
 
-        $table = Table::name('menu');
-        $this->pdo->beginTransaction();
-
         try {
-            $this->pdo->exec("DELETE FROM $table");
-            $insert = $this->pdo->prepare("INSERT INTO $table (label, url, icon, link_target, position) VALUES (:label, :url, :icon, :link_target, :position)");
+            $this->query->transaction(function () use ($items): void {
+                $this->query->deleteAll('menu');
 
-            foreach ($items as $position => $item) {
-                $insert->execute([
-                    'label' => $item['label'],
-                    'url' => $item['url'],
-                    'icon' => $item['icon'] !== '' ? $item['icon'] : null,
-                    'link_target' => $item['link_target'],
-                    'position' => $position,
-                ]);
-            }
-
-            $this->pdo->commit();
+                foreach ($items as $position => $item) {
+                    $this->query->insert('menu', [
+                        'label' => $item['label'],
+                        'url' => $item['url'],
+                        'icon' => $item['icon'] !== '' ? $item['icon'] : null,
+                        'link_target' => $item['link_target'],
+                        'position' => $position,
+                    ]);
+                }
+            });
             return ['success' => true, 'errors' => []];
-        } catch (\Throwable $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
-
+        } catch (\Throwable) {
             return ['success' => false, 'errors' => ['_global' => I18n::t('menu.save_failed')]];
         }
     }

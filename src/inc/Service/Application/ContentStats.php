@@ -4,17 +4,20 @@ declare(strict_types=1);
 namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaRules;
 use App\Service\Infrastructure\Db\Table;
 
 final class ContentStats
 {
     private \PDO $pdo;
+    private Query $query;
     private SchemaRules $schemaRules;
 
     public function __construct()
     {
         $this->pdo = Connection::get();
+        $this->query = new Query($this->pdo);
         $this->schemaRules = new SchemaRules();
     }
 
@@ -77,19 +80,19 @@ final class ContentStats
 
     private function fetchViewsCount(int $contentId): int
     {
-        $contentStatsTable = Table::name('content_stats');
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $contentStatsTable WHERE content = :content");
-        $stmt->execute(['content' => $contentId]);
-
-        return (int)($stmt->fetchColumn() ?: 0);
+        return $this->query
+            ->from('content_stats')
+            ->where('content', $contentId)
+            ->count();
     }
 
     private function fetchLastVisit(int $contentId): string
     {
-        $contentStatsTable = Table::name('content_stats');
-        $stmt = $this->pdo->prepare("SELECT MAX(last_visit) FROM $contentStatsTable WHERE content = :content");
-        $stmt->execute(['content' => $contentId]);
+        $value = $this->query
+            ->from('content_stats')
+            ->where('content', $contentId)
+            ->value($this->query->raw('MAX(last_visit)'));
 
-        return trim((string)($stmt->fetchColumn() ?: ''));
+        return trim((string)($value ?: ''));
     }
 }

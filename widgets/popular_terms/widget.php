@@ -1,9 +1,6 @@
 <?php
 declare(strict_types=1);
 
-use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\Table;
-
 if (!defined('BASE_DIR')) {
     exit;
 }
@@ -45,25 +42,19 @@ return [
         $showCounts = (string)($data['show_counts'] ?? '0') === '1';
         $limit = max(1, min(50, (int)($data['limit'] ?? 10)));
 
-        $termsTable = Table::name('terms');
-        $contentTable = Table::name('content');
-        $contentTermsTable = Table::name('content_terms');
-        $stmt = Connection::get()->prepare(implode("\n", [
-            'SELECT t.id, t.name, COUNT(DISTINCT c.id) AS total',
-            "FROM $termsTable t",
-            "INNER JOIN $contentTermsTable ct ON ct.term = t.id",
-            "INNER JOIN $contentTable c ON c.id = ct.content",
-            'WHERE c.status = :status AND c.created <= :now',
-            'GROUP BY t.id, t.name',
-            'ORDER BY total DESC, t.name ASC',
-            'LIMIT :limit',
-        ]));
-        $stmt->bindValue(':status', 'published');
-        $stmt->bindValue(':now', date('Y-m-d H:i:s'));
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $items = tiny_query()
+            ->from('terms', 't')
+            ->select(['t.id', 't.name'])
+            ->selectRaw('COUNT(DISTINCT c.id) AS total')
+            ->innerJoin('content_terms', 'ct', 'ct.term', '=', 't.id')
+            ->innerJoin('content', 'c', 'c.id', '=', 'ct.content')
+            ->where('c.status', 'published')
+            ->whereOp('c.created', '<=', date('Y-m-d H:i:s'))
+            ->groupBy(['t.id', 't.name'])
+            ->orderBy('total', 'DESC')
+            ->orderBy('t.name', 'ASC')
+            ->limit($limit)
+            ->get();
         if ($items === []) {
             return '';
         }

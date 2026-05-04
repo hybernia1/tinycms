@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 use App\Service\Application\ThemeDefinition;
 use App\Service\Front\Theme;
+use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
 use App\Service\Support\Avatar;
 use App\Service\Support\Escape;
 use App\Service\Support\I18n;
@@ -11,6 +13,13 @@ use App\Service\Support\RequestContext;
 function t(string $key, ?string $fallback = null): string
 {
     return I18n::t($key, $fallback);
+}
+
+function tiny_query(): Query
+{
+    static $query = null;
+
+    return $query ??= new Query(Connection::get());
 }
 
 function icon(string $name, string $classes = 'icon'): string

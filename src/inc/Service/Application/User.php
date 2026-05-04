@@ -6,7 +6,6 @@ namespace App\Service\Application;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaRules;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
@@ -25,17 +24,17 @@ final class User
 
     public function paginate(int $page = 1, int $perPage = 10, ?int $suspend = null, string $search = ''): array
     {
-        $where = $suspend === null ? [] : ['suspend' => $suspend];
+        $builder = $this->query
+            ->from('users')
+            ->select(['ID', 'name', 'email', 'role', 'suspend', 'created'])
+            ->search(['name', 'email'], $search)
+            ->orderBy('ID', 'DESC');
 
-        return $this->query->paginate('users', ['ID', 'name', 'email', 'role', 'suspend', 'created'], $where, [
-            'page' => $page,
-            'perPage' => $perPage,
-            'orderBy' => 'ID',
-            'orderByAllowed' => ['ID', 'name', 'email', 'role', 'suspend', 'created'],
-            'orderDir' => 'DESC',
-            'search' => $search,
-            'searchColumns' => ['name', 'email'],
-        ]);
+        if ($suspend !== null) {
+            $builder->where('suspend', $suspend);
+        }
+
+        return $builder->paginate($page, $perPage);
     }
 
     public function find(int $id): ?array
@@ -227,20 +226,22 @@ final class User
     {
         $needle = trim($query);
         $limit = max(1, min(50, $limit));
-        $usersTable = Table::name('users');
+
+        $builder = $this->query
+            ->from('users')
+            ->select(['ID', 'name', 'email'])
+            ->limit($limit);
 
         if ($needle === '') {
-            $stmt = Connection::get()->prepare("SELECT ID, name, email FROM $usersTable ORDER BY ID DESC LIMIT :limit");
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->execute();
+            $builder->orderBy('ID', 'DESC');
         } else {
-            $stmt = Connection::get()->prepare("SELECT ID, name, email FROM $usersTable WHERE name LIKE :search OR email LIKE :search ORDER BY name ASC, ID ASC LIMIT :limit");
-            $stmt->bindValue(':search', '%' . $needle . '%');
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->execute();
+            $builder
+                ->search(['name', 'email'], $needle)
+                ->orderBy('name', 'ASC')
+                ->orderBy('ID', 'ASC');
         }
 
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $rows = $builder->get();
         return array_map(static fn(array $row): array => [
             'id' => (int)($row['ID'] ?? 0),
             'name' => trim((string)($row['name'] ?? '')),

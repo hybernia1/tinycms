@@ -6,20 +6,17 @@ namespace App\Service\Application;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaRules;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
 final class Term
 {
     private Query $query;
-    private \PDO $pdo;
     private SchemaRules $schemaRules;
 
     public function __construct()
     {
-        $this->pdo = Connection::get();
-        $this->query = new Query($this->pdo);
+        $this->query = new Query(Connection::get());
         $this->schemaRules = new SchemaRules();
     }
 
@@ -29,33 +26,21 @@ final class Term
             return $this->paginateUnassigned($page, $perPage, $search);
         }
 
-        return $this->query->paginate('terms', [
-            'id',
-            'name',
-            'created',
-            'updated',
-        ], [], [
-            'page' => $page,
-            'perPage' => $perPage,
-            'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'created', 'updated'],
-            'orderDir' => 'DESC',
-            'search' => $search,
-            'searchColumns' => ['name'],
-        ]);
+        return $this->query
+            ->from('terms', 't')
+            ->select(['t.id', 't.name', 't.created', 't.updated'])
+            ->search(['t.name'], $search)
+            ->orderBy('t.id', 'DESC')
+            ->paginate($page, $perPage);
     }
 
     public function statusCounts(): array
     {
-        $termsTable = Table::name('terms');
-        $contentTermsTable = Table::name('content_terms');
-
-        $all = (int)($this->pdo->query("SELECT COUNT(*) FROM $termsTable")->fetchColumn() ?: 0);
-        $unassignedSql = implode("\n", [
-            "SELECT COUNT(*) FROM $termsTable t",
-            "WHERE NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)",
-        ]);
-        $unassigned = (int)($this->pdo->query($unassignedSql)->fetchColumn() ?: 0);
+        $all = $this->query->from('terms', 't')->count();
+        $unassigned = $this->query
+            ->from('terms', 't')
+            ->whereNotExists('content_terms', 'ct', 'ct.term', '=', 't.id')
+            ->count();
 
         return [
             'all' => $all,
@@ -133,29 +118,28 @@ final class Term
         }
 
         if ($needle === '') {
-            $rows = $this->query->paginate('terms', ['id', 'name'], [], [
-                'page' => 1,
-                'perPage' => min($limit, 50),
-                'orderBy' => 'name',
-                'orderByAllowed' => ['name'],
-                'orderDir' => 'ASC',
-            ]);
+            $rows = $this->query
+                ->from('terms')
+                ->select(['id', 'name'])
+                ->orderBy('name', 'ASC')
+                ->limit(min($limit, 50))
+                ->get();
             return array_map(static fn(array $item): array => [
                 'id' => (int)($item['id'] ?? 0),
                 'name' => (string)($item['name'] ?? ''),
-            ], (array)($rows['data'] ?? []));
+            ], $rows);
         }
-
-        $termsTable = Table::name('terms');
-        $stmt = $this->pdo->prepare("SELECT id, name FROM $termsTable WHERE name LIKE :search ORDER BY name ASC LIMIT :limit");
-        $stmt->bindValue(':search', '%' . $needle . '%');
-        $stmt->bindValue(':limit', min($limit, 50), \PDO::PARAM_INT);
-        $stmt->execute();
 
         return array_map(static fn(array $item): array => [
             'id' => (int)($item['id'] ?? 0),
             'name' => (string)($item['name'] ?? ''),
-        ], $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        ], $this->query
+            ->from('terms')
+            ->select(['id', 'name'])
+            ->search(['name'], $needle)
+            ->orderBy('name', 'ASC')
+            ->limit(min($limit, 50))
+            ->get());
     }
 
 
@@ -165,15 +149,17 @@ final class Term
             return [];
         }
 
-        $termsTable = Table::name('terms');
-        $contentTermsTable = Table::name('content_terms');
-        $stmt = $this->pdo->prepare("SELECT DISTINCT t.id, t.name FROM $termsTable t INNER JOIN $contentTermsTable ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC");
-        $stmt->execute(['content' => $contentId]);
-
         return array_map(static fn(array $row): array => [
             'id' => (int)($row['id'] ?? 0),
             'name' => trim((string)($row['name'] ?? '')),
-        ], $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        ], $this->query
+            ->from('terms', 't')
+            ->distinct()
+            ->select(['t.id', 't.name'])
+            ->innerJoin('content_terms', 'ct', 'ct.term', '=', 't.id')
+            ->where('ct.content', $contentId)
+            ->orderBy('t.name', 'ASC')
+            ->get());
     }
 
     public function namesByContent(int $contentId): array
@@ -182,11 +168,14 @@ final class Term
             return [];
         }
 
-        $termsTable = Table::name('terms');
-        $contentTermsTable = Table::name('content_terms');
-        $stmt = $this->pdo->prepare("SELECT DISTINCT t.name FROM $termsTable t INNER JOIN $contentTermsTable ct ON ct.term = t.id WHERE ct.content = :content ORDER BY t.name ASC");
-        $stmt->execute(['content' => $contentId]);
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $rows = $this->query
+            ->from('terms', 't')
+            ->distinct()
+            ->select('t.name')
+            ->innerJoin('content_terms', 'ct', 'ct.term', '=', 't.id')
+            ->where('ct.content', $contentId)
+            ->orderBy('t.name', 'ASC')
+            ->get();
 
         return array_values(array_filter(array_map(static fn(array $row): string => trim((string)($row['name'] ?? '')), $rows)));
     }
@@ -199,54 +188,44 @@ final class Term
 
         $names = $this->normalizeTerms($rawTerms);
         if ($names === []) {
-            $contentTermsTable = Table::name('content_terms');
-            $stmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
-            $stmt->execute(['content' => $contentId]);
+            $this->query->delete('content_terms', ['content' => $contentId]);
             return;
         }
 
-        $this->pdo->beginTransaction();
         try {
-            $termIds = [];
-            $termsTable = Table::name('terms');
-            $contentTermsTable = Table::name('content_terms');
-            $selectStmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-            $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $termsTable (name) VALUES (:name)");
+            $this->query->transaction(function () use ($contentId, $names): void {
+                $termIds = [];
 
-            foreach ($names as $name) {
-                $selectStmt->execute(['name' => $name]);
-                $id = (int)$selectStmt->fetchColumn();
-                if ($id <= 0) {
-                    $insertStmt->execute(['name' => $name]);
-                    $selectStmt->execute(['name' => $name]);
-                    $id = (int)$selectStmt->fetchColumn();
+                foreach ($names as $name) {
+                    $id = (int)($this->query
+                        ->from('terms')
+                        ->where('name', $name)
+                        ->value('id') ?: 0);
+                    if ($id <= 0) {
+                        $this->query->insertIgnore('terms', ['name' => $name]);
+                        $id = (int)($this->query
+                            ->from('terms')
+                            ->where('name', $name)
+                            ->value('id') ?: 0);
+                    }
+                    if ($id > 0) {
+                        $termIds[] = $id;
+                    }
                 }
-                if ($id > 0) {
-                    $termIds[] = $id;
+
+                $termIds = array_values(array_unique($termIds));
+                if ($termIds === []) {
+                    $this->query->delete('content_terms', ['content' => $contentId]);
+                    return;
                 }
-            }
 
-            $termIds = array_values(array_unique($termIds));
-            if ($termIds === []) {
-                $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
-                $deleteStmt->execute(['content' => $contentId]);
-                $this->pdo->commit();
-                return;
-            }
+                $this->query->delete('content_terms', ['content' => $contentId]);
 
-            $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
-            $deleteStmt->execute(['content' => $contentId]);
-
-            $attachStmt = $this->pdo->prepare("INSERT IGNORE INTO $contentTermsTable (content, term) VALUES (:content, :term)");
-            foreach ($termIds as $termId) {
-                $attachStmt->execute(['content' => $contentId, 'term' => $termId]);
-            }
-
-            $this->pdo->commit();
-        } catch (\Throwable $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
+                foreach ($termIds as $termId) {
+                    $this->query->insertIgnore('content_terms', ['content' => $contentId, 'term' => $termId]);
+                }
+            });
+        } catch (\Throwable) {
         }
     }
 
@@ -256,19 +235,13 @@ final class Term
             return [];
         }
 
-        $contentTable = Table::name('content');
-        $contentTermsTable = Table::name('content_terms');
-        $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.created',
-            "FROM $contentTable c",
-            "INNER JOIN $contentTermsTable ct ON ct.content = c.id",
-            'WHERE ct.term = :term',
-            'ORDER BY COALESCE(c.updated, c.created) DESC',
-        ]));
-        $stmt->bindValue(':term', $termId, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        return $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.created'])
+            ->innerJoin('content_terms', 'ct', 'ct.content', '=', 'c.id')
+            ->where('ct.term', $termId)
+            ->orderByRaw('COALESCE(c.updated, c.created) DESC')
+            ->get();
     }
 
     private function normalizeTerms(string $rawTerms): array
@@ -296,10 +269,10 @@ final class Term
 
     private function existsByName(string $name, ?int $excludeId = null): bool
     {
-        $termsTable = Table::name('terms');
-        $stmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-        $stmt->execute(['name' => $name]);
-        $foundId = (int)$stmt->fetchColumn();
+        $foundId = (int)($this->query
+            ->from('terms')
+            ->where('name', $name)
+            ->value('id') ?: 0);
 
         if ($foundId <= 0) {
             return false;
@@ -313,25 +286,12 @@ final class Term
         $page = max(1, $page);
         $perPage = max(1, $perPage);
 
-        $termsTable = Table::name('terms');
-        $contentTermsTable = Table::name('content_terms');
-
-        $where = ["NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)"];
-        $params = [];
-        if ($search !== '') {
-            $where[] = 't.name LIKE :search';
-            $params['search'] = '%' . $search . '%';
-        }
-
-        return $this->query->paginateQuery([
-            'select' => 't.id, t.name, t.created, t.updated',
-            'from' => "FROM $termsTable t",
-            'where' => $where,
-            'params' => $params,
-            'orderBy' => 't.id DESC',
-        ], [
-            'page' => $page,
-            'perPage' => $perPage,
-        ]);
+        return $this->query
+            ->from('terms', 't')
+            ->select(['t.id', 't.name', 't.created', 't.updated'])
+            ->whereNotExists('content_terms', 'ct', 'ct.term', '=', 't.id')
+            ->search(['t.name'], $search)
+            ->orderBy('t.id', 'DESC')
+            ->paginate($page, $perPage);
     }
 }

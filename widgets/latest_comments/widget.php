@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\Date;
 use App\Service\Support\Slugger;
 
@@ -45,29 +43,23 @@ return [
         $showContentLink = (string)($data['show_content_link'] ?? '1') === '1';
         $showAvatar = (string)($data['show_avatar'] ?? '0') === '1';
 
-        $commentsTable = Table::name('comments');
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
-        $stmt = Connection::get()->prepare(implode("\n", [
-            'SELECT c.id, c.content, c.author, c.body, c.created, content.name AS content_name,',
-            'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
-            'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email',
-            "FROM $commentsTable c",
-            "INNER JOIN $contentTable content ON content.id = c.content",
-            "LEFT JOIN $commentsTable parent_comment ON parent_comment.id = c.parent",
-            "LEFT JOIN $usersTable u ON u.id = c.author",
-            'WHERE c.status = :comment_status AND content.status = :content_status AND content.comments_enabled = 1 AND content.created <= :now',
-            'AND (c.parent IS NULL OR parent_comment.status = :comment_status)',
-            'ORDER BY c.created DESC, c.id DESC',
-            'LIMIT :limit',
-        ]));
-        $stmt->bindValue(':comment_status', 'published');
-        $stmt->bindValue(':content_status', 'published');
-        $stmt->bindValue(':now', date('Y-m-d H:i:s'));
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $items = tiny_query()
+            ->from('comments', 'c')
+            ->select(['c.id', 'c.content', 'c.author', 'c.body', 'c.created', 'content.name AS content_name'])
+            ->selectRaw('COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name')
+            ->selectRaw('COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email')
+            ->innerJoin('content', 'content', 'content.id', '=', 'c.content')
+            ->leftJoin('comments', 'parent_comment', 'parent_comment.id', '=', 'c.parent')
+            ->leftJoin('users', 'u', 'u.ID', '=', 'c.author')
+            ->where('c.status', 'published')
+            ->where('content.status', 'published')
+            ->where('content.comments_enabled', 1)
+            ->whereOp('content.created', '<=', date('Y-m-d H:i:s'))
+            ->whereRaw('(c.parent IS NULL OR parent_comment.status = :parent_status)', ['parent_status' => 'published'])
+            ->orderBy('c.created', 'DESC')
+            ->orderBy('c.id', 'DESC')
+            ->limit($limit)
+            ->get();
         if ($items === []) {
             return '';
         }

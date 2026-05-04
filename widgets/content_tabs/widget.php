@@ -2,8 +2,6 @@
 declare(strict_types=1);
 
 use App\Service\Application\Content;
-use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\Date;
 use App\Service\Support\Slugger;
 
@@ -12,52 +10,42 @@ if (!defined('BASE_DIR')) {
 }
 
 $fetchContentTabs = static function (int $limit): array {
-    $contentTable = Table::name('content');
-    $contentStatsTable = Table::name('content_stats');
-    $mediaTable = Table::name('media');
     $now = date('Y-m-d H:i:s');
     $since = date('Y-m-d H:i:s', strtotime('-7 days') ?: time());
     $hotItems = [];
 
     try {
-        $hot = Connection::get()->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path AS thumbnail_path, m.name AS thumbnail_name,',
-            'COUNT(cs.ip_address) AS views_count, MAX(cs.last_visit) AS last_visit',
-            "FROM $contentTable c",
-            "INNER JOIN $contentStatsTable cs ON cs.content = c.id AND cs.last_visit >= :since",
-            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE ' . Content::publicWhere('c'),
-            'GROUP BY c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path, m.name',
-            'ORDER BY views_count DESC, last_visit DESC, c.id DESC',
-            'LIMIT :limit',
-        ]));
-        $hot->bindValue(':status', Content::STATUS_PUBLISHED);
-        $hot->bindValue(':now', $now);
-        $hot->bindValue(':since', $since);
-        $hot->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $hot->execute();
-        $hotItems = $hot->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $hot = tiny_query()
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.excerpt', 'c.body', 'c.created', 'c.updated', 'c.thumbnail', 'm.path AS thumbnail_path', 'm.name AS thumbnail_name'])
+            ->selectRaw('COUNT(cs.ip_address) AS views_count')
+            ->selectRaw('MAX(cs.last_visit) AS last_visit')
+            ->innerJoin('content_stats', 'cs', 'cs.content', '=', 'c.id')
+            ->leftJoin('media', 'm', 'm.id', '=', 'c.thumbnail')
+            ->whereOp('cs.last_visit', '>=', $since)
+            ->groupBy(['c.id', 'c.name', 'c.excerpt', 'c.body', 'c.created', 'c.updated', 'c.thumbnail', 'm.path', 'm.name'])
+            ->orderBy('views_count', 'DESC')
+            ->orderBy('last_visit', 'DESC')
+            ->orderBy('c.id', 'DESC')
+            ->limit($limit);
+        $hotItems = Content::publicScope($hot, 'c', $now)->get();
     } catch (PDOException) {
         $hotItems = [];
     }
 
-    $latest = Connection::get()->prepare(implode("\n", [
-        'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path AS thumbnail_path, m.name AS thumbnail_name,',
-        '0 AS views_count, NULL AS last_visit',
-        "FROM $contentTable c",
-        "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-        'WHERE ' . Content::publicWhere('c'),
-        'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
-        'LIMIT :limit',
-    ]));
-    $latest->bindValue(':status', Content::STATUS_PUBLISHED);
-    $latest->bindValue(':now', $now);
-    $latest->bindValue(':limit', $limit, PDO::PARAM_INT);
-    $latest->execute();
+    $latest = tiny_query()
+        ->from('content', 'c')
+        ->select(['c.id', 'c.name', 'c.excerpt', 'c.body', 'c.created', 'c.updated', 'c.thumbnail', 'm.path AS thumbnail_path', 'm.name AS thumbnail_name'])
+        ->selectRaw('0 AS views_count')
+        ->selectRaw('NULL AS last_visit')
+        ->leftJoin('media', 'm', 'm.id', '=', 'c.thumbnail')
+        ->orderByRaw('COALESCE(c.updated, c.created) DESC, c.id DESC')
+        ->limit($limit);
+    $latestItems = Content::publicScope($latest, 'c', $now)->get();
 
     return [
         'hot' => $hotItems,
-        'latest' => $latest->fetchAll(PDO::FETCH_ASSOC) ?: [],
+        'latest' => $latestItems,
     ];
 };
 

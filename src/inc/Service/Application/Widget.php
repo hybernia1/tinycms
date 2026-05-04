@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Service\Application;
 
 use App\Service\Infrastructure\Db\Connection;
+use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaRules;
-use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\I18n;
 
 final class Widget
 {
-    private \PDO $pdo;
+    private Query $query;
     private SchemaRules $schemaRules;
     private array $definitions = [];
     private array $areas = [];
@@ -19,7 +19,7 @@ final class Widget
     {
         $this->rootPath = rtrim($rootPath, '/\\');
         $this->theme = trim($theme) !== '' ? trim($theme) : 'default';
-        $this->pdo = Connection::get();
+        $this->query = new Query(Connection::get());
         $this->schemaRules = new SchemaRules();
         $this->areas = ThemeDefinition::load($this->rootPath, $this->theme)->widgetAreas();
     }
@@ -63,21 +63,19 @@ final class Widget
 
     public function items(?string $area = null): array
     {
-        $table = Table::name('widgets');
-        $conditions = [];
-        $params = [];
+        $builder = $this->query
+            ->from('widgets')
+            ->select(['id', 'area', 'widget', 'data', 'position'])
+            ->orderBy('area', 'ASC')
+            ->orderBy('position', 'ASC')
+            ->orderBy('id', 'ASC');
 
         $cleanArea = $area !== null ? $this->slug($area) : '';
         if ($cleanArea !== '') {
-            $conditions[] = 'area = :area';
-            $params['area'] = $cleanArea;
+            $builder->where('area', $cleanArea);
         }
 
-        $where = $conditions !== [] ? ' WHERE ' . implode(' AND ', $conditions) : '';
-        $stmt = $this->pdo->prepare("SELECT id, area, widget, data, position FROM $table$where ORDER BY area ASC, position ASC, id ASC");
-        $stmt->execute($params);
-
-        return array_map([$this, 'mapItem'], $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []);
+        return array_map([$this, 'mapItem'], $builder->get());
     }
 
     public function inactiveAreaItems(): array
@@ -130,46 +128,29 @@ final class Widget
             return ['success' => false, 'errors' => $errors];
         }
 
-        $table = Table::name('widgets');
-        $this->pdo->beginTransaction();
-
         try {
-            $insert = $this->pdo->prepare("INSERT INTO $table (area, widget, data, position) VALUES (:area, :widget, :data, :position)");
-            $positions = [];
+            $this->query->transaction(function () use ($items, $managedAreas): void {
+                $positions = [];
 
-            if ($managedAreas !== []) {
-                $placeholders = [];
-                $params = [];
-                foreach ($managedAreas as $index => $area) {
-                    $placeholder = ':area' . $index;
-                    $placeholders[] = $placeholder;
-                    $params[$placeholder] = $area;
+                if ($managedAreas !== []) {
+                    $this->query->deleteWhereIn('widgets', 'area', $managedAreas);
                 }
 
-                $delete = $this->pdo->prepare("DELETE FROM $table WHERE area IN (" . implode(',', $placeholders) . ")");
-                $delete->execute($params);
-            }
+                foreach ($items as $item) {
+                    $area = (string)$item['area'];
+                    $position = (int)($positions[$area] ?? 0);
+                    $positions[$area] = $position + 1;
 
-            foreach ($items as $item) {
-                $area = (string)$item['area'];
-                $position = (int)($positions[$area] ?? 0);
-                $positions[$area] = $position + 1;
-
-                $insert->execute([
-                    'area' => $area,
-                    'widget' => $item['widget'],
-                    'data' => json_encode($item['data'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                    'position' => $position,
-                ]);
-            }
-
-            $this->pdo->commit();
+                    $this->query->insert('widgets', [
+                        'area' => $area,
+                        'widget' => $item['widget'],
+                        'data' => json_encode($item['data'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                        'position' => $position,
+                    ]);
+                }
+            });
             return ['success' => true, 'errors' => []];
-        } catch (\Throwable $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
-
+        } catch (\Throwable) {
             return ['success' => false, 'errors' => ['_global' => I18n::t('widgets.save_failed')]];
         }
     }

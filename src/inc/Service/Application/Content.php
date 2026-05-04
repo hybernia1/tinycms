@@ -6,7 +6,7 @@ namespace App\Service\Application;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Query;
 use App\Service\Infrastructure\Db\SchemaRules;
-use App\Service\Infrastructure\Db\Table;
+use App\Service\Infrastructure\Db\SelectQuery;
 use App\Service\Support\I18n;
 use InvalidArgumentException;
 
@@ -23,82 +23,48 @@ final class Content
     public const TYPE_FAQ_PAGE = 'faq_page';
 
     private Query $query;
-    private \PDO $pdo;
     private SchemaRules $schemaRules;
 
     public function __construct()
     {
-        $this->pdo = Connection::get();
-        $this->query = new Query($this->pdo);
+        $this->query = new Query(Connection::get());
         $this->schemaRules = new SchemaRules();
     }
 
     public function paginate(int $page = 1, int $perPage = 10, string $status = 'all', string $search = ''): array
     {
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
-        $where = [];
+        $builder = $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.status', 'c.type', 'c.author', 'u.name AS author_name', 'c.created', 'c.updated'])
+            ->leftJoin('users', 'u', 'u.id', '=', 'c.author')
+            ->search(['c.name', 'c.excerpt', 'c.body'], $search)
+            ->orderBy('c.id', 'DESC');
 
         if ($status !== 'all') {
-            $where['status'] = $status;
+            $builder->where('c.status', $status);
         }
 
-        return $this->query->paginate('content', [
-            'id',
-            'name',
-            'status',
-            'type',
-            'author',
-            "(SELECT name FROM $usersTable WHERE $usersTable.ID = $contentTable.author LIMIT 1) AS author_name",
-            'created',
-            'updated',
-        ], $where, [
-            'page' => $page,
-            'perPage' => $perPage,
-            'orderBy' => 'id',
-            'orderByAllowed' => ['id', 'name', 'status', 'type', 'author', 'created', 'updated'],
-            'orderDir' => 'DESC',
-            'search' => $search,
-            'searchColumns' => ['name', 'excerpt', 'body'],
-        ]);
+        return $builder->paginate($page, $perPage);
     }
 
     public function find(int $id): ?array
     {
-        $contentTable = Table::name('content');
-        $mediaTable = Table::name('media');
-        $rows = $this->query->select('content', [
-            'id',
-            'name',
-            'status',
-            'type',
-            'excerpt',
-            'body',
-            'author',
-            'thumbnail',
-            'comments_enabled',
-            "(SELECT name FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_name",
-            "(SELECT path FROM $mediaTable WHERE $mediaTable.id = $contentTable.thumbnail LIMIT 1) AS thumbnail_path",
-            'created',
-            'updated',
-        ], ['id' => $id]);
-        return $rows[0] ?? null;
+        return $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.status', 'c.type', 'c.excerpt', 'c.body', 'c.author', 'c.thumbnail', 'c.comments_enabled', 'm.name AS thumbnail_name', 'm.path AS thumbnail_path', 'c.created', 'c.updated'])
+            ->leftJoin('media', 'm', 'm.id', '=', 'c.thumbnail')
+            ->where('c.id', $id)
+            ->first();
     }
 
-    public static function publicWhere(string $alias = ''): string
+    public static function publicScope(SelectQuery $query, string $alias = '', ?string $now = null): SelectQuery
     {
         $prefix = trim($alias);
         $prefix = $prefix !== '' ? $prefix . '.' : '';
 
-        return $prefix . 'status = :status AND ' . $prefix . 'created <= :now';
-    }
-
-    public static function publicParams(?string $now = null): array
-    {
-        return [
-            'status' => self::STATUS_PUBLISHED,
-            'now' => $now ?? date('Y-m-d H:i:s'),
-        ];
+        return $query
+            ->where($prefix . 'status', self::STATUS_PUBLISHED)
+            ->whereOp($prefix . 'created', '<=', $now ?? date('Y-m-d H:i:s'));
     }
 
     public function findPublishedSummary(int $id): ?array
@@ -107,12 +73,12 @@ final class Content
             return null;
         }
 
-        $contentTable = Table::name('content');
-        $stmt = $this->pdo->prepare(
-            "SELECT c.id, c.name FROM $contentTable c WHERE c.id = :id AND " . self::publicWhere('c') . " LIMIT 1"
-        );
-        $stmt->execute(array_merge(['id' => $id], self::publicParams()));
-        $item = $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        $builder = $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name'])
+            ->where('c.id', $id);
+
+        $item = self::publicScope($builder, 'c')->first();
 
         return is_array($item) ? $item : null;
     }
@@ -130,31 +96,18 @@ final class Content
 
     public function paginatePublic(int $page = 1, int $perPage = 10, string $search = ''): array
     {
-        $contentTable = Table::name('content');
-        $usersTable = Table::name('users');
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $search = trim($search);
-        $params = self::publicParams();
-        $conditions = [self::publicWhere('c')];
 
-        if ($search !== '') {
-            $conditions[] = '(c.name LIKE :search OR c.excerpt LIKE :search OR c.body LIKE :search)';
-            $params['search'] = '%' . $search . '%';
-        }
+        $builder = $this->query
+            ->from('content', 'c')
+            ->select(['c.id', 'c.name', 'c.status', 'c.type', 'c.author', 'u.name AS author_name', 'c.created', 'c.updated'])
+            ->leftJoin('users', 'u', 'u.id', '=', 'c.author')
+            ->search(['c.name', 'c.excerpt', 'c.body'], $search)
+            ->orderByRaw('COALESCE(c.updated, c.created) DESC, c.id DESC');
 
-        return $this->query->paginateQuery([
-            'select' => 'c.id, c.name, c.status, c.type, c.author, u.name AS author_name, c.created, c.updated',
-            'from' => "FROM $contentTable c",
-            'joins' => ["LEFT JOIN $usersTable u ON u.id = c.author"],
-            'countJoins' => [],
-            'where' => $conditions,
-            'params' => $params,
-            'orderBy' => 'COALESCE(c.updated, c.created) DESC, c.id DESC',
-        ], [
-            'page' => $page,
-            'perPage' => $perPage,
-        ]);
+        return self::publicScope($builder, 'c')->paginate($page, $perPage);
     }
 
     private function delete(int $id): bool
@@ -378,12 +331,12 @@ final class Content
             return false;
         }
 
-        $contentMediaTable = Table::name('content_media');
-        $stmt = $this->pdo->prepare("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)");
-        return $stmt->execute([
+        $this->query->insertIgnore('content_media', [
             'content' => $contentId,
             'media' => $mediaId,
         ]);
+
+        return true;
     }
 
     private function syncAttachments(int $contentId, string $body): void
@@ -394,31 +347,14 @@ final class Content
 
         $mediaIds = $this->extractMediaIdsFromBody($body);
         if ($mediaIds === []) {
-            $contentMediaTable = Table::name('content_media');
-            $stmt = $this->pdo->prepare("DELETE FROM $contentMediaTable WHERE content = :content");
-            $stmt->execute(['content' => $contentId]);
+            $this->query->delete('content_media', ['content' => $contentId]);
             return;
         }
 
-        $placeholders = [];
-        $params = ['content' => $contentId];
-        foreach ($mediaIds as $index => $mediaId) {
-            $key = 'media_' . $index;
-            $placeholders[] = ':' . $key;
-            $params[$key] = $mediaId;
-        }
+        $this->query->deleteWhereNotIn('content_media', 'media', $mediaIds, ['content' => $contentId]);
 
-        $contentMediaTable = Table::name('content_media');
-        $deleteSql = sprintf(
-            "DELETE FROM $contentMediaTable WHERE content = :content AND media NOT IN (%s)",
-            implode(', ', $placeholders),
-        );
-        $deleteStmt = $this->pdo->prepare($deleteSql);
-        $deleteStmt->execute($params);
-
-        $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)");
         foreach ($mediaIds as $mediaId) {
-            $insertStmt->execute([
+            $this->query->insertIgnore('content_media', [
                 'content' => $contentId,
                 'media' => $mediaId,
             ]);
@@ -439,11 +375,12 @@ final class Content
             return [];
         }
 
-        $placeholders = implode(', ', array_fill(0, count($ids), '?'));
-        $mediaTable = Table::name('media');
-        $stmt = $this->pdo->prepare("SELECT id FROM $mediaTable WHERE id IN ($placeholders)");
-        $stmt->execute($ids);
-        $existingIds = array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        $rows = $this->query
+            ->from('media')
+            ->select('id')
+            ->whereIn('id', $ids)
+            ->get();
+        $existingIds = array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $rows);
         $allowed = array_fill_keys($existingIds, true);
 
         return array_values(array_filter($ids, static fn(int $id): bool => isset($allowed[$id])));
