@@ -74,4 +74,5 @@ return [
     'front.comments_no_author' => 'No author',
     'front.comments_edit' => 'Edit',
     'front.comments_count' => '%d comments',
+    'front.comments_pending' => 'Your comment is waiting for approval.',
 ];

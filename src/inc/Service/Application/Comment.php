@@ -27,27 +27,47 @@ final class Comment
         $this->schemaRules = new SchemaRules();
     }
 
-    public function treeForContent(int $contentId): array
+    public function treeForContent(int $contentId, array $visibleDraftIds = []): array
     {
         if ($contentId <= 0) {
             return [];
         }
 
+        $visibleDraftIds = array_values(array_unique(array_filter(
+            array_map(static fn(mixed $id): int => (int)$id, $visibleDraftIds),
+            static fn(int $id): bool => $id > 0
+        )));
         $commentsTable = Table::name('comments');
         $usersTable = Table::name('users');
+        $draftCondition = '';
+        $params = [
+            'content' => $contentId,
+            'status' => self::STATUS_PUBLISHED,
+        ];
+        if ($visibleDraftIds !== []) {
+            $pendingPlaceholders = [];
+            foreach ($visibleDraftIds as $index => $id) {
+                $key = 'pending_' . $index;
+                $pendingPlaceholders[] = ':' . $key;
+                $params[$key] = $id;
+            }
+            $draftCondition = ' OR (c.status = :draft_status AND c.id IN (' . implode(', ', $pendingPlaceholders) . '))';
+            $params['draft_status'] = self::STATUS_DRAFT;
+        }
+
         $stmt = $this->pdo->prepare(implode("\n", [
-            'SELECT c.id, c.parent, c.reply_to, c.author, c.body, c.created, c.updated, u.name AS author_name, reply_user.name AS reply_to_author_name',
+            'SELECT c.id, c.parent, c.reply_to, c.author, c.status, c.body, c.created, c.updated,',
+            'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
+            'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email,',
+            'COALESCE(NULLIF(reply_user.name, \'\'), reply_target.author_name) AS reply_to_author_name',
             "FROM $commentsTable c",
             "LEFT JOIN $usersTable u ON u.id = c.author",
             "LEFT JOIN $commentsTable reply_target ON reply_target.id = c.reply_to",
             "LEFT JOIN $usersTable reply_user ON reply_user.id = reply_target.author",
-            'WHERE c.content = :content AND c.status = :status',
+            'WHERE c.content = :content AND (c.status = :status' . $draftCondition . ')',
             'ORDER BY COALESCE(c.parent, c.id) ASC, c.parent IS NOT NULL ASC, c.created ASC, c.id ASC',
         ]));
-        $stmt->execute([
-            'content' => $contentId,
-            'status' => self::STATUS_PUBLISHED,
-        ]);
+        $stmt->execute($params);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
         $parents = [];
         $children = [];
@@ -60,6 +80,9 @@ final class Comment
                 'reply_to_author_name' => trim((string)($row['reply_to_author_name'] ?? '')),
                 'author' => (int)($row['author'] ?? 0),
                 'author_name' => trim((string)($row['author_name'] ?? '')),
+                'author_email' => trim((string)($row['author_email'] ?? '')),
+                'status' => (string)($row['status'] ?? self::STATUS_PUBLISHED),
+                'is_pending' => (string)($row['status'] ?? '') === self::STATUS_DRAFT,
                 'body' => (string)($row['body'] ?? ''),
                 'created' => (string)($row['created'] ?? ''),
                 'updated' => (string)($row['updated'] ?? ''),
@@ -125,9 +148,9 @@ final class Comment
 
         if ($search !== '') {
             $where[] = implode(' ', [
-                '(c.body LIKE :search OR content.name LIKE :search OR u.name LIKE :search OR u.email LIKE :search',
+                '(c.body LIKE :search OR content.name LIKE :search OR u.name LIKE :search OR u.email LIKE :search OR c.author_name LIKE :search OR c.author_email LIKE :search',
                 "OR EXISTS (SELECT 1 FROM $commentsTable child LEFT JOIN $usersTable child_user ON child_user.id = child.author",
-                'WHERE child.parent = c.id AND (child.body LIKE :search OR child_user.name LIKE :search OR child_user.email LIKE :search)))',
+                'WHERE child.parent = c.id AND (child.body LIKE :search OR child_user.name LIKE :search OR child_user.email LIKE :search OR child.author_name LIKE :search OR child.author_email LIKE :search)))',
             ]);
             $params['search'] = '%' . $search . '%';
         }
@@ -135,7 +158,9 @@ final class Comment
         return $this->query->paginateQuery([
             'select' => implode("\n", [
                 'c.id, c.content, c.parent, c.reply_to, c.author, c.status, c.body, c.ip_address, c.created, c.updated,',
-                'content.name AS content_name, u.name AS author_name, u.email AS author_email,',
+                'content.name AS content_name,',
+                'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
+                'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email,',
                 "(SELECT COUNT(*) FROM $commentsTable child WHERE child.parent = c.id) AS replies_count",
             ]),
             'from' => "FROM $commentsTable c",
@@ -163,7 +188,9 @@ final class Comment
         $usersTable = Table::name('users');
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.content, c.parent, c.reply_to, c.author, c.status, c.body, c.ip_address, c.created, c.updated,',
-            'content.name AS content_name, u.name AS author_name, u.email AS author_email',
+            'content.name AS content_name,',
+            'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
+            'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email',
             "FROM $commentsTable c",
             "INNER JOIN $contentTable content ON content.id = c.content",
             "LEFT JOIN $usersTable u ON u.id = c.author",
@@ -210,7 +237,9 @@ final class Comment
         $usersTable = Table::name('users');
         $stmt = $this->pdo->prepare(implode("\n", [
             'SELECT c.id, c.content, c.parent, c.reply_to, c.author, c.status, c.body, c.ip_address, c.created, c.updated,',
-            'content.name AS content_name, u.name AS author_name, u.email AS author_email',
+            'content.name AS content_name,',
+            'COALESCE(NULLIF(u.name, \'\'), c.author_name) AS author_name,',
+            'COALESCE(NULLIF(u.email, \'\'), c.author_email) AS author_email',
             "FROM $commentsTable c",
             "INNER JOIN $contentTable content ON content.id = c.content",
             "LEFT JOIN $usersTable u ON u.id = c.author",
@@ -294,17 +323,30 @@ final class Comment
         return $counts;
     }
 
-    public function save(int $contentId, int $authorId, array $input, string $ipAddress): array
+    public function save(int $contentId, int $authorId, array $input, string $ipAddress, bool $allowAnonymous = false): array
     {
         if ($this->findOpenContent($contentId) === null) {
             return ['success' => false, 'errors' => ['_global' => I18n::t('comments.closed')]];
         }
 
-        if (!$this->authorExists($authorId)) {
+        $hasAuthor = $this->authorExists($authorId);
+        if (!$hasAuthor && !$allowAnonymous) {
             return ['success' => false, 'errors' => ['_global' => I18n::t('comments.login_required')]];
         }
 
         $body = trim((string)($input['body'] ?? ''));
+        $authorName = $hasAuthor ? '' : $this->schemaRules->truncate(
+            'comments',
+            'author_name',
+            trim((string)($input['author_name'] ?? '')),
+            255
+        );
+        $authorEmail = $hasAuthor ? '' : mb_strtolower($this->schemaRules->truncate(
+            'comments',
+            'author_email',
+            trim((string)($input['author_email'] ?? '')),
+            255
+        ));
         $parentId = (int)($input['parent'] ?? 0);
         $replyToId = (int)($input['reply_to'] ?? 0);
         $replyTarget = $replyToId > 0 ? $this->findCommentForReply($replyToId) : null;
@@ -316,6 +358,14 @@ final class Comment
 
         if ($body === '') {
             $errors['body'] = I18n::t('comments.body_required');
+        }
+
+        if (!$hasAuthor && $authorName === '') {
+            $errors['author_name'] = I18n::t('comments.author_name_required');
+        }
+
+        if (!$hasAuthor && $authorEmail !== '' && !filter_var($authorEmail, FILTER_VALIDATE_EMAIL)) {
+            $errors['author_email'] = I18n::t('comments.author_email_invalid');
         }
 
         if (
@@ -348,9 +398,11 @@ final class Comment
                 'content' => $contentId,
                 'parent' => $parentId > 0 ? $parentId : null,
                 'reply_to' => $replyToId > 0 ? $replyToId : null,
-                'author' => $authorId,
+                'author' => $hasAuthor ? $authorId : null,
+                'author_name' => $authorName !== '' ? $authorName : null,
+                'author_email' => $authorEmail !== '' ? $authorEmail : null,
                 'ip_address' => $ipAddress !== '' ? $ipAddress : null,
-                'status' => self::STATUS_PUBLISHED,
+                'status' => $hasAuthor ? self::STATUS_PUBLISHED : self::STATUS_DRAFT,
                 'body' => $body,
             ]);
 
