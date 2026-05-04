@@ -5,6 +5,7 @@ use App\Service\Application\Content;
 use App\Service\Infrastructure\Db\Connection;
 use App\Service\Infrastructure\Db\Table;
 use App\Service\Support\Date;
+use App\Service\Support\Shortcode;
 use App\Service\Support\Slugger;
 
 if (!defined('BASE_DIR')) {
@@ -79,9 +80,14 @@ $contentTabsRows = static function (array $items, bool $showThumbnail, bool $sho
             'wrap' => false,
         ]) : '';
         $meta = esc_html(Date::formatDateTimeValue((string)($item['updated'] ?? $item['created'] ?? '')));
-        $excerpt = $showExcerpt ? trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode((string)($item['excerpt'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '') : '';
-        if ($showExcerpt && $excerpt === '') {
-            $excerpt = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode((string)($item['body'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
+        $excerpt = '';
+        if ($showExcerpt) {
+            $trustedBlocks = [];
+            $excerpt = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode(Shortcode::render((string)($item['excerpt'] ?? ''), $trustedBlocks), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
+            if ($excerpt === '') {
+                $trustedBlocks = [];
+                $excerpt = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode(Shortcode::render((string)($item['body'] ?? ''), $trustedBlocks), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
+            }
         }
         if (mb_strlen($excerpt) > 120) {
             $excerpt = mb_substr($excerpt, 0, 117) . '...';
