@@ -12,6 +12,7 @@
         const meta = payload && typeof payload.meta === 'object' ? payload.meta : {};
         return {
             items: Array.isArray(payload?.data) ? payload.data : [],
+            rowsHtml: typeof meta.rows_html === 'string' ? meta.rows_html : '',
             page: Number(meta.page || 1),
             totalPages: Number(meta.total_pages || 1),
             statusCounts: meta.status_counts && typeof meta.status_counts === 'object' ? meta.status_counts : {},
@@ -154,7 +155,7 @@
                 }
                 const normalized = normalizeListResponse(responseResult.data);
                 state.page = Math.max(1, normalized.page || 1);
-                body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
+                body.innerHTML = normalized.rowsHtml;
                 setPagination(state.page, normalized.totalPages);
                 syncStatusCounts(normalized.statusCounts);
                 syncFilters();
@@ -322,8 +323,6 @@
         }
     };
 
-    const renderers = api.listRenderers || {};
-
     const contentListConfig = () => ({
         name: 'content',
         rootSelector: '[data-content-list]',
@@ -342,7 +341,6 @@
             restoreSuccess: t('content.restored'),
             toggleSuccess: (mode) => mode === 'publish' ? t('content.published') : t('content.switched_to_draft'),
         },
-        rowHtml: renderers.contentRowHtml,
     });
 
     const termsListConfig = () => ({
@@ -351,7 +349,6 @@
         withStatus: true,
         deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
         messages: { deleteSuccess: t('terms.deleted') },
-        rowHtml: renderers.termsRowHtml,
     });
 
     const commentsListConfig = () => ({
@@ -375,7 +372,6 @@
         getContext: (root) => ({
             contentEditBase: root.getAttribute('data-content-edit-base') || '',
         }),
-        rowHtml: renderers.commentsRowHtml,
     });
 
     const mediaListConfig = () => ({
@@ -384,7 +380,6 @@
         withStatus: true,
         deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
         messages: { deleteSuccess: t('media.deleted') },
-        rowHtml: renderers.mediaRowHtml,
     });
 
     const usersListConfig = () => ({
@@ -398,7 +393,6 @@
             deleteSuccess: t('users.deleted'),
             toggleSuccess: (mode) => mode === 'unsuspend' ? t('users.unsuspended') : t('users.suspended'),
         },
-        rowHtml: renderers.usersRowHtml,
     });
 
     const initLists = () => {

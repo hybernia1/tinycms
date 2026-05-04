@@ -42,7 +42,7 @@ $scriptGroups = [
     ['ui.js', 'loader.js'],
     ['api/flash.js', 'api/http.js'],
     $hasApiForm ? ['api/forms.js'] : [],
-    $hasApiList ? ['api/list-renderers.js', 'api/list.js'] : [],
+    $hasApiList ? ['api/list.js'] : [],
     $adminUiScripts,
     $hasMediaLibrary ? ['media-library/orchestrator.js'] : [],
     $hasPicker ? ['picker.js'] : [],
