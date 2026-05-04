@@ -294,27 +294,14 @@
     cursor: pointer;
 }
 
-.customizer-color-reset {
-    width: 2.75rem;
-    min-width: 2.75rem;
-    height: 2.75rem;
-    padding: 0;
-}
-
-.customizer-color-transparent {
-    min-height: 2.75rem;
-    padding: 0 .2rem;
-    display: inline-flex;
+.custom-color-actions {
+    display: flex;
     align-items: center;
-    gap: .5rem;
-    cursor: pointer;
-    width: fit-content;
+    gap: .45rem;
 }
 
-.customizer-color-transparent input {
-    width: 1rem;
-    height: 1rem;
-    margin: 0;
+.custom-color-actions .btn {
+    min-height: 2.25rem;
 }
 
 .customizer-switch {

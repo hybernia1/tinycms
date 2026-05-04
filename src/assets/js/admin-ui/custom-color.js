@@ -4,8 +4,10 @@
         return;
     }
 
+    const app = window.tinycms || {};
+    const icon = app.icons?.icon || (() => '');
+    const t = app.i18n?.t || ((key, fallback = '') => fallback || key);
     const presets = ['#0f172a', '#1e293b', '#334155', '#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#f8fafc', '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6'];
-
     const validHex = (value) => /^#[0-9a-f]{6}$/i.test(String(value || '').trim());
 
     const sync = (control) => {
@@ -81,7 +83,28 @@
             palette.appendChild(btn);
         });
 
-        panel.append(hex, palette);
+        const actions = document.createElement('div');
+        actions.className = 'custom-color-actions';
+
+        const nativeBtn = document.createElement('button');
+        nativeBtn.type = 'button';
+        nativeBtn.className = 'btn btn-light btn-icon';
+        nativeBtn.innerHTML = icon('brush');
+        nativeBtn.setAttribute('title', 'Native picker');
+
+        const transparentBtn = document.createElement('button');
+        transparentBtn.type = 'button';
+        transparentBtn.className = 'btn btn-light';
+        transparentBtn.textContent = t('themes.color_transparent', 'Transparent');
+
+        const resetBtn = document.createElement('button');
+        resetBtn.type = 'button';
+        resetBtn.className = 'btn btn-light btn-icon';
+        resetBtn.innerHTML = icon('restore');
+        resetBtn.setAttribute('title', t('themes.color_reset', 'Reset color'));
+
+        actions.append(nativeBtn, transparentBtn, resetBtn);
+        panel.append(hex, palette, actions);
 
         const host = document.createElement('div');
         host.className = 'custom-color';
@@ -91,6 +114,30 @@
         trigger.addEventListener('click', () => {
             const open = host.classList.toggle('is-open');
             trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+
+        nativeBtn.addEventListener('click', () => {
+            transparent.checked = false;
+            sync(control);
+            if (typeof picker.showPicker === 'function') {
+                picker.showPicker();
+                return;
+            }
+            picker.click();
+        });
+
+        transparentBtn.addEventListener('click', () => {
+            transparent.checked = !transparent.checked;
+            sync(control);
+            picker.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        resetBtn.addEventListener('click', () => {
+            const defaultValue = String(picker.getAttribute('data-color-default') || '').trim().toLowerCase();
+            picker.value = validHex(defaultValue) ? defaultValue : '#000000';
+            transparent.checked = false;
+            sync(control);
+            picker.dispatchEvent(new Event('change', { bubbles: true }));
         });
 
         hex.addEventListener('change', () => {
@@ -152,35 +199,5 @@
         if (control instanceof HTMLElement) {
             sync(control);
         }
-    });
-
-    document.addEventListener('click', (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) {
-            return;
-        }
-
-        const colorReset = target.closest('[data-color-reset]');
-        if (!(colorReset instanceof HTMLButtonElement)) {
-            return;
-        }
-
-        const control = colorReset.closest('[data-color-field]');
-        if (!(control instanceof HTMLElement)) {
-            return;
-        }
-
-        const picker = control.querySelector('[data-color-picker]');
-        const transparent = control.querySelector('[data-color-transparent]');
-        const value = control.querySelector('[data-color-value]');
-        if (!(picker instanceof HTMLInputElement) || !(transparent instanceof HTMLInputElement) || !(value instanceof HTMLInputElement)) {
-            return;
-        }
-
-        const defaultValue = String(picker.getAttribute('data-color-default') || '').trim().toLowerCase();
-        picker.value = validHex(defaultValue) ? defaultValue : '#000000';
-        transparent.checked = false;
-        sync(control);
-        value.dispatchEvent(new Event('change', { bubbles: true }));
     });
 })();

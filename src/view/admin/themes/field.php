@@ -115,14 +115,8 @@ $colorFieldValue = $colorIsTransparent ? 'transparent' : $colorPickerValue;
                 <input type="hidden" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($colorFieldValue) ?>" data-color-value>
                 <div class="customizer-color-picker-row">
                     <input type="color" value="<?= esc_attr($colorPickerValue) ?>" data-color-picker data-color-default="<?= esc_attr($colorDefaultValue) ?>"<?= $colorIsTransparent ? ' disabled' : '' ?>>
-                    <button class="btn btn-light btn-icon customizer-color-reset" type="button" data-color-reset aria-label="<?= esc_attr(t('themes.color_reset')) ?>" title="<?= esc_attr(t('themes.color_reset')) ?>">
-                        <?= icon('restore') ?>
-                    </button>
                 </div>
-                <label class="customizer-color-transparent">
-                    <input type="checkbox" value="1" data-color-transparent<?= $colorIsTransparent ? ' checked' : '' ?>>
-                    <span><?= esc_html(t('themes.color_transparent')) ?></span>
-                </label>
+                <input type="checkbox" value="1" data-color-transparent<?= $colorIsTransparent ? ' checked' : '' ?> hidden>
             </div>
         <?php else: ?>
             <input type="text" name="theme[<?= esc_attr($fieldKey) ?>]" value="<?= esc_attr($fieldValue) ?>">
