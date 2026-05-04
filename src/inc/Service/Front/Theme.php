@@ -690,7 +690,7 @@ final class Theme
         $comment['author_name'] = $author;
         $html = '<li class="comment-item" id="comment-' . $commentId . '">';
         $html .= '<article class="comment-card' . ($isPending ? ' comment-card-pending' : '') . '">';
-        $html .= '<header class="comment-meta"><span class="comment-author">' . get_avatar($comment, 'comment-avatar', 48) . '<strong>' . esc_html($author) . '</strong></span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
+        $html .= '<header class="comment-meta"><span class="comment-author">' . get_avatar($comment, 'comment-avatar', 48) . $this->commentAuthorName($comment, $author) . '</span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
         if ($isPending) {
             $html .= '<p class="comment-pending-notice">' . esc_html(t('front.comments_pending', 'Your comment is waiting for approval.')) . '</p>';
         }
@@ -752,6 +752,23 @@ final class Theme
     private function commentsAllowAnonymous(): bool
     {
         return $this->setting('comments_allow_anonymous', '0') === '1';
+    }
+
+    private function commentAuthorName(array $comment, string $author): string
+    {
+        $authorId = (int)($comment['author'] ?? 0);
+        if ($authorId <= 0) {
+            return '<strong>' . esc_html($author) . '</strong>';
+        }
+
+        $url = $this->authorUrl([
+            'author' => $authorId,
+            'author_name' => $author,
+        ]);
+
+        return $url !== ''
+            ? '<a class="comment-author-link" href="' . esc_url($url) . '"><strong>' . esc_html($author) . '</strong></a>'
+            : '<strong>' . esc_html($author) . '</strong>';
     }
 
     private function pendingCommentIds(int $contentId): array
