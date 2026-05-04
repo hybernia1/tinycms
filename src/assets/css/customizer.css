@@ -200,7 +200,14 @@
     gap: .55rem;
 }
 
-.customizer-color-control input[type="color"] {
+.customizer-color-picker-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .5rem;
+    align-items: center;
+}
+
+.customizer-color-picker-row input[type="color"] {
     width: 100%;
 }
 
@@ -209,7 +216,10 @@
 }
 
 .customizer-color-reset {
-    justify-self: start;
+    width: 2.75rem;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
 }
 
 .customizer-color-transparent {

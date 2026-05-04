@@ -81,19 +81,6 @@
         frame.src = previewUrl();
     };
 
-    const syncColorControl = (control) => {
-        const value = control.querySelector('[data-color-value]');
-        const picker = control.querySelector('[data-color-picker]');
-        const transparent = control.querySelector('[data-color-transparent]');
-        if (!(value instanceof HTMLInputElement) || !(picker instanceof HTMLInputElement) || !(transparent instanceof HTMLInputElement)) {
-            return;
-        }
-
-        picker.disabled = transparent.checked;
-        value.value = transparent.checked ? 'transparent' : picker.value;
-        control.classList.toggle('is-transparent', transparent.checked);
-    };
-
     const syncWidgetAreaVisibility = () => {
         const values = Array.from(customizerRoot.querySelectorAll('[data-widget-area-visibility-value]'))
             .filter((item) => item instanceof HTMLInputElement);
@@ -248,30 +235,7 @@
 
     form.addEventListener('input', scheduleRefresh);
     form.addEventListener('change', scheduleRefresh);
-    customizerRoot.querySelectorAll('[data-color-field]').forEach(syncColorControl);
     syncWidgetAreaVisibility();
-    customizerRoot.addEventListener('input', (event) => {
-        const target = event.target;
-        if (!(target instanceof Element) || !target.matches('[data-color-picker]')) {
-            return;
-        }
-
-        const control = target.closest('[data-color-field]');
-        if (control instanceof HTMLElement) {
-            syncColorControl(control);
-        }
-    });
-    customizerRoot.addEventListener('change', (event) => {
-        const target = event.target;
-        if (!(target instanceof Element) || !target.matches('[data-color-picker], [data-color-transparent]')) {
-            return;
-        }
-
-        const colorControl = target.closest('[data-color-field]');
-        if (colorControl instanceof HTMLElement) {
-            syncColorControl(colorControl);
-        }
-    });
     customizerRoot.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) {
             return;
@@ -307,26 +271,6 @@
             return;
         }
 
-        const colorReset = event.target.closest('[data-color-reset]');
-        if (colorReset) {
-            const control = colorReset.closest('[data-color-field]');
-            if (!(control instanceof HTMLElement)) {
-                return;
-            }
-
-            const picker = control.querySelector('[data-color-picker]');
-            const transparent = control.querySelector('[data-color-transparent]');
-            if (!(picker instanceof HTMLInputElement) || !(transparent instanceof HTMLInputElement)) {
-                return;
-            }
-
-            const fallback = '#000000';
-            const defaultValue = String(picker.getAttribute('data-color-default') || '').trim().toLowerCase();
-            picker.value = /^#[0-9a-f]{6}$/i.test(defaultValue) ? defaultValue : fallback;
-            transparent.checked = false;
-            syncColorControl(control);
-            scheduleRefresh();
-        }
     });
     document.addEventListener('tinycms:api-form-success', (event) => {
         if (event.target instanceof HTMLFormElement && event.target.hasAttribute('data-preview-refresh-on-success')) {

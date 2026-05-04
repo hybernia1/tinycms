@@ -10,7 +10,7 @@ $hasPicker = str_contains($contentHtml, 'data-picker');
 $hasMenuBuilder = str_contains($contentHtml, 'data-menu-builder');
 $hasWidgetBuilder = str_contains($contentHtml, 'data-widget-builder');
 $scripts = array_merge(
-    ['core.js', 'ui.js', 'api/flash.js', 'api/http.js', 'api/forms.js', 'admin-ui/custom-select.js'],
+    ['core.js', 'ui.js', 'api/flash.js', 'api/http.js', 'api/forms.js', 'admin-ui/custom-select.js', 'admin-ui/custom-color.js'],
     $hasMediaLibrary ? ['media-library/orchestrator.js'] : [],
     $hasPicker ? ['picker.js'] : [],
     $hasMenuBuilder || $hasWidgetBuilder ? ['builder-dnd.js'] : [],
