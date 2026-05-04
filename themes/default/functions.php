@@ -24,7 +24,9 @@ register_theme([
 register_theme_section('branding', t('theme.customizer_sections.branding'), ['brand_display', 'logo']);
 register_theme_section('layout', t('theme.customizer_sections.layout'), [
     'layout_width',
+    'enable_menu',
     'enable_search',
+    'enable_footer',
     'footer_text',
 ]);
 register_theme_section('homepage', t('theme.customizer_sections.homepage'), ['front_home_content']);

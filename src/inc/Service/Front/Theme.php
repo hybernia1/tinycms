@@ -276,6 +276,10 @@ final class Theme
 
     public function menu(array $options = []): string
     {
+        if (!$this->menuEnabled()) {
+            return '';
+        }
+
         $items = $this->menuItems();
         if ($items === []) {
             return '';
@@ -348,6 +352,11 @@ final class Theme
     private function searchEnabled(): bool
     {
         return $this->setting('enable_search', '1') === '1';
+    }
+
+    private function menuEnabled(): bool
+    {
+        return $this->setting('enable_menu', '1') === '1';
     }
 
     private function widgetAreaEnabled(string $area): bool
