@@ -323,6 +323,15 @@ final class Comment
         return $counts;
     }
 
+    public function pendingCount(): int
+    {
+        $commentsTable = Table::name('comments');
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $commentsTable WHERE status = :status");
+        $stmt->execute(['status' => self::STATUS_DRAFT]);
+
+        return (int)($stmt->fetchColumn() ?: 0);
+    }
+
     public function save(int $contentId, int $authorId, array $input, string $ipAddress, bool $allowAnonymous = false): array
     {
         if ($this->findOpenContent($contentId) === null) {

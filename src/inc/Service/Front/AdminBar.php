@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service\Front;
 
+use App\Service\Application\Comment;
 use App\Service\Auth\Auth;
 use App\Service\Infrastructure\Router\Router;
 use App\Service\Support\I18n;
@@ -10,7 +11,7 @@ use App\Service\Support\RequestContext;
 
 final class AdminBar
 {
-    public function __construct(private Router $router, private Auth $auth)
+    public function __construct(private Router $router, private Auth $auth, private Comment $comments)
     {
     }
 
@@ -45,11 +46,13 @@ final class AdminBar
         $logout = esc_url($this->router->url('admin/logout'));
         $logo = esc_url($this->router->url(ASSETS_DIR . 'svg/logo.svg'));
         $edit = $this->editLink($context);
+        $comments = $this->pendingCommentsLink();
 
         return '<div class="tinycms-admin-bar" role="navigation" aria-label="' . esc_attr(I18n::t('admin.brand')) . '">'
             . '<a class="tinycms-admin-bar-brand" href="' . $dashboard . '" aria-label="' . esc_attr(I18n::t('admin.menu.dashboard')) . '"><img src="' . $logo . '" alt=""></a>'
             . $this->link($newContent, I18n::t('admin.add_content'), 'add')
             . $this->link($customizer, I18n::t('themes.customizer'), 'settings')
+            . $comments
             . $edit
             . $this->link($logout, I18n::t('admin.logout'), 'logout', 'tinycms-admin-bar-link-logout')
             . '</div>';
@@ -75,13 +78,31 @@ final class AdminBar
         return '';
     }
 
-    private function link(string $href, string $label, string $icon, string $class = ''): string
+    private function pendingCommentsLink(): string
+    {
+        $count = $this->comments->pendingCount();
+        if ($count <= 0) {
+            return '';
+        }
+
+        return $this->link(
+            esc_url($this->router->url('admin/comments?status=draft')),
+            I18n::t('admin.menu.comments'),
+            'comments',
+            'tinycms-admin-bar-link-comments',
+            (string)$count
+        );
+    }
+
+    private function link(string $href, string $label, string $icon, string $class = '', string $badge = ''): string
     {
         $linkClass = trim('tinycms-admin-bar-link ' . $class);
+        $badgeHtml = $badge !== '' ? '<span class="tinycms-admin-bar-badge">' . esc_html($badge) . '</span>' : '';
 
         return '<a class="' . esc_attr($linkClass) . '" href="' . $href . '">'
             . icon($icon, 'tinycms-admin-bar-icon')
             . '<span class="tinycms-admin-bar-link-label">' . esc_html($label) . '</span>'
+            . $badgeHtml
             . '</a>';
     }
 

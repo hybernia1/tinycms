@@ -83,12 +83,31 @@
     margin-left: auto;
 }
 
+.tinycms-admin-bar-link-comments {
+    gap: 0.25rem;
+}
+
 .tinycms-admin-bar-icon {
     width: 1rem;
     height: 1rem;
     display: block;
     fill: currentColor;
     flex: 0 0 1rem;
+}
+
+.tinycms-admin-bar-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 0.32rem;
+    border-radius: 999px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .tinycms-admin-bar-link:hover,
@@ -109,6 +128,12 @@
         gap: 0;
         width: 26px;
         padding-inline: 0;
+    }
+
+    .tinycms-admin-bar-link-comments {
+        width: auto;
+        gap: 0.25rem;
+        padding-inline: 0.35rem;
     }
 }
 
