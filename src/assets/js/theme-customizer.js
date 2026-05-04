@@ -304,6 +304,28 @@
         const backButton = event.target.closest('[data-customizer-back]');
         if (backButton) {
             openScreen(backButton.getAttribute('data-customizer-back'));
+            return;
+        }
+
+        const colorReset = event.target.closest('[data-color-reset]');
+        if (colorReset) {
+            const control = colorReset.closest('[data-color-field]');
+            if (!(control instanceof HTMLElement)) {
+                return;
+            }
+
+            const picker = control.querySelector('[data-color-picker]');
+            const transparent = control.querySelector('[data-color-transparent]');
+            if (!(picker instanceof HTMLInputElement) || !(transparent instanceof HTMLInputElement)) {
+                return;
+            }
+
+            const fallback = '#000000';
+            const defaultValue = String(picker.getAttribute('data-color-default') || '').trim().toLowerCase();
+            picker.value = /^#[0-9a-f]{6}$/i.test(defaultValue) ? defaultValue : fallback;
+            transparent.checked = false;
+            syncColorControl(control);
+            scheduleRefresh();
         }
     });
     document.addEventListener('tinycms:api-form-success', (event) => {

@@ -208,6 +208,10 @@
     opacity: .45;
 }
 
+.customizer-color-reset {
+    justify-self: start;
+}
+
 .customizer-color-transparent {
     min-height: 2.25rem;
     border: 1px solid #d0d7e2;
