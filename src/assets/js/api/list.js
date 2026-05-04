@@ -2,25 +2,13 @@
     const app = window.tinycms = window.tinycms || {};
     const api = app.api = app.api || {};
     const t = app.i18n?.t || (() => '');
-    const requestJson = api.http?.requestJson;
     const postForm = api.http?.postForm;
     const pushFlash = api.pushFlash || (() => {});
     const sessionStore = app.support?.sessionStore || { get: () => '', set: () => {} };
     const confirmModal = app.ui?.modal?.confirm || (() => Promise.resolve(false));
 
-    const normalizeListResponse = (payload) => {
-        const meta = payload && typeof payload.meta === 'object' ? payload.meta : {};
-        return {
-            items: Array.isArray(payload?.data) ? payload.data : [],
-            rowsHtml: typeof meta.rows_html === 'string' ? meta.rows_html : '',
-            page: Number(meta.page || 1),
-            totalPages: Number(meta.total_pages || 1),
-            statusCounts: meta.status_counts && typeof meta.status_counts === 'object' ? meta.status_counts : {},
-        };
-    };
-
     const initListApi = (config) => {
-        if (typeof requestJson !== 'function' || typeof postForm !== 'function') {
+        if (typeof postForm !== 'function') {
             return;
         }
         const root = document.querySelector(config.rootSelector);
@@ -30,31 +18,16 @@
 
         const endpoint = root.getAttribute('data-endpoint') || '';
         const endpointBase = endpoint.replace(/\/$/, '');
-        const editBase = root.getAttribute('data-edit-base') || '';
         const csrfInput = root.querySelector(`[data-${config.name}-csrf] input[name="_csrf"]`);
         const searchField = root.querySelector(`[data-${config.name}-search]`);
-        const body = root.querySelector(`[data-${config.name}-list-body]`);
-        const prevLink = root.querySelector(`[data-${config.name}-prev]`);
-        const nextLink = root.querySelector(`[data-${config.name}-next]`);
         const filterLinks = config.withStatus
             ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
             : [];
-        const filterBaseLabels = {};
-        filterLinks.forEach((link) => {
-            const statusKey = link.getAttribute(`data-${config.name}-status`) || '';
-            if (statusKey !== '') {
-                filterBaseLabels[statusKey] = String(link.textContent || '').replace(/\s*\(\d+\)\s*$/, '').trim();
-            }
-        });
         const statusStorageKey = `tinycms.${config.name}.activeStatus`;
         const statusExists = (status) => filterLinks.some((link) => link.getAttribute(`data-${config.name}-status`) === status);
         const activeStatus = () => filterLinks.find((link) => link.classList.contains('active'))?.getAttribute(`data-${config.name}-status`) || 'all';
         const initialStatus = config.withStatus ? activeStatus() : 'all';
-        const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
-        const loader = app.loader || null;
-
         let state = {
-            page: 1,
             query: searchField?.value.trim() || '',
         };
 
@@ -68,27 +41,6 @@
             sessionStore.set(statusStorageKey, state.status);
         }
 
-        let searchTimer = null;
-        let fetchController = null;
-
-        const setButtonDisabled = (button, disabled) => {
-            if (!button) {
-                return;
-            }
-            button.disabled = disabled;
-            button.classList.toggle('disabled', disabled);
-            button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-        };
-
-        const setPagination = (page, totalPages) => {
-            if (!prevLink || !nextLink) {
-                return;
-            }
-
-            setButtonDisabled(prevLink, page <= 1);
-            setButtonDisabled(nextLink, page >= totalPages);
-        };
-
         const syncFilters = () => {
             if (!config.withStatus) {
                 return;
@@ -99,71 +51,29 @@
             });
         };
 
-        const syncStatusCounts = (statusCounts) => {
-            if (!config.withStatus || !statusCounts || typeof statusCounts !== 'object') {
-                return;
+        const buildNavigateUrl = (updates = {}) => {
+            const url = new URL(window.location.href);
+            const query = String(updates.q ?? state.query).trim();
+            const page = Number(updates.page ?? 1);
+            if (query !== '') {
+                url.searchParams.set('q', query);
+            } else {
+                url.searchParams.delete('q');
             }
-
-            filterLinks.forEach((link) => {
-                const statusKey = link.getAttribute(`data-${config.name}-status`) || '';
-                const baseLabel = filterBaseLabels[statusKey];
-                if (statusKey === '' || typeof baseLabel !== 'string') {
-                    return;
-                }
-
-                const count = Number(statusCounts[statusKey] ?? 0);
-                link.textContent = `${baseLabel} (${Number.isFinite(count) ? count : 0})`;
-            });
-        };
-
-        const fetchList = async () => {
-            if (!endpoint || !body) {
-                return;
-            }
-
-            if (fetchController) {
-                fetchController.abort();
-            }
-            fetchController = new AbortController();
-
-            if (loader) {
-                loader.set(root, true);
-            }
-            try {
-                const url = new URL(endpoint, window.location.origin);
-                url.searchParams.set('page', String(state.page));
-
-                if (config.withStatus) {
-                    url.searchParams.set('status', state.status);
-                }
-
-                if (state.query !== '') {
-                    url.searchParams.set('q', state.query);
-                }
-
-                const responseResult = await requestJson(url.toString(), {
-                    headers: { Accept: 'application/json' },
-                    signal: fetchController.signal,
-                }).catch((error) => {
-                    if (error instanceof DOMException && error.name === 'AbortError') {
-                        return null;
-                    }
-                    throw error;
-                });
-                if (!responseResult || !responseResult.response || !responseResult.response.ok) {
-                    return;
-                }
-                const normalized = normalizeListResponse(responseResult.data);
-                state.page = Math.max(1, normalized.page || 1);
-                body.innerHTML = normalized.rowsHtml;
-                setPagination(state.page, normalized.totalPages);
-                syncStatusCounts(normalized.statusCounts);
-                syncFilters();
-            } finally {
-                if (loader) {
-                    loader.set(root, false);
+            if (config.withStatus) {
+                const status = String(updates.status ?? state.status ?? 'all');
+                if (status !== '' && status !== 'all') {
+                    url.searchParams.set('status', status);
+                } else {
+                    url.searchParams.delete('status');
                 }
             }
+            if (page > 1) {
+                url.searchParams.set('page', String(page));
+            } else {
+                url.searchParams.delete('page');
+            }
+            return url.toString();
         };
 
         const postAction = async (path, payload) => {
@@ -207,9 +117,9 @@
                 if (statusLink) {
                     event.preventDefault();
                     state.status = statusLink.getAttribute(`data-${config.name}-status`) || 'all';
-                    state.page = 1;
+                    state.query = searchField?.value.trim() || '';
                     sessionStore.set(statusStorageKey, state.status);
-                    await fetchList();
+                    window.location.href = buildNavigateUrl({ status: state.status, page: 1 });
                     return;
                 }
             }
@@ -217,9 +127,9 @@
             const prev = event.target.closest(`[data-${config.name}-prev]`);
             if (prev) {
                 event.preventDefault();
-                if (state.page > 1) {
-                    state.page -= 1;
-                    await fetchList();
+                const currentPage = Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || '1'));
+                if (currentPage > 1) {
+                    window.location.href = buildNavigateUrl({ page: currentPage - 1 });
                 }
                 return;
             }
@@ -227,8 +137,8 @@
             const next = event.target.closest(`[data-${config.name}-next]`);
             if (next) {
                 event.preventDefault();
-                state.page += 1;
-                await fetchList();
+                const currentPage = Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || '1'));
+                window.location.href = buildNavigateUrl({ page: currentPage + 1 });
                 return;
             }
 
@@ -247,7 +157,7 @@
                             if (config.messages?.toggleSuccess) {
                                 pushFlash('success', config.messages.toggleSuccess(mode));
                             }
-                            await fetchList();
+                            window.location.reload();
                         }
                     }
                     return;
@@ -268,7 +178,7 @@
                             if (config.messages?.restoreSuccess) {
                                 pushFlash('success', result.message || config.messages.restoreSuccess);
                             }
-                            await fetchList();
+                            window.location.reload();
                         }
                     }
                     return;
@@ -298,29 +208,23 @@
                     if (config.messages?.deleteSuccess) {
                         pushFlash('success', result.message || config.messages.deleteSuccess);
                     }
-                    await fetchList();
+                    window.location.reload();
                 }
             }
         });
 
         if (searchField) {
-            searchField.addEventListener('input', () => {
-                if (searchTimer) {
-                    clearTimeout(searchTimer);
+            searchField.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter') {
+                    return;
                 }
-
-                searchTimer = window.setTimeout(async () => {
-                    state.query = searchField.value.trim();
-                    state.page = 1;
-                    await fetchList();
-                }, 1000);
+                event.preventDefault();
+                state.query = searchField.value.trim();
+                window.location.href = buildNavigateUrl({ page: 1 });
             });
         }
 
-        if (config.withStatus && state.status !== initialStatus) {
-            syncFilters();
-            fetchList();
-        }
+        syncFilters();
     };
 
     const contentListConfig = () => ({
