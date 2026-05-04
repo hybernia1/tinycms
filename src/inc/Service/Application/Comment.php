@@ -142,7 +142,14 @@ final class Comment
         $params = [];
 
         if ($status !== 'all') {
-            $where[] = 'c.status = :status';
+            if ($status === self::STATUS_DRAFT) {
+                $where[] = implode(' ', [
+                    '(c.status = :status',
+                    "OR EXISTS (SELECT 1 FROM $commentsTable child WHERE child.parent = c.id AND child.status = :status))",
+                ]);
+            } else {
+                $where[] = 'c.status = :status';
+            }
             $params['status'] = $status;
         }
 
@@ -295,8 +302,14 @@ final class Comment
     public function statusCounts(array $statuses = []): array
     {
         $commentsTable = Table::name('comments');
-        $stmt = $this->pdo->query("SELECT status FROM $commentsTable WHERE parent IS NULL");
-        $rows = $stmt ? ($stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []) : [];
+        $stmt = $this->pdo->prepare(implode("\n", [
+            'SELECT c.status,',
+            "       EXISTS (SELECT 1 FROM $commentsTable child WHERE child.parent = c.id AND child.status = :draft_status) AS has_draft_child",
+            "FROM $commentsTable c",
+            'WHERE c.parent IS NULL',
+        ]));
+        $stmt->execute(['draft_status' => self::STATUS_DRAFT]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
         $counts = [
             'all' => count($rows),
         ];
@@ -311,6 +324,10 @@ final class Comment
                 $counts[$value] = 0;
             }
             $counts[$value]++;
+
+            if ($value !== self::STATUS_DRAFT && (int)($row['has_draft_child'] ?? 0) === 1) {
+                $counts[self::STATUS_DRAFT] = ($counts[self::STATUS_DRAFT] ?? 0) + 1;
+            }
         }
 
         foreach ($statuses as $status) {
