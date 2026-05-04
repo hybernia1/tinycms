@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Service\Application\Auth;
+use App\Service\Application\Dashboard;
 use App\Service\Support\Csrf;
 use App\Service\Support\Date;
 use App\Service\Support\Flash;
@@ -18,7 +19,8 @@ class Admin
         protected Auth $authService,
         protected Flash $flash,
         protected Csrf $csrf,
-        private ?AdminView $pages = null
+        private ?AdminView $pages = null,
+        private ?Dashboard $dashboard = null
     ) {
     }
 
@@ -37,7 +39,7 @@ class Admin
             return;
         }
 
-        $this->requirePages()->adminDashboard($this->authService->auth()->user());
+        $this->requirePages()->adminDashboard($this->authService->auth()->user(), $this->requireDashboard()->overview());
     }
 
     public function loginForm(callable $redirect): void
@@ -282,6 +284,15 @@ class Admin
         }
 
         return $this->pages;
+    }
+
+    private function requireDashboard(): Dashboard
+    {
+        if ($this->dashboard === null) {
+            throw new \LogicException('Dashboard service is not configured.');
+        }
+
+        return $this->dashboard;
     }
 
 }

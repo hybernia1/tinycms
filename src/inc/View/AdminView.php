@@ -21,10 +21,11 @@ final class AdminView
         $this->content = $content;
     }
 
-    public function adminDashboard(?array $user): void
+    public function adminDashboard(?array $user, array $dashboard): void
     {
         $this->renderAdmin('admin/dashboard', [
             'user' => $user,
+            'dashboard' => $dashboard,
             'pageTitle' => I18n::t('admin.menu.dashboard'),
         ]);
     }

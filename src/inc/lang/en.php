@@ -96,6 +96,16 @@ return [
         'title_suffix' => 'Admin',
         'dashboard' => [
             'logged_in' => 'Logged in',
+            'recent_content' => 'Recent content',
+            'recent_comments' => 'Recent comments',
+            'stats' => [
+                'content_all' => 'Content',
+                'content_published' => 'Published',
+                'content_draft' => 'Drafts',
+                'comments_pending' => 'Pending comments',
+                'media_all' => 'Media',
+                'users_all' => 'Users',
+            ],
         ],
         'menu' => [
             'dashboard' => 'Dashboard',
