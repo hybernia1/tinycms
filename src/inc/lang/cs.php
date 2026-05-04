@@ -387,6 +387,8 @@ return [
         'replies' => 'Odpovědi',
         'no_replies' => 'Vlákno zatím nemá žádné odpovědi.',
         'ip_address' => 'IP adresa',
+        'parent_thread' => 'Parent vlákno',
+        'child_of' => 'Odpověď na komentář',
         'search_placeholder' => 'Hledat komentáře, obsah nebo autora',
         'delete' => 'Smazat komentář',
         'delete_confirm' => 'Skutečně smazat tento komentář?',

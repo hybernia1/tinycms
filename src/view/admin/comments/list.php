@@ -12,6 +12,7 @@ foreach (['published', 'draft', 'trash'] as $statusValue) {
 $rowRenderer = static function (array $row) use ($url, $formatDateTime): string {
     $id = (int)($row['id'] ?? 0);
     $contentId = (int)($row['content'] ?? 0);
+    $parentId = (int)($row['parent'] ?? 0);
     $repliesCount = (int)($row['replies_count'] ?? 0);
     $statusValue = (string)($row['status'] ?? 'draft');
     $isPublished = $statusValue === 'published';
@@ -31,6 +32,14 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime): string 
                 <?= icon($statusIcon) ?>
                 <a class="admin-list-truncate" href="<?= esc_url($url('admin/comments/edit?id=' . $id)) ?>" title="<?= esc_attr($body) ?>"><?= esc_html($body !== '' ? $body : t('comments.empty_body')) ?></a>
             </span>
+            <div class="text-muted small">
+                <?php if ($parentId > 0): ?>
+                    <?= esc_html(t('comments.child_of')) ?>
+                    <a href="<?= esc_url($url('admin/comments/edit?id=' . $parentId)) ?>">#<?= (int)$parentId ?></a>
+                <?php else: ?>
+                    <?= esc_html(t('comments.parent_thread')) ?>
+                <?php endif; ?>
+            </div>
             <div class="text-muted small">
                 <?php if ($contentId > 0): ?>
                     <a href="<?= esc_url($url('admin/content/edit?id=' . $contentId)) ?>"><?= esc_html((string)($row['content_name'] ?? ('#' . $contentId))) ?></a>

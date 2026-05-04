@@ -387,6 +387,8 @@ return [
         'replies' => 'Replies',
         'no_replies' => 'This thread has no replies yet.',
         'ip_address' => 'IP address',
+        'parent_thread' => 'Parent thread',
+        'child_of' => 'Reply to comment',
         'search_placeholder' => 'Search comments, content or author',
         'delete' => 'Delete comment',
         'delete_confirm' => 'Do you really want to delete this comment?',
