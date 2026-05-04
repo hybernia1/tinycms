@@ -241,6 +241,7 @@ return [
         'invalid_content' => 'Selected content is not available.',
         'max_length' => 'This field can contain at most %d characters.',
         'color_transparent' => 'Transparent',
+        'color_reset' => 'Reset color',
         'customizer' => 'Theme customizer',
         'customize' => 'Customize',
         'activate' => 'Activate',

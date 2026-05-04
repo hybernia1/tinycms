@@ -37,7 +37,6 @@ return [
     'theme.customizer_fields.color_accent' => 'Accent',
     'theme.customizer_fields.color_accent_strong' => 'Accent strong',
     'theme.customizer_fields.color_accent_soft' => 'Accent soft',
-    'themes.color_reset' => 'Reset color',
     'theme.customizer_fields.footer_text' => 'Footer text',
     'theme.customizer_options.brand_both' => 'Logo and title',
     'theme.customizer_options.brand_logo' => 'Logo only',

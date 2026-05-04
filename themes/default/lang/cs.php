@@ -37,7 +37,6 @@ return [
     'theme.customizer_fields.color_accent' => 'Akcent',
     'theme.customizer_fields.color_accent_strong' => 'Silný akcent',
     'theme.customizer_fields.color_accent_soft' => 'Jemný akcent',
-    'themes.color_reset' => 'Resetovat barvu',
     'theme.customizer_fields.footer_text' => 'Text patičky',
     'theme.customizer_options.brand_both' => 'Logo a název',
     'theme.customizer_options.brand_logo' => 'Pouze logo',

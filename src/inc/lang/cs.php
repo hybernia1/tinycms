@@ -241,6 +241,7 @@ return [
         'invalid_content' => 'Vybraný obsah není dostupný.',
         'max_length' => 'Pole může mít maximálně %d znaků.',
         'color_transparent' => 'Transparentní',
+        'color_reset' => 'Resetovat barvu',
         'customizer' => 'Customizer šablony',
         'customize' => 'Přizpůsobit',
         'activate' => 'Aktivovat',
