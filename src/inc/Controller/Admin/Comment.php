@@ -31,7 +31,8 @@ final class Comment extends Admin
         $statuses = [CommentService::STATUS_DRAFT, CommentService::STATUS_PUBLISHED, CommentService::STATUS_TRASH];
         [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(array_merge(['all'], $statuses));
         $pagination = $this->comments->paginate($page, $perPage, $status, $query);
-        $this->pages->adminCommentList($pagination, $status, $query, $this->comments->statusCounts($statuses));
+        $statusCounts = $this->comments->statusCounts($statuses);
+        $this->pages->adminCommentList($pagination, $status, $query, $statusCounts);
     }
 
     public function editForm(callable $redirect): void

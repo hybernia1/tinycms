@@ -62,6 +62,13 @@ final class AdminView
         ]);
     }
 
+    public function adminUsersListFragment(array $pagination, string $status, string $query, array $statusCounts): void
+    {
+        $this->renderAdminFragment('admin/users/list', [
+            'listBase' => $this->adminListBase('users', $pagination, $status, $query, $statusCounts),
+        ]);
+    }
+
     public function adminSettingsForm(array $fields, array $values, string $section): void
     {
         $this->renderAdmin('admin/settings/form', [
@@ -94,6 +101,14 @@ final class AdminView
         ]);
     }
 
+    public function adminContentListFragment(array $pagination, string $status, string $query, array $availableStatuses, array $statusCounts): void
+    {
+        $this->renderAdminFragment('admin/content/list', [
+            'listBase' => $this->adminListBase('content', $pagination, $status, $query, $statusCounts),
+            'availableStatuses' => $availableStatuses,
+        ]);
+    }
+
     public function adminContentForm(string $mode, array $item, array $errors, array $availableStatuses, array $contentTypes, string $authorLabel = '', array $selectedTerms = []): void
     {
         $this->renderAdmin('admin/content/form', [
@@ -117,6 +132,13 @@ final class AdminView
         ]);
     }
 
+    public function adminCommentListFragment(array $pagination, string $status, string $query, array $statusCounts): void
+    {
+        $this->renderAdminFragment('admin/comments/list', [
+            'listBase' => $this->adminListBase('comments', $pagination, $status, $query, $statusCounts),
+        ]);
+    }
+
     public function adminCommentForm(array $item, array $errors, array $children = []): void
     {
         $this->renderAdmin('admin/comments/form', [
@@ -133,6 +155,13 @@ final class AdminView
             'listBase' => $this->adminListBase('terms', $pagination, $status, $query, $statusCounts),
             'pageTitle' => I18n::t('admin.menu.terms'),
             'headerAction' => $this->linkHeaderAction('admin/terms/add', I18n::t('admin.add_term')),
+        ]);
+    }
+
+    public function adminTermListFragment(array $pagination, string $status, string $query, array $statusCounts): void
+    {
+        $this->renderAdminFragment('admin/terms/list', [
+            'listBase' => $this->adminListBase('terms', $pagination, $status, $query, $statusCounts),
         ]);
     }
 
@@ -229,6 +258,23 @@ final class AdminView
         ]);
     }
 
+    public function adminMediaListFragment(array $pagination, string $status, string $query, array $statusCounts): void
+    {
+        $this->renderAdminFragment('admin/media/list', [
+            'listBase' => $this->adminListBase('media', $pagination, $status, $query, $statusCounts),
+        ]);
+    }
+
+    public function adminMediaLibraryItemsFragment(array $items, array $pagination): void
+    {
+        $this->renderAdminFragment('admin/partials/media-library', [
+            'mode' => 'items',
+            'items' => $items,
+            'page' => (int)($pagination['page'] ?? 1),
+            'totalPages' => (int)($pagination['total_pages'] ?? 1),
+        ]);
+    }
+
     private function adminListBase(string $entity, array $pagination, string $status, string $query, array $statusCounts = []): array
     {
         return [
@@ -316,6 +362,15 @@ final class AdminView
                 'adminI18n' => $this->adminI18n(),
             ]
         ));
+    }
+
+    private function renderAdminFragment(string $template, array $data): void
+    {
+        header('Content-Type: text/html; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        echo $this->view->renderPartial($template, $data);
     }
 
     private function adminBranding(): array

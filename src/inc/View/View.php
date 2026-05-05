@@ -38,7 +38,22 @@ final class View
         );
     }
 
+    public function renderPartial(string $template, array $data = []): string
+    {
+        return $this->renderTemplate($this->resolve(VIEW_DIR . $template . '.php', VIEW_DIR), $this->viewData('', $data, false));
+    }
+
     private function renderFiles(string $templateFile, string $layoutFile, string $layout, array $data = []): void
+    {
+        $viewData = $this->viewData($layout, $data, true);
+        $contentHtml = $this->renderTemplate($templateFile, $viewData);
+        extract($viewData, EXTR_SKIP);
+        $content = $contentHtml;
+
+        require $layoutFile;
+    }
+
+    private function viewData(string $layout, array $data, bool $consumeFlashes): array
     {
         $url = fn(string $path = ''): string => $this->router->url($path);
         $absoluteUrl = static function (string $path = '') use ($url): string {
@@ -86,6 +101,7 @@ final class View
             $data['adminMenu'] = array_map($normalizeAdminMenuItem, $data['adminMenu']);
         }
 
+        $data['url'] = $url;
         $data['pageTitle'] = $data['pageTitle'] ?? 'Admin';
         $data['csrfField'] = $csrfField;
         $data['formatDate'] = $formatDate;
@@ -94,15 +110,19 @@ final class View
         $data['absoluteUrl'] = $absoluteUrl;
         $data['media'] = $media;
         $data['lang'] = I18n::htmlLang();
-        $data['flashes'] = $this->flash->consume();
+        $data['flashes'] = $consumeFlashes ? $this->flash->consume() : [];
         $data['currentRoute'] = $this->router->requestPath((string)($_SERVER['REQUEST_URI'] ?? '/'));
+
+        return $data;
+    }
+
+    private function renderTemplate(string $templateFile, array $data): string
+    {
         extract($data, EXTR_SKIP);
 
         ob_start();
         require $templateFile;
-        $content = (string)ob_get_clean();
-
-        require $layoutFile;
+        return (string)ob_get_clean();
     }
 
     private function resolve(string $relativePath, string $allowedPath): string

@@ -66,7 +66,6 @@ $rowRenderer = static function (array $row) use ($url, $formatDateTime): string 
 };
 $list['statusLinks'] = $statusLinks;
 $list['searchPlaceholder'] = t('comments.search_placeholder');
-$list['rootAttrs'] = ['data-content-edit-base' => $url('admin/content/edit?id=')];
 $list['columns'] = [
     ['label' => t('comments.comment')],
     ['label' => t('common.author'), 'class' => 'mobile-hide'],

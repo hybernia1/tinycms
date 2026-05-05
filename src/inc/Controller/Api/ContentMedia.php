@@ -13,6 +13,7 @@ use App\Service\Support\Media as MediaPath;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
+use App\View\AdminView;
 
 final class ContentMedia extends Admin
 {
@@ -22,7 +23,8 @@ final class ContentMedia extends Admin
         private Media $media,
         private Upload $upload,
         Flash $flash,
-        Csrf $csrf
+        Csrf $csrf,
+        private AdminView $adminView
     ) {
         parent::__construct($authService, $flash, $csrf);
     }
@@ -99,6 +101,11 @@ final class ContentMedia extends Admin
                 $items = array_values(array_filter($items, static fn(array $row): bool => (int)($row['id'] ?? 0) !== $currentMediaId));
                 array_unshift($items, $this->mapLibraryItem($currentItem));
             }
+        }
+
+        if ($this->wantsHtmlResponse('library')) {
+            $this->adminView->adminMediaLibraryItemsFragment($items, $pagination);
+            return;
         }
 
         $this->apiOk($items, [

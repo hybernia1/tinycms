@@ -10,6 +10,8 @@ use App\Service\Application\Upload as UploadService;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
+use App\Service\Support\Media as MediaPath;
+use App\View\AdminView;
 
 final class Media extends Admin
 {
@@ -18,7 +20,8 @@ final class Media extends Admin
         private MediaService $media,
         private UploadService $upload,
         Flash $flash,
-        Csrf $csrf
+        Csrf $csrf,
+        private AdminView $adminView
     ) {
         parent::__construct($authService, $flash, $csrf);
     }
@@ -42,6 +45,16 @@ final class Media extends Admin
             }
         }
         $statusCounts = $this->media->statusCounts();
+
+        if ($this->wantsHtmlResponse('library')) {
+            $this->adminView->adminMediaLibraryItemsFragment($items, $pagination);
+            return;
+        }
+
+        if ($this->wantsHtmlResponse('list')) {
+            $this->adminView->adminMediaListFragment($pagination, $status, $query, $statusCounts);
+            return;
+        }
 
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
@@ -154,6 +167,7 @@ final class Media extends Admin
             'can_delete' => true,
             'path' => (string)($row['path'] ?? ''),
             'preview_path' => $previewPath,
+            'webp_path' => MediaPath::bySize((string)($row['path'] ?? ''), 'webp'),
             'author_name' => (string)($row['author_name'] ?? '—'),
             'created' => (string)($row['created'] ?? ''),
             'created_label' => $this->formatDateTime((string)($row['created'] ?? '')),

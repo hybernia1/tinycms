@@ -154,7 +154,7 @@ $frontComments = new FrontCommentController($auth, $commentService, $csrf, $rate
 $adminView = new AdminView($view, $settingsService, $contentService, $themeService->resolved());
 $admin = new AdminController($authService, $flash, $csrf, $adminView, $dashboardService);
 $apiSessions = new SessionsController($authService, $flash, $csrf, $rateLimiter);
-$apiUser = new ApiUserController($authService, $userService, $flash, $csrf);
+$apiUser = new ApiUserController($authService, $userService, $flash, $csrf, $adminView);
 $adminUsers = new UserController($adminView, $authService, $userService, $flash, $csrf);
 $adminContent = new ContentController($adminView, $authService, $contentService, $userService, $termService, $flash, $csrf);
 $adminComments = new CommentController($adminView, $authService, $commentService, $flash, $csrf);
@@ -164,15 +164,15 @@ $adminWidgets = new WidgetController($adminView, $authService, $widgetService, $
 $adminSettings = new SettingsController($adminView, $authService, $settingsService, $flash, $csrf);
 $adminThemes = new ThemeController($adminView, $authService, $themeService, $menuService, $widgetService, $flash, $csrf);
 $adminTerms = new TermController($adminView, $authService, $termService, $flash, $csrf);
-$apiContent = new ApiContentController($authService, $contentService, $termService, $flash, $csrf);
-$apiComment = new ApiCommentController($authService, $commentService, $flash, $csrf);
-$apiContentMedia = new ApiContentMediaController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf);
-$apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, $flash, $csrf);
+$apiContent = new ApiContentController($authService, $contentService, $termService, $flash, $csrf, $adminView);
+$apiComment = new ApiCommentController($authService, $commentService, $flash, $csrf, $adminView);
+$apiContentMedia = new ApiContentMediaController($authService, $contentService, $mediaService, $uploadService, $flash, $csrf, $adminView);
+$apiMedia = new ApiMediaController($authService, $mediaService, $uploadService, $flash, $csrf, $adminView);
 $apiMenu = new ApiMenuController($authService, $menuService, $flash, $csrf);
 $apiWidget = new ApiWidgetController($authService, $widgetService, $themeService, $flash, $csrf);
 $apiSettings = new ApiSettingsController($authService, $settingsService, $flash, $csrf);
 $apiTheme = new ApiThemeController($authService, $themeService, $flash, $csrf);
-$apiTerm = new ApiTermController($authService, $termService, $flash, $csrf);
+$apiTerm = new ApiTermController($authService, $termService, $flash, $csrf, $adminView);
 
 require BASE_DIR . '/' . INC_DIR . 'routes/front.php';
 require BASE_DIR . '/' . INC_DIR . 'routes/admin.php';

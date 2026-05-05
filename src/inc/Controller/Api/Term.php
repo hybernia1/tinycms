@@ -9,6 +9,7 @@ use App\Service\Application\Term as TermService;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
+use App\View\AdminView;
 
 final class Term extends Admin
 {
@@ -16,7 +17,8 @@ final class Term extends Admin
         Auth $authService,
         private TermService $terms,
         Flash $flash,
-        Csrf $csrf
+        Csrf $csrf,
+        private AdminView $adminView
     ) {
         parent::__construct($authService, $flash, $csrf);
     }
@@ -31,6 +33,11 @@ final class Term extends Admin
         $pagination = $this->terms->paginate($page, $perPage, $query, $status);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->terms->statusCounts();
+
+        if ($this->wantsHtmlResponse('list')) {
+            $this->adminView->adminTermListFragment($pagination, $status, $query, $statusCounts);
+            return;
+        }
 
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }

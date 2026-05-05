@@ -10,6 +10,7 @@ use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
 use App\Service\Support\Avatar;
+use App\View\AdminView;
 
 final class User extends Admin
 {
@@ -17,7 +18,8 @@ final class User extends Admin
         Auth $authService,
         private UserService $users,
         Flash $flash,
-        Csrf $csrf
+        Csrf $csrf,
+        private AdminView $adminView
     ) {
         parent::__construct($authService, $flash, $csrf);
     }
@@ -32,6 +34,11 @@ final class User extends Admin
         $pagination = $this->users->paginate($page, $perPage, $suspend, $query);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
         $statusCounts = $this->users->statusCounts();
+
+        if ($this->wantsHtmlResponse('list')) {
+            $this->adminView->adminUsersListFragment($pagination, $status, $query, $statusCounts);
+            return;
+        }
 
         $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
