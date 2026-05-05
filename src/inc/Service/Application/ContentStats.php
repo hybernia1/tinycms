@@ -63,9 +63,9 @@ final class ContentStats
         $contentStatsTable = Table::name('content_stats');
         $now = date('Y-m-d H:i:s');
         $stmt = $this->pdo->prepare(implode("\n", [
-            "INSERT INTO $contentStatsTable (content, ip_address, visits, last_visit)",
-            'VALUES (:content, :ip_address, 1, :last_visit)',
-            'ON DUPLICATE KEY UPDATE visits = visits + 1, last_visit = :last_visit_update',
+            "INSERT INTO $contentStatsTable (content, ip_address, last_visit)",
+            'VALUES (:content, :ip_address, :last_visit)',
+            'ON DUPLICATE KEY UPDATE last_visit = :last_visit_update',
         ]));
         $stmt->execute([
             'content' => $contentId,

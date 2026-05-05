@@ -85,7 +85,7 @@ final class Auth
             'name' => trim((string)($input['name'] ?? '')),
             'email' => trim((string)($input['email'] ?? '')),
             'password' => (string)($input['password'] ?? ''),
-            'role' => 'user',
+            'role' => UserService::ROLE_USER,
             'suspend' => 0,
         ]);
 
@@ -107,7 +107,7 @@ final class Auth
 
     public function canAccessAdmin(): bool
     {
-        return $this->auth->check() && (string)$this->auth->role() === 'admin';
+        return $this->auth->check() && (string)$this->auth->role() === UserService::ROLE_ADMIN;
     }
 
     public function canUseResetToken(string $token): bool

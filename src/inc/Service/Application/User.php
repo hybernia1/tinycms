@@ -12,6 +12,10 @@ use InvalidArgumentException;
 
 final class User
 {
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_USER = 'user';
+    public const ROLES = [self::ROLE_ADMIN, self::ROLE_USER];
+
     private Query $query;
     private SchemaRules $schemaRules;
     private Email $email;
@@ -46,7 +50,7 @@ final class User
             return null;
         }
 
-        $user['is_last_admin'] = (string)($user['role'] ?? '') === 'admin' && !$this->hasAnotherActiveAdmin((int)($user['ID'] ?? 0)) ? 1 : 0;
+        $user['is_last_admin'] = (string)($user['role'] ?? '') === self::ROLE_ADMIN && !$this->hasAnotherActiveAdmin((int)($user['ID'] ?? 0)) ? 1 : 0;
         return $user;
     }
 
@@ -54,7 +58,7 @@ final class User
     {
         $user = $this->find($id);
 
-        if ($user === null || (string)($user['role'] ?? '') === 'admin') {
+        if ($user === null || (string)($user['role'] ?? '') === self::ROLE_ADMIN) {
             return false;
         }
 
@@ -65,7 +69,7 @@ final class User
     {
         $user = $this->find($id);
 
-        if ($user === null || (string)($user['role'] ?? '') === 'admin' || (int)($user['suspend'] ?? 0) === 1) {
+        if ($user === null || (string)($user['role'] ?? '') === self::ROLE_ADMIN || (int)($user['suspend'] ?? 0) === 1) {
             return false;
         }
 
@@ -85,7 +89,7 @@ final class User
     {
         $user = $this->find($id);
 
-        if ($user === null || (string)($user['role'] ?? '') === 'admin' || (int)($user['suspend'] ?? 0) === 0) {
+        if ($user === null || (string)($user['role'] ?? '') === self::ROLE_ADMIN || (int)($user['suspend'] ?? 0) === 0) {
             return false;
         }
 
@@ -110,7 +114,7 @@ final class User
             255
         );
         $email = mb_strtolower(trim((string)($input['email'] ?? '')));
-        $role = trim((string)($input['role'] ?? 'user'));
+        $role = trim((string)($input['role'] ?? self::ROLE_USER));
         $suspend = (int)($input['suspend'] ?? 0) === 1 ? 1 : 0;
         $password = (string)($input['password'] ?? '');
         $errors = [];
@@ -155,7 +159,7 @@ final class User
             $errors['email'] = I18n::t('validation.email_already_used');
         }
 
-        if ($id !== null && $role !== 'admin' && !$this->canDemoteAdmin($id)) {
+        if ($id !== null && $role !== self::ROLE_ADMIN && !$this->canDemoteAdmin($id)) {
             $errors['role'] = I18n::t('users.last_admin_protected');
         }
 
@@ -163,7 +167,7 @@ final class User
             return ['success' => false, 'errors' => $errors];
         }
 
-        if ($role === 'admin') {
+        if ($role === self::ROLE_ADMIN) {
             $suspend = 0;
         }
 
@@ -272,7 +276,7 @@ final class User
     private function canDemoteAdmin(int $id): bool
     {
         $user = $this->find($id);
-        if ($user === null || (string)($user['role'] ?? '') !== 'admin') {
+        if ($user === null || (string)($user['role'] ?? '') !== self::ROLE_ADMIN) {
             return true;
         }
 
@@ -281,7 +285,7 @@ final class User
 
     private function hasAnotherActiveAdmin(int $excludedId): bool
     {
-        $admins = $this->query->select('users', ['ID'], ['role' => 'admin', 'suspend' => 0]);
+        $admins = $this->query->select('users', ['ID'], ['role' => self::ROLE_ADMIN, 'suspend' => 0]);
         foreach ($admins as $admin) {
             if ((int)($admin['ID'] ?? 0) !== $excludedId) {
                 return true;

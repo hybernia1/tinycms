@@ -12,7 +12,7 @@ final class SchemaDefinition
                 'email' => ['max' => 255, 'nullable' => true],
                 'password' => ['max' => 255, 'nullable' => false],
                 'name' => ['max' => 255, 'nullable' => true],
-                'role' => ['max' => 50, 'nullable' => false, 'allowed' => ['admin', 'user']],
+                'role' => ['max' => 50, 'nullable' => false, 'allowed' => User::ROLES],
                 'reset_token' => ['max' => 100, 'nullable' => true],
             ],
             'media' => [
@@ -21,7 +21,7 @@ final class SchemaDefinition
             ],
             'content' => [
                 'status' => ['max' => 50, 'nullable' => false],
-                'type' => ['max' => 100, 'nullable' => false, 'allowed' => ['article', 'page', 'about_page', 'news_article', 'blog_posting', 'faq_page']],
+                'type' => ['max' => 100, 'nullable' => false, 'allowed' => Content::TYPES],
                 'excerpt' => ['max' => 500, 'nullable' => true],
                 'name' => ['max' => 255, 'nullable' => true],
             ],
@@ -29,7 +29,7 @@ final class SchemaDefinition
                 'author_name' => ['max' => 255, 'nullable' => true],
                 'author_email' => ['max' => 255, 'nullable' => true],
                 'ip_address' => ['max' => 45, 'nullable' => true],
-                'status' => ['max' => 50, 'nullable' => false, 'allowed' => ['draft', 'published', 'trash']],
+                'status' => ['max' => 50, 'nullable' => false, 'allowed' => Comment::STATUSES],
             ],
             'content_stats' => [
                 'ip_address' => ['max' => 45, 'nullable' => false],
@@ -77,6 +77,10 @@ final class SchemaDefinition
         $fkContentTermsTerm = self::constraintName($prefix, 'fk_content_terms_term');
         $fkContentMediaContent = self::constraintName($prefix, 'fk_content_media_content');
         $fkContentMediaMedia = self::constraintName($prefix, 'fk_content_media_media');
+        $defaultUserRole = User::ROLE_USER;
+        $defaultContentStatus = Content::STATUS_DRAFT;
+        $defaultContentType = Content::TYPE_ARTICLE;
+        $defaultCommentStatus = Comment::STATUS_PUBLISHED;
 
         return array_merge([
             "CREATE TABLE IF NOT EXISTS $users (
@@ -86,7 +90,7 @@ final class SchemaDefinition
                 name VARCHAR(255) DEFAULT NULL,
                 created DATETIME NOT NULL DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                role VARCHAR(50) NOT NULL DEFAULT 'user',
+                role VARCHAR(50) NOT NULL DEFAULT '$defaultUserRole',
                 suspend TINYINT(1) NOT NULL DEFAULT 0,
                 reset_token VARCHAR(100) DEFAULT NULL,
                 reset_token_expiry DATETIME DEFAULT NULL,
@@ -108,8 +112,8 @@ final class SchemaDefinition
             "CREATE TABLE IF NOT EXISTS $content (
                 id INT NOT NULL AUTO_INCREMENT,
                 author INT DEFAULT NULL,
-                status VARCHAR(50) NOT NULL DEFAULT 'draft',
-                type VARCHAR(100) NOT NULL DEFAULT 'article',
+                status VARCHAR(50) NOT NULL DEFAULT '$defaultContentStatus',
+                type VARCHAR(100) NOT NULL DEFAULT '$defaultContentType',
                 created DATETIME NOT NULL DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                 body LONGTEXT,
@@ -136,7 +140,7 @@ final class SchemaDefinition
                 author_name VARCHAR(255) DEFAULT NULL,
                 author_email VARCHAR(255) DEFAULT NULL,
                 ip_address VARCHAR(45) DEFAULT NULL,
-                status VARCHAR(50) NOT NULL DEFAULT 'published',
+                status VARCHAR(50) NOT NULL DEFAULT '$defaultCommentStatus',
                 body LONGTEXT NOT NULL,
                 created DATETIME NOT NULL DEFAULT (NOW()),
                 updated DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -154,7 +158,6 @@ final class SchemaDefinition
             "CREATE TABLE IF NOT EXISTS $contentStats (
                 content INT NOT NULL,
                 ip_address VARCHAR(45) NOT NULL,
-                visits INT UNSIGNED NOT NULL DEFAULT 1,
                 last_visit DATETIME NOT NULL DEFAULT (NOW()),
                 PRIMARY KEY (content, ip_address),
                 KEY idx_content_stats_last_visit (last_visit),

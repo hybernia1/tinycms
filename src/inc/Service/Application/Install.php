@@ -201,7 +201,7 @@ final class Install
             $row = $exists->fetch(PDO::FETCH_ASSOC);
 
             if (is_array($row)) {
-                if ((string)($row['role'] ?? '') === 'admin') {
+                if ((string)($row['role'] ?? '') === User::ROLE_ADMIN) {
                     return null;
                 }
 
@@ -213,7 +213,7 @@ final class Install
                 'name' => (string)$admin['name'],
                 'email' => (string)$admin['email'],
                 'password' => password_hash((string)$admin['password'], PASSWORD_DEFAULT),
-                'role' => 'admin',
+                'role' => User::ROLE_ADMIN,
                 'suspend' => 0,
             ]);
 

@@ -28,7 +28,7 @@ final class Comment extends Admin
             return;
         }
 
-        $statuses = [CommentService::STATUS_DRAFT, CommentService::STATUS_PUBLISHED, CommentService::STATUS_TRASH];
+        $statuses = CommentService::STATUSES;
         [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(array_merge(['all'], $statuses));
         $pagination = $this->comments->paginate($page, $perPage, $status, $query);
         $statusCounts = $this->comments->statusCounts($statuses);

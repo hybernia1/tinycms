@@ -15,6 +15,7 @@ final class Comment
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PUBLISHED = 'published';
     public const STATUS_TRASH = 'trash';
+    public const STATUSES = [self::STATUS_DRAFT, self::STATUS_PUBLISHED, self::STATUS_TRASH];
 
     private Query $query;
     private \PDO $pdo;
@@ -267,45 +268,19 @@ final class Comment
         return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
     }
 
-    private function delete(int $id): bool
-    {
-        return $id > 0 && $this->query->delete('comments', ['id' => $id]) > 0;
-    }
-
     public function deleteByStatus(int $id): ?string
     {
-        $item = $this->find($id);
-        if ($item === null) {
-            return null;
-        }
-
-        if ((string)($item['status'] ?? '') === self::STATUS_TRASH) {
-            return $this->delete($id) ? 'hard_deleted' : null;
-        }
-
-        return $this->setStatus($id, self::STATUS_TRASH) ? 'soft_deleted' : null;
+        return $this->query->deleteByStatus('comments', ['id' => $id], self::STATUS_TRASH);
     }
 
     public function restore(int $id): bool
     {
-        $item = $this->find($id);
-        if ($item === null || (string)($item['status'] ?? '') !== self::STATUS_TRASH) {
-            return false;
-        }
-
-        return $this->setStatus($id, self::STATUS_DRAFT);
+        return $this->query->restoreStatus('comments', ['id' => $id], self::STATUS_TRASH, self::STATUS_DRAFT);
     }
 
     public function setStatus(int $id, string $status): bool
     {
-        $item = $this->find($id);
-        $status = $this->normalizeStatus($status);
-
-        if ($item === null || (string)($item['status'] ?? '') === $status) {
-            return false;
-        }
-
-        return $this->query->update('comments', ['status' => $status], ['id' => $id]) > 0;
+        return $this->query->setStatus('comments', ['id' => $id], $this->normalizeStatus($status));
     }
 
     public function statusCounts(array $statuses = []): array
@@ -713,7 +688,7 @@ final class Comment
 
     private function normalizeStatus(string $status): string
     {
-        return in_array($status, [self::STATUS_DRAFT, self::STATUS_PUBLISHED, self::STATUS_TRASH], true)
+        return in_array($status, self::STATUSES, true)
             ? $status
             : self::STATUS_DRAFT;
     }

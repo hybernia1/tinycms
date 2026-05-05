@@ -154,8 +154,8 @@ final class User extends Admin
             'id' => (int)($row['ID'] ?? 0),
             'name' => (string)($row['name'] ?? ''),
             'email' => (string)($row['email'] ?? ''),
-            'role' => (string)($row['role'] ?? 'user'),
-            'is_admin' => (string)($row['role'] ?? '') === 'admin',
+            'role' => (string)($row['role'] ?? UserService::ROLE_USER),
+            'is_admin' => (string)($row['role'] ?? '') === UserService::ROLE_ADMIN,
             'is_suspended' => $isSuspended,
             'avatar_url' => Avatar::dataUrl(Avatar::userSeed($row), 40),
         ];

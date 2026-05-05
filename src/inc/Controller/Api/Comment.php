@@ -29,7 +29,7 @@ final class Comment extends Admin
             return;
         }
 
-        $statuses = [CommentService::STATUS_DRAFT, CommentService::STATUS_PUBLISHED, CommentService::STATUS_TRASH];
+        $statuses = CommentService::STATUSES;
         [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(array_merge(['all'], $statuses));
         $pagination = $this->comments->paginate($page, $perPage, $status, $query);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
@@ -124,7 +124,7 @@ final class Comment extends Admin
             return;
         }
 
-        $mode = (string)($_POST['mode'] ?? 'draft');
+        $mode = (string)($_POST['mode'] ?? CommentService::STATUS_DRAFT);
         $item = $this->comments->find($id);
         if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('comments.not_found'))) {
             return;
