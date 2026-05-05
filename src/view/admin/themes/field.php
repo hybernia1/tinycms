@@ -59,7 +59,6 @@ $colorFieldValue = $colorIsTransparent ? 'transparent' : $colorPickerValue;
                 data-media-upload-endpoint="<?= esc_attr($url('admin/api/v1/media/add')) ?>"
                 data-media-upload-name="file"
                 data-media-upload-accept="<?= esc_attr((string)$imageUploadAccept) ?>"
-                data-media-upload-types-label="<?= esc_attr((string)$imageUploadTypesLabel) ?>"
                 data-media-library-allow-delete="0"
                 data-media-library-allow-rename="0"
             >
