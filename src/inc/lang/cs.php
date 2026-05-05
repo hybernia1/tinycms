@@ -385,6 +385,7 @@ return [
         'comment' => 'Komentář',
         'body' => 'Tělo komentáře',
         'replies' => 'Odpovědi',
+        'reacts_to_comment' => 'Reaguje na komentář',
         'no_replies' => 'Vlákno zatím nemá žádné odpovědi.',
         'ip_address' => 'IP adresa',
         'search_placeholder' => 'Hledat komentáře, obsah nebo autora',

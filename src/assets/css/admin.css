@@ -904,10 +904,19 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 }
 
 .admin-content .admin-list-table {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     table-layout: fixed;
 }
 
+.admin-content .admin-list-table-responsive {
+    overflow-x: hidden;
+}
+
 .admin-content .admin-list-table :is(th, td) {
+    box-sizing: border-box;
+    min-width: 0;
     vertical-align: top;
 }
 
@@ -930,6 +939,101 @@ body.admin-focus-mode .content-editor-form .wysiwyg-editor {
 
 .admin-content .admin-list-table td:first-child > .d-flex > :last-child {
     min-width: 0;
+}
+
+.admin-content .admin-list-table :is(th, td).comment-list-author-col {
+    width: 18rem;
+}
+
+.comment-list-author {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.comment-list-avatar {
+    margin-top: calc(var(--space-1) / 2);
+}
+
+.comment-list-author-main {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-1) / 2);
+    min-width: 0;
+}
+
+.comment-list-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.comment-list-meta-icon {
+    width: .85rem;
+    height: .85rem;
+    flex: 0 0 .85rem;
+}
+
+.comment-list-meta a,
+.comment-list-meta span {
+    min-width: 0;
+}
+
+.comment-list-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+
+.comment-list-body-text {
+    display: block;
+    overflow-wrap: break-word;
+}
+
+.comment-list-status {
+    gap: var(--space-1);
+}
+
+.comment-list-status-icon {
+    width: .85rem;
+    height: .85rem;
+    flex: 0 0 .85rem;
+}
+
+@media (max-width: 768px) {
+    .admin-content .admin-list-table .mobile-hide {
+        display: none;
+    }
+
+    .admin-content .comment-list-table :is(th, td).comment-list-author-col {
+        width: 10.5rem;
+    }
+
+    .admin-content .comment-list-table :is(th, td).table-col-actions-wide {
+        width: 4.75rem;
+    }
+
+    .comment-list-author {
+        gap: var(--space-1);
+    }
+
+    .comment-list-author-main {
+        gap: 0;
+    }
+
+    .comment-list-meta {
+        gap: calc(var(--space-1) / 2);
+    }
+
+    .comment-list-body-text {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
 }
 
 .admin-list-truncate {
