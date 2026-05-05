@@ -9,7 +9,10 @@ $entity = (string)($list['entity'] ?? '');
 $listName = (string)($list['name'] ?? $entity);
 $statusCurrent = (string)($list['statusCurrent'] ?? 'all');
 $listQuery = (string)($list['query'] ?? '');
-$listEndpoint = (string)($list['endpoint'] ?? ($entity !== '' ? $url('admin/api/v1/' . $entity) : ''));
+$defaultActionBase = $entity !== '' ? $url('admin/api/v1/' . $entity) : '';
+$defaultListEndpoint = $defaultActionBase !== '' ? $defaultActionBase . (str_contains($defaultActionBase, '?') ? '&' : '?') . 'html=list' : '';
+$listEndpoint = (string)($list['endpoint'] ?? $defaultListEndpoint);
+$listActionBase = (string)($list['actionBase'] ?? $defaultActionBase);
 $listEditBase = (string)($list['editBase'] ?? ($entity !== '' ? $url('admin/' . $entity . '/edit?id=') : ''));
 $listRootAttrs = is_array($list['rootAttrs'] ?? null) ? $list['rootAttrs'] : [];
 $searchPlaceholder = (string)($list['searchPlaceholder'] ?? '');
@@ -25,7 +28,9 @@ $tableClass = trim((string)($list['tableClass'] ?? ''));
 $rootAttrs = [
     'data-' . $listName . '-list' => null,
     'data-endpoint' => $listEndpoint,
+    'data-action-base' => $listActionBase,
     'data-edit-base' => $listEditBase,
+    'data-page' => (string)max(1, $listPage),
 ];
 foreach ($listRootAttrs as $attr => $value) {
     $rootAttrs[(string)$attr] = $value;

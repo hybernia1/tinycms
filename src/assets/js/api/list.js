@@ -2,58 +2,38 @@
     const app = window.tinycms = window.tinycms || {};
     const api = app.api = app.api || {};
     const t = app.i18n?.t || (() => '');
-    const requestJson = api.http?.requestJson;
     const postForm = api.http?.postForm;
     const pushFlash = api.pushFlash || (() => {});
     const sessionStore = app.support?.sessionStore || { get: () => '', set: () => {} };
     const confirmModal = app.ui?.modal?.confirm || (() => Promise.resolve(false));
 
-    const normalizeListResponse = (payload) => {
-        const meta = payload && typeof payload.meta === 'object' ? payload.meta : {};
-        return {
-            items: Array.isArray(payload?.data) ? payload.data : [],
-            page: Number(meta.page || 1),
-            totalPages: Number(meta.total_pages || 1),
-            statusCounts: meta.status_counts && typeof meta.status_counts === 'object' ? meta.status_counts : {},
-        };
-    };
-
     const initListApi = (config) => {
-        if (typeof requestJson !== 'function' || typeof postForm !== 'function') {
+        if (typeof postForm !== 'function') {
             return;
         }
+
         const root = document.querySelector(config.rootSelector);
-        if (!root) {
+        if (!root || root.hasAttribute('data-list-ready')) {
             return;
         }
+        root.setAttribute('data-list-ready', '1');
 
         const endpoint = root.getAttribute('data-endpoint') || '';
-        const endpointBase = endpoint.replace(/\/$/, '');
-        const editBase = root.getAttribute('data-edit-base') || '';
+        const actionBase = root.getAttribute('data-action-base') || endpoint;
+        const endpointBase = actionBase.replace(/\/$/, '');
         const csrfInput = root.querySelector(`[data-${config.name}-csrf] input[name="_csrf"]`);
         const searchField = root.querySelector(`[data-${config.name}-search]`);
-        const body = root.querySelector(`[data-${config.name}-list-body]`);
-        const prevLink = root.querySelector(`[data-${config.name}-prev]`);
-        const nextLink = root.querySelector(`[data-${config.name}-next]`);
         const filterLinks = config.withStatus
             ? Array.from(root.querySelectorAll(`[data-${config.name}-status]`))
             : [];
-        const filterBaseLabels = {};
-        filterLinks.forEach((link) => {
-            const statusKey = link.getAttribute(`data-${config.name}-status`) || '';
-            if (statusKey !== '') {
-                filterBaseLabels[statusKey] = String(link.textContent || '').replace(/\s*\(\d+\)\s*$/, '').trim();
-            }
-        });
         const statusStorageKey = `tinycms.${config.name}.activeStatus`;
         const statusExists = (status) => filterLinks.some((link) => link.getAttribute(`data-${config.name}-status`) === status);
         const activeStatus = () => filterLinks.find((link) => link.classList.contains('active'))?.getAttribute(`data-${config.name}-status`) || 'all';
         const initialStatus = config.withStatus ? activeStatus() : 'all';
-        const context = typeof config.getContext === 'function' ? config.getContext(root) : {};
         const loader = app.loader || null;
 
         let state = {
-            page: 1,
+            page: Math.max(1, Number(root.getAttribute('data-page') || 1)),
             query: searchField?.value.trim() || '',
         };
 
@@ -70,24 +50,6 @@
         let searchTimer = null;
         let fetchController = null;
 
-        const setButtonDisabled = (button, disabled) => {
-            if (!button) {
-                return;
-            }
-            button.disabled = disabled;
-            button.classList.toggle('disabled', disabled);
-            button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-        };
-
-        const setPagination = (page, totalPages) => {
-            if (!prevLink || !nextLink) {
-                return;
-            }
-
-            setButtonDisabled(prevLink, page <= 1);
-            setButtonDisabled(nextLink, page >= totalPages);
-        };
-
         const syncFilters = () => {
             if (!config.withStatus) {
                 return;
@@ -98,25 +60,28 @@
             });
         };
 
-        const syncStatusCounts = (statusCounts) => {
-            if (!config.withStatus || !statusCounts || typeof statusCounts !== 'object') {
+        const replaceList = (html, focusSearch = false) => {
+            const template = document.createElement('template');
+            template.innerHTML = String(html || '').trim();
+            const nextRoot = template.content.querySelector(config.rootSelector);
+            if (!nextRoot) {
                 return;
             }
 
-            filterLinks.forEach((link) => {
-                const statusKey = link.getAttribute(`data-${config.name}-status`) || '';
-                const baseLabel = filterBaseLabels[statusKey];
-                if (statusKey === '' || typeof baseLabel !== 'string') {
-                    return;
+            root.replaceWith(nextRoot);
+            initListApi(config);
+            if (focusSearch) {
+                const nextSearch = nextRoot.querySelector(`[data-${config.name}-search]`);
+                if (nextSearch instanceof HTMLInputElement) {
+                    nextSearch.focus();
+                    const length = nextSearch.value.length;
+                    nextSearch.setSelectionRange(length, length);
                 }
-
-                const count = Number(statusCounts[statusKey] ?? 0);
-                link.textContent = `${baseLabel} (${Number.isFinite(count) ? count : 0})`;
-            });
+            }
         };
 
         const fetchList = async () => {
-            if (!endpoint || !body) {
+            if (!endpoint) {
                 return;
             }
 
@@ -140,8 +105,9 @@
                     url.searchParams.set('q', state.query);
                 }
 
-                const responseResult = await requestJson(url.toString(), {
-                    headers: { Accept: 'application/json' },
+                const focusSearch = document.activeElement === searchField;
+                const response = await fetch(url.toString(), {
+                    headers: { Accept: 'text/html' },
                     signal: fetchController.signal,
                 }).catch((error) => {
                     if (error instanceof DOMException && error.name === 'AbortError') {
@@ -149,15 +115,11 @@
                     }
                     throw error;
                 });
-                if (!responseResult || !responseResult.response || !responseResult.response.ok) {
+                if (!response || !response.ok) {
                     return;
                 }
-                const normalized = normalizeListResponse(responseResult.data);
-                state.page = Math.max(1, normalized.page || 1);
-                body.innerHTML = normalized.items.map((item) => config.rowHtml(item, { editBase, context })).join('');
-                setPagination(state.page, normalized.totalPages);
-                syncStatusCounts(normalized.statusCounts);
-                syncFilters();
+
+                replaceList(await response.text(), focusSearch);
             } finally {
                 if (loader) {
                     loader.set(root, false);
@@ -237,10 +199,7 @@
                     event.preventDefault();
                     const id = Number(toggle.getAttribute(`data-${config.name}-toggle`) || '0');
                     const mode = toggle.getAttribute(`data-${config.name}-mode`) || config.toggle.defaultMode;
-                    if (id > 0) {
-                        if (typeof config.togglePath !== 'function') {
-                            return;
-                        }
+                    if (id > 0 && typeof config.togglePath === 'function') {
                         const result = await postAction(config.togglePath(endpointBase, id), { id, mode });
                         if (result.success === true) {
                             if (config.messages?.toggleSuccess) {
@@ -258,10 +217,7 @@
                 if (restore) {
                     event.preventDefault();
                     const id = Number(restore.getAttribute(`data-${config.name}-restore`) || '0');
-                    if (id > 0) {
-                        if (typeof config.restorePath !== 'function') {
-                            return;
-                        }
+                    if (id > 0 && typeof config.restorePath === 'function') {
                         const result = await postAction(config.restorePath(endpointBase, id), { id });
                         if (result.success === true) {
                             if (config.messages?.restoreSuccess) {
@@ -322,8 +278,6 @@
         }
     };
 
-    const renderers = api.listRenderers || {};
-
     const contentListConfig = () => ({
         name: 'content',
         rootSelector: '[data-content-list]',
@@ -342,7 +296,6 @@
             restoreSuccess: t('content.restored'),
             toggleSuccess: (mode) => mode === 'publish' ? t('content.published') : t('content.switched_to_draft'),
         },
-        rowHtml: renderers.contentRowHtml,
     });
 
     const termsListConfig = () => ({
@@ -351,7 +304,6 @@
         withStatus: true,
         deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
         messages: { deleteSuccess: t('terms.deleted') },
-        rowHtml: renderers.termsRowHtml,
     });
 
     const commentsListConfig = () => ({
@@ -372,10 +324,6 @@
             restoreSuccess: t('comments.restored'),
             toggleSuccess: (mode) => mode === 'publish' ? t('comments.published') : t('comments.switched_to_draft'),
         },
-        getContext: (root) => ({
-            contentEditBase: root.getAttribute('data-content-edit-base') || '',
-        }),
-        rowHtml: renderers.commentsRowHtml,
     });
 
     const mediaListConfig = () => ({
@@ -384,7 +332,6 @@
         withStatus: true,
         deletePath: (endpointBase, id) => `${endpointBase}/${id}/delete`,
         messages: { deleteSuccess: t('media.deleted') },
-        rowHtml: renderers.mediaRowHtml,
     });
 
     const usersListConfig = () => ({
@@ -398,7 +345,6 @@
             deleteSuccess: t('users.deleted'),
             toggleSuccess: (mode) => mode === 'unsuspend' ? t('users.unsuspended') : t('users.suspended'),
         },
-        rowHtml: renderers.usersRowHtml,
     });
 
     const initLists = () => {

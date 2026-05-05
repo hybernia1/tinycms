@@ -51,5 +51,8 @@ $scripts = array_merge(
         <?php endforeach; ?>
     </div>
     <?= $content ?>
+    <?php if ($hasMediaLibrary): ?>
+        <?php require BASE_DIR . '/' . VIEW_DIR . 'admin/partials/media-library.php'; ?>
+    <?php endif; ?>
 </body>
 </html>

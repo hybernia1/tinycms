@@ -42,7 +42,7 @@ $scriptGroups = [
     ['ui.js', 'loader.js'],
     ['api/flash.js', 'api/http.js'],
     $hasApiForm ? ['api/forms.js'] : [],
-    $hasApiList ? ['api/list-renderers.js', 'api/list.js'] : [],
+    $hasApiList ? ['api/list.js'] : [],
     $adminUiScripts,
     $hasMediaLibrary ? ['media-library/orchestrator.js'] : [],
     $hasPicker ? ['picker.js'] : [],
@@ -260,5 +260,8 @@ $isActiveMenuItem = static function (array $item) use ($currentPath): bool {
     </main>
     <div class="admin-version-corner">TinyCMS <?= esc_html((string)($appVersion ?? '0.9.0')) ?></div>
 </div>
+<?php if ($hasMediaLibrary): ?>
+    <?php require BASE_DIR . '/' . VIEW_DIR . 'admin/partials/media-library.php'; ?>
+<?php endif; ?>
 </body>
 </html>

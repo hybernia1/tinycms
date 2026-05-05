@@ -4,9 +4,7 @@
     const currentScript = document.currentScript;
     const loadScripts = app.support?.loadScripts;
     const modules = [
-        'template.js',
         'transport.js',
-        'renderer.js',
         'helpers.js',
         'modal.js',
     ];

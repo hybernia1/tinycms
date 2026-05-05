@@ -257,6 +257,15 @@ class Admin
         ];
     }
 
+    protected function wantsHtmlResponse(string $variant): bool
+    {
+        if (!array_key_exists('html', $_GET)) {
+            return false;
+        }
+
+        return strtolower(trim((string)$_GET['html'])) === $variant;
+    }
+
     protected function buildEditPath(string $basePath, int $id): string
     {
         return $this->buildPath($basePath . '/edit?id=' . $id);

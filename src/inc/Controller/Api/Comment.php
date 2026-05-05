@@ -9,6 +9,7 @@ use App\Service\Application\Comment as CommentService;
 use App\Service\Support\Csrf;
 use App\Service\Support\Flash;
 use App\Service\Support\I18n;
+use App\View\AdminView;
 
 final class Comment extends Admin
 {
@@ -16,7 +17,8 @@ final class Comment extends Admin
         Auth $authService,
         private CommentService $comments,
         Flash $flash,
-        Csrf $csrf
+        Csrf $csrf,
+        private AdminView $adminView
     ) {
         parent::__construct($authService, $flash, $csrf);
     }
@@ -31,8 +33,14 @@ final class Comment extends Admin
         [$page, $perPage, $status, $query] = $this->resolveSimpleListQuery(array_merge(['all'], $statuses));
         $pagination = $this->comments->paginate($page, $perPage, $status, $query);
         $items = array_map([$this, 'mapListItem'], (array)($pagination['data'] ?? []));
+        $statusCounts = $this->comments->statusCounts($statuses);
 
-        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $this->comments->statusCounts($statuses)));
+        if ($this->wantsHtmlResponse('list')) {
+            $this->adminView->adminCommentListFragment($pagination, $status, $query, $statusCounts);
+            return;
+        }
+
+        $this->apiOk($items, $this->buildListMeta($pagination, $perPage, $status, $query, $statusCounts));
     }
 
     public function deleteApiV1(int $id): void

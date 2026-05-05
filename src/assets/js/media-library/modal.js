@@ -9,23 +9,21 @@ const modalUi = app.ui?.modal || {
     confirm: () => Promise.resolve(false),
 };
 const confirmModal = modalUi.confirm;
-const template = mediaLibrary.template || {};
 const transport = mediaLibrary.transport || {};
-const renderer = mediaLibrary.renderer || {};
 const helpers = mediaLibrary.helpers || {};
+const currentCsrf = app.support?.currentCsrf || (() => '');
 const firstTrigger = Array.prototype.find.call(
     document.querySelectorAll('[data-media-library-open]'),
     (node) => node.getAttribute('data-media-library-mode') !== 'editor',
 ) || null;
 let openTrigger = firstTrigger;
-const requestJson = app.api?.http?.requestJson;
 const postForm = app.api?.http?.postForm;
 
 if (!modal) {
-    modal = template.createModal?.(firstTrigger) || null;
+    modal = document.querySelector('[data-media-library-modal]');
 }
 
-if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm === 'function') {
+if (modal && typeof postForm === 'function') {
     const loader = app.loader || null;
     const grid = modal.querySelector('[data-media-library-grid]');
     const prevButton = modal.querySelector('[data-media-library-prev]');
@@ -41,7 +39,6 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
     const deleteButton = modal.querySelector('[data-media-library-delete-open]');
     const renameButton = modal.querySelector('[data-media-library-rename]');
     const status = modal.querySelector('[data-media-library-status]');
-    const detailNodes = { detailPreview, detailNameInput, chooseButton, deleteButton, renameButton };
 
     let endpoint = '';
     let baseUrl = '';
@@ -62,6 +59,66 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         : 10;
     let selectedMedia = null;
     let searchTimer = null;
+
+    const uploadAction = (trigger) => trigger?.getAttribute('data-media-upload-endpoint') || '';
+    const uploadName = (trigger) => trigger?.getAttribute('data-media-upload-name') || 'thumbnail';
+
+    const updateUploadLabel = () => {
+        if (!uploadInput || !uploadLabel) {
+            return;
+        }
+
+        const label = uploadLabel.getAttribute('data-default-label') || uploadLabel.textContent || '';
+        const text = uploadInput.files && uploadInput.files.length > 0
+            ? Array.from(uploadInput.files).map((file) => file.name).join(', ')
+            : label;
+
+        uploadLabel.textContent = text;
+        uploadLabel.setAttribute('title', text);
+    };
+
+    const renderSelected = () => {
+        if (detailPreview) {
+            detailPreview.innerHTML = '';
+            if (selectedMedia && selectedMedia.previewPath) {
+                const image = document.createElement('img');
+                image.src = absoluteUrl(selectedMedia.previewPath);
+                image.alt = selectedMedia.name;
+                detailPreview.appendChild(image);
+            }
+        }
+
+        if (detailNameInput) {
+            detailNameInput.value = selectedMedia ? selectedMedia.name : '';
+            detailNameInput.disabled = !selectedMedia || !selectedMedia.canEdit;
+        }
+
+        if (chooseButton) {
+            chooseButton.disabled = !selectedMedia;
+        }
+
+        if (deleteButton) {
+            deleteButton.disabled = !selectedMedia || !selectedMedia.canDelete;
+        }
+
+        if (renameButton) {
+            renameButton.disabled = !selectedMedia || !selectedMedia.canEdit;
+        }
+    };
+
+    const updatePager = () => {
+        if (prevButton) {
+            prevButton.classList.toggle('disabled', page <= 1);
+            prevButton.setAttribute('aria-disabled', page <= 1 ? 'true' : 'false');
+            prevButton.setAttribute('tabindex', page <= 1 ? '-1' : '0');
+        }
+
+        if (nextButton) {
+            nextButton.classList.toggle('disabled', page >= totalPages);
+            nextButton.setAttribute('aria-disabled', page >= totalPages ? 'true' : 'false');
+            nextButton.setAttribute('tabindex', page >= totalPages ? '-1' : '0');
+        }
+    };
 
     const syncContentContext = (id) => {
         const numericId = Number(id || 0);
@@ -166,7 +223,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
         target.classList.add('selected');
         setStatus('');
-        renderer.renderSelected(detailNodes, selectedMedia, absoluteUrl);
+        renderSelected();
     };
 
     const clearSelected = () => {
@@ -175,7 +232,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             grid.querySelectorAll('.media-library-card.selected').forEach((node) => node.classList.remove('selected'));
         }
         setStatus('');
-        renderer.renderSelected(detailNodes, selectedMedia, absoluteUrl);
+        renderSelected();
     };
 
     const detachCurrent = async () => {
@@ -203,7 +260,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         }
 
         if (grid) {
-            grid.innerHTML = `<p class="text-muted m-0">${t('common.loading')}</p>`;
+            grid.textContent = t('common.loading');
             if (loader) {
                 loader.set(grid, true);
             }
@@ -221,20 +278,26 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         if (currentMediaPath !== '') {
             url.searchParams.set('current_media_path', currentMediaPath);
         }
+        url.searchParams.set('html', 'library');
 
         try {
-            const { response, data: normalized, raw } = await requestJson(url.toString(), {
-                headers: { Accept: 'application/json' },
+            const response = await fetch(url.toString(), {
+                headers: { Accept: 'text/html' },
             });
             if (!response.ok) {
                 throw new Error('load_failed');
             }
-            const items = Array.isArray(normalized.data) ? normalized.data : (Array.isArray(raw.items) ? raw.items : []);
-            const total = Number(normalized.meta.total_pages || raw.total_pages || 1);
-            const current = Number(normalized.meta.page || raw.page || 1);
+            const templateNode = document.createElement('template');
+            templateNode.innerHTML = (await response.text()).trim();
+            const fragment = templateNode.content.querySelector('[data-media-library-items]');
+            if (!fragment || !grid) {
+                throw new Error('invalid_fragment');
+            }
+            const total = Number(fragment.getAttribute('data-total-pages') || 1);
+            const current = Number(fragment.getAttribute('data-page') || 1);
             totalPages = Math.max(1, total);
             page = Math.min(Math.max(1, current), totalPages);
-            renderer.renderItems(grid, items, absoluteUrl);
+            grid.innerHTML = fragment.innerHTML;
             if (!selectedMedia && currentMediaId > 0 && grid) {
                 const currentCard = grid.querySelector(`[data-media-library-select="${currentMediaId}"]`);
                 if (currentCard) {
@@ -248,7 +311,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
                     selectCard(currentCard);
                 }
             }
-            renderer.updatePager(prevButton, nextButton, page, totalPages);
+            updatePager();
         } finally {
             if (grid && loader) {
                 loader.set(grid, false);
@@ -268,10 +331,10 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         allowDelete = detail.allowDelete !== false;
         allowRename = detail.allowRename !== false;
         if (uploadForm && openTrigger) {
-            uploadForm.action = template.uploadAction?.(openTrigger) || uploadForm.action;
+            uploadForm.action = uploadAction(openTrigger) || uploadForm.action;
         }
         if (uploadInput && openTrigger) {
-            uploadInput.name = template.uploadName?.(openTrigger) || uploadInput.name;
+            uploadInput.name = uploadName(openTrigger) || uploadInput.name;
             uploadInput.accept = openTrigger.getAttribute('data-media-upload-accept') || '';
         }
         syncContentContext(contentId);
@@ -287,10 +350,10 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
         page = 1;
         selectedMedia = null;
         setStatus('');
-        renderer.renderSelected(detailNodes, selectedMedia, absoluteUrl);
+        renderSelected();
         load().catch(() => {
             if (grid) {
-                grid.innerHTML = `<p class="text-danger m-0">${t('media.library_load_failed')}</p>`;
+                grid.textContent = t('media.library_load_failed');
             }
         });
     };
@@ -500,7 +563,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
 
     if (uploadForm && uploadInput) {
         uploadInput.addEventListener('change', async () => {
-            renderer.updateUploadLabel(uploadInput, uploadLabel);
+            updateUploadLabel();
             if (!uploadInput.files || uploadInput.files.length === 0) {
                 return;
             }
@@ -512,7 +575,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
                 if (contentId <= 0) {
                     setStatus(t('content.draft_required'));
                     uploadInput.value = '';
-                    renderer.updateUploadLabel(uploadInput, uploadLabel);
+                    updateUploadLabel();
                     return;
                 }
                 syncContentContext(contentId);
@@ -528,7 +591,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
 
             const csrfInput = uploadForm.querySelector('input[name="_csrf"]');
             if (csrfInput) {
-                csrfInput.value = template.currentCsrf?.() || '';
+                csrfInput.value = currentCsrf();
             }
             const { response, data } = await postForm(uploadForm.action, uploadForm);
 
@@ -546,7 +609,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             }
 
             uploadInput.value = '';
-            renderer.updateUploadLabel(uploadInput, uploadLabel);
+            updateUploadLabel();
 
             page = 1;
             await load().catch(() => null);
@@ -583,7 +646,7 @@ if (modal && openTrigger && typeof requestJson === 'function' && typeof postForm
             }
 
             selectedMedia = null;
-            renderer.renderSelected(detailNodes, selectedMedia, absoluteUrl);
+            renderSelected();
             await load().catch(() => null);
             setStatus(t('media.deleted'));
         });
