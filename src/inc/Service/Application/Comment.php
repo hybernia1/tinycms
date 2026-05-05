@@ -138,7 +138,7 @@ final class Comment
         $page = max(1, $page);
         $perPage = max(1, $perPage);
         $search = mb_substr(trim($search), 0, 100);
-        $where = ['c.parent IS NULL'];
+        $where = [];
         $params = [];
 
         if ($status !== 'all') {
@@ -295,7 +295,7 @@ final class Comment
     public function statusCounts(array $statuses = []): array
     {
         $commentsTable = Table::name('comments');
-        $stmt = $this->pdo->query("SELECT status FROM $commentsTable WHERE parent IS NULL");
+        $stmt = $this->pdo->query("SELECT status FROM $commentsTable");
         $rows = $stmt ? ($stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []) : [];
         $counts = [
             'all' => count($rows),

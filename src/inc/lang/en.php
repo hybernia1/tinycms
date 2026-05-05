@@ -385,6 +385,7 @@ return [
         'comment' => 'Comment',
         'body' => 'Comment body',
         'replies' => 'Replies',
+        'reacts_to_comment' => 'Replies to comment',
         'no_replies' => 'This thread has no replies yet.',
         'ip_address' => 'IP address',
         'search_placeholder' => 'Search comments, content or author',

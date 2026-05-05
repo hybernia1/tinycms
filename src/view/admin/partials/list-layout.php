@@ -24,6 +24,7 @@ $statusEnabled = (bool)($list['statusEnabled'] ?? $statusLinks !== []);
 $rowRenderer = is_callable($list['rowRenderer'] ?? null) ? $list['rowRenderer'] : null;
 $csrfMarkup = (string)($list['csrfMarkup'] ?? $csrfField());
 $tableClass = trim((string)($list['tableClass'] ?? ''));
+$tableResponsiveClass = 'table-responsive' . (preg_match('/(^|\s)admin-list-table(\s|$)/', $tableClass) === 1 ? ' admin-list-table-responsive' : '');
 
 $rootAttrs = [
     'data-' . $listName . '-list' => null,
@@ -65,7 +66,7 @@ foreach ($listRootAttrs as $attr => $value) {
     </div>
 
     <div class="card p-2">
-        <div class="table-responsive">
+        <div class="<?= esc_attr($tableResponsiveClass) ?>">
             <table class="table<?= $tableClass !== '' ? ' ' . esc_attr($tableClass) : '' ?>">
                 <thead>
                 <tr>
