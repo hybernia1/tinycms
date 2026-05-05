@@ -118,6 +118,34 @@ final class FrontView
         ]);
     }
 
+    public function commentsFragment(array $item, int $page, string $sort = 'relevant'): array
+    {
+        $theme = $this->createTheme();
+        Theme::setCurrent($theme);
+        I18n::pushCataloguePath($this->themeLangPath());
+
+        try {
+            return $theme->commentsFragment($item, $page, $sort);
+        } finally {
+            I18n::popCataloguePath();
+            Theme::setCurrent(null);
+        }
+    }
+
+    public function commentRepliesFragment(array $item, int $parentId, int $page): array
+    {
+        $theme = $this->createTheme();
+        Theme::setCurrent($theme);
+        I18n::pushCataloguePath($this->themeLangPath());
+
+        try {
+            return $theme->commentRepliesFragment($item, $parentId, $page);
+        } finally {
+            I18n::popCataloguePath();
+            Theme::setCurrent(null);
+        }
+    }
+
     private function render(string $template, array $data): void
     {
         if (is_array($data['pagination'] ?? null)) {
@@ -127,7 +155,7 @@ final class FrontView
 
         $layoutFile = $this->resolveThemeFile('layout.php');
         $templateFile = $this->resolveThemeFile($template . '.php');
-        $theme = new Theme($this->router, $this->settings, $this->theme, $this->menu, $this->widgets, $this->comments, $this->contentStats, $this->auth, $this->csrf);
+        $theme = $this->createTheme();
         $theme->setIncludeThemeFile(function (string $name, array $context = []): void {
             $file = $this->resolveThemeFile($this->partialPath($name));
             extract($context, EXTR_SKIP);
@@ -154,6 +182,11 @@ final class FrontView
             I18n::popCataloguePath();
             Theme::setCurrent(null);
         }
+    }
+
+    private function createTheme(): Theme
+    {
+        return new Theme($this->router, $this->settings, $this->theme, $this->menu, $this->widgets, $this->comments, $this->contentStats, $this->auth, $this->csrf);
     }
 
     private function resolveTheme(string $theme): string

@@ -8,6 +8,7 @@ use App\Service\Auth\Auth;
 use App\Service\Support\Csrf;
 use App\Service\Support\RequestContext;
 use App\Service\Support\RateLimiter;
+use App\View\FrontView;
 
 final class Comment
 {
@@ -16,8 +17,37 @@ final class Comment
         private CommentService $comments,
         private Csrf $csrf,
         private RateLimiter $rateLimiter,
+        private FrontView $view,
         private array $settings = []
     ) {
+    }
+
+    public function list(int $contentId): void
+    {
+        $item = $this->comments->contentForComments($contentId);
+        if ($item === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND']], 404);
+            return;
+        }
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => $this->view->commentsFragment($item, max(1, (int)($_GET['page'] ?? 1)), (string)($_GET['sort'] ?? 'relevant')),
+        ]);
+    }
+
+    public function replies(int $contentId, int $parentId): void
+    {
+        $item = $this->comments->contentForComments($contentId);
+        if ($item === null) {
+            $this->respondJson(['ok' => false, 'error' => ['code' => 'NOT_FOUND']], 404);
+            return;
+        }
+
+        $this->respondJson([
+            'ok' => true,
+            'data' => $this->view->commentRepliesFragment($item, $parentId, max(1, (int)($_GET['page'] ?? 1))),
+        ]);
     }
 
     public function add(callable $redirect, int $contentId): void
@@ -116,5 +146,13 @@ final class Comment
         $current = array_values(array_unique(array_filter($current, static fn(int $id): bool => $id > 0)));
 
         $_SESSION['pending_comments'][$key] = array_slice($current, -50);
+    }
+
+    private function respondJson(array $payload, int $statusCode = 200): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        http_response_code($statusCode);
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     }
 }
