@@ -57,11 +57,11 @@ class Login
             ];
         }
 
-        $users = $this->query->select('users', ['ID', 'name', 'email', 'password', 'role', 'suspend'], [
+        $user = $this->query->first('users', ['ID', 'name', 'email', 'password', 'role', 'suspend'], [
             'email' => $email,
         ]);
 
-        if (empty($users)) {
+        if (!is_array($user)) {
             return [
                 'success' => false,
                 'message' => I18n::t('auth.invalid_credentials'),
@@ -70,8 +70,6 @@ class Login
                 ],
             ];
         }
-
-        $user = $users[0];
 
         if ((int)($user['suspend'] ?? 0) === 1) {
             return [

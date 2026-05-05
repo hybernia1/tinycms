@@ -17,12 +17,14 @@ final class User
     public const ROLES = [self::ROLE_ADMIN, self::ROLE_USER];
 
     private Query $query;
+    private \PDO $pdo;
     private SchemaRules $schemaRules;
     private Email $email;
 
     public function __construct()
     {
-        $this->query = new Query(Connection::get());
+        $this->pdo = Connection::get();
+        $this->query = new Query($this->pdo);
         $this->schemaRules = new SchemaRules();
         $this->email = new Email();
     }
@@ -44,8 +46,7 @@ final class User
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $id]);
-        $user = $rows[0] ?? null;
+        $user = $this->query->first('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $id]);
         if (!is_array($user)) {
             return null;
         }
@@ -153,9 +154,9 @@ final class User
             }
         }
 
-        $existing = $this->query->select('users', ['ID'], ['email' => $email]);
+        $existing = $this->query->first('users', ['ID'], ['email' => $email]);
 
-        if (!empty($existing) && (int)$existing[0]['ID'] !== ($id ?? 0)) {
+        if (is_array($existing) && (int)$existing['ID'] !== ($id ?? 0)) {
             $errors['email'] = I18n::t('validation.email_already_used');
         }
 
@@ -254,21 +255,13 @@ final class User
 
     public function statusCounts(): array
     {
-        $rows = $this->query->select('users', ['suspend']);
+        $suspended = $this->query->count('users', ['suspend' => 1]);
+        $all = $this->query->count('users');
         $counts = [
-            'all' => count($rows),
-            'active' => 0,
-            'suspended' => 0,
+            'all' => $all,
+            'active' => max(0, $all - $suspended),
+            'suspended' => $suspended,
         ];
-
-        foreach ($rows as $row) {
-            if ((int)($row['suspend'] ?? 0) === 1) {
-                $counts['suspended']++;
-                continue;
-            }
-
-            $counts['active']++;
-        }
 
         return $counts;
     }

@@ -71,7 +71,7 @@ final class Content
     {
         $contentTable = Table::name('content');
         $mediaTable = Table::name('media');
-        $rows = $this->query->select('content', [
+        return $this->query->first('content', [
             'id',
             'name',
             'status',
@@ -86,7 +86,6 @@ final class Content
             'created',
             'updated',
         ], ['id' => $id]);
-        return $rows[0] ?? null;
     }
 
     public static function publicWhere(string $alias = ''): string
@@ -297,8 +296,9 @@ final class Content
 
     public function statuses(): array
     {
-        $rows = $this->query->select('content', ['status']);
-        $statuses = array_values(array_unique(array_filter(array_map(static fn(array $row): string => trim((string)($row['status'] ?? '')), $rows))));
+        $counts = $this->query->countsBy('content', 'status');
+        unset($counts['all']);
+        $statuses = array_keys($counts);
         $statuses = array_values(array_unique(array_merge(self::STATUSES, $statuses)));
 
         sort($statuses);
@@ -312,29 +312,7 @@ final class Content
 
     public function statusCounts(array $statuses = []): array
     {
-        $rows = $this->query->select('content', ['status']);
-        $counts = ['all' => count($rows)];
-
-        foreach ($rows as $row) {
-            $value = trim((string)($row['status'] ?? ''));
-            if ($value === '') {
-                continue;
-            }
-
-            if (!isset($counts[$value])) {
-                $counts[$value] = 0;
-            }
-            $counts[$value]++;
-        }
-
-        foreach ($statuses as $status) {
-            $key = trim((string)$status);
-            if ($key !== '' && !isset($counts[$key])) {
-                $counts[$key] = 0;
-            }
-        }
-
-        return $counts;
+        return $this->query->countsBy('content', 'status', $statuses);
     }
 
     public function attachMedia(int $contentId, int $mediaId): bool
@@ -343,14 +321,11 @@ final class Content
             return false;
         }
 
-        $mediaExists = $this->query->select('media', ['id'], ['id' => $mediaId]) !== [];
-        if (!$mediaExists) {
+        if (!$this->query->exists('media', ['id' => $mediaId])) {
             return false;
         }
 
-        $contentMediaTable = Table::name('content_media');
-        $stmt = $this->pdo->prepare("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)");
-        return $stmt->execute([
+        return $this->query->insertIgnore('content_media', [
             'content' => $contentId,
             'media' => $mediaId,
         ]);
@@ -386,9 +361,8 @@ final class Content
         $deleteStmt = $this->pdo->prepare($deleteSql);
         $deleteStmt->execute($params);
 
-        $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $contentMediaTable (content, media) VALUES (:content, :media)");
         foreach ($mediaIds as $mediaId) {
-            $insertStmt->execute([
+            $this->query->insertIgnore('content_media', [
                 'content' => $contentId,
                 'media' => $mediaId,
             ]);
@@ -438,8 +412,7 @@ final class Content
             return null;
         }
 
-        $rows = $this->query->select('users', ['ID'], ['ID' => $authorId]);
-        return $rows === [] ? null : $authorId;
+        return $this->query->exists('users', ['ID' => $authorId]) ? $authorId : null;
     }
 
     private function resolveDateTime(string $value): ?string

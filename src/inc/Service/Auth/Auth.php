@@ -82,15 +82,14 @@ class Auth
         }
 
         $userId = (int)$_SESSION['auth']['id'];
-        $rows = (new Query(Connection::get()))->select('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $userId]);
+        $user = (new Query(Connection::get()))->first('users', ['ID', 'name', 'email', 'role', 'suspend'], ['ID' => $userId]);
 
-        if (empty($rows) || (int)($rows[0]['suspend'] ?? 0) === 1) {
+        if (!is_array($user) || (int)($user['suspend'] ?? 0) === 1) {
             unset($_SESSION['auth']);
             $this->synced = true;
             return;
         }
 
-        $user = $rows[0];
         $_SESSION['auth'] = [
             'id' => (int)$user['ID'],
             'name' => (string)$user['name'],

@@ -1,97 +1,27 @@
 <?php
 declare(strict_types=1);
 
-use App\Service\Application\Content;
-use App\Service\Infrastructure\Db\Connection;
-use App\Service\Infrastructure\Db\Table;
-use App\Service\Support\Date;
-use App\Service\Support\Shortcode;
-use App\Service\Support\Slugger;
-
 if (!defined('BASE_DIR')) {
     exit;
 }
 
-$fetchContentTabs = static function (int $limit): array {
-    $contentTable = Table::name('content');
-    $contentStatsTable = Table::name('content_stats');
-    $mediaTable = Table::name('media');
-    $now = date('Y-m-d H:i:s');
-    $since = date('Y-m-d H:i:s', strtotime('-7 days') ?: time());
-    $hotItems = [];
-
-    try {
-        $hot = Connection::get()->prepare(implode("\n", [
-            'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path AS thumbnail_path, m.name AS thumbnail_name,',
-            'COUNT(cs.ip_address) AS views_count, MAX(cs.last_visit) AS last_visit',
-            "FROM $contentTable c",
-            "INNER JOIN $contentStatsTable cs ON cs.content = c.id AND cs.last_visit >= :since",
-            "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-            'WHERE ' . Content::publicWhere('c'),
-            'GROUP BY c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path, m.name',
-            'ORDER BY views_count DESC, last_visit DESC, c.id DESC',
-            'LIMIT :limit',
-        ]));
-        $hot->bindValue(':status', Content::STATUS_PUBLISHED);
-        $hot->bindValue(':now', $now);
-        $hot->bindValue(':since', $since);
-        $hot->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $hot->execute();
-        $hotItems = $hot->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    } catch (PDOException) {
-        $hotItems = [];
-    }
-
-    $latest = Connection::get()->prepare(implode("\n", [
-        'SELECT c.id, c.name, c.excerpt, c.body, c.created, c.updated, c.thumbnail, m.path AS thumbnail_path, m.name AS thumbnail_name,',
-        '0 AS views_count, NULL AS last_visit',
-        "FROM $contentTable c",
-        "LEFT JOIN $mediaTable m ON m.id = c.thumbnail",
-        'WHERE ' . Content::publicWhere('c'),
-        'ORDER BY COALESCE(c.updated, c.created) DESC, c.id DESC',
-        'LIMIT :limit',
-    ]));
-    $latest->bindValue(':status', Content::STATUS_PUBLISHED);
-    $latest->bindValue(':now', $now);
-    $latest->bindValue(':limit', $limit, PDO::PARAM_INT);
-    $latest->execute();
-
-    return [
-        'hot' => $hotItems,
-        'latest' => $latest->fetchAll(PDO::FETCH_ASSOC) ?: [],
-    ];
-};
-
-$contentTabsRows = static function (array $items, bool $showThumbnail, bool $showExcerpt, string $mode): string {
-    $slugger = new Slugger();
-    $rows = array_map(static function (array $item) use ($slugger, $showThumbnail, $showExcerpt, $mode): string {
+$contentTabsRows = static function (array $items, bool $showThumbnail, bool $showExcerpt, array $widget): string {
+    $rows = array_map(static function (array $item) use ($showThumbnail, $showExcerpt, $widget): string {
         $id = (int)($item['id'] ?? 0);
         $name = trim((string)($item['name'] ?? ''));
         if ($id <= 0 || $name === '') {
             return '';
         }
 
-        $item['thumbnail'] = trim((string)($item['thumbnail_path'] ?? ''));
-        $url = site_url($slugger->slug($name, $id));
-        $thumbnail = $showThumbnail ? get_content_thumbnail($item, [
+        $url = $widget['content_url']($item);
+        $thumbnail = $showThumbnail ? $widget['thumbnail']($item, [
             'size' => 'small',
             'sizes' => '56px',
             'class' => 'content-tabs-thumb',
             'wrap' => false,
         ]) : '';
-        $meta = esc_html(Date::formatDateTimeValue((string)($item['updated'] ?? $item['created'] ?? '')));
-        $excerpt = '';
-        if ($showExcerpt) {
-            $trustedBlocks = [];
-            $excerpt = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode(Shortcode::render((string)($item['excerpt'] ?? ''), $trustedBlocks), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
-            if ($excerpt === '') {
-                $trustedBlocks = [];
-                $excerpt = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode(Shortcode::render((string)($item['body'] ?? ''), $trustedBlocks), ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
-            }
-        }
-        if (mb_strlen($excerpt) > 120) {
-            $excerpt = mb_substr($excerpt, 0, 117) . '...';
-        }
+        $meta = esc_html($widget['date']((string)($item['updated'] ?? $item['created'] ?? '')));
+        $excerpt = $showExcerpt ? $widget['excerpt']($item, 120) : '';
 
         return implode('', [
             '<li>',
@@ -158,7 +88,7 @@ return [
             'default' => '0',
         ],
     ],
-    'render' => static function (array $data) use ($fetchContentTabs, $contentTabsRows): string {
+    'render' => static function (array $data, array $widget) use ($contentTabsRows): string {
         static $instance = 0;
 
         $title = trim((string)($data['title'] ?? ''));
@@ -168,7 +98,10 @@ return [
         $firstTab = (string)($data['first_tab'] ?? 'hot') === 'latest' ? 'latest' : 'hot';
         $showThumbnail = (string)($data['show_thumbnail'] ?? '1') === '1';
         $showExcerpt = (string)($data['show_excerpt'] ?? '0') === '1';
-        $items = $fetchContentTabs($limit);
+        $items = [
+            'hot' => $widget['items']('content', ['sort' => 'popular', 'limit' => $limit, 'days' => 7]),
+            'latest' => $widget['items']('content', ['sort' => 'latest', 'limit' => $limit]),
+        ];
 
         if (($items['hot'] ?? []) === [] && ($items['latest'] ?? []) === []) {
             return '';
@@ -181,7 +114,7 @@ return [
         $hotLabel = $hotLabel !== '' ? $hotLabel : t('widgets.content_tabs.hot_default');
         $latestLabel = $latestLabel !== '' ? $latestLabel : t('widgets.content_tabs.latest_default');
 
-        return widget_title($title, 'content')
+        return $widget['title']($title, 'content')
             . '<div class="content-tabs">'
             . '<input class="content-tabs-input content-tabs-input-hot" id="' . esc_attr($hotId) . '" name="' . esc_attr($id) . '" type="radio"' . ($firstTab === 'hot' ? ' checked' : '') . '>'
             . '<input class="content-tabs-input content-tabs-input-latest" id="' . esc_attr($latestId) . '" name="' . esc_attr($id) . '" type="radio"' . ($firstTab === 'latest' ? ' checked' : '') . '>'
@@ -190,8 +123,8 @@ return [
             . '<label class="content-tabs-tab content-tabs-tab-latest" for="' . esc_attr($latestId) . '">' . esc_html($latestLabel) . '</label>'
             . '</div>'
             . '<div class="content-tabs-panels">'
-            . '<div class="content-tabs-panel content-tabs-panel-hot">' . $contentTabsRows((array)($items['hot'] ?? []), $showThumbnail, $showExcerpt, 'hot') . '</div>'
-            . '<div class="content-tabs-panel content-tabs-panel-latest">' . $contentTabsRows((array)($items['latest'] ?? []), $showThumbnail, $showExcerpt, 'latest') . '</div>'
+            . '<div class="content-tabs-panel content-tabs-panel-hot">' . $contentTabsRows((array)($items['hot'] ?? []), $showThumbnail, $showExcerpt, $widget) . '</div>'
+            . '<div class="content-tabs-panel content-tabs-panel-latest">' . $contentTabsRows((array)($items['latest'] ?? []), $showThumbnail, $showExcerpt, $widget) . '</div>'
             . '</div></div>';
     },
 ];

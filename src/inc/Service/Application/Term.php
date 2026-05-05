@@ -50,7 +50,7 @@ final class Term
         $termsTable = Table::name('terms');
         $contentTermsTable = Table::name('content_terms');
 
-        $all = (int)($this->pdo->query("SELECT COUNT(*) FROM $termsTable")->fetchColumn() ?: 0);
+        $all = $this->query->count('terms');
         $unassignedSql = implode("\n", [
             "SELECT COUNT(*) FROM $termsTable t",
             "WHERE NOT EXISTS (SELECT 1 FROM $contentTermsTable ct WHERE ct.term = t.id)",
@@ -65,8 +65,7 @@ final class Term
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('terms', ['id', 'name', 'created', 'updated'], ['id' => $id]);
-        return $rows[0] ?? null;
+        return $this->query->first('terms', ['id', 'name', 'created', 'updated'], ['id' => $id]);
     }
 
     public function save(array $input, ?int $id = null): array
@@ -158,7 +157,6 @@ final class Term
         ], $stmt->fetchAll(\PDO::FETCH_ASSOC));
     }
 
-
     public function listByContent(int $contentId): array
     {
         if ($contentId <= 0) {
@@ -207,18 +205,13 @@ final class Term
         $this->pdo->beginTransaction();
         try {
             $termIds = [];
-            $termsTable = Table::name('terms');
             $contentTermsTable = Table::name('content_terms');
-            $selectStmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-            $insertStmt = $this->pdo->prepare("INSERT IGNORE INTO $termsTable (name) VALUES (:name)");
 
             foreach ($names as $name) {
-                $selectStmt->execute(['name' => $name]);
-                $id = (int)$selectStmt->fetchColumn();
+                $id = (int)($this->query->value('terms', 'id', ['name' => $name]) ?? 0);
                 if ($id <= 0) {
-                    $insertStmt->execute(['name' => $name]);
-                    $selectStmt->execute(['name' => $name]);
-                    $id = (int)$selectStmt->fetchColumn();
+                    $this->query->insertIgnore('terms', ['name' => $name]);
+                    $id = (int)($this->query->value('terms', 'id', ['name' => $name]) ?? 0);
                 }
                 if ($id > 0) {
                     $termIds[] = $id;
@@ -236,9 +229,8 @@ final class Term
             $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
             $deleteStmt->execute(['content' => $contentId]);
 
-            $attachStmt = $this->pdo->prepare("INSERT IGNORE INTO $contentTermsTable (content, term) VALUES (:content, :term)");
             foreach ($termIds as $termId) {
-                $attachStmt->execute(['content' => $contentId, 'term' => $termId]);
+                $this->query->insertIgnore('content_terms', ['content' => $contentId, 'term' => $termId]);
             }
 
             $this->pdo->commit();
@@ -297,10 +289,7 @@ final class Term
 
     private function existsByName(string $name, ?int $excludeId = null): bool
     {
-        $termsTable = Table::name('terms');
-        $stmt = $this->pdo->prepare("SELECT id FROM $termsTable WHERE name = :name LIMIT 1");
-        $stmt->execute(['name' => $name]);
-        $foundId = (int)$stmt->fetchColumn();
+        $foundId = (int)($this->query->value('terms', 'id', ['name' => $name]) ?? 0);
 
         if ($foundId <= 0) {
             return false;

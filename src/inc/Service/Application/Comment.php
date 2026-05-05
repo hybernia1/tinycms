@@ -285,42 +285,12 @@ final class Comment
 
     public function statusCounts(array $statuses = []): array
     {
-        $commentsTable = Table::name('comments');
-        $stmt = $this->pdo->query("SELECT status FROM $commentsTable");
-        $rows = $stmt ? ($stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []) : [];
-        $counts = [
-            'all' => count($rows),
-        ];
-
-        foreach ($rows as $row) {
-            $value = trim((string)($row['status'] ?? ''));
-            if ($value === '') {
-                continue;
-            }
-
-            if (!isset($counts[$value])) {
-                $counts[$value] = 0;
-            }
-            $counts[$value]++;
-        }
-
-        foreach ($statuses as $status) {
-            $key = trim((string)$status);
-            if ($key !== '' && !isset($counts[$key])) {
-                $counts[$key] = 0;
-            }
-        }
-
-        return $counts;
+        return $this->query->countsBy('comments', 'status', $statuses);
     }
 
     public function pendingCount(): int
     {
-        $commentsTable = Table::name('comments');
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $commentsTable WHERE status = :status");
-        $stmt->execute(['status' => self::STATUS_DRAFT]);
-
-        return (int)($stmt->fetchColumn() ?: 0);
+        return $this->query->count('comments', ['status' => self::STATUS_DRAFT]);
     }
 
     public function save(int $contentId, int $authorId, array $input, string $ipAddress, bool $allowAnonymous = false): array
@@ -682,8 +652,7 @@ final class Comment
 
     private function findCommentForReply(int $commentId): ?array
     {
-        $rows = $this->query->select('comments', ['id', 'content', 'parent', 'status'], ['id' => $commentId]);
-        return $rows[0] ?? null;
+        return $this->query->first('comments', ['id', 'content', 'parent', 'status'], ['id' => $commentId]);
     }
 
     private function normalizeStatus(string $status): string
@@ -699,6 +668,6 @@ final class Comment
             return false;
         }
 
-        return $this->query->select('users', ['ID'], ['ID' => $authorId]) !== [];
+        return $this->query->exists('users', ['ID' => $authorId]);
     }
 }

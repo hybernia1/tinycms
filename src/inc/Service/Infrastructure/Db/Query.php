@@ -31,6 +31,21 @@ class Query
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function first(string $table, array $columns = ['*'], array $where = []): ?array
+    {
+        $table = Table::name($table);
+        $this->assertIdentifier($table, 'table');
+        $cols = $this->buildColumns($columns);
+        [$whereSql, $params] = $this->buildWhere($where);
+        $sql = "SELECT $cols FROM $table$whereSql LIMIT 1";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($row) ? $row : null;
+    }
+
     public function paginate(string $table, array $columns = ['*'], array $where = [], array $options = []): array
     {
         $table = Table::name($table);
@@ -144,6 +159,23 @@ class Query
         return (int)$this->pdo->lastInsertId();
     }
 
+    public function insertIgnore(string $table, array $data): bool
+    {
+        $table = Table::name($table);
+        $this->assertIdentifier($table, 'table');
+        if ($data === []) {
+            throw new InvalidArgumentException(I18n::t('errors.db.insert_data_empty'));
+        }
+
+        $data = $this->normalizeDataKeys($data);
+        $columns = implode(', ', array_keys($data));
+        $placeholders = ':' . implode(', :', array_keys($data));
+
+        $stmt = $this->pdo->prepare("INSERT IGNORE INTO $table ($columns) VALUES ($placeholders)");
+
+        return $stmt->execute($data);
+    }
+
     public function update(string $table, array $data, array $where): int
     {
         $table = Table::name($table);
@@ -193,11 +225,65 @@ class Query
         return $stmt->rowCount();
     }
 
+    public function count(string $table, array $where = []): int
+    {
+        $table = Table::name($table);
+        $this->assertIdentifier($table, 'table');
+        [$whereSql, $params] = $this->buildWhere($where);
+
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM $table$whereSql");
+        $stmt->execute($params);
+
+        return (int)($stmt->fetchColumn() ?: 0);
+    }
+
+    public function exists(string $table, array $where): bool
+    {
+        $table = Table::name($table);
+        $this->assertIdentifier($table, 'table');
+        [$whereSql, $params] = $this->buildWhere($where);
+
+        $stmt = $this->pdo->prepare("SELECT 1 FROM $table$whereSql LIMIT 1");
+        $stmt->execute($params);
+
+        return $stmt->fetchColumn() !== false;
+    }
+
+    public function countsBy(string $table, string $column, array $include = []): array
+    {
+        $table = Table::name($table);
+        $this->assertIdentifier($table, 'table');
+        $this->assertIdentifier($column, 'column');
+
+        $stmt = $this->pdo->prepare("SELECT $column, COUNT(*) AS row_count FROM $table GROUP BY $column");
+        $stmt->execute();
+
+        $counts = ['all' => 0];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $total = (int)($row['row_count'] ?? 0);
+            $counts['all'] += $total;
+
+            $key = trim((string)($row[$column] ?? ''));
+            if ($key !== '') {
+                $counts[$key] = $total;
+            }
+        }
+
+        foreach ($include as $value) {
+            $key = trim((string)$value);
+            if ($key !== '' && !isset($counts[$key])) {
+                $counts[$key] = 0;
+            }
+        }
+
+        return $counts;
+    }
+
     public function value(string $table, string $column, array $where): mixed
     {
         $this->assertIdentifier($column, 'column');
-        $rows = $this->select($table, [$column], $where);
-        return $rows[0][$column] ?? null;
+        $row = $this->first($table, [$column], $where);
+        return $row[$column] ?? null;
     }
 
     public function deleteByStatus(string $table, array $where, string $trashStatus, string $statusColumn = 'status'): ?string
