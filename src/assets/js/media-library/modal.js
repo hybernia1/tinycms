@@ -138,10 +138,38 @@ if (modal && typeof postForm === 'function') {
         }
     };
 
+    const setTriggerLabel = (label) => {
+        if (!openTrigger) {
+            return;
+        }
+
+        const text = document.createElement('span');
+        text.textContent = label;
+        openTrigger.replaceChildren(text);
+    };
+
+    const setTriggerImage = (className, media, imagePath) => {
+        if (!openTrigger) {
+            return;
+        }
+
+        const preview = document.createElement('div');
+        const image = document.createElement('img');
+        preview.className = className;
+        image.src = imagePath;
+        image.alt = String(media.name || '');
+        preview.appendChild(image);
+        openTrigger.replaceChildren(preview);
+    };
+
     const setTriggerEmpty = () => {
+        if (!openTrigger) {
+            return;
+        }
+
         openTrigger.classList.add('empty');
         openTrigger.setAttribute('data-current-media-id', '0');
-        openTrigger.innerHTML = `<span>${t('content.choose_image')}</span>`;
+        setTriggerLabel(t('content.choose_image'));
     };
 
     const setTriggerThumbnail = (media) => {
@@ -156,7 +184,7 @@ if (modal && typeof postForm === 'function') {
 
         openTrigger.classList.remove('empty');
         openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
-        openTrigger.innerHTML = '<div class="media-picker-preview"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
+        setTriggerImage('media-picker-preview', media, imagePath);
         currentMediaId = Number(media.id || 0);
     };
 
@@ -178,7 +206,7 @@ if (modal && typeof postForm === 'function') {
         openTrigger.setAttribute('data-current-media-id', String(Number(media.id || 0)));
         openTrigger.setAttribute('data-current-media-path', path);
         if (imagePath !== '') {
-            openTrigger.innerHTML = '<div class="media-picker-preview-compact"><img src="' + imagePath + '" alt="' + String(media.name || '').replace(/"/g, '&quot;') + '"></div>';
+            setTriggerImage('media-picker-preview-compact', media, imagePath);
         }
         currentMediaId = Number(media.id || 0);
         currentMediaPath = path;
@@ -201,7 +229,7 @@ if (modal && typeof postForm === 'function') {
         openTrigger.classList.add('empty');
         openTrigger.setAttribute('data-current-media-id', '0');
         openTrigger.setAttribute('data-current-media-path', '');
-        openTrigger.innerHTML = `<span>${t('content.choose_image')}</span>`;
+        setTriggerLabel(t('content.choose_image'));
     };
 
     const absoluteUrl = (path) => helpers.absoluteUrl?.(path, baseUrl) || '';

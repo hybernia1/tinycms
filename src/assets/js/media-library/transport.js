@@ -47,6 +47,7 @@
             'data-media-rename-template',
             'data-media-attach-template',
             'data-media-detach-endpoint',
+            'data-media-upload-endpoint',
         ].forEach((attr) => {
             openTrigger.setAttribute(attr, endpointWithContentId(openTrigger.getAttribute(attr) || '', numericId));
         });
