@@ -5,6 +5,8 @@ if (!defined('BASE_DIR')) {
 }
 
 register_routes($router, $redirect, [
+    ['method' => 'GET', 'path' => 'comments/{contentId:int}/replies/{parentId:int}', 'controller' => $frontComments, 'action' => 'replies', 'params' => ['contentId' => 'int', 'parentId' => 'int'], 'with_redirect' => false],
+    ['method' => 'GET', 'path' => 'comments/{contentId:int}', 'controller' => $frontComments, 'action' => 'list', 'params' => ['contentId' => 'int'], 'with_redirect' => false],
     ['method' => 'POST', 'path' => 'comments/{contentId:int}/add', 'controller' => $frontComments, 'action' => 'add', 'params' => ['contentId' => 'int']],
     ['method' => 'GET', 'path' => '', 'controller' => $front, 'action' => 'home', 'with_redirect' => false],
     ['method' => 'GET', 'path' => 'account', 'controller' => $front, 'action' => 'account'],

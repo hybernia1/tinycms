@@ -19,6 +19,9 @@ use App\Service\Support\Shortcode;
 
 final class Theme
 {
+    private const COMMENT_THREADS_PER_PAGE = 20;
+    private const COMMENT_REPLIES_PER_PAGE = 10;
+
     private static ?self $current = null;
     private string $theme;
     private Slugger $slugger;
@@ -489,19 +492,77 @@ final class Theme
             return '';
         }
 
-        $items = $this->comments->treeForContent((int)$item['id'], $this->pendingCommentIds((int)$item['id']));
-        $html = '<div class="comments-list"><h2>' . esc_html(t('front.comments_title', 'Comments')) . '</h2>';
+        $contentId = (int)$item['id'];
+        $pagination = $this->comments->paginateTreeForContent(
+            $contentId,
+            $this->commentsPage(),
+            self::COMMENT_THREADS_PER_PAGE,
+            $this->pendingCommentIds($contentId),
+            $this->commentsSort()
+        );
+        $items = (array)($pagination['data'] ?? []);
+        $sort = (string)($pagination['sort'] ?? $this->commentsSort());
+        $html = '<div class="comments-list" data-comments-list data-comments-endpoint="' . esc_url($this->url('comments/' . $contentId)) . '" data-comments-sort="' . esc_attr($sort) . '">';
+        $html .= $this->commentsHeader($item, $sort);
 
         if ($items === []) {
             return $html . '<p class="text-muted">' . esc_html(t('front.comments_empty', 'No comments yet.')) . '</p></div>';
         }
 
-        $html .= '<ol class="comment-thread">';
-        foreach ($items as $comment) {
-            $html .= $this->commentItem($item, $comment, true);
+        $html .= '<ol class="comment-thread" data-comments-items>' . $this->commentItems($item, $items) . '</ol>';
+        $html .= $this->commentsLoadMore($item, $pagination);
+
+        return $html . '</div>';
+    }
+
+    public function commentsFragment(array $item, int $page = 1, string $sort = 'relevant'): array
+    {
+        if (!$this->commentsEnabled($item)) {
+            return [
+                'items_html' => '',
+                'pagination_html' => '',
+                'pagination' => $this->commentsMeta([]),
+            ];
         }
 
-        return $html . '</ol></div>';
+        $pagination = $this->comments->paginateTreeForContent(
+            (int)$item['id'],
+            $page,
+            self::COMMENT_THREADS_PER_PAGE,
+            $this->pendingCommentIds((int)$item['id']),
+            $sort
+        );
+
+        return [
+            'items_html' => $this->commentItems($item, (array)($pagination['data'] ?? [])),
+            'pagination_html' => $this->commentsLoadMore($item, $pagination),
+            'pagination' => $this->commentsMeta($pagination),
+        ];
+    }
+
+    public function commentRepliesFragment(array $item, int $parentId, int $page = 1): array
+    {
+        if (!$this->commentsEnabled($item)) {
+            return [
+                'items_html' => '',
+                'pagination_html' => '',
+                'pagination' => $this->commentsMeta([]),
+            ];
+        }
+
+        $pagination = $this->comments->paginateChildrenForParent(
+            (int)$item['id'],
+            $parentId,
+            $page,
+            self::COMMENT_REPLIES_PER_PAGE,
+            $this->pendingCommentIds((int)$item['id'])
+        );
+
+        return [
+            'items_html' => $this->commentChildItems($item, (array)($pagination['data'] ?? []), $parentId),
+            'pagination_html' => $this->commentRepliesLoadMore($item, $parentId, $pagination),
+            'pagination' => $this->commentsMeta($pagination),
+        ];
     }
 
     public function commentsCount(array $item): int
@@ -580,7 +641,7 @@ final class Theme
             $this->hiddenRouteField($action) . $this->csrf->field(),
             $parentId,
             $replyToId,
-            esc_attr($this->commentReturnPath()),
+            esc_attr($this->commentReturnPath($item)),
             esc_html($heading),
             $authorFields,
             esc_html(t('front.comments_submit', 'Send comment')),
@@ -722,7 +783,9 @@ final class Theme
         $comment['author_name'] = $author;
         $html = '<li class="comment-item" id="comment-' . $commentId . '">';
         $html .= '<article class="comment-card' . ($isPending ? ' comment-card-pending' : '') . '">';
-        $html .= '<header class="comment-meta"><span class="comment-author">' . get_avatar($comment, 'comment-avatar', 48) . $this->commentAuthorName($comment, $author) . '</span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
+        $html .= get_avatar($comment, 'comment-avatar', 48);
+        $html .= '<div class="comment-content">';
+        $html .= '<header class="comment-meta"><span class="comment-author">' . $this->commentAuthorName($comment, $author) . '</span><a href="#comment-' . $commentId . '"><time datetime="' . esc_attr($this->isoDate((string)($comment['created'] ?? ''))) . '">' . esc_html($this->commentDate((string)($comment['created'] ?? ''))) . '</time></a></header>';
         if ($isPending) {
             $html .= '<p class="comment-pending-notice">' . esc_html(t('front.comments_pending', 'Your comment is waiting for approval.')) . '</p>';
         }
@@ -734,26 +797,40 @@ final class Theme
             $html .= '<p class="comment-reply-context"><a href="#comment-' . (int)$comment['reply_to'] . '">' . esc_html(sprintf(t('front.comments_replying_to', 'Replying to %s'), $replyAuthor)) . '</a></p>';
         }
         $html .= '<div class="comment-body">' . esc_content($comment['body'] ?? '') . '</div>';
+        $children = array_values(array_filter((array)($comment['children'] ?? []), static fn(mixed $child): bool => is_array($child)));
+        $isThreadParent = $threadParentId === $commentId;
+        $childrenTotal = (int)($comment['children_total'] ?? count($children));
         $replyButton = '';
         $replyForm = '';
         if (!$isPending && $allowReply && ($this->auth->check() || $this->commentsAllowAnonymous())) {
-            $replyButton = '<button class="comment-reply" type="button" data-comment-reply data-comment-reply-target="comment-reply-form-' . $commentId . '" aria-controls="comment-reply-form-' . $commentId . '" aria-expanded="false">' . esc_html(t('front.comments_reply_title', 'Reply')) . '</button>';
+            $replyButton = '<button class="comment-reply" type="button" data-comment-reply data-comment-reply-target="comment-reply-form-' . $commentId . '" aria-controls="comment-reply-form-' . $commentId . '" aria-expanded="false">' . icon('reply', 'comment-action-icon') . '<span>' . esc_html(t('front.comments_reply_title', 'Reply')) . '</span></button>';
             $replyForm = $this->commentsForm($item, $threadParentId, $commentId !== $threadParentId ? $commentId : null);
         }
-
+        $repliesButton = $isThreadParent && $childrenTotal > count($children) && $children === [] ? $this->commentRepliesLoadMore($item, $commentId, [
+            'page' => (int)($comment['children_page'] ?? 1),
+            'per_page' => (int)($comment['children_per_page'] ?? self::COMMENT_REPLIES_PER_PAGE),
+            'total' => $childrenTotal,
+            'total_pages' => (int)($comment['children_total_pages'] ?? 1),
+        ]) : '';
         $adminActions = $this->commentAdminLink($commentId, $threadParentId);
-        if ($replyButton !== '' || $adminActions !== '') {
-            $html .= '<div class="comment-actions">' . $replyButton . $adminActions . '</div>' . $replyForm;
+        if ($replyButton !== '' || $adminActions !== '' || $repliesButton !== '') {
+            $html .= '<div class="comment-actions">' . $replyButton . $adminActions . $repliesButton . '</div>' . $replyForm;
         }
+        $html .= '</div>';
         $html .= '</article>';
 
-        $children = array_values(array_filter((array)($comment['children'] ?? []), static fn(mixed $child): bool => is_array($child)));
-        if ($children !== []) {
-            $html .= '<ol class="comment-children">';
-            foreach ($children as $child) {
-                $html .= $this->commentItem($item, $child, true, $commentId);
-            }
+        if ($children !== [] || ($isThreadParent && $childrenTotal > 0)) {
+            $html .= '<ol class="comment-children" data-comment-replies="' . $commentId . '" data-comment-replies-items>';
+            $html .= $this->commentChildItems($item, $children, $commentId);
             $html .= '</ol>';
+        }
+        if ($isThreadParent && $childrenTotal > count($children) && $children !== []) {
+            $html .= $this->commentRepliesLoadMore($item, $commentId, [
+                'page' => (int)($comment['children_page'] ?? 1),
+                'per_page' => (int)($comment['children_per_page'] ?? self::COMMENT_REPLIES_PER_PAGE),
+                'total' => $childrenTotal,
+                'total_pages' => (int)($comment['children_total_pages'] ?? 1),
+            ]);
         }
 
         return $html . '</li>';
@@ -777,7 +854,7 @@ final class Theme
             esc_url($this->url('admin/comments/edit?id=' . $targetId) . $fragment),
             $label,
             $label,
-            icon('concept'),
+            icon('concept', 'comment-action-icon') . '<span>' . esc_html(t('front.comments_edit', 'Edit')) . '</span>',
         );
     }
 
@@ -826,10 +903,11 @@ final class Theme
         return date($format, $timestamp);
     }
 
-    private function commentReturnPath(?int $commentId = null): string
+    private function commentReturnPath(array $item, ?int $commentId = null): string
     {
         $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
-        $path = strtok($uri, '#');
+        $requestPath = $this->router->requestPath($uri);
+        $path = str_starts_with($requestPath, 'comments/') ? $this->contentUrl($item) : strtok($uri, '#');
         $fragment = $commentId !== null && $commentId > 0 ? '#comment-' . $commentId : '#comments';
         return ($path !== false && $path !== '' ? $path : '/') . $fragment;
     }
@@ -879,6 +957,129 @@ final class Theme
         $separator = str_contains($base, '?') ? '&' : '?';
         $suffix = $page > 1 ? $separator . 'page=' . $page : '';
         return $this->url($base . $suffix);
+    }
+
+    private function commentsPage(): int
+    {
+        return max(1, (int)($_GET['comments_page'] ?? 1));
+    }
+
+    private function commentsSort(): string
+    {
+        $sort = trim((string)($_GET['comments_sort'] ?? 'relevant'));
+        return in_array($sort, ['relevant', 'newest', 'oldest'], true) ? $sort : 'relevant';
+    }
+
+    private function commentsHeader(array $item, string $current): string
+    {
+        $links = [];
+        foreach ([
+            'relevant' => t('front.comments_sort_relevant', 'Relevant'),
+            'newest' => t('front.comments_sort_newest', 'Newest'),
+            'oldest' => t('front.comments_sort_oldest', 'Oldest'),
+        ] as $sort => $label) {
+            $links[] = $sort === $current
+                ? '<span class="is-current" aria-current="true">' . esc_html($label) . '</span>'
+                : '<a href="' . esc_url($this->commentsSortUrl($item, $sort)) . '">' . esc_html($label) . '</a>';
+        }
+
+        return '<div class="comments-head"><h2>' . esc_html(t('front.comments_title', 'Comments')) . '</h2><nav class="comments-sort" aria-label="' . esc_attr(t('front.comments_sort_label', 'Comment sorting')) . '">' . implode('', $links) . '</nav></div>';
+    }
+
+    private function commentItems(array $item, array $comments): string
+    {
+        $html = '';
+        foreach ($comments as $comment) {
+            if (is_array($comment)) {
+                $html .= $this->commentItem($item, $comment, true);
+            }
+        }
+
+        return $html;
+    }
+
+    private function commentChildItems(array $item, array $comments, int $threadParentId): string
+    {
+        $html = '';
+        foreach ($comments as $comment) {
+            if (is_array($comment)) {
+                $html .= $this->commentItem($item, $comment, true, $threadParentId);
+            }
+        }
+
+        return $html;
+    }
+
+    private function commentsLoadMore(array $item, array $pagination): string
+    {
+        $page = (int)($pagination['page'] ?? 1);
+        $totalPages = (int)($pagination['total_pages'] ?? 1);
+        $sort = (string)($pagination['sort'] ?? $this->commentsSort());
+        if ($page >= $totalPages) {
+            return '<div class="comments-more" data-comments-pagination></div>';
+        }
+
+        $nextPage = $page + 1;
+        return sprintf(
+            '<div class="comments-more" data-comments-pagination><a class="comments-more-link" data-comments-load-more data-comments-next-page="%d" href="%s">%s</a></div>',
+            $nextPage,
+            esc_url($this->commentsUrl($item, $sort, $nextPage)),
+            icon('chevron-down', 'comment-action-icon') . '<span>' . esc_html(t('front.comments_load_more', 'Load more comments')) . '</span>'
+        );
+    }
+
+    private function commentsMeta(array $pagination): array
+    {
+        return [
+            'page' => (int)($pagination['page'] ?? 1),
+            'per_page' => (int)($pagination['per_page'] ?? self::COMMENT_THREADS_PER_PAGE),
+            'total' => (int)($pagination['total'] ?? 0),
+            'total_pages' => (int)($pagination['total_pages'] ?? 1),
+            'sort' => (string)($pagination['sort'] ?? $this->commentsSort()),
+        ];
+    }
+
+    private function commentRepliesLoadMore(array $item, int $parentId, array $pagination): string
+    {
+        $page = (int)($pagination['page'] ?? 1);
+        $totalPages = (int)($pagination['total_pages'] ?? 1);
+        if ($page >= $totalPages) {
+            return '<div class="comments-more comment-replies-more" data-comment-replies-pagination="' . $parentId . '"></div>';
+        }
+
+        $nextPage = $page + 1;
+        $label = $page <= 0
+            ? sprintf(t('front.comments_show_replies', 'Replies %d'), (int)($pagination['total'] ?? 0))
+            : t('front.comments_load_more_replies', 'Load more replies');
+        $icon = $page <= 0 ? 'comments' : 'chevron-down';
+        return sprintf(
+            '<div class="comments-more comment-replies-more" data-comment-replies-pagination="%d"><a class="comments-more-link" data-comment-replies-load-more data-comment-parent="%d" data-comments-next-page="%d" href="%s">%s</a></div>',
+            $parentId,
+            $parentId,
+            $nextPage,
+            esc_url($this->contentUrl($item) . '#comment-' . $parentId),
+            icon($icon, 'comment-action-icon') . '<span>' . esc_html($label) . '</span>'
+        );
+    }
+
+    private function commentsSortUrl(array $item, string $sort): string
+    {
+        return $this->commentsUrl($item, $sort, 1);
+    }
+
+    private function commentsUrl(array $item, string $sort, int $page): string
+    {
+        $url = $this->contentUrl($item);
+        $query = [];
+        if ($sort !== 'relevant') {
+            $query['comments_sort'] = $sort;
+        }
+        if ($page > 1) {
+            $query['comments_page'] = $page;
+        }
+
+        $queryString = http_build_query($query);
+        return $url . ($queryString !== '' ? (str_contains($url, '?') ? '&' : '?') . $queryString : '') . '#comments';
     }
 
     private function resolveHeadTitle(string $kind, array $item, array $term, ?string $customTitle, string $query = ''): string
