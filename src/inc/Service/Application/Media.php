@@ -13,11 +13,13 @@ use InvalidArgumentException;
 final class Media
 {
     private Query $query;
+    private \PDO $pdo;
     private SchemaRules $schemaRules;
 
     public function __construct()
     {
-        $this->query = new Query(Connection::get());
+        $this->pdo = Connection::get();
+        $this->query = new Query($this->pdo);
         $this->schemaRules = new SchemaRules();
     }
 
@@ -54,7 +56,7 @@ final class Media
         $contentTable = Table::name('content');
         $contentMediaTable = Table::name('content_media');
 
-        $all = (int)(Connection::get()->query("SELECT COUNT(*) FROM $mediaTable")->fetchColumn() ?: 0);
+        $all = $this->query->count('media');
         $unassignedSql = implode("\n", [
             "SELECT COUNT(*) FROM $mediaTable m",
             "WHERE NOT EXISTS (SELECT 1 FROM $contentTable c WHERE c.thumbnail = m.id)",
@@ -70,8 +72,7 @@ final class Media
 
     public function find(int $id): ?array
     {
-        $rows = $this->query->select('media', ['id', 'author', 'name', 'path', 'created', 'updated'], ['id' => $id]);
-        return $rows[0] ?? null;
+        return $this->query->first('media', ['id', 'author', 'name', 'path', 'created', 'updated'], ['id' => $id]);
     }
 
     public function findByPath(string $path): ?array
@@ -81,8 +82,7 @@ final class Media
             return null;
         }
 
-        $rows = $this->query->select('media', ['id', 'author', 'name', 'path', 'created', 'updated'], ['path' => $normalized]);
-        return $rows[0] ?? null;
+        return $this->query->first('media', ['id', 'author', 'name', 'path', 'created', 'updated'], ['path' => $normalized]);
     }
 
     public function delete(int $id): bool
@@ -215,8 +215,7 @@ final class Media
             return null;
         }
 
-        $rows = $this->query->select('users', ['ID'], ['ID' => $authorId]);
-        return $rows === [] ? null : $authorId;
+        return $this->query->exists('users', ['ID' => $authorId]) ? $authorId : null;
     }
 
     private function paginateUnassigned(int $page, int $perPage, string $search): array
@@ -253,4 +252,5 @@ final class Media
             'perPage' => $perPage,
         ]);
     }
+
 }

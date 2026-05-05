@@ -134,8 +134,7 @@ final class Auth
             ];
         }
 
-        $users = $this->query->select('users', ['id', 'email', 'name', 'reset_token', 'reset_token_expiry'], ['email' => $email]);
-        $user = $users[0] ?? null;
+        $user = $this->query->first('users', ['id', 'email', 'name', 'reset_token', 'reset_token_expiry'], ['email' => $email]);
         if (!is_array($user)) {
             return [
                 'success' => true,
@@ -239,8 +238,7 @@ final class Auth
             return null;
         }
 
-        $rows = $this->query->select('users', ['id', 'reset_token_expiry'], ['reset_token' => $token]);
-        $user = $rows[0] ?? null;
+        $user = $this->query->first('users', ['id', 'reset_token_expiry'], ['reset_token' => $token]);
         if (!is_array($user)) {
             return null;
         }
