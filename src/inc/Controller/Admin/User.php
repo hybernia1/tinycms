@@ -45,7 +45,7 @@ final class User extends Admin
             'ID' => null,
             'name' => '',
             'email' => '',
-            'role' => 'user',
+            'role' => UserService::ROLE_USER,
             'suspend' => 0,
         ];
         $this->pages->adminUsersForm('add', $fallback, []);

@@ -191,18 +191,17 @@ final class Term
         return array_values(array_filter(array_map(static fn(array $row): string => trim((string)($row['name'] ?? '')), $rows)));
     }
 
-    public function syncContentTerms(int $contentId, string $rawTerms): void
+    public function syncContentTerms(int $contentId, string $rawTerms): bool
     {
         if ($contentId <= 0) {
-            return;
+            return false;
         }
 
         $names = $this->normalizeTerms($rawTerms);
         if ($names === []) {
             $contentTermsTable = Table::name('content_terms');
             $stmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
-            $stmt->execute(['content' => $contentId]);
-            return;
+            return $stmt->execute(['content' => $contentId]);
         }
 
         $this->pdo->beginTransaction();
@@ -231,7 +230,7 @@ final class Term
                 $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
                 $deleteStmt->execute(['content' => $contentId]);
                 $this->pdo->commit();
-                return;
+                return true;
             }
 
             $deleteStmt = $this->pdo->prepare("DELETE FROM $contentTermsTable WHERE content = :content");
@@ -243,10 +242,12 @@ final class Term
             }
 
             $this->pdo->commit();
+            return true;
         } catch (\Throwable $e) {
             if ($this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
             }
+            return false;
         }
     }
 

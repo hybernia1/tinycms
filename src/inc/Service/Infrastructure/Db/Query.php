@@ -193,6 +193,37 @@ class Query
         return $stmt->rowCount();
     }
 
+    public function value(string $table, string $column, array $where): mixed
+    {
+        $this->assertIdentifier($column, 'column');
+        $rows = $this->select($table, [$column], $where);
+        return $rows[0][$column] ?? null;
+    }
+
+    public function deleteByStatus(string $table, array $where, string $trashStatus, string $statusColumn = 'status'): ?string
+    {
+        $status = $this->value($table, $statusColumn, $where);
+        if ($status === null) {
+            return null;
+        }
+
+        if ((string)$status === $trashStatus) {
+            return $this->delete($table, $where) > 0 ? 'hard_deleted' : null;
+        }
+
+        return $this->update($table, [$statusColumn => $trashStatus], $where) > 0 ? 'soft_deleted' : null;
+    }
+
+    public function restoreStatus(string $table, array $where, string $fromStatus, string $toStatus, string $statusColumn = 'status'): bool
+    {
+        return $this->update($table, [$statusColumn => $toStatus], array_merge($where, [$statusColumn => $fromStatus])) > 0;
+    }
+
+    public function setStatus(string $table, array $where, string $status, string $statusColumn = 'status'): bool
+    {
+        return $this->update($table, [$statusColumn => $status], $where) > 0;
+    }
+
     private function buildWhere(array $where): array
     {
         [$conditions, $params] = $this->buildWhereConditions($where);

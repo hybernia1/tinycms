@@ -105,8 +105,8 @@ final class Content extends Admin
 
         if (($result['success'] ?? false) === true) {
             $newId = (int)($result['id'] ?? 0);
-            if ($newId > 0) {
-                $this->terms->syncContentTerms($newId, (string)($_POST['terms'] ?? ''));
+            if (!$this->syncTermsOrError($newId, (string)($_POST['terms'] ?? ''), I18n::t('content.save_failed'))) {
+                return;
             }
             $this->apiOk([
                 'redirect' => $newId > 0 ? $this->buildEditPath('admin/content', $newId) : $this->buildPath('admin/content'),
@@ -134,7 +134,9 @@ final class Content extends Admin
         $result = $this->content->save($_POST, $authorId, $id);
 
         if (($result['success'] ?? false) === true) {
-            $this->terms->syncContentTerms($id, (string)($_POST['terms'] ?? ''));
+            if (!$this->syncTermsOrError($id, (string)($_POST['terms'] ?? ''), I18n::t('content.update_failed'))) {
+                return;
+            }
             $this->apiOk([
                 'message' => I18n::t('content.updated'),
             ]);
@@ -152,7 +154,7 @@ final class Content extends Admin
             return;
         }
 
-        $mode = (string)($_POST['mode'] ?? 'draft');
+        $mode = (string)($_POST['mode'] ?? ContentService::STATUS_DRAFT);
 
         $item = $this->content->find($id);
         if (!$this->requireEntity($item, 'NOT_FOUND', I18n::t('content.not_found'))) {
@@ -178,14 +180,14 @@ final class Content extends Admin
             return;
         }
 
-        if (!$this->content->setStatus($id, 'draft')) {
+        if (!$this->content->setStatus($id, ContentService::STATUS_DRAFT)) {
             $this->apiError('DRAFT_FAILED', I18n::t('content.draft_failed'));
             return;
         }
 
         $this->apiOk([
             'id' => $id,
-            'status' => 'draft',
+            'status' => ContentService::STATUS_DRAFT,
             'message' => I18n::t('content.switched_to_draft'),
         ]);
     }
@@ -199,7 +201,7 @@ final class Content extends Admin
         $authorId = (int)($this->authService->auth()->id() ?? 0);
         $payload = [
             'name' => $this->resolveAutosaveDraftName(),
-            'status' => 'draft',
+            'status' => ContentService::STATUS_DRAFT,
             'type' => ContentService::TYPE_ARTICLE,
             'excerpt' => '',
             'body' => '',
@@ -258,7 +260,9 @@ final class Content extends Admin
         $savedId = (int)($result['id'] ?? 0);
 
         if ($savedId > 0 && isset($_POST['terms'])) {
-            $this->terms->syncContentTerms($savedId, (string)$_POST['terms']);
+            if (!$this->syncTermsOrError($savedId, (string)$_POST['terms'], I18n::t('content.autosave_failed'))) {
+                return;
+            }
         }
 
         $this->apiOk([
@@ -382,7 +386,7 @@ final class Content extends Admin
 
         return [
             'name' => $name,
-            'status' => trim((string)($input['status'] ?? 'draft')) ?: 'draft',
+            'status' => trim((string)($input['status'] ?? ContentService::STATUS_DRAFT)) ?: ContentService::STATUS_DRAFT,
             'type' => trim((string)($input['type'] ?? ContentService::TYPE_ARTICLE)) ?: ContentService::TYPE_ARTICLE,
             'excerpt' => (string)($input['excerpt'] ?? ''),
             'body' => (string)($input['body'] ?? ''),
@@ -397,11 +401,21 @@ final class Content extends Admin
         return I18n::t('content.autosave_draft_name');
     }
 
+    private function syncTermsOrError(int $contentId, string $terms, string $message): bool
+    {
+        if ($this->terms->syncContentTerms($contentId, $terms)) {
+            return true;
+        }
+
+        $this->apiError('TERMS_SYNC_FAILED', $message, 500);
+        return false;
+    }
+
     private function mapListItem(array $row): array
     {
         $createdAt = (string)($row['created'] ?? '');
         $createdStamp = $createdAt !== '' ? strtotime($createdAt) : false;
-        $status = (string)($row['status'] ?? 'draft');
+        $status = (string)($row['status'] ?? ContentService::STATUS_DRAFT);
         return [
             'id' => (int)($row['id'] ?? 0),
             'name' => (string)($row['name'] ?? ''),

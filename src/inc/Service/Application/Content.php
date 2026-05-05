@@ -16,11 +16,15 @@ final class Content
     public const STATUS_PUBLISHED = 'published';
     public const STATUS_TRASH = 'trash';
     public const TYPE_ARTICLE = 'article';
-    public const TYPE_PAGE = 'page';
-    public const TYPE_ABOUT_PAGE = 'about_page';
-    public const TYPE_NEWS_ARTICLE = 'news_article';
-    public const TYPE_BLOG_POSTING = 'blog_posting';
-    public const TYPE_FAQ_PAGE = 'faq_page';
+    public const STATUSES = [self::STATUS_DRAFT, self::STATUS_PUBLISHED, self::STATUS_TRASH];
+    public const TYPES = [
+        self::TYPE_ARTICLE,
+        'page',
+        'about_page',
+        'news_article',
+        'blog_posting',
+        'faq_page',
+    ];
 
     private Query $query;
     private \PDO $pdo;
@@ -157,46 +161,19 @@ final class Content
         ]);
     }
 
-    private function delete(int $id): bool
-    {
-        return $this->query->delete('content', ['id' => $id]) > 0;
-    }
-
     public function deleteByStatus(int $id): ?string
     {
-        $item = $this->find($id);
-        if ($item === null) {
-            return null;
-        }
-
-        if ((string)($item['status'] ?? '') === self::STATUS_TRASH) {
-            return $this->delete($id) ? 'hard_deleted' : null;
-        }
-
-        return $this->setStatus($id, self::STATUS_TRASH) ? 'soft_deleted' : null;
+        return $this->query->deleteByStatus('content', ['id' => $id], self::STATUS_TRASH);
     }
 
     public function restore(int $id): bool
     {
-        $item = $this->find($id);
-        if ($item === null || (string)($item['status'] ?? '') !== self::STATUS_TRASH) {
-            return false;
-        }
-
-        return $this->setStatus($id, self::STATUS_DRAFT);
+        return $this->query->restoreStatus('content', ['id' => $id], self::STATUS_TRASH, self::STATUS_DRAFT);
     }
 
     public function setStatus(int $id, string $status): bool
     {
-        $item = $this->find($id);
-
-        if ($item === null || (string)($item['status'] ?? '') === $status) {
-            return false;
-        }
-
-        return $this->query->update('content', [
-            'status' => $status,
-        ], ['id' => $id]) > 0;
+        return $this->query->setStatus('content', ['id' => $id], $status);
     }
 
     public function setThumbnail(int $id, ?int $thumbnailId): bool
@@ -224,7 +201,7 @@ final class Content
             trim((string)($input['name'] ?? '')),
             255
         );
-        $status = trim((string)($input['status'] ?? 'draft'));
+        $status = trim((string)($input['status'] ?? self::STATUS_DRAFT));
         $type = trim((string)($input['type'] ?? self::TYPE_ARTICLE));
         $excerpt = $this->schemaRules->truncate(
             'content',
@@ -322,7 +299,7 @@ final class Content
     {
         $rows = $this->query->select('content', ['status']);
         $statuses = array_values(array_unique(array_filter(array_map(static fn(array $row): string => trim((string)($row['status'] ?? '')), $rows))));
-        $statuses = array_values(array_unique(array_merge([self::STATUS_DRAFT, self::STATUS_PUBLISHED, self::STATUS_TRASH], $statuses)));
+        $statuses = array_values(array_unique(array_merge(self::STATUSES, $statuses)));
 
         sort($statuses);
         return $statuses;
@@ -330,14 +307,7 @@ final class Content
 
     public function types(): array
     {
-        return [
-            self::TYPE_ARTICLE,
-            self::TYPE_PAGE,
-            self::TYPE_ABOUT_PAGE,
-            self::TYPE_NEWS_ARTICLE,
-            self::TYPE_BLOG_POSTING,
-            self::TYPE_FAQ_PAGE,
-        ];
+        return self::TYPES;
     }
 
     public function statusCounts(array $statuses = []): array
